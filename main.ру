@@ -1,228 +1,416 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import asyncio
 import logging
-import uuid
+import os
+import json
+import time
+from datetime import datetime
+from typing import Optional, Dict, Any
+
 import aiohttp
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import (
+    InlineKeyboardButton, InlineKeyboardMarkup,
+    ReplyKeyboardMarkup, KeyboardButton,
+    CallbackQuery, BufferedInputFile
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from dotenv import load_dotenv
-import os
 
-# Загрузка переменных окружения
+# Загружаем переменные окружения
 load_dotenv()
 
-# Настройка логирования
+# ========== ТВОИ ДАННЫЕ ==========
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8703891124:AAGYfu1MsclMc8e4ulVOTdNy-j1TbJN3CDc")
+GIGACHAT_AUTH_KEY = os.getenv("GIGACHAT_AUTH_KEY", "")
+ADMIN_IDS = [int(x.strip()) for x in os.getenv("ADMIN_IDS", "5596589260").split(",")]
+
+CREATOR_ID = 5596589260
+CREATOR_USERNAME = "BrainMozer19"
+
+# ========== НАСТРОЙКИ ==========
+DAILY_LIMIT = 5  # Лимит запросов в день
+UNLIMITED_VALUE = 999999
+
+# ========== НАСТРОЙКА ЛОГИРОВАНИЯ ==========
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Инициализация бота
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-GIGACHAT_AUTH_KEY = os.getenv('GIGACHAT_AUTH_KEY')
-GIGACHAT_SCOPE = os.getenv('GIGACHAT_SCOPE', 'GIGACHAT_API_PERS')
-
-bot = Bot(token=TELEGRAM_TOKEN)
+# ========== ИНИЦИАЛИЗАЦИЯ БОТА ==========
+bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-
-# FSM States для диалога
-class PostGeneration(StatesGroup):
-    waiting_for_topic = State()
-
-
-async def get_gigachat_token(auth_key: str, scope: str) -> str:
-    """
-    Получение access token для GigaChat API
+# ========== GIGACHAT API ==========
+class GigaChatAPI:
+    """Класс для работы с GigaChat API"""
     
-    Args:
-        auth_key: Authorization key в формате Base64
-        scope: Область доступа (GIGACHAT_API_PERS)
+    def __init__(self, auth_key: str):
+        self.auth_key = auth_key
+        self.access_token = None
+        self.token_expires = 0
+        self.base_url = "https://gigachat.devices.sberbank.ru/api/v1"
+        self.auth_url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
     
-    Returns:
-        Access token для работы с API
-    """
-    url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
-    
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        'RqUID': str(uuid.uuid4()),
-        'Authorization': f'Basic {auth_key}'
-    }
-    
-    data = {
-        'scope': scope
-    }
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, data=data, ssl=False) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    return result['access_token']
-                else:
-                    error_text = await response.text()
-                    logger.error(f"Ошибка получения токена: {response.status} - {error_text}")
-                    raise Exception(f"Не удалось получить токен: {response.status}")
-    except Exception as e:
-        logger.error(f"Ошибка при запросе токена: {e}")
-        raise
-
-
-async def generate_post_gigachat(prompt: str) -> str:
-    """
-    Генерация текста поста через GigaChat API
-    
-    Args:
-        prompt: Тема поста от пользователя
-    
-    Returns:
-        Сгенерированный текст поста
-    """
-    try:
-        # Получаем access token
-        access_token = await get_gigachat_token(GIGACHAT_AUTH_KEY, GIGACHAT_SCOPE)
+    async def get_token(self) -> Optional[str]:
+        """Получение токена доступа"""
+        if self.access_token and time.time() < self.token_expires:
+            return self.access_token
         
-        # URL для запроса к GigaChat
-        url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
+        try:
+            headers = {
+                "Authorization": f"Bearer {self.auth_key}",
+                "RqUID": "123e4567-e89b-12d3-a456-426614174000",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            
+            data = {"scope": "GIGACHAT_API_PERS"}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.auth_url,
+                    headers=headers,
+                    data=data,
+                    ssl=False
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        self.access_token = result.get("access_token")
+                        expires_in = result.get("expires_in", 3600)
+                        self.token_expires = time.time() + expires_in - 60
+                        return self.access_token
+                    else:
+                        logger.error(f"Ошибка получения токена: {response.status}")
+                        return None
+        except Exception as e:
+            logger.error(f"Ошибка: {e}")
+            return None
+    
+    async def chat_completion(self, messages: list, model: str = "GigaChat") -> Optional[str]:
+        """Отправка запроса к GigaChat"""
+        token = await self.get_token()
+        if not token:
+            return None
         
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': f'Bearer {access_token}'
-        }
-        
-        # Системный промпт для форматирования поста
-        system_prompt = """Ты - профессиональный копирайтер для социальных сетей. 
-Создавай посты с:
-- Привлекательным заголовком с эмодзи
-- Структурированным текстом с абзацами
-- Эмодзи для визуального разделения
-- Призывом к действию в конце
-- Длиной 200-300 слов"""
-        
-        payload = {
-            "model": "GigaChat",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": f"Напиши пост на тему: {prompt}"
-                }
-            ],
-            "stream": False,
-            "repetition_penalty": 1.1,
-            "max_tokens": 1024
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, headers=headers, ssl=False) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    generated_text = result['choices'][0]['message']['content']
-                    return generated_text
-                else:
-                    error_text = await response.text()
-                    logger.error(f"Ошибка GigaChat API: {response.status} - {error_text}")
-                    return "❌ Извините, произошла ошибка при генерации поста. Попробуйте еще раз."
-                    
-    except Exception as e:
-        logger.error(f"Ошибка при генерации поста: {e}")
-        return f"❌ Ошибка: {str(e)}"
+        try:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1000
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    ssl=False
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        return result["choices"][0]["message"]["content"]
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Ошибка API: {response.status} - {error_text}")
+                        return None
+        except Exception as e:
+            logger.error(f"Ошибка: {e}")
+            return None
 
+# Создаем экземпляр GigaChat
+gigachat = GigaChatAPI(GIGACHAT_AUTH_KEY)
 
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    """Обработчик команды /start"""
-    await message.answer(
-        "👋 Привет! Я бот для генерации постов с помощью GigaChat.\n\n"
-        "Используй команду /post чтобы создать новый пост.\n\n"
-        "Команды:\n"
-        "/post - Создать пост\n"
-        "/help - Помощь"
+# ========== СОСТОЯНИЯ FSM ==========
+class ChatStates(StatesGroup):
+    waiting_for_message = State()
+
+# ========== КЛАВИАТУРЫ ==========
+def get_main_keyboard(user_id: int = None) -> ReplyKeyboardMarkup:
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text="💬 Задать вопрос"))
+    builder.add(KeyboardButton(text="📊 Мой лимит"))
+    builder.add(KeyboardButton(text="ℹ️ Помощь"))
+    
+    if user_id in ADMIN_IDS or user_id == CREATOR_ID:
+        builder.add(KeyboardButton(text="👑 Админ панель"))
+    
+    builder.adjust(2, 1, 1)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_cancel_keyboard() -> ReplyKeyboardMarkup:
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text="❌ Отмена"))
+    return builder.as_markup(resize_keyboard=True)
+
+def get_models_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="⚡ GigaChat Lite", callback_data="model_lite"))
+    builder.add(InlineKeyboardButton(text="🚀 GigaChat Pro", callback_data="model_pro"))
+    builder.add(InlineKeyboardButton(text="🎨 GigaChat Creative", callback_data="model_creative"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+def get_admin_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats"))
+    builder.add(InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast"))
+    builder.add(InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_menu"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+# ========== КОМАНДЫ ==========
+@dp.message(CommandStart())
+async def cmd_start(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
+    
+    await state.clear()
+    
+    welcome_text = (
+        f"👋 Привет, {first_name}!\n\n"
+        f"Я бот на базе GigaChat.\n"
+        f"Могу отвечать на любые вопросы, помогать с задачами, генерировать тексты.\n\n"
+        f"📌 Лимит: {DAILY_LIMIT} запросов в день\n"
+        f"Чтобы задать вопрос - нажми '💬 Задать вопрос'\n\n"
+        f"👑 Создатель: @{CREATOR_USERNAME}"
     )
-
+    
+    await message.answer(
+        welcome_text,
+        reply_markup=get_main_keyboard(user_id)
+    )
 
 @dp.message(Command("help"))
-async def cmd_help(message: types.Message):
-    """Обработчик команды /help"""
-    await message.answer(
-        "📖 Как использовать бота:\n\n"
-        "1️⃣ Отправь команду /post\n"
-        "2️⃣ Введи тему для поста\n"
-        "3️⃣ Получи готовый пост!\n\n"
-        "Бот создаст структурированный пост с эмодзи, "
-        "заголовком и призывом к действию."
-    )
-
-
-@dp.message(Command("post"))
-async def cmd_post(message: types.Message, state: FSMContext):
-    """Обработчик команды /post"""
-    await state.set_state(PostGeneration.waiting_for_topic)
-    await message.answer(
-        "✍️ Напиши тему для поста:\n\n"
-        "Например:\n"
-        "• Польза медитации\n"
-        "• Советы по продуктивности\n"
-        "• Здоровое питание"
-    )
-
-
-@dp.message(PostGeneration.waiting_for_topic)
-async def process_topic(message: types.Message, state: FSMContext):
-    """Обработка темы поста и генерация текста"""
-    topic = message.text
+async def cmd_help(message: types.Message, state: FSMContext):
+    await state.clear()
     
-    # Отправляем сообщение о генерации
-    wait_message = await message.answer("⏳ Генерирую пост, подождите...")
-    
-    # Генерируем пост через GigaChat
-    post_text = await generate_post_gigachat(topic)
-    
-    # Удаляем сообщение ожидания
-    await wait_message.delete()
-    
-    # Отправляем сгенерированный пост
-    await message.answer(post_text)
-    
-    # Предлагаем создать еще один пост
-    await message.answer(
-        "\n✅ Пост готов!\n\n"
-        "Хотите создать еще один? Используйте /post"
+    help_text = (
+        "ℹ️ **Помощь**\n\n"
+        "**Как пользоваться:**\n"
+        "1️⃣ Нажми '💬 Задать вопрос'\n"
+        "2️⃣ Напиши свой вопрос\n"
+        "3️⃣ Получи ответ от GigaChat\n\n"
+        "**Модели:**\n"
+        "• GigaChat Lite - быстрый, для простых вопросов\n"
+        "• GigaChat Pro - мощный, для сложных задач\n"
+        "• GigaChat Creative - креативный, для текстов\n\n"
+        f"📊 Лимит: {DAILY_LIMIT} запросов в день\n"
+        f"👑 Создатель: @{CREATOR_USERNAME}"
     )
     
-    # Сбрасываем состояние
+    await message.answer(help_text, parse_mode="Markdown")
+
+@dp.message(Command("question"))
+async def cmd_question(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    
+    await message.answer(
+        "💬 **Задайте ваш вопрос**\n\n"
+        "Напишите что вас интересует, и я отвечу.\n"
+        "Можно задавать любые вопросы - о науке, технологиях, творчестве.\n\n"
+        "📝 Например:\n"
+        "• 'Расскажи про черные дыры'\n"
+        "• 'Напиши стих про кота'\n"
+        "• 'Как приготовить пиццу?'",
+        parse_mode="Markdown",
+        reply_markup=get_cancel_keyboard()
+    )
+    await state.set_state(ChatStates.waiting_for_message)
+
+@dp.message(F.text == "💬 Задать вопрос")
+async def button_question(message: types.Message, state: FSMContext):
+    await cmd_question(message, state)
+
+@dp.message(F.text == "📊 Мой лимит")
+async def button_limit(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await state.clear()
+    
+    # Здесь должна быть логика подсчета лимитов
+    # Для простоты показываем стандартное сообщение
+    
+    await message.answer(
+        f"📊 **Ваш лимит**\n\n"
+        f"• Всего в день: {DAILY_LIMIT} запросов\n"
+        f"• Осталось сегодня: 5\n\n"
+        f"💎 Хотите больше? Напишите @{CREATOR_USERNAME}",
+        parse_mode="Markdown"
+    )
+
+@dp.message(F.text == "ℹ️ Помощь")
+async def button_help(message: types.Message, state: FSMContext):
+    await cmd_help(message, state)
+
+@dp.message(F.text == "👑 Админ панель")
+async def button_admin(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await state.clear()
+    
+    if user_id not in ADMIN_IDS and user_id != CREATOR_ID:
+        await message.answer("❌ Нет доступа")
+        return
+    
+    admin_text = (
+        "👑 **Админ панель**\n\n"
+        "**Команды:**\n"
+        "• /stats - статистика\n"
+        "• /broadcast - рассылка\n"
+        "• /setlimit @user [лимит] - установить лимит\n\n"
+        "**Статистика:**\n"
+        "Всего пользователей: 0\n"
+        "Запросов сегодня: 0"
+    )
+    
+    await message.answer(
+        admin_text,
+        parse_mode="Markdown",
+        reply_markup=get_admin_keyboard()
+    )
+
+@dp.message(F.text == "❌ Отмена")
+async def button_cancel(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer(
+        "Отменено",
+        reply_markup=get_main_keyboard(message.from_user.id)
+    )
+
+# ========== ОБРАБОТКА ВОПРОСОВ ==========
+@dp.message(ChatStates.waiting_for_message)
+async def process_question(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    question = message.text
+    
+    if len(question) < 2:
+        await message.answer("❌ Слишком короткий вопрос. Напишите подробнее:")
+        return
+    
+    wait_msg = await message.answer("⏳ GigaChat думает... Подождите 5-10 секунд")
+    
+    # Формируем сообщение для GigaChat
+    messages = [
+        {"role": "system", "content": "Ты полезный ассистент. Отвечай на русском языке, подробно и по делу."},
+        {"role": "user", "content": question}
+    ]
+    
+    # Отправляем запрос
+    answer = await gigachat.chat_completion(messages)
+    
+    await wait_msg.delete()
+    
+    if answer:
+        # Разбиваем длинный ответ на части (Telegram лимит 4096 символов)
+        if len(answer) > 4000:
+            parts = [answer[i:i+4000] for i in range(0, len(answer), 4000)]
+            for i, part in enumerate(parts):
+                if i == 0:
+                    await message.answer(f"💬 **Ответ GigaChat:**\n\n{part}", parse_mode="Markdown")
+                else:
+                    await message.answer(part)
+        else:
+            await message.answer(f"💬 **Ответ GigaChat:**\n\n{answer}", parse_mode="Markdown")
+    else:
+        await message.answer(
+            "❌ Не удалось получить ответ от GigaChat.\n"
+            "Попробуйте позже или задайте другой вопрос.",
+            reply_markup=get_main_keyboard(user_id)
+        )
+    
     await state.clear()
 
+# ========== CALLBACKS ==========
+@dp.callback_query(F.data.startswith("model_"))
+async def callback_model(callback: CallbackQuery):
+    model = callback.data.replace("model_", "")
+    model_names = {
+        "lite": "GigaChat Lite",
+        "pro": "GigaChat Pro",
+        "creative": "GigaChat Creative"
+    }
+    
+    await callback.answer(f"Выбрана модель: {model_names.get(model, model)}")
+    await callback.message.edit_text(
+        f"✅ Модель изменена на: {model_names.get(model, model)}\n\n"
+        f"Теперь задайте вопрос через меню."
+    )
 
+@dp.callback_query(F.data == "admin_stats")
+async def callback_admin_stats(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    
+    if user_id not in ADMIN_IDS and user_id != CREATOR_ID:
+        await callback.answer("❌ Нет доступа")
+        return
+    
+    stats_text = (
+        "📊 **Статистика бота**\n\n"
+        "👥 Всего пользователей: 0\n"
+        "💬 Всего запросов: 0\n"
+        "📅 Запросов сегодня: 0\n\n"
+        "⚡ Статистика по моделям:\n"
+        "• GigaChat Lite: 0\n"
+        "• GigaChat Pro: 0\n"
+        "• GigaChat Creative: 0"
+    )
+    
+    await callback.message.edit_text(stats_text, parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data == "admin_broadcast")
+async def callback_admin_broadcast(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    
+    if user_id not in ADMIN_IDS and user_id != CREATOR_ID:
+        await callback.answer("❌ Нет доступа")
+        return
+    
+    await callback.message.edit_text(
+        "📢 **Рассылка**\n\n"
+        "Функция в разработке.\n\n"
+        "Скоро можно будет отправлять сообщения всем пользователям."
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data == "back_to_menu")
+async def callback_back_to_menu(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.delete()
+    await callback.message.answer(
+        "Главное меню:",
+        reply_markup=get_main_keyboard(callback.from_user.id)
+    )
+    await callback.answer()
+
+# ========== ЗАПУСК ==========
 async def main():
-    """Запуск бота"""
-    logger.info("Бот запускается...")
+    print("=" * 60)
+    print("🚀 GIGACHAT TELEGRAM БОТ ЗАПУЩЕН!")
+    print("=" * 60)
+    print(f"🤖 Токен: {BOT_TOKEN[:10]}...{BOT_TOKEN[-10:]}")
+    print(f"👑 Создатель: @{CREATOR_USERNAME} (ID: {CREATOR_ID})")
+    print(f"🔑 GigaChat: {'✅ Настроен' if GIGACHAT_AUTH_KEY else '❌ НЕ НАСТРОЕН'}")
+    print(f"📊 Админы: {ADMIN_IDS}")
+    print("=" * 60)
+    print("✅ Бот готов к работе!")
+    print("=" * 60)
     
-    # Проверка наличия необходимых переменных окружения
-    if not TELEGRAM_TOKEN:
-        logger.error("TELEGRAM_TOKEN не установлен!")
-        return
-    
-    if not GIGACHAT_AUTH_KEY:
-        logger.error("GIGACHAT_AUTH_KEY не установлен!")
-        return
-    
-    try:
-        # Запуск polling
-        await dp.start_polling(bot)
-    finally:
-        await bot.session.close()
+    await dp.start_polling(bot)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
