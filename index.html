@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Монополия Online</title>
-    <!-- Firebase SDK (не требуется свой сервер) -->
+    <title>МОНОПОЛИЯ ONLINE</title>
+    <!-- Firebase (обязательно) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -12,142 +12,137 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         body {
-            background: linear-gradient(145deg, #0a3a0a, #1e5a1e);
+            background: #0a3a0a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 20px;
         }
-        .game-wrapper {
+        .game-container {
             max-width: 1300px;
             width: 100%;
             background: #ecd9b4;
-            border-radius: 80px;
-            padding: 30px;
+            border-radius: 60px;
             border: 10px solid #b47d4e;
-            box-shadow: 0 30px 40px black;
+            padding: 30px;
+            box-shadow: 0 20px 30px black;
         }
-        /* Главное меню */
-        .main-menu {
+        .screen { display: none; }
+        .active-screen { display: block; }
+        
+        /* Меню */
+        .menu {
             text-align: center;
             padding: 40px;
         }
-        .main-menu h1 {
-            font-size: 5rem;
-            color: #ffd966;
-            text-shadow: 6px 6px 0 #7a4f1e;
-            margin-bottom: 50px;
-        }
-        .menu-buttons {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
+        .menu h1 {
+            font-size: 4rem;
+            color: gold;
+            text-shadow: 4px 4px 0 #7a4f1e;
+            margin-bottom: 40px;
         }
         .menu-btn {
             background: gold;
             border: none;
-            font-size: 2.5rem;
-            padding: 20px 60px;
-            border-radius: 80px;
-            font-weight: 900;
-            border-bottom: 10px solid #b0851f;
+            font-size: 2rem;
+            padding: 20px 50px;
+            border-radius: 60px;
+            font-weight: bold;
+            border-bottom: 8px solid #b0851f;
+            margin: 15px;
             cursor: pointer;
-            transition: 0.1s;
+            width: 300px;
         }
         .menu-btn:active {
-            transform: translateY(8px);
-            border-bottom-width: 2px;
+            transform: translateY(5px);
+            border-bottom-width: 3px;
         }
-        /* Экраны */
-        .screen {
-            display: none;
-        }
-        .active-screen {
-            display: block;
-        }
-        /* Комнаты */
-        .rooms-container {
-            background: #2d4030d9;
-            border-radius: 60px;
+        
+        /* Ник */
+        .nickname-box {
+            text-align: center;
             padding: 30px;
-            border: 5px solid #dbb67b;
         }
-        .rooms-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+        .nickname-box input {
+            font-size: 2rem;
+            padding: 20px;
+            border-radius: 50px;
+            border: 5px solid #b47d4e;
+            width: 80%;
+            margin: 30px;
+            text-align: center;
+        }
+        
+        /* Комнаты */
+        .rooms-box {
+            background: #2d4030;
+            border-radius: 50px;
+            padding: 30px;
         }
         .rooms-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
-            padding: 10px;
+            margin: 20px 0;
         }
-        .room-card {
+        .room-item {
             background: #f5e9d8;
             border-radius: 40px;
             padding: 20px;
-            border: 5px solid #aa7c4a;
+            border: 4px solid #aa7c4a;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .room-card:hover {
-            transform: scale(1.02);
-            background: #fff2e0;
-        }
-        .room-card .room-name {
-            font-size: 2rem;
-            font-weight: 900;
-        }
-        .room-card .room-players {
+            text-align: center;
             font-size: 1.5rem;
-            color: #2d6e2d;
         }
-        /* Игровая доска (упрощенная для онлайн) */
-        .game-board {
+        
+        /* Игра */
+        .game-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+        }
+        .board {
             display: grid;
-            grid-template-columns: 100px repeat(9, 1fr) 100px;
-            grid-template-rows: 100px repeat(9, 1fr) 100px;
-            gap: 4px;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 3px;
             background: #b4804b;
-            padding: 15px;
-            border-radius: 60px;
-            margin-top: 20px;
+            padding: 10px;
+            border-radius: 40px;
+            aspect-ratio: 1/1;
         }
         .cell {
             background: #fbefdb;
-            border: 3px solid #996f40;
-            border-radius: 16px;
+            border: 2px solid #7b4f2e;
+            border-radius: 8px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
-            font-weight: 800;
+            text-align: center;
             position: relative;
+            aspect-ratio: 1/1;
         }
-        .corner {
-            background: radial-gradient(#ffefcf, #cc9f6b);
-        }
-        .player-token {
-            width: 20px;
-            height: 20px;
+        .player-dot {
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             border: 2px solid white;
             position: absolute;
             bottom: 2px;
         }
-        /* Чат */
-        .chat-box {
-            background: #3f3222e0;
+        .chat {
+            background: #2d4030;
             border-radius: 40px;
             padding: 20px;
             margin-top: 20px;
@@ -156,371 +151,351 @@
             background: #efe6d2;
             height: 150px;
             overflow-y: auto;
-            border-radius: 30px;
-            padding: 15px;
-        }
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input input {
             flex: 2;
             padding: 15px;
-            border-radius: 50px;
-            border: 4px solid #896f44;
+            border-radius: 40px;
+            border: 3px solid #896f44;
             font-size: 1.2rem;
         }
-        .send-btn {
-            background: #ffbe2e;
+        .chat-input button {
+            padding: 15px 30px;
+            border-radius: 40px;
+            background: gold;
             border: none;
-            border-radius: 60px;
-            padding: 0 30px;
-            font-weight: 900;
-            font-size: 1.5rem;
-            border-bottom: 5px solid #926d23;
+            font-weight: bold;
+            border-bottom: 4px solid #b0851f;
             cursor: pointer;
         }
-        .roll-dice {
-            background: gold;
-            font-size: 2rem;
-            padding: 15px 40px;
-            border-radius: 60px;
-            border-bottom: 8px solid #b0851f;
-            cursor: pointer;
+        .dice-area {
+            display: flex;
+            gap: 20px;
+            align-items: center;
             margin: 20px 0;
         }
+        .dice {
+            font-size: 4rem;
+            background: white;
+            padding: 10px 30px;
+            border-radius: 20px;
+            border: 4px solid #7b4f2e;
+        }
+        .red-bg { background: #e63946; }
+        .green-bg { background: #2a9d8f; }
+        .yellow-bg { background: #e9c46a; }
+        .purple-bg { background: #9c89b8; }
     </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <!-- Главное меню -->
-    <div id="mainMenu" class="main-menu active-screen">
-        <h1>🎲 МОНОПОЛИЯ ONLINE 🎲</h1>
-        <div class="menu-buttons">
-            <button class="menu-btn" onclick="showScreen('nicknameScreen')">🆕 ИГРАТЬ</button>
-            <button class="menu-btn" onclick="showScreen('roomsScreen'); loadRooms();">🚪 КОМНАТЫ</button>
-        </div>
+<div class="game-container">
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <div id="mainMenu" class="screen active-screen menu">
+        <h1>🎲 МОНОПОЛИЯ 🎲</h1>
+        <button class="menu-btn" onclick="show('nicknameMenu')">🆕 ИГРАТЬ</button>
+        <button class="menu-btn" onclick="show('roomsMenu'); loadRooms()">🚪 КОМНАТЫ</button>
     </div>
 
-    <!-- Экран ввода ника -->
-    <div id="nicknameScreen" class="main-menu screen">
-        <h2 style="font-size: 3rem; color: white;">ВВЕДИ НИК</h2>
-        <input type="text" id="nicknameInput" placeholder="Твой ник" style="font-size: 2rem; padding: 15px; border-radius: 60px; margin: 30px; text-align: center;">
-        <br>
-        <button class="menu-btn" onclick="createRoom()">СОЗДАТЬ КОМНАТУ</button>
-        <button class="menu-btn" onclick="showScreen('roomsScreen'); loadRooms();">НАЗАД</button>
+    <!-- ВВОД НИКА -->
+    <div id="nicknameMenu" class="screen nickname-box">
+        <h2 style="color:white; font-size:3rem;">ВВЕДИ НИК</h2>
+        <input type="text" id="playerName" value="Игрок" placeholder="Твой ник">
+        <button class="menu-btn" onclick="createRoom()">➕ СОЗДАТЬ КОМНАТУ</button>
+        <button class="menu-btn" onclick="show('mainMenu')">⬅ НАЗАД</button>
     </div>
 
-    <!-- Экран списка комнат -->
-    <div id="roomsScreen" class="screen">
-        <div class="rooms-container">
-            <div class="rooms-header">
-                <h2 style="color: #ffd966; font-size: 3rem;">ДОСТУПНЫЕ КОМНАТЫ</h2>
-                <button class="menu-btn" onclick="showScreen('nicknameScreen')" style="font-size: 1.8rem; padding: 15px 30px;">+ СОЗДАТЬ</button>
-            </div>
-            <div id="roomsList" class="rooms-list">
-                <!-- Список комнат загружается сюда -->
-            </div>
-            <button class="menu-btn" onclick="showScreen('mainMenu')" style="margin-top: 20px;">⬅ ГЛАВНОЕ МЕНЮ</button>
-        </div>
+    <!-- СПИСОК КОМНАТ -->
+    <div id="roomsMenu" class="screen rooms-box">
+        <h2 style="color:gold; font-size:3rem;">КОМНАТЫ</h2>
+        <div id="roomsContainer" class="rooms-list">Загрузка...</div>
+        <button class="menu-btn" onclick="show('mainMenu')">⬅ НАЗАД</button>
     </div>
 
-    <!-- Игровой экран -->
-    <div id="gameScreen" class="screen">
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div style="flex: 3; min-width: 600px;">
-                <div id="gameBoard" class="game-board"></div>
-                <div style="display: flex; gap: 20px; align-items: center; margin: 20px 0;">
-                    <button class="roll-dice" id="rollDiceBtn">🎲 БРОСИТЬ КУБИК</button>
-                    <div style="font-size: 2rem; background: white; padding: 15px 30px; border-radius: 50px;" id="diceResult"></div>
-                </div>
-            </div>
-            <div style="flex: 1.2;">
-                <div class="chat-box">
-                    <h3 style="color: #ffdb9d; font-size: 2rem;">ЧАТ</h3>
-                    <div id="chatMessages" class="chat-messages"></div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chatInput" class="chat-input" placeholder="Написать...">
-                        <button class="send-btn" id="sendChatBtn">➡️</button>
-                    </div>
-                </div>
+    <!-- ИГРА -->
+    <div id="gameMenu" class="screen">
+        <div class="game-header">
+            <span id="roomTitle">Комната</span>
+            <span id="playerMoney">$1500</span>
+        </div>
+        
+        <!-- Доска -->
+        <div class="board" id="board"></div>
+        
+        <!-- Кубики -->
+        <div class="dice-area">
+            <button class="menu-btn" id="rollBtn" style="font-size:1.8rem;" disabled>🎲 БРОСИТЬ</button>
+            <div class="dice" id="diceValue">⚀</div>
+        </div>
+        
+        <!-- Чат -->
+        <div class="chat">
+            <div class="chat-messages" id="chatBox"></div>
+            <div class="chat-input">
+                <input type="text" id="msgInput" placeholder="Написать...">
+                <button id="sendBtn">➡️</button>
             </div>
         </div>
-        <button class="menu-btn" onclick="leaveRoom()" style="margin-top: 20px;">🏠 ВЫЙТИ</button>
+        
+        <!-- Выход -->
+        <button class="menu-btn" onclick="leaveGame()" style="background:#c0392b; border-bottom-color:#78281f; margin-top:20px;">🚪 ВЫЙТИ</button>
     </div>
 </div>
 
 <script>
-    // ================== НАСТРОЙКИ FIREBASE ==================
-    // ТЫ ДОЛЖЕН СОЗДАТЬ СВОЙ ПРОЕКТ И ВСТАВИТЬ ДАННЫЕ НИЖЕ
+    // ===========================================
+    // 🔴 ТВОИ ДАННЫЕ FIREBASE (ВСТАВЬ СЮДА)
+    // ===========================================
     const firebaseConfig = {
-        apiKey: "AIzaSyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Замени на свои данные
-        authDomain: "твой-проект.firebaseapp.com",
-        databaseURL: "https://твой-проект-default-rtdb.firebaseio.com",
-        projectId: "твой-проект",
-        storageBucket: "твой-проект.appspot.com",
-        messagingSenderId: "000000000000",
-        appId: "1:000000000000:web:aaaaaaaaaaaaaaaaaaaaaa"
+        databaseURL: "https://monopoly-online-default-rtdb.firebaseio.com" // ← ВСТАВЬ СВОЮ ССЫЛКУ
     };
 
-    // Инициализация Firebase
+    // Инициализация
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==================
-    let currentPlayer = {
-        id: null,
-        nickname: '',
+    // ===========================================
+    // ДАННЫЕ ИГРОКА
+    // ===========================================
+    let player = {
+        id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        name: 'Игрок',
         color: '#e63946',
-        position: 0,
+        pos: 0,
         money: 1500
     };
-    let currentRoomId = null;
+    let currentRoom = null;
     let roomRef = null;
-    let playersRef = null;
-    let gameStateRef = null;
 
-    // ================== УПРАВЛЕНИЕ ЭКРАНАМИ ==================
-    function showScreen(screenId) {
+    // Названия клеток
+    const cells = [
+        "СТАРТ","БАЛТ","КАЗНА","ВОЛК","НАЛОГ","РИЖС","МОРС","ШАНС","НЕВС","ВАРШ",
+        "ТЮРЬМА","МАЛА","ЭЛЕК","ФОНТ","ВОКЗ","ЛЕРМ","ШАНС","САД","КАЗНА","ЛИГ",
+        "БЕСПЛ","ТЕАТ","ШАНС","МУЗ","НАЛОГ","ПАРК","НАБ","ВОКЗ","ДВОР","ВОДА",
+        "ОТДЫХ","ПРОС","КАЗНА","БАНК","ШАНС","ЗАВ","УНИВ","ВОКЗ","КАЗНА","РОСТ"
+    ];
+
+    // ===========================================
+    // УПРАВЛЕНИЕ ЭКРАНАМИ
+    // ===========================================
+    window.show = function(menuId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(screenId).classList.add('active-screen');
-    }
+        document.getElementById(menuId).classList.add('active-screen');
+    };
 
-    // ================== СОЗДАНИЕ КОМНАТЫ ==================
-    function createRoom() {
-        const nickname = document.getElementById('nicknameInput').value.trim();
-        if (!nickname) {
-            alert('Введите ник!');
-            return;
-        }
-        currentPlayer.nickname = nickname;
-        currentPlayer.id = generateId();
+    // ===========================================
+    // СОЗДАНИЕ КОМНАТЫ
+    // ===========================================
+    window.createRoom = function() {
+        let nick = document.getElementById('playerName').value.trim();
+        if (nick) player.name = nick;
         
-        // Создаем комнату в Firebase
-        const newRoomRef = db.ref('rooms').push();
-        const roomId = newRoomRef.key;
-        
-        const roomData = {
-            id: roomId,
-            name: `Комната ${nickname}`,
-            createdAt: Date.now(),
-            players: {},
-            gameStarted: false,
-            currentTurn: 0,
-            diceResult: 0
+        let roomData = {
+            name: 'Комната ' + player.name,
+            created: Date.now(),
+            gameOn: false,
+            turn: null,
+            players: {}
         };
         
-        // Добавляем текущего игрока
-        roomData.players[currentPlayer.id] = {
-            id: currentPlayer.id,
-            nickname: nickname,
-            color: currentPlayer.color,
-            position: 0,
-            money: 1500,
-            properties: []
+        roomData.players[player.id] = {
+            id: player.id,
+            name: player.name,
+            color: player.color,
+            pos: 0,
+            money: 1500
         };
         
-        newRoomRef.set(roomData).then(() => {
-            currentRoomId = roomId;
-            joinRoom(roomId, nickname);
+        db.ref('rooms').push(roomData).then(ref => {
+            joinRoom(ref.key);
         });
-    }
+    };
 
-    // ================== ПРИСОЕДИНЕНИЕ К КОМНАТЕ ==================
-    function joinRoom(roomId, nickname) {
-        if (!currentPlayer.id) {
-            currentPlayer.id = generateId();
-            currentPlayer.nickname = nickname || 'Игрок';
-        }
+    // ===========================================
+    // ПРИСОЕДИНЕНИЕ
+    // ===========================================
+    window.joinRoom = function(roomId) {
+        currentRoom = roomId;
+        roomRef = db.ref('rooms/' + roomId);
         
-        currentRoomId = roomId;
-        roomRef = db.ref(`rooms/${roomId}`);
-        playersRef = db.ref(`rooms/${roomId}/players`);
-        gameStateRef = db.ref(`rooms/${roomId}/gameState`);
-        
-        // Добавляем себя в список игроков
-        playersRef.child(currentPlayer.id).set({
-            id: currentPlayer.id,
-            nickname: currentPlayer.nickname,
-            color: currentPlayer.color,
-            position: 0,
-            money: 1500,
-            properties: []
+        // Добавляем себя
+        roomRef.child('players/' + player.id).set({
+            id: player.id,
+            name: player.name,
+            color: player.color,
+            pos: 0,
+            money: 1500
         });
         
-        // Слушаем изменения в комнате
-        roomRef.on('value', (snapshot) => {
-            const room = snapshot.val();
-            if (room) {
-                updateGameBoard(room);
-                updatePlayersList(room);
+        // Слушаем изменения
+        roomRef.on('value', function(snap) {
+            let data = snap.val();
+            if (data) {
+                drawBoard(data);
+                updateHeader(data);
+                
+                // Активируем кнопку если наш ход
+                let rollBtn = document.getElementById('rollBtn');
+                if (data.turn === player.id) rollBtn.disabled = false;
+                else rollBtn.disabled = true;
             }
         });
         
         // Слушаем чат
-        db.ref(`rooms/${roomId}/chat`).on('child_added', (snapshot) => {
-            const msg = snapshot.val();
-            addChatMessage(msg);
+        db.ref('rooms/' + roomId + '/chat').on('child_added', function(snap) {
+            let msg = snap.val();
+            addChat(msg);
         });
         
-        showScreen('gameScreen');
-    }
+        show('gameMenu');
+    };
 
-    // ================== ЗАГРУЗКА СПИСКА КОМНАТ ==================
-    function loadRooms() {
-        const roomsList = document.getElementById('roomsList');
-        roomsList.innerHTML = 'Загрузка...';
-        
-        db.ref('rooms').orderByChild('createdAt').limitToLast(20).on('value', (snapshot) => {
-            roomsList.innerHTML = '';
-            snapshot.forEach((child) => {
-                const room = child.val();
-                if (!room.gameStarted) {
-                    const roomCard = document.createElement('div');
-                    roomCard.className = 'room-card';
-                    roomCard.onclick = () => {
-                        const nickname = prompt('Введите ваш ник:');
-                        if (nickname) joinRoom(room.id, nickname);
-                    };
-                    const playersCount = room.players ? Object.keys(room.players).length : 0;
-                    roomCard.innerHTML = `
-                        <div class="room-name">${room.name}</div>
-                        <div class="room-players">👥 ${playersCount}/4</div>
-                    `;
-                    roomsList.appendChild(roomCard);
+    // ===========================================
+    // ЗАГРУЗКА КОМНАТ
+    // ===========================================
+    window.loadRooms = function() {
+        db.ref('rooms').limitToLast(10).on('value', function(snap) {
+            let html = '';
+            snap.forEach(function(child) {
+                let room = child.val();
+                if (!room.gameOn) {
+                    let count = room.players ? Object.keys(room.players).length : 0;
+                    html += `<div class="room-item" onclick="joinRoom('${child.key}')">
+                        <div>${room.name}</div>
+                        <div>👤 ${count}/4</div>
+                    </div>`;
                 }
             });
+            document.getElementById('roomsContainer').innerHTML = html || 'Нет комнат';
         });
-    }
+    };
 
-    // ================== ИГРОВАЯ ДОСКА ==================
-    const cellNames = [
-        "СТАРТ", "Балтийская", "Казна", "Волковка", "Налог", "Рижская", "Морская", "Шанс", "Невский", "Варшавская",
-        "ТЮРЬМА", "Малая", "Эл.ком", "Фонтанка", "Вокзал", "Лермонтов", "Шанс", "Садовая", "Казна", "Лиговка",
-        "БЕСПЛАТНО", "Театр", "Шанс", "Музей", "Налог", "Парк", "Набережная", "Вокзал", "Дворцовая", "Вода",
-        "ОТДЫХ", "Проспект", "Казна", "Банк", "Шанс", "Завод", "Универ", "Вокзал", "Казна", "Ростовщик"
-    ];
-
-    function updateGameBoard(room) {
-        const boardEl = document.getElementById('gameBoard');
-        boardEl.innerHTML = '';
+    // ===========================================
+    // ОТРИСОВКА ДОСКИ
+    // ===========================================
+    function drawBoard(data) {
+        let board = document.getElementById('board');
+        board.innerHTML = '';
         
-        for (let row = 0; row < 11; row++) {
-            for (let col = 0; col < 11; col++) {
+        for (let r = 0; r < 11; r++) {
+            for (let c = 0; c < 11; c++) {
                 let idx = -1;
-                if (row === 0) idx = 10 + col;
-                else if (row === 10) idx = 9 - col;
-                else if (col === 0) idx = 10 - row;
-                else if (col === 10) idx = 20 + row;
-                else {
-                    // Пустая клетка в центре
-                    const emptyCell = document.createElement('div');
-                    emptyCell.className = 'cell';
-                    boardEl.appendChild(emptyCell);
-                    continue;
-                }
+                if (r === 0) idx = 10 + c;
+                else if (r === 10) idx = 9 - c;
+                else if (c === 0) idx = 10 - r;
+                else if (c === 10) idx = 20 + r;
                 
-                const cell = document.createElement('div');
+                let cell = document.createElement('div');
                 cell.className = 'cell';
-                if (idx === 0 || idx === 10 || idx === 20 || idx === 30) cell.classList.add('corner');
                 
-                cell.innerHTML = `<span style="font-size: 0.6rem;">${cellNames[idx]}</span>`;
-                
-                // Отображаем игроков на этой клетке
-                if (room.players) {
-                    Object.values(room.players).forEach(player => {
-                        if (player.position === idx) {
-                            const token = document.createElement('div');
-                            token.className = 'player-token';
-                            token.style.background = player.color;
-                            token.style.left = Math.random() * 20 + 'px'; // Простое смещение
-                            cell.appendChild(token);
+                if (idx >= 0) {
+                    cell.innerHTML = cells[idx];
+                    
+                    // Игроки
+                    if (data.players) {
+                        let offset = 0;
+                        for (let pid in data.players) {
+                            let p = data.players[pid];
+                            if (p.pos === idx) {
+                                let dot = document.createElement('div');
+                                dot.className = 'player-dot';
+                                dot.style.background = p.color;
+                                dot.style.left = (5 + offset * 12) + 'px';
+                                dot.style.backgroundColor = p.color;
+                                cell.appendChild(dot);
+                                offset++;
+                            }
                         }
-                    });
+                    }
                 }
-                
-                boardEl.appendChild(cell);
+                board.appendChild(cell);
             }
         }
     }
 
-    function updatePlayersList(room) {
-        // Обновляем информацию об игроках где-нибудь на экране
+    // ===========================================
+    // ОБНОВЛЕНИЕ ШАПКИ
+    // ===========================================
+    function updateHeader(data) {
+        if (data.players && data.players[player.id]) {
+            player.money = data.players[player.id].money;
+            document.getElementById('playerMoney').innerHTML = '$' + player.money;
+        }
+        
+        let title = data.name || 'Комната';
+        document.getElementById('roomTitle').innerHTML = title;
     }
 
-    // ================== ЧАТ ==================
-    function addChatMessage(msg) {
-        const chatDiv = document.getElementById('chatMessages');
-        const msgEl = document.createElement('div');
-        msgEl.style.fontSize = '1.2rem';
-        msgEl.style.margin = '5px 0';
-        msgEl.innerHTML = `<b>${msg.nickname}:</b> ${msg.text}`;
-        chatDiv.appendChild(msgEl);
-        chatDiv.scrollTop = chatDiv.scrollHeight;
+    // ===========================================
+    // ЧАТ
+    // ===========================================
+    function addChat(msg) {
+        let box = document.getElementById('chatBox');
+        box.innerHTML += `<div><b style="color:${msg.color}">${msg.name}:</b> ${msg.text}</div>`;
+        box.scrollTop = box.scrollHeight;
     }
 
-    document.getElementById('sendChatBtn').addEventListener('click', () => {
-        const input = document.getElementById('chatInput');
-        const text = input.value.trim();
-        if (text && currentRoomId) {
-            db.ref(`rooms/${currentRoomId}/chat`).push({
-                nickname: currentPlayer.nickname,
-                text: text,
-                timestamp: Date.now()
+    document.getElementById('sendBtn').onclick = function() {
+        let input = document.getElementById('msgInput');
+        if (input.value && currentRoom) {
+            db.ref('rooms/' + currentRoom + '/chat').push({
+                name: player.name,
+                text: input.value,
+                color: player.color
             });
             input.value = '';
         }
-    });
+    };
 
-    // ================== БРОСОК КУБИКА ==================
-    document.getElementById('rollDiceBtn').addEventListener('click', () => {
-        if (!currentRoomId) return;
+    // ===========================================
+    // БРОСОК КУБИКА
+    // ===========================================
+    document.getElementById('rollBtn').onclick = function() {
+        let dice = Math.floor(Math.random() * 6) + 1;
+        let diceSymbol = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
+        document.getElementById('diceValue').innerHTML = diceSymbol;
         
-        const dice1 = Math.floor(Math.random() * 6) + 1;
-        const dice2 = Math.floor(Math.random() * 6) + 1;
-        const sum = dice1 + dice2;
+        let newPos = (player.pos + dice) % 40;
+        let newMoney = player.money;
         
-        document.getElementById('diceResult').innerHTML = `🎲 ${dice1} ${dice2} = ${sum}`;
+        // Бонус за старт
+        if (newPos < player.pos) newMoney += 200;
         
-        // Обновляем позицию игрока
-        const newPosition = (currentPlayer.position + sum) % 40;
-        currentPlayer.position = newPosition;
+        player.pos = newPos;
+        player.money = newMoney;
         
-        // Если прошел старт
-        if (currentPlayer.position < sum) {
-            currentPlayer.money += 200;
-        }
-        
-        // Сохраняем в Firebase
-        playersRef.child(currentPlayer.id).update({
-            position: newPosition,
-            money: currentPlayer.money
+        // Обновляем в базе
+        db.ref('rooms/' + currentRoom + '/players/' + player.id).update({
+            pos: newPos,
+            money: newMoney
         });
         
-        // Передаем ход следующему (упрощенно)
-        if (roomRef) {
-            roomRef.child('currentTurn').transaction((turn) => {
-                return (turn + 1) % Object.keys(room.players || {}).length;
-            });
-        }
-    });
+        // Передаем ход следующему
+        roomRef.once('value', function(snap) {
+            let players = snap.val().players;
+            let ids = Object.keys(players);
+            let idx = ids.indexOf(player.id);
+            let nextIdx = (idx + 1) % ids.length;
+            roomRef.update({ turn: ids[nextIdx] });
+        });
+    };
 
-    // ================== ВЫХОД ИЗ КОМНАТЫ ==================
-    function leaveRoom() {
-        if (currentRoomId && currentPlayer.id) {
-            playersRef.child(currentPlayer.id).remove().then(() => {
-                roomRef.off();
-                currentRoomId = null;
-                showScreen('mainMenu');
-            });
+    // ===========================================
+    // ВЫХОД
+    // ===========================================
+    window.leaveGame = function() {
+        if (currentRoom) {
+            db.ref('rooms/' + currentRoom + '/players/' + player.id).remove();
+            currentRoom = null;
         }
-    }
-
-    // ================== ГЕНЕРАТОР ID ==================
-    function generateId() {
-        return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-    }
+        show('mainMenu');
+    };
 </script>
 </body>
 </html>
