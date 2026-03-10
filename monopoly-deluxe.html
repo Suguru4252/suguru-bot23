@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>МОНОПОЛИЯ ПРЕМИУМ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0a2f0a, #1e4a1e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        /* Главный контейнер игры */
+        .game-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #ecd9b4;
+            background-image: radial-gradient(circle at 20% 30%, #fcf3e0 8%, transparent 30%),
+                              radial-gradient(circle at 90% 70%, #f5e1b9 15%, transparent 40%);
+            border-radius: 70px 70px 50px 50px;
+            border: 8px solid #b47d4e;
+            box-shadow: 0 30px 30px rgba(0,0,0,0.7), inset 0 2px 15px #fff2d0;
+            padding: 30px 30px 40px;
+        }
+
+        /* Верхняя панель с игроками и банком */
+        .top-panel {
+            background: #1e2f3f;
+            background: linear-gradient(145deg, #1b2a37, #2c4053);
+            border-radius: 80px 80px 40px 40px;
+            padding: 16px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 4px solid #c99f5e;
+            box-shadow: inset 0 -3px 0 #0f1a22, 0 12px 0 #4f3822;
+        }
+
+        .bank-block {
+            background: radial-gradient(circle at 30% 20%, #ffe066, #e0b020);
+            color: #1d2b36;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-size: 2rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 0 #b58f38;
+            border: 3px solid #f9e186;
+            box-shadow: inset 0 -6px 0 #b38d2c, 0 8px 0 #61481c;
+            transform: translateY(-3px);
+        }
+
+        .players-bar {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .player-chip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #00000038;
+            backdrop-filter: blur(4px);
+            padding: 8px 25px 8px 15px;
+            border-radius: 50px;
+            border: 3px solid;
+            box-shadow: 0 6px 0 #00000070;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .player-chip.active {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 12px gold);
+        }
+        .player-chip[data-p="0"] { border-color: #e63946; }
+        .player-chip[data-p="1"] { border-color: #2a9d8f; }
+        .player-chip[data-p="2"] { border-color: #e9c46a; }
+        .player-chip[data-p="3"] { border-color: #b183c9; }
+
+        .p-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: inset 0 -5px 0 #00000044, 0 5px 0 black;
+        }
+        .p-avatar[data-p="0"] { background: #e63946; }
+        .p-avatar[data-p="1"] { background: #2a9d8f; }
+        .p-avatar[data-p="2"] { background: #e9c46a; }
+        .p-avatar[data-p="3"] { background: #b183c9; }
+
+        .p-money {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f5d742;
+            text-shadow: 2px 2px 0 black;
+        }
+
+        /* Два основных блока: поле и правый интерфейс */
+        .main-play-area {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Сама доска Monopoly */
+        .board {
+            flex: 3;
+            min-width: 600px;
+            display: grid;
+            grid-template-columns: 100px repeat(9, 1fr) 100px;
+            grid-template-rows: 100px repeat(9, 1fr) 100px;
+            gap: 5px;
+            background: #b4804b;
+            padding: 18px;
+            border-radius: 60px;
+            border: 12px solid #684b2c;
+            box-shadow: inset 0 0 0 6px #e2bc89, 0 20px 25px #00000080;
+            aspect-ratio: 1/1;
+        }
+
+        .cell {
+            background: #fbefdb;
+            background: linear-gradient(145deg, #fffbf0, #eddbbd);
+            border: 3px solid #996f40;
+            border-radius: 16px;
+            box-shadow: inset 0 -5px 0 #b48b53, 0 6px 0 #503e28;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-align: center;
+            padding: 4px 2px;
+            position: relative;
+            color: #2c1d0e;
+        }
+        .corner {
+            background: radial-gradient(circle at 30% 30%, #ffefcf, #cc9f6b);
+            font-size: 0.9rem;
+        }
+        .property-color-strip {
+            width: 90%;
+            height: 14px;
+            border-radius: 20px;
+            margin-bottom: 3px;
+            border: 1px solid #5d3d1c;
+        }
+        .cell span.name {
+            font-size: 0.6rem;
+            line-height: 1.2;
+        }
+        .price-tag {
+            font-size: 0.6rem;
+            background: #2d6e2d;
+            color: gold;
+            padding: 2px 6px;
+            border-radius: 30px;
+            margin-top: 3px;
+        }
+        .house-icon {
+            display: flex;
+            gap: 3px;
+            margin: 2px 0;
+        }
+        .house {
+            width: 10px;
+            height: 10px;
+            background: #2e7d32;
+            border-radius: 2px 2px 4px 4px;
+            box-shadow: 0 2px 0 #0f4f13;
+        }
+        .hotel {
+            width: 16px;
+            height: 10px;
+            background: #b33e3e;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Правый блок: чат, обмен, кнопки */
+        .right-panel {
+            flex: 1.2;
+            min-width: 320px;
+            background: #3f3222e0;
+            backdrop-filter: blur(12px);
+            border-radius: 60px 60px 40px 40px;
+            padding: 25px 20px;
+            border: 5px solid #b49466;
+            box-shadow: inset 0 0 20px #eedbaa, 0 15px 15px #00000060;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Кубики и управление */
+        .dice-section {
+            background: #1e332b;
+            border-radius: 50px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border: 4px solid #e5c28e;
+            box-shadow: 0 10px 0 #3a2e1e;
+        }
+        .dice {
+            width: 70px;
+            height: 70px;
+            background: #faf0d7;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #3d2813;
+            box-shadow: inset 0 -5px 0 #c0a16e, 0 8px 0 #3e2e19;
+            border: 3px solid #b48b4e;
+        }
+        .roll-btn {
+            background: gold;
+            border: none;
+            font-size: 2rem;
+            padding: 10px 35px;
+            border-radius: 50px;
+            font-weight: 900;
+            color: #1e3a1e;
+            border-bottom: 8px solid #b0851f;
+            cursor: pointer;
+            transition: 0.07s;
+        }
+        .roll-btn:active {
+            transform: translateY(6px);
+            border-bottom-width: 2px;
+        }
+
+        /* Чат */
+        .chat-container {
+            background: #2d4030d9;
+            border-radius: 40px;
+            padding: 15px;
+            border: 3px solid #dbb67b;
+            box-shadow: inset 0 0 0 2px #fde4b8;
+        }
+        .chat-title {
+            font-size: 1.6rem;
+            color: #ffdb9d;
+            text-shadow: 2px 2px 0 #342917;
+            margin-bottom: 10px;
+        }
+        .chat-messages {
+            background: #efe6d2;
+            height: 140px;
+            overflow-y: auto;
+            border-radius: 30px;
+            padding: 12px;
+            font-size: 1.1rem;
+            border: 3px solid #a17641;
+            margin-bottom: 12px;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 2;
+            background: #faf2e4;
+            border: 4px solid #896f44;
+            border-radius: 50px;
+            padding: 12px 18px;
+            font-size: 1.1rem;
+        }
+        .chat-send {
+            background: #ffbe2e;
+            border: none;
+            border-radius: 60px;
+            padding: 0 25px;
+            font-weight: 900;
+            font-size: 1.3rem;
+            border-bottom: 5px solid #926d23;
+            cursor: pointer;
+        }
+
+        /* Обмен */
+        .trade-section {
+            background: #3e3327d0;
+            border-radius: 40px;
+            padding: 18px;
+            border: 3px solid #caa87b;
+        }
+        .trade-title {
+            font-size: 1.6rem;
+            color: #ffe2a5;
+            margin-bottom: 15px;
+        }
+        .trade-players {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .trade-select {
+            background: #faeac8;
+            border-radius: 40px;
+            padding: 8px 15px;
+            font-size: 1.2rem;
+            border: 3px solid #b4813e;
+        }
+        .trade-money {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .trade-money label {
+            color: #faeac8;
+            font-size: 1.2rem;
+        }
+        .trade-money input {
+            flex: 2;
+            padding: 12px;
+            border-radius: 50px;
+            border: 3px solid #b68f4b;
+            font-size: 1.2rem;
+        }
+        .trade-cards {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .trade-cards select {
+            flex: 1;
+            padding: 10px;
+            border-radius: 40px;
+            background: #faeac8;
+            border: 3px solid #b4813e;
+        }
+        .trade-btn {
+            background: #45a049;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 60px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fef6d8;
+            border-bottom: 7px solid #1e6424;
+            cursor: pointer;
+            transition: 0.08s;
+        }
+        .trade-btn:active {
+            transform: translateY(5px);
+            border-bottom-width: 2px;
+        }
+
+        /* Уведомления */
+        .notif {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #f5e6d3;
+            border-left: 20px solid #f3b33d;
+            padding: 20px 35px;
+            border-radius: 90px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: 0 15px 0 #6b4e28;
+            border: 3px solid #fad68b;
+            z-index: 1000;
+            transition: 0.3s;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn { from {right: -400px;} to {right: 30px;} }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <!-- Верхняя панель -->
+    <div class="top-panel">
+        <div class="bank-block">💰 БАНК</div>
+        <div class="players-bar" id="playersBar"></div>
+    </div>
+
+    <!-- Основное поле и интерфейс -->
+    <div class="main-play-area">
+        <!-- Игровая доска -->
+        <div class="board" id="board"></div>
+
+        <!-- Правый модуль: чат, обмен, кубики -->
+        <div class="right-panel">
+            <div class="dice-section">
+                <div class="dice" id="dice1">⚀</div>
+                <div class="dice" id="dice2">⚀</div>
+                <button class="roll-btn" id="rollDice">🎲</button>
+            </div>
+
+            <!-- Чат -->
+            <div class="chat-container">
+                <div class="chat-title">💬 Чат игроков</div>
+                <div class="chat-messages" id="chatMessages">
+                    <div>👤 Красный: Всем привет!</div>
+                    <div>🤖 Банк: Добро пожаловать в Монополию</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Написать...">
+                    <button class="chat-send" id="sendChat">➡️</button>
+                </div>
+            </div>
+
+            <!-- Обмен -->
+            <div class="trade-section">
+                <div class="trade-title">🤝 Обмен</div>
+                <div class="trade-players">
+                    <select id="tradeFrom" class="trade-select"></select>
+                    <span style="color:gold;"> ⇄ </span>
+                    <select id="tradeTo" class="trade-select"></select>
+                </div>
+                <div class="trade-money">
+                    <label>💰 Деньги:</label>
+                    <input type="number" id="tradeMoney" value="0" min="0" step="10">
+                </div>
+                <div class="trade-cards">
+                    <select id="cardFrom"><option value="">Своя карта</option></select>
+                    <select id="cardTo"><option value="">Карта соперника</option></select>
+                </div>
+                <button class="trade-btn" id="tradeButton">ПРЕДЛОЖИТЬ ОБМЕН</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- ИНИЦИАЛИЗАЦИЯ ДАННЫХ ----------
+        const cellNames = [
+            "СТАРТ", "Балтийская", "Казна", "Волковка", "Налог", "Рижская", "Морская", "Шанс", "Невский", "Варшавская",
+            "ТЮРЬМА", "Малая", "Эл.ком", "Фонтанка", "Вокзал", "Лермонтов", "Шанс", "Садовая", "Казна", "Лиговка",
+            "БЕСПЛАТНО", "Театр", "Шанс", "Музей", "Налог", "Парк", "Набережная", "Вокзал", "Дворцовая", "Вода",
+            "ОТДЫХ", "Проспект", "Казна", "Банк", "Шанс", "Завод", "Универ", "Вокзал", "Казна", "Ростовщик"
+        ];
+
+        // Цвета улиц (для полосок)
+        const propertyColors = [
+            "", "brown", "brown", "brown", "", "lightblue", "lightblue", "", "lightblue", "",
+            "", "pink", "", "pink", "", "pink", "", "orange", "", "orange",
+            "", "orange", "", "red", "", "red", "", "yellow", "yellow", "",
+            "", "green", "", "green", "", "darkblue", "darkblue", "", "", ""
+        ];
+
+        let players = [
+            { id:0, name:'Красный', money:1500, position:0, properties:[], houses:{}, inJail:false, color:'#e63946' },
+            { id:1, name:'Зеленый', money:1500, position:0, properties:[], houses:{}, inJail:false, color:'#2a9d8f' },
+            { id:2, name:'Желтый', money:1500, position:0, properties:[], houses:{}, inJail:false, color:'#e9c46a' },
+            { id:3, name:'Фиолет', money:1500, position:0, properties:[], houses:{}, inJail:false, color:'#b183c9' }
+        ];
+        let currentPlayer = 0; // кто ходит
+        let boardCells = [];
+
+        // Карточки собственности (названия улиц)
+        const propertyNames = ["Балтийская","Волковка","Рижская","Морская","Невский","Варшавская","Малая","Фонтанка","Лермонтов","Садовая","Лиговка","Театр","Музей","Парк","Набережная","Дворцовая","Проспект","Банк","Завод","Универ","Ростовщик"];
+
+        // ----- ОТРИСОВКА ДОСКИ -----
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            // 11x11 (углы включительно)
+            for (let row = 0; row < 11; row++) {
+                for (let col = 0; col < 11; col++) {
+                    let idx = -1;
+                    if (row === 0) idx = 10 + col; // верхний ряд (слева направо)
+                    else if (row === 10) idx = 9 - col; // нижний ряд (справа налево)
+                    else if (col === 0) idx = 10 - row; // левый ряд (снизу вверх)
+                    else if (col === 10) idx = 20 + row; // правый ряд (сверху вниз)
+                    else idx = -1; // центр не используется
+
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (idx === 0 || idx === 10 || idx === 20 || idx === 30) cell.classList.add('corner');
+                    if (idx >= 0 && idx < cellNames.length) {
+                        cell.dataset.index = idx;
+
+                        // Цветная полоска для улиц
+                        if (propertyColors[idx]) {
+                            const strip = document.createElement('div');
+                            strip.className = 'property-color-strip';
+                            strip.style.background = propertyColors[idx] === 'brown' ? '#8b4513' :
+                                                      propertyColors[idx] === 'lightblue' ? '#add8e6' :
+                                                      propertyColors[idx] === 'pink' ? '#ffb6c1' :
+                                                      propertyColors[idx] === 'orange' ? '#ffa500' :
+                                                      propertyColors[idx] === 'red' ? '#ff4444' :
+                                                      propertyColors[idx] === 'yellow' ? '#ffff66' :
+                                                      propertyColors[idx] === 'green' ? '#6aad6a' :
+                                                      propertyColors[idx] === 'darkblue' ? '#00008b' : '#aaa';
+                            cell.appendChild(strip);
+                        }
+
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'name';
+                        nameSpan.innerText = cellNames[idx];
+                        cell.appendChild(nameSpan);
+
+                        // Игроки на клетке
+                        const playersHere = players.filter(p => p.position === idx).map(p => p.id);
+                        if (playersHere.length) {
+                            const playerIcons = document.createElement('div');
+                            playerIcons.style.display = 'flex';
+                            playerIcons.style.gap = '4px';
+                            playerIcons.style.marginTop = '4px';
+                            playersHere.forEach(pid => {
+                                const icon = document.createElement('div');
+                                icon.style.width = '16px';
+                                icon.style.height = '16px';
+                                icon.style.borderRadius = '50%';
+                                icon.style.background = players[pid].color;
+                                icon.style.border = '2px solid gold';
+                                playerIcons.appendChild(icon);
+                            });
+                            cell.appendChild(playerIcons);
+                        }
+                    }
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Обновление верхней панели с игроками
+        function updatePlayersBar() {
+            const bar = document.getElementById('playersBar');
+            bar.innerHTML = '';
+            players.forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = `player-chip ${currentPlayer === p.id ? 'active' : ''}`;
+                chip.dataset.p = p.id;
+                chip.innerHTML = `<div class="p-avatar" data-p="${p.id}"></div><span class="p-money">$${p.money}</span>`;
+                chip.onclick = () => setCurrentPlayer(p.id); // ручное переключение
+                bar.appendChild(chip);
+            });
+        }
+
+        function setCurrentPlayer(id) {
+            if (id >=0 && id<players.length) currentPlayer = id;
+            updatePlayersBar();
+        }
+
+        // Анимация кубиков
+        function rollDice() {
+            const d1 = Math.floor(Math.random()*6)+1;
+            const d2 = Math.floor(Math.random()*6)+1;
+            const diceMap = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+            document.getElementById('dice1').innerText = diceMap[d1-1];
+            document.getElementById('dice2').innerText = diceMap[d2-1];
+            return d1+d2;
+        }
+
+        // Ход
+        document.getElementById('rollDice').addEventListener('click', ()=>{
+            const sum = rollDice();
+            let p = players[currentPlayer];
+            if (p.inJail) { /* пропуск хода упрощенно */ p.inJail=false; showNotif('Вы вышли из тюрьмы'); }
+            p.position = (p.position + sum) % 40;
+            if (p.position === 0) { p.money += 200; showNotif('+200 Проход через СТАРТ'); }
+            // Проверка покупки
+            if (propertyNames.includes(cellNames[p.position])) {
+                if (!boardCells[p.position]?.owner) {
+                    if (p.money >= 200) { // упрощенная цена
+                        p.money -= 200;
+                        p.properties.push(cellNames[p.position]);
+                        boardCells[p.position] = boardCells[p.position] || { owner: p.id };
+                        showNotif(`${p.name} купил ${cellNames[p.position]}`);
+                    }
+                }
+            }
+            updatePlayersBar();
+            renderBoard();
+        });
+
+        // Чат
+        document.getElementById('sendChat').addEventListener('click', ()=>{
+            const input = document.getElementById('chatInput');
+            if (!input.value.trim()) return;
+            const msg = document.createElement('div');
+            msg.innerText = `👤 ${players[currentPlayer].name}: ${input.value}`;
+            document.getElementById('chatMessages').appendChild(msg);
+            input.value = '';
+            document.getElementById('chatMessages').scrollTop = 999;
+        });
+
+        // Обмен (упрощенная логика)
+        function updateTradeSelects() {
+            const fromSel = document.getElementById('tradeFrom');
+            const toSel = document.getElementById('tradeTo');
+            fromSel.innerHTML = ''; toSel.innerHTML = '';
+            players.forEach((p,i)=>{
+                fromSel.innerHTML += `<option value="${i}">${p.name}</option>`;
+                toSel.innerHTML += `<option value="${i}">${p.name}</option>`;
+            });
+        }
+        updateTradeSelects();
+
+        function updateCardSelects() {
+            const from = document.getElementById('tradeFrom').value;
+            const to = document.getElementById('tradeTo').value;
+            const cardFrom = document.getElementById('cardFrom');
+            const cardTo = document.getElementById('cardTo');
+            cardFrom.innerHTML = '<option value="">Нет</option>';
+            cardTo.innerHTML = '<option value="">Нет</option>';
+            if (players[from]) players[from].properties.forEach(prop => cardFrom.innerHTML += `<option value="${prop}">${prop}</option>`);
+            if (players[to]) players[to].properties.forEach(prop => cardTo.innerHTML += `<option value="${prop}">${prop}</option>`);
+        }
+        document.getElementById('tradeFrom').addEventListener('change', updateCardSelects);
+        document.getElementById('tradeTo').addEventListener('change', updateCardSelects);
+
+        document.getElementById('tradeButton').addEventListener('click', ()=>{
+            const fromId = parseInt(document.getElementById('tradeFrom').value);
+            const toId = parseInt(document.getElementById('tradeTo').value);
+            const money = parseInt(document.getElementById('tradeMoney').value) || 0;
+            const cardFromVal = document.getElementById('cardFrom').value;
+            const cardToVal = document.getElementById('cardTo').value;
+
+            if (fromId === toId) { alert('Нельзя сам с собой'); return; }
+            if (money > players[fromId].money) { alert('Недостаточно денег'); return; }
+
+            // Перевод денег
+            players[fromId].money -= money;
+            players[toId].money += money;
+
+            // Обмен карточками (если выбраны)
+            if (cardFromVal && players[fromId].properties.includes(cardFromVal)) {
+                players[fromId].properties = players[fromId].properties.filter(p => p !== cardFromVal);
+                players[toId].properties.push(cardFromVal);
+            }
+            if (cardToVal && players[toId].properties.includes(cardToVal)) {
+                players[toId].properties = players[toId].properties.filter(p => p !== cardToVal);
+                players[fromId].properties.push(cardToVal);
+            }
+
+            showNotif(`Обмен: ${players[fromId].name} ⇄ ${players[toId].name}`);
+            updatePlayersBar();
+            updateCardSelects();
+        });
+
+        function showNotif(text) {
+            const n = document.createElement('div');
+            n.className = 'notif';
+            n.innerText = text;
+            document.body.appendChild(n);
+            setTimeout(()=> n.remove(), 3000);
+        }
+
+        // Начальное состояние
+        renderBoard();
+        updatePlayersBar();
+    })();
+</script>
+</body>
+</html>
