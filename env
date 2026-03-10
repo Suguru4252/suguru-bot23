@@ -1,8 +1,0 @@
-# Telegram Bot Token (от @BotFather)
-TELEGRAM_BOT_TOKEN=8703891124:AAGYfu1MsclMc8e4ulVOTdNy-j1TbJN3CDc
-
-# GigaChat Authorization Key (получить в SberCloud)
-GIGACHAT_AUTH_KEY=YOUR_GIGACHAT_KEY_HERE
-
-# Admin IDs (твой ID)
-ADMIN_IDS=5596589260
