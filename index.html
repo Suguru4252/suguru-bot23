@@ -1,501 +1,97 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МОНОПОЛИЯ ONLINE</title>
-    <!-- Firebase (обязательно) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <title>Монополия P2P</title>
+    <script src="https://cdn.jsdelivr.net/npm/trystero@latest/build/trystero-torrent.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
+        body { background: #0a3a0a; color: white; font-family: Arial; }
+        button { padding: 20px; font-size: 2rem; margin: 10px; }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(11, 1fr); 
+            gap: 2px; 
+            width: 600px; 
+            height: 600px; 
+            background: #b4804b; 
         }
-        body {
-            background: #0a3a0a;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .game-container {
-            max-width: 1300px;
-            width: 100%;
-            background: #ecd9b4;
-            border-radius: 60px;
-            border: 10px solid #b47d4e;
-            padding: 30px;
-            box-shadow: 0 20px 30px black;
-        }
-        .screen { display: none; }
-        .active-screen { display: block; }
-        
-        /* Меню */
-        .menu {
-            text-align: center;
-            padding: 40px;
-        }
-        .menu h1 {
-            font-size: 4rem;
-            color: gold;
-            text-shadow: 4px 4px 0 #7a4f1e;
-            margin-bottom: 40px;
-        }
-        .menu-btn {
-            background: gold;
-            border: none;
-            font-size: 2rem;
-            padding: 20px 50px;
-            border-radius: 60px;
-            font-weight: bold;
-            border-bottom: 8px solid #b0851f;
-            margin: 15px;
-            cursor: pointer;
-            width: 300px;
-        }
-        .menu-btn:active {
-            transform: translateY(5px);
-            border-bottom-width: 3px;
-        }
-        
-        /* Ник */
-        .nickname-box {
-            text-align: center;
-            padding: 30px;
-        }
-        .nickname-box input {
-            font-size: 2rem;
-            padding: 20px;
-            border-radius: 50px;
-            border: 5px solid #b47d4e;
-            width: 80%;
-            margin: 30px;
-            text-align: center;
-        }
-        
-        /* Комнаты */
-        .rooms-box {
-            background: #2d4030;
-            border-radius: 50px;
-            padding: 30px;
-        }
-        .rooms-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin: 20px 0;
-        }
-        .room-item {
-            background: #f5e9d8;
-            border-radius: 40px;
-            padding: 20px;
-            border: 4px solid #aa7c4a;
-            cursor: pointer;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-        
-        /* Игра */
-        .game-header {
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-            border-radius: 40px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.5rem;
-        }
-        .board {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            gap: 3px;
-            background: #b4804b;
-            padding: 10px;
-            border-radius: 40px;
-            aspect-ratio: 1/1;
-        }
-        .cell {
-            background: #fbefdb;
-            border: 2px solid #7b4f2e;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            text-align: center;
-            position: relative;
-            aspect-ratio: 1/1;
-        }
-        .player-dot {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            border: 2px solid white;
-            position: absolute;
-            bottom: 2px;
-        }
-        .chat {
-            background: #2d4030;
-            border-radius: 40px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .chat-messages {
-            background: #efe6d2;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 20px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-        .chat-input input {
-            flex: 2;
-            padding: 15px;
-            border-radius: 40px;
-            border: 3px solid #896f44;
-            font-size: 1.2rem;
-        }
-        .chat-input button {
-            padding: 15px 30px;
-            border-radius: 40px;
-            background: gold;
-            border: none;
-            font-weight: bold;
-            border-bottom: 4px solid #b0851f;
-            cursor: pointer;
-        }
-        .dice-area {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .dice {
-            font-size: 4rem;
-            background: white;
-            padding: 10px 30px;
-            border-radius: 20px;
-            border: 4px solid #7b4f2e;
-        }
-        .red-bg { background: #e63946; }
-        .green-bg { background: #2a9d8f; }
-        .yellow-bg { background: #e9c46a; }
-        .purple-bg { background: #9c89b8; }
+        .cell { background: #fbefdb; border: 1px solid black; }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <div id="mainMenu" class="screen active-screen menu">
-        <h1>🎲 МОНОПОЛИЯ 🎲</h1>
-        <button class="menu-btn" onclick="show('nicknameMenu')">🆕 ИГРАТЬ</button>
-        <button class="menu-btn" onclick="show('roomsMenu'); loadRooms()">🚪 КОМНАТЫ</button>
-    </div>
-
-    <!-- ВВОД НИКА -->
-    <div id="nicknameMenu" class="screen nickname-box">
-        <h2 style="color:white; font-size:3rem;">ВВЕДИ НИК</h2>
-        <input type="text" id="playerName" value="Игрок" placeholder="Твой ник">
-        <button class="menu-btn" onclick="createRoom()">➕ СОЗДАТЬ КОМНАТУ</button>
-        <button class="menu-btn" onclick="show('mainMenu')">⬅ НАЗАД</button>
-    </div>
-
-    <!-- СПИСОК КОМНАТ -->
-    <div id="roomsMenu" class="screen rooms-box">
-        <h2 style="color:gold; font-size:3rem;">КОМНАТЫ</h2>
-        <div id="roomsContainer" class="rooms-list">Загрузка...</div>
-        <button class="menu-btn" onclick="show('mainMenu')">⬅ НАЗАД</button>
-    </div>
-
-    <!-- ИГРА -->
-    <div id="gameMenu" class="screen">
-        <div class="game-header">
-            <span id="roomTitle">Комната</span>
-            <span id="playerMoney">$1500</span>
+    <div style="text-align: center;">
+        <h1>🎲 МОНОПОЛИЯ P2P 🎲</h1>
+        <div>
+            <button onclick="createRoom()">СОЗДАТЬ КОМНАТУ</button>
+            <input id="roomIdInput" placeholder="ID комнаты">
+            <button onclick="joinRoom()">ПРИСОЕДИНИТЬСЯ</button>
         </div>
-        
-        <!-- Доска -->
-        <div class="board" id="board"></div>
-        
-        <!-- Кубики -->
-        <div class="dice-area">
-            <button class="menu-btn" id="rollBtn" style="font-size:1.8rem;" disabled>🎲 БРОСИТЬ</button>
-            <div class="dice" id="diceValue">⚀</div>
-        </div>
-        
-        <!-- Чат -->
-        <div class="chat">
-            <div class="chat-messages" id="chatBox"></div>
-            <div class="chat-input">
-                <input type="text" id="msgInput" placeholder="Написать...">
-                <button id="sendBtn">➡️</button>
-            </div>
-        </div>
-        
-        <!-- Выход -->
-        <button class="menu-btn" onclick="leaveGame()" style="background:#c0392b; border-bottom-color:#78281f; margin-top:20px;">🚪 ВЫЙТИ</button>
+        <div id="roomDisplay"></div>
+        <div id="board"></div>
+        <button id="rollBtn" style="display:none;" onclick="rollDice()">🎲 БРОСИТЬ</button>
     </div>
-</div>
 
-<script>
-    // ===========================================
-    // 🔴 ТВОИ ДАННЫЕ FIREBASE (ВСТАВЬ СЮДА)
-    // ===========================================
-    const firebaseConfig = {
-        databaseURL: "https://monopoly-online-default-rtdb.firebaseio.com" // ← ВСТАВЬ СВОЮ ССЫЛКУ
-    };
-
-    // Инициализация
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // ===========================================
-    // ДАННЫЕ ИГРОКА
-    // ===========================================
-    let player = {
-        id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-        name: 'Игрок',
-        color: '#e63946',
-        pos: 0,
-        money: 1500
-    };
-    let currentRoom = null;
-    let roomRef = null;
-
-    // Названия клеток
-    const cells = [
-        "СТАРТ","БАЛТ","КАЗНА","ВОЛК","НАЛОГ","РИЖС","МОРС","ШАНС","НЕВС","ВАРШ",
-        "ТЮРЬМА","МАЛА","ЭЛЕК","ФОНТ","ВОКЗ","ЛЕРМ","ШАНС","САД","КАЗНА","ЛИГ",
-        "БЕСПЛ","ТЕАТ","ШАНС","МУЗ","НАЛОГ","ПАРК","НАБ","ВОКЗ","ДВОР","ВОДА",
-        "ОТДЫХ","ПРОС","КАЗНА","БАНК","ШАНС","ЗАВ","УНИВ","ВОКЗ","КАЗНА","РОСТ"
-    ];
-
-    // ===========================================
-    // УПРАВЛЕНИЕ ЭКРАНАМИ
-    // ===========================================
-    window.show = function(menuId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(menuId).classList.add('active-screen');
-    };
-
-    // ===========================================
-    // СОЗДАНИЕ КОМНАТЫ
-    // ===========================================
-    window.createRoom = function() {
-        let nick = document.getElementById('playerName').value.trim();
-        if (nick) player.name = nick;
+    <script>
+        const { joinRoom, selfId } = Trystero;
+        let room, gameState = { players: {} };
         
-        let roomData = {
-            name: 'Комната ' + player.name,
-            created: Date.now(),
-            gameOn: false,
-            turn: null,
-            players: {}
-        };
+        function createRoom() {
+            const roomId = 'monopoly_' + Math.random().toString(36).substr(2, 6);
+            room = joinRoom({ appId: 'my-monopoly' }, roomId);
+            document.getElementById('roomDisplay').innerHTML = 'ID комнаты: ' + roomId;
+            setupGame();
+        }
         
-        roomData.players[player.id] = {
-            id: player.id,
-            name: player.name,
-            color: player.color,
-            pos: 0,
-            money: 1500
-        };
+        function joinRoom() {
+            const roomId = document.getElementById('roomIdInput').value;
+            room = joinRoom({ appId: 'my-monopoly' }, roomId);
+            setupGame();
+        }
         
-        db.ref('rooms').push(roomData).then(ref => {
-            joinRoom(ref.key);
-        });
-    };
-
-    // ===========================================
-    // ПРИСОЕДИНЕНИЕ
-    // ===========================================
-    window.joinRoom = function(roomId) {
-        currentRoom = roomId;
-        roomRef = db.ref('rooms/' + roomId);
-        
-        // Добавляем себя
-        roomRef.child('players/' + player.id).set({
-            id: player.id,
-            name: player.name,
-            color: player.color,
-            pos: 0,
-            money: 1500
-        });
-        
-        // Слушаем изменения
-        roomRef.on('value', function(snap) {
-            let data = snap.val();
-            if (data) {
-                drawBoard(data);
-                updateHeader(data);
-                
-                // Активируем кнопку если наш ход
-                let rollBtn = document.getElementById('rollBtn');
-                if (data.turn === player.id) rollBtn.disabled = false;
-                else rollBtn.disabled = true;
-            }
-        });
-        
-        // Слушаем чат
-        db.ref('rooms/' + roomId + '/chat').on('child_added', function(snap) {
-            let msg = snap.val();
-            addChat(msg);
-        });
-        
-        show('gameMenu');
-    };
-
-    // ===========================================
-    // ЗАГРУЗКА КОМНАТ
-    // ===========================================
-    window.loadRooms = function() {
-        db.ref('rooms').limitToLast(10).on('value', function(snap) {
-            let html = '';
-            snap.forEach(function(child) {
-                let room = child.val();
-                if (!room.gameOn) {
-                    let count = room.players ? Object.keys(room.players).length : 0;
-                    html += `<div class="room-item" onclick="joinRoom('${child.key}')">
-                        <div>${room.name}</div>
-                        <div>👤 ${count}/4</div>
-                    </div>`;
-                }
-            });
-            document.getElementById('roomsContainer').innerHTML = html || 'Нет комнат';
-        });
-    };
-
-    // ===========================================
-    // ОТРИСОВКА ДОСКИ
-    // ===========================================
-    function drawBoard(data) {
-        let board = document.getElementById('board');
-        board.innerHTML = '';
-        
-        for (let r = 0; r < 11; r++) {
-            for (let c = 0; c < 11; c++) {
-                let idx = -1;
-                if (r === 0) idx = 10 + c;
-                else if (r === 10) idx = 9 - c;
-                else if (c === 0) idx = 10 - r;
-                else if (c === 10) idx = 20 + r;
-                
+        function setupGame() {
+            document.getElementById('rollBtn').style.display = 'block';
+            
+            // Создаем доску
+            const board = document.getElementById('board');
+            for(let i = 0; i < 40; i++) {
                 let cell = document.createElement('div');
                 cell.className = 'cell';
-                
-                if (idx >= 0) {
-                    cell.innerHTML = cells[idx];
-                    
-                    // Игроки
-                    if (data.players) {
-                        let offset = 0;
-                        for (let pid in data.players) {
-                            let p = data.players[pid];
-                            if (p.pos === idx) {
-                                let dot = document.createElement('div');
-                                dot.className = 'player-dot';
-                                dot.style.background = p.color;
-                                dot.style.left = (5 + offset * 12) + 'px';
-                                dot.style.backgroundColor = p.color;
-                                cell.appendChild(dot);
-                                offset++;
-                            }
-                        }
-                    }
-                }
+                cell.id = 'cell_' + i;
                 board.appendChild(cell);
             }
-        }
-    }
-
-    // ===========================================
-    // ОБНОВЛЕНИЕ ШАПКИ
-    // ===========================================
-    function updateHeader(data) {
-        if (data.players && data.players[player.id]) {
-            player.money = data.players[player.id].money;
-            document.getElementById('playerMoney').innerHTML = '$' + player.money;
-        }
-        
-        let title = data.name || 'Комната';
-        document.getElementById('roomTitle').innerHTML = title;
-    }
-
-    // ===========================================
-    // ЧАТ
-    // ===========================================
-    function addChat(msg) {
-        let box = document.getElementById('chatBox');
-        box.innerHTML += `<div><b style="color:${msg.color}">${msg.name}:</b> ${msg.text}</div>`;
-        box.scrollTop = box.scrollHeight;
-    }
-
-    document.getElementById('sendBtn').onclick = function() {
-        let input = document.getElementById('msgInput');
-        if (input.value && currentRoom) {
-            db.ref('rooms/' + currentRoom + '/chat').push({
-                name: player.name,
-                text: input.value,
-                color: player.color
+            
+            // Слушаем ходы
+            const [sendMove, getMove] = room.makeAction('move');
+            
+            getMove((data, peerId) => {
+                updatePlayerPosition(peerId, data.position);
             });
-            input.value = '';
+            
+            window.rollDice = function() {
+                const dice = Math.floor(Math.random() * 6) + 1;
+                const newPos = (gameState.players[selfId]?.position || 0) + dice;
+                if(newPos >= 40) newPos = newPos - 40; // Проход старта
+                
+                gameState.players[selfId] = { position: newPos };
+                sendMove({ position: newPos });
+                updatePlayerPosition(selfId, newPos);
+            };
         }
-    };
-
-    // ===========================================
-    // БРОСОК КУБИКА
-    // ===========================================
-    document.getElementById('rollBtn').onclick = function() {
-        let dice = Math.floor(Math.random() * 6) + 1;
-        let diceSymbol = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
-        document.getElementById('diceValue').innerHTML = diceSymbol;
         
-        let newPos = (player.pos + dice) % 40;
-        let newMoney = player.money;
-        
-        // Бонус за старт
-        if (newPos < player.pos) newMoney += 200;
-        
-        player.pos = newPos;
-        player.money = newMoney;
-        
-        // Обновляем в базе
-        db.ref('rooms/' + currentRoom + '/players/' + player.id).update({
-            pos: newPos,
-            money: newMoney
-        });
-        
-        // Передаем ход следующему
-        roomRef.once('value', function(snap) {
-            let players = snap.val().players;
-            let ids = Object.keys(players);
-            let idx = ids.indexOf(player.id);
-            let nextIdx = (idx + 1) % ids.length;
-            roomRef.update({ turn: ids[nextIdx] });
-        });
-    };
-
-    // ===========================================
-    // ВЫХОД
-    // ===========================================
-    window.leaveGame = function() {
-        if (currentRoom) {
-            db.ref('rooms/' + currentRoom + '/players/' + player.id).remove();
-            currentRoom = null;
+        function updatePlayerPosition(playerId, pos) {
+            // Очищаем старую позицию
+            document.querySelectorAll('.player').forEach(p => p.remove());
+            
+            // Ставим на новую
+            let cell = document.getElementById('cell_' + pos);
+            let marker = document.createElement('div');
+            marker.className = 'player';
+            marker.style.width = '10px';
+            marker.style.height = '10px';
+            marker.style.background = playerId === selfId ? 'red' : 'blue';
+            marker.style.borderRadius = '50%';
+            marker.style.display = 'inline-block';
+            cell.appendChild(marker);
         }
-        show('mainMenu');
-    };
-</script>
+    </script>
 </body>
 </html>
