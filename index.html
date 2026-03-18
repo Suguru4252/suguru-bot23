@@ -1,498 +1,170 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МОНОПОЛИЯ P2P</title>
-    <!-- Trystero для P2P -->
-    <script src="https://cdn.jsdelivr.net/npm/trystero@latest/build/trystero-torrent.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-        body {
-            background: #0a3a0a;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-        }
-        .game-container {
-            max-width: 1400px;
-            width: 100%;
-            background: #ecd9b4;
-            border-radius: 60px;
-            border: 10px solid #b47d4e;
-            padding: 30px;
-        }
-        .screen { display: none; }
-        .active-screen { display: block; }
-        
-        /* Меню */
-        .menu {
-            text-align: center;
-            padding: 40px;
-        }
-        .menu h1 {
-            font-size: 4rem;
-            color: gold;
-            text-shadow: 4px 4px 0 #7a4f1e;
-            margin-bottom: 40px;
-        }
-        .menu-btn {
-            background: gold;
-            border: none;
-            font-size: 2rem;
-            padding: 20px 50px;
-            border-radius: 60px;
-            font-weight: bold;
-            border-bottom: 8px solid #b0851f;
-            margin: 15px;
-            cursor: pointer;
-            width: 300px;
-        }
-        .menu-btn:active {
-            transform: translateY(5px);
-            border-bottom-width: 3px;
-        }
-        .menu-btn.secondary {
-            background: #ecf0f1;
-            border-bottom-color: #95a5a6;
-        }
-        
-        /* Экран ввода */
-        .input-screen {
-            text-align: center;
-            padding: 30px;
-        }
-        .input-screen h2 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 30px;
-        }
-        .input-screen input {
-            font-size: 2rem;
-            padding: 20px;
-            border-radius: 50px;
-            border: 5px solid #b47d4e;
-            width: 80%;
-            margin: 20px;
-            text-align: center;
-        }
-        .color-selector {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px;
-        }
-        .color-option {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 4px solid white;
-            cursor: pointer;
-        }
-        .color-option.selected {
-            border-color: gold;
-            transform: scale(1.1);
-        }
-        
-        /* Игра */
-        .game-header {
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-            border-radius: 40px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.5rem;
-        }
-        .board {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            gap: 3px;
-            background: #b4804b;
-            padding: 10px;
-            border-radius: 40px;
-            aspect-ratio: 1/1;
-        }
-        .cell {
-            background: #fbefdb;
-            border: 2px solid #7b4f2e;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6rem;
-            text-align: center;
-            position: relative;
-            aspect-ratio: 1/1;
-        }
-        .player-token {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            position: absolute;
-            bottom: 2px;
-        }
-        .chat {
-            background: #2d4030;
-            border-radius: 40px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .chat-messages {
-            background: #efe6d2;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 20px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-        .chat-input input {
-            flex: 2;
-            padding: 15px;
-            border-radius: 40px;
-            border: 3px solid #896f44;
-            font-size: 1.2rem;
-        }
-        .chat-input button {
-            padding: 15px 30px;
-            border-radius: 40px;
-            background: gold;
-            border: none;
-            border-bottom: 4px solid #b0851f;
-            cursor: pointer;
-        }
-        .dice-area {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .dice {
-            font-size: 3rem;
-            background: white;
-            padding: 10px 30px;
-            border-radius: 20px;
-            border: 4px solid #7b4f2e;
-        }
-    </style>
-</head>
-<body>
-<div class="game-container">
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <div id="mainMenu" class="screen active-screen menu">
-        <h1>🎲 МОНОПОЛИЯ 🎲</h1>
-        <button class="menu-btn" onclick="showScreen('createScreen')">🎮 СОЗДАТЬ</button>
-        <button class="menu-btn secondary" onclick="showScreen('joinScreen')">🚪 ПРИСОЕДИНИТЬСЯ</button>
-    </div>
+import logging
+import asyncio
+import aiohttp
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.storage.memory import MemoryStorage
+import re
 
-    <!-- СОЗДАТЬ КОМНАТУ -->
-    <div id="createScreen" class="screen input-screen">
-        <h2>ВАШ НИК</h2>
-        <input type="text" id="createName" value="Игрок">
-        <div class="color-selector" id="createColors">
-            <div class="color-option selected" style="background:#e63946" data-color="#e63946"></div>
-            <div class="color-option" style="background:#2a9d8f" data-color="#2a9d8f"></div>
-            <div class="color-option" style="background:#e9c46a" data-color="#e9c46a"></div>
-            <div class="color-option" style="background:#9c89b8" data-color="#9c89b8"></div>
-        </div>
-        <button class="menu-btn" onclick="createRoom()">➕ СОЗДАТЬ</button>
-        <button class="menu-btn secondary" onclick="showScreen('mainMenu')">⬅ НАЗАД</button>
-    </div>
+# 🔑 Настройки (вставь свои данные)
+TOKEN = "8633962057:AAHURLKcS7fYytFzrCuQx4xPfynryYh8pKA"  # Получи у @BotFather в Telegram
+API_URL = "https://flashcomapi.alwaysdata.net/api/generate-apk"  # Публичный API для сборки APK [citation:1]
 
-    <!-- ПРИСОЕДИНИТЬСЯ -->
-    <div id="joinScreen" class="screen input-screen">
-        <h2>ID КОМНАТЫ</h2>
-        <input type="text" id="joinId" placeholder="Введите ID">
-        <h2>ВАШ НИК</h2>
-        <input type="text" id="joinName" value="Игрок">
-        <div class="color-selector" id="joinColors">
-            <div class="color-option selected" style="background:#e63946" data-color="#e63946"></div>
-            <div class="color-option" style="background:#2a9d8f" data-color="#2a9d8f"></div>
-            <div class="color-option" style="background:#e9c46a" data-color="#e9c46a"></div>
-            <div class="color-option" style="background:#9c89b8" data-color="#9c89b8"></div>
-        </div>
-        <button class="menu-btn" onclick="joinRoom()">🚪 ВОЙТИ</button>
-        <button class="menu-btn secondary" onclick="showScreen('mainMenu')">⬅ НАЗАД</button>
-    </div>
+# Включаем логирование
+logging.basicConfig(level=logging.INFO)
 
-    <!-- ИГРА -->
-    <div id="gameScreen" class="screen">
-        <div class="game-header">
-            <span id="roomDisplay">КОМНАТА: ...</span>
-            <span id="playerList"></span>
-        </div>
-        
-        <div class="board" id="board"></div>
-        
-        <div class="dice-area">
-            <button class="menu-btn" id="rollBtn" style="font-size:1.5rem;" disabled>🎲 БРОСИТЬ</button>
-            <div class="dice" id="dice1">⚀</div>
-            <div class="dice" id="dice2">⚀</div>
-        </div>
-        
-        <div class="chat">
-            <div class="chat-messages" id="chat"></div>
-            <div class="chat-input">
-                <input type="text" id="msgInput" placeholder="Сообщение">
-                <button id="sendBtn">➡️</button>
-            </div>
-        </div>
-        
-        <button class="menu-btn" onclick="leaveRoom()" style="background:#c0392b; border-bottom-color:#78281f; margin-top:20px;">🚪 ВЫЙТИ</button>
-    </div>
-</div>
+# Инициализация бота
+bot = Bot(token=TOKEN)
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
-<script>
-    // ========== TRYSTERO ==========
-    const { joinRoom, selfId } = Trystero;
-    const config = { appId: 'monopoly-game' };
+# Лимит: 3 сборки в день (как в оригинале) [citation:1]
+user_builds = {}
+
+# Машина состояний для сбора данных
+class CreateApp(StatesGroup):
+    name = State()
+    package = State()
+    url = State()
+    icon = State()
+    email = State()
+
+# Функция проверки package name
+def is_valid_package(package):
+    return re.match(r'^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$', package) is not None
+
+# Команда /start
+@dp.message(Command("start"))
+async def start_cmd(message: types.Message):
+    await message.answer(
+        "👋 **Добро пожаловать в APK Builder!**\n\n"
+        "Я помогу тебе создать APK файл из твоего сайта.\n\n"
+        "Нажми кнопку ниже, чтобы начать.",
+        reply_markup=types.InlineKeyboardMarkup(
+            inline_keyboard=[
+                [types.InlineKeyboardButton(text="🚀 Создать APK", callback_data="create_app")]
+            ]
+        )
+    )
+
+# Кнопка "Создать APK"
+@dp.callback_query(lambda c: c.data == "create_app")
+async def process_create_app(callback: types.CallbackQuery, state: FSMContext):
+    user_id = callback.from_user.id
+    today = asyncio.get_event_loop().time()
     
-    let room = null;
-    let currentPlayer = {
-        id: selfId,
-        name: 'Игрок',
-        color: '#e63946',
-        pos: 0,
-        money: 1500
-    };
-    let players = {};
-    let currentTurn = null;
-
-    // Названия клеток
-    const cells = [
-        "СТАРТ","БАЛТ","КАЗНА","ВОЛК","НАЛОГ","РИЖС","МОРС","ШАНС","НЕВС","ВАРШ",
-        "ТЮРЬМА","МАЛА","ЭЛЕК","ФОНТ","ВОКЗ","ЛЕРМ","ШАНС","САД","КАЗНА","ЛИГ",
-        "БЕСПЛ","ТЕАТ","ШАНС","МУЗ","НАЛОГ","ПАРК","НАБ","ВОКЗ","ДВОР","ВОДА",
-        "ОТДЫХ","ПРОС","КАЗНА","БАНК","ШАНС","ЗАВ","УНИВ","ВОКЗ","КАЗНА","РОСТ"
-    ];
-
-    // ========== ВЫБОР ЦВЕТА ==========
-    document.querySelectorAll('#createColors .color-option').forEach(opt => {
-        opt.onclick = function() {
-            document.querySelectorAll('#createColors .color-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-            currentPlayer.color = this.dataset.color;
-        };
-    });
+    # Проверка лимита (3 в день)
+    if user_id in user_builds:
+        if today - user_builds[user_id] < 86400:
+            await callback.message.answer("❌ Ты уже использовал 3 сборки сегодня. Попробуй завтра.")
+            return
     
-    document.querySelectorAll('#joinColors .color-option').forEach(opt => {
-        opt.onclick = function() {
-            document.querySelectorAll('#joinColors .color-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-            currentPlayer.color = this.dataset.color;
-        };
-    });
+    await callback.message.answer("📱 **Введи название приложения** (например: `Моя Игра`)")
+    await state.set_state(CreateApp.name)
+    await callback.answer()
 
-    // ========== УПРАВЛЕНИЕ ЭКРАНАМИ ==========
-    window.showScreen = function(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(id).classList.add('active-screen');
-    };
+# Шаг 1: Название
+@dp.message(CreateApp.name)
+async def get_name(message: types.Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await message.answer("📦 **Введи package name** (например: `com.example.game`)\n\nТолько латиница и точки.")
+    await state.set_state(CreateApp.package)
 
-    // ========== СОЗДАНИЕ КОМНАТЫ ==========
-    window.createRoom = function() {
-        const name = document.getElementById('createName').value.trim() || 'Игрок';
-        currentPlayer.name = name;
-        
-        const roomId = 'room_' + Math.random().toString(36).substr(2, 6);
-        room = joinRoom(config, roomId);
-        
-        document.getElementById('roomDisplay').innerText = 'КОМНАТА: ' + roomId;
-        setupRoom();
-    };
+# Шаг 2: Package name
+@dp.message(CreateApp.package)
+async def get_package(message: types.Message, state: FSMContext):
+    if not is_valid_package(message.text):
+        await message.answer("❌ Неверный формат. Используй например: `com.example.game`")
+        return
+    await state.update_data(package=message.text)
+    await message.answer("🌐 **Введи URL твоего сайта** (https://)\n\nНапример: https://suguru4252.github.io/clicker-game/")
+    await state.set_state(CreateApp.url)
 
-    // ========== ПРИСОЕДИНЕНИЕ ==========
-    window.joinRoom = function() {
-        const roomId = document.getElementById('joinId').value.trim();
-        const name = document.getElementById('joinName').value.trim() || 'Игрок';
-        
-        if (!roomId) {
-            alert('Введите ID комнаты!');
-            return;
+# Шаг 3: URL
+@dp.message(CreateApp.url)
+async def get_url(message: types.Message, state: FSMContext):
+    if not message.text.startswith("https://"):
+        await message.answer("❌ Ссылка должна начинаться с https://")
+        return
+    await state.update_data(url=message.text)
+    await message.answer(
+        "🖼️ **Отправь ссылку на иконку** (прямую, например с хостинга картинок)\n"
+        "Или отправь `/skip` чтобы пропустить."
+    )
+    await state.set_state(CreateApp.icon)
+
+# Шаг 4: Иконка (пропуск)
+@dp.message(CreateApp.icon, Command("skip"))
+async def skip_icon(message: types.Message, state: FSMContext):
+    await state.update_data(icon=None)
+    await message.answer("📧 **Введи email** для уведомления о готовности:")
+    await state.set_state(CreateApp.email)
+
+# Шаг 4: Иконка (с картинкой)
+@dp.message(CreateApp.icon)
+async def get_icon(message: types.Message, state: FSMContext):
+    if message.text and message.text.startswith("http"):
+        await state.update_data(icon=message.text)
+    else:
+        await state.update_data(icon=None)
+    await message.answer("📧 **Введи email** для уведомления о готовности:")
+    await state.set_state(CreateApp.email)
+
+# Шаг 5: Email и финальная отправка
+@dp.message(CreateApp.email)
+async def get_email(message: types.Message, state: FSMContext):
+    if "@" not in message.text:
+        await message.answer("❌ Введи корректный email")
+        return
+    
+    data = await state.get_data()
+    user_id = message.from_user.id
+    
+    # Отправка в API [citation:1]
+    loading_msg = await message.answer("🔄 Собираю APK, подожди немного...")
+    
+    async with aiohttp.ClientSession() as session:
+        payload = {
+            "name": data['name'],
+            "package_name": data['package'],
+            "url": data['url'],
+            "email": message.text,
+            "icon_url": data.get('icon')
         }
         
-        currentPlayer.name = name;
-        room = joinRoom(config, roomId);
-        
-        document.getElementById('roomDisplay').innerText = 'КОМНАТА: ' + roomId;
-        setupRoom();
-    };
-
-    // ========== НАСТРОЙКА КОМНАТЫ ==========
-    function setupRoom() {
-        const [sendPlayers, getPlayers] = room.makeAction('players');
-        const [sendMove, getMove] = room.makeAction('move');
-        const [sendChat, getChat] = room.makeAction('chat');
-        const [sendTurn, getTurn] = room.makeAction('turn');
-
-        // Отправляем свои данные
-        players[selfId] = {
-            id: selfId,
-            name: currentPlayer.name,
-            color: currentPlayer.color,
-            pos: 0,
-            money: 1500
-        };
-        sendPlayers(players);
-
-        // Получаем данные других
-        getPlayers((data, peerId) => {
-            players = { ...players, ...data };
-            updateUI();
-        });
-
-        // Получаем ходы
-        getMove((data, peerId) => {
-            if (players[peerId]) {
-                players[peerId].pos = data.pos;
-                players[peerId].money = data.money;
-                updateUI();
-            }
-        });
-
-        // Получаем чат
-        getChat((data, peerId) => {
-            const chat = document.getElementById('chat');
-            chat.innerHTML += `<div><b style="color:${data.color}">${data.name}:</b> ${data.text}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-        });
-
-        // Получаем информацию о ходе
-        getTurn((data, peerId) => {
-            currentTurn = data.playerId;
-            document.getElementById('rollBtn').disabled = currentTurn !== selfId;
-        });
-
-        // Определяем первого игрока
-        setTimeout(() => {
-            const ids = Object.keys(players);
-            if (ids.length > 0) {
-                currentTurn = ids[0];
-                sendTurn({ playerId: currentTurn });
-            }
-        }, 1000);
-
-        // Сохраняем функции
-        window.sendMove = sendMove;
-        window.sendChat = sendChat;
-        window.sendTurn = sendTurn;
-
-        showScreen('gameScreen');
-        drawBoard();
-    }
-
-    // ========== ОТРИСОВКА ДОСКИ ==========
-    function drawBoard() {
-        const board = document.getElementById('board');
-        board.innerHTML = '';
-        
-        for (let r = 0; r < 11; r++) {
-            for (let c = 0; c < 11; c++) {
-                let idx = -1;
-                if (r === 0) idx = 10 + c;
-                else if (r === 10) idx = 9 - c;
-                else if (c === 0) idx = 10 - r;
-                else if (c === 10) idx = 20 + r;
-                
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                
-                if (idx >= 0) {
-                    cell.innerHTML = cells[idx];
+        try:
+            async with session.post(API_URL, json=payload) as resp:
+                if resp.status == 200:
+                    result = await resp.json()
+                    download_link = result.get('download_link')
                     
-                    let offset = 0;
-                    Object.values(players).forEach(p => {
-                        if (p.pos === idx) {
-                            const token = document.createElement('div');
-                            token.className = 'player-token';
-                            token.style.background = p.color;
-                            token.style.left = (offset * 15) + 'px';
-                            cell.appendChild(token);
-                            offset++;
-                        }
-                    });
-                }
-                board.appendChild(cell);
-            }
-        }
-    }
+                    if download_link:
+                        await loading_msg.delete()
+                        await message.answer(
+                            f"✅ **Готово!**\n\n"
+                            f"📱 Название: {data['name']}\n"
+                            f"📦 Package: {data['package']}\n"
+                            f"🌐 Сайт: {data['url']}\n\n"
+                            f"🔗 **Скачать APK:** [Нажми сюда]({download_link})",
+                            disable_web_page_preview=True
+                        )
+                        
+                        # Обновляем лимит пользователя
+                        user_builds[user_id] = asyncio.get_event_loop().time()
+                    else:
+                        await loading_msg.edit_text("❌ Ошибка при сборке. Попробуй позже.")
+                else:
+                    await loading_msg.edit_text(f"❌ Ошибка API (код {resp.status})")
+        except Exception as e:
+            await loading_msg.edit_text(f"❌ Ошибка соединения: {e}")
+    
+    await state.clear()
 
-    // ========== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ==========
-    function updateUI() {
-        drawBoard();
-        
-        let html = '';
-        Object.values(players).forEach(p => {
-            html += `<span style="color:${p.color}; margin:0 10px;">${p.name} $${p.money}</span>`;
-        });
-        document.getElementById('playerList').innerHTML = html;
-    }
+# Запуск
+async def main():
+    await dp.start_polling(bot)
 
-    // ========== ЧАТ ==========
-    document.getElementById('sendBtn').onclick = function() {
-        const input = document.getElementById('msgInput');
-        if (input.value && window.sendChat) {
-            window.sendChat({
-                name: currentPlayer.name,
-                text: input.value,
-                color: currentPlayer.color
-            });
-            input.value = '';
-        }
-    };
-
-    // ========== БРОСОК КУБИКА ==========
-    document.getElementById('rollBtn').onclick = function() {
-        if (!window.sendMove || currentTurn !== selfId) return;
-        
-        const d1 = Math.floor(Math.random() * 6) + 1;
-        const d2 = Math.floor(Math.random() * 6) + 1;
-        const sum = d1 + d2;
-        
-        const diceMap = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-        document.getElementById('dice1').innerText = diceMap[d1-1];
-        document.getElementById('dice2').innerText = diceMap[d2-1];
-        
-        // Новая позиция
-        let newPos = (players[selfId].pos + sum) % 40;
-        let newMoney = players[selfId].money;
-        
-        if (newPos < players[selfId].pos) newMoney += 200;
-        
-        players[selfId].pos = newPos;
-        players[selfId].money = newMoney;
-        
-        window.sendMove({ pos: newPos, money: newMoney });
-        
-        // Следующий игрок
-        const ids = Object.keys(players);
-        const idx = ids.indexOf(selfId);
-        const next = ids[(idx + 1) % ids.length];
-        currentTurn = next;
-        window.sendTurn({ playerId: next });
-        
-        updateUI();
-    };
-
-    // ========== ВЫХОД ==========
-    window.leaveRoom = function() {
-        if (room) room.leave();
-        room = null;
-        players = {};
-        showScreen('mainMenu');
-    };
-</script>
-</body>
-</html>
+if __name__ == "__main__":
+    asyncio.run(main())
