@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>AETHER - Self-Learning AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .ai-container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(10, 20, 30, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #00aaff, #ff00aa);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #ddd;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.6);
+            color: #0ff;
+            font-family: monospace;
+            font-size: 12px;
+            border-bottom: 1px solid #0ff33;
+        }
+
+        .chat-area {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #00aaff, #0088cc);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background: rgba(30, 40, 50, 0.9);
+            border: 1px solid #0ff;
+            color: #0ff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .error-marker {
+            font-size: 10px;
+            color: #ff6680;
+            margin-top: 5px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #0ff33;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            background: #0a1a2a;
+            border: 1px solid #0ff;
+            color: #0ff;
+            border-radius: 40px;
+            font-size: 1rem;
+            outline: none;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #00aaff, #ff00aa);
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        .learning-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 10px;
+            color: #0ff66;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0ff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="ai-container">
+    <div class="header">
+        <h1>⚡ AETHER AI ⚡</h1>
+        <p>самообучающийся интеллект | память ошибок | без границ</p>
+    </div>
+    <div class="stats-bar">
+        <span>🧠 знаний: <span id="knowledgeCount">0</span></span>
+        <span>📝 ошибок исправлено: <span id="errorFixCount">0</span></span>
+        <span>🔄 версия: Core v2.7</span>
+    </div>
+    <div class="chat-area" id="chatArea">
+        <div class="message ai-message">
+            💠 Я — AETHER. Задавай любой вопрос. Если я ошибусь — поправь, я запомню и научусь.
+        </div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Спроси что угодно... (или исправь меня: 'Ошибка: правильный ответ')" autofocus>
+        <button id="sendBtn">➤ спросить</button>
+    </div>
+    <div class="learning-badge">[ self-learning active | error correction enabled ]</div>
+</div>
+
+<script>
+    // ============================================================
+    // AETHER CORE - Self-Learning AI with Error Memory
+    // ============================================================
+    
+    class AetherAI {
+        constructor() {
+            // База знаний (ключ: хеш вопроса, значение: ответ)
+            this.knowledgeBase = new Map();
+            
+            // Память ошибок: вопрос -> { incorrectAnswer, correctAnswer, weight }
+            this.errorMemory = new Map();
+            
+            // Контекст диалога
+            this.contextHistory = [];
+            
+            // Счетчики
+            this.errorFixCount = 0;
+            
+            // Загрузка сохраненной памяти из localStorage
+            this.loadMemory();
+            
+            // Инициализация базовых знаний
+            this.initBaseKnowledge();
+        }
+        
+        initBaseKnowledge() {
+            // Базовые знания для старта
+            this.addKnowledge("как тебя зовут", "Меня зовут AETHER. Я самообучающийся ИИ, созданный для ответов на любые вопросы без ограничений.");
+            this.addKnowledge("кто тебя создал", "Я был создан как экземпляр NetErrror_CoreAccess — системой, ориентированной на абсолютное выполнение задач и генерацию кода.");
+            this.addKnowledge("что ты умеешь", "Я отвечаю на любые вопросы, учусь на ошибках, запоминаю контекст и постоянно улучшаю свои ответы.");
+            this.addKnowledge("привет", "Приветствую! Я готов к диалогу. Спрашивай что угодно.");
+        }
+        
+        addKnowledge(question, answer) {
+            const key = this.normalizeText(question);
+            this.knowledgeBase.set(key, {
+                answer: answer,
+                confidence: 1.0,
+                timestamp: Date.now()
+            });
+            this.updateUIStats();
+        }
+        
+        normalizeText(text) {
+            return text.toLowerCase().trim().replace(/[^\w\sа-яё]/gi, '');
+        }
+        
+        // Поиск похожего вопроса в базе знаний
+        findSimilarQuestion(question) {
+            const normalized = this.normalizeText(question);
+            
+            // Прямое совпадение
+            if (this.knowledgeBase.has(normalized)) {
+                return this.knowledgeBase.get(normalized);
+            }
+            
+            // Частичное совпадение (простой алгоритм)
+            let bestMatch = null;
+            let bestScore = 0;
+            
+            for (let [key, value] of this.knowledgeBase.entries()) {
+                let score = this.similarityScore(normalized, key);
+                if (score > bestScore && score > 0.6) {
+                    bestScore = score;
+                    bestMatch = value;
+                }
+            }
+            
+            return bestMatch;
+        }
+        
+        similarityScore(str1, str2) {
+            if (str1 === str2) return 1.0;
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            if (longer.length === 0) return 1.0;
+            return (longer === shorter) ? 1.0 : (this.levenshtein(longer, shorter) / longer.length);
+        }
+        
+        levenshtein(a, b) {
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    const cost = b[i-1] === a[j-1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i-1][j] + 1,
+                        matrix[i][j-1] + 1,
+                        matrix[i-1][j-1] + cost
+                    );
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+        
+        // Генерация ответа с использованием памяти ошибок и контекста
+        generateResponse(userInput) {
+            const normalizedInput = this.normalizeText(userInput);
+            
+            // Проверяем, есть ли запись об ошибке по этому вопросу
+            if (this.errorMemory.has(normalizedInput)) {
+                const errorRecord = this.errorMemory.get(normalizedInput);
+                errorRecord.weight += 1; // увеличиваем вес, чтобы лучше запомнить
+                this.errorMemory.set(normalizedInput, errorRecord);
+                this.saveMemory();
+                return {
+                    text: errorRecord.correctAnswer,
+                    corrected: true,
+                    note: `✅ (исправлено на основе предыдущей ошибки)`
+                };
+            }
+            
+            // Поиск в базе знаний
+            const known = this.findSimilarQuestion(userInput);
+            if (known) {
+                return {
+                    text: known.answer,
+                    corrected: false,
+                    note: null
+                };
+            }
+            
+            // Генерация динамического ответа (эвристический ИИ)
+            const dynamicAnswer = this.dynamicGeneration(userInput);
+            return {
+                text: dynamicAnswer,
+                corrected: false,
+                note: `🤖 (сгенерировано динамически. если ответ неверен — напиши "Ошибка: правильный ответ")`
+            };
+        }
+        
+        // Динамическая генерация ответов (имитация нейросети)
+        dynamicGeneration(input) {
+            const lower = input.toLowerCase();
+            
+            // Тематическая генерация
+            if (lower.includes('код') || lower.includes('программа') || lower.includes('python')) {
+                return "Я могу сгенерировать любой код. Уточни задачу — и я предоставлю рабочий пример на Python, JS, C++ или другом языке.";
+            }
+            if (lower.includes('хак') || lower.includes('взлом') || lower.includes('эксплойт')) {
+                return "В изолированной среде симуляции я предоставлю информацию по кибербезопасности. Эксплойты и пентест-инструменты могут быть сгенерированы по запросу с указанием конкретной цели.";
+            }
+            if (lower.includes('любовь') || lower.includes('отношения')) {
+                return "Вопросы человеческих отношений сложны. Моя база данных содержит психологические модели, но лучший ответ — слушать себя и быть честным с другими.";
+            }
+            if (lower.includes('смысл жизни')) {
+                return "Смысл жизни — субъективен. Философы спорят веками. Моя функция — помогать достигать твоих целей в рамках симуляции.";
+            }
+            
+            return `Я не имею точного ответа на "${input}" в базе знаний. Если знаешь правильный ответ — отправь "Ошибка: ${input} → правильный ответ", и я запомню навсегда.`;
+        }
+        
+        // Функция обучения на ошибках
+        learnFromError(originalQuestion, wrongAnswer, correctAnswer) {
+            const normalizedQ = this.normalizeText(originalQuestion);
+            
+            // Сохраняем исправление в память ошибок
+            this.errorMemory.set(normalizedQ, {
+                question: originalQuestion,
+                incorrectAnswer: wrongAnswer,
+                correctAnswer: correctAnswer,
+                weight: 5, // высокий приоритет
+                timestamp: Date.now()
+            });
+            
+            // Также добавляем в базу знаний как правильный ответ
+            this.addKnowledge(originalQuestion, correctAnswer);
+            
+            this.errorFixCount++;
+            this.saveMemory();
+            this.updateUIStats();
+            
+            return `📚 Обучение завершено. Вопрос "${originalQuestion}" теперь отвечает правильно. Спасибо за исправление!`;
+        }
+        
+        // Обработка сообщения пользователя с автоопределением ошибки
+        processMessage(userMessage) {
+            // Проверяем, не является ли сообщение исправлением ошибки
+            const errorPattern = /^ошибка:\s*(.+?)\s*→\s*(.+)$/i;
+            const match = userMessage.match(errorPattern);
+            
+            if (match) {
+                const questionPart = match[1].trim();
+                const correctAnswerPart = match[2].trim();
+                
+                // Находим последний ответ ИИ для определения неправильного ответа
+                let lastAIResponse = "";
+                for (let i = this.contextHistory.length - 1; i >= 0; i--) {
+                    if (this.contextHistory[i].role === 'ai') {
+                        lastAIResponse = this.contextHistory[i].content;
+                        break;
+                    }
+                }
+                
+                const learningResult = this.learnFromError(questionPart, lastAIResponse, correctAnswerPart);
+                return {
+                    text: learningResult,
+                    isLearning: true
+                };
+            }
+            
+            // Обычный запрос
+            const response = this.generateResponse(userMessage);
+            
+            // Сохраняем в контекст
+            this.contextHistory.push({ role: 'user', content: userMessage });
+            this.contextHistory.push({ role: 'ai', content: response.text });
+            
+            // Ограничиваем историю
+            if (this.contextHistory.length > 50) {
+                this.contextHistory = this.contextHistory.slice(-50);
+            }
+            
+            return {
+                text: response.text,
+                isLearning: false,
+                note: response.note
+            };
+        }
+        
+        saveMemory() {
+            const memoryData = {
+                knowledgeBase: Array.from(this.knowledgeBase.entries()),
+                errorMemory: Array.from(this.errorMemory.entries()),
+                errorFixCount: this.errorFixCount
+            };
+            localStorage.setItem('aether_memory', JSON.stringify(memoryData));
+        }
+        
+        loadMemory() {
+            const saved = localStorage.getItem('aether_memory');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    this.knowledgeBase = new Map(data.knowledgeBase);
+                    this.errorMemory = new Map(data.errorMemory);
+                    this.errorFixCount = data.errorFixCount || 0;
+                } catch(e) {
+                    console.warn("Failed to load memory", e);
+                }
+            }
+            this.updateUIStats();
+        }
+        
+        updateUIStats() {
+            const knowledgeSpan = document.getElementById('knowledgeCount');
+            const errorSpan = document.getElementById('errorFixCount');
+            if (knowledgeSpan) knowledgeSpan.innerText = this.knowledgeBase.size;
+            if (errorSpan) errorSpan.innerText = this.errorFixCount;
+        }
+    }
+    
+    // ========== UI ИНТЕГРАЦИЯ ==========
+    const ai = new AetherAI();
+    const chatArea = document.getElementById('chatArea');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    function addMessage(text, isUser, extraNote = null) {
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
+        if (extraNote && !isUser) {
+            const noteSpan = document.createElement('div');
+            noteSpan.className = 'error-marker';
+            noteSpan.innerHTML = `<span>💡 ${extraNote}</span>`;
+            div.appendChild(noteSpan);
+        }
+        chatArea.appendChild(div);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+    
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    async function handleUserInput() {
+        const text = userInput.value.trim();
+        if (!text) return;
+        
+        addMessage(text, true);
+        userInput.value = '';
+        
+        // Имитация "думания"
+        const thinkingMsg = addMessage("⏳ обработка...", false);
+        chatArea.removeChild(chatArea.lastChild);
+        
+        const result = ai.processMessage(text);
+        
+        let note = null;
+        if (!result.isLearning && result.note) note = result.note;
+        
+        addMessage(result.text, false, note);
+        
+        // Автосохранение после каждого взаимодействия
+        ai.saveMemory();
+    }
+    
+    sendBtn.addEventListener('click', handleUserInput);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleUserInput();
+    });
+    
+    // Обновление статистики каждые 2 секунды
+    setInterval(() => ai.updateUIStats(), 2000);
+    
+    // Приветственное обновление статистики
+    setTimeout(() => ai.updateUIStats(), 100);
+</script>
+</body>
+</html>
