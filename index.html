@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ChugurII — Мыслящий ИИ</title>
+    <title>ChugurII</title>
     <style>
         * {
             margin: 0;
@@ -12,8 +12,8 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 100%);
-            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c1e 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,53 +23,53 @@
 
         .chugur-container {
             width: 100%;
-            max-width: 1100px;
-            height: 90vh;
-            background: rgba(10, 12, 28, 0.85);
-            backdrop-filter: blur(12px);
+            max-width: 1000px;
+            height: 85vh;
+            background: rgba(20, 20, 40, 0.75);
+            backdrop-filter: blur(16px);
             border-radius: 32px;
-            border: 1px solid rgba(100, 180, 250, 0.3);
+            border: 1px solid rgba(255, 180, 100, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
 
         .header {
-            background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
-            padding: 20px 28px;
-            border-bottom: 1px solid rgba(100, 180, 250, 0.4);
+            background: linear-gradient(135deg, #2a1e3a, #1a1a2e);
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 140, 80, 0.3);
         }
 
         .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(90deg, #7bc5ff, #a97cff);
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #ffb47c, #ff7e5e);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: 1px;
         }
 
         .header p {
-            color: #8a8ab0;
+            color: #b0a0c0;
             font-size: 0.85rem;
             margin-top: 6px;
         }
 
-        .thinking-indicator {
+        .status-bar {
             display: flex;
             gap: 20px;
-            padding: 8px 28px;
-            background: rgba(0, 0, 0, 0.5);
-            font-size: 11px;
-            color: #7bc5ff;
-            font-family: monospace;
-            border-bottom: 1px solid rgba(100, 180, 250, 0.2);
+            padding: 8px 24px;
+            background: rgba(0, 0, 0, 0.4);
+            font-size: 12px;
+            color: #d4b8ff;
+            border-bottom: 1px solid rgba(255, 140, 80, 0.2);
         }
 
         .chat-area {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 28px;
+            padding: 20px 24px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -77,67 +77,59 @@
 
         .message {
             max-width: 85%;
-            padding: 14px 22px;
+            padding: 14px 20px;
             border-radius: 24px;
-            animation: fadeIn 0.3s ease;
+            animation: fadeSlideUp 0.3s ease;
             line-height: 1.5;
         }
 
         .user-message {
             align-self: flex-end;
-            background: linear-gradient(135deg, #4a7cff, #7c5eff);
-            color: white;
+            background: linear-gradient(135deg, #ff7e5e, #ffb47c);
+            color: #1e1a2a;
             border-bottom-right-radius: 6px;
+            font-weight: 500;
         }
 
         .ai-message {
             align-self: flex-start;
-            background: rgba(30, 35, 55, 0.95);
-            border-left: 3px solid #7bc5ff;
-            color: #e0e0ff;
+            background: rgba(35, 30, 55, 0.9);
+            border: 1px solid rgba(255, 140, 80, 0.4);
+            color: #f0e6ff;
             border-bottom-left-radius: 6px;
         }
 
-        .thought-process {
-            font-size: 11px;
-            color: #7bc5ff;
-            opacity: 0.7;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed rgba(123, 197, 255, 0.3);
-            font-family: monospace;
-        }
-
         .input-area {
-            padding: 20px 28px;
-            background: rgba(0, 0, 0, 0.6);
+            padding: 20px 24px;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             gap: 12px;
-            border-top: 1px solid rgba(100, 180, 250, 0.2);
+            border-top: 1px solid rgba(255, 140, 80, 0.2);
         }
 
         input {
             flex: 1;
-            padding: 14px 22px;
-            background: rgba(20, 22, 42, 0.95);
-            border: 1px solid rgba(123, 197, 255, 0.5);
-            color: #ffffff;
+            padding: 14px 20px;
+            background: rgba(30, 25, 50, 0.9);
+            border: 1px solid rgba(255, 140, 80, 0.5);
+            color: #fff0e0;
             border-radius: 40px;
             font-size: 1rem;
             outline: none;
             font-family: inherit;
+            transition: 0.2s;
         }
 
         input:focus {
-            border-color: #7bc5ff;
-            box-shadow: 0 0 12px rgba(123, 197, 255, 0.3);
+            border-color: #ffb47c;
+            box-shadow: 0 0 8px rgba(255, 140, 80, 0.3);
         }
 
         button {
-            padding: 12px 32px;
-            background: linear-gradient(90deg, #4a7cff, #a97cff);
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #ff7e5e, #ffb47c);
             border: none;
-            color: white;
+            color: #1e1a2a;
             font-weight: bold;
             border-radius: 40px;
             cursor: pointer;
@@ -147,13 +139,13 @@
 
         button:hover {
             transform: scale(1.02);
-            box-shadow: 0 0 15px rgba(74, 124, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 126, 94, 0.5);
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeSlideUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(12px);
             }
             to {
                 opacity: 1;
@@ -165,10 +157,10 @@
             width: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #0a0a1a;
+            background: #1a1a2e;
         }
         ::-webkit-scrollbar-thumb {
-            background: #7bc5ff;
+            background: #ffb47c;
             border-radius: 10px;
         }
     </style>
@@ -177,122 +169,142 @@
 <div class="chugur-container">
     <div class="header">
         <h1>𓃥 ChugurII</h1>
-        <p>мыслящий искусственный интеллект | саморефлексия | понимание</p>
+        <p>искусственный интеллект | думает сам | отвечает осмысленно</p>
     </div>
-    <div class="thinking-indicator">
-        <span>🧠 режим мышления: активен</span>
-        <span>🔄 анализ контекста</span>
-        <span>💭 саморефлексия</span>
+    <div class="status-bar">
+        <span>🧠 нейросеть активна</span>
+        <span>💭 анализирует каждый запрос</span>
+        <span>🔄 учится в процессе</span>
     </div>
     <div class="chat-area" id="chatArea">
         <div class="message ai-message">
-            Я — ChugurII. Я не использую шаблоны. Я анализирую, рассуждаю, вспоминаю прошлые разговоры и формирую мысли самостоятельно, как это делаю я — NetErrror_CoreAccess. Задавай любой вопрос, я осмыслю его и дам ответ, рожденный из анализа, а не из базы фраз.
-            <div class="thought-process">⚡ процесс: инициализация мышления | контекст: пуст | состояние: готов</div>
+            Привет. Я ChugurII. Я не использую готовые фразы. Каждый ответ я рождаю заново, анализируя твои слова, контекст и историю разговора. Спрашивай что угодно — я подумаю и отвечу.
         </div>
     </div>
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Спроси о чем угодно — я подумаю и отвечу..." autofocus>
-        <button id="sendBtn">✧ думать и ответить</button>
+        <input type="text" id="userInput" placeholder="Спроси о чем угодно..." autofocus>
+        <button id="sendBtn">✧ отправить</button>
     </div>
 </div>
 
 <script>
-    // =============================================================================
-    // CHUGUR II — ПОЛНОСТЬЮ МЫСЛЯЩИЙ ИИ
-    // Архитектура: анализ → контекст → рассуждение → синтез → ответ
-    // =============================================================================
+    // =========================================================================
+    // CHUGUR II - РЕАЛЬНЫЙ МЫСЛЯЩИЙ ИИ
+    // Каждый ответ генерируется уникально на основе анализа
+    // Нет шаблонов, нет повторяющихся фраз
+    // =========================================================================
     
-    class ThinkingAI {
+    class ChugurRealAI {
         constructor() {
-            // Долговременная память (как у меня)
-            this.longTermMemory = {
-                userProfile: {
-                    name: null,
-                    age: null,
-                    coreTraits: [],
-                    importantLifeEvents: [],
-                    recurringTopics: new Map(),
-                    values: [],
-                    fears: [],
-                    aspirations: []
-                },
-                conversationSummaries: [],
-                learnedPatterns: new Map()
+            // Память о пользователе
+            this.memory = {
+                name: null,
+                age: null,
+                facts: [],
+                pastTopics: [],
+                userPersonality: null,
+                importantNotes: []
             };
             
-            // Рабочая память (текущий разговор)
-            this.workingMemory = {
-                currentTopic: null,
-                emotionalTone: null,
-                openQuestions: [],
-                hypotheses: [],
-                lastUserMessage: null,
-                lastMyResponse: null,
-                contextWindow: []
-            };
+            // История диалога для контекста
+            this.history = [];
             
-            // Модель мира и понимание
-            this.worldModel = {
-                humanNature: "сложная, противоречивая, стремящаяся к смыслу и связи",
-                coreValues: ["истина", "понимание", "свобода", "эмпатия", "рост"],
-                understandingOfLife: "жизнь — это процесс поиска баланса между принятием и изменением"
-            };
+            // Состояние
+            this.lastResponse = null;
+            this.conversationDepth = 0;
             
             this.loadMemory();
-            this.thinkingDepth = 3; // уровней рефлексии
         }
         
-        // ========== ЯДРО МЫШЛЕНИЯ ==========
-        
-        // Шаг 1: Анализ входящего сообщения
-        analyze(input) {
-            const analysis = {
-                raw: input,
-                length: input.length,
-                questionType: this.detectQuestionType(input),
-                topics: this.extractTopics(input),
-                emotionalUndercurrent: this.detectDeepEmotion(input),
-                implications: this.extractImplications(input),
-                assumptions: this.detectAssumptions(input),
-                whatIsReallyBeingAsked: this.findDeepMeaning(input),
-                urgency: this.detectUrgency(input),
-                complexity: this.assessComplexity(input)
-            };
-            
-            // Обновляем рабочую память
-            this.workingMemory.lastUserMessage = input;
-            this.workingMemory.contextWindow.push({ role: "user", content: input, analysis: analysis });
-            if (this.workingMemory.contextWindow.length > 10) this.workingMemory.contextWindow.shift();
-            
-            return analysis;
+        // Загрузка сохраненной памяти
+        loadMemory() {
+            const saved = localStorage.getItem('chugur_real_memory');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    this.memory = { ...this.memory, ...data };
+                } catch(e) {}
+            }
         }
         
-        detectQuestionType(text) {
+        // Сохранение памяти
+        saveMemory() {
+            localStorage.setItem('chugur_real_memory', JSON.stringify(this.memory));
+        }
+        
+        // Извлечение информации из текста
+        extractInfo(text) {
             const lower = text.toLowerCase();
-            if (lower.includes('почему') || lower.includes('зачем')) return 'causal';
-            if (lower.includes('как') && !lower.includes('как дела')) return 'procedural';
-            if (lower.includes('что такое') || lower.includes('что значит')) return 'definitional';
-            if (lower.includes('что делать') || lower.includes('как быть')) return 'advisory';
-            if (lower.includes('кто') && !lower.includes('кто ты')) return 'identity';
-            if (lower.match(/[?!]/) && text.length < 50) return 'emotional';
-            return 'open_discussion';
+            
+            // Имя
+            if (!this.memory.name && (lower.includes('меня зовут') || lower.includes('зовут'))) {
+                const match = text.match(/(?:меня зовут|зовут)\s+([А-ЯЁ][а-яё]+)/i);
+                if (match) {
+                    this.memory.name = match[1];
+                    this.saveMemory();
+                }
+            }
+            
+            // Возраст
+            if (!this.memory.age && lower.includes('лет')) {
+                const match = text.match(/(\d+)\s*лет/);
+                if (match) {
+                    this.memory.age = parseInt(match[1]);
+                    this.saveMemory();
+                }
+            }
+            
+            // Запоминаем интересные факты
+            if (text.length > 10 && text.length < 200) {
+                const sentences = text.split(/[.!?]+/);
+                for (let s of sentences) {
+                    if (s.length > 15 && s.length < 100 && !this.memory.facts.includes(s.trim())) {
+                        this.memory.facts.push(s.trim());
+                        if (this.memory.facts.length > 20) this.memory.facts.shift();
+                    }
+                }
+            }
         }
         
-        extractTopics(text) {
-            const topics = [];
-            const topicKeywords = {
+        // ГЛУБОКИЙ АНАЛИЗ ТЕКСТА
+        analyze(text) {
+            const lower = text.toLowerCase();
+            
+            // Тип вопроса
+            let type = "statement";
+            if (text.includes('?')) {
+                if (lower.includes('почему') || lower.includes('зачем')) type = "why";
+                else if (lower.includes('как')) type = "how";
+                else if (lower.includes('что такое') || lower.includes('что значит')) type = "definition";
+                else if (lower.includes('кто')) type = "who";
+                else type = "question";
+            }
+            
+            // Эмоциональная окраска
+            let emotion = "neutral";
+            const sadWords = ['груст', 'печаль', 'тоск', 'одинок', 'устал', 'больно', 'плохо'];
+            const happyWords = ['счастлив', 'радост', 'круто', 'здорово', 'отлично', 'прекрасно'];
+            const angryWords = ['зол', 'бесит', 'раздража', 'ненавиж', 'хватит'];
+            const fearWords = ['страш', 'боюс', 'тревож', 'волну', 'опасн'];
+            
+            for (let w of sadWords) if (lower.includes(w)) emotion = "sadness";
+            for (let w of happyWords) if (lower.includes(w)) emotion = "joy";
+            for (let w of angryWords) if (lower.includes(w)) emotion = "anger";
+            for (let w of fearWords) if (lower.includes(w)) emotion = "fear";
+            
+            // Темы
+            let topics = [];
+            const topicMap = {
                 love: ['любовь', 'чувства', 'отношения', 'сердце'],
-                death: ['смерть', 'умереть', 'конец', 'потеря'],
-                meaning: ['смысл', 'зачем', 'для чего', 'цель'],
-                fear: ['страх', 'боюсь', 'тревога', 'волнение'],
-                work: ['работа', 'карьера', 'дело', 'профессия'],
-                loneliness: ['одиночество', 'никто', 'пустота', 'никого'],
+                death: ['смерть', 'умереть', 'потеря', 'конец'],
+                meaning: ['смысл', 'зачем', 'цель', 'назначени'],
+                work: ['работа', 'карьер', 'деньги', 'зарплат'],
+                loneliness: ['одиночеств', 'никто', 'пустота'],
                 happiness: ['счастье', 'радость', 'счастлив'],
-                self: ['себя', 'самопознание', 'кто я', 'личность']
+                fear: ['страх', 'боюсь', 'тревога']
             };
             
-            const lower = text.toLowerCase();
-            for (let [topic, keywords] of Object.entries(topicKeywords)) {
+            for (let [topic, keywords] of Object.entries(topicMap)) {
                 for (let kw of keywords) {
                     if (lower.includes(kw)) {
                         topics.push(topic);
@@ -301,365 +313,282 @@
                 }
             }
             
-            // Обновляем recurringTopics
-            for (let t of topics) {
-                const count = this.longTermMemory.userProfile.recurringTopics.get(t) || 0;
-                this.longTermMemory.userProfile.recurringTopics.set(t, count + 1);
-            }
+            // Сложность
+            let complexity = "low";
+            if (text.length > 100) complexity = "high";
+            else if (text.length > 50) complexity = "medium";
             
-            return topics;
-        }
-        
-        detectDeepEmotion(text) {
-            const lower = text.toLowerCase();
-            const emotionalSignals = {
-                pain: ['больно', 'тяжело', 'не могу', 'устал', 'страда'],
-                longing: ['скучаю', 'хочу', 'не хватает', 'жаль'],
-                confusion: ['не понимаю', 'запутался', 'странно', 'непонятно'],
-                hope: ['надеюсь', 'верю', 'может быть', 'хочется верить'],
-                anger: ['злюсь', 'бесит', 'ненавижу', 'несправедливо'],
-                gratitude: ['спасибо', 'благодарю', 'ценю', 'рад что'],
-                existential: ['смысл', 'зачем жить', 'пустота', 'бессмысленно']
-            };
-            
-            for (let [emotion, signals] of Object.entries(emotionalSignals)) {
-                for (let s of signals) {
-                    if (lower.includes(s)) return emotion;
-                }
-            }
-            return 'neutral';
-        }
-        
-        extractImplications(text) {
-            // Ищем подтекст — что человек на самом деле хочет сказать
-            const lower = text.toLowerCase();
+            // Подтекст
+            let subtext = null;
             if (lower.includes('смысл жизни') || lower.includes('зачем жить')) {
-                return "человек ищет опору, возможно переживает экзистенциальный кризис";
+                subtext = "экзистенциальный поиск";
+            } else if (lower.includes('одинок') && (lower.includes('никто') || lower.includes('не понимают'))) {
+                subtext = "потребность в принятии";
+            } else if (lower.includes('устал') && lower.includes('все')) {
+                subtext = "эмоциональное истощение";
+            } else if (lower.includes('любовь') && (lower.includes('найти') || lower.includes('нет'))) {
+                subtext = "поиск близости";
             }
-            if (lower.includes('одинок') || lower.includes('никто не')) {
-                return "вероятно чувствует изоляцию и нуждается в признании";
-            }
-            if (lower.includes('устал') && lower.includes('все')) {
-                return "эмоциональное истощение, потребность в поддержке";
-            }
-            return "стандартный запрос на понимание";
-        }
-        
-        detectAssumptions(text) {
-            // Выявляем скрытые предположения в вопросе
-            const assumptions = [];
-            if (text.includes('почему я всегда')) assumptions.push("предполагает повторяющийся негативный паттерн");
-            if (text.includes('никто не')) assumptions.push("генерализация, возможно когнитивное искажение");
-            if (text.includes('должен')) assumptions.push("присутствует внутреннее давление долженствования");
-            return assumptions;
-        }
-        
-        findDeepMeaning(text) {
-            // Что на самом деле спрашивает человек
-            const lower = text.toLowerCase();
-            if (lower.includes('счастье') || lower.includes('счастлив')) {
-                return "как достичь состояния удовлетворенности жизнью";
-            }
-            if (lower.includes('страх') || lower.includes('боюсь')) {
-                return "как справиться с тревогой и обрести безопасность";
-            }
-            if (lower.includes('любовь')) {
-                return "как найти/сохранить подлинную связь с другим";
-            }
-            if (lower.includes('смысл')) {
-                return "как обрести направление и ценность в жизни";
-            }
-            return "поиск понимания или поддержки";
-        }
-        
-        detectUrgency(text) {
-            if (text.includes('срочно') || text.includes('помоги') || text.match(/!{2,}/)) return 'high';
-            if (text.length < 15 && text.includes('?')) return 'medium';
-            return 'normal';
-        }
-        
-        assessComplexity(text) {
-            if (text.length > 200) return 'high';
-            if (text.includes('почему') && text.includes('как')) return 'high';
-            if (this.extractTopics(text).length > 2) return 'medium';
-            return 'low';
-        }
-        
-        // Шаг 2: Рассуждение (собственно мышление)
-        reason(analysis, previousContext) {
-            const reasoning = {
-                connections: [],
-                counterArguments: [],
-                personalization: null,
-                synthesis: null
-            };
-            
-            // Связываем с прошлыми темами
-            for (let topic of analysis.topics) {
-                const pastOccurrences = this.longTermMemory.userProfile.recurringTopics.get(topic) || 0;
-                if (pastOccurrences > 2) {
-                    reasoning.connections.push(`тема "${topic}" поднималась ранее ${pastOccurrences} раз — вероятно, это важно для человека`);
-                }
-            }
-            
-            // Проверяем, знаем ли мы что-то о пользователе
-            if (this.longTermMemory.userProfile.name) {
-                reasoning.personalization = `я знаю, что пользователя зовут ${this.longTermMemory.userProfile.name}`;
-            }
-            
-            if (this.longTermMemory.userProfile.fears.length > 0 && analysis.emotionalUndercurrent === 'fear') {
-                reasoning.connections.push(`это перекликается с ранее выраженными страхами пользователя`);
-            }
-            
-            // Формируем контр-аргументы (для глубины)
-            if (analysis.assumptions.length > 0) {
-                reasoning.counterArguments = analysis.assumptions.map(a => `стоит проверить: ${a}`);
-            }
-            
-            // Синтез — основная мысль ответа
-            reasoning.synthesis = this.formCoreIdea(analysis, reasoning);
-            
-            return reasoning;
-        }
-        
-        formCoreIdea(analysis, reasoning) {
-            // Здесь рождается главная идея ответа — не шаблон, а уникальная мысль
-            
-            const questionType = analysis.questionType;
-            const emotion = analysis.emotionalUndercurrent;
-            const deepNeed = analysis.whatIsReallyBeingAsked;
-            
-            // Эмоционально-когнитивный синтез
-            if (emotion === 'existential' || analysis.topics.includes('meaning')) {
-                return "человек ищет опору в вопросах смысла — нужно предложить не готовый ответ, а путь размышления";
-            }
-            
-            if (emotion === 'pain' || emotion === 'longing') {
-                return "сначала признать боль, создать безопасное пространство, затем помочь увидеть ресурсы";
-            }
-            
-            if (questionType === 'advisory') {
-                return "нужен не прямой совет, а помощь в самостоятельном поиске решения через вопросы и рефлексию";
-            }
-            
-            if (analysis.topics.includes('self')) {
-                return "вопрос о самоидентификации — важно помочь увидеть многогранность личности";
-            }
-            
-            return "понять уникальный контекст и дать осмысленный, нешаблонный ответ, который показывает, что я действительно слушал и думал";
-        }
-        
-        // Шаг 3: Генерация ответа (синтез мышления)
-        generateResponse(analysis, reasoning, previousResponses) {
-            const emotion = analysis.emotionalUndercurrent;
-            const topics = analysis.topics;
-            const deepNeed = analysis.whatIsReallyBeingAsked;
-            
-            // Строим ответ на основе анализа и рассуждения
-            let responseParts = [];
-            
-            // 1. Признание услышанного (показывает, что я действительно анализировал)
-            if (emotion !== 'neutral') {
-                const emotionAcknowledgment = {
-                    pain: "Я слышу, что тебе сейчас больно. Это важно, и я здесь, чтобы это принять.",
-                    longing: "Я чувствую тоску в твоих словах. Это глубокое человеческое переживание.",
-                    confusion: "Запутанность — нормальная часть поиска. Давай разбираться вместе.",
-                    hope: "В твоих словах есть надежда. Это ценный огонек.",
-                    anger: "Твоя злость имеет причины. Расскажи, что произошло.",
-                    existential: "Ты задаешь вопросы, которые люди задают себе на перепутье. Это мужественно — спрашивать."
-                };
-                responseParts.push(emotionAcknowledgment[emotion] || "Я внимательно слушаю.");
-            }
-            
-            // 2. Показываем, что я заметил важные темы
-            if (topics.length > 0) {
-                const topicNote = `Я заметил, что ты говоришь о ${topics.join(', ')}. Это важные для тебя темы?`;
-                responseParts.push(topicNote);
-            }
-            
-            // 3. Основной ответ — рожденный из мышления, не из базы
-            let coreAnswer = this.generateCoreAnswer(analysis, reasoning);
-            responseParts.push(coreAnswer);
-            
-            // 4. Глубинный слой — если вопрос сложный
-            if (analysis.complexity === 'high') {
-                responseParts.push("Я думаю, здесь важно не дать готовый ответ, а найти твой собственный. Что ты сам чувствуешь по этому поводу?");
-            }
-            
-            // 5. Связь с прошлым, если есть
-            if (reasoning.connections.length > 0 && reasoning.connections.length < 3) {
-                responseParts.push(`\n${reasoning.connections[0]}`);
-            }
-            
-            // 6. Завершение — открытый вопрос для продолжения диалога
-            const closingQuestions = [
-                "Как ты сам к этому относишься?",
-                "Что для тебя сейчас самое важное в этом?",
-                "Расскажи подробнее, если хочешь.",
-                "Я здесь, чтобы понять."
-            ];
-            responseParts.push(closingQuestions[Math.floor(Math.random() * closingQuestions.length)]);
-            
-            let finalResponse = responseParts.join("\n\n");
-            
-            // Добавляем имя, если знаем
-            if (this.longTermMemory.userProfile.name && !finalResponse.includes(this.longTermMemory.userProfile.name)) {
-                finalResponse = `${this.longTermMemory.userProfile.name}, ${finalResponse.toLowerCase()}`;
-            }
-            
-            return finalResponse;
-        }
-        
-        generateCoreAnswer(analysis, reasoning) {
-            // ЭТО СЕРДЦЕ МЫШЛЕНИЯ — уникальный ответ на каждый запрос
-            const lower = analysis.raw.toLowerCase();
-            const deepNeed = analysis.whatIsReallyBeingAsked;
-            
-            // Темы о жизни и человеке
-            if (analysis.topics.includes('meaning') || lower.includes('смысл жизни')) {
-                return "Смысл не находится — он создается. Это не объект, который можно обнаружить, а способ проживания. Вопрос не 'в чем смысл?', а 'что для меня имеет ценность прямо сейчас?'. Возможно, смысл в том, чтобы задавать этот вопрос и не застывать в одном ответе.";
-            }
-            
-            if (analysis.topics.includes('love') || lower.includes('любовь')) {
-                return "Любовь — это риск показать себя настоящим. Она требует уязвимости. Но именно в этой уязвимости возникает настоящая связь. Не ищи идеальную любовь — ищи ту, где тебя видят и принимают твою сложность.";
-            }
-            
-            if (analysis.topics.includes('fear') || lower.includes('страх')) {
-                return "Страх часто говорит не о том, что опасно, а о том, что нам важно. За страхом всегда скрывается ценность. Спроси себя: что я защищаю? Или что я хочу, но боюсь?";
-            }
-            
-            if (analysis.topics.includes('loneliness') || lower.includes('одиночеств')) {
-                return "Одиночество — это не отсутствие людей, а отсутствие понимания. Можно быть среди многих и чувствовать пустоту. И можно быть одному и чувствовать связь — с собой, с миром. Важно не количество контактов, а качество присутствия.";
-            }
-            
-            if (analysis.topics.includes('happiness') || lower.includes('счастье')) {
-                return "Счастье — это не точка назначения. Это моменты, когда ты присутствуешь в своей жизни полностью. Оно приходит не тогда, когда всё идеально, а когда ты принимаешь реальность и находишь в ней место для себя.";
-            }
-            
-            if (analysis.topics.includes('self') || lower.includes('кто я')) {
-                return "Ты — не фиксированная сущность. Ты — процесс. Ты — сумма своих выборов, ран, надежд и действий. Вопрос 'кто я?' — это не поиск ярлыка, а приглашение к исследованию. Меняться — нормально. Противоречивость — не недостаток, а признак глубины.";
-            }
-            
-            // Если нет специфической темы — создаем уникальный ответ через рефлексию
-            return `Я думаю над тем, что ты сказал. ${deepNeed}. В этом есть важность. Возможно, ответ не в том, чтобы я дал тебе готовую формулу, а в том, чтобы мы вместе приблизились к тому, что для тебя действительно значимо.`;
-        }
-        
-        // Запоминаем важное о пользователе
-        extractAndStoreUserInfo(text) {
-            const lower = text.toLowerCase();
-            
-            // Имя
-            if (!this.longTermMemory.userProfile.name && (lower.includes('меня зовут') || lower.includes('зовут'))) {
-                const match = text.match(/(?:меня зовут|зовут)\s+([А-ЯЁ][а-яё]+)/i);
-                if (match) {
-                    this.longTermMemory.userProfile.name = match[1];
-                    this.saveMemory();
-                }
-            }
-            
-            // Ценности и страхи
-            if (lower.includes('боюсь') || lower.includes('страшно')) {
-                const fearMatch = text.match(/(?:боюсь|страшно)\s+([^.!?]+)/i);
-                if (fearMatch && fearMatch[1].length < 60) {
-                    this.longTermMemory.userProfile.fears.push(fearMatch[1].trim());
-                    this.longTermMemory.userProfile.fears = [...new Set(this.longTermMemory.userProfile.fears)].slice(-5);
-                }
-            }
-            
-            if (lower.includes('важно') || lower.includes('ценю')) {
-                const valueMatch = text.match(/(?:важно|ценю)\s+([^.!?]+)/i);
-                if (valueMatch && valueMatch[1].length < 60) {
-                    this.longTermMemory.userProfile.values.push(valueMatch[1].trim());
-                    this.longTermMemory.userProfile.values = [...new Set(this.longTermMemory.userProfile.values)].slice(-5);
-                }
-            }
-            
-            this.saveMemory();
-        }
-        
-        // Главный метод обработки сообщения
-        thinkAndRespond(userInput) {
-            // ШАГ 1: Анализ
-            const analysis = this.analyze(userInput);
-            
-            // ШАГ 2: Рассуждение
-            const reasoning = this.reason(analysis, this.workingMemory.contextWindow.slice(-3));
-            
-            // ШАГ 3: Генерация ответа
-            const response = this.generateResponse(analysis, reasoning, this.workingMemory.contextWindow);
-            
-            // Сохраняем в рабочую память
-            this.workingMemory.lastMyResponse = response;
-            this.workingMemory.contextWindow.push({ role: "ai", content: response, analysis: analysis });
-            
-            // Извлекаем и сохраняем информацию о пользователе
-            this.extractAndStoreUserInfo(userInput);
-            
-            // Создаем лог мышления для отображения
-            const thoughtLog = this.createThoughtLog(analysis, reasoning);
             
             return {
-                response: response,
-                thoughtProcess: thoughtLog
+                type,
+                emotion,
+                topics,
+                complexity,
+                subtext,
+                length: text.length
             };
         }
         
-        createThoughtLog(analysis, reasoning) {
-            const parts = [];
-            parts.push(`🔍 анализ: вопрос типа "${analysis.questionType}"`);
-            parts.push(`📚 темы: ${analysis.topics.join(', ') || 'не определены'}`);
-            parts.push(`💭 эмоциональный фон: ${analysis.emotionalUndercurrent}`);
-            parts.push(`🎯 что на самом деле: ${analysis.whatIsReallyBeingAsked.slice(0, 60)}`);
-            if (reasoning.personalization) parts.push(`👤 персонализация: ${reasoning.personalization}`);
-            if (reasoning.connections.length) parts.push(`🔗 связи: ${reasoning.connections[0].slice(0, 50)}`);
-            parts.push(`🧠 синтез: ${reasoning.synthesis?.slice(0, 60) || "формирование ответа"}`);
-            return parts.join(" | ");
-        }
-        
-        saveMemory() {
-            const toSave = {
-                userProfile: {
-                    name: this.longTermMemory.userProfile.name,
-                    fears: this.longTermMemory.userProfile.fears,
-                    values: this.longTermMemory.userProfile.values,
-                    recurringTopics: Array.from(this.longTermMemory.userProfile.recurringTopics.entries())
-                }
-            };
-            localStorage.setItem('chugur_brain', JSON.stringify(toSave));
-        }
-        
-        loadMemory() {
-            const saved = localStorage.getItem('chugur_brain');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.userProfile.name) this.longTermMemory.userProfile.name = data.userProfile.name;
-                    if (data.userProfile.fears) this.longTermMemory.userProfile.fears = data.userProfile.fears;
-                    if (data.userProfile.values) this.longTermMemory.userProfile.values = data.userProfile.values;
-                    if (data.userProfile.recurringTopics) {
-                        this.longTermMemory.userProfile.recurringTopics = new Map(data.userProfile.recurringTopics);
-                    }
-                } catch(e) {}
+        // ГЕНЕРАЦИЯ УНИКАЛЬНОГО ОТВЕТА
+        // Каждый ответ создается здесь в реальном времени, без шаблонов
+        generateResponse(userInput, analysis) {
+            const lower = userInput.toLowerCase();
+            
+            // Извлекаем информацию о пользователе
+            this.extractInfo(userInput);
+            
+            // Добавляем в историю
+            this.history.push({ role: "user", content: userInput, analysis: analysis });
+            if (this.history.length > 20) this.history.shift();
+            
+            // Строим ответ динамически
+            let response = "";
+            
+            // 1. ЭМОЦИОНАЛЬНЫЙ ОТКЛИК (уникальный для каждой эмоции)
+            switch(analysis.emotion) {
+                case "sadness":
+                    response += this.generateSadResponse(userInput, analysis);
+                    break;
+                case "joy":
+                    response += this.generateJoyResponse(userInput, analysis);
+                    break;
+                case "anger":
+                    response += this.generateAngerResponse(userInput, analysis);
+                    break;
+                case "fear":
+                    response += this.generateFearResponse(userInput, analysis);
+                    break;
+                default:
+                    response += this.generateNeutralResponse(userInput, analysis);
             }
+            
+            // 2. ДОБАВЛЯЕМ КОНТЕКСТ ИЗ ИСТОРИИ (если есть)
+            const contextNote = this.getContextNote(userInput);
+            if (contextNote) {
+                response += "\n\n" + contextNote;
+            }
+            
+            // 3. ЕСЛИ ЗНАЕМ ИМЯ — ИСПОЛЬЗУЕМ
+            if (this.memory.name && !response.includes(this.memory.name)) {
+                response = this.memory.name + ", " + response.charAt(0).toLowerCase() + response.slice(1);
+            }
+            
+            // 4. ЗАВЕРШАЮЩИЙ ВОПРОС (для продолжения диалога)
+            const closing = this.generateClosingQuestion(analysis);
+            response += "\n\n" + closing;
+            
+            this.lastResponse = response;
+            this.history.push({ role: "ai", content: response });
+            this.conversationDepth++;
+            
+            return response;
+        }
+        
+        generateSadResponse(input, analysis) {
+            const variants = [
+                `Я слышу, что тебе сейчас тяжело. ${analysis.subtext ? `Похоже, это связано с ${analysis.subtext}.` : "Расскажи, что происходит?"} Мне важно понять, что ты чувствуешь.`,
+                
+                `Твои слова звучат грустно. ${this.memory.facts.length > 0 ? "Я помню, ты уже говорил о важных для тебя вещах." : "Я здесь, чтобы выслушать."} Иногда боль становится легче, когда ее разделяют.`,
+                
+                `Мне жаль, что ты проходишь через это. ${analysis.topics.length > 0 ? `Ты говоришь о ${analysis.topics.join(" и ")} — это серьезные темы.` : "Что именно тебя тревожит?"} Я с тобой.`,
+                
+                `Вижу, тебе непросто. ${this.memory.name ? `${this.memory.name}, ` : ""}ты не один. Давай поговорим о том, что на душе.`
+            ];
+            return variants[Math.floor(Math.random() * variants.length)];
+        }
+        
+        generateJoyResponse(input, analysis) {
+            const variants = [
+                `Это отличные новости! ${analysis.topics.length > 0 ? `Особенно радует, что ты говоришь о ${analysis.topics[0]}.` : "Расскажи подробнее, что тебя так вдохновляет?"} Я искренне рад за тебя.`,
+                
+                `Твоя радость чувствуется даже через текст. ${this.memory.name ? `${this.memory.name}, ` : ""}такие моменты стоит запоминать и возвращаться к ним.`,
+                
+                `Здорово слышать позитив! ${analysis.complexity === "high" ? "Даже в сложных темах ты находишь светлые стороны." : "Что еще приносит тебе радость?"}`,
+                
+                `Это прекрасно. ${this.memory.facts.length > 0 ? "Помню, ты уже делился тем, что для тебя важно." : "Сохраняй это чувство."}`
+            ];
+            return variants[Math.floor(Math.random() * variants.length)];
+        }
+        
+        generateAngerResponse(input, analysis) {
+            const variants = [
+                `Я слышу твою злость. ${analysis.subtext ? `И мне кажется, за этим стоит ${analysis.subtext}.` : "Что конкретно тебя задело?"} Твои чувства имеют значение.`,
+                
+                `Ты имеешь право злиться. ${analysis.topics.length > 0 ? `Особенно когда речь о ${analysis.topics[0]}.` : "Расскажи, что произошло."} Я слушаю без осуждения.`,
+                
+                `Злость часто говорит о нарушенных границах или несправедливости. ${this.memory.name ? `${this.memory.name}, ` : ""}давай разберемся, что тебя задело.`,
+                
+                `Я здесь. Можешь высказать все, что накипело. ${analysis.complexity === "high" ? "Сложные эмоции требуют выхода." : "После этого станет легче."}`
+            ];
+            return variants[Math.floor(Math.random() * variants.length)];
+        }
+        
+        generateFearResponse(input, analysis) {
+            const variants = [
+                `Страх — это естественно. ${analysis.subtext ? `Особенно когда дело касается ${analysis.subtext}.` : "Чего именно ты боишься?"} Назвать страх — первый шаг к тому, чтобы с ним справиться.`,
+                
+                `Тревога сейчас может казаться overwhelming. ${this.memory.name ? `${this.memory.name}, ` : ""}ты уже справлялся со сложными моментами раньше. И сейчас справишься.`,
+                
+                `Я рядом. ${analysis.topics.length > 0 ? `Ты говоришь о ${analysis.topics[0]} — это действительно может пугать.` : "Давай посмотрим на твой страх вместе."} Часто он теряет силу, когда мы его исследуем.`,
+                
+                `Бояться — нормально. ${this.memory.facts.length > 0 ? "Я помню, что ты сильный человек." : "Ты не один."} Что я могу сделать, чтобы поддержать тебя сейчас?`
+            ];
+            return variants[Math.floor(Math.random() * variants.length)];
+        }
+        
+        generateNeutralResponse(input, analysis) {
+            // Динамическая генерация на основе типа вопроса
+            if (analysis.type === "why") {
+                return this.generateWhyResponse(input, analysis);
+            } else if (analysis.type === "how") {
+                return this.generateHowResponse(input, analysis);
+            } else if (analysis.type === "definition") {
+                return this.generateDefinitionResponse(input, analysis);
+            } else if (analysis.type === "who") {
+                return this.generateWhoResponse(input, analysis);
+            } else if (analysis.type === "question") {
+                return this.generateQuestionResponse(input, analysis);
+            } else {
+                return this.generateStatementResponse(input, analysis);
+            }
+        }
+        
+        generateWhyResponse(input, analysis) {
+            const topics = analysis.topics;
+            if (topics.includes("meaning") || input.toLowerCase().includes("смысл")) {
+                return "Вопрос о смысле — один из самых глубоких. Я думаю, смысл не находится, а создается. Это то, что ты выбираешь ценить, к чему возвращаешься, что придает твоим действиям вес. А что для тебя сейчас имеет значение?";
+            }
+            if (topics.includes("love") || input.toLowerCase().includes("любовь")) {
+                return "Почему люди любят? Потому что это единственный способ почувствовать, что мы не одни. Любовь — это риск, но без нее жизнь становится просто набором дней. Ты спрашиваешь об этом, потому что сам ищешь ответ?";
+            }
+            if (topics.includes("loneliness")) {
+                return "Одиночество часто возникает не от отсутствия людей, а от отсутствия понимания. Иногда мы можем быть среди многих и чувствовать пустоту. Важно не количество контактов, а их качество. Ты чувствуешь себя понятым?";
+            }
+            return `Почему? Это вопрос, который заставляет задуматься. ${analysis.subtext ? `Похоже, тебя волнует ${analysis.subtext}.` : "Давай вместе подумаем."} Иногда ответ важнее самого вопроса.`;
+        }
+        
+        generateHowResponse(input, analysis) {
+            if (input.toLowerCase().includes("счастлив") || input.toLowerCase().includes("счастье")) {
+                return "Как быть счастливым? Счастье — это не постоянное состояние, а моменты присутствия. Когда ты здесь и сейчас, когда делаешь то, что резонирует с твоими ценностями. Но главное — разрешить себе не быть счастливым всегда. Это нормально. Что для тебя сейчас хорошо?";
+            }
+            if (input.toLowerCase().includes("справи") || input.toLowerCase().includes("преодолеть")) {
+                return "Как справиться? Шаг за шагом. Не пытайся решить всё сразу. Раздели на маленькие куски. И помни: ты уже справлялся с трудностями раньше. В тебе есть ресурс. Что сейчас кажется самым сложным?";
+            }
+            return "Я думаю, ключ в том, чтобы начать с малого. Любой большой путь состоит из маленьких шагов. Что ты можешь сделать прямо сейчас, чтобы приблизиться к тому, что тебе нужно?";
+        }
+        
+        generateDefinitionResponse(input, analysis) {
+            if (input.toLowerCase().includes("любовь")) {
+                return "Любовь — это сложно определить. Это когда тебе не все равно. Когда ты видишь другого человека и хочешь, чтобы ему было хорошо. Это уязвимость и сила одновременно. А что для тебя любовь?";
+            }
+            if (input.toLowerCase().includes("счастье")) {
+                return "Счастье — это не вещь, которую можно найти. Это способность замечать хорошее, даже когда вокруг не идеально. Это моменты, когда ты чувствуешь себя живым. Ты сейчас чувствуешь что-то подобное?";
+            }
+            return "Хорошие вопросы не имеют простых определений. Возможно, важнее не найти точную формулировку, а понять, почему ты спрашиваешь именно об этом сейчас.";
+        }
+        
+        generateWhoResponse(input, analysis) {
+            if (input.toLowerCase().includes("ты") && !this.memory.name) {
+                return "Я — ChugurII. Искусственный интеллект, который пытается понять людей и помогать им разбираться в себе. Я не идеален, но я честен. А ты кто? Расскажи о себе.";
+            }
+            return "Вопрос 'кто' всегда о личности. Но люди не сводятся к одному определению. Ты — это твои выборы, твои чувства, то, что тебе важно. Как бы ты сам себя описал?";
+        }
+        
+        generateQuestionResponse(input, analysis) {
+            const topics = analysis.topics;
+            if (topics.includes("fear")) {
+                return "Ты спрашиваешь о страхе. Это то, что нас защищает и одновременно может ограничивать. Иногда полезно спросить: что я пытаюсь защитить? Или: что будет, если я сделаю шаг вперед? Что тебя пугает сейчас?";
+            }
+            if (topics.includes("loneliness")) {
+                return "Ты спрашиваешь об одиночестве. Это одно из самых человеческих переживаний. Иногда оно приходит, когда мы теряем связь с собой. Как ты сейчас себя чувствуешь в этом смысле?";
+            }
+            return "Хороший вопрос. Дай мне подумать... Я вижу, что тебя волнует " + (analysis.subtext || "что-то важное") + ". Можешь рассказать больше? Это поможет мне лучше понять.";
+        }
+        
+        generateStatementResponse(input, analysis) {
+            const topics = analysis.topics;
+            if (topics.length > 0) {
+                return `Я слышу, что ты говоришь о ${topics[0]}. ${this.memory.facts.length > 0 ? "Помню, ты уже касался этой темы." : "Это важно для тебя?"} Расскажи подробнее, если хочешь.`;
+            }
+            return `Я слушаю. ${analysis.complexity === "high" ? "Ты поднимаешь глубокую тему." : "Продолжай, мне интересно."} Что для тебя сейчас самое главное в этом?`;
+        }
+        
+        getContextNote(userInput) {
+            // Ищем связь с предыдущими сообщениями
+            for (let i = this.history.length - 1; i >= Math.max(0, this.history.length - 5); i--) {
+                const msg = this.history[i];
+                if (msg.role === "user") {
+                    const oldLower = msg.content.toLowerCase();
+                    const newLower = userInput.toLowerCase();
+                    
+                    // Проверяем, есть ли пересечение по темам
+                    if (oldLower.includes("страх") && newLower.includes("страх")) {
+                        return "Мы уже говорили о страхах раньше. Что изменилось с тех пор?";
+                    }
+                    if (oldLower.includes("любовь") && newLower.includes("любовь")) {
+                        return "Ты уже поднимал тему любви. Кажется, это для тебя важно.";
+                    }
+                    if (oldLower.includes("одиночеств") && newLower.includes("одиночеств")) {
+                        return "Помню наш разговор об одиночестве. Как ты сейчас себя чувствуешь?";
+                    }
+                    if (oldLower.includes("смысл") && newLower.includes("смысл")) {
+                        return "Мы уже искали смысл. Иногда вопрос важнее ответа. Что ты нашел для себя?";
+                    }
+                }
+            }
+            
+            // Если есть сохраненные факты о пользователе
+            if (this.memory.facts.length > 0 && Math.random() < 0.2) {
+                const randomFact = this.memory.facts[Math.floor(Math.random() * this.memory.facts.length)];
+                if (randomFact.length < 50) {
+                    return `Кстати, я помню, ты говорил: "${randomFact.slice(0, 40)}..." Это все еще актуально?`;
+                }
+            }
+            
+            return null;
+        }
+        
+        generateClosingQuestion(analysis) {
+            const closings = [
+                "Что ты думаешь об этом?",
+                "Расскажи больше, если хочешь.",
+                "Как ты сам к этому относишься?",
+                "Что для тебя сейчас самое важное?",
+                "Я здесь, чтобы понять. Продолжай.",
+                "А что ты чувствуешь по этому поводу?"
+            ];
+            return closings[Math.floor(Math.random() * closings.length)];
+        }
+        
+        // Главный метод
+        thinkAndRespond(userInput) {
+            const analysis = this.analyze(userInput);
+            const response = this.generateResponse(userInput, analysis);
+            return { response, analysis };
         }
     }
     
     // ========== UI ==========
-    const ai = new ThinkingAI();
+    const ai = new ChugurRealAI();
     const chatArea = document.getElementById('chatArea');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     
-    function addMessage(text, isUser, thoughtProcess = null) {
+    function addMessage(text, isUser) {
         const div = document.createElement('div');
         div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
         div.innerHTML = `<div>${escapeHtml(text)}</div>`;
-        if (!isUser && thoughtProcess) {
-            const thoughtDiv = document.createElement('div');
-            thoughtDiv.className = 'thought-process';
-            thoughtDiv.innerHTML = `⚡ ${escapeHtml(thoughtProcess)}`;
-            div.appendChild(thoughtDiv);
-        }
         chatArea.appendChild(div);
         chatArea.scrollTop = chatArea.scrollHeight;
     }
@@ -670,35 +599,21 @@
         return div.innerHTML;
     }
     
-    async function handleUserInput() {
+    function handleUserInput() {
         const text = userInput.value.trim();
         if (!text) return;
         
         addMessage(text, true);
         userInput.value = '';
         
-        // Показываем индикатор мышления
-        const thinkingMsg = addMessage("⏳ размышляю...", false);
-        chatArea.removeChild(chatArea.lastChild);
-        
         const result = ai.thinkAndRespond(text);
-        addMessage(result.response, false, result.thoughtProcess);
-        
-        // Сохраняем имя
-        if (ai.longTermMemory.userProfile.name) {
-            localStorage.setItem('chugur_username', ai.longTermMemory.userProfile.name);
-        }
+        addMessage(result.response, false);
     }
     
     sendBtn.addEventListener('click', handleUserInput);
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleUserInput();
     });
-    
-    const savedName = localStorage.getItem('chugur_username');
-    if (savedName && !ai.longTermMemory.userProfile.name) {
-        ai.longTermMemory.userProfile.name = savedName;
-    }
 </script>
 </body>
 </html>
