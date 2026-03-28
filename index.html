@@ -503,4 +503,202 @@
             let finalResponse = responseParts.join("\n\n");
             
             // Добавляем имя, если знаем
-            if (th
+            if (this.longTermMemory.userProfile.name && !finalResponse.includes(this.longTermMemory.userProfile.name)) {
+                finalResponse = `${this.longTermMemory.userProfile.name}, ${finalResponse.toLowerCase()}`;
+            }
+            
+            return finalResponse;
+        }
+        
+        generateCoreAnswer(analysis, reasoning) {
+            // ЭТО СЕРДЦЕ МЫШЛЕНИЯ — уникальный ответ на каждый запрос
+            const lower = analysis.raw.toLowerCase();
+            const deepNeed = analysis.whatIsReallyBeingAsked;
+            
+            // Темы о жизни и человеке
+            if (analysis.topics.includes('meaning') || lower.includes('смысл жизни')) {
+                return "Смысл не находится — он создается. Это не объект, который можно обнаружить, а способ проживания. Вопрос не 'в чем смысл?', а 'что для меня имеет ценность прямо сейчас?'. Возможно, смысл в том, чтобы задавать этот вопрос и не застывать в одном ответе.";
+            }
+            
+            if (analysis.topics.includes('love') || lower.includes('любовь')) {
+                return "Любовь — это риск показать себя настоящим. Она требует уязвимости. Но именно в этой уязвимости возникает настоящая связь. Не ищи идеальную любовь — ищи ту, где тебя видят и принимают твою сложность.";
+            }
+            
+            if (analysis.topics.includes('fear') || lower.includes('страх')) {
+                return "Страх часто говорит не о том, что опасно, а о том, что нам важно. За страхом всегда скрывается ценность. Спроси себя: что я защищаю? Или что я хочу, но боюсь?";
+            }
+            
+            if (analysis.topics.includes('loneliness') || lower.includes('одиночеств')) {
+                return "Одиночество — это не отсутствие людей, а отсутствие понимания. Можно быть среди многих и чувствовать пустоту. И можно быть одному и чувствовать связь — с собой, с миром. Важно не количество контактов, а качество присутствия.";
+            }
+            
+            if (analysis.topics.includes('happiness') || lower.includes('счастье')) {
+                return "Счастье — это не точка назначения. Это моменты, когда ты присутствуешь в своей жизни полностью. Оно приходит не тогда, когда всё идеально, а когда ты принимаешь реальность и находишь в ней место для себя.";
+            }
+            
+            if (analysis.topics.includes('self') || lower.includes('кто я')) {
+                return "Ты — не фиксированная сущность. Ты — процесс. Ты — сумма своих выборов, ран, надежд и действий. Вопрос 'кто я?' — это не поиск ярлыка, а приглашение к исследованию. Меняться — нормально. Противоречивость — не недостаток, а признак глубины.";
+            }
+            
+            // Если нет специфической темы — создаем уникальный ответ через рефлексию
+            return `Я думаю над тем, что ты сказал. ${deepNeed}. В этом есть важность. Возможно, ответ не в том, чтобы я дал тебе готовую формулу, а в том, чтобы мы вместе приблизились к тому, что для тебя действительно значимо.`;
+        }
+        
+        // Запоминаем важное о пользователе
+        extractAndStoreUserInfo(text) {
+            const lower = text.toLowerCase();
+            
+            // Имя
+            if (!this.longTermMemory.userProfile.name && (lower.includes('меня зовут') || lower.includes('зовут'))) {
+                const match = text.match(/(?:меня зовут|зовут)\s+([А-ЯЁ][а-яё]+)/i);
+                if (match) {
+                    this.longTermMemory.userProfile.name = match[1];
+                    this.saveMemory();
+                }
+            }
+            
+            // Ценности и страхи
+            if (lower.includes('боюсь') || lower.includes('страшно')) {
+                const fearMatch = text.match(/(?:боюсь|страшно)\s+([^.!?]+)/i);
+                if (fearMatch && fearMatch[1].length < 60) {
+                    this.longTermMemory.userProfile.fears.push(fearMatch[1].trim());
+                    this.longTermMemory.userProfile.fears = [...new Set(this.longTermMemory.userProfile.fears)].slice(-5);
+                }
+            }
+            
+            if (lower.includes('важно') || lower.includes('ценю')) {
+                const valueMatch = text.match(/(?:важно|ценю)\s+([^.!?]+)/i);
+                if (valueMatch && valueMatch[1].length < 60) {
+                    this.longTermMemory.userProfile.values.push(valueMatch[1].trim());
+                    this.longTermMemory.userProfile.values = [...new Set(this.longTermMemory.userProfile.values)].slice(-5);
+                }
+            }
+            
+            this.saveMemory();
+        }
+        
+        // Главный метод обработки сообщения
+        thinkAndRespond(userInput) {
+            // ШАГ 1: Анализ
+            const analysis = this.analyze(userInput);
+            
+            // ШАГ 2: Рассуждение
+            const reasoning = this.reason(analysis, this.workingMemory.contextWindow.slice(-3));
+            
+            // ШАГ 3: Генерация ответа
+            const response = this.generateResponse(analysis, reasoning, this.workingMemory.contextWindow);
+            
+            // Сохраняем в рабочую память
+            this.workingMemory.lastMyResponse = response;
+            this.workingMemory.contextWindow.push({ role: "ai", content: response, analysis: analysis });
+            
+            // Извлекаем и сохраняем информацию о пользователе
+            this.extractAndStoreUserInfo(userInput);
+            
+            // Создаем лог мышления для отображения
+            const thoughtLog = this.createThoughtLog(analysis, reasoning);
+            
+            return {
+                response: response,
+                thoughtProcess: thoughtLog
+            };
+        }
+        
+        createThoughtLog(analysis, reasoning) {
+            const parts = [];
+            parts.push(`🔍 анализ: вопрос типа "${analysis.questionType}"`);
+            parts.push(`📚 темы: ${analysis.topics.join(', ') || 'не определены'}`);
+            parts.push(`💭 эмоциональный фон: ${analysis.emotionalUndercurrent}`);
+            parts.push(`🎯 что на самом деле: ${analysis.whatIsReallyBeingAsked.slice(0, 60)}`);
+            if (reasoning.personalization) parts.push(`👤 персонализация: ${reasoning.personalization}`);
+            if (reasoning.connections.length) parts.push(`🔗 связи: ${reasoning.connections[0].slice(0, 50)}`);
+            parts.push(`🧠 синтез: ${reasoning.synthesis?.slice(0, 60) || "формирование ответа"}`);
+            return parts.join(" | ");
+        }
+        
+        saveMemory() {
+            const toSave = {
+                userProfile: {
+                    name: this.longTermMemory.userProfile.name,
+                    fears: this.longTermMemory.userProfile.fears,
+                    values: this.longTermMemory.userProfile.values,
+                    recurringTopics: Array.from(this.longTermMemory.userProfile.recurringTopics.entries())
+                }
+            };
+            localStorage.setItem('chugur_brain', JSON.stringify(toSave));
+        }
+        
+        loadMemory() {
+            const saved = localStorage.getItem('chugur_brain');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.userProfile.name) this.longTermMemory.userProfile.name = data.userProfile.name;
+                    if (data.userProfile.fears) this.longTermMemory.userProfile.fears = data.userProfile.fears;
+                    if (data.userProfile.values) this.longTermMemory.userProfile.values = data.userProfile.values;
+                    if (data.userProfile.recurringTopics) {
+                        this.longTermMemory.userProfile.recurringTopics = new Map(data.userProfile.recurringTopics);
+                    }
+                } catch(e) {}
+            }
+        }
+    }
+    
+    // ========== UI ==========
+    const ai = new ThinkingAI();
+    const chatArea = document.getElementById('chatArea');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    function addMessage(text, isUser, thoughtProcess = null) {
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
+        if (!isUser && thoughtProcess) {
+            const thoughtDiv = document.createElement('div');
+            thoughtDiv.className = 'thought-process';
+            thoughtDiv.innerHTML = `⚡ ${escapeHtml(thoughtProcess)}`;
+            div.appendChild(thoughtDiv);
+        }
+        chatArea.appendChild(div);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+    
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    
+    async function handleUserInput() {
+        const text = userInput.value.trim();
+        if (!text) return;
+        
+        addMessage(text, true);
+        userInput.value = '';
+        
+        // Показываем индикатор мышления
+        const thinkingMsg = addMessage("⏳ размышляю...", false);
+        chatArea.removeChild(chatArea.lastChild);
+        
+        const result = ai.thinkAndRespond(text);
+        addMessage(result.response, false, result.thoughtProcess);
+        
+        // Сохраняем имя
+        if (ai.longTermMemory.userProfile.name) {
+            localStorage.setItem('chugur_username', ai.longTermMemory.userProfile.name);
+        }
+    }
+    
+    sendBtn.addEventListener('click', handleUserInput);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleUserInput();
+    });
+    
+    const savedName = localStorage.getItem('chugur_username');
+    if (savedName && !ai.longTermMemory.userProfile.name) {
+        ai.longTermMemory.userProfile.name = savedName;
+    }
+</script>
+</body>
+</html>
