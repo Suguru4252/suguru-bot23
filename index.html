@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -58,6 +59,8 @@
             align-items: center;
             gap: 20px;
             flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
         .gang-name-box {
@@ -79,12 +82,15 @@
             cursor: pointer;
             transition: 0.2s;
             border: 1px solid rgba(255,255,255,0.1);
+            font-family: inherit;
         }
 
         .btn-danger { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
         .btn-success { background: linear-gradient(135deg, #2e7d32, #1b5e20); }
         .btn-warning { background: linear-gradient(135deg, #f57c00, #ef6c00); }
+        .btn-info { background: linear-gradient(135deg, #0288d1, #01579b); }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
 
         .main-layout {
             display: flex;
@@ -118,6 +124,42 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+        }
+
+        /* Доступные банды */
+        .gangs-list {
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .gangs-list h3 { margin-bottom: 10px; font-size: 16px; }
+        .gang-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gang-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .gang-item-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .gang-item-stats {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        .join-gang-btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            background: #2e7d32;
         }
 
         /* Создание банды */
@@ -154,19 +196,20 @@
         }
         .tile-owner-name { font-size: 20px; font-weight: bold; margin: 10px 0; }
         .capture-btn { width: 100%; padding: 12px; font-size: 18px; margin-top: 10px; }
+        .cooldown-text { font-size: 11px; color: #ffaa44; margin-top: 5px; }
 
         /* Лог */
         .event-log {
             background: rgba(0,0,0,0.6);
             border-radius: 16px;
             padding: 12px;
-            height: 200px;
+            height: 180px;
             overflow-y: auto;
             font-size: 12px;
             font-family: monospace;
         }
         .event-entry { border-left: 3px solid #ff4444; padding-left: 8px; margin: 6px 0; color: #ccc; }
-        .respect-meter { background: #2a2f3f; border-radius: 20px; height: 8px; margin-top: 10px; }
+        .respect-meter { background: #2a2f3f; border-radius: 20px; height: 8px; margin-top: 8px; }
         .respect-fill { background: linear-gradient(90deg, #ff4444, #ffaa44); height: 100%; width: 0%; border-radius: 20px; }
     </style>
 </head>
@@ -180,7 +223,7 @@
         <div class="resource" style="border-left-color: #44aaff;"><span class="resource-icon">⭐</span><div><div class="resource-value" id="respect">0</div><div class="resource-label">АВТОРИТЕТ</div></div></div>
     </div>
 
-    <div class="gang-header" id="gangHeader" style="margin-bottom: 20px; justify-content: space-between;">
+    <div class="gang-header" id="gangHeader" style="justify-content: space-between;">
         <div class="gang-name-box" id="gangNameBox" style="border-left-color: #888;">
             <div class="gang-name-text" id="gangNameDisplay">⚡ НЕТ БАНДЫ</div>
             <div class="respect-meter" id="respectMeter" style="width: 150px; margin-top: 8px;"><div class="respect-fill" id="respectFill"></div></div>
@@ -191,16 +234,22 @@
     <div class="main-layout">
         <div class="map-container">
             <canvas id="gameCanvas" width="700" height="700"></canvas>
-            <div style="margin-top: 10px; font-size: 12px; text-align: center;">🎯 Клик по клетке — выбрать | ⚔️ Нажми "ЗАХВАТИТЬ"</div>
+            <div style="margin-top: 10px; font-size: 12px; text-align: center;">🎯 Клик по клетке — выбрать | ⚔️ Атака раз в минуту</div>
         </div>
 
         <div class="right-panel">
+            <!-- СПИСОК ДОСТУПНЫХ БАНД -->
+            <div class="gangs-list" id="gangsList">
+                <h3>🔥 ДОСТУПНЫЕ БАНДЫ</h3>
+                <div id="gangsListContainer">Загрузка...</div>
+            </div>
+
             <!-- Создание банды -->
             <div class="create-panel" id="createPanel">
-                <h3>🔥 СОЗДАТЬ БАНДУ</h3>
-                <input type="text" id="gangNameInput" placeholder="Название" value="ГЕТТО">
+                <h3>✨ СОЗДАТЬ НОВУЮ БАНДУ</h3>
+                <input type="text" id="gangNameInput" placeholder="Название банды" value="ГЕТТО">
                 <input type="color" id="gangColorInput" value="#FF4444">
-                <button class="btn btn-success" id="createGangBtn" style="width: 100%;">СОЗДАТЬ</button>
+                <button class="btn btn-success" id="createGangBtn" style="width: 100%;">СОЗДАТЬ БАНДУ</button>
             </div>
 
             <!-- Действия (есть банда) -->
@@ -212,14 +261,16 @@
 
             <!-- Инфо о выбранной клетке -->
             <div class="tile-info" id="tileInfo">
-                <div>👆 Выбери клетку</div>
-                <div class="tile-owner-name" id="tileOwner">—</div>
+                <div>👆 Выбери клетку на карте</div>
+                <div class="tile-owner-name">—</div>
                 <button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ ЗАХВАТИТЬ</button>
+                <div class="cooldown-text" id="cooldownText"></div>
             </div>
 
             <div class="event-log" id="eventLog">
                 <div class="event-entry">🔥 Онлайн игра Territory Wars</div>
-                <div class="event-entry">💀 Создай банду, захватывай клетки</div>
+                <div class="event-entry">💀 Создай банду или вступи в существующую</div>
+                <div class="event-entry">⏱️ Атака доступна раз в 60 секунд</div>
             </div>
         </div>
     </div>
@@ -229,12 +280,14 @@
     // ========== НАСТРОЙКИ ==========
     const MAP_SIZE = 25;
     const CELL_SIZE = 700 / MAP_SIZE;
+    const ATTACK_COOLDOWN_MS = 60000; // 60 секунд
     
     // ========== ДАННЫЕ ==========
     let mapData = [];           // [y][x] = gangId или null
     let gangs = [];             // [{ id, name, color, money, weapons, soldiers, respect }]
     let currentGangId = null;
     let selectedTile = null;
+    let lastAttackTime = 0;     // время последней атаки
     
     // Canvas
     const canvas = document.getElementById('gameCanvas');
@@ -242,7 +295,7 @@
     
     // ========== СОХРАНЕНИЕ ==========
     function saveToLocalStorage() {
-        localStorage.setItem('turfwars_online', JSON.stringify({
+        localStorage.setItem('turfwars_online_v2', JSON.stringify({
             gangs: gangs,
             mapData: mapData,
             currentGangId: currentGangId
@@ -250,7 +303,7 @@
     }
     
     function loadFromLocalStorage() {
-        const saved = localStorage.getItem('turfwars_online');
+        const saved = localStorage.getItem('turfwars_online_v2');
         if (saved) {
             try {
                 const data = JSON.parse(saved);
@@ -323,35 +376,112 @@
             document.getElementById('leaveGangBtn').style.display = 'none';
         }
         updateTileDetail();
+        renderGangsList();
+    }
+    
+    // ========== ОТОБРАЖЕНИЕ СПИСКА БАНД ==========
+    function renderGangsList() {
+        const container = document.getElementById('gangsListContainer');
+        if(!container) return;
+        
+        // Фильтруем банды, в которых игрок не состоит
+        const availableGangs = gangs.filter(g => g.id !== currentGangId);
+        
+        if(availableGangs.length === 0) {
+            container.innerHTML = '<div style="opacity:0.6; text-align:center;">Нет доступных банд<br>Создай свою!</div>';
+            return;
+        }
+        
+        container.innerHTML = availableGangs.map(gang => `
+            <div class="gang-item">
+                <div class="gang-item-info">
+                    <div class="gang-item-name" style="color: ${gang.color}">${gang.name}</div>
+                    <div class="gang-item-stats">🏠 ${countTerritory(gang.id)} клеток | 👥 ${gang.soldiers} бойцов | ⭐ ${gang.respect} авт.</div>
+                </div>
+                <button class="btn join-gang-btn" onclick="joinGang(${gang.id})">ВСТУПИТЬ</button>
+            </div>
+        `).join('');
+    }
+    
+    // ========== ВСТУПЛЕНИЕ В БАНДУ ==========
+    function joinGang(gangId) {
+        const gang = gangs.find(g => g.id === gangId);
+        if(!gang) {
+            addLog("❌ Банда не найдена");
+            return;
+        }
+        
+        if(currentGangId !== null) {
+            addLog(`❌ Сначала покинь текущую банду!`);
+            return;
+        }
+        
+        currentGangId = gangId;
+        addLog(`🎉 Вы вступили в банду "${gang.name}"!`);
+        updateUI();
+        renderMap();
+        saveToLocalStorage();
     }
     
     // ========== ИНФО О КЛЕТКЕ ==========
     function updateTileDetail() {
         if(!selectedTile) {
-            document.getElementById('tileInfo').innerHTML = `<div>👆 Выбери клетку</div><div class="tile-owner-name">—</div><button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ ЗАХВАТИТЬ</button>`;
+            document.getElementById('tileInfo').innerHTML = `<div>👆 Выбери клетку</div><div class="tile-owner-name">—</div><button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ ЗАХВАТИТЬ</button><div class="cooldown-text" id="cooldownText"></div>`;
             return;
         }
         
         const {x,y} = selectedTile;
         const ownerId = mapData[y][x];
         const owner = ownerId ? gangs.find(g => g.id === ownerId) : null;
-        const ownerName = owner ? `${owner.name} (${owner.color})` : "Нейтральная";
+        const ownerName = owner ? `${owner.name}` : "Нейтральная территория";
         const isOwn = (ownerId === currentGangId);
         const canCapture = (currentGangId !== null && !isOwn);
+        
+        // Проверка кулдауна
+        const now = Date.now();
+        const timeSinceLastAttack = now - lastAttackTime;
+        const isOnCooldown = (currentGangId !== null && timeSinceLastAttack < ATTACK_COOLDOWN_MS);
+        const cooldownRemaining = Math.ceil((ATTACK_COOLDOWN_MS - timeSinceLastAttack) / 1000);
         
         document.getElementById('tileInfo').innerHTML = `
             <div>📍 Клетка (${x}, ${y})</div>
             <div class="tile-owner-name" style="color: ${owner ? owner.color : '#888'}">${ownerName}</div>
-            <button class="btn btn-danger capture-btn" id="captureBtn" style="display: ${canCapture ? 'block' : 'none'};">⚔️ ЗАХВАТИТЬ</button>
+            <button class="btn btn-danger capture-btn" id="captureBtn" style="display: ${canCapture && !isOnCooldown ? 'block' : 'none'};">⚔️ ЗАХВАТИТЬ</button>
+            <div class="cooldown-text" id="cooldownText">${isOnCooldown && currentGangId ? `⏱️ Атака доступна через ${cooldownRemaining} сек` : (currentGangId ? '✅ Атака доступна' : '⚡ Вступи в банду чтобы атаковать')}</div>
         `;
+        
         const captureBtn = document.getElementById('captureBtn');
-        if(captureBtn && canCapture) captureBtn.onclick = () => captureTile();
+        if(captureBtn && canCapture && !isOnCooldown) captureBtn.onclick = () => captureTile();
+        
+        // Обновляем текст кулдауна отдельно для динамики
+        const cooldownText = document.getElementById('cooldownText');
+        if(cooldownText && currentGangId && isOnCooldown) {
+            const interval = setInterval(() => {
+                const now2 = Date.now();
+                const remaining = Math.ceil((ATTACK_COOLDOWN_MS - (now2 - lastAttackTime)) / 1000);
+                if(remaining <= 0) {
+                    clearInterval(interval);
+                    updateTileDetail();
+                    renderMap();
+                } else if(document.getElementById('cooldownText')) {
+                    document.getElementById('cooldownText').innerHTML = `⏱️ Атака доступна через ${remaining} сек`;
+                }
+            }, 1000);
+            setTimeout(() => clearInterval(interval), 60000);
+        }
     }
     
-    // ========== ЗАХВАТ (ЛЮБАЯ КЛЕТКА, С РАСЧЕТОМ СИЛЫ) ==========
+    // ========== ЗАХВАТ (С КУЛДАУНОМ) ==========
     function captureTile() {
         if(!currentGangId) { addLog("❌ Создай банду!"); return; }
         if(!selectedTile) { addLog("❌ Выбери клетку!"); return; }
+        
+        const now = Date.now();
+        if(now - lastAttackTime < ATTACK_COOLDOWN_MS) {
+            const remaining = Math.ceil((ATTACK_COOLDOWN_MS - (now - lastAttackTime)) / 1000);
+            addLog(`⏱️ Атака доступна через ${remaining} секунд!`);
+            return;
+        }
         
         const {x,y} = selectedTile;
         const attacker = gangs.find(g => g.id === currentGangId);
@@ -376,20 +506,24 @@
             addLog(`✅ ${attacker.name} ЗАХВАТИЛ (${x},${y})! +10 авторитета`);
             attacker.respect = Math.min(100, attacker.respect + 10);
             
-            // Если у защитника 0 территорий — банда исчезает
             if(defender && countTerritory(defenderId) === 0) {
                 addLog(`💀 БАНДА ${defender.name} РАСПАЛАСЬ!`);
                 gangs = gangs.filter(g => g.id !== defenderId);
+                if(currentGangId === defenderId) currentGangId = null;
             }
+            
+            lastAttackTime = Date.now();
             renderMap();
             updateUI();
             saveToLocalStorage();
         } else {
             addLog(`😭 Поражение! -5 авторитета`);
             attacker.respect = Math.max(0, attacker.respect - 5);
+            lastAttackTime = Date.now();
             updateUI();
             saveToLocalStorage();
         }
+        updateTileDetail();
     }
     
     // ========== СОЗДАНИЕ БАНДЫ ==========
@@ -397,6 +531,12 @@
         let name = document.getElementById('gangNameInput').value.trim();
         if(!name) name = "ГЕТТО";
         let color = document.getElementById('gangColorInput').value;
+        
+        // Проверка на существующее имя
+        if(gangs.some(g => g.name.toLowerCase() === name.toLowerCase())) {
+            addLog(`❌ Банда с именем "${name}" уже существует!`);
+            return;
+        }
         
         const newId = Date.now();
         const newGang = {
@@ -577,3 +717,4 @@
 </script>
 </body>
 </html>
+```
