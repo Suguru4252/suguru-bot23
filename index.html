@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ТЕРРИТОРИИ | Криминальная стратегия</title>
+    <title>TERRITORY WARS | Захват территорий</title>
     <style>
         * {
             margin: 0;
@@ -15,19 +15,18 @@
         body {
             background: linear-gradient(135deg, #0a0c12 0%, #0e111a 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', 'Poppins', 'Courier New', monospace;
-            padding: 15px;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            padding: 20px;
             color: #eee;
         }
 
-        /* ГЛАВНЫЙ КОНТЕЙНЕР */
         .game-wrapper {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ РЕСУРСОВ */
-        .resources-bar {
+        /* Верхняя панель */
+        .top-bar {
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -36,129 +35,52 @@
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
 
-        .resource {
+        .gang-info {
             display: flex;
+            gap: 30px;
             align-items: center;
-            gap: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 20px;
-            border-radius: 40px;
-            border-left: 3px solid;
-        }
-
-        .resource-icon {
-            font-size: 28px;
-        }
-
-        .resource-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .resource-value {
-            font-size: 24px;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .resource-label {
-            font-size: 10px;
-            opacity: 0.6;
-            letter-spacing: 1px;
-        }
-
-        /* ОСНОВНОЙ ЛЭЙАУТ */
-        .main-layout {
-            display: flex;
-            gap: 20px;
             flex-wrap: wrap;
         }
 
-        /* КАНВАС КАРТЫ */
-        .map-container {
-            flex: 3;
-            min-width: 500px;
-            background: #00000055;
-            border-radius: 24px;
-            padding: 10px;
-            backdrop-filter: blur(4px);
+        .gang-name-box {
+            background: rgba(0,0,0,0.5);
+            padding: 8px 20px;
+            border-radius: 40px;
+            border-left: 4px solid;
         }
 
-        canvas {
-            width: 100%;
-            height: auto;
-            background: #1a1f2a;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: crosshair;
+        .gang-name-text {
+            font-size: 24px;
+            font-weight: bold;
         }
 
-        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
-        .control-panel {
-            flex: 1.2;
-            min-width: 280px;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+        .stat-box {
             display: flex;
-            flex-direction: column;
             gap: 20px;
-        }
-
-        /* БАНДА ИНФО */
-        .gang-card {
-            background: linear-gradient(135deg, #1a1f2e, #0f121c);
-            border-radius: 20px;
-            padding: 18px;
-            text-align: center;
-            border-bottom: 3px solid;
-        }
-
-        .gang-name {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        .gang-stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 15px 0;
         }
 
         .stat {
             text-align: center;
         }
 
-        .stat-num {
+        .stat-value {
             font-size: 22px;
             font-weight: bold;
         }
 
         .stat-label {
-            font-size: 10px;
+            font-size: 11px;
             opacity: 0.7;
-        }
-
-        /* КНОПКИ */
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
         }
 
         .btn {
             background: linear-gradient(135deg, #2a2f3f, #1a1f2f);
             border: none;
-            padding: 12px;
+            padding: 10px 20px;
             border-radius: 40px;
             color: white;
             font-weight: bold;
@@ -166,12 +88,10 @@
             cursor: pointer;
             transition: 0.2s;
             border: 1px solid rgba(255,255,255,0.1);
-            font-family: inherit;
         }
 
-        .btn-primary {
+        .btn-danger {
             background: linear-gradient(135deg, #d32f2f, #b71c1c);
-            box-shadow: 0 0 10px rgba(211,47,47,0.4);
         }
 
         .btn-success {
@@ -187,84 +107,119 @@
             filter: brightness(1.05);
         }
 
-        /* ЛОГ СОБЫТИЙ */
+        /* Основной лэйаут */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .map-container {
+            flex: 3;
+            min-width: 500px;
+            background: #00000055;
+            border-radius: 24px;
+            padding: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background: #1a1f2a;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 260px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tile-detail {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .tile-owner {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .capture-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
         .event-log {
             background: rgba(0,0,0,0.6);
             border-radius: 16px;
             padding: 12px;
-            height: 200px;
+            height: 250px;
             overflow-y: auto;
-            font-size: 11px;
+            font-size: 12px;
             font-family: monospace;
         }
 
         .event-entry {
-            border-left: 3px solid #d32f2f;
+            border-left: 3px solid #ff4444;
             padding-left: 8px;
-            margin: 8px 0;
+            margin: 6px 0;
             color: #ccc;
         }
 
-        .event-war { border-left-color: #ff4444; }
-        .event-econ { border-left-color: #ffaa44; }
-        .event-diplo { border-left-color: #44ff44; }
-        .event-police { border-left-color: #44aaff; }
-
-        /* ИНФО О КЛЕТКЕ */
-        .tile-info {
-            background: rgba(0,0,0,0.5);
+        .create-gang-panel {
+            background: rgba(0,0,0,0.4);
             border-radius: 16px;
-            padding: 12px;
-            font-size: 12px;
+            padding: 15px;
+            text-align: center;
         }
 
-        .respect-meter {
+        .create-gang-panel input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
             background: #2a2f3f;
-            border-radius: 20px;
-            height: 8px;
-            overflow: hidden;
-            margin: 10px 0;
+            border: 1px solid #555;
+            border-radius: 40px;
+            color: white;
+            font-family: inherit;
         }
 
-        .respect-fill {
-            background: linear-gradient(90deg, #ff4444, #ffaa44);
-            width: 0%;
-            height: 100%;
-            transition: width 0.3s;
+        .create-gang-panel input[type="color"] {
+            height: 40px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
-    <!-- Ресурсы -->
-    <div class="resources-bar" id="resourcesBar">
-        <div class="resource" style="border-left-color: #ffaa44;">
-            <span class="resource-icon">💰</span>
-            <div class="resource-info">
-                <div class="resource-value" id="money">5000</div>
-                <div class="resource-label">НАЛИЧНЫЕ</div>
+    <!-- Верхняя панель -->
+    <div class="top-bar" id="topBar">
+        <div class="gang-info" id="gangInfo">
+            <div class="gang-name-box" id="gangNameBox" style="border-left-color: #888;">
+                <div class="gang-name-text" id="gangNameDisplay">⚡ НЕТ БАНДЫ</div>
+            </div>
+            <div class="stat-box" id="statBox" style="display: none;">
+                <div class="stat"><div class="stat-value" id="territoryCount">0</div><div class="stat-label">ТЕРРИТОРИЙ</div></div>
+                <div class="stat"><div class="stat-value" id="gangPower">0</div><div class="stat-label">СИЛА</div></div>
             </div>
         </div>
-        <div class="resource" style="border-left-color: #ff4444;">
-            <span class="resource-icon">🔫</span>
-            <div class="resource-info">
-                <div class="resource-value" id="weapons">250</div>
-                <div class="resource-label">ОРУЖИЕ</div>
-            </div>
-        </div>
-        <div class="resource" style="border-left-color: #44ff44;">
-            <span class="resource-icon">👥</span>
-            <div class="resource-info">
-                <div class="resource-value" id="soldiers">12</div>
-                <div class="resource-label">БОЙЦЫ</div>
-            </div>
-        </div>
-        <div class="resource" style="border-left-color: #44aaff;">
-            <span class="resource-icon">⭐</span>
-            <div class="resource-info">
-                <div class="resource-value" id="respect">45</div>
-                <div class="resource-label">АВТОРИТЕТ</div>
-            </div>
+        <div>
+            <button class="btn" id="leaveGangBtn" style="display: none; background: #7f8c8d;">🏃‍♂️ ПОКИНУТЬ БАНДУ</button>
         </div>
     </div>
 
@@ -273,579 +228,357 @@
         <div class="map-container">
             <canvas id="gameCanvas" width="700" height="700"></canvas>
             <div style="margin-top: 10px; font-size: 12px; text-align: center; opacity: 0.7;">
-                🎯 Клик по клетке — атака/взаимодействие | 🏠 Свои территории приносят доход каждые 30 сек
+                🎯 Клик по клетке — выбрать | ⚔️ Нажми "ЗАХВАТИТЬ" чтобы атаковать
             </div>
         </div>
 
-        <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
-        <div class="control-panel">
-            <div class="gang-card" id="gangCard">
-                <div class="gang-name" id="gangName">⚡ НЕТ БАНДЫ</div>
-                <div class="gang-stats">
-                    <div class="stat"><div class="stat-num" id="territoryCount">0</div><div class="stat-label">ТЕРРИТОРИЙ</div></div>
-                    <div class="stat"><div class="stat-num" id="income">0</div><div class="stat-label">ДОХОД/мин</div></div>
-                    <div class="stat"><div class="stat-num" id="warLevel">0</div><div class="stat-label">УРОВЕНЬ ВОЙНЫ</div></div>
-                </div>
-                <div class="respect-meter"><div class="respect-fill" id="respectFill"></div></div>
+        <!-- ПРАВАЯ ПАНЕЛЬ -->
+        <div class="right-panel">
+            <!-- Панель создания банды -->
+            <div class="create-gang-panel" id="createGangPanel">
+                <h3>🔥 СОЗДАТЬ БАНДУ</h3>
+                <input type="text" id="gangNameInput" placeholder="Название банды" value="ГЕТТО КРЫСЫ">
+                <input type="color" id="gangColorInput" value="#FF4444">
+                <button class="btn btn-success" id="createGangBtn" style="width: 100%;">СОЗДАТЬ БАНДУ</button>
             </div>
 
-            <div class="action-buttons">
-                <button class="btn btn-primary" id="createGangBtn">🔥 СОЗДАТЬ БАНДУ</button>
-                <button class="btn" id="recruitBtn">👥 НАНЯТЬ БОЙЦОВ (200$)</button>
-                <button class="btn btn-success" id="buyWeaponsBtn">🔫 КУПИТЬ ОРУЖИЕ (150$)</button>
-                <button class="btn btn-warning" id="extortBtn">💀 ВЫМОГАТЕЛЬСТВО (риск)</button>
-                <button class="btn" id="resetWorldBtn">🌍 СБРОС МИРА</button>
+            <!-- Информация о выбранной клетке -->
+            <div class="tile-detail" id="tileDetail">
+                <div style="opacity: 0.6;">👆 Выбери клетку на карте</div>
+                <div class="tile-owner" id="tileOwner">—</div>
+                <button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ ЗАХВАТИТЬ</button>
             </div>
 
-            <div class="tile-info" id="tileInfo">
-                <div style="opacity:0.6; text-align:center;">👆 Наведись на клетку</div>
-            </div>
-
+            <!-- Лог событий -->
             <div class="event-log" id="eventLog">
-                <div class="event-entry">🔥 Добро пожаловать в ТЕРРИТОРИИ</div>
-                <div class="event-entry">💀 Война начинается с первой клетки</div>
+                <div class="event-entry">🔥 Добро пожаловать в Territory Wars</div>
+                <div class="event-entry">💀 Создай банду и захватывай территории</div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ========== 1. КОНФИГУРАЦИЯ ==========
-    const MAP_SIZE = 25;        // 25x25 клеток (625 территорий)
+    // ========== НАСТРОЙКИ ==========
+    const MAP_SIZE = 25;        // 25x25 = 625 клеток
     const CELL_SIZE = 700 / MAP_SIZE;
     
-    // ========== 2. КЛАССЫ ==========
-    class Tile {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.type = this.randomType();     // тип территории
-            this.owner = null;                  // gangId владельца
-            this.controlStrength = 50;          // 0-100 сила контроля
-            this.graffitiTimer = Date.now();    // когда последний раз обновляли тэги
-            this.income = this.calcIncome();    // доход в минуту
-            this.defenseBonus = this.calcDefense(); // бонус защиты
-        }
-        
-        randomType() {
-            const types = ['corner', 'drug_spot', 'shop', 'warehouse', 'street', 'hq_spot'];
-            const weights = [20, 15, 25, 10, 25, 5];
-            const rand = Math.random() * 100;
-            let sum = 0;
-            for(let i=0; i<types.length; i++) {
-                sum += weights[i];
-                if(rand < sum) return types[i];
-            }
-            return 'street';
-        }
-        
-        calcIncome() {
-            const base = {
-                'corner': 5,
-                'drug_spot': 25,
-                'shop': 15,
-                'warehouse': 20,
-                'street': 2,
-                'hq_spot': 30
-            };
-            let inc = base[this.type] || 5;
-            // доход зависит от силы контроля
-            inc = Math.floor(inc * (this.controlStrength / 100));
-            return inc;
-        }
-        
-        calcDefense() {
-            const defBase = {
-                'corner': 5,
-                'drug_spot': 15,
-                'shop': 10,
-                'warehouse': 20,
-                'street': 3,
-                'hq_spot': 25
-            };
-            let def = defBase[this.type] || 5;
-            def = Math.floor(def * (this.controlStrength / 100));
-            return Math.max(1, def);
-        }
-        
-        updateIncome() {
-            this.income = this.calcIncome();
-        }
-    }
-    
-    class Gang {
-        constructor(id, name, color) {
-            this.id = id;
-            this.name = name;
-            this.color = color;
-            this.money = 3000;
-            this.weapons = 150;
-            this.soldiers = 8;
-            this.respect = 40;      // авторитет (влияет на найм и доход)
-            this.warLevel = 0;       // уровень эскалации (0-100)
-            this.captains = [];       // лейтенанты (уникальные)
-        }
-        
-        getTotalPower() {
-            let power = this.soldiers * 5 + this.weapons * 0.5;
-            power = power * (0.5 + this.respect / 100);
-            return Math.floor(power);
-        }
-        
-        getIncomePerMinute(tiles, ownedTiles) {
-            let total = 0;
-            for(let id of ownedTiles) {
-                total += tiles[id].income;
-            }
-            // бонус от авторитета
-            total = Math.floor(total * (0.7 + this.respect / 200));
-            return total;
-        }
-    }
-    
-    // ========== 3. ГЛОБАЛЬНОЕ СОСТОЯНИЕ ==========
-    let tiles = [];
-    let gangs = [];
-    let currentGangId = null;
-    let hoverTile = null;
-    let gameLoop = null;
-    let lastUpdate = Date.now();
+    // ========== ГЛОБАЛЬНЫЕ ДАННЫЕ ==========
+    let mapData = [];           // 2D массив [y][x] = gangId или null
+    let gangs = [];             // [{ id, name, color }]
+    let currentGangId = null;   // ID банды игрока
+    let selectedTile = null;     // { x, y }
     
     // Canvas
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ========== 4. ИНИЦИАЛИЗАЦИЯ КАРТЫ ==========
-    function initMap() {
-        tiles = [];
-        for(let y=0; y<MAP_SIZE; y++) {
-            for(let x=0; x<MAP_SIZE; x++) {
-                const idx = y * MAP_SIZE + x;
-                tiles[idx] = new Tile(x, y);
-            }
-        }
+    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+    function saveToLocalStorage() {
+        localStorage.setItem('turfwars_data', JSON.stringify({
+            gangs: gangs,
+            mapData: mapData,
+            currentGangId: currentGangId
+        }));
     }
     
-    // ========== 5. СОЗДАНИЕ ИИ-БАНД ==========
-    function createAIGangs() {
-        const aiNames = ["💀 СКИНЫ", "🔫 БРИГАДА", "🐺 ВОЛКИ", "🔥 ПЛАМЯ", "⚡ МОЛНИЯ"];
-        const aiColors = ["#8B0000", "#2E5A3A", "#4A2A6A", "#C97E00", "#1F6D8A"];
+    function loadFromLocalStorage() {
+        const saved = localStorage.getItem('turfwars_data');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                gangs = data.gangs;
+                mapData = data.mapData;
+                currentGangId = data.currentGangId;
+                return true;
+            } catch(e) { console.warn(e); }
+        }
+        return false;
+    }
+    
+    // Инициализация пустой карты (все клетки null)
+    function initEmptyMap() {
+        mapData = Array(MAP_SIZE).fill().map(() => Array(MAP_SIZE).fill(null));
+    }
+    
+    // Подсчет территорий банды
+    function countTerritory(gangId) {
+        let count = 0;
+        for(let y = 0; y < MAP_SIZE; y++) {
+            for(let x = 0; x < MAP_SIZE; x++) {
+                if(mapData[y][x] === gangId) count++;
+            }
+        }
+        return count;
+    }
+    
+    // Сила банды (просто количество территорий)
+    function getGangPower(gangId) {
+        return countTerritory(gangId);
+    }
+    
+    // Обновить интерфейс
+    function updateUI() {
+        const gang = gangs.find(g => g.id === currentGangId);
         
-        for(let i=0; i<4; i++) {
-            let gang = new Gang(Date.now() + i, aiNames[i], aiColors[i]);
-            gang.money = 2000 + Math.random() * 2000;
-            gang.soldiers = 5 + Math.floor(Math.random() * 8);
-            gang.weapons = 80 + Math.floor(Math.random() * 100);
-            gangs.push(gang);
+        if (gang) {
+            document.getElementById('gangNameDisplay').innerHTML = gang.name;
+            document.getElementById('gangNameBox').style.borderLeftColor = gang.color;
+            document.getElementById('gangNameDisplay').style.color = gang.color;
+            document.getElementById('statBox').style.display = 'flex';
+            document.getElementById('leaveGangBtn').style.display = 'block';
+            document.getElementById('createGangPanel').style.display = 'none';
             
-            // расставить стартовые территории (по 4-6 клеток)
-            let placed = 0;
-            while(placed < 5) {
-                let rx = Math.floor(Math.random() * MAP_SIZE);
-                let ry = Math.floor(Math.random() * MAP_SIZE);
-                let idx = ry * MAP_SIZE + rx;
-                if(tiles[idx].owner === null) {
-                    tiles[idx].owner = gang.id;
-                    tiles[idx].controlStrength = 60 + Math.random() * 30;
-                    tiles[idx].updateIncome();
-                    placed++;
-                }
-            }
+            const territories = countTerritory(currentGangId);
+            document.getElementById('territoryCount').innerText = territories;
+            document.getElementById('gangPower').innerText = territories;
+        } else {
+            document.getElementById('gangNameDisplay').innerHTML = '⚡ НЕТ БАНДЫ';
+            document.getElementById('gangNameBox').style.borderLeftColor = '#888';
+            document.getElementById('gangNameDisplay').style.color = '#eee';
+            document.getElementById('statBox').style.display = 'none';
+            document.getElementById('leaveGangBtn').style.display = 'none';
+            document.getElementById('createGangPanel').style.display = 'block';
+        }
+        
+        // Обновляем детали выбранной клетки
+        updateTileDetail();
+    }
+    
+    // Обновить информацию о выбранной клетке
+    function updateTileDetail() {
+        if (selectedTile === null) {
+            document.getElementById('tileDetail').innerHTML = `
+                <div style="opacity: 0.6;">👆 Выбери клетку на карте</div>
+                <div class="tile-owner">—</div>
+                <button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ ЗАХВАТИТЬ</button>
+            `;
+            return;
+        }
+        
+        const { x, y } = selectedTile;
+        const ownerId = mapData[y][x];
+        const owner = ownerId ? gangs.find(g => g.id === ownerId) : null;
+        const ownerName = owner ? owner.name : "Нейтральная территория";
+        const ownerColor = owner ? owner.color : "#888";
+        
+        const isOwnTerritory = (ownerId === currentGangId);
+        const canCapture = (currentGangId !== null && !isOwnTerritory);
+        
+        document.getElementById('tileDetail').innerHTML = `
+            <div style="opacity: 0.6;">📍 Клетка (${x}, ${y})</div>
+            <div class="tile-owner" style="color: ${ownerColor};">${ownerName}</div>
+            <button class="btn btn-danger capture-btn" id="captureBtn" style="display: ${canCapture ? 'block' : 'none'};">⚔️ ЗАХВАТИТЬ</button>
+        `;
+        
+        // Перепривязываем событие
+        const captureBtn = document.getElementById('captureBtn');
+        if (captureBtn && canCapture) {
+            captureBtn.onclick = () => captureTile();
         }
     }
     
-    // ========== 6. ПОЛУЧИТЬ СОСЕДНИЕ КЛЕТКИ ==========
-    function getNeighbors(x, y) {
-        const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-        let neighbors = [];
-        for(let [dx,dy] of dirs) {
-            let nx = x+dx, ny = y+dy;
-            if(nx>=0 && nx<MAP_SIZE && ny>=0 && ny<MAP_SIZE) {
-                neighbors.push(ny * MAP_SIZE + nx);
-            }
+    // ========== ЗАХВАТ ТЕРРИТОРИИ (ЛЮБУЮ, НЕЗАВИСИМО ОТ РАСПОЛОЖЕНИЯ) ==========
+    function captureTile() {
+        if (currentGangId === null) {
+            addLog("❌ Сначала создай банду!", true);
+            return;
         }
-        return neighbors;
-    }
-    
-    // ========== 7. АТАКА (ВОЙНА) ==========
-    function attackTile(tileIdx) {
-        if(currentGangId === null) {
-            addLog("❌ Создай банду сначала!", "war");
-            return false;
+        
+        if (selectedTile === null) {
+            addLog("❌ Выбери клетку для захвата!", true);
+            return;
+        }
+        
+        const { x, y } = selectedTile;
+        const currentOwnerId = mapData[y][x];
+        
+        // Если уже своя
+        if (currentOwnerId === currentGangId) {
+            addLog("🏠 Это уже твоя территория!", true);
+            return;
         }
         
         const attacker = gangs.find(g => g.id === currentGangId);
-        if(!attacker) return false;
+        const defender = currentOwnerId ? gangs.find(g => g.id === currentOwnerId) : null;
         
-        const targetTile = tiles[tileIdx];
-        const defenderId = targetTile.owner;
+        // Сила атакующего = количество его территорий + рандом
+        const attackerPower = countTerritory(currentGangId) + Math.random() * 30;
         
-        // своя клетка
-        if(defenderId === currentGangId) {
-            addLog(`🏠 ${attacker.name}: это наша территория`, "war");
-            return false;
-        }
-        
-        // проверка границы
-        const tilePos = {x: targetTile.x, y: targetTile.y};
-        let hasAdjacent = false;
-        for(let neighborIdx of getNeighbors(tilePos.x, tilePos.y)) {
-            if(tiles[neighborIdx].owner === currentGangId) {
-                hasAdjacent = true;
-                break;
-            }
-        }
-        if(!hasAdjacent) {
-            addLog(`⚠️ Нет границы с твоей территорией!`, "war");
-            return false;
-        }
-        
-        // Силы сторон
-        let attackerPower = attacker.getTotalPower() * (0.8 + Math.random() * 0.7);
-        let defenderPower = 20;
+        // Сила защитника
+        let defenderPower = 20 + Math.random() * 30; // базовая защита нейтралов
         let defenderName = "Нейтралы";
         
-        if(defenderId !== null) {
-            const defender = gangs.find(g => g.id === defenderId);
-            if(defender) {
-                defenderName = defender.name;
-                defenderPower = defender.getTotalPower() * (0.7 + Math.random() * 0.8);
-                defenderPower += targetTile.defenseBonus;
-            }
-        } else {
-            defenderPower = 30 + Math.random() * 40;
+        if (defender) {
+            defenderPower = countTerritory(currentOwnerId) + Math.random() * 30;
+            defenderName = defender.name;
         }
         
-        addLog(`⚔️ ${attacker.name} (${Math.floor(attackerPower)}) атакует ${defenderName} (${Math.floor(defenderPower)})`, "war");
+        addLog(`⚔️ ${attacker.name} (${Math.floor(attackerPower)}) атакует ${defenderName} (${Math.floor(defenderPower)})`);
         
-        if(attackerPower > defenderPower) {
-            // ЗАХВАТ
-            const oldOwner = targetTile.owner;
-            targetTile.owner = currentGangId;
-            targetTile.controlStrength = Math.min(100, targetTile.controlStrength + 15);
-            targetTile.updateIncome();
+        if (attackerPower > defenderPower) {
+            // Захват
+            mapData[y][x] = currentGangId;
+            addLog(`✅ ${attacker.name} ЗАХВАТИЛ территорию (${x},${y})!`);
             
-            addLog(`✅ ${attacker.name} ЗАХВАТИЛ ${targetTile.type} (${targetTile.x},${targetTile.y})`, "war");
-            
-            // потери в бою
-            attacker.soldiers = Math.max(1, attacker.soldiers - Math.floor(Math.random() * 3));
-            attacker.weapons = Math.max(10, attacker.weapons - Math.floor(Math.random() * 20));
-            
-            // повышение авторитета
-            attacker.respect = Math.min(100, attacker.respect + 2);
-            
-            // проверка уничтожения банды
-            if(oldOwner !== null) {
-                let stillAlive = false;
-                for(let t of tiles) {
-                    if(t.owner === oldOwner) { stillAlive = true; break; }
-                }
-                if(!stillAlive) {
-                    const deadGang = gangs.find(g => g.id === oldOwner);
-                    if(deadGang) {
-                        addLog(`💀 БАНДА ${deadGang.name} УНИЧТОЖЕНА!`, "war");
-                        gangs = gangs.filter(g => g.id !== oldOwner);
-                    }
-                }
+            // Если у защитника не осталось территорий — банда исчезает
+            if (defender && countTerritory(currentOwnerId) === 0) {
+                addLog(`💀 БАНДА ${defender.name} УНИЧТОЖЕНА!`);
+                gangs = gangs.filter(g => g.id !== currentOwnerId);
             }
             
-            updateUI();
             renderMap();
-            return true;
-        } else {
-            addLog(`😭 Поражение! ${defenderName} отбил атаку`, "war");
-            attacker.soldiers = Math.max(1, attacker.soldiers - Math.floor(Math.random() * 2));
-            attacker.respect = Math.max(0, attacker.respect - 1);
             updateUI();
-            return false;
-        }
-    }
-    
-    // ========== 8. ЭКОНОМИКА (каждые 30 секунд) ==========
-    function processIncome() {
-        if(currentGangId === null) return;
-        
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(!gang) return;
-        
-        // подсчет территорий игрока
-        let ownedTiles = [];
-        for(let i=0; i<tiles.length; i++) {
-            if(tiles[i].owner === currentGangId) ownedTiles.push(i);
-        }
-        
-        let totalIncome = 0;
-        for(let idx of ownedTiles) {
-            totalIncome += tiles[idx].income;
-        }
-        
-        // бонус от авторитета
-        totalIncome = Math.floor(totalIncome * (0.7 + gang.respect / 200));
-        
-        if(totalIncome > 0) {
-            gang.money += totalIncome;
-            addLog(`💰 Доход: +${totalIncome}$ (${ownedTiles.length} территорий)`, "econ");
-        }
-        
-        // содержание бойцов
-        const upkeep = Math.floor(gang.soldiers * 5);
-        if(upkeep > 0) {
-            gang.money -= upkeep;
-            addLog(`⚙️ Содержание бойцов: -${upkeep}$`, "econ");
-        }
-        
-        if(gang.money < 0) gang.money = 0;
-        
-        // деградация граффити (если не обновлять - теряем контроль)
-        for(let idx of ownedTiles) {
-            if(Date.now() - tiles[idx].graffitiTimer > 60000) { // 1 минута
-                tiles[idx].controlStrength = Math.max(0, tiles[idx].controlStrength - 2);
-                tiles[idx].updateIncome();
-                if(tiles[idx].controlStrength <= 0) {
-                    tiles[idx].owner = null;
-                    addLog(`🎨 Территория потеряна из-за отсутствия тэгов!`, "war");
-                }
-            }
-        }
-        
-        updateUI();
-        renderMap();
-    }
-    
-    // ========== 9. ВЫМОГАТЕЛЬСТВО ==========
-    function extort() {
-        if(currentGangId === null) return;
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(!gang) return;
-        
-        let success = Math.random() * 100 < (30 + gang.respect / 2);
-        if(success) {
-            let profit = 300 + Math.floor(Math.random() * 500);
-            gang.money += profit;
-            addLog(`💀 Успешное вымогательство! +${profit}$`, "econ");
-            gang.respect = Math.min(100, gang.respect + 3);
+            saveToLocalStorage();
         } else {
-            let loss = 150 + Math.floor(Math.random() * 300);
-            gang.money = Math.max(0, gang.money - loss);
-            addLog(`😡 Провал! Потеряно ${loss}$ и уважение`, "econ");
-            gang.respect = Math.max(0, gang.respect - 5);
+            addLog(`😭 Поражение! ${defenderName} отбил атаку`, true);
         }
-        updateUI();
     }
     
-    // ========== 10. НАЙМ И ПОКУПКА ==========
-    function recruit() {
-        if(!currentGangId) return;
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(gang.money >= 200) {
-            gang.money -= 200;
-            gang.soldiers += 2;
-            addLog(`👥 Нанято 2 бойца!`, "econ");
-        } else {
-            addLog(`❌ Не хватает денег!`, "econ");
-        }
-        updateUI();
-    }
-    
-    function buyWeapons() {
-        if(!currentGangId) return;
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(gang.money >= 150) {
-            gang.money -= 150;
-            gang.weapons += 40;
-            addLog(`🔫 Куплено оружие +40`, "econ");
-        } else {
-            addLog(`❌ Не хватает денег!`, "econ");
-        }
-        updateUI();
-    }
-    
-    // ========== 11. СОЗДАНИЕ БАНДЫ ==========
-    function createPlayerGang() {
-        let name = prompt("🔥 Название банды:", "ГЕТТО КРЫСЫ");
-        if(!name) name = "ГЕТТО КРЫСЫ";
-        let color = prompt("🎨 Цвет (HEX):", "#FF4444");
-        if(!/^#[0-9A-F]{6}$/i.test(color)) color = "#FF4444";
+    // ========== СОЗДАНИЕ БАНДЫ ==========
+    function createGang() {
+        let name = document.getElementById('gangNameInput').value.trim();
+        if (!name) name = "ГЕТТО КРЫСЫ";
         
-        let newId = Date.now();
-        let newGang = new Gang(newId, name, color);
-        newGang.money = 3000;
-        newGang.soldiers = 6;
+        let color = document.getElementById('gangColorInput').value;
+        
+        const newId = Date.now();
+        const newGang = {
+            id: newId,
+            name: name,
+            color: color
+        };
+        
         gangs.push(newGang);
         currentGangId = newId;
         
-        // стартовая клетка
-        for(let i=0; i<tiles.length; i++) {
-            if(tiles[i].owner === null) {
-                tiles[i].owner = newId;
-                tiles[i].controlStrength = 70;
-                tiles[i].updateIncome();
-                break;
+        // Даём стартовую территорию (первую свободную)
+        let placed = false;
+        for(let y = 0; y < MAP_SIZE && !placed; y++) {
+            for(let x = 0; x < MAP_SIZE && !placed; x++) {
+                if(mapData[y][x] === null) {
+                    mapData[y][x] = newId;
+                    placed = true;
+                    addLog(`🎉 Банда "${name}" создана! Стартовая клетка (${x},${y})`);
+                }
             }
         }
         
-        addLog(`🎉 Банда "${name}" создана! Начинай захват.`, "war");
-        updateUI();
-        renderMap();
-    }
-    
-    // ========== 12. СБРОС МИРА ==========
-    function resetWorld() {
-        gangs = [];
-        currentGangId = null;
-        initMap();
-        createAIGangs();
-        addLog(`💥 МИР ПЕРЕЗАПУЩЕН! 4 банды делят территории`, "war");
-        updateUI();
-        renderMap();
-    }
-    
-    // ========== 13. UI ОБНОВЛЕНИЕ ==========
-    function updateUI() {
-        const gang = currentGangId ? gangs.find(g => g.id === currentGangId) : null;
+        if (!placed) {
+            addLog("⚠️ Карта переполнена! Не удалось разместить базу.", true);
+        }
         
-        if(gang) {
-            document.getElementById('gangName').innerHTML = `${gang.name}`;
-            document.getElementById('gangName').style.color = gang.color;
-            document.getElementById('money').innerText = Math.floor(gang.money);
-            document.getElementById('weapons').innerText = gang.weapons;
-            document.getElementById('soldiers').innerText = gang.soldiers;
-            document.getElementById('respect').innerText = gang.respect;
-            document.getElementById('respectFill').style.width = gang.respect + '%';
+        renderMap();
+        updateUI();
+        saveToLocalStorage();
+    }
+    
+    // ========== ПОКИНУТЬ БАНДУ ==========
+    function leaveGang() {
+        if (currentGangId === null) return;
+        
+        const gang = gangs.find(g => g.id === currentGangId);
+        if (gang) {
+            addLog(`👋 Вы покинули банду "${gang.name}"`);
             
-            let owned = tiles.filter(t => t.owner === currentGangId).length;
-            let income = gang.getIncomePerMinute(tiles, owned);
-            document.getElementById('territoryCount').innerText = owned;
-            document.getElementById('income').innerText = income;
-            document.getElementById('warLevel').innerText = gang.warLevel;
-        } else {
-            document.getElementById('gangName').innerHTML = `⚡ НЕТ БАНДЫ`;
-            document.getElementById('money').innerText = '0';
-            document.getElementById('weapons').innerText = '0';
-            document.getElementById('soldiers').innerText = '0';
-            document.getElementById('respect').innerText = '0';
-            document.getElementById('respectFill').style.width = '0%';
-            document.getElementById('territoryCount').innerText = '0';
+            // Если у банды есть другие территории? Они остаются, но без игрока
+            // Просто убираем игрока из банды
+            currentGangId = null;
+            
+            renderMap();
+            updateUI();
+            saveToLocalStorage();
         }
     }
     
-    function addLog(msg, type="war") {
-        const logDiv = document.getElementById('eventLog');
-        const entry = document.createElement('div');
-        entry.className = `event-entry event-${type}`;
-        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        logDiv.appendChild(entry);
-        entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        if(logDiv.children.length > 30) logDiv.removeChild(logDiv.children[0]);
-    }
-    
-    // ========== 14. ОТРИСОВКА КАРТЫ ==========
+    // ========== ОТРИСОВКА КАРТЫ ==========
     function renderMap() {
-        for(let y=0; y<MAP_SIZE; y++) {
-            for(let x=0; x<MAP_SIZE; x++) {
-                let idx = y * MAP_SIZE + x;
-                let tile = tiles[idx];
-                let color = "#2a2f3a";
+        for(let y = 0; y < MAP_SIZE; y++) {
+            for(let x = 0; x < MAP_SIZE; x++) {
+                const ownerId = mapData[y][x];
+                let color = "#3a3f4a"; // серый цвет нейтральной клетки
                 
-                if(tile.owner !== null) {
-                    let gang = gangs.find(g => g.id === tile.owner);
-                    if(gang) color = gang.color;
+                if (ownerId !== null) {
+                    const gang = gangs.find(g => g.id === ownerId);
+                    if (gang) color = gang.color;
                     else color = "#5a5f6a";
-                } else {
-                    color = "#3a3f4a";
                 }
                 
-                // яркость зависит от силы контроля
-                let brightness = 0.5 + (tile.controlStrength / 200);
                 ctx.fillStyle = color;
-                ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
+                ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
                 
-                // подсветка при наведении
-                if(hoverTile === idx) {
+                // Подсветка выбранной клетки
+                if (selectedTile && selectedTile.x === x && selectedTile.y === y) {
                     ctx.strokeStyle = "white";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x*CELL_SIZE+1, y*CELL_SIZE+1, CELL_SIZE-3, CELL_SIZE-3);
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x * CELL_SIZE + 2, y * CELL_SIZE + 2, CELL_SIZE - 5, CELL_SIZE - 5);
                 }
                 
-                // тип территории (иконка)
-                ctx.font = `${CELL_SIZE/2}px monospace`;
-                ctx.fillStyle = "rgba(0,0,0,0.7)";
-                let icon = "⬤";
-                if(tile.type === 'drug_spot') icon = "💊";
-                else if(tile.type === 'shop') icon = "🏪";
-                else if(tile.type === 'warehouse') icon = "📦";
-                else if(tile.type === 'corner') icon = "⛔";
-                else if(tile.type === 'hq_spot') icon = "🏠";
-                ctx.fillText(icon, x*CELL_SIZE+CELL_SIZE/4, y*CELL_SIZE+CELL_SIZE/1.5);
+                // Рамка клетки
+                ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
         }
     }
     
-    // ========== 15. ОБРАБОТЧИКИ СОБЫТИЙ ==========
+    // ========== ВЫБОР КЛЕТКИ ==========
+    function selectTile(x, y) {
+        selectedTile = { x, y };
+        updateTileDetail();
+        renderMap();
+    }
+    
+    // ========== ОБРАБОТКА КЛИКА ПО КАНВАСУ ==========
     function handleCanvasClick(e) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
+        
         let mouseX = (e.clientX - rect.left) * scaleX;
         let mouseY = (e.clientY - rect.top) * scaleY;
+        
         let cellX = Math.floor(mouseX / CELL_SIZE);
         let cellY = Math.floor(mouseY / CELL_SIZE);
-        if(cellX>=0 && cellX<MAP_SIZE && cellY>=0 && cellY<MAP_SIZE) {
-            let idx = cellY * MAP_SIZE + cellX;
-            attackTile(idx);
+        
+        if (cellX >= 0 && cellX < MAP_SIZE && cellY >= 0 && cellY < MAP_SIZE) {
+            selectTile(cellX, cellY);
         }
     }
     
-    function handleCanvasMove(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let mouseX = (e.clientX - rect.left) * scaleX;
-        let mouseY = (e.clientY - rect.top) * scaleY;
-        let cellX = Math.floor(mouseX / CELL_SIZE);
-        let cellY = Math.floor(mouseY / CELL_SIZE);
-        if(cellX>=0 && cellX<MAP_SIZE && cellY>=0 && cellY<MAP_SIZE) {
-            let idx = cellY * MAP_SIZE + cellX;
-            hoverTile = idx;
-            let tile = tiles[idx];
-            let ownerName = tile.owner ? gangs.find(g=>g.id===tile.owner)?.name || "Неизвестно" : "Нейтралы";
-            document.getElementById('tileInfo').innerHTML = `
-                <strong>📍 Клетка (${tile.x},${tile.y})</strong><br>
-                Тип: ${tile.type}<br>
-                Владелец: ${ownerName}<br>
-                Контроль: ${Math.floor(tile.controlStrength)}%<br>
-                Доход: ${tile.income}$/мин<br>
-                Защита: +${tile.defenseBonus}
-            `;
-        } else {
-            hoverTile = null;
-            document.getElementById('tileInfo').innerHTML = `<div style="opacity:0.6;">👆 Наведись на клетку</div>`;
-        }
-        renderMap();
+    // ========== ДОБАВЛЕНИЕ В ЛОГ ==========
+    function addLog(msg, isError = false) {
+        const logDiv = document.getElementById('eventLog');
+        const entry = document.createElement('div');
+        entry.className = 'event-entry';
+        entry.style.borderLeftColor = isError ? '#ff8888' : '#ff4444';
+        entry.innerHTML = `[${new Date().toLocaleTimeString().slice(0,5)}] ${msg}`;
+        logDiv.appendChild(entry);
+        entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (logDiv.children.length > 30) logDiv.removeChild(logDiv.children[0]);
     }
     
-    // ========== 16. ИГРОВОЙ ЦИКЛ ==========
-    setInterval(() => {
-        processIncome();
-    }, 30000); // каждые 30 секунд
+    // ========== СБРОС МИРА (только если нужно) ==========
+    // Убрал кнопку, но функция осталась на случай если понадобится через консоль
     
-    // ========== 17. ЗАПУСК ==========
-    function startGame() {
-        initMap();
-        createAIGangs();
-        canvas.addEventListener('click', handleCanvasClick);
-        canvas.addEventListener('mousemove', handleCanvasMove);
-        document.getElementById('createGangBtn').onclick = () => createPlayerGang();
-        document.getElementById('recruitBtn').onclick = () => recruit();
-        document.getElementById('buyWeaponsBtn').onclick = () => buyWeapons();
-        document.getElementById('extortBtn').onclick = () => extort();
-        document.getElementById('resetWorldBtn').onclick = () => resetWorld();
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    function init() {
+        if (!loadFromLocalStorage()) {
+            initEmptyMap();
+            gangs = [];
+            currentGangId = null;
+        }
+        
         renderMap();
         updateUI();
-        addLog("🔥 Игра запущена! Создай банду и захватывай территории.", "war");
+        
+        canvas.addEventListener('click', handleCanvasClick);
+        document.getElementById('createGangBtn').onclick = () => createGang();
+        document.getElementById('leaveGangBtn').onclick = () => leaveGang();
+        
+        addLog("🔥 Игра запущена! Создай банду и захватывай любые клетки.");
     }
     
-    startGame();
+    init();
 </script>
 </body>
 </html>
