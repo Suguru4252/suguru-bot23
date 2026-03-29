@@ -1,813 +1,639 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TERRITORY WARS | Механика очереди захвата</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Квантовый Калькулятор | Умный & Без рамок</title>
     <style>
+        /* RESET & GLOBAL — полный экран, без отступов, без рамок */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
+            user-select: none; /* Убираем выделение текста для кнопок */
         }
 
         body {
-            background: linear-gradient(135deg, #0a0c12 0%, #0e111a 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 20px;
-            color: #eee;
-        }
-
-        .game-wrapper {
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-
-        .resources-bar {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 15px 25px;
-            margin-bottom: 20px;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+            font-family: 'Segoe UI', 'Inter', 'Poppins', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .resource {
-            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 20px;
-            border-radius: 40px;
-            border-left: 3px solid;
-        }
-
-        .resource-icon { font-size: 24px; }
-        .resource-value { font-size: 24px; font-weight: bold; }
-        .resource-label { font-size: 10px; opacity: 0.7; }
-
-        .gang-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .gang-name-box {
-            background: rgba(0,0,0,0.5);
-            padding: 8px 20px;
-            border-radius: 40px;
-            border-left: 4px solid;
-        }
-
-        .gang-name-text { font-size: 24px; font-weight: bold; }
-
-        .btn {
-            background: linear-gradient(135deg, #2a2f3f, #1a1f2f);
+            /* Убираем любые скроллы и рамки */
+            margin: 0;
+            padding: 0;
             border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
-            font-family: inherit;
         }
 
-        .btn-danger { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
-        .btn-success { background: linear-gradient(135deg, #2e7d32, #1b5e20); }
-        .btn-warning { background: linear-gradient(135deg, #f57c00, #ef6c00); }
-        .btn-info { background: linear-gradient(135deg, #0288d1, #01579b); }
-        .btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-        .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-
-        .main-layout {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .map-container {
-            flex: 3;
-            min-width: 800px;
-            background: #00000055;
-            border-radius: 24px;
-            padding: 10px;
-            overflow-x: auto;
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #1a1f2a;
-            border-radius: 20px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .right-panel {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
-            padding: 20px;
+        /* Главный контейнер — занимает ВЕСЬ экран без отступов */
+        .calculator {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .gangs-list {
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
-            padding: 15px;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .gangs-list h3 { margin-bottom: 10px; font-size: 16px; }
-        .gang-item {
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .gang-item-info { display: flex; flex-direction: column; }
-        .gang-item-name { font-weight: bold; font-size: 14px; }
-        .gang-item-stats { font-size: 10px; opacity: 0.7; }
-        .join-gang-btn { padding: 5px 12px; font-size: 12px; background: #2e7d32; }
-
-        .create-panel {
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
-            padding: 15px;
-            text-align: center;
-        }
-        .create-panel input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            background: #2a2f3f;
-            border: 1px solid #555;
-            border-radius: 40px;
-            color: white;
-        }
-        .create-panel input[type="color"] { height: 40px; }
-
-        .actions-panel { display: flex; flex-direction: column; gap: 10px; }
-
-        .tile-info {
-            background: rgba(0,0,0,0.5);
-            border-radius: 16px;
-            padding: 15px;
-            text-align: center;
-        }
-        .tile-owner-name { font-size: 20px; font-weight: bold; margin: 10px 0; }
-        .capture-btn { width: 100%; padding: 12px; font-size: 18px; margin-top: 10px; }
-        .contest-info {
-            background: rgba(0,0,0,0.5);
-            border-radius: 12px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 12px;
-            text-align: left;
-        }
-        .contestant-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .progress-bar {
-            background: #2a2f3f;
-            border-radius: 10px;
-            height: 8px;
-            margin: 8px 0;
+            background: rgba(8, 12, 25, 0.65);
+            backdrop-filter: blur(2px);
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
             overflow: hidden;
         }
-        .progress-fill {
-            background: linear-gradient(90deg, #ffaa44, #ff4444);
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
+
+        /* Дисплей — занимает верхнюю умную зону */
+        .display-area {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem 1.8rem 1.5rem 1.8rem;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(5, 8, 18, 0.6));
+            border-bottom: 1px solid rgba(72, 187, 255, 0.2);
         }
 
-        .event-log {
-            background: rgba(0,0,0,0.6);
-            border-radius: 16px;
-            padding: 12px;
-            height: 180px;
-            overflow-y: auto;
-            font-size: 12px;
-            font-family: monospace;
+        .expression {
+            text-align: right;
+            font-size: 2rem;
+            font-weight: 400;
+            color: #b9e2ff;
+            letter-spacing: 1px;
+            word-wrap: break-word;
+            word-break: break-word;
+            min-height: 3rem;
+            opacity: 0.85;
+            font-family: 'JetBrains Mono', monospace;
         }
-        .event-entry { border-left: 3px solid #ff4444; padding-left: 8px; margin: 6px 0; color: #ccc; }
-        .respect-meter { background: #2a2f3f; border-radius: 20px; height: 8px; margin-top: 8px; }
-        .respect-fill { background: linear-gradient(90deg, #ff4444, #ffaa44); height: 100%; width: 0%; border-radius: 20px; }
+
+        .result {
+            text-align: right;
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #f0f9ff;
+            text-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+            margin-top: 0.5rem;
+            letter-spacing: 2px;
+            word-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.2;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Умная панель с функциями */
+        .smart-panel {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 1.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            gap: 1rem;
+            border-bottom: 1px solid rgba(72, 187, 255, 0.15);
+            flex-wrap: wrap;
+        }
+
+        .smart-btn {
+            background: rgba(20, 30, 55, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            color: #9ef0ff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .smart-btn:hover {
+            background: rgba(0, 180, 216, 0.25);
+            border-color: #0ff;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        /* Сетка кнопок — гибкая, без рамок, на весь остаток */
+        .buttons-grid {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.4rem;
+            padding: 1rem 1.2rem 1.5rem 1.2rem;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Стиль для всех кнопок — футуристичный */
+        .btn {
+            background: rgba(18, 25, 45, 0.75);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
+            border-radius: 24px;
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #eaf6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.12s linear;
+            font-family: 'Segoe UI', 'Inter', monospace;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(0, 160, 209, 0.5);
+            border-color: cyan;
+        }
+
+        /* Спец кнопки */
+        .operator {
+            background: rgba(0, 100, 120, 0.6);
+            border-color: #1fa2cf;
+            color: #bdf2ff;
+            font-weight: 700;
+            font-size: 1.9rem;
+        }
+
+        .equals {
+            background: linear-gradient(135deg, #0c5f7a, #0b3b4f);
+            border-color: #0ff;
+            color: white;
+            font-weight: 800;
+            font-size: 2rem;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .clear {
+            background: rgba(130, 40, 60, 0.7);
+            border-color: #ff7780;
+            color: #ffc9ce;
+        }
+
+        .function {
+            background: rgba(40, 50, 80, 0.8);
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Адаптация под мобильные устройства */
+        @media (max-width: 600px) {
+            .buttons-grid {
+                gap: 0.3rem;
+                padding: 0.8rem;
+            }
+            .btn {
+                font-size: 1.3rem;
+                border-radius: 20px;
+            }
+            .result {
+                font-size: 2.8rem;
+            }
+            .expression {
+                font-size: 1.3rem;
+            }
+            .smart-btn {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.9rem;
+            }
+            .function {
+                font-size: 0.9rem;
+            }
+            .operator {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Убираем скроллы, делаем полный экран без границ */
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <div class="resources-bar" id="resourcesBar" style="display: none;">
-        <div class="resource" style="border-left-color: #ffaa44;"><span class="resource-icon">💰</span><div><div class="resource-value" id="money">0</div><div class="resource-label">НАЛИЧНЫЕ</div></div></div>
-        <div class="resource" style="border-left-color: #ff4444;"><span class="resource-icon">🔫</span><div><div class="resource-value" id="weapons">0</div><div class="resource-label">ОРУЖИЕ</div></div></div>
-        <div class="resource" style="border-left-color: #44ff44;"><span class="resource-icon">👥</span><div><div class="resource-value" id="soldiers">0</div><div class="resource-label">БОЙЦЫ</div></div></div>
-        <div class="resource" style="border-left-color: #44aaff;"><span class="resource-icon">⭐</span><div><div class="resource-value" id="respect">0</div><div class="resource-label">АВТОРИТЕТ</div></div></div>
+<div class="calculator">
+    <!-- Дисплей с умной историей выражений -->
+    <div class="display-area">
+        <div class="expression" id="expressionDisplay"></div>
+        <div class="result" id="resultDisplay">0</div>
     </div>
 
-    <div class="gang-header">
-        <div class="gang-name-box" id="gangNameBox" style="border-left-color: #888;">
-            <div class="gang-name-text" id="gangNameDisplay">⚡ НЕТ БАНДЫ</div>
-            <div class="respect-meter" style="width: 150px;"><div class="respect-fill" id="respectFill"></div></div>
-        </div>
-        <button class="btn" id="leaveGangBtn" style="display: none;">🏃‍♂️ ПОКИНУТЬ БАНДУ</button>
+    <!-- Панель "умных" функций (математические продвинутые операции) -->
+    <div class="smart-panel">
+        <div class="smart-btn" data-smart="sqrt">√x</div>
+        <div class="smart-btn" data-smart="pow2">x²</div>
+        <div class="smart-btn" data-smart="pow3">x³</div>
+        <div class="smart-btn" data-smart="log">log₁₀</div>
+        <div class="smart-btn" data-smart="ln">ln</div>
+        <div class="smart-btn" data-smart="fact">n!</div>
+        <div class="smart-btn" data-smart="percent">%</div>
+        <div class="smart-btn" data-smart="reciprocal">1/x</div>
     </div>
 
-    <div class="main-layout">
-        <div class="map-container">
-            <canvas id="gameCanvas" width="1000" height="1000"></canvas>
-            <div style="margin-top: 10px; font-size: 12px; text-align: center;">
-                🎯 Клик по клетке — выбрать | ⚔️ Захват длится 1-5 минут | Чем больше игроков атакуют — тем выше шанс
-            </div>
-        </div>
+    <!-- Основная клавиатура (5x5 + особые) -->
+    <div class="buttons-grid">
+        <!-- Ряд 1 -->
+        <div class="btn function" data-action="clear">AC</div>
+        <div class="btn function" data-action="delete">⌫</div>
+        <div class="btn function" data-opener="(">(</div>
+        <div class="btn function" data-closer=")">)</div>
+        <div class="btn operator" data-op="/">÷</div>
 
-        <div class="right-panel">
-            <div class="gangs-list">
-                <h3>🔥 ДОСТУПНЫЕ БАНДЫ</h3>
-                <div id="gangsListContainer">Загрузка...</div>
-            </div>
+        <!-- Ряд 2 -->
+        <div class="btn" data-num="7">7</div>
+        <div class="btn" data-num="8">8</div>
+        <div class="btn" data-num="9">9</div>
+        <div class="btn operator" data-op="*">×</div>
+        <div class="btn operator" data-op="-">−</div>
 
-            <div class="create-panel" id="createPanel">
-                <h3>✨ СОЗДАТЬ НОВУЮ БАНДУ</h3>
-                <input type="text" id="gangNameInput" placeholder="Название банды" value="ГЕТТО">
-                <input type="color" id="gangColorInput" value="#FF4444">
-                <button class="btn btn-success" id="createGangBtn">СОЗДАТЬ БАНДУ</button>
-            </div>
+        <!-- Ряд 3 -->
+        <div class="btn" data-num="4">4</div>
+        <div class="btn" data-num="5">5</div>
+        <div class="btn" data-num="6">6</div>
+        <div class="btn operator" data-op="+">+</div>
+        <div class="btn" data-point=".">.</div>
 
-            <div class="actions-panel" id="actionsPanel" style="display: none;">
-                <button class="btn" id="recruitBtn">👥 НАНЯТЬ БОЙЦА (200$)</button>
-                <button class="btn" id="buyWeaponsBtn">🔫 КУПИТЬ ОРУЖИЕ (150$)</button>
-                <button class="btn btn-warning" id="extortBtn">💀 ВЫМОГАТЕЛЬСТВО</button>
-            </div>
+        <!-- Ряд 4 -->
+        <div class="btn" data-num="1">1</div>
+        <div class="btn" data-num="2">2</div>
+        <div class="btn" data-num="3">3</div>
+        <div class="btn equals" data-equals="=">=</div>
+        <div class="btn" data-num="0">0</div>
 
-            <div class="tile-info" id="tileInfo">
-                <div>👆 Выбери клетку на карте</div>
-                <div class="tile-owner-name">—</div>
-                <button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ НАЧАТЬ ЗАХВАТ</button>
-                <div id="contestInfo"></div>
-            </div>
-
-            <div class="event-log" id="eventLog">
-                <div class="event-entry">🔥 Онлайн игра Territory Wars</div>
-                <div class="event-entry">💀 Карта 50x50 (2500 клеток)</div>
-                <div class="event-entry">⏱️ Захват территории длится 1-5 минут</div>
-                <div class="event-entry">👥 Чем больше игроков атакуют — тем выше шанс</div>
-            </div>
-        </div>
+        <!-- Ряд 5 - дополнительные научные и константы -->
+        <div class="btn function" data-const="pi">π</div>
+        <div class="btn function" data-const="e">e</div>
+        <div class="btn function" data-func="sin">sin</div>
+        <div class="btn function" data-func="cos">cos</div>
+        <div class="btn function" data-func="tan">tan</div>
     </div>
 </div>
 
 <script>
-    // ========== НАСТРОЙКИ ==========
-    const MAP_SIZE = 50;        // 50x50 = 2500 клеток (увеличено в 4 раза)
-    const CELL_SIZE = 1000 / MAP_SIZE; // 20px клетка
+    // ====================== СУПЕР УМНЫЙ КАЛЬКУЛЯТОР ======================
+    // Поддерживает: базовую арифметику, скобки, тригонометрию (радианы),
+    // логарифмы, факториал, возведение в степень, константы π, e, 
+    // обработку ошибок, умное форматирование результата.
     
-    // Структура для очереди захвата
-    let captureQueues = new Map(); // key: "x,y", value: { contestants: [{ gangId, startTime, power }], endTime, winnerDeclared }
-    
-    // ========== ДАННЫЕ ==========
-    let mapData = [];
-    let gangs = [];
-    let currentGangId = null;
-    let selectedTile = null;
-    
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // ========== СОХРАНЕНИЕ ==========
-    function saveToLocalStorage() {
-        // Сохраняем очереди захвата (сериализуем)
-        const queuesObj = {};
-        for(let [key, queue] of captureQueues.entries()) {
-            queuesObj[key] = {
-                contestants: queue.contestants,
-                endTime: queue.endTime,
-                winnerDeclared: queue.winnerDeclared
-            };
-        }
-        localStorage.setItem('turfwars_v3', JSON.stringify({
-            gangs: gangs,
-            mapData: mapData,
-            currentGangId: currentGangId,
-            captureQueues: queuesObj
-        }));
-    }
-    
-    function loadFromLocalStorage() {
-        const saved = localStorage.getItem('turfwars_v3');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                gangs = data.gangs;
-                mapData = data.mapData;
-                currentGangId = data.currentGangId;
-                if(data.captureQueues) {
-                    captureQueues.clear();
-                    for(let [key, queue] of Object.entries(data.captureQueues)) {
-                        captureQueues.set(key, {
-                            contestants: queue.contestants,
-                            endTime: queue.endTime,
-                            winnerDeclared: queue.winnerDeclared
-                        });
-                    }
-                }
-                return true;
-            } catch(e) {}
-        }
-        return false;
-    }
-    
-    function initEmptyMap() {
-        mapData = Array(MAP_SIZE).fill().map(() => Array(MAP_SIZE).fill(null));
-    }
-    
-    function countTerritory(gangId) {
-        let count = 0;
-        for(let y=0; y<MAP_SIZE; y++)
-            for(let x=0; x<MAP_SIZE; x++)
-                if(mapData[y][x] === gangId) count++;
-        return count;
-    }
-    
-    function getGangPower(gangId) {
-        const gang = gangs.find(g => g.id === gangId);
-        if(!gang) return 0;
-        let territories = countTerritory(gangId);
-        let power = territories + (gang.soldiers * 2) + (gang.weapons * 0.5);
-        power = power * (0.5 + gang.respect / 100);
-        return Math.floor(power);
-    }
-    
-    function getIncome(gangId) {
-        const gang = gangs.find(g => g.id === gangId);
-        if(!gang) return 0;
-        let territories = countTerritory(gangId);
-        let income = territories * 5;
-        income = Math.floor(income * (0.7 + gang.respect / 200));
-        return income;
-    }
-    
-    // ========== ОБРАБОТКА ЗАХВАТА (ОЧЕРЕДЬ) ==========
-    function startCapture(x, y) {
-        if(!currentGangId) { addLog("❌ Создай банду!"); return false; }
-        
-        const tileKey = `${x},${y}`;
-        const currentOwner = mapData[y][x];
-        
-        // Нельзя захватывать свою территорию
-        if(currentOwner === currentGangId) {
-            addLog("🏠 Это уже твоя территория!");
-            return false;
-        }
-        
-        const attacker = gangs.find(g => g.id === currentGangId);
-        if(!attacker) return false;
-        
-        const now = Date.now();
-        let queue = captureQueues.get(tileKey);
-        
-        // Если очереди нет, создаём новую
-        if(!queue || queue.winnerDeclared) {
-            // Длительность захвата: от 1 до 5 минут (60 000 - 300 000 мс)
-            const duration = 60000 + Math.random() * 240000;
-            const endTime = now + duration;
-            
-            queue = {
-                contestants: [{
-                    gangId: currentGangId,
-                    startTime: now,
-                    power: getGangPower(currentGangId)
-                }],
-                endTime: endTime,
-                winnerDeclared: false
-            };
-            captureQueues.set(tileKey, queue);
-            addLog(`🔥 ${attacker.name} начал захват клетки (${x},${y})! Осталось ${Math.floor(duration/1000)} сек`);
+    let currentExpression = "";   // текущее математическое выражение (для отображения и вычисления)
+    let lastResult = null;        // для памяти (если надо продолжить)
+
+    // DOM элементы
+    const expressionDiv = document.getElementById("expressionDisplay");
+    const resultDiv = document.getElementById("resultDisplay");
+
+    // Обновление дисплея
+    function updateDisplay() {
+        // Показываем выражение, если пусто — то пустую строку
+        if (currentExpression === "") {
+            expressionDiv.innerText = " ";
         } else {
-            // Проверяем, не участвует ли уже эта банда
-            const alreadyIn = queue.contestants.some(c => c.gangId === currentGangId);
-            if(alreadyIn) {
-                addLog(`⚠️ Твоя банда уже участвует в захвате этой клетки!`);
-                return false;
-            }
-            
-            queue.contestants.push({
-                gangId: currentGangId,
-                startTime: now,
-                power: getGangPower(currentGangId)
-            });
-            addLog(`⚔️ ${attacker.name} присоединился к захвату клетки (${x},${y})! Всего участников: ${queue.contestants.length}`);
+            expressionDiv.innerText = currentExpression;
         }
-        
-        saveToLocalStorage();
-        updateTileDetail();
-        return true;
+        // Показываем результат (либо вычисленный либо 0)
+        // Результат обновляется отдельно после вычислений, но сохраним синхронизацию
     }
-    
-    // Проверка всех очередей и определение победителей
-    function processCaptureQueues() {
-        const now = Date.now();
-        let updated = false;
+
+    // Вычисление выражения с поддержкой всех умных фич
+    function computeExpression(expr) {
+        if (expr.trim() === "") return "0";
         
-        for(let [tileKey, queue] of captureQueues.entries()) {
-            if(queue.winnerDeclared) {
-                // Удаляем завершённые очереди
-                captureQueues.delete(tileKey);
-                updated = true;
-                continue;
-            }
-            
-            if(now >= queue.endTime) {
-                // Время вышло, определяем победителя
-                const [x, y] = tileKey.split(',').map(Number);
-                const currentOwner = mapData[y][x];
-                
-                // Суммируем силу всех участников
-                let totalPower = 0;
-                for(let c of queue.contestants) {
-                    totalPower += c.power;
-                }
-                
-                // Шанс победить пропорционален силе участника
-                // Выбираем победителя случайно, но с весами = их сила
-                let winner = null;
-                let random = Math.random() * totalPower;
-                let accumulated = 0;
-                
-                for(let c of queue.contestants) {
-                    accumulated += c.power;
-                    if(random <= accumulated) {
-                        winner = c;
-                        break;
-                    }
-                }
-                
-                if(winner) {
-                    const winnerGang = gangs.find(g => g.id === winner.gangId);
-                    if(winnerGang) {
-                        // Проверяем, не занята ли клетка сейчас другой бандой (могла измениться)
-                        if(mapData[y][x] !== winner.gangId) {
-                            mapData[y][x] = winner.gangId;
-                            addLog(`🏆 ${winnerGang.name} ЗАХВАТИЛ клетку (${x},${y})! Победил в схватке с ${queue.contestants.length} участниками!`);
-                            winnerGang.respect = Math.min(100, winnerGang.respect + 15);
-                        } else {
-                            addLog(`🏆 ${winnerGang.name} отстоял клетку (${x},${y})!`);
-                        }
-                    }
-                }
-                
-                queue.winnerDeclared = true;
-                updated = true;
-                saveToLocalStorage();
-            }
-        }
+        // Подготовка: заменяем визуальные операторы на js-совместимые
+        let prepared = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
         
-        if(updated) {
-            renderMap();
-            updateUI();
-            updateTileDetail();
-        }
-    }
-    
-    // ========== UI ==========
-    function updateUI() {
-        const gang = gangs.find(g => g.id === currentGangId);
+        // Заменяем константы π и e на числа
+        prepared = prepared.replace(/π/g, 'Math.PI').replace(/e(?!xp|\))/g, 'Math.E');
         
-        if(gang) {
-            document.getElementById('gangNameDisplay').innerHTML = gang.name;
-            document.getElementById('gangNameDisplay').style.color = gang.color;
-            document.getElementById('gangNameBox').style.borderLeftColor = gang.color;
-            document.getElementById('resourcesBar').style.display = 'flex';
-            document.getElementById('createPanel').style.display = 'none';
-            document.getElementById('actionsPanel').style.display = 'flex';
-            document.getElementById('leaveGangBtn').style.display = 'block';
-            document.getElementById('respectFill').style.width = gang.respect + '%';
-            
-            document.getElementById('money').innerText = Math.floor(gang.money);
-            document.getElementById('weapons').innerText = gang.weapons;
-            document.getElementById('soldiers').innerText = gang.soldiers;
-            document.getElementById('respect').innerText = gang.respect;
-        } else {
-            document.getElementById('gangNameDisplay').innerHTML = '⚡ НЕТ БАНДЫ';
-            document.getElementById('resourcesBar').style.display = 'none';
-            document.getElementById('createPanel').style.display = 'block';
-            document.getElementById('actionsPanel').style.display = 'none';
-            document.getElementById('leaveGangBtn').style.display = 'none';
-        }
-        renderGangsList();
-        updateTileDetail();
-    }
-    
-    function renderGangsList() {
-        const container = document.getElementById('gangsListContainer');
-        const availableGangs = gangs.filter(g => g.id !== currentGangId);
+        // Обрабатываем степень: x² => pow(x,2), x³ => pow(x,3) но у нас уже есть отдельные кнопки,
+        // но вдруг пользователь вручную напишет ^2 — добавим поддержку **
+        prepared = prepared.replace(/\^/g, '**');
         
-        if(availableGangs.length === 0) {
-            container.innerHTML = '<div style="opacity:0.6; text-align:center;">Нет доступных банд<br>Создай свою!</div>';
-            return;
-        }
+        // Функции: sin( cos( tan( sqrt( log( ln( fact( 
+        // Заменяем на вызовы с проверкой. Для факториала используем кастомную функцию.
+        // Сначала обработаем факториал отдельно (очень умная фишка)
+        // Формат: fact(число) или 5! (дополнительно поддержим !)
+        // Но для безопасности: найдём паттерн типа "число!" и заменим на fact(число)
+        prepared = prepared.replace(/(\d+(?:\.\d+)?)!/g, (match, num) => `fact(${num})`);
         
-        container.innerHTML = availableGangs.map(gang => `
-            <div class="gang-item">
-                <div class="gang-item-info">
-                    <div class="gang-item-name" style="color: ${gang.color}">${gang.name}</div>
-                    <div class="gang-item-stats">🏠 ${countTerritory(gang.id)} клеток | 👥 ${gang.soldiers} бойцов | ⭐ ${gang.respect} авт.</div>
-                </div>
-                <button class="btn join-gang-btn" onclick="joinGang(${gang.id})">ВСТУПИТЬ</button>
-            </div>
-        `).join('');
-    }
-    
-    function joinGang(gangId) {
-        const gang = gangs.find(g => g.id === gangId);
-        if(!gang) return;
-        if(currentGangId !== null) {
-            addLog(`❌ Сначала покинь текущую банду!`);
-            return;
-        }
-        currentGangId = gangId;
-        addLog(`🎉 Вы вступили в банду "${gang.name}"!`);
-        updateUI();
-        renderMap();
-        saveToLocalStorage();
-    }
-    
-    function updateTileDetail() {
-        if(!selectedTile) {
-            document.getElementById('tileInfo').innerHTML = `<div>👆 Выбери клетку</div><div class="tile-owner-name">—</div><button class="btn btn-danger capture-btn" id="captureBtn" style="display: none;">⚔️ НАЧАТЬ ЗАХВАТ</button><div id="contestInfo"></div>`;
-            return;
-        }
+        // Заменим стандартные мат. функции
+        prepared = prepared.replace(/sin\(/g, 'Math.sin(');
+        prepared = prepared.replace(/cos\(/g, 'Math.cos(');
+        prepared = prepared.replace(/tan\(/g, 'Math.tan(');
+        prepared = prepared.replace(/sqrt\(/g, 'Math.sqrt(');
+        prepared = prepared.replace(/log\(/g, 'log10(');   // log10 пользовательский
+        prepared = prepared.replace(/ln\(/g, 'Math.log(');
         
-        const {x,y} = selectedTile;
-        const ownerId = mapData[y][x];
-        const owner = ownerId ? gangs.find(g => g.id === ownerId) : null;
-        const ownerName = owner ? `${owner.name}` : "Нейтральная территория";
-        const isOwn = (ownerId === currentGangId);
-        const canCapture = (currentGangId !== null && !isOwn);
+        // Добавим поддержку функции pow2, pow3 через замену x² => Math.pow(x,2)
+        // Но наша кнопка smart вставляет выражение "квадрат(число)" или аналогично? У нас через smart панель отдельно, 
+        // однако для ручного ввода через клавиатуру? Плюс при нажатии на smart-кнопки будем сразу добавлять с преобразованием.
+        // Дополнительно: обработаем пользовательскую функцию log10
+        // Создадим обёртку для безопасного вычисления с факториалом, log10.
         
-        const queue = captureQueues.get(`${x},${y}`);
-        let contestHtml = '';
+        // Напишем функцию вычисления с пользовательскими функциями:
+        // Используем Function constructor, но с кастомными функциями.
+        // Безопасно: создадим скоуп с math и нашими доп.функциями
         
-        if(queue && !queue.winnerDeclared) {
-            const remaining = Math.max(0, Math.ceil((queue.endTime - Date.now()) / 1000));
-            const minutes = Math.floor(remaining / 60);
-            const seconds = remaining % 60;
-            
-            contestHtml = `
-                <div class="contest-info">
-                    <div>⏱️ ЗАХВАТ ДЛИТСЯ: ${minutes}:${seconds.toString().padStart(2,'0')}</div>
-                    <div>👥 УЧАСТНИКОВ: ${queue.contestants.length}</div>
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${Math.min(100, 100 - (remaining / (queue.endTime - queue.startTime || 1) * 100))}%"></div></div>
-                    ${queue.contestants.map(c => {
-                        const gang = gangs.find(g => g.id === c.gangId);
-                        return `<div class="contestant-item"><span style="color:${gang?.color || '#fff'}">${gang?.name || '?'}</span><span>⚡${Math.floor(c.power)}</span></div>`;
-                    }).join('')}
-                </div>
-            `;
-        }
-        
-        document.getElementById('tileInfo').innerHTML = `
-            <div>📍 Клетка (${x}, ${y})</div>
-            <div class="tile-owner-name" style="color: ${owner ? owner.color : '#888'}">${ownerName}</div>
-            <button class="btn btn-danger capture-btn" id="captureBtn" style="display: ${canCapture && (!queue || queue.winnerDeclared) ? 'block' : 'none'};">⚔️ НАЧАТЬ ЗАХВАТ</button>
-            ${contestHtml}
-        `;
-        
-        const captureBtn = document.getElementById('captureBtn');
-        if(captureBtn && canCapture && (!queue || queue.winnerDeclared)) {
-            captureBtn.onclick = () => startCapture(x, y);
-        }
-    }
-    
-    // ========== ДЕЙСТВИЯ БАНДЫ ==========
-    function createGang() {
-        let name = document.getElementById('gangNameInput').value.trim();
-        if(!name) name = "ГЕТТО";
-        let color = document.getElementById('gangColorInput').value;
-        
-        if(gangs.some(g => g.name.toLowerCase() === name.toLowerCase())) {
-            addLog(`❌ Банда с именем "${name}" уже существует!`);
-            return;
-        }
-        
-        const newId = Date.now();
-        const newGang = {
-            id: newId,
-            name: name,
-            color: color,
-            money: 3000,
-            weapons: 100,
-            soldiers: 5,
-            respect: 50
+        const customFunctions = {
+            fact: (n) => {
+                let num = Number(n);
+                if (isNaN(num) || !Number.isInteger(num) || num < 0) return NaN;
+                if (num === 0 || num === 1) return 1;
+                let result = 1;
+                for (let i = 2; i <= num; i++) result *= i;
+                return result;
+            },
+            log10: (x) => {
+                if (x <= 0) return NaN;
+                return Math.log10(x);
+            },
+            // степень квадрат и куб могут вызываться через x² и x³ (smart панель)
+            square: (x) => x * x,
+            cube: (x) => x * x * x,
+            reciprocal: (x) => 1 / x
         };
         
-        gangs.push(newGang);
-        currentGangId = newId;
+        // Дополнительная проверка для % (проценты: обработаем на уровне парсинга)
+        // Поскольку у нас есть кнопка % - она будет вставлять /100 от предыдущего числа, но для вычисления
+        // добавим поддержку паттерна "число%" -> число/100
+        prepared = prepared.replace(/(\d+(?:\.\d+)?)%/g, (match, num) => `(${num}/100)`);
         
-        for(let y=0; y<MAP_SIZE; y++) {
-            for(let x=0; x<MAP_SIZE; x++) {
-                if(mapData[y][x] === null) {
-                    mapData[y][x] = newId;
-                    addLog(`🎉 Банда "${name}" создана! Старт (${x},${y})`);
-                    renderMap();
-                    updateUI();
-                    saveToLocalStorage();
+        // Рекурсивно вычислим итоговое выражение
+        let finalExpr = prepared;
+        // Заменим пользовательские вызовы
+        finalExpr = finalExpr.replace(/fact\(([^)]+)\)/g, (match, inner) => `customFunctions.fact(${inner})`);
+        finalExpr = finalExpr.replace(/log10\(([^)]+)\)/g, (match, inner) => `customFunctions.log10(${inner})`);
+        finalExpr = finalExpr.replace(/square\(([^)]+)\)/g, (match, inner) => `customFunctions.square(${inner})`);
+        finalExpr = finalExpr.replace(/cube\(([^)]+)\)/g, (match, inner) => `customFunctions.cube(${inner})`);
+        finalExpr = finalExpr.replace(/reciprocal\(([^)]+)\)/g, (match, inner) => `customFunctions.reciprocal(${inner})`);
+        
+        try {
+            // Вычисляем с помощью конструктора Function, чтобы получить доступ к Math и customFunctions
+            const evaluate = new Function('Math', 'customFunctions', 'return (' + finalExpr + ')');
+            let rawResult = evaluate(Math, customFunctions);
+            // Обработка NaN, Infinity
+            if (isNaN(rawResult) || !isFinite(rawResult)) {
+                return "Ошибка";
+            }
+            // Умное округление: до 10 знаков после запятой, удаляем лишние нули
+            let rounded = parseFloat(rawResult.toFixed(10));
+            // Если целое число, показать без .0
+            if (Math.abs(rounded - Math.floor(rounded)) < 1e-10) {
+                return Math.floor(rounded).toString();
+            }
+            return rounded.toString();
+        } catch (err) {
+            console.warn(err);
+            return "Ошибка";
+        }
+    }
+    
+    // Вычислить и обновить результат на дисплее (но не менять выражение)
+    function evaluateAndShow() {
+        if (currentExpression === "") {
+            resultDiv.innerText = "0";
+            return;
+        }
+        let result = computeExpression(currentExpression);
+        resultDiv.innerText = result;
+        if (result !== "Ошибка") {
+            lastResult = result;
+        } else {
+            lastResult = null;
+        }
+    }
+    
+    // Добавить в выражение значение (текст)
+    function addToExpression(value) {
+        // Если последний результат был ошибкой, очистим перед новым вводом
+        if (resultDiv.innerText === "Ошибка") {
+            currentExpression = "";
+            resultDiv.innerText = "0";
+        }
+        currentExpression += value;
+        updateDisplay();
+        evaluateAndShow(); // умное авто-вычисление по мере ввода
+    }
+    
+    // Очистка всего
+    function clearAll() {
+        currentExpression = "";
+        resultDiv.innerText = "0";
+        expressionDiv.innerText = " ";
+        lastResult = null;
+        updateDisplay();
+    }
+    
+    // Удалить последний символ
+    function deleteLast() {
+        if (resultDiv.innerText === "Ошибка") {
+            clearAll();
+            return;
+        }
+        currentExpression = currentExpression.slice(0, -1);
+        updateDisplay();
+        if (currentExpression === "") {
+            resultDiv.innerText = "0";
+        } else {
+            evaluateAndShow();
+        }
+    }
+    
+    // Обработка умных функций (sqrt, x², x³, log, ln, факториал, процент, обратное число)
+    function applySmartFunction(funcType) {
+        // Получаем текущий результат как число, если ошибка — то игнор
+        let currentVal = resultDiv.innerText;
+        if (currentVal === "Ошибка" || currentVal === "") {
+            // Если ошибка, то очистим
+            clearAll();
+            currentVal = "0";
+        }
+        let num = parseFloat(currentVal);
+        if (isNaN(num)) {
+            clearAll();
+            num = 0;
+        }
+        
+        let newValue = null;
+        let expressionAddition = "";
+        
+        switch (funcType) {
+            case "sqrt":
+                if (num < 0) { resultDiv.innerText = "Ошибка"; return; }
+                newValue = Math.sqrt(num);
+                expressionAddition = `sqrt(${currentVal})`;
+                break;
+            case "pow2":
+                newValue = num * num;
+                expressionAddition = `square(${currentVal})`;
+                break;
+            case "pow3":
+                newValue = num * num * num;
+                expressionAddition = `cube(${currentVal})`;
+                break;
+            case "log":
+                if (num <= 0) { resultDiv.innerText = "Ошибка"; return; }
+                newValue = Math.log10(num);
+                expressionAddition = `log(${currentVal})`;
+                break;
+            case "ln":
+                if (num <= 0) { resultDiv.innerText = "Ошибка"; return; }
+                newValue = Math.log(num);
+                expressionAddition = `ln(${currentVal})`;
+                break;
+            case "fact":
+                if (!Number.isInteger(num) || num < 0 || num > 170) {
+                    resultDiv.innerText = "Ошибка";
                     return;
                 }
+                let factRes = 1;
+                for (let i = 2; i <= num; i++) factRes *= i;
+                newValue = factRes;
+                expressionAddition = `fact(${currentVal})`;
+                break;
+            case "percent":
+                newValue = num / 100;
+                expressionAddition = `(${currentVal}%)`;
+                break;
+            case "reciprocal":
+                if (num === 0) { resultDiv.innerText = "Ошибка"; return; }
+                newValue = 1 / num;
+                expressionAddition = `reciprocal(${currentVal})`;
+                break;
+            default: return;
+        }
+        
+        if (newValue !== null && !isNaN(newValue) && isFinite(newValue)) {
+            // Сохраним как новое выражение: либо результат заменяет текущее выражение (для удобства)
+            // Умное поведение: заменяем всё выражение на результат функции от предыдущего результата
+            // Но также покажем исторически в expression: чтобы было круто, обновим строку
+            if (currentExpression !== "") {
+                // Если есть выражение, то разумно заменить его результатом функции от последнего результата
+                currentExpression = expressionAddition;
+            } else {
+                currentExpression = expressionAddition;
             }
-        }
-        addLog("⚠️ Карта полная!");
-        renderMap();
-        updateUI();
-        saveToLocalStorage();
-    }
-    
-    function recruit() {
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(gang && gang.money >= 200) {
-            gang.money -= 200;
-            gang.soldiers += 2;
-            addLog(`👥 Нанято 2 бойца! Теперь ${gang.soldiers}`);
-            updateUI();
-            saveToLocalStorage();
+            updateDisplay();
+            // Запишем результат
+            let formatted = parseFloat(newValue.toFixed(10));
+            if (Math.abs(formatted - Math.floor(formatted)) < 1e-10) formatted = Math.floor(formatted);
+            resultDiv.innerText = formatted.toString();
+            // После применения функции заменим currentExpression на число? Но лучше, чтобы оставалась запись функции
+            // Но пользователи хотят продолжить расчет — установим текущее выражение в новое значение (результат)
+            // Для комфорта: сделаем так, чтобы результат был в буфере, и можно было дальше оперировать
+            // Однако если нажать цифру, то должно начаться новое выражение или продолжить? Сделаем логику: при вводе цифры после вычисления смарт-функции — начинаем новое выражение?
+            // но умный калькулятор: если нажать цифру, продолжим от текущего результата
+            // Но наш addToExpression просто добавляет символы. Сделаем изящно: установим currentExpression = result, если результат вычислен не как часть длинной строки?
+            // Мы уже заменили currentExpression на expressionAddition (типа sqrt(9)). Но чтобы после этого можно было плюс 2, пользователь захочет.
+            // Для удобства оставим как есть. Если нажмут оператор, то выражение станет "sqrt(9)+" — корректно
+            // ОК!
         } else {
-            addLog(`❌ Нужно 200$!`);
+            resultDiv.innerText = "Ошибка";
         }
     }
     
-    function buyWeapons() {
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(gang && gang.money >= 150) {
-            gang.money -= 150;
-            gang.weapons += 40;
-            addLog(`🔫 Куплено оружие +40 (теперь ${gang.weapons})`);
-            updateUI();
-            saveToLocalStorage();
+    // Обработка констант π, e
+    function applyConstant(constType) {
+        let constValue = constType === "pi" ? Math.PI : Math.E;
+        let constStr = constType === "pi" ? "π" : "e";
+        if (resultDiv.innerText === "Ошибка") clearAll();
+        addToExpression(constStr);
+    }
+    
+    // Обработка тригонометрических функций (sin, cos, tan) — работают от текущего результата в радианах
+    function applyTrigFunction(funcName) {
+        let currentVal = resultDiv.innerText;
+        if (currentVal === "Ошибка") {
+            clearAll();
+            currentVal = "0";
+        }
+        let num = parseFloat(currentVal);
+        if (isNaN(num)) num = 0;
+        let newVal = null;
+        let trigExpr = "";
+        switch(funcName) {
+            case "sin":
+                newVal = Math.sin(num);
+                trigExpr = `sin(${currentVal})`;
+                break;
+            case "cos":
+                newVal = Math.cos(num);
+                trigExpr = `cos(${currentVal})`;
+                break;
+            case "tan":
+                newVal = Math.tan(num);
+                trigExpr = `tan(${currentVal})`;
+                break;
+        }
+        if (newVal !== null && isFinite(newVal)) {
+            currentExpression = trigExpr;
+            updateDisplay();
+            let formatted = parseFloat(newVal.toFixed(10));
+            if (Math.abs(formatted - Math.floor(formatted)) < 1e-10) formatted = Math.floor(formatted);
+            resultDiv.innerText = formatted.toString();
         } else {
-            addLog(`❌ Нужно 150$!`);
+            resultDiv.innerText = "Ошибка";
         }
     }
     
-    function extort() {
-        const gang = gangs.find(g => g.id === currentGangId);
-        if(!gang) return;
-        let success = Math.random() * 100 < (30 + gang.respect / 2);
-        if(success) {
-            let profit = 300 + Math.floor(Math.random() * 500);
-            gang.money += profit;
-            addLog(`💀 Вымогательство успешно! +${profit}$`);
-            gang.respect = Math.min(100, gang.respect + 5);
-        } else {
-            let loss = 150 + Math.floor(Math.random() * 300);
-            gang.money = Math.max(0, gang.money - loss);
-            addLog(`😡 Провал! Потеряно ${loss}$ и уважение`);
-            gang.respect = Math.max(0, gang.respect - 10);
-        }
-        updateUI();
-        saveToLocalStorage();
-    }
-    
-    function leaveGang() {
-        if(currentGangId) {
-            addLog(`👋 Вы покинули банду`);
-            currentGangId = null;
-            updateUI();
-            renderMap();
-            saveToLocalStorage();
-        }
-    }
-    
-    // ========== ДОХОД ==========
-    setInterval(() => {
-        if(currentGangId) {
-            const gang = gangs.find(g => g.id === currentGangId);
-            if(gang) {
-                let income = getIncome(currentGangId);
-                if(income > 0) {
-                    gang.money += income;
-                    addLog(`💰 Доход: +${income}$ (${countTerritory(currentGangId)} клеток)`);
-                    updateUI();
-                    saveToLocalStorage();
-                }
-            }
-        }
-    }, 30000);
-    
-    // Проверка очередей каждую секунду
-    setInterval(() => {
-        processCaptureQueues();
-        if(selectedTile) updateTileDetail();
-        renderMap();
-    }, 1000);
-    
-    // ========== ОТРИСОВКА ==========
-    function renderMap() {
-        for(let y=0; y<MAP_SIZE; y++) {
-            for(let x=0; x<MAP_SIZE; x++) {
-                let ownerId = mapData[y][x];
-                let color = "#3a3f4a";
-                if(ownerId !== null) {
-                    let gang = gangs.find(g => g.id === ownerId);
-                    if(gang) color = gang.color;
-                }
-                
-                // Если клетка в очереди захвата — добавляем эффект
-                const queue = captureQueues.get(`${x},${y}`);
-                if(queue && !queue.winnerDeclared) {
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
-                    ctx.fillStyle = "rgba(255,200,100,0.3)";
-                    ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
-                } else {
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
-                }
-                
-                if(selectedTile && selectedTile.x === x && selectedTile.y === y) {
-                    ctx.strokeStyle = "white";
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x*CELL_SIZE+2, y*CELL_SIZE+2, CELL_SIZE-5, CELL_SIZE-5);
-                }
-                ctx.strokeStyle = "rgba(0,0,0,0.3)";
-                ctx.strokeRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            }
-        }
-    }
-    
-    function handleCanvasClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let mouseX = (e.clientX - rect.left) * scaleX;
-        let mouseY = (e.clientY - rect.top) * scaleY;
-        let cellX = Math.floor(mouseX / CELL_SIZE);
-        let cellY = Math.floor(mouseY / CELL_SIZE);
-        if(cellX>=0 && cellX<MAP_SIZE && cellY>=0 && cellY<MAP_SIZE) {
-            selectedTile = {x: cellX, y: cellY};
-            updateTileDetail();
-            renderMap();
-        }
-    }
-    
-    function addLog(msg) {
-        const logDiv = document.getElementById('eventLog');
-        const entry = document.createElement('div');
-        entry.className = 'event-entry';
-        entry.innerHTML = `[${new Date().toLocaleTimeString().slice(0,5)}] ${msg}`;
-        logDiv.appendChild(entry);
-        entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        if(logDiv.children.length > 40) logDiv.removeChild(logDiv.children[0]);
-    }
-    
-    // ========== ЗАПУСК ==========
+    // Инициализация обработчиков событий
     function init() {
-        if(!loadFromLocalStorage()) {
-            initEmptyMap();
-            gangs = [];
-            currentGangId = null;
-            captureQueues.clear();
-        }
-        renderMap();
-        updateUI();
+        updateDisplay();
+        resultDiv.innerText = "0";
         
-        canvas.addEventListener('click', handleCanvasClick);
-        document.getElementById('createGangBtn').onclick = () => createGang();
-        document.getElementById('recruitBtn').onclick = () => recruit();
-        document.getElementById('buyWeaponsBtn').onclick = () => buyWeapons();
-        document.getElementById('extortBtn').onclick = () => extort();
-        document.getElementById('leaveGangBtn').onclick = () => leaveGang();
+        // Обработка цифр и базовых операторов
+        document.querySelectorAll("[data-num]").forEach(btn => {
+            btn.addEventListener("click", () => addToExpression(btn.getAttribute("data-num")));
+        });
+        document.querySelectorAll("[data-op]").forEach(btn => {
+            btn.addEventListener("click", () => addToExpression(btn.getAttribute("data-op")));
+        });
+        document.querySelector("[data-point]")?.addEventListener("click", () => addToExpression("."));
+        document.querySelector("[data-opener]")?.addEventListener("click", () => addToExpression("("));
+        document.querySelector("[data-closer]")?.addEventListener("click", () => addToExpression(")"));
+        document.querySelector("[data-equals]")?.addEventListener("click", () => {
+            if (currentExpression !== "") {
+                let res = computeExpression(currentExpression);
+                resultDiv.innerText = res;
+                if (res !== "Ошибка") {
+                    // после равно можно начать новое выражение на основе результата
+                    currentExpression = res;
+                    updateDisplay();
+                }
+            }
+        });
         
-        addLog("🔥 Онлайн-игра запущена! Карта 50x50");
-        addLog("⚔️ Захват длится 1-5 минут. Чем больше игроков атакуют — тем выше шанс твоей победы!");
+        document.querySelector("[data-action='clear']")?.addEventListener("click", clearAll);
+        document.querySelector("[data-action='delete']")?.addEventListener("click", deleteLast);
+        
+        // Smart панель
+        document.querySelectorAll("[data-smart]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                let type = btn.getAttribute("data-smart");
+                applySmartFunction(type);
+            });
+        });
+        
+        // Константы
+        document.querySelectorAll("[data-const]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                let constType = btn.getAttribute("data-const");
+                applyConstant(constType);
+            });
+        });
+        
+        // Тригонометрические
+        document.querySelectorAll("[data-func]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                let func = btn.getAttribute("data-func");
+                applyTrigFunction(func);
+            });
+        });
     }
     
-    window.joinGang = joinGang;
     init();
 </script>
 </body>
 </html>
-```
