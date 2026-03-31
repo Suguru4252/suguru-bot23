@@ -159,6 +159,13 @@
         let canvasHeight = window.innerHeight;
         let walkCycle = 0;
         
+        // Эффекты атаки
+        let attackEffects = [];
+        
+        function addAttackEffect(x, y, type) {
+            attackEffects.push({ x, y, type, life: 10 });
+        }
+        
         function resizeCanvas() {
             canvasWidth = window.innerWidth;
             canvasHeight = window.innerHeight;
@@ -327,12 +334,11 @@
                 portalY = safeZone.y + 60;
             } else { portalActive = false; }
             const progressPercent = Math.min(100, Math.floor(mobsKilledInWorld / MOBS_NEEDED_FOR_PORTAL * 100));
-            document.getElementById('portalProgress').innerText = `🚪 Прогресс портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL} (${progressPercent}%)`;
+            document.getElementById('portalProgress').innerHTML = `🚪 Прогресс портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL} (${progressPercent}%)`;
             if(portalActive) {
                 document.getElementById('portalProgress').innerHTML = `✨ ПОРТАЛ ОТКРЫТ! ✨ (Нажмите на него)`;
                 document.getElementById('portalProgress').style.color = "#ffaa66";
             } else {
-                document.getElementById('portalProgress').innerHTML = `🚪 Прогресс портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL} (${progressPercent}%)`;
                 document.getElementById('portalProgress').style.color = "#88ffaa";
             }
         }
@@ -477,14 +483,14 @@
             mage: { name: "Маг", icon: "🔮", color: "#9a6aba", armorColor: "#8a5aaa", hp: 260, mp: 240, dmgMin: 44, dmgMax: 78, skill: "Огненный взрыв", range: 175, skillRange: 205, isMelee: false, skinColor: "#e0c8a0", hairColor: "#4a2a6a" }
         };
         
-        // МОБЫ
+        // МОБЫ - скорость увеличена
         const MOB_TYPES = [
-            { name: "Гоблин", hp: 60, dmg: 8, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 0.7, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-18,24,32); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-10,20,24); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-12,4,4); ctx.fillRect(x+2,y-12,4,4); ctx.fillStyle="#8b5a2b"; ctx.fillRect(x-8,y+4,16,8); } },
-            { name: "Волк", hp: 80, dmg: 10, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 0.9, range: 50, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-16,28,28); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,22); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-10,4,4); ctx.fillRect(x+4,y-10,4,4); ctx.fillStyle="#4a3a2a"; ctx.fillRect(x-4,y+2,8,6); } },
-            { name: "Медведь", hp: 120, dmg: 14, exp: 78, color: "#8b5a3a", skin: "#b87a4a", icon: "🐻", speed: 0.6, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-20,32,36); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-12,28,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#5a3a2a"; ctx.fillRect(x-6,y+2,12,8); } },
-            { name: "Скелет", hp: 140, dmg: 16, exp: 95, color: "#b8b8cc", skin: "#d0d0e0", icon: "💀", speed: 0.75, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-20,24,36); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-12,20,28); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-14,4,4); ctx.fillRect(x+2,y-14,4,4); ctx.fillStyle="#8a8a8a"; ctx.fillRect(x-8,y+2,16,6); } },
-            { name: "Орк", hp: 180, dmg: 20, exp: 132, color: "#8a6a4a", skin: "#aa8262", icon: "👺", speed: 0.65, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-20,28,36); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#b87c3a"; ctx.fillRect(x-10,y+2,20,10); } },
-            { name: "Дракон", hp: 240, dmg: 28, exp: 210, color: "#c97a3a", skin: "#e09a5a", icon: "🐉", speed: 0.45, range: 65, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-22,32,40); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-14,28,32); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-16,5,5); ctx.fillRect(x+3,y-16,5,5); ctx.fillStyle="#d97a3a"; ctx.fillRect(x-12,y-2,24,8); } }
+            { name: "Гоблин", hp: 60, dmg: 8, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.1, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-18,24,32); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-10,20,24); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-12,4,4); ctx.fillRect(x+2,y-12,4,4); ctx.fillStyle="#8b5a2b"; ctx.fillRect(x-8,y+4,16,8); } },
+            { name: "Волк", hp: 80, dmg: 10, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 1.3, range: 50, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-16,28,28); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,22); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-10,4,4); ctx.fillRect(x+4,y-10,4,4); ctx.fillStyle="#4a3a2a"; ctx.fillRect(x-4,y+2,8,6); } },
+            { name: "Медведь", hp: 120, dmg: 14, exp: 78, color: "#8b5a3a", skin: "#b87a4a", icon: "🐻", speed: 1.0, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-20,32,36); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-12,28,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#5a3a2a"; ctx.fillRect(x-6,y+2,12,8); } },
+            { name: "Скелет", hp: 140, dmg: 16, exp: 95, color: "#b8b8cc", skin: "#d0d0e0", icon: "💀", speed: 1.15, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-20,24,36); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-12,20,28); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-14,4,4); ctx.fillRect(x+2,y-14,4,4); ctx.fillStyle="#8a8a8a"; ctx.fillRect(x-8,y+2,16,6); } },
+            { name: "Орк", hp: 180, dmg: 20, exp: 132, color: "#8a6a4a", skin: "#aa8262", icon: "👺", speed: 1.05, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-20,28,36); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#b87c3a"; ctx.fillRect(x-10,y+2,20,10); } },
+            { name: "Дракон", hp: 240, dmg: 28, exp: 210, color: "#c97a3a", skin: "#e09a5a", icon: "🐉", speed: 0.85, range: 65, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-22,32,40); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-14,28,32); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-16,5,5); ctx.fillRect(x+3,y-16,5,5); ctx.fillStyle="#d97a3a"; ctx.fillRect(x-12,y-2,24,8); } }
         ];
         
         let mobs = [], spawnTimer = 0;
@@ -554,7 +560,6 @@
             const legOffset = Math.sin(walkCycle) * 5;
             const armOffset = Math.sin(walkCycle + Math.PI) * 7;
             
-            // Тень
             ctx.shadowColor = "rgba(0,0,0,0.3)";
             ctx.shadowBlur = 8;
             
@@ -571,12 +576,11 @@
             ctx.lineTo(x+6 - legOffset*0.2, y+24);
             ctx.fill();
             
-            // Обувь
             ctx.fillStyle = "#5a3a2a";
             ctx.fillRect(x-14 + legOffset*0.3, y+22, 10, 5);
             ctx.fillRect(x+4 - legOffset*0.3, y+22, 10, 5);
             
-            // Тело с бронёй
+            // Тело
             ctx.fillStyle = armor ? armor.color : c.armorColor;
             ctx.beginPath();
             ctx.moveTo(x-14, y+2);
@@ -585,7 +589,6 @@
             ctx.quadraticCurveTo(x, y, x-12, y-4);
             ctx.fill();
             
-            // Броня детали
             ctx.fillStyle = "#ffcc88aa";
             ctx.fillRect(x-8, y, 16, 8);
             
@@ -609,8 +612,6 @@
                     ctx.fillRect(x+13 - armOffset*0.2, y-2, 18, 6);
                     ctx.fillStyle = "#aa8866";
                     ctx.fillRect(x+27 - armOffset*0.3, y-4, 7, 12);
-                    ctx.fillStyle = "#ffcc88";
-                    ctx.fillRect(x+30 - armOffset*0.3, y-6, 4, 4);
                 } else if(weapon.type === "ranged") {
                     ctx.fillStyle = "#c4b27a";
                     ctx.beginPath();
@@ -618,18 +619,11 @@
                     ctx.lineTo(x+30 - armOffset*0.3, y);
                     ctx.lineTo(x+14 - armOffset*0.2, y+4);
                     ctx.fill();
-                    ctx.fillStyle = "#aa8866";
-                    ctx.fillRect(x+26 - armOffset*0.3, y-2, 5, 8);
                 } else {
                     ctx.fillStyle = "#ffaa66";
                     ctx.beginPath();
                     ctx.ellipse(x+14 - armOffset*0.2, y, 9, 7, 0, 0, Math.PI*2);
                     ctx.fill();
-                    ctx.fillStyle = "#ff8844";
-                    ctx.beginPath();
-                    ctx.ellipse(x+16 - armOffset*0.3, y, 5, 4, 0, 0, Math.PI*2);
-                    ctx.fill();
-                    // Магический эффект
                     ctx.shadowBlur = 12;
                     ctx.shadowColor = "#ffaa44";
                     ctx.fillStyle = "#ffaa44";
@@ -645,20 +639,11 @@
             ctx.ellipse(x, y-8, 11, 13, 0, 0, Math.PI*2);
             ctx.fill();
             
-            // Волосы
             ctx.fillStyle = c.hairColor;
             ctx.beginPath();
             ctx.ellipse(x-3, y-16, 8, 7, 0, 0, Math.PI*2);
             ctx.ellipse(x+3, y-16, 8, 7, 0, 0, Math.PI*2);
             ctx.fill();
-            
-            // Шлем/капюшон
-            if(armor && armor.level > 30) {
-                ctx.fillStyle = "#888888aa";
-                ctx.beginPath();
-                ctx.ellipse(x, y-14, 9, 6, 0, 0, Math.PI*2);
-                ctx.fill();
-            }
             
             // Глаза
             ctx.fillStyle = "#ffffff";
@@ -677,14 +662,12 @@
             ctx.arc(x+4.2, y-12, 0.7, 0, Math.PI*2);
             ctx.fill();
             
-            // Рот
             ctx.beginPath();
             ctx.strokeStyle = "#8b5a3a";
             ctx.lineWidth = 2;
             ctx.arc(x, y-5, 5, 0.1, Math.PI - 0.1);
             ctx.stroke();
             
-            // Нос
             ctx.fillStyle = "#c99e6f";
             ctx.beginPath();
             ctx.moveTo(x-2, y-8);
@@ -692,26 +675,19 @@
             ctx.lineTo(x+2, y-8);
             ctx.fill();
             
-            // Пояс
             ctx.fillStyle = "#8b5a2b";
             ctx.fillRect(x-9, y+6, 18, 4);
             ctx.fillStyle = "#ffcc88";
             ctx.fillRect(x-2, y+6, 4, 6);
             
             ctx.shadowBlur = 0;
-            
-            // Уровень над головой
             ctx.font = "bold 10px monospace";
             ctx.fillStyle = "#ffcc88";
-            ctx.shadowBlur = 2;
             ctx.fillText(`Lv.${player.level}`, x-15, y-22);
-            ctx.shadowBlur = 0;
         }
         
         // ========== СУПЕРСПОСОБНОСТЬ ==========
         let explosionTarget = null;
-        let whirlwindActive = false;
-        let whirlwindTimer = 0;
         
         function useSuper() {
             if(player.superCooldown > 0) {
@@ -720,16 +696,16 @@
             }
             let c = CLASSES[player.classType];
             if(c.name === "Мечник") {
-                whirlwindActive = true; whirlwindTimer = 30; player.superCooldown = 180;
                 addMsg(`🌀 ВИХРЬ! Урон x2 по всем врагам!`);
                 for(let mob of mobs) {
                     if(Math.hypot(player.x-mob.x,player.y-mob.y)<100 && mob.hp>0) {
                         let avg=(player.dmgMin+player.dmgMax)/2, dmg=Math.floor(avg*2);
                         mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                        addMsg(`🌀 Вихрь → ${dmg} урона ${mob.name}!`);
+                        addAttackEffect(mob.x, mob.y, "slash");
                         if(mob.hp<=0) killMob(mob);
                     }
                 }
+                player.superCooldown = 180;
             } else if(c.name === "Лучник") {
                 let targets = mobs.filter(m=>m.hp>0 && Math.hypot(player.x-m.x,player.y-m.y)<220);
                 targets.sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y));
@@ -737,7 +713,7 @@
                 for(let mob of targets.slice(0,3)) {
                     let avg=(player.dmgMin+player.dmgMax)/2, dmg=Math.floor(avg*3);
                     mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                    addMsg(`🏹 Тройной выстрел → ${dmg} урона ${mob.name}!`);
+                    addAttackEffect(mob.x, mob.y, "arrow");
                     if(mob.hp<=0) killMob(mob); hit++;
                 }
                 if(hit>0) player.superCooldown=180;
@@ -756,7 +732,7 @@
             for(let mob of mobs) {
                 if(Math.hypot(wx-mob.x,wy-mob.y)<90 && mob.hp>0) {
                     mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                    addMsg(`🔥 Взрыв → ${dmg} урона ${mob.name}!`);
+                    addAttackEffect(mob.x, mob.y, "explosion");
                     if(mob.hp<=0) killMob(mob); hit=true;
                 }
             }
@@ -802,7 +778,14 @@
             selectedMob.hp -= dmg;
             stats.totalDamage += dmg;
             player.attackTimer = 20;
-            addMsg(`⚔️ ${CLASSES[player.classType].name} → ${dmg} урона ${selectedMob.name}!`);
+            
+            // Добавляем эффект атаки
+            let c = CLASSES[player.classType];
+            if(c.name === "Мечник") addAttackEffect(selectedMob.x, selectedMob.y, "slash");
+            else if(c.name === "Лучник") addAttackEffect(selectedMob.x, selectedMob.y, "arrow");
+            else addAttackEffect(selectedMob.x, selectedMob.y, "magic");
+            
+            addMsg(`⚔️ ${c.name} → ${dmg} урона ${selectedMob.name}!`);
             showDamage(selectedMob.x, selectedMob.y, dmg);
             if(selectedMob.hp <= 0) killMob(selectedMob);
             saveGame();
@@ -821,6 +804,7 @@
             let dmg=Math.floor(avg*2.3);
             selectedMob.hp-=dmg;
             stats.totalDamage+=dmg;
+            addAttackEffect(selectedMob.x, selectedMob.y, "skill");
             addMsg(`✨ ${c.skill}! ${dmg} урона по ${selectedMob.name}!`);
             showDamage(selectedMob.x,selectedMob.y,dmg);
             if(selectedMob.hp<=0) killMob(selectedMob);
@@ -913,9 +897,9 @@
         }
         
         function handleClick(wx,wy) {
-            if(showStatsWindow) { showStatsWindow=false; return; }
-            if(showInventory) { showInventory=false; return; }
-            if(shopOpen) { shopOpen=false; return; }
+            if(showStatsWindow) return;
+            if(showInventory) return;
+            if(shopOpen) return;
             if(showMap) { handleMapClick(wx, wy); return; }
             if(explosionTarget?.active) { castExplosion(wx,wy); return; }
             if(isClickOnPortal(wx,wy)) return;
@@ -933,6 +917,7 @@
         
         // ========== МАГАЗИН (ПОЛНОСТЬЮ ИСПРАВЛЕН) ==========
         let shopScroll = 0;
+        let shopTargetScroll = 0;
         let shopTab = "potions";
         let shopItemsPerPage = 4;
         
@@ -940,6 +925,7 @@
             if(isInSafeZone(player.x,player.y)) { 
                 shopOpen = true; 
                 shopScroll = 0;
+                shopTargetScroll = 0;
                 addMsg(`🏪 Магазин открыт`); 
             } else { 
                 addMsg(`🏪 Подойдите к торговцу в безопасной зоне!`, true); 
@@ -957,19 +943,17 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(x, y, w, h);
             
-            // Заголовок
             ctx.fillStyle = "#ffcc88";
             ctx.font = "bold 22px monospace";
             ctx.fillText("🏪 ТОРГОВЕЦ", x+20, y+40);
             
-            // Кнопка закрытия
+            // Кнопка закрытия - ТОЛЬКО ЗДЕСЬ
             ctx.fillStyle = "#ffaa55";
             ctx.fillRect(x+w-45, y+15, 35, 35);
             ctx.fillStyle = "#ffcc88";
             ctx.font = "28px monospace";
             ctx.fillText("✕", x+w-35, y+43);
             
-            // Разделитель
             ctx.fillStyle = "#aa8866";
             ctx.fillRect(x+15, y+60, w-30, 3);
             
@@ -991,10 +975,10 @@
             let items = [];
             if(shopTab === "potions") {
                 items = [
-                    { name: "Зелье HP", type: "hp", price: 50, icon: "❤️", desc: "Восст. 70% HP", color: "#ff6666" },
-                    { name: "Зелье MP", type: "mp", price: 45, icon: "💙", desc: "Восст. 75% MP", color: "#6666ff" },
-                    { name: "Большое HP", type: "hp_big", price: 140, icon: "❤️✨", desc: "Восст. 90% HP", color: "#ff8888" },
-                    { name: "Большое MP", type: "mp_big", price: 130, icon: "💙✨", desc: "Восст. 100% MP", color: "#8888ff" }
+                    { name: "Зелье HP", type: "hp", price: 50, icon: "❤️", desc: "Восст. 70% HP" },
+                    { name: "Зелье MP", type: "mp", price: 45, icon: "💙", desc: "Восст. 75% MP" },
+                    { name: "Большое HP", type: "hp_big", price: 140, icon: "❤️✨", desc: "Восст. 90% HP" },
+                    { name: "Большое MP", type: "mp_big", price: 130, icon: "💙✨", desc: "Восст. 100% MP" }
                 ];
             } else if(shopTab === "armor") {
                 items = ALL_ARMOR.filter(a => a.level <= player.level + 10);
@@ -1002,7 +986,6 @@
                 items = ALL_WEAPONS.filter(w => w.level <= player.level + 10);
             }
             
-            // Область прокрутки
             ctx.save();
             ctx.beginPath();
             ctx.rect(x+10, y+115, w-20, h-145);
@@ -1017,35 +1000,30 @@
                 let itemX = x + 20;
                 let itemH = 85;
                 
-                // Фон предмета
                 ctx.fillStyle = "#2a2e4a";
                 ctx.fillRect(itemX, itemY, w-40, itemH-5);
                 ctx.strokeStyle = "#ffaa55";
                 ctx.strokeRect(itemX, itemY, w-40, itemH-5);
                 
-                // Иконка
                 ctx.font = "32px monospace";
                 ctx.fillStyle = "#ffcc88";
                 ctx.fillText(it.icon, itemX+12, itemY+40);
                 
-                // Название
                 ctx.font = "bold 14px monospace";
                 ctx.fillStyle = "#ffffaa";
                 ctx.fillText(it.name, itemX+55, itemY+28);
                 
-                // Описание
                 ctx.font = "10px monospace";
                 ctx.fillStyle = "#aa8866";
                 if(it.desc) ctx.fillText(it.desc, itemX+55, itemY+48);
                 if(it.def) ctx.fillText(`Защита: +${it.def} | Уровень ${it.level}`, itemX+55, itemY+48);
                 if(it.dmgMin) ctx.fillText(`Урон: ${it.dmgMin}-${it.dmgMax} | Уровень ${it.level}`, itemX+55, itemY+48);
                 
-                // Цена
                 ctx.font = "bold 13px monospace";
                 ctx.fillStyle = "#88ffaa";
                 ctx.fillText(`${it.price} 💰`, itemX+55, itemY+68);
                 
-                // Кнопка покупки
+                // Кнопка КУПИТЬ
                 ctx.fillStyle = "#ffaa55";
                 ctx.fillRect(itemX + w-100, itemY+25, 80, 35);
                 ctx.fillStyle = "#1a1e2a";
@@ -1071,7 +1049,6 @@
                 ctx.fillRect(scrollBarX, thumbY, 8, thumbH);
             }
             
-            // Информация о золоте
             ctx.fillStyle = "#ffcc88";
             ctx.font = "bold 12px monospace";
             ctx.fillText(`💰 Ваше золото: ${player.gold}`, x+15, y+h-20);
@@ -1090,9 +1067,9 @@
             
             // Табы
             if(my > y+70 && my < y+105) {
-                if(mx > x+15 && mx < x+125) { shopTab = "potions"; shopScroll = 0; return true; }
-                if(mx > x+135 && mx < x+245) { shopTab = "armor"; shopScroll = 0; return true; }
-                if(mx > x+255 && mx < x+365) { shopTab = "weapons"; shopScroll = 0; return true; }
+                if(mx > x+15 && mx < x+125) { shopTab = "potions"; shopScroll = 0; shopTargetScroll = 0; return true; }
+                if(mx > x+135 && mx < x+245) { shopTab = "armor"; shopScroll = 0; shopTargetScroll = 0; return true; }
+                if(mx > x+255 && mx < x+365) { shopTab = "weapons"; shopScroll = 0; shopTargetScroll = 0; return true; }
             }
             
             let items = [];
@@ -1118,6 +1095,7 @@
                 let itemH = 85;
                 let buyX = x + w - 100;
                 
+                // Проверяем клик по кнопке КУПИТЬ
                 if(my > itemY && my < itemY + itemH-5 && mx > buyX && mx < buyX + 80 && my > itemY+25 && my < itemY+60) {
                     if(player.gold >= it.price) {
                         player.gold -= it.price;
@@ -1136,8 +1114,9 @@
             return false;
         }
         
-        // ========== ИНВЕНТАРЬ (ПОЛНОСТЬЮ ИСПРАВЛЕН) ==========
+        // ========== ИНВЕНТАРЬ ==========
         let invScroll = 0;
+        let invTargetScroll = 0;
         let invItemsPerPage = 4;
         
         function drawInventory() {
@@ -1151,7 +1130,6 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(x, y, w, h);
             
-            // Заголовок
             ctx.fillStyle = "#ffcc88";
             ctx.font = "bold 22px monospace";
             ctx.fillText("🎒 ИНВЕНТАРЬ", x+20, y+40);
@@ -1163,7 +1141,6 @@
             ctx.font = "28px monospace";
             ctx.fillText("✕", x+w-35, y+43);
             
-            // Разделитель
             ctx.fillStyle = "#aa8866";
             ctx.fillRect(x+15, y+60, w-30, 3);
             
@@ -1231,6 +1208,7 @@
                 if(it.dmgMin) ctx.fillText(`${it.dmgMin}-${it.dmgMax} урона | Ур.${it.level}`, x+65, itemY+45);
                 
                 if(!isEquipped) {
+                    // Кнопка НАДЕТЬ
                     ctx.fillStyle = "#ffaa55";
                     ctx.fillRect(x+w-100, itemY+18, 80, 30);
                     ctx.fillStyle = "#1a1e2a";
@@ -1283,8 +1261,10 @@
                 let it = allItems[i];
                 let isEquipped = (it.type === "armor" && player.armorId === it.id) || (it.type === "weapon" && player.weaponId === it.id);
                 let itemH = 70;
+                let btnX = x + w - 100;
                 
-                if(!isEquipped && my > itemY && my < itemY + itemH-5 && mx > x+20 && mx < x+w-40) {
+                // Проверяем клик по кнопке НАДЕТЬ
+                if(!isEquipped && my > itemY && my < itemY + itemH-5 && mx > btnX && mx < btnX + 80 && my > itemY+18 && my < itemY+48) {
                     if(it.type === "armor") { 
                         player.armorId = it.id; 
                         addMsg(`🛡️ Надета ${it.name}!`); 
@@ -1301,8 +1281,9 @@
             return false;
         }
         
-        // ========== СТАТИСТИКА (ПОЛНОСТЬЮ ИСПРАВЛЕНА) ==========
+        // ========== СТАТИСТИКА ==========
         let statsScroll = 0;
+        let statsTargetScroll = 0;
         let statsItemsPerPage = 8;
         
         function drawStatsWindow() {
@@ -1316,7 +1297,6 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(x, y, w, h);
             
-            // Заголовок
             ctx.fillStyle = "#ffcc88";
             ctx.font = "bold 22px monospace";
             ctx.fillText("📊 СТАТИСТИКА", x+20, y+40);
@@ -1328,7 +1308,6 @@
             ctx.font = "28px monospace";
             ctx.fillText("✕", x+w-35, y+43);
             
-            // Разделитель
             ctx.fillStyle = "#aa8866";
             ctx.fillRect(x+15, y+60, w-30, 3);
             
@@ -1422,15 +1401,10 @@
                         ctx.fillStyle = "#8e8e9a";
                         ctx.font = `${cellH*0.6}px monospace`;
                         ctx.fillText("⛰️", mapX + x*cellW + cellW*0.25, mapY + y*cellH + cellH*0.75);
-                    } else if(worldMap[y][x] === 5) {
-                        ctx.fillStyle = "#5ac8ff";
-                        ctx.font = `${cellH*0.6}px monospace`;
-                        ctx.fillText("💧", mapX + x*cellW + cellW*0.25, mapY + y*cellH + cellH*0.75);
                     }
                 }
             }
             
-            // Игрок
             let playerTileX = player.x / TILE_SIZE;
             let playerTileY = player.y / TILE_SIZE;
             ctx.fillStyle = "#ff4444";
@@ -1442,7 +1416,6 @@
             ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2);
             ctx.fill();
             
-            // Портал
             if(portalActive && currentWorld === "forest") {
                 let portalTileX = portalX / TILE_SIZE;
                 let portalTileY = portalY / TILE_SIZE;
@@ -1450,13 +1423,8 @@
                 ctx.beginPath();
                 ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.55, 0, Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle = "#ffff88";
-                ctx.beginPath();
-                ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2);
-                ctx.fill();
             }
             
-            // Метка цели
             if(mapClickTarget) {
                 let targetTileX = mapClickTarget.x / TILE_SIZE;
                 let targetTileY = mapClickTarget.y / TILE_SIZE;
@@ -1464,23 +1432,14 @@
                 ctx.beginPath();
                 ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.7, 0, Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle = "#ffaa00";
-                ctx.beginPath();
-                ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.35, 0, Math.PI*2);
-                ctx.fill();
             }
             
-            // Легенда
             ctx.fillStyle = "#ffcc88";
             ctx.font = `bold ${Math.min(18, canvasWidth/40)}px monospace`;
             ctx.fillText("🗺️ КАРТА МИРА", canvasWidth/2-80, mapY-15);
-            ctx.font = "10px monospace";
-            ctx.fillStyle = "#88aaff";
-            ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода", canvasWidth/2-220, mapY+mapHeight+20);
-            ctx.fillStyle = "#ffaa88";
-            ctx.fillText("🔴 вы 🔶 портал 🟡 метка", canvasWidth/2+150, mapY+mapHeight+20);
             ctx.fillStyle = "#ccaa88";
-            ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC для закрытия", canvasWidth/2-220, mapY+mapHeight+45);
+            ctx.font = "10px monospace";
+            ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC для закрытия", canvasWidth/2-220, mapY+mapHeight+25);
         }
         
         function handleMapClick(clientX, clientY) {
@@ -1509,14 +1468,74 @@
             }
         }
         
-        // ========== ОТРИСОВКА МИРА ==========
+        // ========== ОТРИСОВКА ЭФФЕКТОВ АТАКИ ==========
+        function drawAttackEffects() {
+            for(let i=0; i<attackEffects.length; i++) {
+                let e = attackEffects[i];
+                let x = e.x - cameraX;
+                let y = e.y - cameraY;
+                let life = e.life / 10;
+                
+                if(e.type === "slash") {
+                    ctx.beginPath();
+                    ctx.moveTo(x-15, y-10);
+                    ctx.lineTo(x, y-25);
+                    ctx.lineTo(x+15, y-10);
+                    ctx.lineTo(x, y+5);
+                    ctx.fillStyle = `rgba(255, 200, 100, ${0.5 * life})`;
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(x-10, y-5);
+                    ctx.lineTo(x, y-18);
+                    ctx.lineTo(x+10, y-5);
+                    ctx.fillStyle = `rgba(255, 255, 150, ${0.7 * life})`;
+                    ctx.fill();
+                } else if(e.type === "arrow") {
+                    ctx.beginPath();
+                    ctx.moveTo(x-20, y);
+                    ctx.lineTo(x, y-12);
+                    ctx.lineTo(x+5, y);
+                    ctx.lineTo(x, y+12);
+                    ctx.fillStyle = `rgba(200, 200, 100, ${0.6 * life})`;
+                    ctx.fill();
+                } else if(e.type === "magic") {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15 * (1-life), 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(100, 100, 255, ${0.5 * life})`;
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8 * (1-life), 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(200, 200, 255, ${0.7 * life})`;
+                    ctx.fill();
+                } else if(e.type === "skill") {
+                    for(let a=0; a<3; a++) {
+                        let angle = (Date.now()/100 + a) * Math.PI * 2;
+                        ctx.beginPath();
+                        ctx.arc(x + Math.cos(angle)*12, y + Math.sin(angle)*12, 6, 0, Math.PI*2);
+                        ctx.fillStyle = `rgba(255, 100, 100, ${0.6 * life})`;
+                        ctx.fill();
+                    }
+                } else if(e.type === "explosion") {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 25 * (1-life), 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(255, 100, 50, ${0.5 * life})`;
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15 * (1-life), 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(255, 200, 50, ${0.7 * life})`;
+                    ctx.fill();
+                }
+                e.life--;
+                if(e.life <= 0) attackEffects.splice(i,1), i--;
+            }
+        }
+        
         function drawWorld() {
             let w = WORLDS[currentWorld];
             for(let i=0;i<WORLD_WIDTH/52+10;i++) {
                 for(let j=0;j<WORLD_HEIGHT/52+10;j++) {
                     let x=i*52-cameraX, y=j*52-cameraY;
                     if(x>-60 && x<canvasWidth+60 && y>-60 && y<canvasHeight+60) {
-                        // Градиент для фона
                         let grad = ctx.createLinearGradient(x, y, x+52, y+52);
                         grad.addColorStop(0, ((i+j)%2===0)?w.bgColor1:w.bgColor2);
                         grad.addColorStop(1, ((i+j)%2===0)?w.bgColor2:w.bgColor1);
@@ -1538,12 +1557,6 @@
                         ctx.beginPath();
                         ctx.ellipse(x,y-42,26,30,0,0,Math.PI*2);
                         ctx.fill();
-                        // Детали дерева
-                        ctx.fillStyle="#2a7a2a";
-                        ctx.beginPath();
-                        ctx.ellipse(x-8,y-48,12,14,0,0,Math.PI*2);
-                        ctx.ellipse(x+8,y-48,12,14,0,0,Math.PI*2);
-                        ctx.fill();
                     } else if(o.type==='mountain') {
                         let grad = ctx.createLinearGradient(x-20, y-30, x+20, y+15);
                         grad.addColorStop(0, "#8e8e9a");
@@ -1554,20 +1567,10 @@
                         ctx.lineTo(x-40,y+15);
                         ctx.lineTo(x+40,y+15);
                         ctx.fill();
-                        ctx.fillStyle="#a0a0b0";
-                        ctx.beginPath();
-                        ctx.moveTo(x-12,y-15);
-                        ctx.lineTo(x,y-38);
-                        ctx.lineTo(x+12,y-15);
-                        ctx.fill();
                     } else if(o.type==='rock') {
                         ctx.fillStyle="#7a6a5a";
                         ctx.beginPath();
                         ctx.ellipse(x,y,18,14,0,0,Math.PI*2);
-                        ctx.fill();
-                        ctx.fillStyle="#9a8a7a";
-                        ctx.beginPath();
-                        ctx.ellipse(x-4,y-3,6,5,0,0,Math.PI*2);
                         ctx.fill();
                     } else if(o.type==='fence') {
                         ctx.fillStyle="#c99e6f";
@@ -1580,7 +1583,6 @@
                 }
             }
             
-            // Безопасная зона с полупрозрачностью
             let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
             ctx.fillStyle="#88aa66aa";
             ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
@@ -1588,7 +1590,6 @@
             ctx.lineWidth=2;
             ctx.strokeRect(szX,szY,safeZone.width,safeZone.height);
             
-            // Портал
             if(portalActive && currentWorld === "forest") {
                 let px = portalX - cameraX, py = portalY - cameraY;
                 ctx.fillStyle = "#aa44ffaa";
@@ -1607,7 +1608,6 @@
                 ctx.fillText("ПОРТАЛ", px-20, py-25);
             }
             
-            // NPC Торговец
             let npcX = shopNPC.x - cameraX, npcY = shopNPC.y - cameraY;
             ctx.fillStyle = "#c99e6f";
             ctx.fillRect(npcX-18, npcY-25, 36, 45);
@@ -1616,8 +1616,6 @@
             ctx.fillStyle = "#000";
             ctx.fillRect(npcX-8, npcY-10, 5, 5);
             ctx.fillRect(npcX+3, npcY-10, 5, 5);
-            ctx.fillStyle = "#8b5a2b";
-            ctx.fillRect(npcX-4, npcY-4, 8, 5);
             ctx.font = "26px monospace";
             ctx.fillStyle = "#ffdd99";
             ctx.fillText("🏪", npcX-14, npcY+8);
@@ -1625,7 +1623,6 @@
             ctx.fillStyle = "#ffffaa";
             ctx.fillText("Торговец", npcX-22, npcY-28);
             
-            // Ворота
             for(let g of gates) {
                 let gx=g.x-cameraX, gy=g.y-cameraY;
                 ctx.fillStyle="#c9a87a";
@@ -1643,20 +1640,17 @@
             let x = m.x - cameraX, y = m.y - cameraY;
             if(x < -80 || x > canvasWidth+80) return;
             
-            // Тень моба
             ctx.shadowBlur = 5;
             ctx.shadowColor = "rgba(0,0,0,0.3)";
             m.drawFunc(x, y);
             ctx.shadowBlur = 0;
             
-            // Полоска HP
             let percent = m.hp / m.maxHp;
             ctx.fillStyle = "#a33";
             ctx.fillRect(x-24, y-32, 48, 6);
             ctx.fillStyle = percent > 0.6 ? "#4f6" : (percent > 0.3 ? "#fa4" : "#f44");
             ctx.fillRect(x-24, y-32, 48 * percent, 6);
             
-            // Имя и уровень
             ctx.font = "bold 9px monospace";
             ctx.fillStyle = "#ffffaa";
             ctx.fillText(m.name, x-20, y-38);
@@ -1669,7 +1663,6 @@
             let c=CLASSES[player.classType];
             let fs=Math.max(12,Math.min(16,canvasWidth/65));
             
-            // Панель HP/MP
             ctx.fillStyle="#000000aa";
             ctx.fillRect(12,12,220,85);
             ctx.fillStyle="#c55";
@@ -1688,7 +1681,6 @@
             ctx.font=`bold ${fs+2}px monospace`;
             ctx.fillText(`${c.icon} ${c.name} Lv.${player.level}`,22,88);
             
-            // Опыт
             ctx.fillStyle="#000000aa";
             ctx.fillRect(12,100,220,14);
             ctx.fillStyle="#8af";
@@ -1697,7 +1689,6 @@
             ctx.font=`${fs-2}px monospace`;
             ctx.fillText(`EXP: ${player.exp}/${player.expToNext}`,18,112);
             
-            // Золото и зелья
             ctx.fillStyle="#000000aa";
             ctx.fillRect(canvasWidth-155,12,145,70);
             ctx.fillStyle="#fc8";
@@ -1707,7 +1698,6 @@
             ctx.fillText(`❤️ ${player.potionHp}  💙 ${player.potionMp}`,canvasWidth-145,58);
             ctx.fillText(`❤️✨ ${player.potionBigHp}  💙✨ ${player.potionBigMp}`,canvasWidth-145,78);
             
-            // Сообщения
             for(let i=0;i<Math.min(4,messages.length);i++) {
                 let m=messages[i];
                 ctx.fillStyle=m.isErr?"#f86c":"#edbc";
@@ -1715,7 +1705,6 @@
                 ctx.fillText(m.text.substring(0,38),15,canvasHeight-45-i*20);
             }
             
-            // Рамка выбранной цели
             if(selectedMob && selectedMob.hp>0) {
                 let x=selectedMob.x-cameraX, y=selectedMob.y-cameraY;
                 ctx.strokeStyle="#fa4";
@@ -1726,7 +1715,6 @@
                 ctx.strokeRect(x-21,y-33,56,56);
             }
             
-            // Маркер цели
             if(player.targetX!==null && player.targetY!==null) {
                 let tx=player.targetX-cameraX, ty=player.targetY-cameraY;
                 ctx.fillStyle="#fc4a";
@@ -1737,13 +1725,8 @@
                 ctx.beginPath();
                 ctx.arc(tx,ty,8,0,Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle="#ff4";
-                ctx.beginPath();
-                ctx.arc(tx,ty,3,0,Math.PI*2);
-                ctx.fill();
             }
             
-            // Урон и эффекты
             for(let i=0;i<damageFloats.length;i++) {
                 let d=damageFloats[i], x=d.x-cameraX, y=d.y-cameraY;
                 if(d.isExplosion) {
@@ -1761,7 +1744,6 @@
                 if(d.life<=0) damageFloats.splice(i,1), i--;
             }
             
-            // Кулдаун суперспособности
             if(player.superCooldown>0) {
                 let p=player.superCooldown/180;
                 ctx.fillStyle="#000000aa";
@@ -1773,32 +1755,41 @@
                 ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55);
             }
             
-            // Окна
             if(showMap) drawFullMap();
             if(shopOpen) drawShop();
             if(showInventory) drawInventory();
             if(showStatsWindow) drawStatsWindow();
+            
+            drawAttackEffects();
         }
         
-        // ========== ОБРАБОТЧИКИ КОЛЁСИКА ДЛЯ ПРОКРУТКИ ==========
+        // ========== ПЛАВНАЯ ПРОКРУТКА ==========
+        let lastWheelTime = 0;
+        
         function handleWheel(e) {
+            const now = Date.now();
+            if(now - lastWheelTime < 16) return;
+            lastWheelTime = now;
+            
+            let delta = e.deltaY > 0 ? 1 : -1;
+            
             if(shopOpen) {
                 let items = [];
                 if(shopTab === "potions") items = [1,2,3,4];
                 else if(shopTab === "armor") items = ALL_ARMOR.filter(a => a.level <= player.level + 10);
                 else items = ALL_WEAPONS.filter(w => w.level <= player.level + 10);
                 let maxScroll = Math.max(0, items.length - shopItemsPerPage);
-                shopScroll = Math.min(maxScroll, Math.max(0, shopScroll + (e.deltaY > 0 ? 1 : -1)));
+                shopScroll = Math.min(maxScroll, Math.max(0, shopScroll + delta));
                 e.preventDefault();
             } else if(showInventory) {
                 let availableArmor = ALL_ARMOR.filter(a => a.level <= player.level);
                 let availableWeapons = ALL_WEAPONS.filter(w => w.level <= player.level);
                 let maxScroll = Math.max(0, availableArmor.length + availableWeapons.length - invItemsPerPage);
-                invScroll = Math.min(maxScroll, Math.max(0, invScroll + (e.deltaY > 0 ? 1 : -1)));
+                invScroll = Math.min(maxScroll, Math.max(0, invScroll + delta));
                 e.preventDefault();
             } else if(showStatsWindow) {
                 let maxScroll = Math.max(0, 14 - statsItemsPerPage);
-                statsScroll = Math.min(maxScroll, Math.max(0, statsScroll + (e.deltaY > 0 ? 1 : -1)));
+                statsScroll = Math.min(maxScroll, Math.max(0, statsScroll + delta));
                 e.preventDefault();
             }
         }
@@ -1830,6 +1821,19 @@
         
         canvas.addEventListener('click', (e) => { 
             let w = getWorldClick(e.clientX, e.clientY);
+            
+            // Проверяем клики по окнам
+            if(shopOpen) {
+                let handled = handleShopClick(e.clientX, e.clientY);
+                if(handled) return;
+            } else if(showInventory) {
+                let handled = handleInventoryClick(e.clientX, e.clientY);
+                if(handled) return;
+            } else if(showStatsWindow) {
+                let handled = handleStatsClick(e.clientX, e.clientY);
+                if(handled) return;
+            }
+            
             handleClick(w.x, w.y); 
         });
         
@@ -1837,6 +1841,18 @@
             e.preventDefault();
             let t = e.touches[0];
             let w = getWorldClick(t.clientX, t.clientY);
+            
+            if(shopOpen) {
+                let handled = handleShopClick(t.clientX, t.clientY);
+                if(handled) return;
+            } else if(showInventory) {
+                let handled = handleInventoryClick(t.clientX, t.clientY);
+                if(handled) return;
+            } else if(showStatsWindow) {
+                let handled = handleStatsClick(t.clientX, t.clientY);
+                if(handled) return;
+            }
+            
             handleClick(w.x, w.y);
         });
         
