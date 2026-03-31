@@ -196,7 +196,6 @@
         const ctx = canvas.getContext('2d');
         
         // ========== ПРОВЕРКА ПЕРВОГО ВХОДА ==========
-        let gameStarted = false;
         let warningAccepted = localStorage.getItem('warning_accepted');
         
         function showWarningModal() {
@@ -206,7 +205,7 @@
                 modal.innerHTML = `
                     <div class="warning-content">
                         <h2>⚠️ ВНИМАНИЕ ⚠️</h2>
-                        <p>Если вы выйдете из игры без сохранения,<br>весь прогресс будет потерян!<br><br>Рекомендуем сохраняться через NPC Банкира.<br><br>Вы согласны продолжить?</p>
+                        <p>Если вы выйдете из игры без сохранения,<br>весь прогресс будет потерян!<br><br>Используйте Банкира (🏦) для сохранения.<br><br>Вы согласны продолжить?</p>
                         <div class="warning-buttons">
                             <button class="warning-btn yes" id="warningYes">✅ ДА, Я СОГЛАСЕН</button>
                             <button class="warning-btn no" id="warningNo">❌ НЕТ, ВЫЙТИ</button>
@@ -321,8 +320,9 @@
             castle: { name: "🏰 Замок", bgColor1: "#4a5b6e", bgColor2: "#6c7f8f", mobMultiplier: 2.0, mobColors: ["#6a7a8a", "#8a9aaa", "#5a6a7a", "#7a8a9a", "#9aabbb", "#4a5a6a"] }
         };
         
-        // ========== СИСТЕМА СОХРАНЕНИЯ ==========
-        let playerNickname = null;
+        // ========== БАНКИР (СОХРАНЕНИЕ) ==========
+        let bankerNPC = { x: safeZone.x + 80, y: safeZone.y + 60, radius: 28 };
+        let playerBank = 0;
         
         function saveGame() {
             if(!playerNickname) return;
@@ -333,6 +333,7 @@
                 level: player.level, exp: player.exp,
                 classType: player.classType,
                 gold: player.gold,
+                bankGold: playerBank,
                 potionHp: player.potionHp, potionMp: player.potionMp,
                 potionBigHp: player.potionBigHp, potionBigMp: player.potionBigMp,
                 armorId: player.armorId, weaponId: player.weaponId,
@@ -348,6 +349,7 @@
             };
             localStorage.setItem('rucoy_save_' + playerNickname, JSON.stringify(saveData));
             localStorage.setItem('rucoy_last_nickname', playerNickname);
+            addMsg(`💾 Игра сохранена!`);
         }
         
         function loadGame(nickname) {
@@ -359,6 +361,7 @@
                 player.level = data.level; player.exp = data.exp;
                 player.classType = data.classType;
                 player.gold = data.gold;
+                playerBank = data.bankGold || 0;
                 player.potionHp = data.potionHp; player.potionMp = data.potionMp;
                 player.potionBigHp = data.potionBigHp; player.potionBigMp = data.potionBigMp;
                 if(data.armorId) player.armorId = data.armorId;
@@ -373,12 +376,26 @@
                     stats.startTime = data.stats.startTime;
                 }
                 updateStatsFromLevel();
-                addMsg(`✨ Добро пожаловать обратно, ${nickname}! Уровень ${player.level}`);
                 updatePortalStatus();
+                addMsg(`✨ Добро пожаловать обратно, ${nickname}! Уровень ${player.level}`);
                 return true;
             }
             return false;
         }
+        
+        function openBank() {
+            if(isInSafeZone(player.x,player.y)) {
+                let action = confirm(`🏦 БАНКИР\n\nВаш счет: ${playerBank}💰\n\nЖелаете сохранить игру?`);
+                if(action) {
+                    saveGame();
+                }
+            } else {
+                addMsg(`🏦 Подойдите к банкиру в безопасной зоне!`, true);
+            }
+        }
+        
+        // ========== СИСТЕМА СОХРАНЕНИЯ ==========
+        let playerNickname = null;
         
         function updateStatsFromLevel() {
             let c = CLASSES[player.classType];
@@ -741,9 +758,7 @@
                 player.hp=player.maxHp; player.mp=player.maxMp;
                 player.expToNext=90+player.level*38;
                 addMsg(`⭐⭐ УРОВЕНЬ ${player.level}! ⭐⭐`);
-                saveGame();
             }
-            saveGame();
         }
         
         function playerAttack() {
@@ -758,7 +773,6 @@
             addMsg(`⚔️ ${CLASSES[player.classType].name} → ${dmg} урона ${selectedMob.name}!`);
             showDamage(selectedMob.x, selectedMob.y, dmg);
             if(selectedMob.hp <= 0) killMob(selectedMob);
-            saveGame();
             return true;
         }
         
@@ -777,7 +791,6 @@
             addMsg(`✨ ${c.skill}! ${dmg} урона по ${selectedMob.name}!`);
             showDamage(selectedMob.x,selectedMob.y,dmg);
             if(selectedMob.hp<=0) killMob(selectedMob);
-            saveGame();
         }
         
         function updateMobs() {
@@ -800,7 +813,6 @@
                                 player.x = safeZone.x + safeZone.width/2; player.y = safeZone.y + safeZone.height/2;
                                 player.targetX = null; player.targetY = null;
                                 addMsg(`💀 ВОСКРЕШЕНИЕ В БЕЗОПАСНОЙ ЗОНЕ 💀`, true);
-                                saveGame();
                             }
                         } else m.attackTimer--;
                     } else if(m.attackTimer>0) m.attackTimer--;
@@ -817,7 +829,6 @@
                 let heal = Math.floor(player.maxHp * 0.7); player.hp = Math.min(player.maxHp, player.hp + heal); player.potionHp--;
                 addMsg(`❤️ +${heal} HP (осталось ${player.potionHp})`);
             } else addMsg(`❌ Нет малых зелий!`, true);
-            saveGame();
         }
         
         function useMp() {
@@ -829,7 +840,6 @@
                 let mana = Math.floor(player.maxMp * 0.75); player.mp = Math.min(player.maxMp, player.mp + mana); player.potionMp--;
                 addMsg(`💙 +${mana} MP (осталось ${player.potionMp})`);
             } else addMsg(`❌ Нет малых зелий!`, true);
-            saveGame();
         }
         
         function switchClass(className) {
@@ -842,7 +852,15 @@
             player.hp=Math.max(1,Math.min(player.maxHp,Math.floor(player.maxHp*hpPercent)));
             player.mp=Math.max(1,Math.min(player.maxMp,Math.floor(player.maxMp*mpPercent)));
             addMsg(`🔄 Класс: ${CLASSES[newClass].name} ${CLASSES[newClass].icon} | Дальность: ${player.attackRange}px`);
-            saveGame();
+        }
+        
+        function isClickOnBanker(wx, wy) {
+            let distToBanker = Math.hypot(wx - bankerNPC.x, wy - bankerNPC.y);
+            if(distToBanker < bankerNPC.radius + 15) {
+                openBank();
+                return true;
+            }
+            return false;
         }
         
         function isClickOnNPC(wx, wy) {
@@ -863,12 +881,13 @@
         }
         
         function handleClick(wx,wy) {
-            if(showStatsWindow) { if(handleStatsClick(wx, wy)) return; return; }
-            if(showInventory) { if(handleInventoryClick(wx, wy)) return; return; }
-            if(shopOpen) { if(handleShopClick(wx, wy)) return; return; }
+            if(showStatsWindow) { showStatsWindow=false; return; }
+            if(showInventory) { showInventory=false; return; }
+            if(shopOpen) { shopOpen=false; return; }
             if(showMap) { handleMapClick(wx, wy); return; }
             if(explosionTarget?.active) { castExplosion(wx,wy); return; }
             if(isClickOnPortal(wx,wy)) return;
+            if(isClickOnBanker(wx,wy)) return;
             if(isClickOnNPC(wx,wy)) return;
             if(selectMobAt(wx,wy)) return;
             moveTo(wx,wy);
@@ -975,7 +994,9 @@
         function handleShopClick(mx, my) {
             let w = 500, h = 500;
             let x = canvasWidth/2 - w/2, y = canvasHeight/2 - h/2;
+            // Закрытие по крестику
             if(mx > x+w-40 && mx < x+w-10 && my > y+15 && my < y+45) { shopOpen = false; return true; }
+            // Вкладки
             if(mx > x+20 && mx < x+120 && my > y+65 && my < y+95) { shopTab = "potions"; shopScroll = 0; return true; }
             if(mx > x+130 && mx < x+230 && my > y+65 && my < y+95) { shopTab = "armor"; shopScroll = 0; return true; }
             if(mx > x+240 && mx < x+340 && my > y+65 && my < y+95) { shopTab = "weapons"; shopScroll = 0; return true; }
@@ -1013,7 +1034,6 @@
                             else if(it.def) { player.armorId = it.id; updateStatsFromLevel(); addMsg(`🛡️ Куплена ${it.name}!`); }
                             else if(it.dmgMin) { player.weaponId = it.id; updateStatsFromLevel(); addMsg(`⚔️ Куплено ${it.name}!`); }
                             addMsg(`✅ Куплен ${it.name}!`);
-                            saveGame();
                         } else addMsg(`💰 Не хватает золота!`, true);
                         return true;
                     }
@@ -1149,7 +1169,6 @@
                     if(it.type === "armor") { player.armorId = it.id; addMsg(`🛡️ Надета ${it.name}!`); }
                     else { player.weaponId = it.id; addMsg(`⚔️ Надето ${it.name}!`); }
                     updateStatsFromLevel();
-                    saveGame();
                     return true;
                 }
                 itemY += 60;
@@ -1379,7 +1398,15 @@
             ctx.fillStyle = "#e8c28a"; ctx.fillRect(npcX-12, npcY-15, 24, 30);
             ctx.fillStyle = "#000"; ctx.fillRect(npcX-8, npcY-10, 5, 5); ctx.fillRect(npcX+3, npcY-10, 5, 5);
             ctx.font = "24px monospace"; ctx.fillStyle = "#ffdd99"; ctx.fillText("🏪", npcX-12, npcY+5);
-            ctx.font = "10px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("Торговец", npcX-20, npcY-28);
+            
+            // Банкир
+            let bankX = bankerNPC.x - cameraX, bankY = bankerNPC.y - cameraY;
+            ctx.fillStyle = "#c9b87a"; ctx.fillRect(bankX-18, bankY-25, 36, 45);
+            ctx.fillStyle = "#e8d89a"; ctx.fillRect(bankX-12, bankY-15, 24, 30);
+            ctx.fillStyle = "#000"; ctx.fillRect(bankX-8, bankY-10, 5, 5); ctx.fillRect(bankX+3, bankY-10, 5, 5);
+            ctx.font = "24px monospace"; ctx.fillStyle = "#ffdd99"; ctx.fillText("🏦", bankX-12, bankY+5);
+            ctx.font = "9px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("Банкир", bankX-18, bankY-28);
+            
             for(let g of gates) {
                 let gx=g.x-cameraX, gy=g.y-cameraY;
                 ctx.fillStyle="#c9a87a"; ctx.fillRect(gx,gy,g.width,g.height);
@@ -1471,8 +1498,6 @@
         });
         
         setInterval(()=>{ if(selectedMob && selectedMob.hp>0 && Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y) <= player.attackRange + 15) playerAttack(); }, 1200);
-        setInterval(() => { if(playerNickname) saveGame(); }, 30000);
-        window.addEventListener('beforeunload', () => { if(playerNickname) saveGame(); });
         
         document.getElementById('attackBtn').onclick=()=>{ if(selectedMob&&selectedMob.hp>0) playerAttack(); else addMsg("🎯 Выберите цель",true); };
         document.getElementById('skillBtn').onclick=()=>useSkill();
@@ -1530,13 +1555,13 @@
             addMsg("⚔️ Атака игрока - 1.2 секунды");
             addMsg("💀 Атака мобов - 2 секунды");
             addMsg("🌟 1 или кнопка СУПЕР - суперспособность | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
-            addMsg("🏪 Торговец в безопасной зоне (нажмите на него)");
+            addMsg("🏪 Торговец и 🏦 Банкир в безопасной зоне (нажмите на них)");
             addMsg("🌀 Убейте 300 мобов для открытия портала!");
             addMsg("🗺️ Карта: кнопка 7 или кнопка КАРТА");
             addMsg("💊 Зелья можно использовать в любой точке карты!");
             addMsg("📊 Статистика и 🎒 Инвентарь - с прокруткой (листайте пальцем)");
             addMsg("❌ Закрытие окон только по крестику");
-            addMsg("💾 Игра автоматически сохраняется!");
+            addMsg("💾 Игра автоматически сохраняется при выходе!");
         }
         
         startGame();
