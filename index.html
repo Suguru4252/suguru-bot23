@@ -12,20 +12,17 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background: #0a0a0f;
             color: #fff;
         }
-
         .app {
             max-width: 100%;
             min-height: 100vh;
             background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
             padding-bottom: 70px;
         }
-
         .header {
             background: rgba(10, 10, 15, 0.95);
             backdrop-filter: blur(20px);
@@ -38,7 +35,6 @@
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
         .logo {
             font-size: 24px;
             font-weight: 800;
@@ -48,7 +44,6 @@
             background-clip: text;
             cursor: pointer;
         }
-
         .back-btn {
             background: rgba(255,255,255,0.1);
             border: none;
@@ -58,11 +53,9 @@
             border-radius: 30px;
             color: #fff;
         }
-
         .content {
             padding: 20px;
         }
-
         .search-block {
             background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(78,205,196,0.15));
             border-radius: 28px;
@@ -70,21 +63,18 @@
             margin-bottom: 24px;
             border: 1px solid rgba(255,255,255,0.2);
         }
-
         .search-title {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 8px;
             text-align: center;
         }
-
         .search-desc {
             text-align: center;
             opacity: 0.7;
             font-size: 13px;
             margin-bottom: 20px;
         }
-
         .search-input-group {
             display: flex;
             gap: 12px;
@@ -93,7 +83,6 @@
             padding: 5px;
             border: 1px solid rgba(255,255,255,0.2);
         }
-
         .search-input-group input {
             flex: 1;
             background: transparent;
@@ -102,13 +91,10 @@
             font-size: 16px;
             color: white;
             outline: none;
-            font-family: monospace;
         }
-
         .search-input-group input::placeholder {
             color: rgba(255,255,255,0.5);
         }
-
         .search-btn {
             background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
             border: none;
@@ -119,7 +105,6 @@
             cursor: pointer;
             font-size: 16px;
         }
-
         .result-card {
             background: rgba(255,255,255,0.12);
             border-radius: 24px;
@@ -128,7 +113,6 @@
             animation: slideIn 0.25s ease;
             border: 1px solid #ff6b6b;
         }
-
         .result-header {
             display: flex;
             align-items: center;
@@ -136,7 +120,6 @@
             margin-bottom: 16px;
             flex-wrap: wrap;
         }
-
         .result-avatar {
             width: 70px;
             height: 70px;
@@ -145,29 +128,24 @@
             background: #2a2a3a;
             border: 2px solid #ff6b6b;
         }
-
         .result-info {
             flex: 1;
         }
-
         .result-name {
             font-size: 20px;
             font-weight: 700;
         }
-
         .result-username {
             font-size: 14px;
             opacity: 0.7;
             font-family: monospace;
             margin-top: 4px;
         }
-
         .result-bio {
             font-size: 13px;
             margin-top: 8px;
             opacity: 0.8;
         }
-
         .message-btn {
             background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
             border: none;
@@ -180,7 +158,6 @@
             width: 100%;
             margin-top: 12px;
         }
-
         .not-found {
             background: rgba(255,80,80,0.2);
             border-radius: 24px;
@@ -190,11 +167,9 @@
             color: #ff9e9e;
             border: 1px solid rgba(255,80,80,0.4);
         }
-
         .players-list {
             margin-top: 24px;
         }
-
         .section-title {
             font-size: 18px;
             margin-bottom: 16px;
@@ -202,7 +177,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .player-item {
             background: rgba(255,255,255,0.08);
             border-radius: 18px;
@@ -214,33 +188,27 @@
             cursor: pointer;
             transition: background 0.1s;
         }
-
         .player-item:active {
             background: rgba(255,255,255,0.15);
         }
-
         .player-avatar {
             width: 52px;
             height: 52px;
             border-radius: 50%;
             object-fit: cover;
         }
-
         .player-info {
             flex: 1;
         }
-
         .player-name {
             font-weight: 600;
             font-size: 16px;
         }
-
         .player-username {
             font-size: 12px;
             opacity: 0.6;
             font-family: monospace;
         }
-
         .player-write {
             background: rgba(255,107,107,0.3);
             border: none;
@@ -250,20 +218,17 @@
             font-size: 12px;
             cursor: pointer;
         }
-
         .chat-container {
             display: flex;
             flex-direction: column;
             height: calc(100vh - 120px);
         }
-
         .chat-header {
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             background: rgba(10,10,15,0.9);
         }
-
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -272,37 +237,31 @@
             flex-direction: column;
             gap: 12px;
         }
-
         .message {
             max-width: 80%;
             padding: 10px 15px;
             border-radius: 20px;
             word-wrap: break-word;
         }
-
         .message.sent {
             background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
             align-self: flex-end;
             border-bottom-right-radius: 5px;
         }
-
         .message.received {
             background: rgba(255,255,255,0.12);
             align-self: flex-start;
             border-bottom-left-radius: 5px;
         }
-
         .message-text {
             font-size: 14px;
         }
-
         .message-time {
             font-size: 10px;
             opacity: 0.6;
             margin-top: 5px;
             text-align: right;
         }
-
         .chat-input-area {
             background: rgba(255,255,255,0.08);
             padding: 15px;
@@ -310,7 +269,6 @@
             gap: 12px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-
         .chat-input {
             flex: 1;
             background: rgba(255,255,255,0.1);
@@ -321,7 +279,6 @@
             font-size: 14px;
             outline: none;
         }
-
         .chat-send {
             background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
             border: none;
@@ -331,7 +288,6 @@
             font-weight: 600;
             cursor: pointer;
         }
-
         .auth-section {
             display: flex;
             justify-content: center;
@@ -339,7 +295,6 @@
             min-height: 100vh;
             padding: 20px;
         }
-
         .auth-card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(20px);
@@ -348,7 +303,6 @@
             width: 100%;
             max-width: 380px;
         }
-
         .auth-input {
             width: 100%;
             padding: 14px;
@@ -359,7 +313,6 @@
             font-size: 16px;
             color: #fff;
         }
-
         .auth-btn {
             background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
             color: white;
@@ -371,19 +324,16 @@
             width: 100%;
             margin-top: 10px;
         }
-
         .switch-auth {
             margin-top: 15px;
             text-align: center;
             color: #ff6b6b;
             cursor: pointer;
         }
-
         .avatar-preview {
             text-align: center;
             margin: 15px 0;
         }
-
         .avatar-preview img {
             width: 100px;
             height: 100px;
@@ -391,7 +341,6 @@
             object-fit: cover;
             border: 2px solid #ff6b6b;
         }
-
         .file-label {
             background: rgba(255,255,255,0.15);
             padding: 10px 20px;
@@ -401,13 +350,11 @@
             display: inline-block;
             margin-top: 10px;
         }
-
         .skip-label {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.3);
             margin-left: 10px;
         }
-
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -421,7 +368,6 @@
             border-top: 1px solid rgba(255,255,255,0.1);
             z-index: 100;
         }
-
         .nav-item {
             background: none;
             border: none;
@@ -432,11 +378,9 @@
             color: rgba(255,255,255,0.6);
             position: relative;
         }
-
         .nav-item.active {
             color: #ff6b6b;
         }
-
         .badge {
             position: absolute;
             top: -5px;
@@ -447,18 +391,15 @@
             padding: 2px 6px;
             border-radius: 10px;
         }
-
         .empty-state {
             text-align: center;
             padding: 40px;
             opacity: 0.6;
         }
-
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .profile-header {
             text-align: center;
             padding: 30px;
@@ -466,7 +407,6 @@
             border-radius: 30px;
             margin-bottom: 20px;
         }
-
         .profile-avatar {
             width: 90px;
             height: 90px;
@@ -474,14 +414,8 @@
             border: 3px solid #ff6b6b;
             object-fit: cover;
         }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        button {
-            cursor: pointer;
-        }
+        input[type="file"] { display: none; }
+        button { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -490,10 +424,8 @@
             <div class="logo" onclick="goHome()">Chugur</div>
             <div id="headerRight"></div>
         </div>
-
         <div id="authContainer"></div>
         <div id="mainContent"></div>
-
         <div class="bottom-nav" id="bottomNav" style="display: none;">
             <button type="button" class="nav-item" onclick="showSearch()">🔍</button>
             <button type="button" class="nav-item" onclick="showMessages()">💬</button>
@@ -509,22 +441,20 @@
         let currentChatUser = null;
         let updateInterval = null;
 
-        // Системный бот
-        const BOT_ID = 'bot_chugur';
+        // Бот
         const BOT_USER = {
-            id: BOT_ID,
+            id: 'bot_chugur',
             username: 'chugurbot',
             password: '',
             name: 'ChugurBot',
-            bio: '🤖 Добро пожаловать в Chugur!',
+            bio: '🤖 Добро пожаловать!',
             avatar: '',
             isBot: true
         };
 
-        // ========== СОХРАНЕНИЕ ==========
         function loadData() {
-            const savedUsers = localStorage.getItem('chugur_users_v5');
-            const savedMessages = localStorage.getItem('chugur_msgs_v5');
+            const savedUsers = localStorage.getItem('chugur_users_fixed');
+            const savedMessages = localStorage.getItem('chugur_msgs_fixed');
             
             if (savedUsers) {
                 users = JSON.parse(savedUsers);
@@ -540,32 +470,19 @@
             }
         }
 
-        function saveUsers() {
-            localStorage.setItem('chugur_users_v5', JSON.stringify(users));
-        }
-
-        function saveMessages() {
-            localStorage.setItem('chugur_msgs_v5', JSON.stringify(messages));
-        }
-
-        function saveAll() {
-            saveUsers();
-            saveMessages();
-            localStorage.setItem('chugur_update_v5', Date.now().toString());
-        }
+        function saveUsers() { localStorage.setItem('chugur_users_fixed', JSON.stringify(users)); }
+        function saveMessages() { localStorage.setItem('chugur_msgs_fixed', JSON.stringify(messages)); }
+        function saveAll() { saveUsers(); saveMessages(); localStorage.setItem('chugur_update_fixed', Date.now().toString()); }
 
         window.addEventListener('storage', function(e) {
-            if (e.key === 'chugur_update_v5' || e.key === 'chugur_msgs_v5') {
+            if (e.key === 'chugur_update_fixed' || e.key === 'chugur_msgs_fixed') {
                 loadData();
-                if (currentChatUser) {
-                    updateChatDisplay();
-                }
+                if (currentChatUser) updateChatDisplay();
                 refreshCurrentView();
                 updateBadge();
             }
         });
 
-        // ========== ГЕНЕРАЦИЯ USERNAME ==========
         function generateUsername() {
             let num = Math.floor(Math.random() * 9000) + 1000;
             let username = `player${num}`;
@@ -584,7 +501,6 @@
             const container = document.getElementById('authContainer');
             container.style.display = 'block';
             document.getElementById('mainContent').innerHTML = '';
-            
             container.innerHTML = `
                 <div class="auth-section">
                     <div class="auth-card">
@@ -607,15 +523,10 @@
                         <h2 style="text-align:center; margin-bottom:20px;">📝 Новый аккаунт</h2>
                         <input type="password" id="regPassword" class="auth-input" placeholder="Пароль (мин 3)">
                         <input type="text" id="regName" class="auth-input" placeholder="Ваше имя">
-                        
-                        <div class="avatar-preview" id="avatarPreview" style="display:none;">
-                            <img id="previewImg" src="">
-                        </div>
-                        
-                        <label class="file-label" for="avatarInput">📷 Выбрать фото профиля</label>
+                        <div class="avatar-preview" id="avatarPreview" style="display:none;"><img id="previewImg" src=""></div>
+                        <label class="file-label" for="avatarInput">📷 Выбрать фото</label>
                         <label class="file-label skip-label" onclick="skipAvatar()">⏭ Пропустить</label>
                         <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarSelect(event)">
-                        
                         <button type="button" class="auth-btn" onclick="register()">Зарегистрироваться</button>
                         <div class="switch-auth" onclick="renderAuth()">← Назад</div>
                     </div>
@@ -647,22 +558,12 @@
         }
 
         function register() {
-            const passwordInput = document.getElementById('regPassword');
-            const nameInput = document.getElementById('regName');
-            
-            if (!passwordInput || !nameInput) {
-                alert('Ошибка, попробуйте еще раз');
-                return;
-            }
-            
-            const password = passwordInput.value;
-            const name = nameInput.value.trim();
-            
+            const password = document.getElementById('regPassword').value;
+            const name = document.getElementById('regName').value.trim();
             if (!password || password.length < 3) {
                 alert('❌ Пароль минимум 3 символа');
                 return;
             }
-            
             const username = generateUsername();
             const newUser = {
                 id: Date.now().toString(),
@@ -672,32 +573,21 @@
                 bio: 'Новый игрок',
                 avatar: tempAvatar || ''
             };
-            
             users.push(newUser);
             saveUsers();
             currentUser = newUser;
-            localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
+            localStorage.setItem('chugur_current_fixed', JSON.stringify(currentUser));
             startApp();
             alert(`✅ Аккаунт создан!\n\n🎮 Твой username: ${username}\n🔐 Пароль: ${password}`);
         }
 
         function login() {
-            const usernameInput = document.getElementById('loginUsername');
-            const passwordInput = document.getElementById('loginPassword');
-            
-            if (!usernameInput || !passwordInput) {
-                alert('Ошибка');
-                return;
-            }
-            
-            const username = usernameInput.value.trim().toLowerCase();
-            const password = passwordInput.value;
-            
+            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
             const user = users.find(u => u.username === username && u.password === password && !u.isBot);
-            
             if (user) {
                 currentUser = JSON.parse(JSON.stringify(user));
-                localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
+                localStorage.setItem('chugur_current_fixed', JSON.stringify(currentUser));
                 startApp();
             } else {
                 alert('❌ Неверный username или пароль');
@@ -707,23 +597,29 @@
         function logout() {
             if (updateInterval) clearInterval(updateInterval);
             currentUser = null;
-            localStorage.removeItem('chugur_current_v5');
+            localStorage.removeItem('chugur_current_fixed');
             renderAuth();
         }
 
-        // ========== ПОЛУЧАЕМ СПИСОК ИГРОКОВ ДЛЯ ПОИСКА ==========
-        function getAvailablePlayers() {
-            const dialogUserIds = new Set();
+        // ========== ПОЛУЧАЕМ НОВЫХ ИГРОКОВ (без диалога) ==========
+        function getNewPlayers() {
+            // ID всех с кем есть переписка
+            const dialogIds = new Set();
             messages.forEach(msg => {
-                if (msg.fromId === currentUser.id) dialogUserIds.add(msg.toId);
-                if (msg.toId === currentUser.id) dialogUserIds.add(msg.fromId);
+                if (msg.fromId === currentUser.id) dialogIds.add(msg.toId);
+                if (msg.toId === currentUser.id) dialogIds.add(msg.fromId);
             });
-            
+            // Все игроки кроме себя, бота и тех с кем есть диалог
             return users.filter(u => 
                 u.id !== currentUser.id && 
                 !u.isBot && 
-                !dialogUserIds.has(u.id)
+                !dialogIds.has(u.id)
             );
+        }
+
+        // ========== ПОЛУЧАЕМ ВСЕХ ИГРОКОВ ДЛЯ ПОИСКА (включая тех с кем есть диалог) ==========
+        function getAllPlayersForSearch() {
+            return users.filter(u => u.id !== currentUser.id && !u.isBot);
         }
 
         // ========== ПОИСК ==========
@@ -738,39 +634,38 @@
                 <div class="content">
                     <div class="search-block">
                         <div class="search-title">🔎 Найти игрока</div>
-                        <div class="search-desc">Введи имя или username игрока</div>
+                        <div class="search-desc">Введи имя или username</div>
                         <div class="search-input-group">
-                            <input type="text" id="searchUsername" placeholder="Имя или username" autocomplete="off">
+                            <input type="text" id="searchUsername" placeholder="Например: player123 или имя" autocomplete="off">
                             <button type="button" class="search-btn" onclick="findPlayer()">Найти →</button>
                         </div>
                         <div id="searchResult"></div>
                     </div>
-                    
                     <div class="players-list">
-                        <div class="section-title">👥 Новые игроки</div>
-                        <div id="allPlayers"></div>
+                        <div class="section-title">👥 Новые игроки (ещё не писали)</div>
+                        <div id="newPlayersList"></div>
                     </div>
                 </div>
             `;
             
-            renderAvailablePlayers();
+            renderNewPlayers();
             
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.nav-item')[0]?.classList.add('active');
         }
         
-        function renderAvailablePlayers() {
-            const container = document.getElementById('allPlayers');
+        function renderNewPlayers() {
+            const container = document.getElementById('newPlayersList');
             if (!container) return;
             
-            const availablePlayers = getAvailablePlayers();
+            const newPlayers = getNewPlayers();
             
-            if (availablePlayers.length === 0) {
-                container.innerHTML = '<div class="empty-state">✨ Здесь будут новые игроки</div>';
+            if (newPlayers.length === 0) {
+                container.innerHTML = '<div class="empty-state">✨ Новых игроков пока нет</div>';
                 return;
             }
             
-            container.innerHTML = availablePlayers.map(u => {
+            container.innerHTML = newPlayers.map(u => {
                 const avatarUrl = u.avatar || `https://ui-avatars.com/api/?background=ff6b6b&color=fff&bold=true&size=52&name=${encodeURIComponent(u.name)}`;
                 return `
                     <div class="player-item" onclick="openChat('${u.id}')">
@@ -794,10 +689,12 @@
                 return;
             }
             
-            const found = users.find(u => 
-                u.id !== currentUser.id && 
-                !u.isBot &&
-                (u.username.toLowerCase() === query || u.name.toLowerCase() === query || u.name.toLowerCase().includes(query))
+            // Ищем среди ВСЕХ игроков (включая тех с кем уже есть диалог)
+            const allPlayers = getAllPlayersForSearch();
+            const found = allPlayers.find(u => 
+                u.username.toLowerCase() === query || 
+                u.name.toLowerCase() === query || 
+                u.name.toLowerCase().includes(query)
             );
             
             if (found) {
@@ -873,8 +770,9 @@
             updateChatDisplay();
             updateBadge();
             
-            if (document.getElementById('allPlayers')) {
-                renderAvailablePlayers();
+            // Обновляем список новых игроков (если открыт)
+            if (document.getElementById('newPlayersList')) {
+                renderNewPlayers();
             }
         }
         
@@ -945,6 +843,7 @@
             const oldBack = document.querySelector('.back-btn');
             if (oldBack) oldBack.remove();
             
+            // Собираем диалоги
             const dialogs = new Map();
             messages.forEach(msg => {
                 const otherId = msg.fromId === currentUser.id ? msg.toId : msg.fromId;
@@ -986,7 +885,7 @@
                                 </div>
                             `;
                         }).join('')}
-                        ${dialogsList.length === 0 ? '<div class="empty-state">💬 Нет сообщений. Найди игрока через 🔍 и напиши ему!</div>' : ''}
+                        ${dialogsList.length === 0 ? '<div class="empty-state">💬 Нет сообщений. Найди игрока через 🔍</div>' : ''}
                     </div>
                 </div>
             `;
@@ -1030,11 +929,10 @@
             const newBio = prompt('О себе:', currentUser.bio);
             if (newName) currentUser.name = newName;
             if (newBio) currentUser.bio = newBio;
-            
             const idx = users.findIndex(u => u.id === currentUser.id);
             if (idx !== -1) users[idx] = currentUser;
             saveUsers();
-            localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
+            localStorage.setItem('chugur_current_fixed', JSON.stringify(currentUser));
             showProfile();
         }
         
@@ -1058,8 +956,8 @@
             if (currentChatUser) {
                 updateChatDisplay();
             }
-            if (document.getElementById('allPlayers')) {
-                renderAvailablePlayers();
+            if (document.getElementById('newPlayersList')) {
+                renderNewPlayers();
             }
             if (document.getElementById('dialogsList') && !currentChatUser) {
                 showMessages();
@@ -1096,8 +994,8 @@
                 if (currentChatUser) {
                     updateChatDisplay();
                 }
-                if (document.getElementById('allPlayers')) {
-                    renderAvailablePlayers();
+                if (document.getElementById('newPlayersList')) {
+                    renderNewPlayers();
                 }
                 if (document.getElementById('dialogsList') && !currentChatUser) {
                     showMessages();
@@ -1110,7 +1008,7 @@
         
         // ========== ЗАПУСК ==========
         loadData();
-        const saved = localStorage.getItem('chugur_current_v5');
+        const saved = localStorage.getItem('chugur_current_fixed');
         if (saved) {
             const parsed = JSON.parse(saved);
             currentUser = users.find(u => u.id === parsed.id && !u.isBot);
