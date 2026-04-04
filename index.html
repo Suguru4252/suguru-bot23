@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Chugur | Найди игрока</title>
+    <title>Chugur | Рабочий поиск игроков</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -455,6 +454,17 @@
             opacity: 0.6;
         }
 
+        .demo-btn {
+            background: rgba(78,205,196,0.3);
+            border: 1px solid #4ecdc4;
+            padding: 10px;
+            border-radius: 30px;
+            text-align: center;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -522,15 +532,47 @@
             isBot: true
         };
 
+        // ДЕМО-ПОЛЬЗОВАТЕЛИ (чтобы сразу были видны другие игроки)
+        const DEMO_USERS = [
+            {
+                id: 'demo_1',
+                username: 'alex_fighter',
+                password: 'demo123',
+                name: 'Алексей',
+                bio: '🔥 Ищу друзей для общения',
+                avatar: 'https://i.pravatar.cc/150?img=1',
+                isBot: false
+            },
+            {
+                id: 'demo_2',
+                username: 'misha_gamer',
+                password: 'demo123',
+                name: 'Миша',
+                bio: '🎮 Люблю игры и чат',
+                avatar: 'https://i.pravatar.cc/150?img=2',
+                isBot: false
+            },
+            {
+                id: 'demo_3',
+                username: 'katy_art',
+                password: 'demo123',
+                name: 'Катя',
+                bio: '🎨 Художник, ищу вдохновение',
+                avatar: 'https://i.pravatar.cc/150?img=3',
+                isBot: false
+            }
+        ];
+
         // ========== СОХРАНЕНИЕ ==========
         function loadData() {
-            const savedUsers = localStorage.getItem('chugur_users_v5');
-            const savedMessages = localStorage.getItem('chugur_msgs_v5');
+            const savedUsers = localStorage.getItem('chugur_users_v6');
+            const savedMessages = localStorage.getItem('chugur_msgs_v6');
             
             if (savedUsers) {
                 users = JSON.parse(savedUsers);
             } else {
-                users = [BOT_USER];
+                // Создаём начальный список: бот + демо-пользователи
+                users = [BOT_USER, ...DEMO_USERS];
                 saveUsers();
             }
             
@@ -542,21 +584,21 @@
         }
 
         function saveUsers() {
-            localStorage.setItem('chugur_users_v5', JSON.stringify(users));
+            localStorage.setItem('chugur_users_v6', JSON.stringify(users));
         }
 
         function saveMessages() {
-            localStorage.setItem('chugur_msgs_v5', JSON.stringify(messages));
+            localStorage.setItem('chugur_msgs_v6', JSON.stringify(messages));
         }
 
         function saveAll() {
             saveUsers();
             saveMessages();
-            localStorage.setItem('chugur_update_v5', Date.now().toString());
+            localStorage.setItem('chugur_update_v6', Date.now().toString());
         }
 
         window.addEventListener('storage', function(e) {
-            if (e.key === 'chugur_update_v5' || e.key === 'chugur_msgs_v5') {
+            if (e.key === 'chugur_update_v6' || e.key === 'chugur_msgs_v6') {
                 loadData();
                 if (currentChatUser) {
                     updateChatDisplay();
@@ -594,9 +636,21 @@
                         <input type="password" id="loginPassword" class="auth-input" placeholder="Пароль">
                         <button type="button" class="auth-btn" onclick="login()">Войти</button>
                         <div class="switch-auth" onclick="showRegister()">✨ Создать аккаунт</div>
+                        <div class="demo-btn" onclick="loginAsDemo()">🎭 Войти как демо-игрок (alex_fighter)</div>
                     </div>
                 </div>
             `;
+        }
+
+        function loginAsDemo() {
+            const demoUser = users.find(u => u.username === 'alex_fighter' && !u.isBot);
+            if (demoUser) {
+                currentUser = JSON.parse(JSON.stringify(demoUser));
+                localStorage.setItem('chugur_current_v6', JSON.stringify(currentUser));
+                startApp();
+            } else {
+                alert('Демо-пользователь не найден');
+            }
         }
 
         function showRegister() {
@@ -677,7 +731,7 @@
             users.push(newUser);
             saveUsers();
             currentUser = newUser;
-            localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
+            localStorage.setItem('chugur_current_v6', JSON.stringify(currentUser));
             startApp();
             alert(`✅ Аккаунт создан!\n\n🎮 Твой username: ${username}\n🔐 Пароль: ${password}`);
         }
@@ -698,7 +752,7 @@
             
             if (user) {
                 currentUser = JSON.parse(JSON.stringify(user));
-                localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
+                localStorage.setItem('chugur_current_v6', JSON.stringify(currentUser));
                 startApp();
             } else {
                 alert('❌ Неверный username или пароль');
@@ -708,11 +762,11 @@
         function logout() {
             if (updateInterval) clearInterval(updateInterval);
             currentUser = null;
-            localStorage.removeItem('chugur_current_v5');
+            localStorage.removeItem('chugur_current_v6');
             renderAuth();
         }
 
-        // ========== ПОЛУЧАЕМ СПИСОК ИГРОКОВ ДЛЯ ПОИСКА ==========
+        // ========== ПОЛУЧАЕМ СПИСОК ИГРОКОВ ДЛЯ ПОИСКА (НЕ В ДИАЛОГАХ) ==========
         function getAvailablePlayers() {
             const dialogUserIds = new Set();
             messages.forEach(msg => {
@@ -725,6 +779,11 @@
                 !u.isBot && 
                 !dialogUserIds.has(u.id)
             );
+        }
+
+        // ========== ПОЛУЧАЕМ ВСЕХ ИГРОКОВ ДЛЯ ПОИСКА (ВКЛЮЧАЯ ТЕХ, С КЕМ УЖЕ ПЕРЕПИСКА) ==========
+        function getAllPlayersForSearch() {
+            return users.filter(u => u.id !== currentUser.id && !u.isBot);
         }
 
         // ========== ПОИСК ==========
@@ -741,14 +800,14 @@
                         <div class="search-title">🔎 Найти игрока</div>
                         <div class="search-desc">Введи имя или username игрока</div>
                         <div class="search-input-group">
-                            <input type="text" id="searchUsername" placeholder="Имя или username" autocomplete="off">
+                            <input type="text" id="searchUsername" placeholder="Например: alex_fighter или Алексей" autocomplete="off">
                             <button type="button" class="search-btn" onclick="findPlayer()">Найти →</button>
                         </div>
                         <div id="searchResult"></div>
                     </div>
                     
                     <div class="players-list">
-                        <div class="section-title">👥 Новые игроки</div>
+                        <div class="section-title">👥 Новые игроки (ещё нет диалога)</div>
                         <div id="allPlayers"></div>
                     </div>
                 </div>
@@ -767,7 +826,7 @@
             const availablePlayers = getAvailablePlayers();
             
             if (availablePlayers.length === 0) {
-                container.innerHTML = '<div class="empty-state">✨ Здесь будут новые игроки</div>';
+                container.innerHTML = '<div class="empty-state">✨ Нет новых игроков. Попробуй поискать через 🔍</div>';
                 return;
             }
             
@@ -797,14 +856,12 @@
             
             const queryLower = query.toLowerCase();
             
-            // Ищем среди всех пользователей (кроме бота и текущего)
-            const found = users.find(u => 
-                u.id !== currentUser.id && 
-                !u.isBot &&
-                (u.username.toLowerCase() === queryLower || 
-                 u.name.toLowerCase() === queryLower || 
-                 u.name.toLowerCase().includes(queryLower) ||
-                 u.username.toLowerCase().includes(queryLower))
+            // Ищем среди ВСЕХ игроков (включая тех, с кем уже есть диалог)
+            const found = getAllPlayersForSearch().find(u => 
+                u.username.toLowerCase() === queryLower || 
+                u.name.toLowerCase() === queryLower || 
+                u.name.toLowerCase().includes(queryLower) ||
+                u.username.toLowerCase().includes(queryLower)
             );
             
             if (found) {
@@ -870,7 +927,7 @@
             if (!text) return;
             
             const newMessage = {
-                id: Date.now().toString(),
+                id: Date.now().toString() + Math.random(),
                 fromId: currentUser.id,
                 toId: currentChatUser.id,
                 fromName: currentUser.name,
@@ -887,6 +944,7 @@
             updateChatDisplay();
             updateBadge();
             
+            // Обновляем список новых игроков, если он открыт
             if (document.getElementById('allPlayers')) {
                 renderAvailablePlayers();
             }
@@ -975,165 +1033,3 @@
                             lastMsg: userMsgs[0],
                             unread: messages.filter(m => m.fromId === otherId && m.toId === currentUser.id && !m.read).length
                         });
-                    }
-                }
-            });
-            
-            const dialogsList = Array.from(dialogs.values()).sort((a,b) => 
-                new Date(b.lastMsg.timestamp) - new Date(a.lastMsg.timestamp)
-            );
-            
-            document.getElementById('mainContent').innerHTML = `
-                <div class="content">
-                    <h3 style="margin-bottom: 20px;">💬 Мои сообщения</h3>
-                    <div id="dialogsList">
-                        ${dialogsList.map(d => {
-                            const avatarUrl = d.user.avatar || `https://ui-avatars.com/api/?background=ff6b6b&color=fff&bold=true&size=52&name=${encodeURIComponent(d.user.name)}`;
-                            return `
-                                <div class="player-item" onclick="openChat('${d.user.id}')">
-                                    <img class="player-avatar" src="${avatarUrl}">
-                                    <div class="player-info">
-                                        <div class="player-name">${escapeHtml(d.user.name)} ${d.unread > 0 ? `<span style="background:#ff6b6b; padding:2px 8px; border-radius:12px; font-size:11px;">${d.unread}</span>` : ''}</div>
-                                        <div class="player-username">@${escapeHtml(d.user.username)}</div>
-                                        <div style="font-size:12px; opacity:0.6;">${d.lastMsg.text ? (d.lastMsg.text.length > 25 ? d.lastMsg.text.slice(0,25)+'...' : d.lastMsg.text) : ''}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                        ${dialogsList.length === 0 ? '<div class="empty-state">💬 Нет сообщений. Найди игрока через 🔍 и напиши ему!</div>' : ''}
-                    </div>
-                </div>
-            `;
-            
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[1]?.classList.add('active');
-            updateBadge();
-        }
-        
-        function showProfile() {
-            if (!currentUser) return;
-            
-            const oldBack = document.querySelector('.back-btn');
-            if (oldBack) oldBack.remove();
-            
-            const avatarUrl = currentUser.avatar || `https://ui-avatars.com/api/?background=ff6b6b&color=fff&bold=true&size=90&name=${encodeURIComponent(currentUser.name)}`;
-            
-            document.getElementById('mainContent').innerHTML = `
-                <div class="content">
-                    <div class="profile-header">
-                        <img class="profile-avatar" src="${avatarUrl}">
-                        <div class="profile-name" style="margin-top:12px;">${escapeHtml(currentUser.name)}</div>
-                        <div style="background:rgba(255,107,107,0.2); padding:5px 12px; border-radius:20px; display:inline-block; margin:8px 0;">@${escapeHtml(currentUser.username)}</div>
-                        <div style="margin:10px 0;">${escapeHtml(currentUser.bio)}</div>
-                        <button type="button" class="auth-btn" style="width:auto; padding:10px 30px;" onclick="editProfile()">✏️ Редактировать</button>
-                        <button type="button" class="auth-btn" style="width:auto; padding:10px 30px; margin-top:10px; background:rgba(255,80,80,0.5);" onclick="logout()">🚪 Выйти</button>
-                    </div>
-                    <div class="section-title">📊 Твой username:</div>
-                    <div style="background:rgba(255,107,107,0.2); padding:12px; border-radius:16px; text-align:center; font-family:monospace; font-size:18px;">
-                        ${escapeHtml(currentUser.username)}
-                    </div>
-                </div>
-            `;
-            
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[2]?.classList.add('active');
-        }
-        
-        function editProfile() {
-            const newName = prompt('Новое имя:', currentUser.name);
-            const newBio = prompt('О себе:', currentUser.bio);
-            if (newName) currentUser.name = newName;
-            if (newBio) currentUser.bio = newBio;
-            
-            const idx = users.findIndex(u => u.id === currentUser.id);
-            if (idx !== -1) users[idx] = currentUser;
-            saveUsers();
-            localStorage.setItem('chugur_current_v5', JSON.stringify(currentUser));
-            showProfile();
-        }
-        
-        function updateBadge() {
-            if (!currentUser) return;
-            const unread = messages.filter(m => m.toId === currentUser.id && !m.read).length;
-            const msgBtn = document.querySelectorAll('.nav-item')[1];
-            if (msgBtn) {
-                const old = msgBtn.querySelector('.badge');
-                if (old) old.remove();
-                if (unread > 0) {
-                    const badge = document.createElement('span');
-                    badge.className = 'badge';
-                    badge.textContent = unread > 99 ? '99+' : unread;
-                    msgBtn.appendChild(badge);
-                }
-            }
-        }
-        
-        function refreshCurrentView() {
-            if (currentChatUser) {
-                updateChatDisplay();
-            }
-            if (document.getElementById('allPlayers')) {
-                renderAvailablePlayers();
-            }
-            if (document.getElementById('dialogsList') && !currentChatUser) {
-                showMessages();
-            }
-        }
-        
-        function goHome() {
-            if (currentChatUser) {
-                currentChatUser = null;
-                showMessages();
-            } else {
-                showSearch();
-            }
-        }
-        
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-        
-        function startApp() {
-            document.getElementById('bottomNav').style.display = 'flex';
-            document.getElementById('authContainer').style.display = 'none';
-            showSearch();
-            
-            if (updateInterval) clearInterval(updateInterval);
-            updateInterval = setInterval(() => {
-                loadData();
-                if (currentChatUser) {
-                    updateChatDisplay();
-                }
-                if (document.getElementById('allPlayers')) {
-                    renderAvailablePlayers();
-                }
-                if (document.getElementById('dialogsList') && !currentChatUser) {
-                    showMessages();
-                }
-                updateBadge();
-            }, 30000);
-            
-            updateBadge();
-        }
-        
-        // ========== ЗАПУСК ==========
-        loadData();
-        const saved = localStorage.getItem('chugur_current_v5');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            currentUser = users.find(u => u.id === parsed.id && !u.isBot);
-            if (currentUser) startApp();
-            else renderAuth();
-        } else {
-            renderAuth();
-        }
-    </script>
-</body>
-</html>
-```
