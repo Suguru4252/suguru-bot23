@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pet Sim Lite Engine</title>
+<title>Pet Sim Lite Engine V2</title>
 
 <style>
 body { margin:0; overflow:hidden; font-family:Arial; }
+
 #ui {
   position:absolute;
   top:10px;
@@ -17,20 +18,28 @@ body { margin:0; overflow:hidden; font-family:Arial; }
   border-radius:10px;
   font-size:14px;
 }
+
 button{
   position:absolute;
   right:10px;
   width:120px;
   height:45px;
+  border-radius:10px;
+  border:none;
+  background:#ffffffaa;
+  font-weight:bold;
 }
+
 #egg{ bottom:140px; }
 #zone{ bottom:80px; }
 #save{ bottom:20px; }
 </style>
 </head>
+
 <body>
 
 <div id="ui"></div>
+
 <button id="egg">🥚 Hatch</button>
 <button id="zone">🌍 Zone</button>
 <button id="save">💾 Save</button>
@@ -39,42 +48,75 @@ button{
 
 <script>
 
-// ================= WORLD =================
+// ================= SCENE =================
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
 
+// 🌫️ Fog (делает глубину как в нормальных играх)
+scene.fog = new THREE.Fog(0xaaccff, 20, 120);
+
+// 🌈 Sky color
+scene.background = new THREE.Color(0xaaccff);
+
+// ================= CAMERA =================
 const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight,0.1,1000);
+
+// ================= RENDERER =================
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
+
+// 💡 ВКЛЮЧАЕМ ТЕНИ
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 document.body.appendChild(renderer.domElement);
 
-// LIGHT
-scene.add(new THREE.DirectionalLight(0xffffff,1).position.set(10,10,10));
+// ================= LIGHT =================
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(20,30,10);
+sun.castShadow = true;
 
-// FLOOR
+sun.shadow.mapSize.width = 1024;
+sun.shadow.mapSize.height = 1024;
+
+scene.add(sun);
+
+// мягкий свет
+scene.add(new THREE.AmbientLight(0xffffff,0.4));
+
+// ================= FLOOR (УЛУЧШЕННЫЙ) =================
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(200,200),
-  new THREE.MeshStandardMaterial({color:0x3cb371})
+  new THREE.PlaneGeometry(300,300),
+  new THREE.MeshStandardMaterial({
+    color:0x3cb371,
+    roughness:1
+  })
 );
+
 floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
 scene.add(floor);
 
 // ================= PLAYER =================
 const player = new THREE.Mesh(
-  new THREE.SphereGeometry(1,16,16),
-  new THREE.MeshStandardMaterial({color:"lime"})
+  new THREE.SphereGeometry(1,32,32),
+  new THREE.MeshStandardMaterial({
+    color:"lime",
+    roughness:0.3,
+    metalness:0.2
+  })
 );
+
+player.position.y = 1;
+player.castShadow = true;
 scene.add(player);
 
-// ================= GAME DATA =================
-let coins = [];
+// ================= DATA =================
 let objects = [];
 let pets = [];
 
 let coinsCount = 0;
 let level = 1;
 let exp = 0;
-
 let zone = 1;
 
 // ================= ZONES =================
@@ -87,16 +129,17 @@ const zones = [
 
 // ================= SAVE =================
 function save(){
-  localStorage.setItem("pet_save", JSON.stringify({
+  localStorage.setItem("pet_save_v2", JSON.stringify({
     coinsCount, level, exp, zone,
     pets: pets.length
   }));
 }
 
 function load(){
-  const s = localStorage.getItem("pet_save");
+  const s = localStorage.getItem("pet_save_v2");
   if(!s) return;
   const d = JSON.parse(s);
+
   coinsCount = d.coinsCount||0;
   level = d.level||1;
   exp = d.exp||0;
@@ -110,27 +153,39 @@ function spawnObject(){
 
   const obj = new THREE.Mesh(
     new THREE.BoxGeometry(2,2,2),
-    new THREE.MeshStandardMaterial({color:"brown"})
+    new THREE.MeshStandardMaterial({
+      color:new THREE.Color(`hsl(${Math.random()*360},70%,50%)`),
+      roughness:0.6
+    })
   );
 
-  obj.position.set((Math.random()-0.5)*60,1,(Math.random()-0.5)*60);
+  obj.position.set((Math.random()-0.5)*80,1,(Math.random()-0.5)*80);
   obj.hp = hp;
+
+  obj.castShadow = true;
+  obj.receiveShadow = true;
 
   scene.add(obj);
   objects.push(obj);
 }
 
-for(let i=0;i<10;i++) spawnObject();
+for(let i=0;i<15;i++) spawnObject();
 
 // ================= PETS =================
 function addPet(){
   const pet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5,12,12),
-    new THREE.MeshStandardMaterial({color:"cyan"})
+    new THREE.SphereGeometry(0.6,24,24),
+    new THREE.MeshStandardMaterial({
+      color:"cyan",
+      roughness:0.2,
+      metalness:0.4
+    })
   );
 
   pet.power = 2 + level;
   pet.angle = Math.random()*Math.PI*2;
+
+  pet.castShadow = true;
 
   scene.add(pet);
   pets.push(pet);
@@ -138,11 +193,7 @@ function addPet(){
 
 // ================= EGGS =================
 function hatch(){
-  const r = Math.random();
-
-  if(r<0.5) addPet();
-  else if(r<0.8) addPet();
-  else addPet(); // simplified rarities
+  addPet();
 }
 
 // ================= INPUT =================
@@ -160,34 +211,34 @@ document.getElementById("zone").onclick=()=>{
 
 document.getElementById("save").onclick=save;
 
-// ================= GAME LOOP =================
+// ================= UPDATE =================
 function update(){
 
   // MOVE
-  if(keys["w"]) player.position.z -= 0.2;
-  if(keys["s"]) player.position.z += 0.2;
-  if(keys["a"]) player.position.x -= 0.2;
-  if(keys["d"]) player.position.x += 0.2;
+  if(keys["w"]) player.position.z -= 0.25;
+  if(keys["s"]) player.position.z += 0.25;
+  if(keys["a"]) player.position.x -= 0.25;
+  if(keys["d"]) player.position.x += 0.25;
 
   // LIMIT
-  player.position.x = Math.max(-40,Math.min(40,player.position.x));
-  player.position.z = Math.max(-40,Math.min(40,player.position.z));
+  player.position.x = Math.max(-60,Math.min(60,player.position.x));
+  player.position.z = Math.max(-60,Math.min(60,player.position.z));
 
-  // ================= AUTO FARM =================
+  // AUTO FARM
   pets.forEach(p=>{
-    let target = null;
-    let minD = 999;
+    let target=null;
+    let min=999;
 
     objects.forEach(o=>{
-      let d = player.position.distanceTo(o.position);
-      if(d<minD){
-        minD=d;
+      const d = player.position.distanceTo(o.position);
+      if(d<min){
+        min=d;
         target=o;
       }
     });
 
     if(target){
-      target.hp -= p.power * 0.05;
+      target.hp -= p.power*0.06;
 
       if(target.hp<=0){
         scene.remove(target);
@@ -207,42 +258,43 @@ function update(){
     }
   });
 
-  // PET FOLLOW
-  let a=0;
-  pets.forEach(p=>{
-    p.angle += 0.05;
-    p.position.x = player.position.x + Math.cos(p.angle)*2;
-    p.position.z = player.position.z + Math.sin(p.angle)*2;
-    p.position.y = 0.5;
-    a++;
+  // PET FOLLOW (плавнее)
+  pets.forEach((p,i)=>{
+    p.angle += 0.04;
+
+    const radius = 2 + i*0.1;
+
+    p.position.x = player.position.x + Math.cos(p.angle)*radius;
+    p.position.z = player.position.z + Math.sin(p.angle)*radius;
+    p.position.y = 1 + Math.sin(p.angle*2)*0.2;
   });
 }
 
-// ================= CAMERA =================
+// ================= CAMERA (SMOOTH) =================
 function cam(){
-  camera.position.x += (player.position.x - camera.position.x)*0.1;
-  camera.position.z += (player.position.z+5 - camera.position.z)*0.1;
-  camera.position.y = 5;
+  camera.position.x += (player.position.x - camera.position.x)*0.08;
+  camera.position.z += (player.position.z + 8 - camera.position.z)*0.08;
+  camera.position.y = 6;
   camera.lookAt(player.position);
 }
 
 // ================= UI =================
 function ui(){
 document.getElementById("ui").innerHTML=`
-Zone: ${zones[zone].name}<br>
-Coins: ${coinsCount}<br>
-Level: ${level}<br>
-XP: ${exp}/${level*5}<br>
-Pets: ${pets.length}<br>
-Objects: ${objects.length}
+🌍 Zone: ${zones[zone].name}<br>
+💰 Coins: ${coinsCount}<br>
+⭐ Level: ${level}<br>
+⚡ XP: ${exp}/${level*5}<br>
+🐶 Pets: ${pets.length}<br>
+📦 Objects: ${objects.length}
 `;
 }
 
 // ================= LOOP =================
 function loop(){
 update();
-ui();
 cam();
+ui();
 renderer.render(scene,camera);
 requestAnimationFrame(loop);
 }
