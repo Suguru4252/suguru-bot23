@@ -1,84 +1,205 @@
 <!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Space Game Optimized</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chugur Space Game</title>
 <style>
-  body { margin:0; overflow:hidden; background:#000; }
-  canvas { display:block; }
-</style>
+  body { margin:0; overflow:hidden; background:#000; font-family:Arial; }
+  canvas { display:block; }/* UI */ .ui { position:fixed; top:0; left:0; width:100%; color:white; z-index:10; pointer-events:none; }
+
+.panel { pointer-events:auto; position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; }
+
+button { margin:5px; padding:10px; border:none; border-radius:8px; }
+
+#controls { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:20px; z-index:10; }
+
+.btn { width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.2); text-align:center; line-height:70px; color:white; font-size:20px; } </style>
+
 </head>
-<body>
-<canvas id="game"></canvas>
-<script>
+<body><canvas id="game"></canvas>
+
+<div class="ui">
+  <div class="panel">
+    <div>Score: <span id="score">0</span></div>
+    <div>Coins: <span id="coins">0</span></div>
+    <button onclick="openShop()">Shop</button>
+    <button onclick="startGame()">Start</button>
+  </div>
+</div><div id="controls">
+  <div class="btn" id="left">◀</div>
+  <div class="btn" id="shoot">🔥</div>
+  <div class="btn" id="right">▶</div>
+</div><script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;// ===== PERFORMANCE SETTINGS ===== const STAR_COUNT = 80; const MAX_PARTICLES = 40;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-// ===== STARS (pre-generated) ===== const stars = Array.from({length: STAR_COUNT}, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 2, s: 0.2 + Math.random() * 0.8 }));
+// ===== STATE =====
+let gameState = "menu";
+let score = 0;
+let coins = Number(localStorage.getItem("coins")||0);
 
-// ===== PLAYER ===== const player = { x: canvas.width / 2, y: canvas.height - 100, size: 20, speed: 6 };
+// ===== PLAYER =====
+const player = { x: innerWidth/2, y: innerHeight-120, w:20, h:20, speed:6, damage:1 };
 
-// ===== BULLETS ===== const bullets = [];
+// ===== GAME OBJECTS =====
+let bullets = [];
+let enemies = [];
+let boss = null;
+let particles = [];
 
-// ===== ENEMIES ===== const enemies = []; let boss = null; let score = 0;
+// ===== PLANET SYSTEM =====
+function getPlanet(){
+  if(score < 100) return "EARTH";
+  if(score < 250) return "MARS";
+  return "SATURN";
+}
 
-// ===== PARTICLES (pool system) ===== const particles = [];
+// ===== AUDIO (simple beeps) =====
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function beep(freq){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.frequency.value = freq;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+0.05);
+}
 
-function spawnParticle(x, y) { if (particles.length > MAX_PARTICLES) return; particles.push({ x, y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, life: 30 }); }
+// ===== INPUT =====
+let touchX = player.x;
 
-// ===== INPUT ===== let touchX = player.x; canvas.addEventListener("touchmove", e => { touchX = e.touches[0].clientX; });
+addEventListener("touchmove", e=>{
+  touchX = e.touches[0].clientX;
+});
 
-canvas.addEventListener("touchstart", e => { bullets.push({ x: player.x, y: player.y, vy: -8 }); });
+addEventListener("touchstart", ()=>{
+  if(gameState!="game") return;
+  shoot();
+});
 
-// ===== GAME LOOP ===== function update() { // move player player.x += (touchX - player.x) * 0.15;
+// buttons
+left.onclick = ()=> player.x -= 30;
+right.onclick = ()=> player.x += 30;
+shoot.onclick = ()=> shoot();
 
-// bullets bullets.forEach(b => b.y += b.vy);
+// ===== SHOOT =====
+function shoot(){
+  bullets.push({x:player.x,y:player.y,v:8});
+  beep(600);
+}
 
-// enemies spawn if (Math.random() < 0.02) { enemies.push({ x: Math.random() * canvas.width, y: -20, size: 20, vy: 2 + Math.random() * 2, hp: 1 }); }
+// ===== ENEMIES =====
+function spawnEnemy(){
+  enemies.push({x:Math.random()*innerWidth,y:-20,hp:1,v:2});
+}
 
-// boss spawn if (score > 150 && !boss) { boss = { x: canvas.width/2, y: 100, hp: 50, dir: 1 }; }
+// ===== BOSS =====
+function spawnBoss(){
+  boss = {x:innerWidth/2,y:100,hp:60,dir:1};
+}
 
-// update enemies enemies.forEach(e => e.y += e.vy);
+// ===== SHOP =====
+function openShop(){
+  alert("Shop: +damage or +speed (demo)");
+  if(coins>=10){ player.damage++; coins-=10; save(); }
+}
 
-// boss movement if (boss) { boss.x += boss.dir * 3; if (boss.x < 50 || boss.x > canvas.width - 50) boss.dir *= -1; }
+// ===== SAVE =====
+function save(){ localStorage.setItem("coins",coins); }
 
-// collisions bullets.forEach((b, bi) => { enemies.forEach((e, ei) => { if (Math.hypot(b.x - e.x, b.y - e.y) < 20) { spawnParticle(e.x, e.y); enemies.splice(ei, 1); bullets.splice(bi, 1); score += 10; } });
+// ===== GAME START =====
+function startGame(){
+  gameState="game";
+  score=0;
+  enemies=[];
+  bullets=[];
+  boss=null;
+}
 
-if (boss && Math.hypot(b.x - boss.x, b.y - boss.y) < 40) {
-  boss.hp--;
-  spawnParticle(boss.x, boss.y);
-  bullets.splice(bi, 1);
-  if (boss.hp <= 0) {
-    boss = null;
-    score += 100;
+// ===== UPDATE =====
+function update(){
+  if(gameState!="game") return;
+
+  player.x += (touchX-player.x)*0.1;
+
+  bullets.forEach(b=>b.y-=b.v);
+  enemies.forEach(e=>e.y+=e.v);
+
+  if(Math.random()<0.02) spawnEnemy();
+
+  if(score>150 && !boss) spawnBoss();
+
+  if(boss){
+    boss.x += boss.dir*3;
+    if(boss.x<50||boss.x>innerWidth-50) boss.dir*=-1;
+  }
+
+  // collisions
+  bullets.forEach((b,bi)=>{
+    enemies.forEach((e,ei)=>{
+      if(Math.hypot(b.x-e.x,b.y-e.y)<20){
+        enemies.splice(ei,1);
+        bullets.splice(bi,1);
+        score+=10;
+        coins+=1;
+        beep(300);
+      }
+    });
+
+    if(boss && Math.hypot(b.x-boss.x,b.y-boss.y)<40){
+      boss.hp-=player.damage;
+      bullets.splice(bi,1);
+      beep(150);
+      if(boss.hp<=0){
+        boss=null;
+        score+=100;
+        coins+=20;
+      }
+    }
+  });
+
+  document.getElementById("score").innerText=score;
+  document.getElementById("coins").innerText=coins;
+}
+
+// ===== DRAW =====
+function draw(){
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,innerWidth,innerHeight);
+
+  // planet bg
+  let p=getPlanet();
+  ctx.fillStyle = p=="EARTH"?"#111":p=="MARS"?"#220": "#110033";
+  ctx.fillRect(0,0,innerWidth,innerHeight);
+
+  // player
+  ctx.fillStyle="cyan";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
+
+  // bullets
+  ctx.fillStyle="yellow";
+  bullets.forEach(b=>ctx.fillRect(b.x,b.y,3,8));
+
+  // enemies
+  ctx.fillStyle="red";
+  enemies.forEach(e=>ctx.fillRect(e.x,e.y,20,20));
+
+  // boss
+  if(boss){
+    ctx.fillStyle="purple";
+    ctx.fillRect(boss.x-40,boss.y-40,80,80);
+    ctx.fillStyle="white";
+    ctx.fillText("BOSS HP:"+boss.hp,boss.x-40,boss.y-50);
   }
 }
 
-});
-
-// particles particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life--; if (p.life <= 0) particles.splice(i, 1); }); }
-
-function draw() { ctx.clearRect(0,0,canvas.width,canvas.height);
-
-// stars (cheap render) ctx.fillStyle = "white"; stars.forEach(s => { ctx.globalAlpha = 0.5 + Math.random() * 0.5; ctx.fillRect(s.x, s.y, s.r, s.r); }); ctx.globalAlpha = 1;
-
-// player ctx.fillStyle = "cyan"; ctx.fillRect(player.x-10, player.y-10, 20, 20);
-
-// bullets ctx.fillStyle = "yellow"; bullets.forEach(b => ctx.fillRect(b.x, b.y, 3, 8));
-
-// enemies ctx.fillStyle = "red"; enemies.forEach(e => ctx.fillRect(e.x, e.y, e.size, e.size));
-
-// boss if (boss) { ctx.fillStyle = "purple"; ctx.fillRect(boss.x-40, boss.y-40, 80, 80); }
-
-// particles ctx.fillStyle = "orange"; particles.forEach(p => ctx.fillRect(p.x, p.y, 2, 2));
-
-// score ctx.fillStyle = "white"; ctx.fillText("Score: " + score, 20, 30); }
-
-function loop() { update(); draw(); requestAnimationFrame(loop); }
-
-loop(); </script>
-
-</body>
+// ===== LOOP =====
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script></body>
 </html>
