@@ -2,18 +2,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chugur Space Game</title>
+<title>Chugur Space Cell Game</title>
 <style>
   body { margin:0; overflow:hidden; background:#000; font-family:Arial; }
-  canvas { display:block; }/* UI */ .ui { position:fixed; top:0; left:0; width:100%; color:white; z-index:10; pointer-events:none; }
+  canvas { display:block; }.ui { position:fixed; top:0; left:0; width:100%; color:white; z-index:10; }
 
-.panel { pointer-events:auto; position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; }
+.panel { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; }
 
-button { margin:5px; padding:10px; border:none; border-radius:8px; }
+#controls { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:20px; }
 
-#controls { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:20px; z-index:10; }
-
-.btn { width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.2); text-align:center; line-height:70px; color:white; font-size:20px; } </style>
+.btn { width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.2); text-align:center; line-height:70px; color:white; } </style>
 
 </head>
 <body><canvas id="game"></canvas>
@@ -22,7 +20,8 @@ button { margin:5px; padding:10px; border:none; border-radius:8px; }
   <div class="panel">
     <div>Score: <span id="score">0</span></div>
     <div>Coins: <span id="coins">0</span></div>
-    <button onclick="openShop()">Shop</button>
+    <div>Mode: <span id="mode">SPACE</span></div>
+    <button onclick="toggleMode()">Switch Mode</button>
     <button onclick="startGame()">Start</button>
   </div>
 </div><div id="controls">
@@ -35,132 +34,108 @@ const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// ===== STATE =====
-let gameState = "menu";
-let score = 0;
-let coins = Number(localStorage.getItem("coins")||0);
+// ===== MODE =====
+let mode = "SPACE"; // SPACE or CELL
 
-// ===== PLAYER =====
-const player = { x: innerWidth/2, y: innerHeight-120, w:20, h:20, speed:6, damage:1 };
-
-// ===== GAME OBJECTS =====
-let bullets = [];
-let enemies = [];
-let boss = null;
-let particles = [];
-
-// ===== PLANET SYSTEM =====
-function getPlanet(){
-  if(score < 100) return "EARTH";
-  if(score < 250) return "MARS";
-  return "SATURN";
+function toggleMode(){
+  mode = mode === "SPACE" ? "CELL" : "SPACE";
+  document.getElementById("mode").innerText = mode;
 }
 
-// ===== AUDIO (simple beeps) =====
-const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-function beep(freq){
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.frequency.value = freq;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime+0.05);
+// ===== GAME STATE =====
+let score = 0;
+let coins = Number(localStorage.getItem("coins")||0);
+let gameState = "game";
+
+// ===== PLAYER =====
+const player = {
+  x: innerWidth/2,
+  y: innerHeight/2,
+  size: 20,
+  speed: 6,
+  growth: 1
+};
+
+// ===== OBJECTS =====
+let bullets = [];
+let enemies = [];
+let food = [];
+
+// ===== CELL MODE FOOD =====
+function spawnFood(){
+  food.push({
+    x: Math.random()*innerWidth,
+    y: Math.random()*innerHeight,
+    r: 3 + Math.random()*3
+  });
 }
 
 // ===== INPUT =====
 let touchX = player.x;
+let touchY = player.y;
 
 addEventListener("touchmove", e=>{
   touchX = e.touches[0].clientX;
+  touchY = e.touches[0].clientY;
 });
 
 addEventListener("touchstart", ()=>{
-  if(gameState!="game") return;
-  shoot();
+  if(mode=="SPACE") shoot();
 });
 
-// buttons
 left.onclick = ()=> player.x -= 30;
 right.onclick = ()=> player.x += 30;
 shoot.onclick = ()=> shoot();
 
-// ===== SHOOT =====
 function shoot(){
+  if(mode!=="SPACE") return;
   bullets.push({x:player.x,y:player.y,v:8});
-  beep(600);
 }
 
 // ===== ENEMIES =====
 function spawnEnemy(){
-  enemies.push({x:Math.random()*innerWidth,y:-20,hp:1,v:2});
-}
-
-// ===== BOSS =====
-function spawnBoss(){
-  boss = {x:innerWidth/2,y:100,hp:60,dir:1};
-}
-
-// ===== SHOP =====
-function openShop(){
-  alert("Shop: +damage or +speed (demo)");
-  if(coins>=10){ player.damage++; coins-=10; save(); }
-}
-
-// ===== SAVE =====
-function save(){ localStorage.setItem("coins",coins); }
-
-// ===== GAME START =====
-function startGame(){
-  gameState="game";
-  score=0;
-  enemies=[];
-  bullets=[];
-  boss=null;
+  enemies.push({x:Math.random()*innerWidth,y:-20,v:2});
 }
 
 // ===== UPDATE =====
 function update(){
-  if(gameState!="game") return;
 
-  player.x += (touchX-player.x)*0.1;
+  if(mode === "CELL"){
+    player.x += (touchX - player.x)*0.1;
+    player.y += (touchY - player.y)*0.1;
 
-  bullets.forEach(b=>b.y-=b.v);
-  enemies.forEach(e=>e.y+=e.v);
+    if(Math.random()<0.2) spawnFood();
 
-  if(Math.random()<0.02) spawnEnemy();
-
-  if(score>150 && !boss) spawnBoss();
-
-  if(boss){
-    boss.x += boss.dir*3;
-    if(boss.x<50||boss.x>innerWidth-50) boss.dir*=-1;
-  }
-
-  // collisions
-  bullets.forEach((b,bi)=>{
-    enemies.forEach((e,ei)=>{
-      if(Math.hypot(b.x-e.x,b.y-e.y)<20){
-        enemies.splice(ei,1);
-        bullets.splice(bi,1);
-        score+=10;
-        coins+=1;
-        beep(300);
+    food.forEach((f,fi)=>{
+      let d = Math.hypot(player.x-f.x, player.y-f.y);
+      if(d < player.size){
+        food.splice(fi,1);
+        player.size += 0.3;
+        score += 1;
       }
     });
 
-    if(boss && Math.hypot(b.x-boss.x,b.y-boss.y)<40){
-      boss.hp-=player.damage;
-      bullets.splice(bi,1);
-      beep(150);
-      if(boss.hp<=0){
-        boss=null;
-        score+=100;
-        coins+=20;
-      }
-    }
-  });
+  } else {
 
-  document.getElementById("score").innerText=score;
-  document.getElementById("coins").innerText=coins;
+    player.x += (touchX-player.x)*0.1;
+
+    bullets.forEach(b=>b.y-=b.v);
+    enemies.forEach(e=>e.y+=e.v);
+
+    if(Math.random()<0.02) spawnEnemy();
+
+    bullets.forEach((b,bi)=>{
+      enemies.forEach((e,ei)=>{
+        if(Math.hypot(b.x-e.x,b.y-e.y)<20){
+          enemies.splice(ei,1);
+          bullets.splice(bi,1);
+          score += 10;
+        }
+      });
+    });
+  }
+
+  document.getElementById("score").innerText = Math.floor(score);
 }
 
 // ===== DRAW =====
@@ -168,29 +143,30 @@ function draw(){
   ctx.fillStyle="#000";
   ctx.fillRect(0,0,innerWidth,innerHeight);
 
-  // planet bg
-  let p=getPlanet();
-  ctx.fillStyle = p=="EARTH"?"#111":p=="MARS"?"#220": "#110033";
-  ctx.fillRect(0,0,innerWidth,innerHeight);
+  if(mode === "CELL"){
 
-  // player
-  ctx.fillStyle="cyan";
-  ctx.fillRect(player.x,player.y,player.w,player.h);
+    ctx.fillStyle="lime";
+    food.forEach(f=>{
+      ctx.beginPath();
+      ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+      ctx.fill();
+    });
 
-  // bullets
-  ctx.fillStyle="yellow";
-  bullets.forEach(b=>ctx.fillRect(b.x,b.y,3,8));
+    ctx.fillStyle="cyan";
+    ctx.beginPath();
+    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
+    ctx.fill();
 
-  // enemies
-  ctx.fillStyle="red";
-  enemies.forEach(e=>ctx.fillRect(e.x,e.y,20,20));
+  } else {
 
-  // boss
-  if(boss){
-    ctx.fillStyle="purple";
-    ctx.fillRect(boss.x-40,boss.y-40,80,80);
-    ctx.fillStyle="white";
-    ctx.fillText("BOSS HP:"+boss.hp,boss.x-40,boss.y-50);
+    ctx.fillStyle="cyan";
+    ctx.fillRect(player.x,player.y,20,20);
+
+    ctx.fillStyle="yellow";
+    bullets.forEach(b=>ctx.fillRect(b.x,b.y,3,8));
+
+    ctx.fillStyle="red";
+    enemies.forEach(e=>ctx.fillRect(e.x,e.y,20,20));
   }
 }
 
