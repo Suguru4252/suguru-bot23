@@ -1,197 +1,84 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Space Game Pro+ Levels</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Space Game Optimized</title>
 <style>
-body { margin:0; overflow:hidden; background:black; touch-action:none; font-family:Arial; }
-canvas { display:block; }
-#menu, #shop {
- position:absolute; top:0; left:0; width:100%; height:100%;
- background:rgba(0,0,0,0.9); color:white;
- display:flex; flex-direction:column; justify-content:center; align-items:center;
-}
-button { padding:10px 20px; margin:10px; font-size:18px; border-radius:10px; }
-#ui { position:absolute; top:10px; left:10px; color:white; }
-#levelUI { position:absolute; top:10px; right:10px; color:cyan; font-size:18px; }
-#controls { position:absolute; bottom:20px; width:100%; display:flex; justify-content:space-between; padding:0 20px; }
-.joystick { width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.1); position:relative; }
-.stick { width:50px; height:50px; border-radius:50%; background:white; position:absolute; left:35px; top:35px; }
-#shootBtn { width:80px; height:80px; border-radius:50%; background:red; color:white; font-size:20px; border:none; }
+  body { margin:0; overflow:hidden; background:#000; }
+  canvas { display:block; }
 </style>
 </head>
-<body><div id="menu">
-<h1>🚀 Space Game Pro+</h1>
-<button onclick="startGame()">Играть</button>
-<button onclick="openShop()">Магазин</button>
-</div><div id="shop" style="display:none">
-<h2>🛒 Магазин</h2>
-<button onclick="buy('hp')">+50 HP (50)</button>
-<button onclick="buy('dmg')">Урон + (50)</button>
-<button onclick="buy('speed')">Скорость + (50)</button>
-<button onclick="closeShop()">Назад</button>
-</div><canvas id="game"></canvas>
-
-<div id="ui">
-<div>HP: <span id="hp">100</span></div>
-<div>Очки: <span id="score">0</span></div>
-</div><div id="levelUI">Планета: -</div><div id="controls">
- <div class="joystick" id="joy"><div class="stick" id="stick"></div></div>
- <button id="shootBtn">🔥</button>
-</div><script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+<body>
+<canvas id="game"></canvas>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.height = window.innerHeight;// ===== PERFORMANCE SETTINGS ===== const STAR_COUNT = 80; const MAX_PARTICLES = 40;
 
-// ===== PLANETS =====
-const planets = [
- {name:"Earth Orbit", speed:2, spawn:1000, bg:"#050814"},
- {name:"Mars Field", speed:3, spawn:800, bg:"#140505"},
- {name:"Neon Saturn", speed:4, spawn:600, bg:"#0a0514"}
-];
+// ===== STARS (pre-generated) ===== const stars = Array.from({length: STAR_COUNT}, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 2, s: 0.2 + Math.random() * 0.8 }));
 
-let currentLevel = 0;
+// ===== PLAYER ===== const player = { x: canvas.width / 2, y: canvas.height - 100, size: 20, speed: 6 };
 
-let player, bullets, enemies, score, gameRunning=false;
-let dmg=5, speed=0.1;
+// ===== BULLETS ===== const bullets = [];
 
-function saveGame(){
- localStorage.setItem('save', JSON.stringify({hp:player.hp,score,dmg,speed,level:currentLevel}));
-}
-function loadGame(){
- let s=localStorage.getItem('save');
- if(s){ let d=JSON.parse(s); player.hp=d.hp; score=d.score; dmg=d.dmg; speed=d.speed; currentLevel=d.level||0; }
-}
+// ===== ENEMIES ===== const enemies = []; let boss = null; let score = 0;
 
-function startGame(){
- document.getElementById('menu').style.display='none';
- player={x:canvas.width/2,y:canvas.height/2,vx:0,vy:0,hp:100};
- bullets=[]; enemies=[]; score=0;
- loadGame();
- gameRunning=true;
- spawnLoop();
-}
+// ===== PARTICLES (pool system) ===== const particles = [];
 
-function openShop(){ document.getElementById('shop').style.display='flex'; }
-function closeShop(){ document.getElementById('shop').style.display='none'; }
-function buy(type){
- if(score<50) return alert('Мало очков');
- score-=50;
- if(type==='hp') player.hp+=50;
- if(type==='dmg') dmg+=2;
- if(type==='speed') speed+=0.05;
- saveGame();
-}
+function spawnParticle(x, y) { if (particles.length > MAX_PARTICLES) return; particles.push({ x, y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, life: 30 }); }
 
-// ===== LEVEL SYSTEM =====
-function updateLevel(){
- if(score>250) currentLevel=2;
- else if(score>100) currentLevel=1;
- else currentLevel=0;
+// ===== INPUT ===== let touchX = player.x; canvas.addEventListener("touchmove", e => { touchX = e.touches[0].clientX; });
 
- document.getElementById('levelUI').innerText = "Планета: " + planets[currentLevel].name;
+canvas.addEventListener("touchstart", e => { bullets.push({ x: player.x, y: player.y, vy: -8 }); });
+
+// ===== GAME LOOP ===== function update() { // move player player.x += (touchX - player.x) * 0.15;
+
+// bullets bullets.forEach(b => b.y += b.vy);
+
+// enemies spawn if (Math.random() < 0.02) { enemies.push({ x: Math.random() * canvas.width, y: -20, size: 20, vy: 2 + Math.random() * 2, hp: 1 }); }
+
+// boss spawn if (score > 150 && !boss) { boss = { x: canvas.width/2, y: 100, hp: 50, dir: 1 }; }
+
+// update enemies enemies.forEach(e => e.y += e.vy);
+
+// boss movement if (boss) { boss.x += boss.dir * 3; if (boss.x < 50 || boss.x > canvas.width - 50) boss.dir *= -1; }
+
+// collisions bullets.forEach((b, bi) => { enemies.forEach((e, ei) => { if (Math.hypot(b.x - e.x, b.y - e.y) < 20) { spawnParticle(e.x, e.y); enemies.splice(ei, 1); bullets.splice(bi, 1); score += 10; } });
+
+if (boss && Math.hypot(b.x - boss.x, b.y - boss.y) < 40) {
+  boss.hp--;
+  spawnParticle(boss.x, boss.y);
+  bullets.splice(bi, 1);
+  if (boss.hp <= 0) {
+    boss = null;
+    score += 100;
+  }
 }
 
-// ===== SHOOT =====
-document.getElementById('shootBtn').ontouchstart=()=>{
- if(!gameRunning) return;
- bullets.push({x:player.x,y:player.y,vx:0,vy:-8});
-};
+});
 
-// ===== JOYSTICK =====
-let joy=document.getElementById('joy'), stick=document.getElementById('stick');
-let active=false;
-joy.ontouchstart=()=>active=true;
-joy.ontouchend=()=>{active=false;player.vx=0;player.vy=0;stick.style.left='35px';stick.style.top='35px';};
-joy.ontouchmove=e=>{
- if(!active) return;
- let r=joy.getBoundingClientRect();
- let t=e.touches[0];
- let x=t.clientX-r.left-60, y=t.clientY-r.top-60;
- let d=Math.min(40,Math.hypot(x,y));
- let a=Math.atan2(y,x);
- let dx=Math.cos(a)*d, dy=Math.sin(a)*d;
- stick.style.left=(dx+35)+'px';
- stick.style.top=(dy+35)+'px';
- player.vx=dx*speed;
- player.vy=dy*speed;
-};
+// particles particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life--; if (p.life <= 0) particles.splice(i, 1); }); }
 
-// ===== SPAWN =====
-function spawnEnemies(){
- if(!gameRunning) return;
- enemies.push({x:Math.random()*canvas.width,y:-20,hp:20+currentLevel*10});
- setTimeout(spawnEnemies, planets[currentLevel].spawn);
-}
+function draw() { ctx.clearRect(0,0,canvas.width,canvas.height);
 
-function spawnLoop(){ spawnEnemies(); }
+// stars (cheap render) ctx.fillStyle = "white"; stars.forEach(s => { ctx.globalAlpha = 0.5 + Math.random() * 0.5; ctx.fillRect(s.x, s.y, s.r, s.r); }); ctx.globalAlpha = 1;
 
-// ===== UPDATE =====
-function update(){
- if(!gameRunning) return;
+// player ctx.fillStyle = "cyan"; ctx.fillRect(player.x-10, player.y-10, 20, 20);
 
- player.x+=player.vx; player.y+=player.vy;
- bullets.forEach(b=>b.y+=b.vy);
- enemies.forEach(e=>e.y+=planets[currentLevel].speed);
+// bullets ctx.fillStyle = "yellow"; bullets.forEach(b => ctx.fillRect(b.x, b.y, 3, 8));
 
- bullets.forEach((b,bi)=>{
-  enemies.forEach((e,ei)=>{
-   if(Math.hypot(b.x-e.x,b.y-e.y)<15){
-    e.hp-=dmg; bullets.splice(bi,1);
-    if(e.hp<=0){ enemies.splice(ei,1); score+=10; }
-   }
-  });
- });
+// enemies ctx.fillStyle = "red"; enemies.forEach(e => ctx.fillRect(e.x, e.y, e.size, e.size));
 
- enemies.forEach((e,ei)=>{
-  if(Math.hypot(player.x-e.x,player.y-e.y)<20){ player.hp-=10; enemies.splice(ei,1); }
- });
+// boss if (boss) { ctx.fillStyle = "purple"; ctx.fillRect(boss.x-40, boss.y-40, 80, 80); }
 
- updateLevel();
+// particles ctx.fillStyle = "orange"; particles.forEach(p => ctx.fillRect(p.x, p.y, 2, 2));
 
- if(player.hp<=0){
-  saveGame();
-  alert('GAME OVER');
-  location.reload();
- }
+// score ctx.fillStyle = "white"; ctx.fillText("Score: " + score, 20, 30); }
 
- document.getElementById('hp').innerText=player.hp;
- document.getElementById('score').innerText=score;
- saveGame();
-}
+function loop() { update(); draw(); requestAnimationFrame(loop); }
 
-// ===== DRAW =====
-function draw(){
- ctx.fillStyle=planets[currentLevel].bg;
- ctx.fillRect(0,0,canvas.width,canvas.height);
+loop(); </script>
 
- // stars
- for(let i=0;i<50;i++){
-  ctx.fillStyle='white';
-  ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,2,2);
- }
-
- // ship
- ctx.save();
- ctx.translate(player.x,player.y);
- ctx.fillStyle='cyan';
- ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo(8,10); ctx.lineTo(-8,10); ctx.closePath(); ctx.fill();
- ctx.restore();
-
- // bullets
- ctx.fillStyle='yellow'; bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-5,4,10));
-
- // enemies
- enemies.forEach(e=>{
-  let g=ctx.createRadialGradient(e.x,e.y,2,e.x,e.y,10);
-  g.addColorStop(0,'red'); g.addColorStop(1,'black');
-  ctx.fillStyle=g;
-  ctx.beginPath(); ctx.arc(e.x,e.y,10,0,Math.PI*2); ctx.fill();
- });
-}
-
-function loop(){ update(); draw(); requestAnimationFrame(loop); }
-loop();
-</script></body>
+</body>
 </html>
