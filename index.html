@@ -1,113 +1,137 @@
 <!DOCTYPE html><html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Space Survivor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Space Mobile Game</title>
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: radial-gradient(circle, #000010, #000);
-  color: white;
-  overflow: hidden;
-}#game { text-align: center; padding-top: 40px; }
+body { margin:0; overflow:hidden; background:black; touch-action:none; }
+canvas { display:block; }
+#ui {
+ position:absolute; top:10px; left:10px; color:white; font-family:Arial;
+}#controls { position:absolute; bottom:20px; width:100%; display:flex; justify-content:space-between; padding:0 20px; box-sizing:border-box; }
 
-.stat { margin: 10px; font-size: 18px; }
+.joystick { width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.1); position:relative; }
 
-button { padding: 10px 20px; margin: 5px; border: none; border-radius: 10px; background: #1e90ff; color: white; cursor: pointer; transition: 0.3s; }
+.stick { width:50px; height:50px; border-radius:50%; background:white; position:absolute; left:35px; top:35px; }
 
-button:hover { transform: scale(1.1); background: #00bfff; }
-
-#log { height: 120px; overflow-y: auto; border-top: 1px solid #444; margin-top: 20px; padding: 10px; font-size: 14px; }
-
-.star { position: absolute; width: 2px; height: 2px; background: white; animation: moveStars linear infinite; }
-
-@keyframes moveStars { from { transform: translateY(0); } to { transform: translateY(100vh); } } </style>
+#shootBtn { width:80px; height:80px; border-radius:50%; background:red; color:white; font-size:20px; border:none; } </style>
 
 </head>
-<body><div id="game">
-  <h1>🚀 Space Survivor</h1>  <div class="stat">🔋 Энергия: <span id="energy">100</span></div>
-  <div class="stat">🫁 Кислород: <span id="oxygen">100</span></div>
-  <div class="stat">🍖 Еда: <span id="food">100</span></div><button onclick="repair()">⚙️ Чинить корабль</button> <button onclick="search()">📡 Искать сигнал</button> <button onclick="rest()">😴 Отдохнуть</button>
-
-  <div id="log"></div>
+<body>
+<canvas id="game"></canvas><div id="ui">
+<div>HP: <span id="hp">100</span></div>
+</div><div id="controls">
+ <div class="joystick" id="joy">
+   <div class="stick" id="stick"></div>
+ </div>
+ <button id="shootBtn">🔥</button>
 </div><script>
-let energy = 100;
-let oxygen = 100;
-let food = 100;
-let progress = 0;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-function update() {
-  document.getElementById("energy").innerText = energy;
-  document.getElementById("oxygen").innerText = oxygen;
-  document.getElementById("food").innerText = food;
+let player = { x:canvas.width/2, y:canvas.height/2, vx:0, vy:0, hp:100 };
+let bullets = [];
+let enemies = [];
+
+// стрельба
+document.getElementById('shootBtn').ontouchstart = ()=>{
+ bullets.push({ x:player.x, y:player.y, vx:0, vy:-6 });
+};
+
+// джойстик
+let joy = document.getElementById('joy');
+let stick = document.getElementById('stick');
+let joyActive=false;
+
+joy.addEventListener('touchstart', ()=> joyActive=true);
+joy.addEventListener('touchend', ()=>{
+ joyActive=false;
+ player.vx=0; player.vy=0;
+ stick.style.left='35px'; stick.style.top='35px';
+});
+
+joy.addEventListener('touchmove', e=>{
+ if(!joyActive) return;
+ let rect = joy.getBoundingClientRect();
+ let touch = e.touches[0];
+ let x = touch.clientX - rect.left - 60;
+ let y = touch.clientY - rect.top - 60;
+
+ let dist = Math.min(40, Math.hypot(x,y));
+ let angle = Math.atan2(y,x);
+
+ let dx = Math.cos(angle)*dist;
+ let dy = Math.sin(angle)*dist;
+
+ stick.style.left = (dx+35)+'px';
+ stick.style.top = (dy+35)+'px';
+
+ player.vx = dx * 0.1;
+ player.vy = dy * 0.1;
+});
+
+// враги
+function spawnEnemy(){
+ enemies.push({ x:Math.random()*canvas.width, y:-20 });
 }
+setInterval(spawnEnemy,1500);
 
-function log(text) {
-  const logDiv = document.getElementById("log");
-  logDiv.innerHTML = text + "<br>" + logDiv.innerHTML;
-}
+function update(){
+ player.x += player.vx;
+ player.y += player.vy;
 
-function repair() {
-  if (energy < 10) return log("❌ Не хватает энергии");
+ bullets.forEach(b=> b.y+=b.vy);
+ enemies.forEach(e=> e.y+=2);
 
-  energy -= 10;
-  progress += Math.random() * 10;
+ // столкновения
+ bullets.forEach((b,bi)=>{
+  enemies.forEach((e,ei)=>{
+   if(Math.hypot(b.x-e.x,b.y-e.y)<15){
+    enemies.splice(ei,1);
+    bullets.splice(bi,1);
+   }
+  });
+ });
 
-  log("🔧 Ты чинишь корабль...");
-
-  if (progress >= 100) {
-    log("🎉 Ты починил корабль и спасся!");
-    alert("ПОБЕДА");
-    location.reload();
+ enemies.forEach((e,ei)=>{
+  if(Math.hypot(player.x-e.x,player.y-e.y)<20){
+    player.hp-=10;
+    enemies.splice(ei,1);
   }
+ });
+
+ if(player.hp<=0){ alert('GAME OVER'); location.reload(); }
+ document.getElementById('hp').innerText=player.hp;
 }
 
-function search() {
-  if (energy < 5) return log("❌ Нет энергии");
+function draw(){
+ ctx.fillStyle='black';
+ ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  energy -= 5;
+ ctx.fillStyle='white';
+ ctx.beginPath();
+ ctx.arc(player.x,player.y,10,0,Math.PI*2);
+ ctx.fill();
 
-  let event = Math.random();
+ ctx.fillStyle='yellow';
+ bullets.forEach(b=> ctx.fillRect(b.x-2,b.y-5,4,10));
 
-  if (event < 0.3) {
-    log("📡 Ты нашел слабый сигнал...");
-    progress += 5;
-  } else if (event < 0.6) {
-    log("☄️ Метеорит повредил корабль!");
-    energy -= 10;
-  } else {
-    log("👽 Ты заметил странный объект...");
-    oxygen -= 5;
-  }
+ ctx.fillStyle='red';
+ enemies.forEach(e=>{
+  ctx.beginPath();
+  ctx.arc(e.x,e.y,10,0,Math.PI*2);
+  ctx.fill();
+ });
 }
 
-function rest() {
-  log("😴 Ты отдыхаешь...");
-  energy += 10;
-  food -= 5;
+function loop(){
+ update();
+ draw();
+ requestAnimationFrame(loop);
 }
 
-setInterval(() => {
-  oxygen -= 1;
-  food -= 1;
-
-  if (oxygen <= 0 || food <= 0 || energy <= 0) {
-    alert("💀 Ты погиб...");
-    location.reload();
-  }
-
-  update();
-}, 1000);
-
-// звезды
-for (let i = 0; i < 100; i++) {
-  let star = document.createElement("div");
-  star.className = "star";
-  star.style.left = Math.random() * 100 + "vw";
-  star.style.animationDuration = (2 + Math.random() * 5) + "s";
-  document.body.appendChild(star);
-}
-
-update();
+loop();
 </script></body>
 </html>
