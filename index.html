@@ -3,59 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>Roblox Style Pet Game</title>
+<title>MAX AAA FULL GAME</title>
 
 <style>
-body { margin:0; overflow:hidden; font-family:Arial; }
+body{margin:0;overflow:hidden;font-family:Arial;}
 
-/* UI */
 #ui{
-  position:absolute;
-  top:10px;
-  left:10px;
-  background:rgba(0,0,0,0.6);
-  color:white;
-  padding:10px;
-  border-radius:12px;
-  font-size:14px;
+position:absolute;top:10px;left:10px;
+background:rgba(0,0,0,0.5);
+color:white;padding:10px;border-radius:10px;
+font-size:14px;
 }
 
-/* JOYSTICK */
-#joy {
-  position:absolute;
-  bottom:30px;
-  left:30px;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.15);
+#joy{
+position:absolute;bottom:30px;left:30px;
+width:130px;height:130px;border-radius:50%;
+background:rgba(255,255,255,0.1);
 }
 
 #stick{
-  width:50px;
-  height:50px;
-  background:white;
-  border-radius:50%;
-  position:absolute;
-  top:35px;
-  left:35px;
+width:50px;height:50px;background:white;
+border-radius:50%;
+position:absolute;top:40px;left:40px;
 }
 
-/* BUTTONS */
 button{
-  position:absolute;
-  right:10px;
-  width:120px;
-  height:45px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  background:white;
+position:absolute;right:10px;
+width:140px;height:45px;border:none;
+border-radius:10px;font-weight:bold;
 }
 
-#egg{ bottom:160px; }
-#zone{ bottom:100px; }
-#save{ bottom:40px; }
+#shop{bottom:160px;}
+#pet{bottom:100px;}
+#boss{bottom:40px;}
 </style>
 </head>
 
@@ -65,253 +45,270 @@ button{
 
 <div id="joy"><div id="stick"></div></div>
 
-<button id="egg">🥚 Egg</button>
-<button id="zone">🌍 Zone</button>
-<button id="save">💾 Save</button>
+<button id="shop">🏪 SHOP</button>
+<button id="pet">🐾 PET</button>
+<button id="boss">🐉 BOSS</button>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
-// ================= SCENE =================
+// ================= WORLD =================
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xaadfff, 20, 140);
-scene.background = new THREE.Color(0xaadfff);
+scene.fog = new THREE.Fog(0x0b0f2a, 10, 200);
 
-// ================= CAMERA =================
+// CAMERA
 const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight,0.1,1000);
+camera.position.set(0,8,12);
 
-// ================= RENDER =================
+// RENDER
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// ================= LIGHT =================
-const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-sun.position.set(30,40,20);
-sun.castShadow = true;
-scene.add(sun);
-
+// LIGHT
 scene.add(new THREE.AmbientLight(0xffffff,0.5));
 
-// ================= FLOOR =================
+const sun = new THREE.DirectionalLight(0xffffff,1);
+sun.position.set(10,20,10);
+scene.add(sun);
+
+// FLOOR
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(400,400),
-  new THREE.MeshStandardMaterial({color:0x3fbf6f, roughness:1})
+new THREE.PlaneGeometry(500,500),
+new THREE.MeshStandardMaterial({color:0x222244})
 );
 floor.rotation.x = -Math.PI/2;
-floor.receiveShadow = true;
 scene.add(floor);
 
 // ================= PLAYER =================
 const player = new THREE.Mesh(
-  new THREE.SphereGeometry(1,32,32),
-  new THREE.MeshStandardMaterial({color:"lime"})
+new THREE.SphereGeometry(1,32,32),
+new THREE.MeshStandardMaterial({color:"lime"})
 );
 player.position.y = 1;
-player.castShadow = true;
 scene.add(player);
 
 // ================= DATA =================
-let pets = [];
-let objects = [];
-let coins = 0;
-let level = 1;
-let exp = 0;
-let zone = 1;
+let pets=[];
+let enemies=[];
+let boss=null;
 
-const zones = ["Starter","Desert","Space","Alien"];
+let coins=0;
+let level=1;
+let xp=0;
+
+// ================= ENEMY =================
+function spawnEnemy(){
+const e=new THREE.Mesh(
+new THREE.BoxGeometry(2,2,2),
+new THREE.MeshStandardMaterial({color:"red"})
+);
+
+e.hp=20+level*5;
+e.position.set((Math.random()-0.5)*80,1,(Math.random()-0.5)*80);
+
+scene.add(e);
+enemies.push(e);
+}
+
+for(let i=0;i<8;i++) spawnEnemy();
+
+// ================= PET =================
+function spawnPet(power=2,color=0x00ffff){
+const p=new THREE.Mesh(
+new THREE.SphereGeometry(0.6,32,32),
+new THREE.MeshStandardMaterial({
+color,
+emissive:color,
+emissiveIntensity:0.5
+})
+);
+
+p.power=power;
+p.angle=Math.random()*Math.PI*2;
+
+scene.add(p);
+pets.push(p);
+}
+
+// ================= BOSS =================
+function spawnBoss(){
+if(boss) return;
+
+boss=new THREE.Mesh(
+new THREE.TorusKnotGeometry(3,1,100,16),
+new THREE.MeshStandardMaterial({
+color:"purple",
+emissive:0x5500ff,
+emissiveIntensity:1
+})
+);
+
+boss.hp=300;
+boss.phase=1;
+boss.position.set(0,5,-20);
+
+scene.add(boss);
+}
 
 // ================= SAVE =================
 function save(){
-  localStorage.setItem("game_save", JSON.stringify({
-    coins, level, exp, zone, pets: pets.length
-  }));
+localStorage.setItem("game",JSON.stringify({
+coins,level,xp,pets:pets.length
+}));
 }
 
 function load(){
-  let d = localStorage.getItem("game_save");
-  if(!d) return;
-  d = JSON.parse(d);
+let d=localStorage.getItem("game");
+if(!d) return;
+d=JSON.parse(d);
 
-  coins = d.coins||0;
-  level = d.level||1;
-  exp = d.exp||0;
-  zone = d.zone||1;
+coins=d.coins;
+level=d.level;
+xp=d.xp;
+
+for(let i=0;i<d.pets;i++) spawnPet();
 }
+
 load();
 
-// ================= OBJECTS =================
-function spawnObject(){
-  const obj = new THREE.Mesh(
-    new THREE.BoxGeometry(2,2,2),
-    new THREE.MeshStandardMaterial({
-      color:new THREE.Color(`hsl(${Math.random()*360},70%,55%)`)
-    })
-  );
+// ================= DAMAGE =================
+function hit(target,dmg){
+target.hp-=dmg;
 
-  obj.position.set((Math.random()-0.5)*90,1,(Math.random()-0.5)*90);
-  obj.hp = 20 + zone*10;
+if(target.hp<=0){
+scene.remove(target);
 
-  obj.castShadow = true;
-  scene.add(obj);
-  objects.push(obj);
+if(enemies.includes(target)){
+enemies.splice(enemies.indexOf(target),1);
+coins+=5;
+xp++;
+spawnEnemy();
 }
 
-for(let i=0;i<15;i++) spawnObject();
-
-// ================= PETS =================
-function addPet(){
-  const pet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.6,24,24),
-    new THREE.MeshStandardMaterial({
-      color:"cyan",
-      emissive:0x0022ff,
-      emissiveIntensity:0.3
-    })
-  );
-
-  pet.power = 2 + level;
-  pet.angle = Math.random()*Math.PI*2;
-
-  scene.add(pet);
-  pets.push(pet);
+if(target===boss){
+boss=null;
+coins+=100;
+spawnPet(5,0xff00ff);
+}
+}
 }
 
-// ================= EGGS =================
-function egg(){
-  addPet();
+// ================= PET LOGIC =================
+function petLogic(){
+pets.forEach(p=>{
+p.angle+=0.03;
+
+p.position.x=player.position.x+Math.cos(p.angle)*2.5;
+p.position.z=player.position.z+Math.sin(p.angle)*2.5;
+
+// attack enemies
+enemies.forEach(e=>{
+if(p.position.distanceTo(e.position)<5){
+hit(e,p.power);
+}
+});
+
+// boss
+if(boss && p.position.distanceTo(boss.position)<8){
+hit(boss,p.power*0.2);
+}
+});
 }
 
-// ================= INPUT =================
-let keys = {};
+// ================= PLAYER MOVE =================
+let keys={};
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-// ================= JOYSTICK FIX (FULL WORKING) =================
-const joy = document.getElementById("joy");
-const stick = document.getElementById("stick");
+// JOYSTICK
+let jx=0,jy=0;
+const joy=document.getElementById("joy");
+const stick=document.getElementById("stick");
 
-let joyX = 0;
-let joyY = 0;
-let active = false;
+joy.addEventListener("touchmove",(e)=>{
+let t=e.touches[0];
+let r=joy.getBoundingClientRect();
 
-function setStick(x, y){
-  const rect = joy.getBoundingClientRect();
+let dx=t.clientX-r.left-65;
+let dy=t.clientY-r.top-65;
 
-  let dx = x - rect.left - rect.width/2;
-  let dy = y - rect.top - rect.height/2;
+let max=50;
+jx=Math.max(-1,Math.min(1,dx/max));
+jy=Math.max(-1,Math.min(1,dy/max));
 
-  const max = 40;
+stick.style.transform=`translate(${dx}px,${dy}px)`;
+});
 
-  dx = Math.max(-max, Math.min(max, dx));
-  dy = Math.max(-max, Math.min(max, dy));
+joy.addEventListener("touchend",()=>{
+jx=jy=0;
+stick.style.transform="translate(0px,0px)";
+});
 
-  stick.style.transform = `translate(${dx}px, ${dy}px)`;
+// ================= CAMERA =================
+let angle=0;
+document.addEventListener("mousemove",(e)=>{
+angle+=e.movementX*0.003;
+});
 
-  joyX = dx / max;
-  joyY = dy / max;
+// ================= UI BUTTONS =================
+document.getElementById("shop").onclick=()=>{
+if(coins>=10){
+coins-=10;
+spawnPet();
 }
-
-joy.addEventListener("touchstart", ()=> active=true);
-
-joy.addEventListener("touchmove", (e)=>{
-  if(!active) return;
-  const t = e.touches[0];
-  setStick(t.clientX, t.clientY);
-});
-
-joy.addEventListener("touchend", ()=>{
-  active=false;
-  joyX=0;
-  joyY=0;
-  stick.style.transform="translate(0px,0px)";
-});
-
-// ================= BUTTONS =================
-document.getElementById("egg").onclick=egg;
-
-document.getElementById("zone").onclick=()=>{
-  zone++;
-  if(zone>=zones.length) zone=0;
 };
 
-document.getElementById("save").onclick=save;
+document.getElementById("pet").onclick=()=>spawnPet();
+
+document.getElementById("boss").onclick=()=>spawnBoss();
+
+// ================= LEVEL =================
+function levelUp(){
+if(xp>=level*5){
+level++;
+xp=0;
+spawnPet();
+}
+}
 
 // ================= UPDATE =================
 function update(){
 
-  // PLAYER MOVE (FIXED)
-  player.position.x += (keys["a"]?-0.3:0) + (keys["d"]?0.3:0) + joyX*0.35;
-  player.position.z += (keys["w"]?-0.3:0) + (keys["s"]?0.3:0) + joyY*0.35;
+// move
+player.position.x += (keys["a"]?-0.3:0)+(keys["d"]?0.3:0)+jx*0.3;
+player.position.z += (keys["w"]?-0.3:0)+(keys["s"]?0.3:0)+jy*0.3;
 
-  player.position.x = Math.max(-80,Math.min(80,player.position.x));
-  player.position.z = Math.max(-80,Math.min(80,player.position.z));
+// pets
+petLogic();
 
-  // PET FOLLOW
-  pets.forEach((p,i)=>{
-    p.angle += 0.05;
-
-    let r = 2 + i*0.15;
-
-    p.position.x = player.position.x + Math.cos(p.angle)*r;
-    p.position.z = player.position.z + Math.sin(p.angle)*r;
-    p.position.y = 1 + Math.sin(Date.now()*0.005+i)*0.2;
-  });
-
-  // AUTO FARM
-  pets.forEach(p=>{
-    let target=null;
-    let min=999;
-
-    objects.forEach(o=>{
-      let d = player.position.distanceTo(o.position);
-      if(d<min){
-        min=d;
-        target=o;
-      }
-    });
-
-    if(target){
-      target.hp -= p.power*0.08;
-
-      if(target.hp<=0){
-        scene.remove(target);
-        objects.splice(objects.indexOf(target),1);
-
-        coins += 10;
-        exp++;
-
-        spawnObject();
-
-        if(exp>=level*5){
-          level++;
-          exp=0;
-          addPet();
-        }
-      }
-    }
-  });
+// level
+levelUp();
 }
 
-// ================= CAMERA (ROBLOX STYLE) =================
+// ================= CAMERA FOLLOW =================
 function cam(){
-  camera.position.x += (player.position.x - camera.position.x)*0.08;
-  camera.position.z += (player.position.z + 10 - camera.position.z)*0.08;
-  camera.position.y = 7;
-  camera.lookAt(player.position);
+let dist=12;
+
+let x=player.position.x+Math.cos(angle)*dist;
+let z=player.position.z+Math.sin(angle)*dist;
+
+camera.position.x+=(x-camera.position.x)*0.08;
+camera.position.z+=(z-camera.position.z)*0.08;
+camera.position.y=8;
+
+camera.lookAt(player.position);
 }
 
 // ================= UI =================
 function ui(){
 document.getElementById("ui").innerHTML=`
-🌍 Zone: ${zones[zone]}<br>
 💰 Coins: ${coins}<br>
 ⭐ Level: ${level}<br>
-⚡ XP: ${exp}/${level*5}<br>
-🐶 Pets: ${pets.length}<br>
-📦 Objects: ${objects.length}
+⚡ XP: ${xp}/${level*5}<br>
+🐾 Pets: ${pets.length}<br>
+👹 Boss: ${boss?"YES":"NO"}
 `;
 }
 
