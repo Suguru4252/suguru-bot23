@@ -1,181 +1,265 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chugur Space Cell Game</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>3D Pet Mobile</title>
+
 <style>
-  body { margin:0; overflow:hidden; background:#000; font-family:Arial; }
-  canvas { display:block; }.ui { position:fixed; top:0; left:0; width:100%; color:white; z-index:10; }
+body { margin:0; overflow:hidden; font-family:Arial; }
 
-.panel { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; }
-
-#controls { position:fixed; bottom:20px; width:100%; display:flex; justify-content:center; gap:20px; }
-
-.btn { width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.2); text-align:center; line-height:70px; color:white; } </style>
-
-</head>
-<body><canvas id="game"></canvas>
-
-<div class="ui">
-  <div class="panel">
-    <div>Score: <span id="score">0</span></div>
-    <div>Coins: <span id="coins">0</span></div>
-    <div>Mode: <span id="mode">SPACE</span></div>
-    <button onclick="toggleMode()">Switch Mode</button>
-    <button onclick="startGame()">Start</button>
-  </div>
-</div><div id="controls">
-  <div class="btn" id="left">◀</div>
-  <div class="btn" id="shoot">🔥</div>
-  <div class="btn" id="right">▶</div>
-</div><script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
-// ===== MODE =====
-let mode = "SPACE"; // SPACE or CELL
-
-function toggleMode(){
-  mode = mode === "SPACE" ? "CELL" : "SPACE";
-  document.getElementById("mode").innerText = mode;
+#ui {
+    position:absolute;
+    top:10px;
+    left:10px;
+    color:white;
+    background:rgba(0,0,0,0.4);
+    padding:10px;
+    border-radius:10px;
+    font-size:14px;
 }
 
-// ===== GAME STATE =====
-let score = 0;
-let coins = Number(localStorage.getItem("coins")||0);
-let gameState = "game";
+/* JOYSTICK */
+#joystick {
+    position:absolute;
+    bottom:40px;
+    left:40px;
+    width:120px;
+    height:120px;
+    background:rgba(255,255,255,0.1);
+    border-radius:50%;
+}
 
-// ===== PLAYER =====
-const player = {
-  x: innerWidth/2,
-  y: innerHeight/2,
-  size: 20,
-  speed: 6,
-  growth: 1
+#stick {
+    position:absolute;
+    width:50px;
+    height:50px;
+    background:rgba(255,255,255,0.5);
+    border-radius:50%;
+    left:35px;
+    top:35px;
+}
+
+/* BUTTONS */
+.btn {
+    position:absolute;
+    right:20px;
+    width:90px;
+    height:50px;
+    background:rgba(0,0,0,0.5);
+    color:white;
+    text-align:center;
+    line-height:50px;
+    border-radius:10px;
+    user-select:none;
+}
+
+#eggBtn { bottom:140px; }
+#foodBtn { bottom:80px; }
+
+</style>
+</head>
+<body>
+
+<div id="ui"></div>
+
+<div id="joystick">
+    <div id="stick"></div>
+</div>
+
+<div id="eggBtn" class="btn">🥚 Egg</div>
+<div id="foodBtn" class="btn">🍖 Food</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+<script>
+// ================= SCENE =================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1e1e1e);
+
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// LIGHT
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(10,10,10);
+scene.add(light);
+
+// FLOOR
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(200,200),
+    new THREE.MeshStandardMaterial({color:0x2d6a4f})
+);
+floor.rotation.x = -Math.PI/2;
+scene.add(floor);
+
+// PLAYER
+const player = new THREE.Mesh(
+    new THREE.SphereGeometry(1,16,16),
+    new THREE.MeshStandardMaterial({color:"lime"})
+);
+scene.add(player);
+
+// ================= DATA =================
+let coins = [];
+let pets = [];
+let eggs = 3;
+let food = 2;
+
+let coinsCount = 0;
+let level = 1;
+let exp = 0;
+let speed = 0.15;
+
+// ================= SPAWN =================
+function spawnCoin(){
+    const c = new THREE.Mesh(
+        new THREE.SphereGeometry(0.4,8,8),
+        new THREE.MeshStandardMaterial({color:"gold"})
+    );
+    c.position.set((Math.random()-0.5)*80,0.5,(Math.random()-0.5)*80);
+    scene.add(c);
+    coins.push(c);
+}
+for(let i=0;i<25;i++) spawnCoin();
+
+// ================= PET =================
+function addPet(){
+    const p = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5,10,10),
+        new THREE.MeshStandardMaterial({color:"cyan"})
+    );
+    scene.add(p);
+    pets.push(p);
+}
+
+// ================= JOYSTICK =================
+let joyX = 0;
+let joyY = 0;
+
+const stick = document.getElementById("stick");
+const joystick = document.getElementById("joystick");
+
+let dragging = false;
+
+joystick.addEventListener("touchstart", ()=>dragging=true);
+joystick.addEventListener("touchend", ()=>{
+    dragging=false;
+    joyX=0; joyY=0;
+    stick.style.left="35px";
+    stick.style.top="35px";
+});
+
+joystick.addEventListener("touchmove", (e)=>{
+    if(!dragging) return;
+
+    let t = e.touches[0];
+    let rect = joystick.getBoundingClientRect();
+
+    let x = t.clientX - rect.left - 60;
+    let y = t.clientY - rect.top - 60;
+
+    joyX = x/40;
+    joyY = y/40;
+
+    joyX = Math.max(-1,Math.min(1,joyX));
+    joyY = Math.max(-1,Math.min(1,joyY));
+
+    stick.style.left = (60 + joyX*40 - 25)+"px";
+    stick.style.top  = (60 + joyY*40 - 25)+"px";
+});
+
+// ================= BUTTONS =================
+document.getElementById("eggBtn").onclick = ()=>{
+    if(eggs > 0){
+        eggs--;
+        if(Math.random()>0.3) addPet();
+    }
 };
 
-// ===== OBJECTS =====
-let bullets = [];
-let enemies = [];
-let food = [];
+document.getElementById("foodBtn").onclick = ()=>{
+    if(food > 0){
+        food--;
+        speed += 0.1;
+        setTimeout(()=>speed-=0.1,4000);
+    }
+};
 
-// ===== CELL MODE FOOD =====
-function spawnFood(){
-  food.push({
-    x: Math.random()*innerWidth,
-    y: Math.random()*innerHeight,
-    r: 3 + Math.random()*3
-  });
-}
-
-// ===== INPUT =====
-let touchX = player.x;
-let touchY = player.y;
-
-addEventListener("touchmove", e=>{
-  touchX = e.touches[0].clientX;
-  touchY = e.touches[0].clientY;
-});
-
-addEventListener("touchstart", ()=>{
-  if(mode=="SPACE") shoot();
-});
-
-left.onclick = ()=> player.x -= 30;
-right.onclick = ()=> player.x += 30;
-shoot.onclick = ()=> shoot();
-
-function shoot(){
-  if(mode!=="SPACE") return;
-  bullets.push({x:player.x,y:player.y,v:8});
-}
-
-// ===== ENEMIES =====
-function spawnEnemy(){
-  enemies.push({x:Math.random()*innerWidth,y:-20,v:2});
-}
-
-// ===== UPDATE =====
+// ================= LOOP =================
 function update(){
 
-  if(mode === "CELL"){
-    player.x += (touchX - player.x)*0.1;
-    player.y += (touchY - player.y)*0.1;
+    // MOVE PLAYER (TOUCH)
+    player.position.x += joyX * speed;
+    player.position.z += joyY * speed;
 
-    if(Math.random()<0.2) spawnFood();
+    player.position.x = Math.max(-40,Math.min(40,player.position.x));
+    player.position.z = Math.max(-40,Math.min(40,player.position.z));
 
-    food.forEach((f,fi)=>{
-      let d = Math.hypot(player.x-f.x, player.y-f.y);
-      if(d < player.size){
-        food.splice(fi,1);
-        player.size += 0.3;
-        score += 1;
-      }
-    });
+    // COINS
+    coins.forEach((c,i)=>{
+        if(player.position.distanceTo(c.position)<1.2){
+            scene.remove(c);
+            coins.splice(i,1);
 
-  } else {
+            coinsCount++;
+            exp++;
 
-    player.x += (touchX-player.x)*0.1;
+            spawnCoin();
 
-    bullets.forEach(b=>b.y-=b.v);
-    enemies.forEach(e=>e.y+=e.v);
-
-    if(Math.random()<0.02) spawnEnemy();
-
-    bullets.forEach((b,bi)=>{
-      enemies.forEach((e,ei)=>{
-        if(Math.hypot(b.x-e.x,b.y-e.y)<20){
-          enemies.splice(ei,1);
-          bullets.splice(bi,1);
-          score += 10;
+            if(exp>=level*5){
+                level++;
+                exp=0;
+                eggs++;
+                food++;
+                speed+=0.02;
+            }
         }
-      });
-    });
-  }
-
-  document.getElementById("score").innerText = Math.floor(score);
-}
-
-// ===== DRAW =====
-function draw(){
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,innerWidth,innerHeight);
-
-  if(mode === "CELL"){
-
-    ctx.fillStyle="lime";
-    food.forEach(f=>{
-      ctx.beginPath();
-      ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
-      ctx.fill();
     });
 
-    ctx.fillStyle="cyan";
-    ctx.beginPath();
-    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
-    ctx.fill();
-
-  } else {
-
-    ctx.fillStyle="cyan";
-    ctx.fillRect(player.x,player.y,20,20);
-
-    ctx.fillStyle="yellow";
-    bullets.forEach(b=>ctx.fillRect(b.x,b.y,3,8));
-
-    ctx.fillStyle="red";
-    enemies.forEach(e=>ctx.fillRect(e.x,e.y,20,20));
-  }
+    // PET FOLLOW
+    let angle=0;
+    pets.forEach(p=>{
+        p.position.x = player.position.x + Math.cos(angle)*2;
+        p.position.z = player.position.z + Math.sin(angle)*2;
+        angle+=Math.PI;
+    });
 }
 
-// ===== LOOP =====
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
+// ================= UI =================
+function ui(){
+document.getElementById("ui").innerHTML=
+`
+Coins: ${coinsCount}<br>
+Level: ${level}<br>
+XP: ${exp}/${level*5}<br><br>
+🥚 Eggs: ${eggs}<br>
+🍖 Food: ${food}<br>
+🐶 Pets: ${pets.length}
+`;
 }
-loop();
-</script></body>
+
+// ================= CAMERA =================
+function cam(){
+camera.position.x = player.position.x;
+camera.position.z = player.position.z + 5;
+camera.position.y = 5;
+camera.lookAt(player.position);
+}
+
+// ================= LOOP =================
+function animate(){
+update();
+ui();
+cam();
+renderer.render(scene,camera);
+requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
 </html>
