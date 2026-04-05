@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pet World 3D</title>
+<title>Pet Sim Lite Engine</title>
+
 <style>
 body { margin:0; overflow:hidden; font-family:Arial; }
-#ui{
+#ui {
   position:absolute;
   top:10px;
   left:10px;
@@ -14,42 +15,41 @@ body { margin:0; overflow:hidden; font-family:Arial; }
   background:rgba(0,0,0,0.5);
   padding:10px;
   border-radius:10px;
+  font-size:14px;
 }
 button{
   position:absolute;
   right:10px;
-  width:100px;
-  height:50px;
+  width:120px;
+  height:45px;
 }
-#egg{ bottom:120px; }
-#food{ bottom:60px; }
+#egg{ bottom:140px; }
+#zone{ bottom:80px; }
+#save{ bottom:20px; }
 </style>
 </head>
 <body>
 
 <div id="ui"></div>
-<button id="egg">🥚 Egg</button>
-<button id="food">🍖 Food</button>
+<button id="egg">🥚 Hatch</button>
+<button id="zone">🌍 Zone</button>
+<button id="save">💾 Save</button>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
 
-// ================= ENGINE =================
+// ================= WORLD =================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
 
-const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1000);
-
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight,0.1,1000);
 const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// LIGHTS
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(10,10,10);
-scene.add(light);
+// LIGHT
+scene.add(new THREE.DirectionalLight(0xffffff,1).position.set(10,10,10));
 
 // FLOOR
 const floor = new THREE.Mesh(
@@ -60,47 +60,90 @@ floor.rotation.x = -Math.PI/2;
 scene.add(floor);
 
 // ================= PLAYER =================
-const player = new THREE.Group();
-scene.add(player);
-
-// TEMP MODEL (потом заменим на GLB)
-const playerMesh = new THREE.Mesh(
-  new THREE.CapsuleGeometry(0.5,1,4,8),
+const player = new THREE.Mesh(
+  new THREE.SphereGeometry(1,16,16),
   new THREE.MeshStandardMaterial({color:"lime"})
 );
-player.add(playerMesh);
-
-// ================= PETS =================
-let pets = [];
-
-function createPet(color){
-  const pet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.3,16,16),
-    new THREE.MeshStandardMaterial({color})
-  );
-  scene.add(pet);
-  pets.push({mesh:pet, angle:Math.random()*Math.PI*2, height:0});
-}
-
-// ================= COINS =================
-let coins = [];
-
-function spawnCoin(){
-  const c = new THREE.Mesh(
-    new THREE.TorusGeometry(0.3,0.1,8,16),
-    new THREE.MeshStandardMaterial({color:"gold"})
-  );
-  c.position.set((Math.random()-0.5)*60,0.5,(Math.random()-0.5)*60);
-  scene.add(c);
-  coins.push(c);
-}
-for(let i=0;i<30;i++) spawnCoin();
+scene.add(player);
 
 // ================= GAME DATA =================
-let speed = 0.15;
+let coins = [];
+let objects = [];
+let pets = [];
+
 let coinsCount = 0;
 let level = 1;
 let exp = 0;
+
+let zone = 1;
+
+// ================= ZONES =================
+const zones = [
+  {name:"Starter", color:"green"},
+  {name:"Desert", color:"orange"},
+  {name:"Space", color:"purple"},
+  {name:"Alien", color:"red"}
+];
+
+// ================= SAVE =================
+function save(){
+  localStorage.setItem("pet_save", JSON.stringify({
+    coinsCount, level, exp, zone,
+    pets: pets.length
+  }));
+}
+
+function load(){
+  const s = localStorage.getItem("pet_save");
+  if(!s) return;
+  const d = JSON.parse(s);
+  coinsCount = d.coinsCount||0;
+  level = d.level||1;
+  exp = d.exp||0;
+  zone = d.zone||1;
+}
+load();
+
+// ================= OBJECTS =================
+function spawnObject(){
+  const hp = 10 + zone*10;
+
+  const obj = new THREE.Mesh(
+    new THREE.BoxGeometry(2,2,2),
+    new THREE.MeshStandardMaterial({color:"brown"})
+  );
+
+  obj.position.set((Math.random()-0.5)*60,1,(Math.random()-0.5)*60);
+  obj.hp = hp;
+
+  scene.add(obj);
+  objects.push(obj);
+}
+
+for(let i=0;i<10;i++) spawnObject();
+
+// ================= PETS =================
+function addPet(){
+  const pet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5,12,12),
+    new THREE.MeshStandardMaterial({color:"cyan"})
+  );
+
+  pet.power = 2 + level;
+  pet.angle = Math.random()*Math.PI*2;
+
+  scene.add(pet);
+  pets.push(pet);
+}
+
+// ================= EGGS =================
+function hatch(){
+  const r = Math.random();
+
+  if(r<0.5) addPet();
+  else if(r<0.8) addPet();
+  else addPet(); // simplified rarities
+}
 
 // ================= INPUT =================
 let keys = {};
@@ -108,90 +151,103 @@ document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
 // ================= BUTTONS =================
-document.getElementById("egg").onclick=()=>{
-  if(Math.random()>0.4){
-    createPet("cyan");
-  }else{
-    createPet("yellow");
-  }
+document.getElementById("egg").onclick=hatch;
+
+document.getElementById("zone").onclick=()=>{
+  zone++;
+  if(zone>=zones.length) zone=0;
 };
 
-document.getElementById("food").onclick=()=>{
-  speed+=0.1;
-  setTimeout(()=>speed-=0.1,4000);
-};
+document.getElementById("save").onclick=save;
 
-// ================= UPDATE =================
+// ================= GAME LOOP =================
 function update(){
 
   // MOVE
-  if(keys["w"]) player.position.z -= speed;
-  if(keys["s"]) player.position.z += speed;
-  if(keys["a"]) player.position.x -= speed;
-  if(keys["d"]) player.position.x += speed;
+  if(keys["w"]) player.position.z -= 0.2;
+  if(keys["s"]) player.position.z += 0.2;
+  if(keys["a"]) player.position.x -= 0.2;
+  if(keys["d"]) player.position.x += 0.2;
 
   // LIMIT
   player.position.x = Math.max(-40,Math.min(40,player.position.x));
   player.position.z = Math.max(-40,Math.min(40,player.position.z));
 
-  // COINS
-  coins.forEach((c,i)=>{
-    c.rotation.y += 0.05;
+  // ================= AUTO FARM =================
+  pets.forEach(p=>{
+    let target = null;
+    let minD = 999;
 
-    if(player.position.distanceTo(c.position)<1){
-      scene.remove(c);
-      coins.splice(i,1);
-      coinsCount++;
-      exp++;
+    objects.forEach(o=>{
+      let d = player.position.distanceTo(o.position);
+      if(d<minD){
+        minD=d;
+        target=o;
+      }
+    });
 
-      spawnCoin();
+    if(target){
+      target.hp -= p.power * 0.05;
 
-      if(exp>=level*5){
-        level++;
-        exp=0;
+      if(target.hp<=0){
+        scene.remove(target);
+        objects.splice(objects.indexOf(target),1);
+
+        coinsCount += 5;
+        exp++;
+
+        spawnObject();
+
+        if(exp>=level*5){
+          level++;
+          exp=0;
+          addPet();
+        }
       }
     }
   });
 
-  // PET ANIMATION (ВОТ ТУТ АНИМАЦИЯ)
+  // PET FOLLOW
+  let a=0;
   pets.forEach(p=>{
-    p.angle += 0.02;
-
-    p.mesh.position.x = player.position.x + Math.cos(p.angle)*2;
-    p.mesh.position.z = player.position.z + Math.sin(p.angle)*2;
-    p.mesh.position.y = 0.5 + Math.sin(p.angle*3)*0.2; // bounce animation
+    p.angle += 0.05;
+    p.position.x = player.position.x + Math.cos(p.angle)*2;
+    p.position.z = player.position.z + Math.sin(p.angle)*2;
+    p.position.y = 0.5;
+    a++;
   });
 }
 
 // ================= CAMERA =================
-function cameraFollow(){
+function cam(){
   camera.position.x += (player.position.x - camera.position.x)*0.1;
-  camera.position.z += (player.position.z + 5 - camera.position.z)*0.1;
+  camera.position.z += (player.position.z+5 - camera.position.z)*0.1;
   camera.position.y = 5;
   camera.lookAt(player.position);
 }
 
 // ================= UI =================
 function ui(){
-document.getElementById("ui").innerHTML=
-`
+document.getElementById("ui").innerHTML=`
+Zone: ${zones[zone].name}<br>
 Coins: ${coinsCount}<br>
 Level: ${level}<br>
 XP: ${exp}/${level*5}<br>
-Pets: ${pets.length}
+Pets: ${pets.length}<br>
+Objects: ${objects.length}
 `;
 }
 
 // ================= LOOP =================
-function animate(){
+function loop(){
 update();
 ui();
-cameraFollow();
+cam();
 renderer.render(scene,camera);
-requestAnimationFrame(animate);
+requestAnimationFrame(loop);
 }
 
-animate();
+loop();
 
 </script>
 
