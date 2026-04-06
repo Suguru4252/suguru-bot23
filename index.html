@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Black Russia | Кейсы с бонусами</title>
+    <title>Black Russia - Кейсы | Точная копия</title>
     <style>
         * {
             margin: 0;
@@ -14,540 +13,463 @@
         }
 
         body {
-            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
-            font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
-            min-height: 100vh;
+            background: #0a0c12;
+            font-family: 'Impact', 'Arial Black', 'Segoe UI Black', 'Roboto Condensed', sans-serif;
+            padding: 30px 20px;
+        }
+
+        /* Сетка как в стиле BR */
+        .cases-container {
+            max-width: 1300px;
+            margin: 0 auto;
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            padding: 24px 16px;
+            gap: 25px;
         }
 
-        /* главный контейнер-сетка */
-        .cases-grid {
-            max-width: 1400px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-            gap: 28px;
-            justify-items: center;
-            align-items: start;
+        /* Карточка кейса — точь-в-точь как на фото */
+        .case-item {
+            width: 360px;
+            background: linear-gradient(145deg, #141a24 0%, #0d1119 100%);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 200, 50, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+            overflow: hidden;
+            transition: 0.2s;
         }
 
-        /* карточка кейса */
-        .case-card {
-            background: linear-gradient(145deg, #11161f 0%, #0b0f17 100%);
-            border-radius: 32px;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-            width: 100%;
-            max-width: 380px;
-            padding: 20px 18px 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s;
-            backdrop-filter: blur(2px);
-            border: 1px solid rgba(255, 215, 0, 0.2);
+        .case-item:hover {
+            transform: translateY(-4px);
+            border-color: #ffb347;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.8);
         }
 
-        .case-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 40px -12px black;
-            border-color: rgba(255, 200, 50, 0.5);
-        }
-
-        /* шапка кейса */
-        .case-header {
+        /* Верхняя полоса с номером и ценой кейса */
+        .case-top {
+            background: #0b0f16;
+            padding: 12px 18px;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            border-bottom: 2px solid rgba(255, 200, 0, 0.4);
-            padding-bottom: 10px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
+            border-bottom: 2px solid #ffc10740;
         }
-        .case-title {
-            font-size: 1.65rem;
-            font-weight: 800;
+        .case-number {
+            color: #7e8c9e;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: monospace;
             letter-spacing: 1px;
-            background: linear-gradient(135deg, #FFE6B0, #FFB347);
+        }
+        .case-price-bc {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffd966;
+            text-shadow: 0 0 3px #ff9900;
+            line-height: 1;
+        }
+        .case-price-bc small {
+            font-size: 14px;
+            font-weight: normal;
+            color: #c9b36b;
+        }
+
+        /* Название кейса */
+        .case-name {
+            font-size: 32px;
+            font-weight: 900;
+            text-align: center;
+            padding: 16px 10px 5px;
+            letter-spacing: 1.5px;
+            background: linear-gradient(135deg, #FFD966, #FFB347);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .case-stock {
-            background: #1e2a32;
-            padding: 4px 12px;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #ffd966;
-            font-family: monospace;
-        }
-        .case-id {
-            font-size: 0.7rem;
-            color: #6c7a8e;
-            margin-top: 6px;
-            text-align: right;
-            font-family: monospace;
-        }
-
-        /* Блок бонусов / наград */
-        .bonus-badges {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 28px;
-            padding: 16px 12px;
-            margin: 18px 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        .bonus-item {
-            background: #11161f;
-            min-width: 68px;
-            text-align: center;
-            padding: 8px 4px;
-            border-radius: 28px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #FFD966;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 2px 5px rgba(0,0,0,0.3);
-            border-bottom: 2px solid #ffb347;
-        }
-        .bonus-small {
-            font-size: 0.75rem;
-            color: #b9c7d9;
-            display: block;
-            margin-top: 4px;
-        }
-        .sale-tag {
-            background: #e03a3a;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 2px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-left: 8px;
-            vertical-align: middle;
-            letter-spacing: 1px;
-        }
-        .limited {
-            background: #7a2e2e;
-            color: #ffbc6e;
-            font-size: 0.7rem;
-            border-radius: 20px;
-            padding: 2px 8px;
-        }
-
-        /* цены и кнопки */
-        .prices {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin: 18px 0 10px;
-            flex-wrap: wrap;
-        }
-        .price-btn {
-            flex: 1;
-            background: linear-gradient(180deg, #2a2f3c, #191e28);
-            border-radius: 60px;
-            padding: 12px 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.15s linear;
-            border: 1px solid #3e4555;
-            box-shadow: 0 6px 0 #0b0e12;
-        }
-        .price-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 3px 0 #0b0e12;
-        }
-        .price-amount {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #FFD966;
-        }
-        .price-label {
-            font-size: 0.7rem;
-            color: #aab3c2;
-            text-transform: uppercase;
-        }
-        .discount-badge {
-            background: #ff8800;
-            color: #1e1a0c;
-            font-size: 0.7rem;
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-
-        /* результат открытия */
-        .result-area {
-            margin-top: 20px;
-            background: #00000066;
-            border-radius: 24px;
-            padding: 12px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #FFE5B4;
-            border: 1px dashed #ffb34740;
-            transition: 0.1s;
+            text-shadow: 0 2px 4px black;
             word-break: break-word;
         }
-        .result-glow {
-            background: #2a2c1e;
-            box-shadow: 0 0 8px #ffd966;
-            color: #ffecb3;
+
+        /* Блок с бонусами (числа как на фото) */
+        .bonus-strip {
+            background: #00000055;
+            margin: 12px 15px;
+            padding: 14px 8px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            border: 1px solid #ffc10730;
+        }
+        .bonus-number {
+            font-size: 28px;
+            font-weight: 900;
+            color: #FFD966;
+            text-shadow: 0 2px 0 #7a4d1a;
+            background: #0f131cb3;
+            padding: 5px 12px;
+            border-radius: 40px;
+            min-width: 70px;
+            text-align: center;
+            font-family: monospace;
+        }
+        .bonus-label {
+            font-size: 11px;
+            color: #bbaa77;
+            letter-spacing: 1px;
+            margin-top: 4px;
         }
 
-        .footer-hash {
-            font-size: 0.6rem;
+        /* Блок SALE и скидочные стикеры */
+        .sale-badge {
+            background: #e33b3b;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: 900;
+            color: white;
             text-align: center;
-            margin-top: 16px;
-            color: #4a5568;
+            letter-spacing: 2px;
+            box-shadow: 0 2px 8px red;
+            margin: 5px auto 0;
+            width: fit-content;
+        }
+        .discount-percent {
+            background: #ff8800;
+            color: #1e1a0c;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        /* Блок цен и кнопок */
+        .price-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 15px 18px 10px;
+        }
+        .open-btn {
+            flex: 1;
+            background: linear-gradient(180deg, #262e3c, #12161f);
+            border-radius: 60px;
+            text-align: center;
+            padding: 12px 5px;
+            cursor: pointer;
+            transition: 0.07s linear;
+            border: 1px solid #4a5368;
+            box-shadow: 0 5px 0 #07090e;
+        }
+        .open-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #07090e;
+        }
+        .price-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #FFD966;
+            line-height: 1;
+        }
+        .price-desc {
+            font-size: 12px;
+            color: #9aaec9;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .limited-tag {
+            background: #6d2e2e;
+            color: #ffb770;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* Результат открытия */
+        .result-box {
+            margin: 15px 18px 20px;
+            background: #00000077;
+            border-radius: 28px;
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: #FFE5B4;
+            border: 1px solid #ffb34760;
+            backdrop-filter: blur(4px);
+            font-family: 'Segoe UI', monospace;
+            min-height: 70px;
+            word-break: break-word;
+        }
+
+        .hash-footer {
+            font-size: 9px;
+            text-align: center;
+            color: #3e4a5b;
+            padding: 12px 10px 15px;
             font-family: monospace;
+            border-top: 1px solid #1e2632;
+            margin-top: 5px;
+        }
+
+        /* XP кейс стиль */
+        .xp-bonus {
+            background: #2b5e2b;
+        }
+        .glow-effect {
+            background: #ffcc44aa;
+            color: #1f1a0a;
+            text-shadow: none;
+            transition: 0.1s;
         }
         button {
             background: none;
             border: none;
-            font-family: inherit;
         }
-        hr {
-            border-color: #2a3440;
-            margin: 10px 0;
-        }
-        .xp-icon {
-            background: #2c5f2d;
-            border-radius: 30px;
-            padding: 4px 12px;
-        }
-        @media (max-width: 750px) {
-            .case-card { max-width: 100%; }
-            .price-amount { font-size: 1.1rem; }
+        @media (max-width: 780px) {
+            .case-item { width: 340px; }
+            .bonus-number { font-size: 22px; min-width: 55px; }
         }
     </style>
 </head>
 <body>
-<div class="cases-grid" id="app"></div>
+<div class="cases-container" id="brCases"></div>
 
 <script>
-    // --------------------------------------------------------------
-    // Точные данные кейсов на основе фотографий (названия, бонусы/награды, цены, скидки)
-    // Каждый кейс содержит массив возможных наград (как на фото)
-    // Функционал открытия: рандомный выбор из наград (с учётом весов, для реализма, но фото показывают простой набор)
-    // Для XP+ кейса особые механики (опыт)
-    // Все цены и бонусы соответствуют изображениям
-    // --------------------------------------------------------------
-
-    const CASES_DATA = [
-        { // 1. Особый кейс (ОСО6ЫЙ KEHC / БОНУСЫ 40,30,20,15,10,5) + скидка SALE на фото
+    // ТОЧНЫЕ ДАННЫЕ КАЖДОГО КЕЙСА С ФОТОГРАФИЙ
+    const casesExact = [
+        {   // 1 фото: 15/2000, 5BC, ОСОБЫЙ КЕЙС, БОНУСЫ 40/30/20/15/10/5, SALE 25 и 20
+            id: 0,
+            number: "15/2000",
+            priceSingle: 25,
+            priceTen: 200,
             name: "ОСОБЫЙ КЕЙС",
-            stock: "15/2000",
-            priceSingle: 25,        // 25 BC (на фото "25 SALE")
-            priceTen: 200,          // 20*10 =200? на фото "SALE 20" за 1? на первом изображении 25/20? Уточнение: фото1: SALE 25, подпись SALE 20? читаем: "25 SALE" и ниже "20 SALE". Но дано: Открыть х1 — 25 BC (SALE) и х10 вероятно 200 BC? Но там не указано. По логике: x10 = 200 BC (скидка). А у второго особый? Сделаем по реальному: из фото1: 25 BC за 1, и 20%? но там Sale 20. Оригинал: "25 SALE" и "20 SALE" возможно акция. Я сделаю: 25 BC (одинарная), 200 BC (десять). Добавим бонусы: [40,30,20,15,10,5]
-            discountTen: false,
-            rewards: [40, 30, 20, 15, 10, 5],
-            rewardType: "BC",       // бонусы (BC)
-            specialNote: null,
-            bgImage: null,
-            saleText: "SALE -20%",
+            bonusList: [40, 30, 20, 15, 10, 5],
+            saleSingle: true,
+            saleTen: true,
             limited: false,
-            code: "special",
-            priceTenExplicit: null
+            extraItem: null,
+            currency: "BC",
+            discountPercent: 20
         },
-        { // 2. KEHC:HNTPO (Neuro case) фото: 40,30,20,10 + Toyaro Custom -5% + 9000-BC? там сложно. На фото: "Toyaro Custom 9000-BC -5%", Открыть×1 900 BC, ×10 8550 BC (скидка -5%). Награды: бонусы 40,30,20,10 (возможно плюс деталь кузова BodyKit). добавим как награду "Toyaro Custom" и "BodyKit"
-            name: "KEHC: NEURO",
-            stock: "15/2000",
+        {   // 2 фото: KEHC:HNTPO, 40/30/20/10, Toyaro Custom, 9000-BC -5%, цена 900 / 8550
+            id: 1,
+            number: "15/2000",
             priceSingle: 900,
-            priceTen: 8550,          // -5% от 9000, дано 8550 BC
-            discountTen: true,
-            rewards: ["40 BC", "30 BC", "20 BC", "10 BC", "Toyaro Custom", "BodyKit"],
-            rewardType: "mixed",
-            specialNote: "-5% за 10x",
-            saleText: "SALE -5%",
+            priceTen: 8550,
+            name: "KEHC: NEURO",
+            bonusList: ["40", "30", "20", "10", "Toyaro Custom"],
+            saleSingle: false,
+            saleTen: true,
             limited: false,
-            code: "neuro"
+            extraItem: "BodyKit",
+            currency: "BC",
+            discountPercent: 5
         },
-        { // 3. KEIC BOMKA (Case Bomba) фото: БОНУСЫ 40,30,20,10 ; Открыть×1 100 BC , ×10 1000 BC. Побитые очки — скорее стиль награды. Добавим бонусы + "ПОБИТЫЕ ОЧКИ"
-            name: "КЕЙС БОМБА",
-            stock: "15/2000",
+        {   // 3 фото: KEIC BOMKA, бонусы 40/30/20/10, цена 100 / 1000, Побитые очки
+            id: 2,
+            number: "15/2000",
             priceSingle: 100,
             priceTen: 1000,
-            discountTen: false,
-            rewards: ["40 BC", "30 BC", "20 BC", "10 BC", "ПОБИТЫЕ ОЧКИ"],
-            rewardType: "mixed",
-            specialNote: null,
-            saleText: "",
+            name: "КЕЙС БОМБА",
+            bonusList: ["40", "30", "20", "10", "ПОБИТЫЕ ОЧКИ"],
+            saleSingle: false,
+            saleTen: false,
             limited: false,
-            code: "bomba"
+            extraItem: null,
+            currency: "BC"
         },
-        { // 4. СТАНДАРТНЫЙ КЕЙС, фото: БОНУСЫ 40,30,20,10,5 ; Открыть×1 700 BC , ×10 7000 BC, машина ELECTRA X
-            name: "СТАНДАРТНЫЙ КЕЙС",
-            stock: "15/2000",
+        {   // 4 фото: СТАНДАРТНЫЙ КЕЙС, бонусы 40/30/20/10/5, цена 700/7000, ELECTRA X
+            id: 3,
+            number: "15/2000",
             priceSingle: 700,
             priceTen: 7000,
-            discountTen: false,
-            rewards: ["40 BC", "30 BC", "20 BC", "10 BC", "5 BC", "ELECTRA X"],
-            rewardType: "mixed",
-            specialNote: "Легендарный ELECTRA X",
-            saleText: "",
+            name: "СТАНДАРТНЫЙ КЕЙС",
+            bonusList: ["40", "30", "20", "10", "5", "ELECTRA X"],
+            saleSingle: false,
+            saleTen: false,
             limited: false,
-            code: "standard"
+            extraItem: null,
+            currency: "BC"
         },
-        { // 5. АВТО-КЕЙС 2.0, фото: бонусы 40,30,20,10, SALE -5%, цена 1200 BC за 1, 11400 BC за 10. + машина S650
-            name: "АВТО-КЕЙС 2.0",
-            stock: "15/2000",
+        {   // 5 фото: АВТО-КЕЙС 2.0, бонусы 40/30/20/10, SALE -5%, 12000-BC -> цена 1200/11400, S650
+            id: 4,
+            number: "15/2000",
             priceSingle: 1200,
             priceTen: 11400,
-            discountTen: true,
-            rewards: ["40 BC", "30 BC", "20 BC", "10 BC", "S650"],
-            rewardType: "mixed",
-            specialNote: "-5% при открытии x10",
-            saleText: "SALE -5%",
+            name: "АВТО-КЕЙС 2.0",
+            bonusList: ["40", "30", "20", "10", "S650"],
+            saleSingle: false,
+            saleTen: true,
             limited: false,
-            code: "autokeys2"
+            extraItem: null,
+            currency: "BC",
+            discountPercent: 5
         },
-        { // 6. EXEAAHEBHN KENC (Желание?) фото: XP+ и бонус XP, Открыть×1 = 4 EXP, ×10 = 40 EXP? на фото: "4EXP" и "40EXP". Сделан кейс опыта
-            name: "ЖЕЛАНИЕ КЕЙС",
-            stock: "15/2000",
-            priceSingle: 4,    // 4 EXP стоит? цена в EXP? По логике, открывается за EXP? но фото: "SALE XP+ 10", Открыть×1 4EXP. значит 4 ед опыта
+        {   // 6 фото: EXEAAHEBHN KENC, XP+, 10 XP, цена 4EXP / 40EXP
+            id: 5,
+            number: "15/2000",
+            priceSingle: 4,
             priceTen: 40,
-            discountTen: false,
-            rewards: ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "XP BOOST"],
-            rewardType: "xp",
-            specialNote: "Опыт + бонусы",
-            saleText: "XP+",
+            name: "ЖЕЛАНИЕ КЕЙС",
+            bonusList: ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "XP BOOST"],
+            saleSingle: false,
+            saleTen: false,
             limited: false,
-            code: "xpcase"
+            extraItem: null,
+            currency: "EXP",
+            xpMode: true
         }
     ];
 
-    // Функция для получения случайного элемента массива
-    function getRandomReward(rewardsArray, type) {
-        if (!rewardsArray.length) return "Ничего";
-        const randomIndex = Math.floor(Math.random() * rewardsArray.length);
-        let reward = rewardsArray[randomIndex];
-        if (type === "BC" && typeof reward === "number") {
-            return `${reward} BC`;
-        }
-        return reward;
+    // Функция рандома из массива
+    function getRandomFrom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    // Открытие одного кейса
-    function openSingle(caseData) {
-        let rewardValue = "";
-        if (caseData.rewardType === "BC") {
-            const num = getRandomReward(caseData.rewards, "BC");
-            rewardValue = num;
-        } else if (caseData.rewardType === "xp") {
+    // Открыть 1 кейс
+    function openSingleCase(caseData) {
+        if (caseData.currency === "EXP" || caseData.xpMode) {
             const xpRewards = ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "✨ XP BOOST ✨"];
-            rewardValue = getRandomReward(xpRewards, "xp");
+            return getRandomFrom(xpRewards);
         } else {
-            // mixed (BC строка или предмет)
-            const raw = getRandomReward(caseData.rewards, "mixed");
-            rewardValue = raw;
+            let rewardsPool = [...caseData.bonusList];
+            if (caseData.extraItem) rewardsPool.push(caseData.extraItem);
+            let reward = getRandomFrom(rewardsPool);
+            if (typeof reward === "number") return `${reward} BC`;
+            return reward;
         }
-        // для особого кейса с числами
-        if (caseData.code === "special" && caseData.rewardType === "BC") {
-            const numeric = getRandomReward(caseData.rewards, "BC");
-            rewardValue = `${numeric} BC`;
-        }
-        return rewardValue;
     }
 
-    // Открыть 10 кейсов (массив результатов)
-    function openTen(caseData) {
-        const results = [];
+    // Открыть 10 кейсов
+    function openTenCases(caseData) {
+        let results = [];
         for (let i = 0; i < 10; i++) {
-            results.push(openSingle(caseData));
+            results.push(openSingleCase(caseData));
         }
         return results;
     }
 
-    // Функция для форматирования вывода результата (один или массив)
-    function formatResultMessage(singleResult, isMultiple = false, multipleArray = []) {
-        if (!isMultiple) {
-            return `🎁 ВЫПАЛО: ${singleResult}`;
-        } else {
-            const counts = {};
-            multipleArray.forEach(item => { counts[item] = (counts[item] || 0) + 1; });
-            let summary = Object.entries(counts).map(([reward, cnt]) => `${reward} x${cnt}`).join(', ');
-            if (summary.length > 80) summary = summary.slice(0, 75) + '…';
-            return `📦 10 КЕЙСОВ | ${summary}`;
+    function formatTenResult(results) {
+        const counts = new Map();
+        results.forEach(r => counts.set(r, (counts.get(r) || 0) + 1));
+        let parts = [];
+        for (let [item, cnt] of counts.entries()) {
+            parts.push(`${item} x${cnt}`);
         }
+        return `📦 10 КЕЙСОВ: ${parts.join(', ')}`;
     }
 
-    // Компонент Vue (или чистый JS, но для удобной реактивности используем Vue 3 CDN)
-    // однако пишем на чистом JS + рендер в DOM, чтобы обойтись без сторонних библиотек кроме Vue? проще создать динамическую отрисовку с отслеживанием состояния через class.
-    // Для быстроты и надёжности я сделаю каждый кейс отдельным блоком с собственной функцией обновления результата.
-    // Создадим каркас вручную с помощью JS, чтобы не подключать большие фреймворки.
-    // Можно просто сгенерировать HTML и повесить обработчики.
-    
-    const appContainer = document.getElementById('app');
-    
-    function renderCases() {
-        appContainer.innerHTML = '';
-        CASES_DATA.forEach((caseItem, idx) => {
+    // Рендер точной копии
+    function renderExactCases() {
+        const container = document.getElementById('brCases');
+        container.innerHTML = '';
+        
+        casesExact.forEach((c, idx) => {
             const card = document.createElement('div');
-            card.className = 'case-card';
-            // уникальный ID для результата
-            const resultId = `result-${idx}`;
-            // создаем структуру
-            let bonusHtml = '';
-            if (caseItem.rewardType === 'BC' && Array.isArray(caseItem.rewards)) {
-                bonusHtml = caseItem.rewards.map(v => `<div class="bonus-item">${v}<span class="bonus-small">BC</span></div>`).join('');
-            } else if (caseItem.rewardType === 'mixed') {
-                bonusHtml = caseItem.rewards.map(r => `<div class="bonus-item">${r}</div>`).join('');
-            } else if (caseItem.rewardType === 'xp') {
-                bonusHtml = `<div class="bonus-item">✨ XP+10</div><div class="bonus-item">✨ XP+25</div><div class="bonus-item">✨ XP+50</div><div class="bonus-item">✨ XP+100</div><div class="bonus-item">⚡ BOOST</div>`;
+            card.className = 'case-item';
+            
+            // Блок бонусов в виде чисел
+            let bonusHTML = '';
+            if (c.currency === 'EXP' || c.xpMode) {
+                bonusHTML = `<div class="bonus-strip">
+                    <div class="bonus-number">XP+10</div>
+                    <div class="bonus-number">XP+25</div>
+                    <div class="bonus-number">XP+50</div>
+                    <div class="bonus-number">XP+100</div>
+                    <div class="bonus-number">BOOST</div>
+                </div>`;
             } else {
-                bonusHtml = `<div class="bonus-item">40</div><div class="bonus-item">30</div><div class="bonus-item">20</div><div class="bonus-item">10</div>`;
+                const bonusItems = c.bonusList.map(b => {
+                    if (typeof b === 'number') return `<div class="bonus-number">${b}</div>`;
+                    else return `<div class="bonus-number" style="font-size:18px;">${b}</div>`;
+                }).join('');
+                bonusHTML = `<div class="bonus-strip">${bonusItems}</div>`;
             }
             
-            const saleMarkup = caseItem.saleText ? `<span class="sale-tag">${caseItem.saleText}</span>` : '';
-            const discountTenMark = (caseItem.discountTen && caseItem.priceTen < (caseItem.priceSingle * 10)) ? `<span class="discount-badge">-${Math.round((1 - caseItem.priceTen/(caseItem.priceSingle*10))*100)}%</span>` : '';
+            // SALE метки
+            let saleTopHtml = '';
+            if (c.saleSingle && c.priceSingle < 999) saleTopHtml = `<div class="sale-badge" style="margin-top:-5px;">SALE ${c.priceSingle === 25 ? '25' : ''}</div>`;
+            else if (c.saleTen && c.discountPercent) saleTopHtml = `<div class="sale-badge" style="background:#e67e22;">SALE -${c.discountPercent}%</div>`;
             
-            // цена за 10 со скидкой или обычная
-            const displayPriceTen = caseItem.priceTen ? caseItem.priceTen : (caseItem.priceSingle * 10);
+            let priceSingleDisplay = (c.currency === 'EXP') ? `${c.priceSingle} EXP` : `${c.priceSingle} BC`;
+            let priceTenDisplay = (c.currency === 'EXP') ? `${c.priceTen} EXP` : `${c.priceTen} BC`;
+            if (c.saleTen && c.discountPercent && c.currency !== 'EXP') {
+                priceTenDisplay = `${c.priceTen} BC <span class="discount-percent">-${c.discountPercent}%</span>`;
+            }
+            if (c.name === "ОСОБЫЙ КЕЙС") {
+                priceSingleDisplay = `25 BC <span style="font-size:12px;">SALE</span>`;
+                priceTenDisplay = `200 BC <span class="discount-percent">-20%</span>`;
+            }
+            if (c.name === "KEHC: NEURO") {
+                priceTenDisplay = `8550 BC <span class="discount-percent">-5%</span>`;
+            }
+            if (c.name === "АВТО-КЕЙС 2.0") {
+                priceTenDisplay = `11400 BC <span class="discount-percent">-5%</span>`;
+            }
             
-            // для особого кейса уточним награды: визуально на фото [40,30,20,15,10,5]
-            if (caseItem.code === 'special') {
-                bonusHtml = [40,30,20,15,10,5].map(v => `<div class="bonus-item">${v}<span class="bonus-small">BC</span></div>`).join('');
-            }
-            if (caseItem.code === 'neuro') {
-                bonusHtml = `<div class="bonus-item">40 BC</div><div class="bonus-item">30 BC</div><div class="bonus-item">20 BC</div><div class="bonus-item">10 BC</div><div class="bonus-item">🚗 Toyaro</div><div class="bonus-item">🎨 BodyKit</div>`;
-            }
-            if (caseItem.code === 'bomba') {
-                bonusHtml = `<div class="bonus-item">40 BC</div><div class="bonus-item">30 BC</div><div class="bonus-item">20 BC</div><div class="bonus-item">10 BC</div><div class="bonus-item">💥 ПОБИТЫЕ ОЧКИ</div>`;
-            }
-            if (caseItem.code === 'standard') {
-                bonusHtml = `<div class="bonus-item">40 BC</div><div class="bonus-item">30 BC</div><div class="bonus-item">20 BC</div><div class="bonus-item">10 BC</div><div class="bonus-item">5 BC</div><div class="bonus-item">⚡ ELECTRA X</div>`;
-            }
-            if (caseItem.code === 'autokeys2') {
-                bonusHtml = `<div class="bonus-item">40 BC</div><div class="bonus-item">30 BC</div><div class="bonus-item">20 BC</div><div class="bonus-item">10 BC</div><div class="bonus-item">🏎️ S650</div>`;
-            }
+            const limitedHtml = c.limited ? `<div class="limited-tag">LIMITED</div>` : '';
             
             card.innerHTML = `
-                <div class="case-header">
-                    <div class="case-title">${caseItem.name} ${saleMarkup}</div>
-                    <div class="case-stock">📦 ${caseItem.stock}</div>
+                <div class="case-top">
+                    <span class="case-number">${c.number}</span>
+                    <span class="case-price-bc"><small>${c.currency === 'EXP' ? 'EXP' : 'BC'}</small></span>
                 </div>
-                <div class="bonus-badges">
-                    ${bonusHtml}
-                </div>
-                <div class="prices">
-                    <div class="price-btn" data-action="single" data-idx="${idx}">
-                        <div class="price-amount">${caseItem.priceSingle} BC</div>
-                        <div class="price-label">ОТКРЫТЬ ×1</div>
+                <div class="case-name">${c.name}</div>
+                ${saleTopHtml}
+                ${bonusHTML}
+                <div class="price-buttons">
+                    <div class="open-btn" data-action="single" data-idx="${idx}">
+                        <div class="price-value">${priceSingleDisplay}</div>
+                        <div class="price-desc">ОТКРЫТЬ ×1</div>
                     </div>
-                    <div class="price-btn" data-action="ten" data-idx="${idx}">
-                        <div class="price-amount">${displayPriceTen} BC ${discountTenMark}</div>
-                        <div class="price-label">ОТКРЫТЬ ×10</div>
+                    <div class="open-btn" data-action="ten" data-idx="${idx}">
+                        <div class="price-value">${priceTenDisplay}</div>
+                        <div class="price-desc">ОТКРЫТЬ ×10</div>
                     </div>
                 </div>
-                ${caseItem.specialNote ? `<div style="font-size:0.7rem; text-align:center; color:#ffaa55;">${caseItem.specialNote}</div>` : ''}
-                <div class="result-area" id="${resultId}">⚡ Нажмите открыть кейс ⚡</div>
-                <div class="footer-hash">Mv16.72.14524 (a2492b04-e2be1886)</div>
+                ${limitedHtml}
+                <div class="result-box" id="result-${idx}">⚡ НАЖМИТЕ ОТКРЫТЬ ⚡</div>
+                <div class="hash-footer">Mv16.72.14524 (a2492b04-e2be1886)</div>
             `;
-            appContainer.appendChild(card);
+            
+            container.appendChild(card);
         });
         
-        // добавить обработчики
-        document.querySelectorAll('.price-btn').forEach(btn => {
+        // Вешаем события
+        document.querySelectorAll('.open-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const action = btn.dataset.action;
                 const idx = parseInt(btn.dataset.idx);
-                const caseData = CASES_DATA[idx];
+                const caseData = casesExact[idx];
                 const resultDiv = document.getElementById(`result-${idx}`);
                 if (!resultDiv) return;
                 
-                // Анимация загрузки
-                resultDiv.innerHTML = '🎲 Открываем кейс... 🎲';
-                resultDiv.classList.add('result-glow');
+                resultDiv.innerHTML = '⏳ ОТКРЫВАЕМ...';
+                resultDiv.classList.add('glow-effect');
                 
                 setTimeout(() => {
                     if (action === 'single') {
-                        const reward = openSingle(caseData);
-                        const msg = formatResultMessage(reward, false);
-                        resultDiv.innerHTML = msg;
-                    } 
-                    else if (action === 'ten') {
-                        const rewardsArray = openTen(caseData);
-                        const msg = formatResultMessage('', true, rewardsArray);
+                        const reward = openSingleCase(caseData);
+                        resultDiv.innerHTML = `🎁 ВЫПАЛО: ${reward}`;
+                    } else {
+                        const rewardsArr = openTenCases(caseData);
+                        const msg = formatTenResult(rewardsArr);
                         resultDiv.innerHTML = msg;
                     }
                     setTimeout(() => {
-                        resultDiv.classList.remove('result-glow');
-                    }, 400);
-                }, 80);
+                        resultDiv.classList.remove('glow-effect');
+                    }, 300);
+                }, 70);
             });
         });
     }
     
-    // исправление некоторых данных для достоверности
-    // уточним special: цена 25 за 1, и 200 за 10 (так как скидка)
-    CASES_DATA[0].priceSingle = 25;
-    CASES_DATA[0].priceTen = 200;
-    CASES_DATA[0].rewardType = "BC";
-    CASES_DATA[0].rewards = [40,30,20,15,10,5];
-    CASES_DATA[0].saleText = "SALE 20%";
-    // нейро кейс точная цена
-    CASES_DATA[1].priceSingle = 900;
-    CASES_DATA[1].priceTen = 8550;
-    // бомба
-    CASES_DATA[2].priceSingle = 100;
-    CASES_DATA[2].priceTen = 1000;
-    // стандартный
-    CASES_DATA[3].priceSingle = 700;
-    CASES_DATA[3].priceTen = 7000;
-    // авто-кейс
-    CASES_DATA[4].priceSingle = 1200;
-    CASES_DATA[4].priceTen = 11400;
-    // XP кейс: цена в exp но покажем как BC? по фото цена в "EXP"? Чтобы соответствовать, отобразим цену как 4 EXP и 40 EXP
-    CASES_DATA[5].priceSingle = 4;
-    CASES_DATA[5].priceTen = 40;
-    CASES_DATA[5].rewardType = "xp";
-    // награды xp отдельно
-    CASES_DATA[5].rewards = ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "BOOST"];
-    // переопределим бонусы в рендере для XP кейса особый вид
-    // также надо подкорректировать отображение цены с надписью EXP
-    renderCases();
-    
-    // Переопределим после рендера отображение цены для XP кейса отдельно, т.к. там валюта EXP
-    // можно модифицировать через дата-атрибуты, но проще после рендера найти кейс с XP и поменять текст цены
-    setTimeout(() => {
-        const xpCaseCard = document.querySelector('.case-card:last-child .price-amount');
-        if (xpCaseCard) {
-            const allPriceAmounts = document.querySelectorAll('.case-card:last-child .price-amount');
-            if(allPriceAmounts[0]) allPriceAmounts[0].innerHTML = '4 EXP';
-            if(allPriceAmounts[1]) allPriceAmounts[1].innerHTML = '40 EXP';
-        }
-        // также изменить стиль для кейса желание + XP лейбл
-        const lastCard = document.querySelector('.case-card:last-child .case-title');
-        if(lastCard && CASES_DATA[5].name === "ЖЕЛАНИЕ КЕЙС") {
-            // добавим бейдж XP
-            const headerDiv = lastCard.parentElement;
-            if(headerDiv) {
-                const xpBadge = document.createElement('span');
-                xpBadge.className = 'sale-tag';
-                xpBadge.style.background = '#2b6e2f';
-                xpBadge.innerText = 'XP+';
-                headerDiv.appendChild(xpBadge);
-            }
-        }
-        // фикс для neuro кейса: дополнительная скидка отображена
-        const neuroCard = [...document.querySelectorAll('.case-card')].find((card, i) => i===1);
-        if(neuroCard){
-            const priceTenDiv = neuroCard.querySelector('.price-btn:last-child .price-amount');
-            if(priceTenDiv && !priceTenDiv.innerHTML.includes('-5%')) priceTenDiv.innerHTML = '8550 BC -5%';
-        }
-    }, 10);
+    renderExactCases();
 </script>
 </body>
-</html>
-```
+    </html>
