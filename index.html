@@ -1,149 +1,477 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Case Opening</title>
-<style>
-    body {
-        margin: 0;
-        background: #0f172a;
-        color: white;
-        font-family: Arial;
-        text-align: center;
-    }
-
-    h1 {
-        margin-top: 20px;
-    }
-
-    #case {
-        margin: 40px auto;
-        width: 600px;
-        height: 120px;
-        overflow: hidden;
-        border: 3px solid #fff;
-        position: relative;
-    }
-
-    #items {
-        display: flex;
-        position: absolute;
-        left: 0;
-        transition: 4s cubic-bezier(0.1, 0.7, 0.1, 1);
-    }
-
-    .item {
-        width: 120px;
-        height: 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        font-size: 12px;
-        border-right: 1px solid #000;
-    }
-
-    .common { background: gray; }
-    .rare { background: blue; }
-    .epic { background: purple; }
-    .legendary { background: orange; }
-    .mythic { background: red; }
-
-    #pointer {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        width: 4px;
-        height: 120px;
-        background: yellow;
-        transform: translateX(-50%);
-    }
-
-    button {
-        padding: 15px 30px;
-        font-size: 18px;
-        cursor: pointer;
-        background: #22c55e;
-        border: none;
-        border-radius: 10px;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BLACK RUSSIA 2026 | ВСЕ КЕЙСЫ</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Orbitron', 'Impact', monospace;
+            background: #000;
+            color: white;
+        }
+        /* UI Панели */
+        .top-bar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            z-index: 30;
+            pointer-events: none;
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border-left: 3px solid #ff2d75;
+            border-right: 3px solid #6a00ff;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: monospace;
+            pointer-events: auto;
+        }
+        .stat-card span {
+            color: #ffcc44;
+            font-size: 20px;
+            margin-left: 8px;
+        }
+        .case-selector {
+            position: absolute;
+            bottom: 100px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            z-index: 30;
+            border: 1px solid rgba(255,45,117,0.5);
+            pointer-events: auto;
+        }
+        .case-btn {
+            background: linear-gradient(145deg, #1a1a2e, #0a0a1a);
+            border: 1px solid #ff2d75;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.08s linear;
+            text-shadow: 0 0 3px black;
+            font-family: monospace;
+        }
+        .case-btn.active {
+            background: linear-gradient(145deg, #ff2d75, #6a00ff);
+            box-shadow: 0 0 15px #ff2d75;
+            border-color: white;
+        }
+        .open-btn {
+            background: radial-gradient(circle at 30% 10%, #ff2d75, #aa00ff);
+            border: none;
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            padding: 14px 40px;
+            border-radius: 60px;
+            letter-spacing: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 30px #ff2d75;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            font-family: 'Orbitron', monospace;
+        }
+        .dust-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            height: 12px;
+            background: #222;
+            border-radius: 20px;
+            overflow: hidden;
+            z-index: 30;
+            pointer-events: none;
+        }
+        .dust-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffaa44, #ff44cc);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+        .toast {
+            position: absolute;
+            bottom: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            padding: 16px 32px;
+            border-radius: 60px;
+            font-size: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 40;
+            border: 2px solid gold;
+            color: gold;
+            font-family: monospace;
+            opacity: 0;
+            transition: 0.1s;
+            pointer-events: none;
+            text-align: center;
+        }
+        @media (max-width: 700px) {
+            .case-btn { padding: 5px 10px; font-size: 9px; }
+            .open-btn { font-size: 18px; padding: 10px 24px; }
+            .stat-card { font-size: 10px; padding: 4px 12px; }
+            .stat-card span { font-size: 16px; }
+            .toast { font-size: 14px; padding: 10px 20px; white-space: nowrap; }
+        }
+    </style>
 </head>
 <body>
 
-<h1>🎁 Открытие кейса</h1>
-
-<div id="case">
-    <div id="items"></div>
-    <div id="pointer"></div>
+<div class="top-bar">
+    <div class="stat-card">💎 ПЫЛЬ: <span id="dustValue">0</span> / 2000</div>
+    <div class="stat-card">🎲 ОТКРЫТИЙ: <span id="openCounter">0</span></div>
+    <div class="stat-card">🪙 МОНЕТЫ: <span id="coinVal">1500</span></div>
 </div>
 
-<button onclick="openCase()">ОТКРЫТЬ КЕЙС</button>
+<div class="case-selector" id="caseSelector">
+    <!-- Кнопки будут добавлены через JS -->
+</div>
 
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+<div style="display: flex; justify-content: center; position: absolute; bottom: 180px; left:0; right:0; z-index:30; pointer-events: auto;">
+    <button class="open-btn" id="openCaseMainBtn">🚀 ОТКРЫТЬ КЕЙС 🚀</button>
+</div>
 
-<script>
+<div class="dust-bar">
+    <div class="dust-fill" id="dustFill"></div>
+</div>
+<div id="toastMsg" class="toast">✨ ВЫПАЛО ✨</div>
 
-const itemsData = [
-    {name: "Lada Vesta", rarity: "common", chance: 40},
-    {name: "BMW M5", rarity: "rare", chance: 25},
-    {name: "Mercedes G63", rarity: "epic", chance: 15},
-    {name: "Lamborghini", rarity: "legendary", chance: 5},
-    {name: "Bugatti", rarity: "mythic", chance: 1}
-];
-
-function getRandomItem() {
-    let total = itemsData.reduce((sum, i) => sum + i.chance, 0);
-    let rand = Math.random() * total;
-
-    for (let item of itemsData) {
-        if (rand < item.chance) return item;
-        rand -= item.chance;
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+        }
     }
-}
-
-function createRoll() {
-    const container = document.getElementById("items");
-    container.innerHTML = "";
-
-    for (let i = 0; i < 50; i++) {
-        let item = itemsData[Math.floor(Math.random() * itemsData.length)];
-
-        let div = document.createElement("div");
-        div.className = "item " + item.rarity;
-        div.innerHTML = `<b>${item.name}</b><br>${item.rarity}`;
-
-        container.appendChild(div);
-    }
-}
-
-function openCase() {
-    const container = document.getElementById("items");
-    const sound = document.getElementById("spinSound");
-
-    createRoll();
-
-    let winItem = getRandomItem();
-
-    let winIndex = Math.floor(Math.random() * 10) + 30;
-
-    let offset = winIndex * 120 - 300;
-
-    container.style.transition = "none";
-    container.style.left = "0px";
-
-    setTimeout(() => {
-        container.style.transition = "4s cubic-bezier(0.1, 0.7, 0.1, 1)";
-        container.style.left = `-${offset}px`;
-        sound.play();
-    }, 50);
-
-    setTimeout(() => {
-        alert("Тебе выпало: " + winItem.name + " (" + winItem.rarity + ")");
-    }, 4200);
-}
-
 </script>
 
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // ---------- 3D СЦЕНА ----------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x010118);
+    scene.fog = new THREE.FogExp2(0x010118, 0.01);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 50);
+    camera.position.set(4, 2.5, 5);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+    
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = false;
+    controls.target.set(0, 0.8, 0);
+    
+    // освещение
+    const ambient = new THREE.AmbientLight(0x22223b);
+    scene.add(ambient);
+    const mainLight = new THREE.DirectionalLight(0xffccaa, 1.0);
+    mainLight.position.set(3,5,2);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
+    const neonLight = new THREE.PointLight(0xff44aa, 0.6);
+    neonLight.position.set(1,1.5,2);
+    scene.add(neonLight);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(10,10), new THREE.MeshStandardMaterial({ color: 0x0a0a2a, metalness: 0.7, roughness: 0.3 }));
+    floor.rotation.x = -Math.PI/2;
+    floor.position.y = -0.8;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    const grid = new THREE.GridHelper(12, 20, 0xff66aa, 0x3366ff);
+    grid.position.y = -0.75;
+    scene.add(grid);
+    
+    // ----- Класс машинки для показа -----
+    class DisplayCar {
+        constructor(color, posX, name, rarity) {
+            this.group = new THREE.Group();
+            this.name = name;
+            this.rarity = rarity;
+            const bodyMat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.8 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.3, 1.6), bodyMat);
+            body.position.y = 0.2;
+            body.castShadow = true;
+            this.group.add(body);
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 1.0), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+            roof.position.y = 0.55;
+            this.group.add(roof);
+            const wheelGeo = new THREE.CylinderGeometry(0.16,0.16,0.08,12);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            [[-0.55,0.1,-0.65],[0.55,0.1,-0.65],[-0.55,0.1,0.65],[0.55,0.1,0.65]].forEach(pos=>{
+                const w = new THREE.Mesh(wheelGeo, wheelMat);
+                w.rotation.z = Math.PI/2;
+                w.position.set(pos[0],pos[1],pos[2]);
+                this.group.add(w);
+            });
+            this.group.position.set(posX, -0.5, 0);
+            scene.add(this.group);
+            const div = document.createElement('div');
+            div.textContent = `${name} [${rarity}]`;
+            div.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            div.style.padding = '2px 8px';
+            div.style.borderRadius = '16px';
+            div.style.fontSize = '10px';
+            div.style.color = rarity==='legendary'?'#ffaa33': rarity==='epic'?'#cc88ff':'#88ccff';
+            const label = new CSS2DObject(div);
+            label.position.set(posX, 0.9, 0);
+            scene.add(label);
+            this.label = label;
+        }
+    }
+    
+    // ----- БАЗА ДАННЫХ ПРЕДМЕТОВ (авто, скины, аксессуары) под каждый кейс -----
+    const caseDatabase = {
+        'Турбо': { priceBC: 0, dustPrice: 0, items: [
+            { name: "Lamborghini Centenario", rarity: "legendary", type:"car", valueCoins: 4200, color: 0xff5500 },
+            { name: "Анна Организатор", rarity: "epic", type:"skin", valueCoins: 800, color: 0xff88aa },
+            { name: "Ночная Орхидея", rarity: "epic", type:"skin", valueCoins: 750, color: 0xaa66ff },
+            { name: "Жетон на шею", rarity: "rare", type:"acc", valueCoins: 200, color: 0xffaa44 },
+            { name: "Рюкзак Уличный", rarity: "rare", type:"acc", valueCoins: 180, color: 0x88aaff }
+        ], guarant40: "Chevrolet Astro Van Lowrider" },
+        'Нитро': { priceBC: 0, items: [
+            { name: "Toyota Custom BodyKit", rarity: "legendary", type:"car", valueCoins: 4000, color: 0xff3366 },
+            { name: "Городской хищник", rarity: "epic", type:"skin", valueCoins: 850, color: 0x66ff66 },
+            { name: "Доминик", rarity: "epic", type:"skin", valueCoins: 820, color: 0x33aaff },
+            { name: "Мопс на плечо", rarity: "rare", type:"acc", valueCoins: 210, color: 0xccaa88 },
+            { name: "Очки Горение", rarity: "rare", type:"acc", valueCoins: 190, color: 0xff8844 }
+        ], guarant40: "Plymouth GTX 1971" },
+        'Ежедневный': { priceBC: 0, daily: true, items: [
+            { name: "50 монет", rarity: "common", valueCoins: 50, color: 0xccccaa },
+            { name: "100 монет", rarity: "common", valueCoins: 100, color: 0xddcc88 },
+            { name: "Скин базовый", rarity: "rare", valueCoins: 150, color: 0x88aaff }
+        ] },
+        'Кейс бомжа': { priceBC: 100, items: [
+            { name: "Lada Granta", rarity: "common", valueCoins: 40, color: 0xaaaaaa },
+            { name: "Жигули", rarity: "common", valueCoins: 30, color: 0xbb9966 },
+            { name: "Скин Бомж", rarity: "common", valueCoins: 20, color: 0xccaa88 }
+        ] },
+        'Стандартный кейс': { priceBC: 600, items: [
+            { name: "BMW M3", rarity: "rare", valueCoins: 450, color: 0x3399ff },
+            { name: "Audi RS6", rarity: "epic", valueCoins: 1100, color: 0x44ccff },
+            { name: "Кожаная куртка", rarity: "rare", valueCoins: 200, color: 0xaa8866 }
+        ] },
+        'Авто-кейс 2.0': { priceBC: 1200, items: [
+            { name: "Ferrari F40", rarity: "legendary", valueCoins: 5000, color: 0xff3300 },
+            { name: "Porsche 911", rarity: "epic", valueCoins: 2500, color: 0x66ffcc },
+            { name: "Nissan GT-R", rarity: "epic", valueCoins: 2300, color: 0xffaa66 }
+        ] },
+        'Особый кейс': { priceBC: 0, special: true, items: [
+            { name: "Bugatti Chiron", rarity: "legendary", valueCoins: 10000, color: 0xaa44ff },
+            { name: "McLaren P1", rarity: "legendary", valueCoins: 9500, color: 0xff66cc }
+        ] },
+        'Кейс Гром': { priceBC: 0, past: true, items: [
+            { name: "Lamborghini Aventador SV", rarity: "legendary", valueCoins: 4800, color: 0xffaa22 },
+            { name: "Audi A8 Police", rarity: "epic", valueCoins: 1300, color: 0x2266ff }
+        ] },
+        'Кейс Голос улиц': { priceBC: 0, past: true, items: [
+            { name: "Rolls Royce Spectre", rarity: "legendary", valueCoins: 6000, color: 0xdd88ff },
+            { name: "Hummer H3T", rarity: "epic", valueCoins: 1600, color: 0x88aa44 }
+        ] },
+        'Весенний кейс': { priceBC: 0, past: true, items: [
+            { name: "Cherry Blossom GT", rarity: "epic", valueCoins: 1100, color: 0xff99cc }
+        ] },
+        'Кейс Основателя': { priceBC: 0, past: true, items: [
+            { name: "McLaren P1 Founder", rarity: "legendary", valueCoins: 7000, color: 0xff8844 }
+        ] }
+    };
+    
+    let currentCaseKey = "Турбо";
+    let dust = 0;
+    let openTotal = 0;
+    let coins = 1500;
+    const perCaseGuarantMap = {};
+
+    // Элементы UI
+    const dustSpan = document.getElementById('dustValue');
+    const openSpan = document.getElementById('openCounter');
+    const coinSpan = document.getElementById('coinVal');
+    const dustFill = document.getElementById('dustFill');
+    const toastDiv = document.getElementById('toastMsg');
+    const caseSelectorDiv = document.getElementById('caseSelector');
+    const openBtn = document.getElementById('openCaseMainBtn');
+    
+    function showMessage(text, rarity='common') {
+        toastDiv.style.opacity = '0';
+        setTimeout(() => {
+            toastDiv.innerHTML = `✨ ${text} ✨`;
+            toastDiv.style.opacity = '1';
+            setTimeout(() => { toastDiv.style.opacity = '0'; }, 2000);
+        }, 30);
+    }
+    
+    function updateUI() {
+        dustSpan.innerText = dust;
+        openSpan.innerText = openTotal;
+        coinSpan.innerText = Math.floor(coins);
+        let percent = (dust / 2000) * 100;
+        dustFill.style.width = Math.min(100, percent) + '%';
+    }
+    
+    function addDust(amount) {
+        dust += amount;
+        if (dust >= 2000) {
+            dust = 0;
+            showMessage("ОСОБЫЙ КЕЙС ПОЛУЧЕН! +1 ОСОБЫЙ КЕЙС", "legendary");
+            // добавляем особый кейс в инвентарь (имитация открытия)
+            openSpecialCase();
+        }
+        updateUI();
+    }
+    
+    function openSpecialCase() {
+        const special = caseDatabase['Особый кейс'];
+        const reward = special.items[Math.floor(Math.random() * special.items.length)];
+        coins += reward.valueCoins;
+        showMessage(`${reward.name} +${reward.valueCoins}🪙`, reward.rarity);
+        updateUI();
+        // анимация
+        spawnCarModel(reward.color, reward.name, reward.rarity);
+    }
+    
+    function spawnCarModel(color, name, rarity) {
+        // показать новую машинку в 3D на секунду
+        const tempCar = new DisplayCar(color, (Math.random() - 0.5)*2, name, rarity);
+        setTimeout(() => {
+            scene.remove(tempCar.group);
+            if(tempCar.label) scene.remove(tempCar.label);
+        }, 3000);
+    }
+    
+    function openCase() {
+        let caseData = caseDatabase[currentCaseKey];
+        if (!caseData) return;
+        // проверка валюты
+        if (caseData.priceBC > 0 && coins < caseData.priceBC) {
+            showMessage(`Не хватает ${caseData.priceBC}🪙 для ${currentCaseKey}`, "common");
+            return;
+        }
+        if (caseData.priceBC > 0) {
+            coins -= caseData.priceBC;
+        }
+        // Механика гаранта за 40
+        if (!perCaseGuarantMap[currentCaseKey]) perCaseGuarantMap[currentCaseKey] = 0;
+        perCaseGuarantMap[currentCaseKey]++;
+        let reward = null;
+        let isGuarant = false;
+        if (perCaseGuarantMap[currentCaseKey] >= 40 && caseData.guarant40) {
+            reward = { name: caseData.guarant40, rarity: "legendary", valueCoins: 5000, color: 0xffaa55 };
+            isGuarant = true;
+            perCaseGuarantMap[currentCaseKey] = 0;
+            showMessage(`ГАРАНТ ЗА 40 КЕЙСОВ: ${reward.name}`, "legendary");
+        } else {
+            // обычный дроп с весами
+            let items = caseData.items;
+            let roll = Math.random();
+            if (roll < 0.1) items = items.filter(i=>i.rarity==='legendary');
+            else if (roll < 0.3) items = items.filter(i=>i.rarity==='epic');
+            else if (roll < 0.6) items = items.filter(i=>i.rarity==='rare');
+            if (!items.length) items = caseData.items;
+            reward = items[Math.floor(Math.random() * items.length)];
+        }
+        if (!reward) reward = caseData.items[0];
+        // добавление монет
+        coins += reward.valueCoins;
+        // добавление пыли (за распыление по умолчанию добавляем немного)
+        let dustGain = Math.floor(reward.valueCoins * 0.2);
+        addDust(dustGain);
+        openTotal++;
+        updateUI();
+        showMessage(`${reward.name} +${reward.valueCoins}🪙`, reward.rarity);
+        // анимация авто на сцене
+        spawnCarModel(reward.color || 0xffaa66, reward.name, reward.rarity);
+        // эффект камеры
+        const origPos = camera.position.clone();
+        camera.position.x += (Math.random() - 0.5)*0.08;
+        camera.position.y += (Math.random() - 0.5)*0.06;
+        setTimeout(()=> { camera.position.copy(origPos); }, 120);
+    }
+    
+    // создание кнопок выбора кейса
+    const caseKeys = ["Турбо","Нитро","Ежедневный","Кейс бомжа","Стандартный кейс","Авто-кейс 2.0","Особый кейс","Кейс Гром","Кейс Голос улиц","Весенний кейс","Кейс Основателя"];
+    function buildCaseSelector() {
+        caseSelectorDiv.innerHTML = '';
+        caseKeys.forEach(key => {
+            const btn = document.createElement('button');
+            btn.innerText = key;
+            btn.classList.add('case-btn');
+            if (currentCaseKey === key) btn.classList.add('active');
+            btn.onclick = () => {
+                currentCaseKey = key;
+                document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                showMessage(`Выбран: ${key}`, 'rare');
+            };
+            caseSelectorDiv.appendChild(btn);
+        });
+    }
+    buildCaseSelector();
+    openBtn.addEventListener('click', () => openCase());
+    
+    // добавим несколько машин на сцену для красоты
+    new DisplayCar(0xff44aa, -1.5, "DEMON GT", "legendary");
+    new DisplayCar(0x33aaff, 0, "NIGHT PHANTOM", "epic");
+    new DisplayCar(0x88ff88, 1.6, "VIPER", "rare");
+    
+    // анимация
+    let tm = 0;
+    function animate() {
+        requestAnimationFrame(animate);
+        tm += 0.016;
+        neonLight.intensity = 0.6 + Math.sin(tm*2)*0.2;
+        controls.update();
+        renderer.render(scene, camera);
+        labelRenderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener('resize', ()=>{
+        camera.aspect = window.innerWidth/innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, innerHeight);
+        labelRenderer.setSize(window.innerWidth, innerHeight);
+    });
+    updateUI();
+    console.log("Black Russia 2026 все кейсы загружены");
+</script>
 </body>
-</html>
+    </html>
