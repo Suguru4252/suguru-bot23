@@ -2,52 +2,110 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Adult Game - Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>3D Adult Doll - Mobile Control</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            touch-action: none;
         }
-        #controls-hint {
+        #controls-panel {
             position: absolute;
             bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: rgba(255,255,255,0.8);
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 12px;
+            z-index: 20;
+            color: white;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            pointer-events: auto;
+            border: 1px solid rgba(255,100,150,0.5);
+            font-size: 12px;
+        }
+        .control-btn {
+            background: rgba(255,80,120,0.8);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
             font-size: 14px;
-            pointer-events: none;
-            z-index: 10;
-            backdrop-filter: blur(5px);
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            min-width: 70px;
+        }
+        .control-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,50,80,1);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        input[type="range"] {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #ff88aa;
+            border-radius: 2px;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ff3366;
+            cursor: pointer;
         }
         #info {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             color: white;
             background: rgba(0,0,0,0.6);
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
+            z-index: 20;
             pointer-events: none;
-            z-index: 10;
-            font-weight: bold;
         }
-        @media (max-width: 768px) {
-            #controls-hint { font-size: 12px; bottom: 10px; }
-            #info { font-size: 10px; top: 10px; left: 10px; }
+        @media (max-width: 700px) {
+            .control-btn { padding: 6px 12px; font-size: 11px; min-width: 55px; }
+            .slider-container { padding: 2px 8px; }
+            input[type="range"] { width: 80px; }
         }
     </style>
 </head>
 <body>
-    <div id="info">🔞 ADULT 3D | Тащите пальцем для вращения</div>
-    <div id="controls-hint">🖐️ Один палец — вращение камеры | ✌️ Два пальца — масштаб</div>
+    <div id="info">🔞 ADULT DOLL | Тащите для вращения | Кнопки — движение частей тела</div>
+    <div id="controls-panel">
+        <button class="control-btn" id="resetBtn">⟳ Сброс</button>
+        <div class="slider-container">🦵 Левая нога <input type="range" id="leftLeg" min="-60" max="60" step="1" value="0"></div>
+        <div class="slider-container">🦵 Правая нога <input type="range" id="rightLeg" min="-60" max="60" step="1" value="0"></div>
+        <div class="slider-container">🦿 Левая рука <input type="range" id="leftArm" min="-90" max="90" step="1" value="0"></div>
+        <div class="slider-container">🦿 Правая рука <input type="range" id="rightArm" min="-90" max="90" step="1" value="0"></div>
+        <div class="slider-container">🧠 Голова <input type="range" id="headRot" min="-45" max="45" step="1" value="0"></div>
+        <div class="slider-container">💋 Грудь <input type="range" id="breast" min="0" max="30" step="1" value="15"></div>
+    </div>
 
-    <!-- Подключаем Three.js и дополнения -->
     <script type="importmap">
         {
             "imports": {
@@ -60,256 +118,303 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
-        // --- Инициализация сцены, камеры, рендереров ---
+        
+        // --- Оптимизация: снижаем качество теней для телефонов ---
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // --- Сцена, камера, рендер (с оптимизацией) ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x050510);
-        scene.fog = new THREE.FogExp2(0x050510, 0.008); // туман для атмосферы
-
-        // Камера для телефона (более широкий угол)
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(3, 2, 4);
-        camera.lookAt(0, 1, 0);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        scene.fog = new THREE.FogExp2(0x050510, 0.015);
+        
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 50);
+        camera.position.set(3, 1.8, 4);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // тени для красоты
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = !isMobile; // на телефонах тени отключаем для FPS
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
-
-        // 2D рендерер для текста поверх 3D
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        document.body.appendChild(labelRenderer.domElement);
-
-        // --- Управление пальцем (OrbitControls с поддержкой тач) ---
+        
+        // --- Управление пальцем ---
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;      // плавность
-        controls.dampingFactor = 0.05;
-        controls.rotateSpeed = 1.0;
-        controls.zoomSpeed = 1.2;
-        controls.panSpeed = 0.5;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.rotateSpeed = 1.2;
+        controls.zoomSpeed = 1.0;
         controls.enableZoom = true;
-        controls.enablePan = true;
-        controls.zoomSpeed = 0.8;
-        controls.touchRotate = true;
-        controls.touchZoom = true;
+        controls.enablePan = false;
         controls.target.set(0, 1.2, 0);
-
-        // --- Освещение (красивая графика) ---
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0x404060);
+        
+        // --- Освещение (оптимизированное) ---
+        const ambientLight = new THREE.AmbientLight(0x40406a);
         scene.add(ambientLight);
         
-        // Главный направленный свет (солнце)
-        const mainLight = new THREE.DirectionalLight(0xffccaa, 1.2);
-        mainLight.position.set(5, 10, 3);
-        mainLight.castShadow = true;
-        mainLight.receiveShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
+        const mainLight = new THREE.DirectionalLight(0xffccaa, 1.0);
+        mainLight.position.set(4, 6, 3);
+        if (!isMobile) {
+            mainLight.castShadow = true;
+            mainLight.receiveShadow = false;
+            mainLight.shadow.mapSize.width = 512;
+            mainLight.shadow.mapSize.height = 512;
+        }
         scene.add(mainLight);
         
-        // Заполняющий свет сзади
-        const backLight = new THREE.PointLight(0x4466ff, 0.4);
-        backLight.position.set(-2, 2, -3);
-        scene.add(backLight);
-        
-        // Тёплый свет снизу (эффект "сцены")
-        const fillLight = new THREE.PointLight(0xffaa66, 0.5);
-        fillLight.position.set(0, -1, 1);
+        const fillLight = new THREE.PointLight(0xff88aa, 0.5);
+        fillLight.position.set(1, 2, 2);
         scene.add(fillLight);
         
-        // Динамический цветной свет для настроения
-        const moodLight = new THREE.PointLight(0xff66aa, 0.6);
-        moodLight.position.set(1, 2, 2);
-        scene.add(moodLight);
+        const backLight = new THREE.PointLight(0x6688ff, 0.3);
+        backLight.position.set(-1, 1.5, -2);
+        scene.add(backLight);
         
-        // --- Пол с отражением (глянец) ---
-        const planeGeometry = new THREE.CircleGeometry(5, 32);
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x221133, roughness: 0.3, metalness: 0.7, emissive: 0x110022 });
-        const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+        // --- Пол с зеркальным эффектом ---
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a0a2a, roughness: 0.4, metalness: 0.6 });
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(4.5, 24), groundMat);
         ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -0.5;
-        ground.receiveShadow = true;
+        ground.position.y = -0.6;
+        ground.receiveShadow = false;
         scene.add(ground);
         
-        // Декоративная сетка для стиля
-        const gridHelper = new THREE.GridHelper(12, 20, 0xff66aa, 0x8844aa);
-        gridHelper.position.y = -0.4;
-        gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.3;
-        scene.add(gridHelper);
+        // Декоративный подиум
+        const podiumMat = new THREE.MeshStandardMaterial({ color: 0x331144, roughness: 0.3, metalness: 0.4 });
+        const podium = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.8, 0.2, 8), podiumMat);
+        podium.position.y = -0.5;
+        podium.receiveShadow = false;
+        scene.add(podium);
         
-        // --- Создание персонажа (анимированная модель с "взрослыми" формами) ---
-        const characterGroup = new THREE.Group();
+        // --- СОЗДАНИЕ ПОЛНОСТЬЮ АНИМИРУЕМОЙ МОДЕЛИ (скелетная эмуляция через группы) ---
+        const dollGroup = new THREE.Group();
+        scene.add(dollGroup);
         
-        // Тело (женская фигура с подчёркнутыми формами)
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.25, metalness: 0.1, emissive: 0x442200 });
-        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.4, 1.0, 24), bodyMat);
-        torso.position.y = 0.5;
-        torso.castShadow = true;
-        torso.receiveShadow = true;
-        characterGroup.add(torso);
+        // Материалы
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.25, metalness: 0.05 });
+        const skinMatDark = new THREE.MeshStandardMaterial({ color: 0xffbb99, roughness: 0.2 });
+        const clothMat = new THREE.MeshStandardMaterial({ color: 0xdd44aa, roughness: 0.5, emissive: 0x330022 });
+        const leatherMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.7 });
         
-        // Грудь (детализированно)
-        const breastMat = new THREE.MeshStandardMaterial({ color: 0xffbb99, roughness: 0.2, emissive: 0x552200 });
-        const leftBreast = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 32), breastMat);
-        leftBreast.position.set(-0.42, 0.9, 0.45);
+        // --- Таз/корпус (основа) ---
+        const pelvis = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 0.55, 16), skinMat);
+        pelvis.position.y = 0.3;
+        pelvis.castShadow = true;
+        dollGroup.add(pelvis);
+        
+        // --- Грудь (отдельная группа для анимации) ---
+        const breastGroup = new THREE.Group();
+        breastGroup.position.y = 0.85;
+        dollGroup.add(breastGroup);
+        
+        const leftBreast = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 32), skinMatDark);
+        leftBreast.position.set(-0.42, 0, 0.45);
         leftBreast.castShadow = true;
-        const rightBreast = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 32), breastMat);
-        rightBreast.position.set(0.42, 0.9, 0.45);
+        const rightBreast = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 32), skinMatDark);
+        rightBreast.position.set(0.42, 0, 0.45);
         rightBreast.castShadow = true;
-        characterGroup.add(leftBreast);
-        characterGroup.add(rightBreast);
+        breastGroup.add(leftBreast, rightBreast);
         
-        // Бёдра и таз
-        const hipMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.3 });
-        const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.5, 0.6, 24), hipMat);
-        hips.position.y = 0.15;
-        hips.castShadow = true;
-        characterGroup.add(hips);
+        // Соски (детали)
+        const nippleMat = new THREE.MeshStandardMaterial({ color: 0xcc6688 });
+        const leftNipple = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), nippleMat);
+        leftNipple.position.set(-0.42, 0.05, 0.73);
+        const rightNipple = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), nippleMat);
+        rightNipple.position.set(0.42, 0.05, 0.73);
+        breastGroup.add(leftNipple, rightNipple);
         
-        // Голова
-        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.2 });
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 48, 48), headMat);
-        head.position.y = 1.15;
+        // --- Голова с шеей ---
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.2, 8), skinMat);
+        neck.position.set(0, 1.1, 0);
+        dollGroup.add(neck);
+        
+        const headGroup = new THREE.Group();
+        headGroup.position.set(0, 1.35, 0);
+        dollGroup.add(headGroup);
+        
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 48, 48), skinMat);
         head.castShadow = true;
-        characterGroup.add(head);
+        headGroup.add(head);
         
-        // Волосы (длинные)
-        const hairMat = new THREE.MeshStandardMaterial({ color: 0x442211, roughness: 0.5 });
-        const hair = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.25, 16), hairMat);
-        hair.position.y = 1.38;
-        hair.castShadow = true;
-        characterGroup.add(hair);
+        // Волосы
+        const hairMat = new THREE.MeshStandardMaterial({ color: 0x442200 });
+        const hair = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.52, 0.28, 16), hairMat);
+        hair.position.y = 0.12;
+        headGroup.add(hair);
         
         // Глаза
-        const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), eyeMat);
-        leftEye.position.set(-0.15, 1.28, 0.42);
-        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), eyeMat);
-        rightEye.position.set(0.15, 1.28, 0.42);
-        const pupilMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-        const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 32), pupilMat);
-        leftPupil.position.set(-0.15, 1.27, 0.52);
-        const rightPupil = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 32), pupilMat);
-        rightPupil.position.set(0.15, 1.27, 0.52);
-        characterGroup.add(leftEye, rightEye, leftPupil, rightPupil);
+        const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 24), eyeWhite);
+        leftEye.position.set(-0.14, 0.12, 0.42);
+        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 24), eyeWhite);
+        rightEye.position.set(0.14, 0.12, 0.42);
+        const eyeBlack = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), eyeBlack);
+        leftPupil.position.set(-0.14, 0.11, 0.52);
+        const rightPupil = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), eyeBlack);
+        rightPupil.position.set(0.14, 0.11, 0.52);
+        headGroup.add(leftEye, rightEye, leftPupil, rightPupil);
         
-        // Губы (чуть приоткрыты)
-        const lipMat = new THREE.MeshStandardMaterial({ color: 0xcc5577 });
-        const lips = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.04, 16, 32), lipMat);
-        lips.position.set(0, 1.08, 0.45);
+        // Губы
+        const lipMatObj = new THREE.MeshStandardMaterial({ color: 0xdd5577 });
+        const lips = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.04, 16, 32), lipMatObj);
+        lips.position.set(0, -0.05, 0.44);
         lips.rotation.x = 0.2;
-        characterGroup.add(lips);
+        headGroup.add(lips);
         
-        // Нижняя часть тела (ягодицы)
-        const buttMat = new THREE.MeshStandardMaterial({ color: 0xffbb99, roughness: 0.2 });
-        const leftButt = new THREE.Mesh(new THREE.SphereGeometry(0.38, 32, 32), buttMat);
-        leftButt.position.set(-0.45, 0.2, -0.55);
-        const rightButt = new THREE.Mesh(new THREE.SphereGeometry(0.38, 32, 32), buttMat);
-        rightButt.position.set(0.45, 0.2, -0.55);
-        characterGroup.add(leftButt, rightButt);
+        // --- КОНЕЧНОСТИ (вращаемые) ---
+        // Левая нога
+        const leftLegGroup = new THREE.Group();
+        leftLegGroup.position.set(-0.28, 0.15, 0);
+        dollGroup.add(leftLegGroup);
+        const leftThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.18, 0.55, 12), skinMat);
+        leftThigh.position.y = -0.28;
+        leftThigh.castShadow = true;
+        leftLegGroup.add(leftThigh);
+        const leftCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.5, 12), skinMat);
+        leftCalf.position.y = -0.65;
+        leftCalf.castShadow = true;
+        leftLegGroup.add(leftCalf);
         
-        // Добавляем персонажа в сцену
-        scene.add(characterGroup);
+        // Правая нога
+        const rightLegGroup = new THREE.Group();
+        rightLegGroup.position.set(0.28, 0.15, 0);
+        dollGroup.add(rightLegGroup);
+        const rightThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.18, 0.55, 12), skinMat);
+        rightThigh.position.y = -0.28;
+        rightThigh.castShadow = true;
+        rightLegGroup.add(rightThigh);
+        const rightCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.5, 12), skinMat);
+        rightCalf.position.y = -0.65;
+        rightCalf.castShadow = true;
+        rightLegGroup.add(rightCalf);
         
-        // --- Вспомогательные декорации: кровать/подиум ---
-        const bedMat = new THREE.MeshStandardMaterial({ color: 0xaa88aa, roughness: 0.6, metalness: 0.1 });
-        const bedBase = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.3, 1.8), bedMat);
-        bedBase.position.set(0, -0.35, -1.2);
-        bedBase.receiveShadow = true;
-        bedBase.castShadow = true;
-        scene.add(bedBase);
+        // Левая рука
+        const leftArmGroup = new THREE.Group();
+        leftArmGroup.position.set(-0.52, 0.85, 0);
+        dollGroup.add(leftArmGroup);
+        const leftUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.12, 0.55, 10), skinMat);
+        leftUpperArm.position.y = -0.28;
+        leftUpperArm.castShadow = true;
+        leftArmGroup.add(leftUpperArm);
+        const leftForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.45, 10), skinMat);
+        leftForearm.position.y = -0.65;
+        leftForearm.castShadow = true;
+        leftArmGroup.add(leftForearm);
         
-        const pillowMat = new THREE.MeshStandardMaterial({ color: 0xddbbdd, roughness: 0.8 });
-        const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.6), pillowMat);
-        pillow.position.set(0, -0.1, -1.8);
-        pillow.castShadow = true;
-        scene.add(pillow);
+        // Правая рука
+        const rightArmGroup = new THREE.Group();
+        rightArmGroup.position.set(0.52, 0.85, 0);
+        dollGroup.add(rightArmGroup);
+        const rightUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.12, 0.55, 10), skinMat);
+        rightUpperArm.position.y = -0.28;
+        rightUpperArm.castShadow = true;
+        rightArmGroup.add(rightUpperArm);
+        const rightForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.45, 10), skinMat);
+        rightForearm.position.y = -0.65;
+        rightForearm.castShadow = true;
+        rightArmGroup.add(rightForearm);
         
-        // --- Анимация "дыхания" и лёгких покачиваний ---
-        let time = 0;
+        // Ягодицы (деталь)
+        const buttMat = new THREE.MeshStandardMaterial({ color: 0xffaa99 });
+        const leftButt = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), buttMat);
+        leftButt.position.set(-0.45, 0.1, -0.52);
+        const rightButt = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), buttMat);
+        rightButt.position.set(0.45, 0.1, -0.52);
+        dollGroup.add(leftButt, rightButt);
         
-        // --- CSS2D текст поверх персонажа (пикантная подпись) ---
-        const labelDiv = document.createElement('div');
-        labelDiv.textContent = '💋 Touch & Rotate 💋';
-        labelDiv.style.color = '#ffaacc';
-        labelDiv.style.fontSize = '18px';
-        labelDiv.style.fontWeight = 'bold';
-        labelDiv.style.textShadow = '0 0 10px rgba(0,0,0,0.8)';
-        labelDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        labelDiv.style.padding = '4px 12px';
-        labelDiv.style.borderRadius = '30px';
-        labelDiv.style.border = '1px solid #ff66aa';
-        labelDiv.style.backdropFilter = 'blur(4px)';
-        const labelObj = new CSS2DObject(labelDiv);
-        labelObj.position.set(0, 1.8, 0);
-        scene.add(labelObj);
+        // Трусики (стринги)
+        const pantyMat = new THREE.MeshStandardMaterial({ color: 0xff44aa });
+        const panty = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.05, 16, 32), pantyMat);
+        panty.position.y = 0.2;
+        panty.rotation.x = Math.PI / 2;
+        dollGroup.add(panty);
         
-        // --- Частицы для эротической атмосферы ---
-        const particleCount = 300;
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlePositions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions[i*3] = (Math.random() - 0.5) * 12;
-            particlePositions[i*3+1] = Math.random() * 3;
-            particlePositions[i*3+2] = (Math.random() - 0.5) * 8 - 2;
+        // --- Управление слайдерами ---
+        const leftLegSlider = document.getElementById('leftLeg');
+        const rightLegSlider = document.getElementById('rightLeg');
+        const leftArmSlider = document.getElementById('leftArm');
+        const rightArmSlider = document.getElementById('rightArm');
+        const headSlider = document.getElementById('headRot');
+        const breastSlider = document.getElementById('breast');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        function updatePose() {
+            leftLegGroup.rotation.x = (leftLegSlider.value * Math.PI) / 180;
+            rightLegGroup.rotation.x = (rightLegSlider.value * Math.PI) / 180;
+            leftArmGroup.rotation.z = (leftArmSlider.value * Math.PI) / 180;
+            rightArmGroup.rotation.z = (rightArmSlider.value * Math.PI) / 180;
+            headGroup.rotation.y = (headSlider.value * Math.PI) / 180;
+            const breastScale = 1 + (breastSlider.value / 50);
+            leftBreast.scale.set(breastScale, breastScale, breastScale);
+            rightBreast.scale.set(breastScale, breastScale, breastScale);
         }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        const particleMat = new THREE.PointsMaterial({ color: 0xff88aa, size: 0.03, transparent: true, opacity: 0.6 });
-        const particles = new THREE.Points(particlesGeometry, particleMat);
+        
+        leftLegSlider.addEventListener('input', updatePose);
+        rightLegSlider.addEventListener('input', updatePose);
+        leftArmSlider.addEventListener('input', updatePose);
+        rightArmSlider.addEventListener('input', updatePose);
+        headSlider.addEventListener('input', updatePose);
+        breastSlider.addEventListener('input', updatePose);
+        
+        resetBtn.addEventListener('click', () => {
+            leftLegSlider.value = '0';
+            rightLegSlider.value = '0';
+            leftArmSlider.value = '0';
+            rightArmSlider.value = '0';
+            headSlider.value = '0';
+            breastSlider.value = '15';
+            updatePose();
+            controls.target.set(0, 1.2, 0);
+            camera.position.set(3, 1.8, 4);
+            controls.update();
+        });
+        
+        // --- Частицы для атмосферы (легкие) ---
+        const particleCount = 150;
+        const particlesGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            positions[i*3] = (Math.random() - 0.5) * 8;
+            positions[i*3+1] = Math.random() * 3;
+            positions[i*3+2] = (Math.random() - 0.5) * 6 - 1;
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMatSimple = new THREE.PointsMaterial({ color: 0xff88aa, size: 0.04, transparent: true, opacity: 0.4 });
+        const particles = new THREE.Points(particlesGeo, particleMatSimple);
         scene.add(particles);
         
-        // --- Адаптация под экран телефона ---
-        window.addEventListener('resize', onWindowResize, false);
-        function onWindowResize() {
+        // --- Анимация дыхания (FPS оптимизация) ---
+        let lastTimestamp = 0;
+        let breathTime = 0;
+        
+        function animate(currentTime = 0) {
+            requestAnimationFrame(animate);
+            const delta = Math.min(1/30, (currentTime - lastTimestamp) / 1000);
+            lastTimestamp = currentTime;
+            
+            breathTime += delta * 3;
+            const breath = Math.sin(breathTime) * 0.008;
+            breastGroup.position.y = 0.85 + breath * 0.5;
+            leftBreast.scale.z = 1 + breath * 0.3;
+            rightBreast.scale.z = 1 + breath * 0.3;
+            
+            particles.rotation.y += 0.002;
+            
+            controls.update(); // обновление OrbitControls
+            renderer.render(scene, camera);
+        }
+        
+        updatePose();
+        animate();
+        
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        }
+        });
         
-        // --- Анимационный цикл ---
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.016; // примерно 60 FPS
-            
-            // Дыхание персонажа (лёгкое покачивание груди и тела)
-            const breath = Math.sin(time * 2.5) * 0.012;
-            leftBreast.scale.set(1 + breath, 1 + breath*0.7, 1 + breath);
-            rightBreast.scale.set(1 + breath, 1 + breath*0.7, 1 + breath);
-            // Лёгкое движение ягодиц
-            leftButt.position.z = -0.55 + Math.sin(time * 3) * 0.008;
-            rightButt.position.z = -0.55 + Math.sin(time * 3) * 0.008;
-            // Мерцание света настроения
-            moodLight.intensity = 0.6 + Math.sin(time * 1.8) * 0.2;
-            
-            // Частицы плавают
-            particles.rotation.y += 0.005;
-            particles.rotation.x = Math.sin(time * 0.2) * 0.1;
-            
-            // Обновление контроллера
-            controls.update();
-            
-            // Рендер
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-        
-        animate();
-        
-        // --- Блокировка контекстного меню (для удобства тачей) ---
+        // Блокировка контекстного меню
         window.addEventListener('contextmenu', (e) => e.preventDefault());
         
-        console.log('3D Adult Game запущена для телефонов');
+        console.log('3D Adult Doll готова — полный контроль конечностей');
     </script>
 </body>
 </html>
