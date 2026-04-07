@@ -175,7 +175,7 @@
         osc.stop(now + 0.2);
     }
     
-    // продолжение во 2 части...    // ========== ЧАСТЬ 2/3 ==========
+    // ========== ЧАСТЬ 2/3: МЕХАНИКА КЛИКОВ, КОМБО, КРИТЫ ==========
     
     function startMinigame() {
         if (minigame.active) return;
@@ -197,16 +197,12 @@
         minigame.active = false;
         totalBj++;
         suslovLevel++;
-        // рекорд комбо сохраняем для эмоций
         updateUI();
         suslov.isHitching = true;
-        // визуальный финиш
         minigame.screenFlash = 25;
-        // вибрация если есть
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     }
     
-    // добавление удовольствия с механикой комбо и критов
     function addPleasure(rawAmount) {
         if (!minigame.active) return;
         
@@ -222,26 +218,20 @@
         }
         minigame.lastHitTime = now;
         
-        // бонус от комбо
         let comboBonus = 1 + (minigame.combo / 20);
-        // критический удар (шанс 18% + процент от комбо)
         let isCrit = (Math.random() < 0.12 + (minigame.combo / 80));
         let critMulti = isCrit ? 2.2 : 1.0;
         
         let gain = rawAmount * comboBonus * critMulti;
-        // увеличение интенсивности
         minigame.intensity = Math.min(minigame.intensity + 5 + (minigame.combo * 0.7), 75);
         minigame.mouthWide = 16 + Math.floor(minigame.intensity / 5);
         
-        // анимация рта и эффекты
         minigame.pleasure = Math.min(minigame.pleasure + gain, minigame.maxPleasure);
         
-        // критический эффект
         if (isCrit) {
             minigame.screenFlash = 12;
             minigame.shake = 8;
             playClickSound(true);
-            // добавляем частицы спермы/капли
             for(let i=0; i<8; i++) {
                 minigame.critParticle.push({
                     x: suslov.x + suslov.w/2 + (Math.random() - 0.5)*30,
@@ -255,7 +245,6 @@
         } else {
             playClickSound(false);
             if (navigator.vibrate && minigame.combo % 5 === 0) navigator.vibrate(30);
-            // обычные капли
             if (Math.random() < 0.4) {
                 minigame.critParticle.push({
                     x: suslov.x + suslov.w/2 + (Math.random() - 0.5)*20,
@@ -316,7 +305,6 @@
         minigame.intensity = Math.max(0, minigame.intensity - delta * 18);
         minigame.mouthWide = Math.max(5, minigame.mouthWide - delta * 35);
         minigame.headBobAngle = (minigame.headBobAngle + delta * 21) % (Math.PI * 2);
-        // обновление частиц
         for(let i=0; i<minigame.critParticle.length; i++) {
             let p = minigame.critParticle[i];
             p.x += p.vx * delta * 60;
@@ -346,12 +334,11 @@
         updateUI();
     });
     
-    // продолжение в части 3 (рендер с анимацией глубокого минета + эффекты)    // ========== ЧАСТЬ 3/3 ==========
+    // ========== ЧАСТЬ 3/3: РЕНДЕР, АНИМАЦИЯ МИНЕТА, ЭФФЕКТЫ ==========
     
     function drawRoad() {
         ctx.fillStyle = "#2a3824";
         ctx.fillRect(0, 280, canvas.width, 160);
-        // полосы
         ctx.fillStyle = "#d4c47a";
         for(let i = 0; i < 14; i++) {
             let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
@@ -374,13 +361,11 @@
         ctx.arc(88, 378, 9, 0, Math.PI*2);
         ctx.arc(126, 378, 9, 0, Math.PI*2);
         ctx.fill();
-        // фары
         ctx.fillStyle = "#ffcc66";
         ctx.fillRect(135, 352, 8, 6);
     }
     
     function drawSuslovWithMinigame() {
-        // Эффект тряски экрана
         let shakeX = 0, shakeY = 0;
         if (minigame.shake > 0) {
             shakeX = (Math.random() - 0.5) * minigame.shake;
@@ -390,56 +375,44 @@
         }
         
         if (minigame.active) {
-            // ======= ПОЛНАЯ АНИМАЦИЯ МИНЕТА С ГЛУБИНОЙ =======
             let centerX = suslov.x + suslov.w/2;
             let centerY = suslov.y + 30;
-            
-            // Движение головы вверх-вниз (имитация ритма)
             let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
             let headY = -20 + bobOffset;
             
             ctx.save();
             ctx.translate(centerX, centerY);
-            
-            // Наклон тела
             let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
             ctx.rotate(tilt);
             
-            // Туловище (спина)
             ctx.fillStyle = "#dba878";
             ctx.beginPath();
             ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
             ctx.fill();
             
-            // Штаны на коленях
             ctx.fillStyle = "#3d5230";
             ctx.fillRect(-18, 12, 36, 22);
             
-            // Голова
             ctx.fillStyle = "#f2cfa0";
             ctx.beginPath();
             ctx.arc(0, headY, 18, 0, Math.PI*2);
             ctx.fill();
             
-            // Рот (открыт широко, пульсирует от интенсивности)
             let mouthHeight = minigame.mouthWide;
             let mouthYOffset = -12 + (mouthHeight / 2);
             ctx.fillStyle = "#441122";
             ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
             
-            // Язык (активный)
             if (minigame.intensity > 15 || minigame.combo > 5) {
                 ctx.fillStyle = "#dd6688";
                 let tongueOut = Math.sin(Date.now() * 0.02) * 3;
                 ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
             }
             
-            // Глаза (закачены)
             ctx.fillStyle = "#2a2a2a";
             ctx.fillRect(-12, headY-10, 6, 5);
             ctx.fillRect(6, headY-10, 6, 5);
             
-            // Капли пота/слюны
             if (minigame.intensity > 20) {
                 ctx.fillStyle = "#aaffdd";
                 for(let s=0; s<3; s++) {
@@ -448,10 +421,8 @@
                     ctx.fill();
                 }
             }
-            
             ctx.restore();
             
-            // === ЧАСТИЦЫ (капли) ===
             for(let p of minigame.critParticle) {
                 ctx.fillStyle = `rgba(255, 200, 180, ${p.life})`;
                 ctx.beginPath();
@@ -459,7 +430,6 @@
                 ctx.fill();
             }
             
-            // Полоска удовольствия
             let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
             ctx.fillStyle = "#ff8844";
             ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
@@ -467,7 +437,6 @@
             ctx.font = "bold 14px monospace";
             ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
             
-            // Комбо счётчик над головой
             if (minigame.combo > 3) {
                 ctx.fillStyle = "#ff66aa";
                 ctx.font = "bold 20px monospace";
@@ -477,7 +446,6 @@
             }
             
         } else {
-            // ======= ХОДЬБА ПО ТРАССЕ =======
             ctx.fillStyle = "#dcab7a";
             ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
             ctx.fillStyle = "#f2cf9a";
@@ -493,208 +461,6 @@
             ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
             ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
             
-            // Баллон "подвези"
-            ctx.fillStyle = "#ffffcc";
-            ctx.font = "bold 13px monospace";
-            ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 8, suslov.y - 14);
-            ctx.fillStyle = "#dd9966";
-            ctx.fillText("(сын бляди)", suslov.x + 12, suslov.y - 2);
-        }
-        
-        if (minigame.shake > 0) ctx.restore();
-    }
-    
-    function drawFlashAndEffects() {
-        if (minigame.screenFlash > 0) {
-            ctx.fillStyle = `rgba(255, 200, 100, ${minigame.screenFlash / 15})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        if (minigame.active && minigame.combo > 8) {
-            ctx.strokeStyle = "#ffaa44";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(5, 5, canvas.width-10, canvas.height-10);
-        }
-    }
-    
-    function drawMinigameInstructions() {
-        if (!minigame.active) return;
-        ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 48);
-        ctx.fillStyle = "#ffcc99";
-        ctx.font = "bold 16px monospace";
-        ctx.fillText("🍆💦 КЛИКАЙ БЫСТРО - НАБИРАЙ КОМБО - КРИТИЧЕСКИЙ МИНЕТ 💦🍆", canvas.width/2 - 280, 32);
-    }
-    
-    let lastTime = 0;
-    function gameLoop(now) {
-        let delta = Math.min(0.033, (now - lastTime) / 1000);
-        if (delta > 0.01) {
-            updateSuslov(delta);
-            updateMinigameEffects(delta);
-        }
-        lastTime = now;
-        
-        drawRoad();
-        drawCar();
-        drawSuslovWithMinigame();
-        drawFlashAndEffects();
-        drawMinigameInstructions();
-        
-        requestAnimationFrame(gameLoop);
-    }
-    
-    updateUI();
-    requestAnimationFrame(gameLoop);
-</script>
-</body>
-</html>    // ========== ЧАСТЬ 3/3 ==========
-    
-    function drawRoad() {
-        ctx.fillStyle = "#2a3824";
-        ctx.fillRect(0, 280, canvas.width, 160);
-        // полосы
-        ctx.fillStyle = "#d4c47a";
-        for(let i = 0; i < 14; i++) {
-            let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
-            ctx.fillRect(dashX, 352, 40, 6);
-        }
-        ctx.fillStyle = "#9e7e5a";
-        ctx.fillRect(0, 425, canvas.width, 14);
-        ctx.fillStyle = "#4a7a3a";
-        ctx.fillRect(0, 258, canvas.width, 24);
-        roadOffset = (roadOffset + 2.2) % 50;
-    }
-    
-    function drawCar() {
-        ctx.fillStyle = "#5a7a9a";
-        ctx.fillRect(70, 338, 72, 48);
-        ctx.fillStyle = "#3a4f66";
-        ctx.fillRect(80, 328, 22, 12);
-        ctx.fillStyle = "#1a1a2a";
-        ctx.beginPath();
-        ctx.arc(88, 378, 9, 0, Math.PI*2);
-        ctx.arc(126, 378, 9, 0, Math.PI*2);
-        ctx.fill();
-        // фары
-        ctx.fillStyle = "#ffcc66";
-        ctx.fillRect(135, 352, 8, 6);
-    }
-    
-    function drawSuslovWithMinigame() {
-        // Эффект тряски экрана
-        let shakeX = 0, shakeY = 0;
-        if (minigame.shake > 0) {
-            shakeX = (Math.random() - 0.5) * minigame.shake;
-            shakeY = (Math.random() - 0.5) * minigame.shake;
-            ctx.save();
-            ctx.translate(shakeX, shakeY);
-        }
-        
-        if (minigame.active) {
-            // ======= ПОЛНАЯ АНИМАЦИЯ МИНЕТА С ГЛУБИНОЙ =======
-            let centerX = suslov.x + suslov.w/2;
-            let centerY = suslov.y + 30;
-            
-            // Движение головы вверх-вниз (имитация ритма)
-            let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
-            let headY = -20 + bobOffset;
-            
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            
-            // Наклон тела
-            let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
-            ctx.rotate(tilt);
-            
-            // Туловище (спина)
-            ctx.fillStyle = "#dba878";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Штаны на коленях
-            ctx.fillStyle = "#3d5230";
-            ctx.fillRect(-18, 12, 36, 22);
-            
-            // Голова
-            ctx.fillStyle = "#f2cfa0";
-            ctx.beginPath();
-            ctx.arc(0, headY, 18, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Рот (открыт широко, пульсирует от интенсивности)
-            let mouthHeight = minigame.mouthWide;
-            let mouthYOffset = -12 + (mouthHeight / 2);
-            ctx.fillStyle = "#441122";
-            ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            
-            // Язык (активный)
-            if (minigame.intensity > 15 || minigame.combo > 5) {
-                ctx.fillStyle = "#dd6688";
-                let tongueOut = Math.sin(Date.now() * 0.02) * 3;
-                ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
-            }
-            
-            // Глаза (закачены)
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(-12, headY-10, 6, 5);
-            ctx.fillRect(6, headY-10, 6, 5);
-            
-            // Капли пота/слюны
-            if (minigame.intensity > 20) {
-                ctx.fillStyle = "#aaffdd";
-                for(let s=0; s<3; s++) {
-                    ctx.beginPath();
-                    ctx.arc(-14 + s*14, headY+4, 2, 0, Math.PI*2);
-                    ctx.fill();
-                }
-            }
-            
-            ctx.restore();
-            
-            // === ЧАСТИЦЫ (капли) ===
-            for(let p of minigame.critParticle) {
-                ctx.fillStyle = `rgba(255, 200, 180, ${p.life})`;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            // Полоска удовольствия
-            let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
-            ctx.fillStyle = "#ff8844";
-            ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
-            
-            // Комбо счётчик над головой
-            if (minigame.combo > 3) {
-                ctx.fillStyle = "#ff66aa";
-                ctx.font = "bold 20px monospace";
-                ctx.shadowBlur = 8;
-                ctx.fillText(`⚡x${minigame.combo} COMBO!`, suslov.x - 15, suslov.y - 50);
-                ctx.shadowBlur = 0;
-            }
-            
-        } else {
-            // ======= ХОДЬБА ПО ТРАССЕ =======
-            ctx.fillStyle = "#dcab7a";
-            ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
-            ctx.fillStyle = "#f2cf9a";
-            ctx.beginPath();
-            ctx.arc(suslov.x + suslov.w/2, suslov.y + 16, 19, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
-            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            
-            let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
-            ctx.fillStyle = "#5f704a";
-            ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
-            ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            
-            // Баллон "подвези"
             ctx.fillStyle = "#ffffcc";
             ctx.font = "bold 13px monospace";
             ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 8, suslov.y - 14);
