@@ -1,475 +1,255 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Black Russia - Кейсы | Точная копия</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>3D Mobile Sandbox</title>
 
-        body {
-            background: #0a0c12;
-            font-family: 'Impact', 'Arial Black', 'Segoe UI Black', 'Roboto Condensed', sans-serif;
-            padding: 30px 20px;
-        }
+<style>
+body { margin:0; overflow:hidden; }
 
-        /* Сетка как в стиле BR */
-        .cases-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 25px;
-        }
+#joystick {
+    position: absolute;
+    bottom: 80px;
+    left: 40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    touch-action: none;
+}
 
-        /* Карточка кейса — точь-в-точь как на фото */
-        .case-item {
-            width: 360px;
-            background: linear-gradient(145deg, #141a24 0%, #0d1119 100%);
-            border-radius: 28px;
-            border: 1px solid rgba(255, 200, 50, 0.3);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-            overflow: hidden;
-            transition: 0.2s;
-        }
+#stick {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    position: relative;
+    top: 30px;
+    left: 30px;
+}
 
-        .case-item:hover {
-            transform: translateY(-4px);
-            border-color: #ffb347;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.8);
-        }
+button {
+    position: absolute;
+    right: 20px;
+    padding: 10px;
+}
 
-        /* Верхняя полоса с номером и ценой кейса */
-        .case-top {
-            background: #0b0f16;
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            border-bottom: 2px solid #ffc10740;
-        }
-        .case-number {
-            color: #7e8c9e;
-            font-size: 18px;
-            font-weight: bold;
-            font-family: monospace;
-            letter-spacing: 1px;
-        }
-        .case-price-bc {
-            font-size: 28px;
-            font-weight: 900;
-            color: #ffd966;
-            text-shadow: 0 0 3px #ff9900;
-            line-height: 1;
-        }
-        .case-price-bc small {
-            font-size: 14px;
-            font-weight: normal;
-            color: #c9b36b;
-        }
-
-        /* Название кейса */
-        .case-name {
-            font-size: 32px;
-            font-weight: 900;
-            text-align: center;
-            padding: 16px 10px 5px;
-            letter-spacing: 1.5px;
-            background: linear-gradient(135deg, #FFD966, #FFB347);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 4px black;
-            word-break: break-word;
-        }
-
-        /* Блок с бонусами (числа как на фото) */
-        .bonus-strip {
-            background: #00000055;
-            margin: 12px 15px;
-            padding: 14px 8px;
-            border-radius: 50px;
-            display: flex;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            border: 1px solid #ffc10730;
-        }
-        .bonus-number {
-            font-size: 28px;
-            font-weight: 900;
-            color: #FFD966;
-            text-shadow: 0 2px 0 #7a4d1a;
-            background: #0f131cb3;
-            padding: 5px 12px;
-            border-radius: 40px;
-            min-width: 70px;
-            text-align: center;
-            font-family: monospace;
-        }
-        .bonus-label {
-            font-size: 11px;
-            color: #bbaa77;
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
-
-        /* Блок SALE и скидочные стикеры */
-        .sale-badge {
-            background: #e33b3b;
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 20px;
-            font-weight: 900;
-            color: white;
-            text-align: center;
-            letter-spacing: 2px;
-            box-shadow: 0 2px 8px red;
-            margin: 5px auto 0;
-            width: fit-content;
-        }
-        .discount-percent {
-            background: #ff8800;
-            color: #1e1a0c;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-left: 8px;
-        }
-
-        /* Блок цен и кнопок */
-        .price-buttons {
-            display: flex;
-            gap: 15px;
-            padding: 15px 18px 10px;
-        }
-        .open-btn {
-            flex: 1;
-            background: linear-gradient(180deg, #262e3c, #12161f);
-            border-radius: 60px;
-            text-align: center;
-            padding: 12px 5px;
-            cursor: pointer;
-            transition: 0.07s linear;
-            border: 1px solid #4a5368;
-            box-shadow: 0 5px 0 #07090e;
-        }
-        .open-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #07090e;
-        }
-        .price-value {
-            font-size: 28px;
-            font-weight: 900;
-            color: #FFD966;
-            line-height: 1;
-        }
-        .price-desc {
-            font-size: 12px;
-            color: #9aaec9;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .limited-tag {
-            background: #6d2e2e;
-            color: #ffb770;
-            font-size: 11px;
-            padding: 4px 12px;
-            border-radius: 50px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        /* Результат открытия */
-        .result-box {
-            margin: 15px 18px 20px;
-            background: #00000077;
-            border-radius: 28px;
-            padding: 12px;
-            text-align: center;
-            font-size: 15px;
-            font-weight: bold;
-            color: #FFE5B4;
-            border: 1px solid #ffb34760;
-            backdrop-filter: blur(4px);
-            font-family: 'Segoe UI', monospace;
-            min-height: 70px;
-            word-break: break-word;
-        }
-
-        .hash-footer {
-            font-size: 9px;
-            text-align: center;
-            color: #3e4a5b;
-            padding: 12px 10px 15px;
-            font-family: monospace;
-            border-top: 1px solid #1e2632;
-            margin-top: 5px;
-        }
-
-        /* XP кейс стиль */
-        .xp-bonus {
-            background: #2b5e2b;
-        }
-        .glow-effect {
-            background: #ffcc44aa;
-            color: #1f1a0a;
-            text-shadow: none;
-            transition: 0.1s;
-        }
-        button {
-            background: none;
-            border: none;
-        }
-        @media (max-width: 780px) {
-            .case-item { width: 340px; }
-            .bonus-number { font-size: 22px; min-width: 55px; }
-        }
-    </style>
+#place { bottom: 200px; }
+#view { bottom: 140px; }
+#clear { bottom: 80px; }
+</style>
 </head>
+
 <body>
-<div class="cases-container" id="brCases"></div>
+
+<div id="joystick"><div id="stick"></div></div>
+<button id="place">Поставить</button>
+<button id="view">Сменить вид</button>
+<button id="clear">Очистить мир</button>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
-    // ТОЧНЫЕ ДАННЫЕ КАЖДОГО КЕЙСА С ФОТОГРАФИЙ
-    const casesExact = [
-        {   // 1 фото: 15/2000, 5BC, ОСОБЫЙ КЕЙС, БОНУСЫ 40/30/20/15/10/5, SALE 25 и 20
-            id: 0,
-            number: "15/2000",
-            priceSingle: 25,
-            priceTen: 200,
-            name: "ОСОБЫЙ КЕЙС",
-            bonusList: [40, 30, 20, 15, 10, 5],
-            saleSingle: true,
-            saleTen: true,
-            limited: false,
-            extraItem: null,
-            currency: "BC",
-            discountPercent: 20
-        },
-        {   // 2 фото: KEHC:HNTPO, 40/30/20/10, Toyaro Custom, 9000-BC -5%, цена 900 / 8550
-            id: 1,
-            number: "15/2000",
-            priceSingle: 900,
-            priceTen: 8550,
-            name: "KEHC: NEURO",
-            bonusList: ["40", "30", "20", "10", "Toyaro Custom"],
-            saleSingle: false,
-            saleTen: true,
-            limited: false,
-            extraItem: "BodyKit",
-            currency: "BC",
-            discountPercent: 5
-        },
-        {   // 3 фото: KEIC BOMKA, бонусы 40/30/20/10, цена 100 / 1000, Побитые очки
-            id: 2,
-            number: "15/2000",
-            priceSingle: 100,
-            priceTen: 1000,
-            name: "КЕЙС БОМБА",
-            bonusList: ["40", "30", "20", "10", "ПОБИТЫЕ ОЧКИ"],
-            saleSingle: false,
-            saleTen: false,
-            limited: false,
-            extraItem: null,
-            currency: "BC"
-        },
-        {   // 4 фото: СТАНДАРТНЫЙ КЕЙС, бонусы 40/30/20/10/5, цена 700/7000, ELECTRA X
-            id: 3,
-            number: "15/2000",
-            priceSingle: 700,
-            priceTen: 7000,
-            name: "СТАНДАРТНЫЙ КЕЙС",
-            bonusList: ["40", "30", "20", "10", "5", "ELECTRA X"],
-            saleSingle: false,
-            saleTen: false,
-            limited: false,
-            extraItem: null,
-            currency: "BC"
-        },
-        {   // 5 фото: АВТО-КЕЙС 2.0, бонусы 40/30/20/10, SALE -5%, 12000-BC -> цена 1200/11400, S650
-            id: 4,
-            number: "15/2000",
-            priceSingle: 1200,
-            priceTen: 11400,
-            name: "АВТО-КЕЙС 2.0",
-            bonusList: ["40", "30", "20", "10", "S650"],
-            saleSingle: false,
-            saleTen: true,
-            limited: false,
-            extraItem: null,
-            currency: "BC",
-            discountPercent: 5
-        },
-        {   // 6 фото: EXEAAHEBHN KENC, XP+, 10 XP, цена 4EXP / 40EXP
-            id: 5,
-            number: "15/2000",
-            priceSingle: 4,
-            priceTen: 40,
-            name: "ЖЕЛАНИЕ КЕЙС",
-            bonusList: ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "XP BOOST"],
-            saleSingle: false,
-            saleTen: false,
-            limited: false,
-            extraItem: null,
-            currency: "EXP",
-            xpMode: true
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Свет
+let light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(10,20,10);
+scene.add(light);
+
+// Пол
+let plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(100,100),
+    new THREE.MeshStandardMaterial({color:0x55aa55})
+);
+plane.rotation.x = -Math.PI/2;
+scene.add(plane);
+
+// Игрок
+let player = new THREE.Mesh(
+    new THREE.BoxGeometry(1,2,1),
+    new THREE.MeshStandardMaterial({color:0x0000ff})
+);
+player.position.y = 1;
+scene.add(player);
+
+let blocks = [];
+
+// ================== СОХРАНЕНИЕ ==================
+
+function saveWorld(){
+    let data = blocks.map(b => ({
+        x: b.position.x,
+        y: b.position.y,
+        z: b.position.z
+    }));
+    localStorage.setItem("world", JSON.stringify(data));
+}
+
+function loadWorld(){
+    let data = JSON.parse(localStorage.getItem("world") || "[]");
+
+    data.forEach(pos => {
+        let block = new THREE.Mesh(
+            new THREE.BoxGeometry(1,1,1),
+            new THREE.MeshStandardMaterial({color:0xaaaaaa})
+        );
+
+        block.position.set(pos.x, pos.y, pos.z);
+        scene.add(block);
+        blocks.push(block);
+    });
+}
+
+// Загружаем мир
+loadWorld();
+
+// ================== КАМЕРА ==================
+
+let thirdPerson = true;
+let rotX = 0, rotY = 0;
+
+// ================== ДЖОЙСТИК ==================
+
+let joystick = document.getElementById("joystick");
+let stick = document.getElementById("stick");
+
+let moveX = 0, moveZ = 0;
+
+joystick.addEventListener("touchmove", e => {
+    let t = e.touches[0];
+    let rect = joystick.getBoundingClientRect();
+    let x = t.clientX - rect.left - 60;
+    let y = t.clientY - rect.top - 60;
+
+    moveX = x / 40;
+    moveZ = y / 40;
+
+    stick.style.transform = `translate(${x}px,${y}px)`;
+});
+
+joystick.addEventListener("touchend", () => {
+    moveX = 0;
+    moveZ = 0;
+    stick.style.transform = `translate(0px,0px)`;
+});
+
+// ================== ВРАЩЕНИЕ КАМЕРЫ ==================
+
+window.addEventListener("touchmove", e => {
+    if(e.touches.length === 1){
+        rotY += e.touches[0].movementX * 0.002;
+        rotX += e.touches[0].movementY * 0.002;
+    }
+});
+
+// ================== ЗУМ ==================
+
+window.addEventListener("wheel", e => {
+    camera.position.z += e.deltaY * 0.01;
+});
+
+// ================== ПОСТАВИТЬ БЛОК ==================
+
+document.getElementById("place").onclick = () => {
+    let block = new THREE.Mesh(
+        new THREE.BoxGeometry(1,1,1),
+        new THREE.MeshStandardMaterial({color:0xaaaaaa})
+    );
+
+    block.position.set(
+        Math.round(player.position.x),
+        0.5,
+        Math.round(player.position.z - 2)
+    );
+
+    scene.add(block);
+    blocks.push(block);
+
+    saveWorld(); // СОХРАНЕНИЕ
+};
+
+// ================== УДАЛЕНИЕ БЛОКА ==================
+
+let holdTime = 0;
+
+renderer.domElement.addEventListener("touchstart", () => {
+    holdTime = Date.now();
+});
+
+renderer.domElement.addEventListener("touchend", () => {
+    if(Date.now() - holdTime > 4000){
+
+        let raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+
+        let intersects = raycaster.intersectObjects(blocks);
+
+        if(intersects.length > 0){
+            let obj = intersects[0].object;
+
+            scene.remove(obj);
+            blocks = blocks.filter(b => b !== obj);
+
+            saveWorld(); // СОХРАНЕНИЕ
         }
-    ];
-
-    // Функция рандома из массива
-    function getRandomFrom(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
     }
+});
 
-    // Открыть 1 кейс
-    function openSingleCase(caseData) {
-        if (caseData.currency === "EXP" || caseData.xpMode) {
-            const xpRewards = ["+10 XP", "+25 XP", "+50 XP", "+100 XP", "✨ XP BOOST ✨"];
-            return getRandomFrom(xpRewards);
-        } else {
-            let rewardsPool = [...caseData.bonusList];
-            if (caseData.extraItem) rewardsPool.push(caseData.extraItem);
-            let reward = getRandomFrom(rewardsPool);
-            if (typeof reward === "number") return `${reward} BC`;
-            return reward;
-        }
-    }
+// ================== СМЕНА ВИДА ==================
 
-    // Открыть 10 кейсов
-    function openTenCases(caseData) {
-        let results = [];
-        for (let i = 0; i < 10; i++) {
-            results.push(openSingleCase(caseData));
-        }
-        return results;
-    }
+document.getElementById("view").onclick = () => {
+    thirdPerson = !thirdPerson;
+};
 
-    function formatTenResult(results) {
-        const counts = new Map();
-        results.forEach(r => counts.set(r, (counts.get(r) || 0) + 1));
-        let parts = [];
-        for (let [item, cnt] of counts.entries()) {
-            parts.push(`${item} x${cnt}`);
-        }
-        return `📦 10 КЕЙСОВ: ${parts.join(', ')}`;
-    }
+// ================== ОЧИСТКА МИРА ==================
 
-    // Рендер точной копии
-    function renderExactCases() {
-        const container = document.getElementById('brCases');
-        container.innerHTML = '';
-        
-        casesExact.forEach((c, idx) => {
-            const card = document.createElement('div');
-            card.className = 'case-item';
-            
-            // Блок бонусов в виде чисел
-            let bonusHTML = '';
-            if (c.currency === 'EXP' || c.xpMode) {
-                bonusHTML = `<div class="bonus-strip">
-                    <div class="bonus-number">XP+10</div>
-                    <div class="bonus-number">XP+25</div>
-                    <div class="bonus-number">XP+50</div>
-                    <div class="bonus-number">XP+100</div>
-                    <div class="bonus-number">BOOST</div>
-                </div>`;
-            } else {
-                const bonusItems = c.bonusList.map(b => {
-                    if (typeof b === 'number') return `<div class="bonus-number">${b}</div>`;
-                    else return `<div class="bonus-number" style="font-size:18px;">${b}</div>`;
-                }).join('');
-                bonusHTML = `<div class="bonus-strip">${bonusItems}</div>`;
-            }
-            
-            // SALE метки
-            let saleTopHtml = '';
-            if (c.saleSingle && c.priceSingle < 999) saleTopHtml = `<div class="sale-badge" style="margin-top:-5px;">SALE ${c.priceSingle === 25 ? '25' : ''}</div>`;
-            else if (c.saleTen && c.discountPercent) saleTopHtml = `<div class="sale-badge" style="background:#e67e22;">SALE -${c.discountPercent}%</div>`;
-            
-            let priceSingleDisplay = (c.currency === 'EXP') ? `${c.priceSingle} EXP` : `${c.priceSingle} BC`;
-            let priceTenDisplay = (c.currency === 'EXP') ? `${c.priceTen} EXP` : `${c.priceTen} BC`;
-            if (c.saleTen && c.discountPercent && c.currency !== 'EXP') {
-                priceTenDisplay = `${c.priceTen} BC <span class="discount-percent">-${c.discountPercent}%</span>`;
-            }
-            if (c.name === "ОСОБЫЙ КЕЙС") {
-                priceSingleDisplay = `25 BC <span style="font-size:12px;">SALE</span>`;
-                priceTenDisplay = `200 BC <span class="discount-percent">-20%</span>`;
-            }
-            if (c.name === "KEHC: NEURO") {
-                priceTenDisplay = `8550 BC <span class="discount-percent">-5%</span>`;
-            }
-            if (c.name === "АВТО-КЕЙС 2.0") {
-                priceTenDisplay = `11400 BC <span class="discount-percent">-5%</span>`;
-            }
-            
-            const limitedHtml = c.limited ? `<div class="limited-tag">LIMITED</div>` : '';
-            
-            card.innerHTML = `
-                <div class="case-top">
-                    <span class="case-number">${c.number}</span>
-                    <span class="case-price-bc"><small>${c.currency === 'EXP' ? 'EXP' : 'BC'}</small></span>
-                </div>
-                <div class="case-name">${c.name}</div>
-                ${saleTopHtml}
-                ${bonusHTML}
-                <div class="price-buttons">
-                    <div class="open-btn" data-action="single" data-idx="${idx}">
-                        <div class="price-value">${priceSingleDisplay}</div>
-                        <div class="price-desc">ОТКРЫТЬ ×1</div>
-                    </div>
-                    <div class="open-btn" data-action="ten" data-idx="${idx}">
-                        <div class="price-value">${priceTenDisplay}</div>
-                        <div class="price-desc">ОТКРЫТЬ ×10</div>
-                    </div>
-                </div>
-                ${limitedHtml}
-                <div class="result-box" id="result-${idx}">⚡ НАЖМИТЕ ОТКРЫТЬ ⚡</div>
-                <div class="hash-footer">Mv16.72.14524 (a2492b04-e2be1886)</div>
-            `;
-            
-            container.appendChild(card);
-        });
-        
-        // Вешаем события
-        document.querySelectorAll('.open-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const action = btn.dataset.action;
-                const idx = parseInt(btn.dataset.idx);
-                const caseData = casesExact[idx];
-                const resultDiv = document.getElementById(`result-${idx}`);
-                if (!resultDiv) return;
-                
-                resultDiv.innerHTML = '⏳ ОТКРЫВАЕМ...';
-                resultDiv.classList.add('glow-effect');
-                
-                setTimeout(() => {
-                    if (action === 'single') {
-                        const reward = openSingleCase(caseData);
-                        resultDiv.innerHTML = `🎁 ВЫПАЛО: ${reward}`;
-                    } else {
-                        const rewardsArr = openTenCases(caseData);
-                        const msg = formatTenResult(rewardsArr);
-                        resultDiv.innerHTML = msg;
-                    }
-                    setTimeout(() => {
-                        resultDiv.classList.remove('glow-effect');
-                    }, 300);
-                }, 70);
-            });
-        });
+document.getElementById("clear").onclick = () => {
+    blocks.forEach(b => scene.remove(b));
+    blocks = [];
+    localStorage.removeItem("world");
+};
+
+// ================== ДВИЖЕНИЕ ==================
+
+function updatePlayer(){
+    player.position.x -= moveX * 0.1;
+    player.position.z += moveZ * 0.1;
+}
+
+// ================== КАМЕРА ==================
+
+function updateCamera(){
+    if(thirdPerson){
+        camera.position.x = player.position.x + Math.sin(rotY) * 5;
+        camera.position.z = player.position.z + Math.cos(rotY) * 5;
+        camera.position.y = player.position.y + 3;
+        camera.lookAt(player.position);
+    } else {
+        camera.position.copy(player.position);
+        camera.position.y += 1.5;
+        camera.rotation.y = rotY;
     }
-    
-    renderExactCases();
+}
+
+// ================== РЕНДЕР ==================
+
+function animate(){
+    requestAnimationFrame(animate);
+
+    updatePlayer();
+    updateCamera();
+
+    renderer.render(scene, camera);
+}
+
+animate();
 </script>
+
 </body>
-    </html>
+</html>
