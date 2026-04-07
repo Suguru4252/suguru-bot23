@@ -3,54 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Sandbox</title>
+<title>Sandbox</title>
 
 <style>
-body { margin:0; overflow:hidden; background: linear-gradient(#87CEEB, #e0f7ff); }
+body { margin:0; overflow:hidden; background:#87CEEB; }
 
 #joystick {
-    position: absolute;
-    bottom: 80px;
-    left: 40px;
-    width: 120px;
-    height: 120px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
+    position:absolute;
+    bottom:80px;
+    left:40px;
+    width:120px;
+    height:120px;
+    background:rgba(255,255,255,0.2);
+    border-radius:50%;
 }
 
 #stick {
-    width: 60px;
-    height: 60px;
-    background: white;
-    border-radius: 50%;
-    position: relative;
-    top: 30px;
-    left: 30px;
+    width:60px;
+    height:60px;
+    background:white;
+    border-radius:50%;
+    position:relative;
+    top:30px;
+    left:30px;
+}
+
+#blockUI {
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
 }
 
 button {
-    position: absolute;
-    right: 20px;
-    padding: 10px;
+    padding:10px;
+    margin:5px;
 }
-
-#place { bottom: 200px; }
-#view { bottom: 140px; }
 </style>
 </head>
 
 <body>
 
 <div id="joystick"><div id="stick"></div></div>
-<button id="place">Блок</button>
-<button id="view">Вид</button>
+
+<div id="blockUI">
+<button onclick="selectBlock(0)">⬜</button>
+<button onclick="selectBlock(1)">🟫</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
-// СЦЕНА
+// === СЦЕНА ===
 let scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB); // НЕБО
+scene.background = new THREE.Color(0x87CEEB);
 
 let camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
 let renderer = new THREE.WebGLRenderer({antialias:true});
@@ -58,12 +64,11 @@ renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // СВЕТ
-let sun = new THREE.DirectionalLight(0xffffff, 1);
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+
+let sun = new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(10,20,10);
 scene.add(sun);
-
-let ambient = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambient);
 
 // ПОЛ
 let plane = new THREE.Mesh(
@@ -81,19 +86,28 @@ let player = new THREE.Mesh(
 player.position.y = 1;
 scene.add(player);
 
-// КАМЕРА СТАРТ
-camera.position.set(0,5,5);
+// КАМЕРА
+let rotY = 0;
+let rotX = 0;
 
-// БЛОКИ
-let blocks = [];
+function updateCamera(){
+    let dist = 5;
 
-// ================= ДЖОЙСТИК =================
+    let x = player.position.x + Math.sin(rotY) * dist * Math.cos(rotX);
+    let z = player.position.z + Math.cos(rotY) * dist * Math.cos(rotX);
+    let y = player.position.y + Math.sin(rotX) * dist + 2;
+
+    camera.position.set(x,y,z);
+    camera.lookAt(player.position);
+}
+
+// === ДЖОЙСТИК ===
 let joystick = document.getElementById("joystick");
 let stick = document.getElementById("stick");
 
 let moveX = 0, moveZ = 0;
 
-joystick.addEventListener("touchmove", e => {
+joystick.addEventListener("touchmove", e=>{
     let t = e.touches[0];
     let rect = joystick.getBoundingClientRect();
 
@@ -106,79 +120,106 @@ joystick.addEventListener("touchmove", e => {
     stick.style.transform = `translate(${x}px,${y}px)`;
 });
 
-joystick.addEventListener("touchend", () => {
-    moveX = 0;
-    moveZ = 0;
+joystick.addEventListener("touchend", ()=>{
+    moveX = moveZ = 0;
     stick.style.transform = `translate(0px,0px)`;
 });
 
-// ================= ВРАЩЕНИЕ КАМЕРЫ =================
-let lastX = null;
-
-window.addEventListener("touchmove", e => {
-    if(e.touches.length === 1){
-        let x = e.touches[0].clientX;
-
-        if(lastX !== null){
-            rotY += (x - lastX) * 0.005;
-        }
-
-        lastX = x;
-    }
-});
-
-window.addEventListener("touchend", () => {
-    lastX = null;
-});
-
-// ================= КАМЕРА =================
-let rotY = 0;
-let thirdPerson = true;
-
-function updateCamera(){
-    if(thirdPerson){
-        camera.position.x = player.position.x + Math.sin(rotY) * 5;
-        camera.position.z = player.position.z + Math.cos(rotY) * 5;
-        camera.position.y = player.position.y + 3;
-
-        camera.lookAt(player.position);
-    } else {
-        camera.position.copy(player.position);
-        camera.position.y += 1.5;
-
-        camera.rotation.y = rotY;
-    }
-}
-
-// ================= ДВИЖЕНИЕ =================
+// === ДВИЖЕНИЕ ===
 function updatePlayer(){
     player.position.x -= moveX * 0.1;
     player.position.z += moveZ * 0.1;
 }
 
-// ================= ПОСТАВИТЬ БЛОК =================
-document.getElementById("place").onclick = () => {
+// === КАМЕРА УПРАВЛЕНИЕ ===
+let lastTouch = null;
+
+renderer.domElement.addEventListener("touchmove", e=>{
+    if(e.touches.length === 1){
+        let t = e.touches[0];
+
+        if(lastTouch){
+            let dx = t.clientX - lastTouch.x;
+            let dy = t.clientY - lastTouch.y;
+
+            rotY -= dx * 0.005;
+            rotX -= dy * 0.005;
+
+            rotX = Math.max(-1.2, Math.min(1.2, rotX));
+        }
+
+        lastTouch = {x:t.clientX,y:t.clientY};
+    }
+});
+
+renderer.domElement.addEventListener("touchend", ()=>{
+    lastTouch = null;
+});
+
+// === БЛОКИ ===
+let blocks = [];
+let selectedBlock = 0;
+
+function selectBlock(id){
+    selectedBlock = id;
+}
+
+function createBlock(x,y,z){
+    let color = selectedBlock === 0 ? 0xffffff : 0x8B4513;
+
     let block = new THREE.Mesh(
         new THREE.BoxGeometry(1,1,1),
-        new THREE.MeshStandardMaterial({color:0xaaaaaa})
+        new THREE.MeshStandardMaterial({color})
     );
 
-    block.position.set(
-        Math.round(player.position.x),
-        0.5,
-        Math.round(player.position.z - 2)
-    );
-
+    block.position.set(x,y,z);
     scene.add(block);
     blocks.push(block);
-};
+}
 
-// ================= СМЕНА ВИДА =================
-document.getElementById("view").onclick = () => {
-    thirdPerson = !thirdPerson;
-};
+// === РЕЙКАСТ ===
+let raycaster = new THREE.Raycaster();
+let touchStartTime = 0;
 
-// ================= РЕНДЕР =================
+renderer.domElement.addEventListener("touchstart", e=>{
+    touchStartTime = Date.now();
+});
+
+renderer.domElement.addEventListener("touchend", e=>{
+    let touchTime = Date.now() - touchStartTime;
+
+    let touch = e.changedTouches[0];
+
+    let mouse = new THREE.Vector2(
+        (touch.clientX / innerWidth) * 2 - 1,
+        -(touch.clientY / innerHeight) * 2 + 1
+    );
+
+    raycaster.setFromCamera(mouse, camera);
+
+    let intersects = raycaster.intersectObjects(blocks);
+
+    if(touchTime > 4000){
+        if(intersects.length > 0){
+            scene.remove(intersects[0].object);
+            blocks = blocks.filter(b=>b !== intersects[0].object);
+        }
+    } else {
+        let hit = raycaster.intersectObject(plane);
+
+        if(hit.length > 0){
+            let p = hit[0].point;
+
+            createBlock(
+                Math.round(p.x),
+                0.5,
+                Math.round(p.z)
+            );
+        }
+    }
+});
+
+// === РЕНДЕР ===
 function animate(){
     requestAnimationFrame(animate);
 
@@ -187,9 +228,8 @@ function animate(){
 
     renderer.render(scene, camera);
 }
-
 animate();
 </script>
 
 </body>
-</html>
+    </html>
