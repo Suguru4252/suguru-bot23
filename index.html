@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - ТРАССА СУСЛОВА: МИНЕТ АРКАДА</title>
+    <title>NetErrror - ТРАССА СУСЛОВА: МИНЕТ АРКАДА + КАПЛИ</title>
     <style>
         * {
             user-select: none;
@@ -100,13 +100,13 @@
             <div class="stat">🍆 МИНЕТЫ: <span id="bjTotal">0</span></div>
             <div class="combo-counter">⚡ COMBO: <span id="comboDisplay">0</span>x</div>
             <button id="resetBtn">💀 СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ NETERROR MODE | КЛИКАЙ - ДЕЛАЙ МИНЕТ</div>
+            <div class="warning">⚠️ NETERROR MODE | ЛОВИ КАПЛИ + КЛИКАЙ</div>
         </div>
     </div>
 </div>
 
 <script>
-    // ========== ЧАСТЬ 1/3: ОСНОВА + ЭФФЕКТЫ ==========
+    // ========== ПОЛНАЯ ВЕРСИЯ: МИНЕТ + ПАДАЮЩИЕ КАПЛИ (+5% ЗА КАЖДУЮ) ==========
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -126,27 +126,28 @@
         maxCombo: 0,
         lastHitTime: 0,
         intensity: 0,
-        // анимации
         headBobAngle: 0,
         mouthWide: 0,
-        droolTimer: 0,
-        // критические эффекты
         critParticle: [],
         screenFlash: 0,
-        shake: 0
+        shake: 0,
+        // ЭФФЕКТ "КОНЧИЛ"
+        finishFlash: 0,
+        finishTextTimer: 0,
+        // ПАДАЮЩИЕ КАПЛИ
+        fallingDrops: []
     };
     
-    // ----- СТАТИСТИКА -----
-    let suslovLevel = 0;      // опыт суслова
-    let totalBj = 0;          // завершённые миньеты
+    let suslovLevel = 0;
+    let totalBj = 0;
     
-    // UI элементы
     const suslovLevelSpan = document.getElementById('suslovLevel');
     const bjTotalSpan = document.getElementById('bjTotal');
     const comboDisplaySpan = document.getElementById('comboDisplay');
     const resetBtn = document.getElementById('resetBtn');
     
     let roadOffset = 0;
+    let lastDropSpawn = 0;
     
     function updateUI() {
         suslovLevelSpan.innerText = suslovLevel;
@@ -154,15 +155,12 @@
         comboDisplaySpan.innerText = minigame.combo;
     }
     
-    // ---- ЗВУКИ через Web Audio (синтез) ----
     let audioCtx = null;
     function playClickSound(isCrit = false) {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -175,8 +173,6 @@
         osc.stop(now + 0.2);
     }
     
-    // ========== ЧАСТЬ 2/3: МЕХАНИКА КЛИКОВ, КОМБО, КРИТЫ ==========
-    
     function startMinigame() {
         if (minigame.active) return;
         minigame.active = true;
@@ -188,6 +184,10 @@
         minigame.critParticle = [];
         minigame.screenFlash = 0;
         minigame.shake = 0;
+        minigame.finishFlash = 0;
+        minigame.finishTextTimer = 0;
+        minigame.fallingDrops = [];
+        lastDropSpawn = 0;
         suslov.isHitching = false;
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
@@ -199,18 +199,23 @@
         suslovLevel++;
         updateUI();
         suslov.isHitching = true;
-        minigame.screenFlash = 25;
+        
+        // ЭФФЕКТ "КОНЧИЛ" - белый экран + надпись на 1.5 секунды
+        minigame.finishFlash = 25;
+        minigame.finishTextTimer = 45;  // ~1.5 секунды при 30fps
+        minigame.fallingDrops = [];
+        
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     }
     
-    function addPleasure(rawAmount) {
+    // Добавление удовольствия + бонус от ловли капель
+    function addPleasure(rawAmount, fromDrop = false) {
         if (!minigame.active) return;
         
         const now = Date.now();
         const timeSinceLast = now - minigame.lastHitTime;
         if (timeSinceLast < 180) {
             minigame.combo = Math.min(minigame.combo + 1, 35);
-            if (minigame.combo > minigame.maxCombo) minigame.maxCombo = minigame.combo;
         } else if (timeSinceLast > 400) {
             minigame.combo = 1;
         } else {
@@ -219,48 +224,89 @@
         minigame.lastHitTime = now;
         
         let comboBonus = 1 + (minigame.combo / 20);
-        let isCrit = (Math.random() < 0.12 + (minigame.combo / 80));
+        let isCrit = (!fromDrop && Math.random() < 0.12 + (minigame.combo / 80));
         let critMulti = isCrit ? 2.2 : 1.0;
         
         let gain = rawAmount * comboBonus * critMulti;
-        minigame.intensity = Math.min(minigame.intensity + 5 + (minigame.combo * 0.7), 75);
-        minigame.mouthWide = 16 + Math.floor(minigame.intensity / 5);
+        if (fromDrop) gain = rawAmount; // капли дают ровно 5%
         
+        minigame.intensity = Math.min(minigame.intensity + 3 + (minigame.combo * 0.5), 75);
+        minigame.mouthWide = 14 + Math.floor(minigame.intensity / 6);
         minigame.pleasure = Math.min(minigame.pleasure + gain, minigame.maxPleasure);
         
-        if (isCrit) {
+        if (isCrit && !fromDrop) {
             minigame.screenFlash = 12;
             minigame.shake = 8;
             playClickSound(true);
-            for(let i=0; i<8; i++) {
+            for(let i=0; i<6; i++) {
                 minigame.critParticle.push({
                     x: suslov.x + suslov.w/2 + (Math.random() - 0.5)*30,
                     y: suslov.y + 20 + Math.random() * 30,
-                    vx: (Math.random() - 0.5) * 7,
-                    vy: Math.random() * -5 - 2,
-                    life: 0.8
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: Math.random() * -4 - 2,
+                    life: 0.7
                 });
             }
-            if (navigator.vibrate) navigator.vibrate(80);
+            if (navigator.vibrate) navigator.vibrate(60);
         } else {
-            playClickSound(false);
-            if (navigator.vibrate && minigame.combo % 5 === 0) navigator.vibrate(30);
-            if (Math.random() < 0.4) {
-                minigame.critParticle.push({
-                    x: suslov.x + suslov.w/2 + (Math.random() - 0.5)*20,
-                    y: suslov.y + 15,
-                    vx: (Math.random() - 0.5)*3,
-                    vy: Math.random() * -2 - 1,
-                    life: 0.5
-                });
-            }
+            if (!fromDrop) playClickSound(false);
         }
         
         updateUI();
-        
-        if (minigame.pleasure >= minigame.maxPleasure) {
-            completeMinigame();
+        if (minigame.pleasure >= minigame.maxPleasure) completeMinigame();
+    }
+    
+    // СПАВН ПАДАЮЩИХ КАПЕЛЬ (каждая даёт +5% при клике)
+    function spawnFallingDrop() {
+        if (!minigame.active) return;
+        let x = 50 + Math.random() * (canvas.width - 100);
+        minigame.fallingDrops.push({
+            x: x,
+            y: 20,
+            radius: 12,
+            speed: 2 + Math.random() * 3 + (minigame.combo / 15),
+            value: 5
+        });
+    }
+    
+    function updateFallingDrops(delta) {
+        if (!minigame.active) return;
+        // спавн каждые 0.6-1.2 секунды
+        let now = Date.now();
+        if (now - lastDropSpawn > 600 - Math.min(400, minigame.combo * 8)) {
+            spawnFallingDrop();
+            lastDropSpawn = now;
+            if (minigame.combo > 10) spawnFallingDrop(); // двойной спавн
         }
+        
+        for(let i=0; i<minigame.fallingDrops.length; i++) {
+            let d = minigame.fallingDrops[i];
+            d.y += d.speed * delta * 60;
+            if (d.y > canvas.height - 50) {
+                minigame.fallingDrops.splice(i,1);
+                i--;
+            }
+        }
+    }
+    
+    function checkDropClick(canvasX, canvasY) {
+        if (!minigame.active) return false;
+        for(let i=0; i<minigame.fallingDrops.length; i++) {
+            let d = minigame.fallingDrops[i];
+            let dx = canvasX - d.x;
+            let dy = canvasY - d.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < d.radius) {
+                // поймали каплю -> +5%
+                addPleasure(d.value, true);
+                minigame.fallingDrops.splice(i,1);
+                // визуальный эффект
+                minigame.screenFlash = 8;
+                if (navigator.vibrate) navigator.vibrate(30);
+                return true;
+            }
+        }
+        return false;
     }
     
     function isPointInSuslov(x, y) {
@@ -285,7 +331,11 @@
         let canvasY = (clientY - rect.top) * scaleY;
         
         if (minigame.active) {
-            addPleasure(9);
+            // сначала проверяем попадание по капле
+            let hitDrop = checkDropClick(canvasX, canvasY);
+            if (!hitDrop) {
+                addPleasure(9, false);
+            }
         } else if (isPointInSuslov(canvasX, canvasY)) {
             startMinigame();
         }
@@ -305,6 +355,7 @@
         minigame.intensity = Math.max(0, minigame.intensity - delta * 18);
         minigame.mouthWide = Math.max(5, minigame.mouthWide - delta * 35);
         minigame.headBobAngle = (minigame.headBobAngle + delta * 21) % (Math.PI * 2);
+        
         for(let i=0; i<minigame.critParticle.length; i++) {
             let p = minigame.critParticle[i];
             p.x += p.vx * delta * 60;
@@ -315,6 +366,8 @@
         minigame.critParticle = minigame.critParticle.filter(p => p.life > 0);
         if (minigame.screenFlash > 0) minigame.screenFlash -= delta * 90;
         if (minigame.shake > 0) minigame.shake -= delta * 100;
+        if (minigame.finishFlash > 0) minigame.finishFlash -= delta * 70;
+        if (minigame.finishTextTimer > 0) minigame.finishTextTimer -= delta * 30;
     }
     
     canvas.addEventListener('click', handleCanvasClick);
@@ -331,11 +384,13 @@
         totalBj = 0;
         minigame.combo = 0;
         minigame.critParticle = [];
+        minigame.fallingDrops = [];
+        minigame.finishFlash = 0;
+        minigame.finishTextTimer = 0;
         updateUI();
     });
     
-    // ========== ЧАСТЬ 3/3: РЕНДЕР, АНИМАЦИЯ МИНЕТА, ЭФФЕКТЫ ==========
-    
+    // ========== РЕНДЕР ==========
     function drawRoad() {
         ctx.fillStyle = "#2a3824";
         ctx.fillRect(0, 280, canvas.width, 160);
@@ -365,6 +420,24 @@
         ctx.fillRect(135, 352, 8, 6);
     }
     
+    function drawFallingDrops() {
+        for(let d of minigame.fallingDrops) {
+            ctx.fillStyle = "#ffffcc";
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#ffdd88";
+            ctx.beginPath();
+            ctx.arc(d.x-2, d.y-2, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#000000aa";
+            ctx.font = "bold 12px monospace";
+            ctx.fillText("+5%", d.x-12, d.y-6);
+            ctx.shadowBlur = 0;
+        }
+    }
+    
     function drawSuslovWithMinigame() {
         let shakeX = 0, shakeY = 0;
         if (minigame.shake > 0) {
@@ -379,40 +452,32 @@
             let centerY = suslov.y + 30;
             let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
             let headY = -20 + bobOffset;
-            
             ctx.save();
             ctx.translate(centerX, centerY);
             let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
             ctx.rotate(tilt);
-            
             ctx.fillStyle = "#dba878";
             ctx.beginPath();
             ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
             ctx.fill();
-            
             ctx.fillStyle = "#3d5230";
             ctx.fillRect(-18, 12, 36, 22);
-            
             ctx.fillStyle = "#f2cfa0";
             ctx.beginPath();
             ctx.arc(0, headY, 18, 0, Math.PI*2);
             ctx.fill();
-            
             let mouthHeight = minigame.mouthWide;
             let mouthYOffset = -12 + (mouthHeight / 2);
             ctx.fillStyle = "#441122";
             ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            
             if (minigame.intensity > 15 || minigame.combo > 5) {
                 ctx.fillStyle = "#dd6688";
                 let tongueOut = Math.sin(Date.now() * 0.02) * 3;
                 ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
             }
-            
             ctx.fillStyle = "#2a2a2a";
             ctx.fillRect(-12, headY-10, 6, 5);
             ctx.fillRect(6, headY-10, 6, 5);
-            
             if (minigame.intensity > 20) {
                 ctx.fillStyle = "#aaffdd";
                 for(let s=0; s<3; s++) {
@@ -444,7 +509,6 @@
                 ctx.fillText(`⚡x${minigame.combo} COMBO!`, suslov.x - 15, suslov.y - 50);
                 ctx.shadowBlur = 0;
             }
-            
         } else {
             ctx.fillStyle = "#dcab7a";
             ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
@@ -455,24 +519,37 @@
             ctx.fillStyle = "#2a2a2a";
             ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
             ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            
             let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
             ctx.fillStyle = "#5f704a";
             ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
             ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            
             ctx.fillStyle = "#ffffcc";
             ctx.font = "bold 13px monospace";
             ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 8, suslov.y - 14);
             ctx.fillStyle = "#dd9966";
             ctx.fillText("(сын бляди)", suslov.x + 12, suslov.y - 2);
         }
-        
         if (minigame.shake > 0) ctx.restore();
     }
     
+    function drawFinishEffect() {
+        if (minigame.finishFlash > 0) {
+            ctx.fillStyle = `rgba(255, 255, 240, ${Math.min(1, minigame.finishFlash / 12)})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        if (minigame.finishTextTimer > 0) {
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 52px monospace";
+            ctx.shadowBlur = 12;
+            ctx.textAlign = "center";
+            ctx.fillText("💦 КОНЧИЛ 💦", canvas.width/2, canvas.height/2);
+            ctx.textAlign = "left";
+            ctx.shadowBlur = 0;
+        }
+    }
+    
     function drawFlashAndEffects() {
-        if (minigame.screenFlash > 0) {
+        if (minigame.screenFlash > 0 && minigame.finishFlash <= 0) {
             ctx.fillStyle = `rgba(255, 200, 100, ${minigame.screenFlash / 15})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
@@ -486,10 +563,10 @@
     function drawMinigameInstructions() {
         if (!minigame.active) return;
         ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 48);
+        ctx.fillRect(0, 0, canvas.width, 50);
         ctx.fillStyle = "#ffcc99";
-        ctx.font = "bold 16px monospace";
-        ctx.fillText("🍆💦 КЛИКАЙ БЫСТРО - НАБИРАЙ КОМБО - КРИТИЧЕСКИЙ МИНЕТ 💦🍆", canvas.width/2 - 280, 32);
+        ctx.font = "bold 15px monospace";
+        ctx.fillText("🍆 ЛОВИ КАПЛИ (кликай по круглишкам) + КЛИКАЙ ПО ЭКРАНУ ДЛЯ МИНЕТА 🍆", canvas.width/2 - 300, 32);
     }
     
     let lastTime = 0;
@@ -498,13 +575,16 @@
         if (delta > 0.01) {
             updateSuslov(delta);
             updateMinigameEffects(delta);
+            updateFallingDrops(delta);
         }
         lastTime = now;
         
         drawRoad();
         drawCar();
+        drawFallingDrops();
         drawSuslovWithMinigame();
         drawFlashAndEffects();
+        drawFinishEffect();
         drawMinigameInstructions();
         
         requestAnimationFrame(gameLoop);
