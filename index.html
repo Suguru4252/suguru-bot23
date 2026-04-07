@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - ТРАССА СУСЛОВА: УДЕРЖИВАЙ КРУГЛИШКИ</title>
+    <title>NetErrror - BIG Бибеджон: Кокосовый замес</title>
     <style>
         * {
             user-select: none;
@@ -12,7 +12,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f0a, #030803);
+            background: linear-gradient(145deg, #0a2f2a, #051a15);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,344 +21,234 @@
             touch-action: manipulation;
         }
         .game-container {
-            background: #1a2a14;
+            background: #1e3a2f;
             border-radius: 48px;
             padding: 16px;
-            box-shadow: 0 20px 40px black, inset 0 1px 2px rgba(255,255,255,0.1);
-            border: 2px solid #7a9f6a;
+            box-shadow: 0 20px 40px black;
+            border: 2px solid #d4b87a;
         }
         canvas {
             display: block;
             margin: 0 auto;
             border-radius: 24px;
-            box-shadow: 0 0 0 4px #2b3b24, 0 10px 30px black;
-            cursor: pointer;
+            box-shadow: 0 0 0 4px #2b4a3a, 0 10px 30px black;
+            cursor: crosshair;
         }
         .ui-panel {
             margin-top: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            background: #0c140acc;
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
+            gap: 15px;
+            background: #0c1a16cc;
+            backdrop-filter: blur(8px);
+            padding: 8px 24px;
             border-radius: 60px;
-            border: 1px solid #8ab87a;
+            border: 1px solid #c4a86a;
         }
         .stat {
             background: #1f2c1a;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: #eaffc4;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-shadow: 0 0 4px #3c8c2a;
-            font-family: monospace;
-        }
-        .combo-counter {
-            background: #3a1f2f;
-            color: #ffaa88;
-            font-size: 1.4rem;
-            font-weight: bold;
-            padding: 4px 16px;
-            border-radius: 40px;
-            letter-spacing: 2px;
-        }
-        button {
-            background: #4a6e3a;
-            border: none;
-            color: #f0ffd0;
-            font-weight: bold;
             padding: 6px 20px;
             border-radius: 40px;
+            color: #f7e05e;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .lives {
+            color: #ff7777;
+            font-size: 1.4rem;
+            letter-spacing: 4px;
+        }
+        button {
+            background: #6e4a2e;
+            border: none;
+            color: #ffefb0;
+            font-weight: bold;
+            padding: 6px 18px;
+            border-radius: 40px;
             font-size: 1rem;
-            font-family: monospace;
             cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 3px 6px black;
         }
         button:active {
             transform: scale(0.94);
-            background: #6e9658;
         }
-        .warning {
-            font-size: 0.7rem;
-            background: #2a1f1a;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #ffb878;
+        .power-bar {
+            width: 120px;
+            height: 12px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .power-fill {
+            width: 0%;
+            height: 100%;
+            background: #ffaa44;
+            transition: width 0.02s linear;
         }
     </style>
 </head>
 <body>
 <div>
     <div class="game-container">
-        <canvas id="gameCanvas" width="950" height="520"></canvas>
+        <canvas id="gameCanvas" width="1000" height="550"></canvas>
         <div class="ui-panel">
-            <div class="stat">🚗 СУСЛОВ: <span id="suslovLevel">0</span></div>
-            <div class="stat">🍆 МИНЕТЫ: <span id="bjTotal">0</span></div>
-            <div class="combo-counter">⚡ УДЕРЖИВАЙ: <span id="holdDisplay">0</span>%</div>
-            <button id="resetBtn">💀 СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ НАЖМИ И УДЕРЖИВАЙ КРУГЛИШКИ (+5%)</div>
+            <div class="stat">🐒 БИБЕДЖОН: <span id="scoreSpan">0</span></div>
+            <div class="lives" id="livesSpan">❤️❤️❤️</div>
+            <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
+            <button id="resetBtn">💥 НОВАЯ ИГРА</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ========== ПОЛНАЯ ВЕРСИЯ: МИНЕТ + УДЕРЖИВАНИЕ КРУГЛИШЕК ==========
+    // ========== BIG БИБЕДЖОН - ЗАЩИТА БАЛКОНА ==========
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ----- СУСЛОВ НА ТРАССЕ -----
-    let suslov = {
-        x: 180, y: 320, dir: 1, speed: 1.3,
-        w: 52, h: 56, walkCycle: 0,
-        isHitching: true
+    // ---- ИГРОК (БИБЕДЖОН) ----
+    let bibedjon = {
+        x: canvas.width/2,
+        y: canvas.height - 70,
+        width: 70,
+        height: 80
     };
     
-    // ----- МИНИ-ИГРА МИНЕТА -----
-    let minigame = {
-        active: false,
-        pleasure: 0,
-        maxPleasure: 100,
-        combo: 0,
-        lastHitTime: 0,
-        intensity: 0,
-        headBobAngle: 0,
-        mouthWide: 0,
-        critParticle: [],
-        screenFlash: 0,
-        shake: 0,
-        finishFlash: 0,
-        finishTextTimer: 0,
-        // ПАДАЮЩИЕ КРУГЛИШКИ (для удержания)
-        fallingDrops: [],
-        // Активное удержание
-        activeHold: null,      // { index, progress, startTime }
-        holdProgress: 0
-    };
+    // ---- СНАРЯДЫ (кокосы/бананы) ----
+    let projectiles = [];
     
-    let suslovLevel = 0;
-    let totalBj = 0;
+    // ---- ВРАГИ (роботы-полицейские) ----
+    let enemies = [];
     
-    const suslovLevelSpan = document.getElementById('suslovLevel');
-    const bjTotalSpan = document.getElementById('bjTotal');
-    const holdDisplaySpan = document.getElementById('holdDisplay');
+    // ---- СИСТЕМА ПРИЦЕЛА И СИЛЫ БРОСКА ----
+    let aiming = false;
+    let aimStartX = 0, aimStartY = 0;
+    let aimCurrentX = 0, aimCurrentY = 0;
+    let power = 0;
+    let powerCharge = 0; // 0-100
+    let charging = false;
+    let chargeInterval = null;
+    
+    // ---- СТАТИСТИКА ----
+    let score = 0;
+    let lives = 3;
+    let gameActive = true;
+    let gameOverFlag = false;
+    
+    // ---- ЭФФЕКТЫ ----
+    let particles = [];
+    let screenShake = 0;
+    let lastEnemySpawn = 0;
+    
+    // UI элементы
+    const scoreSpan = document.getElementById('scoreSpan');
+    const livesSpan = document.getElementById('livesSpan');
+    const powerFillDiv = document.getElementById('powerFill');
     const resetBtn = document.getElementById('resetBtn');
     
-    let roadOffset = 0;
-    let lastDropSpawn = 0;
-    let frameRequest;
-    
     function updateUI() {
-        suslovLevelSpan.innerText = suslovLevel;
-        bjTotalSpan.innerText = totalBj;
-        if (minigame.active && minigame.activeHold) {
-            holdDisplaySpan.innerText = Math.floor(minigame.activeHold.progress * 100);
-        } else {
-            holdDisplaySpan.innerText = "0";
+        scoreSpan.innerText = score;
+        let hearts = "";
+        for(let i=0; i<lives; i++) hearts += "❤️ ";
+        for(let i=lives; i<3; i++) hearts += "🖤 ";
+        livesSpan.innerText = hearts;
+    }
+    
+    function updatePowerBar() {
+        powerFillDiv.style.width = powerCharge + "%";
+    }
+    
+    function spawnEnemy() {
+        if (!gameActive) return;
+        let x = 50 + Math.random() * (canvas.width - 100);
+        enemies.push({
+            x: x,
+            y: 50,
+            width: 48,
+            height: 52,
+            speed: 0.8 + Math.random() * 0.9,
+            hp: 1
+        });
+    }
+    
+    function addParticles(x, y, color, count) {
+        for(let i=0; i<count; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6 - 2,
+                life: 0.8,
+                color: color
+            });
         }
     }
     
+    // Создание снаряда с заданной силой и направлением
+    function shootProjectile(fromX, fromY, toX, toY, chargePower) {
+        let dx = toX - fromX;
+        let dy = toY - fromY;
+        let len = Math.sqrt(dx*dx + dy*dy);
+        if (len < 0.1) return;
+        let normX = dx / len;
+        let normY = dy / len;
+        let speed = 5 + (chargePower / 15); // макс ~11.6
+        projectiles.push({
+            x: fromX, y: fromY,
+            vx: normX * speed,
+            vy: normY * speed,
+            radius: 12,
+            life: true
+        });
+        // звук броска
+        playThrowSound();
+    }
+    
+    // Звуки через Web Audio
     let audioCtx = null;
-    function playClickSound(isCrit = false) {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+    function playThrowSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-        osc.frequency.value = isCrit ? 880 : 440;
-        gain.gain.value = 0.25;
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+        osc.frequency.value = 380;
+        gain.gain.value = 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
         osc.start();
-        osc.stop(now + 0.2);
+        osc.stop(audioCtx.currentTime + 0.15);
     }
     
-    function startMinigame() {
-        if (minigame.active) return;
-        minigame.active = true;
-        minigame.pleasure = 0;
-        minigame.combo = 0;
-        minigame.intensity = 0;
-        minigame.mouthWide = 0;
-        minigame.headBobAngle = 0;
-        minigame.critParticle = [];
-        minigame.screenFlash = 0;
-        minigame.shake = 0;
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.fallingDrops = [];
-        minigame.activeHold = null;
-        minigame.holdProgress = 0;
-        lastDropSpawn = 0;
-        suslov.isHitching = false;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    function playHitSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 680;
+        gain.gain.value = 0.2;
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
     }
     
-    function completeMinigame() {
-        if (!minigame.active) return;
-        minigame.active = false;
-        totalBj++;
-        suslovLevel++;
-        updateUI();
-        suslov.isHitching = true;
-        
-        // ЭФФЕКТ "КОНЧИЛ" - белый экран + чёрная надпись
-        minigame.finishFlash = 30;
-        minigame.finishTextTimer = 50;
-        minigame.fallingDrops = [];
-        minigame.activeHold = null;
-        
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        playClickSound(true);
+    function playLoseLifeSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 220;
+        gain.gain.value = 0.3;
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
     }
     
-    function addPleasure(amount, fromHold = false) {
-        if (!minigame.active) return;
-        
-        const now = Date.now();
-        const timeSinceLast = now - minigame.lastHitTime;
-        if (timeSinceLast < 180) {
-            minigame.combo = Math.min(minigame.combo + 1, 30);
-        } else if (timeSinceLast > 400) {
-            minigame.combo = 1;
-        } else {
-            minigame.combo = Math.max(1, minigame.combo);
-        }
-        minigame.lastHitTime = now;
-        
-        let comboBonus = 1 + (minigame.combo / 25);
-        let gain = amount * comboBonus;
-        if (fromHold) gain = amount; // удержание даёт ровно 5%
-        
-        minigame.intensity = Math.min(minigame.intensity + 2 + (minigame.combo * 0.4), 70);
-        minigame.mouthWide = 12 + Math.floor(minigame.intensity / 6);
-        minigame.pleasure = Math.min(minigame.pleasure + gain, minigame.maxPleasure);
-        
-        // маленькая вспышка при удержании
-        if (fromHold) {
-            minigame.screenFlash = 6;
-            if (navigator.vibrate) navigator.vibrate(20);
-        } else {
-            playClickSound(false);
-        }
-        
-        updateUI();
-        if (minigame.pleasure >= minigame.maxPleasure) completeMinigame();
-    }
-    
-    // СПАВН КРУГЛИШЕК (реже, чтобы было сложнее попасть)
-    function spawnFallingDrop() {
-        if (!minigame.active) return;
-        let x = 60 + Math.random() * (canvas.width - 120);
-        minigame.fallingDrops.push({
-            x: x,
-            y: 30,
-            radius: 18,
-            speed: 1.2 + Math.random() * 1.5,
-            value: 5,
-            id: Math.random()
-        });
-    }
-    
-    function updateFallingDrops(delta) {
-        if (!minigame.active) return;
-        let now = Date.now();
-        // спавн медленнее: раз в 1.2-1.8 секунды
-        if (now - lastDropSpawn > 1400 - Math.min(500, minigame.combo * 12)) {
-            spawnFallingDrop();
-            lastDropSpawn = now;
-        }
-        
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            d.y += d.speed * delta * 60;
-            if (d.y > canvas.height - 60) {
-                minigame.fallingDrops.splice(i,1);
-                i--;
-            }
-        }
-    }
-    
-    // ПОИСК КРУГЛИШКИ ПО КООРДИНАТАМ
-    function findDropAt(x, y) {
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            let dx = x - d.x;
-            let dy = y - d.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < d.radius) {
-                return { index: i, drop: d };
-            }
-        }
-        return null;
-    }
-    
-    // НАЧАЛО УДЕРЖАНИЯ
-    function startHoldOnDrop(dropIndex, drop) {
-        if (!minigame.active) return false;
-        if (minigame.activeHold) return false; // уже держим другой
-        
-        minigame.activeHold = {
-            index: dropIndex,
-            dropId: drop.id,
-            progress: 0,
-            startTime: Date.now()
-        };
-        updateUI();
-        return true;
-    }
-    
-    // ОБНОВЛЕНИЕ ПРОГРЕССА УДЕРЖАНИЯ (вызывается в цикле)
-    function updateHoldProgress(delta) {
-        if (!minigame.active) return;
-        if (!minigame.activeHold) return;
-        
-        let hold = minigame.activeHold;
-        // ищем дроп по id (мог удалиться)
-        let currentDrop = minigame.fallingDrops.find(d => d.id === hold.dropId);
-        if (!currentDrop) {
-            // дроп исчез - отменяем удержание
-            minigame.activeHold = null;
-            updateUI();
-            return;
-        }
-        
-        // увеличиваем прогресс (полный цикл = 0.8 секунды)
-        hold.progress += delta / 0.8;
-        if (hold.progress >= 1.0) {
-            // УСПЕХ! даём +5%
-            addPleasure(currentDrop.value, true);
-            // удаляем дроп
-            let idx = minigame.fallingDrops.findIndex(d => d.id === hold.dropId);
-            if (idx !== -1) minigame.fallingDrops.splice(idx, 1);
-            minigame.activeHold = null;
-            // небольшая визуальная вспышка
-            minigame.screenFlash = 10;
-        }
-        updateUI();
-    }
-    
-    // ОТМЕНА УДЕРЖАНИЯ (палец отпустили)
-    function cancelHold() {
-        if (minigame.activeHold) {
-            minigame.activeHold = null;
-            updateUI();
-        }
-    }
-    
-    function isPointInSuslov(x, y) {
-        return (x >= suslov.x && x <= suslov.x + suslov.w &&
-                y >= suslov.y - 8 && y <= suslov.y + suslov.h);
-    }
-    
-    // ОБРАБОТКА НАЖАТИЯ (START HOLD)
-    function handlePointerStart(e) {
+    // ОБРАБОТКА МЫШИ/ТАЧА ДЛЯ ПРИЦЕЛА
+    function handlePointerDown(e) {
+        if (!gameActive) return;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
@@ -374,270 +264,317 @@
         let canvasX = (clientX - rect.left) * scaleX;
         let canvasY = (clientY - rect.top) * scaleY;
         
-        if (minigame.active) {
-            // сначала проверяем попадание по круглишке
-            let hit = findDropAt(canvasX, canvasY);
-            if (hit) {
-                startHoldOnDrop(hit.index, hit.drop);
-                return;
+        // начало прицеливания от позиции Бибеджона
+        aiming = true;
+        aimStartX = bibedjon.x + bibedjon.width/2;
+        aimStartY = bibedjon.y - 20;
+        aimCurrentX = canvasX;
+        aimCurrentY = canvasY;
+        
+        charging = true;
+        powerCharge = 0;
+        if (chargeInterval) clearInterval(chargeInterval);
+        chargeInterval = setInterval(() => {
+            if (charging && gameActive) {
+                powerCharge = Math.min(powerCharge + 3, 100);
+                updatePowerBar();
             }
-            // иначе обычный клик для минета (немного удовольствия)
-            addPleasure(4, false);
-        } else if (isPointInSuslov(canvasX, canvasY)) {
-            startMinigame();
+        }, 30);
+    }
+    
+    function handlePointerMove(e) {
+        if (!aiming || !gameActive) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
         }
+        let canvasX = (clientX - rect.left) * scaleX;
+        let canvasY = (clientY - rect.top) * scaleY;
+        aimCurrentX = canvasX;
+        aimCurrentY = canvasY;
     }
     
-    // ОТПУСКАНИЕ (cancel hold)
-    function handlePointerEnd(e) {
-        cancelHold();
+    function handlePointerUp(e) {
+        if (!aiming || !gameActive) {
+            aiming = false;
+            charging = false;
+            if (chargeInterval) clearInterval(chargeInterval);
+            updatePowerBar();
+            return;
+        }
+        aiming = false;
+        charging = false;
+        if (chargeInterval) clearInterval(chargeInterval);
+        
+        // бросок с текущей силой
+        shootProjectile(aimStartX, aimStartY, aimCurrentX, aimCurrentY, powerCharge);
+        powerCharge = 0;
+        updatePowerBar();
     }
     
-    canvas.addEventListener('mousedown', handlePointerStart);
-    window.addEventListener('mouseup', handlePointerEnd);
-    canvas.addEventListener('touchstart', handlePointerStart);
-    window.addEventListener('touchend', handlePointerEnd);
+    canvas.addEventListener('mousedown', handlePointerDown);
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('mouseup', handlePointerUp);
+    canvas.addEventListener('touchstart', handlePointerDown);
+    window.addEventListener('touchmove', handlePointerMove);
+    window.addEventListener('touchend', handlePointerUp);
     
     resetBtn.addEventListener('click', () => {
-        minigame.active = false;
-        suslov = { x: 180, y: 320, dir: 1, speed: 1.3, w: 52, h: 56, walkCycle: 0, isHitching: true };
-        suslovLevel = 0;
-        totalBj = 0;
-        minigame.combo = 0;
-        minigame.critParticle = [];
-        minigame.fallingDrops = [];
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.activeHold = null;
+        gameActive = true;
+        gameOverFlag = false;
+        score = 0;
+        lives = 3;
+        projectiles = [];
+        enemies = [];
+        particles = [];
+        aiming = false;
+        charging = false;
+        if (chargeInterval) clearInterval(chargeInterval);
+        powerCharge = 0;
+        updatePowerBar();
         updateUI();
+        lastEnemySpawn = Date.now();
     });
     
-    function updateSuslov(delta) {
-        if (minigame.active) return;
-        let step = suslov.speed * delta * 60;
-        suslov.x += suslov.dir * step;
-        if (suslov.x <= 40) { suslov.x = 40; suslov.dir = 1; }
-        if (suslov.x >= canvas.width - suslov.w - 40) { suslov.x = canvas.width - suslov.w - 40; suslov.dir = -1; }
-        suslov.walkCycle = (suslov.walkCycle + delta * 14) % (Math.PI * 2);
-    }
-    
-    function updateMinigameEffects(delta) {
-        if (!minigame.active) return;
-        minigame.intensity = Math.max(0, minigame.intensity - delta * 18);
-        minigame.mouthWide = Math.max(5, minigame.mouthWide - delta * 35);
-        minigame.headBobAngle = (minigame.headBobAngle + delta * 21) % (Math.PI * 2);
+    // ЛОГИКА ИГРЫ
+    function updateGame(delta) {
+        if (!gameActive) return;
         
-        for(let i=0; i<minigame.critParticle.length; i++) {
-            let p = minigame.critParticle[i];
+        // спавн врагов
+        let now = Date.now();
+        if (now - lastEnemySpawn > 1100 - Math.min(500, score/5)) {
+            spawnEnemy();
+            lastEnemySpawn = now;
+        }
+        
+        // движение врагов
+        for(let i=0; i<enemies.length; i++) {
+            let e = enemies[i];
+            e.y += e.speed * delta * 60;
+            if (e.y + e.height > bibedjon.y + 20) {
+                // враг добрался до Бибеджона
+                enemies.splice(i,1);
+                i--;
+                lives--;
+                updateUI();
+                playLoseLifeSound();
+                screenShake = 12;
+                if (lives <= 0) {
+                    gameActive = false;
+                    gameOverFlag = true;
+                }
+                continue;
+            }
+        }
+        
+        // движение снарядов и столкновения
+        for(let i=0; i<projectiles.length; i++) {
+            let p = projectiles[i];
             p.x += p.vx * delta * 60;
             p.y += p.vy * delta * 60;
-            p.life -= delta * 1.8;
-            p.vy += delta * 180;
+            if (p.x < -50 || p.x > canvas.width+50 || p.y < -50 || p.y > canvas.height+100) {
+                projectiles.splice(i,1);
+                i--;
+                continue;
+            }
+            let hit = false;
+            for(let j=0; j<enemies.length; j++) {
+                let e = enemies[j];
+                if (p.x + p.radius > e.x && p.x - p.radius < e.x + e.width &&
+                    p.y + p.radius > e.y && p.y - p.radius < e.y + e.height) {
+                    // попадание
+                    enemies.splice(j,1);
+                    hit = true;
+                    score++;
+                    updateUI();
+                    addParticles(p.x, p.y, "#ffaa66", 8);
+                    playHitSound();
+                    screenShake = 5;
+                    break;
+                }
+            }
+            if (hit) {
+                projectiles.splice(i,1);
+                i--;
+            }
         }
-        minigame.critParticle = minigame.critParticle.filter(p => p.life > 0);
-        if (minigame.screenFlash > 0) minigame.screenFlash -= delta * 90;
-        if (minigame.shake > 0) minigame.shake -= delta * 100;
-        if (minigame.finishFlash > 0) minigame.finishFlash -= delta * 70;
-        if (minigame.finishTextTimer > 0) minigame.finishTextTimer -= delta * 30;
         
-        // обновляем прогресс удержания
-        updateHoldProgress(delta);
-    }
-    
-    // ========== РЕНДЕР ==========
-    function drawRoad() {
-        ctx.fillStyle = "#2a3824";
-        ctx.fillRect(0, 280, canvas.width, 160);
-        ctx.fillStyle = "#d4c47a";
-        for(let i = 0; i < 14; i++) {
-            let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
-            ctx.fillRect(dashX, 352, 40, 6);
+        // обновление частиц
+        for(let i=0; i<particles.length; i++) {
+            let p = particles[i];
+            p.x += p.vx * delta * 60;
+            p.y += p.vy * delta * 60;
+            p.life -= delta * 2;
+            if (p.life <= 0) {
+                particles.splice(i,1);
+                i--;
+            }
         }
-        ctx.fillStyle = "#9e7e5a";
-        ctx.fillRect(0, 425, canvas.width, 14);
-        ctx.fillStyle = "#4a7a3a";
-        ctx.fillRect(0, 258, canvas.width, 24);
-        roadOffset = (roadOffset + 2.2) % 50;
+        
+        if (screenShake > 0) screenShake -= delta * 50;
     }
     
-    function drawCar() {
-        ctx.fillStyle = "#5a7a9a";
-        ctx.fillRect(70, 338, 72, 48);
-        ctx.fillStyle = "#3a4f66";
-        ctx.fillRect(80, 328, 22, 12);
-        ctx.fillStyle = "#1a1a2a";
+    // РЕНДЕР
+    function drawBackground() {
+        ctx.fillStyle = "#2a6b55";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // балкон
+        ctx.fillStyle = "#b87a4a";
+        ctx.fillRect(0, canvas.height-90, canvas.width, 90);
+        ctx.fillStyle = "#9e5e3a";
+        ctx.fillRect(0, canvas.height-90, canvas.width, 12);
+        // перила
+        ctx.fillStyle = "#c4966a";
+        for(let i=0; i<12; i++) {
+            ctx.fillRect(40 + i*80, canvas.height-100, 12, 30);
+        }
+    }
+    
+    function drawBibedjon() {
+        let x = bibedjon.x - bibedjon.width/2;
+        let y = bibedjon.y - bibedjon.height;
+        ctx.fillStyle = "#8b5a2b";
+        ctx.fillRect(x+15, y+20, 40, 50);
+        ctx.fillStyle = "#c49a6c";
         ctx.beginPath();
-        ctx.arc(88, 378, 9, 0, Math.PI*2);
-        ctx.arc(126, 378, 9, 0, Math.PI*2);
+        ctx.ellipse(x+bibedjon.width/2, y+15, 25, 30, 0, 0, Math.PI*2);
         ctx.fill();
-        ctx.fillStyle = "#ffcc66";
-        ctx.fillRect(135, 352, 8, 6);
+        ctx.fillStyle = "#2c2c2c";
+        ctx.fillRect(x+20, y+8, 8, 8);
+        ctx.fillRect(x+42, y+8, 8, 8);
+        ctx.fillStyle = "#aa6644";
+        ctx.fillRect(x+30, y+25, 12, 8);
+        // корона
+        ctx.fillStyle = "#ffcc44";
+        ctx.fillRect(x+22, y-8, 26, 12);
+        for(let i=0;i<3;i++) ctx.fillRect(x+24+i*10, y-14, 4, 10);
+        ctx.fillStyle = "#f0e68c";
+        ctx.font = "bold 20px monospace";
+        ctx.fillText("BIG", x+15, y-18);
     }
     
-    function drawFallingDrops() {
-        for(let d of minigame.fallingDrops) {
-            // рисуем круглишку с анимацией если её удерживают
-            let isActiveHold = (minigame.activeHold && minigame.activeHold.dropId === d.id);
-            ctx.fillStyle = isActiveHold ? "#ffaa66" : "#ffffaa";
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#dd8844";
-            ctx.beginPath();
-            ctx.arc(d.x-3, d.y-3, 5, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#000000cc";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("💦", d.x-8, d.y+6);
-            ctx.fillText("+5%", d.x-12, d.y-10);
-            
-            // прогресс-бар удержания
-            if (isActiveHold) {
-                let progress = minigame.activeHold.progress;
-                ctx.fillStyle = "#00ff88aa";
-                ctx.fillRect(d.x - d.radius, d.y + d.radius + 5, d.radius*2 * progress, 5);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 10px monospace";
-                ctx.fillText(`${Math.floor(progress*100)}%`, d.x-12, d.y+d.radius+12);
-            }
-            ctx.shadowBlur = 0;
-        }
-    }
-    
-    function drawSuslovWithMinigame() {
-        let shakeX = 0, shakeY = 0;
-        if (minigame.shake > 0) {
-            shakeX = (Math.random() - 0.5) * minigame.shake;
-            shakeY = (Math.random() - 0.5) * minigame.shake;
-            ctx.save();
-            ctx.translate(shakeX, shakeY);
-        }
-        
-        if (minigame.active) {
-            let centerX = suslov.x + suslov.w/2;
-            let centerY = suslov.y + 30;
-            let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
-            let headY = -20 + bobOffset;
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
-            ctx.rotate(tilt);
-            ctx.fillStyle = "#dba878";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#3d5230";
-            ctx.fillRect(-18, 12, 36, 22);
-            ctx.fillStyle = "#f2cfa0";
-            ctx.beginPath();
-            ctx.arc(0, headY, 18, 0, Math.PI*2);
-            ctx.fill();
-            let mouthHeight = minigame.mouthWide;
-            let mouthYOffset = -12 + (mouthHeight / 2);
-            ctx.fillStyle = "#441122";
-            ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            if (minigame.intensity > 15 || minigame.combo > 5) {
-                ctx.fillStyle = "#dd6688";
-                let tongueOut = Math.sin(Date.now() * 0.02) * 3;
-                ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
-            }
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(-12, headY-10, 6, 5);
-            ctx.fillRect(6, headY-10, 6, 5);
-            ctx.restore();
-            
-            let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
-            ctx.fillStyle = "#ff8844";
-            ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
+    function drawEnemies() {
+        for(let e of enemies) {
+            ctx.fillStyle = "#6a8eb0";
+            ctx.fillRect(e.x, e.y, e.width, e.height);
+            ctx.fillStyle = "#3a5a7a";
+            ctx.fillRect(e.x+8, e.y+8, 8, 8);
+            ctx.fillRect(e.x+e.width-16, e.y+8, 8, 8);
+            ctx.fillStyle = "#cc4444";
+            ctx.fillRect(e.x+15, e.y+30, 18, 8);
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
-            
-            if (minigame.combo > 3) {
-                ctx.fillStyle = "#ff66aa";
-                ctx.font = "bold 18px monospace";
-                ctx.shadowBlur = 6;
-                ctx.fillText(`⚡x${minigame.combo} COMBO!`, suslov.x - 10, suslov.y - 50);
-                ctx.shadowBlur = 0;
-            }
-        } else {
-            ctx.fillStyle = "#dcab7a";
-            ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
-            ctx.fillStyle = "#f2cf9a";
-            ctx.beginPath();
-            ctx.arc(suslov.x + suslov.w/2, suslov.y + 16, 19, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
-            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
-            ctx.fillStyle = "#5f704a";
-            ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
-            ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            ctx.fillStyle = "#ffffcc";
-            ctx.font = "bold 13px monospace";
-            ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 8, suslov.y - 14);
-            ctx.fillStyle = "#dd9966";
-            ctx.fillText("(сын бляди)", suslov.x + 12, suslov.y - 2);
+            ctx.font = "bold 10px monospace";
+            ctx.fillText("РОБОПОЛ", e.x+5, e.y+48);
         }
-        if (minigame.shake > 0) ctx.restore();
     }
     
-    function drawFinishEffect() {
-        if (minigame.finishFlash > 0) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, minigame.finishFlash / 12)})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function drawProjectiles() {
+        for(let p of projectiles) {
+            ctx.fillStyle = "#ffcc55";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius-2, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#aa8833";
+            ctx.beginPath();
+            ctx.arc(p.x-2, p.y-2, 4, 0, Math.PI*2);
+            ctx.fill();
         }
-        if (minigame.finishTextTimer > 0) {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 58px monospace";
-            ctx.shadowBlur = 0;
+    }
+    
+    function drawAimLine() {
+        if (!aiming) return;
+        ctx.beginPath();
+        ctx.moveTo(aimStartX, aimStartY);
+        ctx.lineTo(aimCurrentX, aimCurrentY);
+        ctx.strokeStyle = "#ffaa66";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 8]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // кружок силы
+        let radius = 15 + (powerCharge / 3);
+        ctx.beginPath();
+        ctx.arc(aimCurrentX, aimCurrentY, radius, 0, Math.PI*2);
+        ctx.strokeStyle = "#ff8844";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = `rgba(255, 140, 50, ${powerCharge/150})`;
+        ctx.fill();
+    }
+    
+    function drawParticles() {
+        for(let p of particles) {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+    
+    function drawGameOver() {
+        if (gameOverFlag && !gameActive) {
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffcc88";
+            ctx.font = "bold 42px monospace";
             ctx.textAlign = "center";
-            ctx.fillText("КОНЧИЛ", canvas.width/2, canvas.height/2);
+            ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2 - 40);
+            ctx.font = "24px monospace";
+            ctx.fillStyle = "#ffaa66";
+            ctx.fillText("Нажми НОВАЯ ИГРА", canvas.width/2, canvas.height/2 + 40);
             ctx.textAlign = "left";
         }
     }
     
-    function drawFlashAndEffects() {
-        if (minigame.screenFlash > 0 && minigame.finishFlash <= 0) {
-            ctx.fillStyle = `rgba(255, 220, 120, ${minigame.screenFlash / 15})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    
-    function drawMinigameInstructions() {
-        if (!minigame.active) return;
-        ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 48);
-        ctx.fillStyle = "#ffcc99";
+    function drawUIHints() {
+        ctx.fillStyle = "#ffffcc";
         ctx.font = "bold 14px monospace";
-        ctx.fillText("🍆 НАЖМИ И УДЕРЖИВАЙ КРУГЛИШКИ, ЧТОБЫ ПОЛУЧИТЬ +5% 🍆", canvas.width/2 - 280, 32);
+        ctx.fillText("ЗАЖМИ ЛКМ → ПРИЦЕЛ → ОТПУСТИ (сила броска)", 20, 40);
     }
     
     let lastTime = 0;
     function gameLoop(now) {
         let delta = Math.min(0.033, (now - lastTime) / 1000);
         if (delta > 0.01) {
-            updateSuslov(delta);
-            updateMinigameEffects(delta);
-            updateFallingDrops(delta);
+            updateGame(delta);
         }
         lastTime = now;
         
-        drawRoad();
-        drawCar();
-        drawFallingDrops();
-        drawSuslovWithMinigame();
-        drawFlashAndEffects();
-        drawFinishEffect();
-        drawMinigameInstructions();
+        // тряска экрана
+        let shakeX = 0, shakeY = 0;
+        if (screenShake > 0) {
+            shakeX = (Math.random() - 0.5) * screenShake;
+            shakeY = (Math.random() - 0.5) * screenShake;
+            ctx.save();
+            ctx.translate(shakeX, shakeY);
+        }
+        
+        drawBackground();
+        drawEnemies();
+        drawProjectiles();
+        drawBibedjon();
+        drawAimLine();
+        drawParticles();
+        drawGameOver();
+        drawUIHints();
+        
+        if (screenShake > 0) ctx.restore();
         
         requestAnimationFrame(gameLoop);
     }
     
     updateUI();
+    updatePowerBar();
     requestAnimationFrame(gameLoop);
+    lastEnemySpawn = Date.now();
 </script>
 </body>
 </html>
