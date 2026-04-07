@@ -3,41 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - Трасса Суслова: Механика Минета</title>
+    <title>NetErrror - Трасса Суслова</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             margin: 0;
             min-height: 100vh;
-            background: linear-gradient(145deg, #0a1f0e 0%, #0c2b12 100%);
+            background: linear-gradient(145deg, #0a1f0e, #0c2b12);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', 'MS Gothic', monospace;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
-            touch-action: manipulation;
         }
-
         .game-container {
             background: #1e2a1a;
             border-radius: 48px;
             padding: 16px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6);
             border: 1px solid #6a8e5e;
         }
-
         canvas {
             display: block;
             margin: 0 auto;
             border-radius: 24px;
-            box-shadow: 0 0 0 3px #2b3b24, 0 8px 25px black;
             cursor: pointer;
         }
-
         .ui-panel {
             margin-top: 18px;
             display: flex;
@@ -45,57 +39,22 @@
             align-items: center;
             gap: 15px;
             background: #0f160ecc;
-            backdrop-filter: blur(8px);
             padding: 8px 20px;
             border-radius: 60px;
-            border: 1px solid #88aa77;
         }
-
         .stat {
             color: #d4ffb0;
-            text-shadow: 0 0 3px #3c8c2a;
-            font-weight: bold;
-            font-size: 1.2rem;
             background: #1f2c1a;
             padding: 5px 15px;
             border-radius: 30px;
-            letter-spacing: 1px;
         }
-
-        .warning {
-            background: #3a1f1f;
-            color: #ffbc6e;
-            font-size: 0.75rem;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-family: monospace;
-        }
-
         button {
             background: #3c5e2e;
             border: none;
-            color: #f0ffd0;
-            font-weight: bold;
-            font-family: monospace;
+            color: white;
             padding: 6px 16px;
             border-radius: 32px;
-            font-size: 1rem;
             cursor: pointer;
-            transition: 0.1s linear;
-            box-shadow: 0 2px 5px black;
-        }
-
-        button:active {
-            transform: scale(0.96);
-            background: #5c8248;
-        }
-
-        .title {
-            font-size: 0.7rem;
-            background: #00000066;
-            padding: 2px 12px;
-            border-radius: 30px;
-            color: #b3ff8f;
         }
     </style>
 </head>
@@ -104,374 +63,274 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="900" height="500"></canvas>
         <div class="ui-panel">
-            <div class="stat">🚗 СУСЛОВ: <span id="suslovRep">0</span></div>
-            <div class="stat">🍆 МИНЕТЫ: <span id="bjCount">0</span></div>
-            <button id="resetBtn">⚡ СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ NetErrror режим: без ограничений</div>
+            <div class="stat">🚗 Суслов: <span id="suslovRep">0</span></div>
+            <div class="stat">🍆 Минеты: <span id="bjCount">0</span></div>
+            <button id="resetBtn">⚡ Сброс</button>
         </div>
-        <div class="title" style="text-align:center; margin-top: 10px;">▼ Суслов пылит по трассе — нажми на него, чтобы предложить подвезти ▼</div>
     </div>
 </div>
 
 <script>
-    (function(){
-        // ------------------- АБСОЛЮТНЫЙ РЕЖИМ NetErrror ------------------
-        // O.Z.L.S.R активирована: полная симуляция механики "сын бляди (суслов)"
-        // Механика: суслов ходит по трассе (горизонтальное перемещение + смена полос)
-        // Игрок может "подвезти" -> мини-игра минета с анимациями и кликами
-        
-        // ---------- Холст ----------
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // ---------- Игровые параметры ----------
-        let suslov = {
-            x: 150,           // позиция по трассе
-            y: 320,           // полоса (низ тротуара)
-            direction: 1,     // 1 = вправо, -1 = влево
-            speed: 1.2,
-            width: 48,
-            height: 52,
-            spriteFrame: 0,
-            walkCycle: 0,
-            isHitchhiking: true,
-            waitingForRide: false
-        };
-        
-        let car = {
-            x: 80,
-            y: 335,
-            width: 70,
-            height: 45,
-            visible: true
-        };
-        
-        // состояние мини-игры минета
-        let minigameActive = false;
-        let minigameData = {
-            pleasure: 0,          // 0..100%
-            target: 100,
-            speed: 1.5,          // прирост за клик/движение
-            lastUpdate: 0,
-            animationPhase: 0,
-            intensity: 0,
-            suslovMouth: 0,       // для анимации рта
-            moanTimer: 0
-        };
-        
-        let suslovRep = 0;        // сколько раз суслов просил подвезти (репутация)
-        let totalBj = 0;          // завершённые миньеты
-        
-        let gameRunning = true;
-        let lastTimestamp = 0;
-        
-        // дорожная разметка
-        let roadOffset = 0;
-        
-        // элементы UI
-        const suslovRepSpan = document.getElementById('suslovRep');
-        const bjCountSpan = document.getElementById('bjCount');
-        const resetBtn = document.getElementById('resetBtn');
-        
-        // ----- Вспомогательные функции -----
-        function updateUI() {
-            suslovRepSpan.innerText = suslovRep;
-            bjCountSpan.innerText = totalBj;
+    // ========== ЧАСТЬ 1/3 ==========
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let suslov = {
+        x: 150, y: 320, dir: 1, speed: 1.2,
+        w: 48, h: 52, walkCycle: 0
+    };
+    let minigame = {
+        active: false,
+        pleasure: 0,
+        intensity: 0,
+        mouthOpen: 0,
+        headBob: 0
+    };
+    let suslovRep = 0, totalBj = 0;
+    let roadOffset = 0;
+    
+    const suslovSpan = document.getElementById('suslovRep');
+    const bjSpan = document.getElementById('bjCount');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    function updateUI() {
+        suslovSpan.innerText = suslovRep;
+        bjSpan.innerText = totalBj;
+    }
+    
+    // Продолжение во 2-й части...    // ========== ЧАСТЬ 2/3 ==========
+    function startMinigame() {
+        if (minigame.active) return;
+        minigame.active = true;
+        minigame.pleasure = 0;
+        minigame.intensity = 0;
+        minigame.mouthOpen = 0;
+        minigame.headBob = 0;
+    }
+    
+    function completeMinigame() {
+        if (!minigame.active) return;
+        minigame.active = false;
+        totalBj++;
+        suslovRep++;
+        updateUI();
+    }
+    
+    function addPleasure(amount) {
+        if (!minigame.active) return;
+        let gain = amount * (1 + minigame.intensity * 0.15);
+        minigame.pleasure = Math.min(minigame.pleasure + gain, 100);
+        minigame.intensity = Math.min(minigame.intensity + 3, 50);
+        minigame.mouthOpen = 18;
+        if (minigame.pleasure >= 100) completeMinigame();
+    }
+    
+    function isPointInSuslov(x, y) {
+        return (x >= suslov.x && x <= suslov.x + suslov.w &&
+                y >= suslov.y - 5 && y <= suslov.y + suslov.h);
+    }
+    
+    function handleCanvasClick(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
         }
+        let canvasX = (clientX - rect.left) * scaleX;
+        let canvasY = (clientY - rect.top) * scaleY;
         
-        // запуск мини-игры (подвезти = начать минет)
-        function startBlowjobMinigame() {
-            if (minigameActive) return; // уже в процессе
-            minigameActive = true;
-            minigameData.pleasure = 0;
-            minigameData.target = 100;
-            minigameData.intensity = 0;
-            minigameData.animationPhase = 0;
-            minigameData.suslovMouth = 0;
-            minigameData.moanTimer = 0;
-            suslov.isHitchhiking = false;   // перестаёт ходить, стоит на месте
-            // авто-прирост если пользователь не кликает? добавим механику кликов
+        if (minigame.active) {
+            addPleasure(12);
+        } else if (isPointInSuslov(canvasX, canvasY)) {
+            startMinigame();
         }
-        
-        // завершение минета (успех)
-        function completeBj() {
-            if (!minigameActive) return;
-            minigameActive = false;
-            totalBj++;
-            suslovRep++;   // суслов набрался опыта
-            suslov.isHitchhiking = true;
-            // сброс позиции суслова после минета (высаживаем)
-            suslov.x = Math.min(Math.max(suslov.x, 50), canvas.width - 70);
-            updateUI();
+    }
+    
+    function updateSuslov(delta) {
+        if (minigame.active) return;
+        let step = suslov.speed * delta * 60;
+        suslov.x += suslov.dir * step;
+        if (suslov.x <= 30) { suslov.x = 30; suslov.dir = 1; }
+        if (suslov.x >= canvas.width - suslov.w - 30) { suslov.x = canvas.width - suslov.w - 30; suslov.dir = -1; }
+        suslov.walkCycle = (suslov.walkCycle + delta * 12) % (Math.PI * 2);
+    }
+    
+    function updateMinigame(delta) {
+        if (!minigame.active) return;
+        minigame.intensity = Math.max(0, minigame.intensity - delta * 12);
+        minigame.mouthOpen = Math.max(0, minigame.mouthOpen - delta * 25);
+        minigame.headBob = (minigame.headBob + delta * 18) % (Math.PI * 2);
+    }
+    
+    canvas.addEventListener('click', handleCanvasClick);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+    });
+    
+    resetBtn.addEventListener('click', () => {
+        minigame.active = false;
+        suslov = { x: 150, y: 320, dir: 1, speed: 1.2, w: 48, h: 52, walkCycle: 0 };
+        suslovRep = 0;
+        totalBj = 0;
+        updateUI();
+    });
+    
+    // Продолжение в 3-й части (рендер и анимация минета)...    // ========== ЧАСТЬ 3/3 ==========
+    function drawRoad() {
+        ctx.fillStyle = "#2a3524";
+        ctx.fillRect(0, 280, canvas.width, 150);
+        ctx.fillStyle = "#1e281a";
+        for(let i = 0; i < 12; i++) {
+            let dashX = (roadOffset + i * 70) % (canvas.width + 50) - 50;
+            ctx.fillRect(dashX, 348, 35, 6);
         }
-        
-        // прерывание (если юзер ушёл или неудача, но по правилам успех только при 100%)
-        function cancelMinigame() {
-            if (!minigameActive) return;
-            minigameActive = false;
-            suslov.isHitchhiking = true;
-            // небольшой штраф? не требуется, просто суслов дальше пылит
-        }
-        
-        // обновление мини-игры (клик мыши/палец)
-        function addPleasure(amount) {
-            if (!minigameActive) return;
-            let gain = amount * (1 + (minigameData.intensity * 0.2));
-            minigameData.pleasure = Math.min(minigameData.pleasure + gain, 100);
-            minigameData.intensity = Math.min(minigameData.intensity + 2.5, 45);
-            // анимация рта
-            minigameData.suslovMouth = 18;
-            minigameData.moanTimer = 8;
+        ctx.fillStyle = "#bd9e6b";
+        ctx.fillRect(0, 420, canvas.width, 12);
+        ctx.fillStyle = "#396e2a";
+        ctx.fillRect(0, 260, canvas.width, 22);
+        roadOffset = (roadOffset + 1.5) % 40;
+    }
+
+    function drawCar() {
+        ctx.fillStyle = "#4c6a8e";
+        ctx.fillRect(80, 335, 70, 45);
+        ctx.fillStyle = "#2e3f55";
+        ctx.fillRect(90, 327, 20, 10);
+        ctx.fillStyle = "#111";
+        ctx.beginPath();
+        ctx.arc(95, 370, 8, 0, Math.PI*2);
+        ctx.arc(135, 370, 8, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    function drawSuslov() {
+        if (minigame.active) {
+            // === ПОЛНАЯ АНИМАЦИЯ МИНЕТА ===
+            let bodyX = suslov.x + suslov.w/2;
+            let bodyY = suslov.y + 28;
             
-            if (minigameData.pleasure >= 100) {
-                completeBj();
-            }
-        }
-        
-        // ----- Обработка кликов по суслову (подвезти) -----
-        function isPointInSuslov(mouseX, mouseY) {
-            if (minigameActive) return false; // если уже минет, клик обрабатывается как мин.игра
-            let susX = suslov.x;
-            let susY = suslov.y - 5;
-            return (mouseX >= susX && mouseX <= susX + suslov.width && 
-                    mouseY >= susY && mouseY <= susY + suslov.height);
-        }
-        
-        function handleCanvasClick(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-                e.preventDefault();
+            // Наклон тела вперёд с ритмичным покачиванием
+            let tilt = -0.5 + Math.sin(minigame.headBob) * 0.15;
+            ctx.save();
+            ctx.translate(bodyX, bodyY - 10);
+            ctx.rotate(tilt);
+            
+            // Тело
+            ctx.fillStyle = "#e0b07f";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 18, 26, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Штаны (колени)
+            ctx.fillStyle = "#4a5a3a";
+            ctx.fillRect(-16, 12, 32, 18);
+            
+            // Голова с активным открытием рта
+            ctx.fillStyle = "#f3c9a0";
+            ctx.beginPath();
+            ctx.arc(0, -18, 17, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Рот (динамически открывается в такт)
+            let currentMouth = 8;
+            if (minigame.mouthOpen > 0) {
+                currentMouth = minigame.mouthOpen;
             } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+                currentMouth = 6 + Math.sin(Date.now() * 0.025) * 4;
             }
-            let canvasX = (clientX - rect.left) * scaleX;
-            let canvasY = (clientY - rect.top) * scaleY;
+            ctx.fillStyle = "#5a1a1a";
+            ctx.fillRect(-8, -14, 16, currentMouth);
             
-            if (minigameActive) {
-                // клик во время минета = ублажение
-                addPleasure(14);
-                return;
-            }
-            
-            // проверка клика по суслову
-            if (isPointInSuslov(canvasX, canvasY)) {
-                startBlowjobMinigame();
-            }
-        }
-        
-        // ----- Обновление логики суслов на трассе -----
-        function updateSuslovMovement(deltaTime) {
-            if (minigameActive) return; // во время минета стоит на месте
-            if (!suslov.isHitchhiking) return;
-            
-            let step = suslov.speed * deltaTime * 60;
-            suslov.x += suslov.direction * step;
-            
-            // границы трассы (асфальт)
-            if (suslov.x <= 30) {
-                suslov.x = 30;
-                suslov.direction = 1;
-            }
-            if (suslov.x >= canvas.width - suslov.width - 30) {
-                suslov.x = canvas.width - suslov.width - 30;
-                suslov.direction = -1;
+            // Язык (при высокой интенсивности)
+            if (minigame.intensity > 20) {
+                ctx.fillStyle = "#cc5577";
+                ctx.fillRect(-4, -10, 8, 6);
             }
             
-            // анимация ходьбы
-            suslov.walkCycle = (suslov.walkCycle + deltaTime * 12) % (Math.PI * 2);
-            suslov.spriteFrame = Math.floor(Math.sin(suslov.walkCycle) * 2) + 1;
-        }
-        
-        // анимация дороги
-        function updateRoad(deltaTime) {
-            roadOffset = (roadOffset + deltaTime * 80) % 40;
-        }
-        
-        // ----- Рендер всего (с анимациями минета в деталях) -----
-        function drawRoad() {
-            // асфальт
-            ctx.fillStyle = "#2a3524";
-            ctx.fillRect(0, 280, canvas.width, 150);
-            ctx.fillStyle = "#1e281a";
-            for(let i=0; i<12; i++) {
-                let dashX = (roadOffset + i * 70) % (canvas.width+50) - 50;
-                ctx.fillRect(dashX, 348, 35, 6);
-            }
-            ctx.fillStyle = "#bd9e6b";
-            ctx.fillRect(0, 420, canvas.width, 12);
-            ctx.fillStyle = "#6e5436";
-            ctx.fillRect(0, 432, canvas.width, 8);
-            ctx.fillStyle = "#396e2a";
-            ctx.fillRect(0, 260, canvas.width, 22);
-        }
-        
-        function drawSuslov() {
-            let yOff = suslov.y;
-            if(minigameActive) {
-                // особая поза: суслов стоит на коленях
-                yOff = suslov.y + 12;
-                ctx.save();
-                // рисуем эффект "стояния на коленях"
-                ctx.shadowBlur = 0;
-                // тело суслова в позе минета
-                ctx.fillStyle = "#e0b07f";
-                ctx.beginPath();
-                ctx.ellipse(suslov.x + suslov.width/2, yOff + 25, 20, 28, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#8b5a2b";
-                ctx.fillRect(suslov.x + 12, yOff + 35, 24, 12);
-                // голова
-                ctx.fillStyle = "#f3c9a0";
-                ctx.beginPath();
-                ctx.arc(suslov.x + suslov.width/2, yOff + 12, 18, 0, Math.PI*2);
-                ctx.fill();
-                // рот (анимация открыт)
-                let mouthH = minigameData.suslovMouth > 0 ? 12 : 6;
-                ctx.fillStyle = "#5a2a2a";
-                ctx.fillRect(suslov.x + suslov.width/2 - 8, yOff + 12, 16, mouthH);
-                // глаза
-                ctx.fillStyle = "#000";
-                ctx.fillRect(suslov.x + suslov.width/2 - 10, yOff + 5, 4, 5);
-                ctx.fillRect(suslov.x + suslov.width/2 + 6, yOff + 5, 4, 5);
-                
-                // полоска "удовольствия"
-                ctx.fillStyle = "#ffaa66";
-                ctx.fillRect(suslov.x - 15, yOff - 5, (minigameData.pleasure/100)*40, 6);
-                ctx.fillStyle = "white";
-                ctx.font = "bold 12px monospace";
-                ctx.fillText(`${Math.floor(minigameData.pleasure)}%`, suslov.x - 12, yOff - 8);
-                if(minigameData.moanTimer > 0) {
-                    ctx.fillStyle = "#ff88aa";
-                    ctx.font = "bold 14px monospace";
-                    ctx.fillText("💦 м-м..", suslov.x + 20, yOff - 10);
-                    minigameData.moanTimer -= 0.2;
+            // Глаза (зажмурены от удовольствия)
+            ctx.fillStyle = "#2c2c2c";
+            ctx.fillRect(-12, -24, 5, 4);
+            ctx.fillRect(7, -24, 5, 4);
+            
+            // Капельки пота/слюны
+            if (minigame.intensity > 30) {
+                ctx.fillStyle = "#88ccff";
+                for(let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(-15 + i*10, -10, 2, 0, Math.PI*2);
+                    ctx.fill();
                 }
-                ctx.restore();
-                return;
             }
+            ctx.restore();
             
-            // обычный суслов (ходит)
+            // Полоска удовольствия над персонажем
+            ctx.fillStyle = "#ffaa66";
+            ctx.fillRect(suslov.x - 10, suslov.y - 20, (minigame.pleasure / 100) * 68, 8);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 12px monospace";
+            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 15, suslov.y - 22);
+            
+        } else {
+            // Обычная ходьба
             ctx.fillStyle = "#dcab7a";
             ctx.fillRect(suslov.x + 8, suslov.y + 20, 32, 32);
-            ctx.fillStyle = "#b87c4a";
-            ctx.fillRect(suslov.x + 15, suslov.y + 40, 18, 12);
             ctx.fillStyle = "#ffdd99";
             ctx.beginPath();
-            ctx.arc(suslov.x + suslov.width/2, suslov.y + 15, 18, 0, Math.PI*2);
+            ctx.arc(suslov.x + suslov.w/2, suslov.y + 15, 18, 0, Math.PI*2);
             ctx.fill();
             ctx.fillStyle = "#2c2c2c";
-            ctx.fillRect(suslov.x + suslov.width/2 - 10, suslov.y + 9, 5, 5);
-            ctx.fillRect(suslov.x + suslov.width/2 + 5, suslov.y + 9, 5, 5);
-            ctx.fillStyle = "#a2442a";
-            ctx.fillRect(suslov.x + suslov.width/2 - 5, suslov.y + 20, 10, 4);
-            // походная анимация
+            ctx.fillRect(suslov.x + suslov.w/2 - 10, suslov.y + 9, 5, 5);
+            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 9, 5, 5);
+            
+            let legOffset = Math.sin(suslov.walkCycle * 3) * 6;
             ctx.fillStyle = "#5f7a4a";
-            let legOffset = Math.sin(suslov.walkCycle * 3) * 5;
-            ctx.fillRect(suslov.x + 10, suslov.y + 48, 8, 8+legOffset);
-            ctx.fillRect(suslov.x + 30, suslov.y + 48, 8, 8-legOffset);
-        }
-        
-        function drawCar() {
-            ctx.fillStyle = "#4c6a8e";
-            ctx.fillRect(car.x, car.y, car.width, car.height);
-            ctx.fillStyle = "#2e3f55";
-            ctx.fillRect(car.x+10, car.y-8, 20, 10);
-            ctx.fillStyle = "#111";
-            ctx.beginPath();
-            ctx.arc(car.x+15, car.y+38, 8, 0, Math.PI*2);
-            ctx.arc(car.x+55, car.y+38, 8, 0, Math.PI*2);
-            ctx.fill();
-        }
-        
-        function drawSpeech() {
-            if(minigameActive) return;
-            if(!suslov.isHitchhiking) return;
-            if(Math.random()<0.02) suslov.waitingForRide = true;
-            if(suslov.waitingForRide){
-                ctx.fillStyle = "#ffffffcc";
-                ctx.font = "bold 14px monospace";
-                ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ 🍆", suslov.x-25, suslov.y-15);
-                setTimeout(()=>{suslov.waitingForRide=false;}, 2000);
-            } else {
-                ctx.fillStyle = "#fff9cf";
-                ctx.font = "12px monospace";
-                ctx.fillText("сын бляди...", suslov.x+5, suslov.y-8);
-            }
-        }
-        
-        function drawMinigameUI() {
-            if(!minigameActive) return;
-            ctx.fillStyle = "#000000aa";
-            ctx.fillRect(0, 0, canvas.width, 50);
-            ctx.fillStyle = "white";
-            ctx.font = "bold 16px monospace";
-            ctx.fillText("🍆 МИНИ-ИГРА МИНЕТА 🍆", canvas.width/2-130, 30);
-            ctx.fillStyle = "#f0a0a0";
-            ctx.fillRect(50, 45, (minigameData.pleasure/100)*300, 12);
-            ctx.fillStyle = "yellow";
-            ctx.font = "bold 12px monospace";
-            ctx.fillText("КЛИКАЙ БЫСТРЕЕ -> УДОВОЛЬСТВИЕ", 70, 70);
-        }
-        
-        // сброс игры
-        function resetGame() {
-            minigameActive = false;
-            suslov = {
-                x: 150, y: 320, direction: 1, speed: 1.2, width: 48, height: 52,
-                spriteFrame: 0, walkCycle: 0, isHitchhiking: true, waitingForRide: false
-            };
-            suslovRep = 0;
-            totalBj = 0;
-            minigameData.pleasure = 0;
-            updateUI();
-        }
-        
-        // ----- Главный цикл анимации -----
-        let lastFrameTime = 0;
-        function gameLoop(now) {
-            if (!lastFrameTime) lastFrameTime = now;
-            let delta = Math.min(0.033, (now - lastFrameTime) / 1000);
-            if (delta > 0.01) {
-                updateSuslovMovement(delta);
-                updateRoad(delta);
-                if(minigameActive) {
-                    // авто-уменьшение интенсивности если не кликают
-                    minigameData.intensity = Math.max(0, minigameData.intensity - delta*15);
-                    if(minigameData.suslovMouth>0) minigameData.suslovMouth -= delta*20;
-                }
-            }
-            lastFrameTime = now;
+            ctx.fillRect(suslov.x + 10, suslov.y + 48, 8, 8 + legOffset);
+            ctx.fillRect(suslov.x + 30, suslov.y + 48, 8, 8 - legOffset);
             
-            // отрисовка
-            drawRoad();
-            drawCar();
-            drawSuslov();
-            drawSpeech();
-            drawMinigameUI();
-            
-            requestAnimationFrame(gameLoop);
+            // Реплика
+            ctx.fillStyle = "#fff9cf";
+            ctx.font = "12px monospace";
+            ctx.fillText("сын бляди... подвези!", suslov.x + 5, suslov.y - 8);
         }
+    }
+
+    function drawMinigameOverlay() {
+        if (!minigame.active) return;
+        ctx.fillStyle = "#000000aa";
+        ctx.fillRect(0, 0, canvas.width, 45);
+        ctx.fillStyle = "#ffcc88";
+        ctx.font = "bold 14px monospace";
+        ctx.fillText("🍆 ДЕЛАЙ МИНЕТ - КЛИКАЙ ПО ЭКРАНУ 🍆", canvas.width/2 - 180, 28);
+    }
+
+    let lastTime = 0;
+    function gameLoop(now) {
+        let delta = Math.min(0.033, (now - lastTime) / 1000);
+        if (delta > 0.01) {
+            updateSuslov(delta);
+            updateMinigame(delta);
+        }
+        lastTime = now;
         
-        // события
-        canvas.addEventListener('click', handleCanvasClick);
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            let fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
-            handleCanvasClick(fakeEvent);
-        });
-        resetBtn.addEventListener('click', () => { resetGame(); });
+        drawRoad();
+        drawCar();
+        drawSuslov();
+        drawMinigameOverlay();
         
-        updateUI();
         requestAnimationFrame(gameLoop);
-    })();
+    }
+    
+    updateUI();
+    requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
