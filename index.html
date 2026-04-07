@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - BIG Бибеджон: Кокосовый замес</title>
+    <title>NetErrror - BIG Бибеджон: Боссы, Бонусы, Армия роботов</title>
     <style>
         * {
             user-select: none;
@@ -39,51 +39,68 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             background: #0c1a16cc;
             backdrop-filter: blur(8px);
-            padding: 8px 24px;
+            padding: 8px 20px;
             border-radius: 60px;
             border: 1px solid #c4a86a;
+            flex-wrap: wrap;
         }
         .stat {
             background: #1f2c1a;
-            padding: 6px 20px;
+            padding: 4px 16px;
             border-radius: 40px;
             color: #f7e05e;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1rem;
         }
         .lives {
             color: #ff7777;
-            font-size: 1.4rem;
-            letter-spacing: 4px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        .combo {
+            background: #3a1f2f;
+            color: #ffaa88;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: bold;
+        }
+        .rage-bar {
+            width: 150px;
+            height: 14px;
+            background: #2a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .rage-fill {
+            width: 0%;
+            height: 100%;
+            background: #ff4444;
+            transition: width 0.1s linear;
         }
         button {
             background: #6e4a2e;
             border: none;
             color: #ffefb0;
             font-weight: bold;
-            padding: 6px 18px;
+            padding: 4px 16px;
             border-radius: 40px;
-            font-size: 1rem;
             cursor: pointer;
         }
-        button:active {
-            transform: scale(0.94);
-        }
+        button:active { transform: scale(0.94); }
         .power-bar {
-            width: 120px;
-            height: 12px;
+            width: 100px;
+            height: 10px;
             background: #2a2a2a;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
         }
         .power-fill {
             width: 0%;
             height: 100%;
             background: #ffaa44;
-            transition: width 0.02s linear;
         }
     </style>
 </head>
@@ -92,58 +109,65 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="1000" height="550"></canvas>
         <div class="ui-panel">
-            <div class="stat">🐒 БИБЕДЖОН: <span id="scoreSpan">0</span></div>
+            <div class="stat">🐒 ОЧКИ: <span id="scoreSpan">0</span></div>
             <div class="lives" id="livesSpan">❤️❤️❤️</div>
+            <div class="combo">⚡ КОМБО: <span id="comboSpan">1</span>x</div>
+            <div class="rage-bar"><div class="rage-fill" id="rageFill"></div></div>
             <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
-            <button id="resetBtn">💥 НОВАЯ ИГРА</button>
+            <button id="resetBtn">💥 ЗАНОВО</button>
         </div>
+        <div style="text-align:center; margin-top:8px; font-size:11px; color:#aacf9a;">ЗАЖМИ → ПРИЦЕЛ → ОТПУСТИ | R или ПРОБЕЛ = ОГНЕННЫЙ ШАР</div>
     </div>
 </div>
 
 <script>
-    // ========== BIG БИБЕДЖОН - ЗАЩИТА БАЛКОНА ==========
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ---- ИГРОК (БИБЕДЖОН) ----
-    let bibedjon = {
-        x: canvas.width/2,
-        y: canvas.height - 70,
-        width: 70,
-        height: 80
-    };
-    
-    // ---- СНАРЯДЫ (кокосы/бананы) ----
+    // ========== ИГРОК ==========
+    let bibedjon = { x: canvas.width/2, y: canvas.height - 70, width: 70, height: 80 };
     let projectiles = [];
-    
-    // ---- ВРАГИ (роботы-полицейские) ----
     let enemies = [];
+    let bonuses = [];
+    let boss = null;
+    let particles = [];
+    let screenShake = 0;
     
-    // ---- СИСТЕМА ПРИЦЕЛА И СИЛЫ БРОСКА ----
-    let aiming = false;
-    let aimStartX = 0, aimStartY = 0;
-    let aimCurrentX = 0, aimCurrentY = 0;
-    let power = 0;
-    let powerCharge = 0; // 0-100
-    let charging = false;
-    let chargeInterval = null;
-    
-    // ---- СТАТИСТИКА ----
+    // ========== СТАТИСТИКА ==========
     let score = 0;
     let lives = 3;
     let gameActive = true;
     let gameOverFlag = false;
+    let combo = 1;
+    let comboCounter = 0;
+    let lastHitFrame = 0;
     
-    // ---- ЭФФЕКТЫ ----
-    let particles = [];
-    let screenShake = 0;
-    let lastEnemySpawn = 0;
+    // ========== ШКАЛА ЯРОСТИ ==========
+    let rage = 0;
+    let maxRage = 100;
     
-    // UI элементы
+    // ========== БОНУСНЫЕ ЭФФЕКТЫ ==========
+    let bananaStorm = { active: false, endTime: 0 };
+    let doubleSpeed = { active: false, endTime: 0 };
+    let shotgunMode = { active: false, endTime: 0 };
+    
+    // ========== ПРИЦЕЛ ==========
+    let aiming = false;
+    let aimStartX, aimStartY, aimCurrentX, aimCurrentY;
+    let powerCharge = 0;
+    let charging = false;
+    let chargeInterval = null;
+    
+    // ========== UI ==========
     const scoreSpan = document.getElementById('scoreSpan');
     const livesSpan = document.getElementById('livesSpan');
+    const comboSpan = document.getElementById('comboSpan');
+    const rageFill = document.getElementById('rageFill');
     const powerFillDiv = document.getElementById('powerFill');
     const resetBtn = document.getElementById('resetBtn');
+    
+    let lastEnemySpawn = 0;
+    let frame = 0;
     
     function updateUI() {
         scoreSpan.innerText = score;
@@ -151,38 +175,132 @@
         for(let i=0; i<lives; i++) hearts += "❤️ ";
         for(let i=lives; i<3; i++) hearts += "🖤 ";
         livesSpan.innerText = hearts;
+        comboSpan.innerText = combo;
+        rageFill.style.width = (rage / maxRage * 100) + "%";
     }
     
-    function updatePowerBar() {
-        powerFillDiv.style.width = powerCharge + "%";
+    function updatePowerBar() { powerFillDiv.style.width = powerCharge + "%"; }
+    
+    // ========== ЗВУКИ ==========
+    let audioCtx = null;
+    function playSound(freq, vol=0.15, duration=0.2) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        gain.gain.value = vol;
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
     }
+    
+    // ========== ТИПЫ ВРАГОВ ==========
+    const enemyTypes = [
+        { name: "пехотинец", color: "#6a8eb0", hp: 1, speed: 0.8, width: 44, height: 48, score: 10, icon: "🤖" },
+        { name: "щитовик", color: "#5a9e6a", hp: 2, speed: 0.6, width: 48, height: 52, score: 20, icon: "🛡️" },
+        { name: "ниндзя", color: "#cc6666", hp: 1, speed: 1.4, width: 42, height: 46, score: 15, icon: "⚡" },
+        { name: "летающий", color: "#eebb55", hp: 1, speed: 1.0, width: 46, height: 40, score: 12, icon: "🕊️", flying: true }
+    ];
     
     function spawnEnemy() {
         if (!gameActive) return;
-        let x = 50 + Math.random() * (canvas.width - 100);
+        let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        let x = 40 + Math.random() * (canvas.width - 80);
+        let y = type.flying ? 60 + Math.random() * 100 : 40;
         enemies.push({
-            x: x,
-            y: 50,
-            width: 48,
-            height: 52,
-            speed: 0.8 + Math.random() * 0.9,
-            hp: 1
+            x: x, y: y, type: type, hp: type.hp, maxHp: type.hp,
+            width: type.width, height: type.height, speed: type.speed,
+            flying: type.flying || false, wobble: 0
         });
     }
     
-    function addParticles(x, y, color, count) {
-        for(let i=0; i<count; i++) {
-            particles.push({
-                x: x, y: y,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6 - 2,
-                life: 0.8,
-                color: color
-            });
+    // ========== БОСС ==========
+    function spawnBoss() {
+        if (boss) return;
+        boss = {
+            x: canvas.width/2 - 60, y: 60, width: 120, height: 100, hp: 5, maxHp: 5,
+            speed: 0.3, direction: 1, shootTimer: 0, name: "MEGA РОБОТ"
+        };
+        playSound(300, 0.3, 0.5);
+    }
+    
+    function updateBoss(delta) {
+        if (!boss) return;
+        boss.x += boss.direction * boss.speed * delta * 60;
+        if (boss.x <= 30) boss.direction = 1;
+        if (boss.x >= canvas.width - boss.width - 30) boss.direction = -1;
+        boss.shootTimer += delta;
+        if (boss.shootTimer > 1.5) {
+            boss.shootTimer = 0;
+            // босс стреляет бомбой
+            let bomb = {
+                x: boss.x + boss.width/2, y: boss.y + boss.height-10,
+                vx: (Math.random() - 0.5) * 1.5, vy: 2.5, radius: 10, isBomb: true
+            };
+            projectiles.push(bomb);
+            playSound(440, 0.2);
         }
     }
     
-    // Создание снаряда с заданной силой и направлением
+    // ========== БОНУСЫ ==========
+    const bonusTypes = [
+        { name: "banana", color: "#ffcc44", effect: "bananaStorm", duration: 5000, icon: "🍌", text: "БАНАНОВЫЙ ШТОРМ" },
+        { name: "medkit", color: "#ff7777", effect: "medkit", icon: "💊", text: "+1 ЖИЗНЬ" },
+        { name: "speed", color: "#88ffaa", effect: "doubleSpeed", duration: 6000, icon: "⚡", text: "УСКОРЕНИЕ" },
+        { name: "shotgun", color: "#ffaa66", effect: "shotgun", duration: 5000, icon: "🔫", text: "ДРОБОВИК" }
+    ];
+    
+    function spawnBonus(x, y) {
+        let type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+        bonuses.push({ x: x, y: y, type: type, radius: 14, life: true });
+    }
+    
+    function applyBonus(bonus) {
+        switch(bonus.type.effect) {
+            case "bananaStorm":
+                bananaStorm.active = true;
+                bananaStorm.endTime = Date.now() + 5000;
+                playSound(660, 0.2);
+                break;
+            case "medkit":
+                lives = Math.min(lives + 1, 5);
+                updateUI();
+                playSound(880, 0.2);
+                break;
+            case "doubleSpeed":
+                doubleSpeed.active = true;
+                doubleSpeed.endTime = Date.now() + 6000;
+                playSound(550, 0.2);
+                break;
+            case "shotgun":
+                shotgunMode.active = true;
+                shotgunMode.endTime = Date.now() + 5000;
+                playSound(770, 0.2);
+                break;
+        }
+    }
+    
+    // ========== СПЕЦСПОСОБНОСТЬ ==========
+    function fireRage() {
+        if (!gameActive) return;
+        if (rage < maxRage) return;
+        rage = 0;
+        updateUI();
+        playSound(300, 0.4, 0.6);
+        screenShake = 15;
+        // огненный шар
+        let fireball = {
+            x: bibedjon.x, y: bibedjon.y - 40, vx: 0, vy: -8, radius: 20, isFireball: true, life: true
+        };
+        projectiles.push(fireball);
+        // добавляем эффект
+        for(let i=0; i<20; i++) particles.push({ x: bibedjon.x, y: bibedjon.y-30, vx: (Math.random()-0.5)*6, vy: -Math.random()*5, life: 0.6, color: "#ff8844" });
+    }
+    
+    // ========== БРОСОК ==========
     function shootProjectile(fromX, fromY, toX, toY, chargePower) {
         let dx = toX - fromX;
         let dy = toY - fromY;
@@ -190,95 +308,188 @@
         if (len < 0.1) return;
         let normX = dx / len;
         let normY = dy / len;
-        let speed = 5 + (chargePower / 15); // макс ~11.6
-        projectiles.push({
-            x: fromX, y: fromY,
-            vx: normX * speed,
-            vy: normY * speed,
-            radius: 12,
-            life: true
-        });
-        // звук броска
-        playThrowSound();
+        let speed = 6 + (chargePower / 12);
+        
+        if (shotgunMode.active) {
+            for(let i=-1; i<=1; i++) {
+                let angle = Math.atan2(normY, normX) + i * 0.25;
+                let vx = Math.cos(angle) * speed;
+                let vy = Math.sin(angle) * speed;
+                projectiles.push({ x: fromX, y: fromY, vx: vx, vy: vy, radius: 10, isBomb: false, isFireball: false });
+            }
+        } else {
+            projectiles.push({ x: fromX, y: fromY, vx: normX * speed, vy: normY * speed, radius: 12, isBomb: false, isFireball: false });
+        }
+        playSound(480, 0.12);
     }
     
-    // Звуки через Web Audio
-    let audioCtx = null;
-    function playThrowSound() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = 380;
-        gain.gain.value = 0.15;
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.15);
+    // ========== УВЕЛИЧЕНИЕ КОМБО ==========
+    function addCombo() {
+        comboCounter++;
+        if (comboCounter >= 3) {
+            combo = Math.min(combo + 1, 6);
+            comboCounter = 0;
+        }
+        lastHitFrame = frame;
     }
     
-    function playHitSound() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = 680;
-        gain.gain.value = 0.2;
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
+    function resetCombo() {
+        if (frame - lastHitFrame > 60) {
+            combo = 1;
+            comboCounter = 0;
+        }
     }
     
-    function playLoseLifeSound() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = 220;
-        gain.gain.value = 0.3;
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
+    // ========== ОБНОВЛЕНИЕ ==========
+    function updateGame(delta) {
+        if (!gameActive) return;
+        
+        // бонусные таймеры
+        if (bananaStorm.active && Date.now() > bananaStorm.endTime) bananaStorm.active = false;
+        if (doubleSpeed.active && Date.now() > doubleSpeed.endTime) doubleSpeed.active = false;
+        if (shotgunMode.active && Date.now() > shotgunMode.endTime) shotgunMode.active = false;
+        
+        // спавн врагов
+        let now = Date.now();
+        let spawnDelay = Math.max(600, 1100 - Math.floor(score/8));
+        if (!boss && now - lastEnemySpawn > spawnDelay) {
+            spawnEnemy();
+            lastEnemySpawn = now;
+        }
+        
+        // босс при 20 очках
+        if (score >= 20 && !boss && !gameOverFlag) spawnBoss();
+        if (boss) updateBoss(delta);
+        
+        // движение врагов
+        for(let i=0; i<enemies.length; i++) {
+            let e = enemies[i];
+            let spd = e.speed * (doubleSpeed.active ? 1.5 : 1) * delta * 60;
+            if (e.flying) {
+                e.wobble = (e.wobble + delta*8) % (Math.PI*2);
+                e.x += Math.sin(e.wobble) * 0.8;
+                e.y += spd;
+            } else {
+                e.y += spd;
+            }
+            if (e.y + e.height > bibedjon.y + 15) {
+                enemies.splice(i,1); i--;
+                lives--;
+                updateUI();
+                playSound(220, 0.3);
+                screenShake = 10;
+                if (lives <= 0) { gameActive = false; gameOverFlag = true; }
+                continue;
+            }
+        }
+        
+        // банановый шторм
+        if (bananaStorm.active) {
+            for(let i=0; i<2; i++) {
+                projectiles.push({ x: Math.random()*canvas.width, y: -10, vx: (Math.random()-0.5)*3, vy: 4, radius: 8, isBanana: true });
+            }
+        }
+        
+        // снаряды и столкновения
+        for(let i=0; i<projectiles.length; i++) {
+            let p = projectiles[i];
+            p.x += p.vx * delta * 60;
+            p.y += p.vy * delta * 60;
+            if (p.x < -100 || p.x > canvas.width+100 || p.y < -100 || p.y > canvas.height+150) {
+                projectiles.splice(i,1); i--; continue;
+            }
+            let hit = false;
+            // проверка врагов
+            for(let j=0; j<enemies.length; j++) {
+                let e = enemies[j];
+                if (p.x + p.radius > e.x && p.x - p.radius < e.x + e.width &&
+                    p.y + p.radius > e.y && p.y - p.radius < e.y + e.height) {
+                    e.hp -= 1;
+                    hit = true;
+                    if (e.hp <= 0) {
+                        let pts = e.type.score * combo;
+                        score += pts;
+                        rage = Math.min(rage + 10, maxRage);
+                        addCombo();
+                        spawnBonus(e.x + e.width/2, e.y + e.height/2);
+                        enemies.splice(j,1);
+                        playSound(680, 0.15);
+                        screenShake = 4;
+                        for(let k=0;k<8;k++) particles.push({ x: p.x, y: p.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 0.5, color: "#ffaa66" });
+                    } else {
+                        playSound(540, 0.1);
+                    }
+                    break;
+                }
+            }
+            // босс
+            if (!hit && boss && p.x + p.radius > boss.x && p.x - p.radius < boss.x + boss.width &&
+                p.y + p.radius > boss.y && p.y - p.radius < boss.y + boss.height) {
+                boss.hp -= 1;
+                hit = true;
+                rage = Math.min(rage + 15, maxRage);
+                addCombo();
+                playSound(800, 0.2);
+                screenShake = 8;
+                for(let k=0;k<12;k++) particles.push({ x: p.x, y: p.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 0.5, color: "#ff8844" });
+                if (boss.hp <= 0) {
+                    score += 100 * combo;
+                    boss = null;
+                    playSound(300, 0.4, 0.8);
+                    for(let k=0;k<30;k++) particles.push({ x: boss.x+boss.width/2, y: boss.y+boss.height/2, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 0.7, color: "#ffaa44" });
+                }
+            }
+            if (hit) { projectiles.splice(i,1); i--; }
+        }
+        
+        // бонусы кликабельные (обновляем UI)
+        resetCombo();
+        updateUI();
+        
+        // частицы
+        for(let i=0; i<particles.length; i++) {
+            let p = particles[i];
+            p.x += p.vx * delta * 60;
+            p.y += p.vy * delta * 60;
+            p.life -= delta * 2;
+            if (p.life <= 0) particles.splice(i,1), i--;
+        }
+        if (screenShake > 0) screenShake -= delta * 50;
     }
     
-    // ОБРАБОТКА МЫШИ/ТАЧА ДЛЯ ПРИЦЕЛА
+    // ========== ОБРАБОТКА КЛИКОВ ==========
     function handlePointerDown(e) {
         if (!gameActive) return;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
+        let cx, cy;
+        if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; e.preventDefault(); }
+        else { cx = e.clientX; cy = e.clientY; }
+        let canvasX = (cx - rect.left) * scaleX;
+        let canvasY = (cy - rect.top) * scaleY;
         
-        // начало прицеливания от позиции Бибеджона
+        // проверка бонусов
+        for(let i=0; i<bonuses.length; i++) {
+            let b = bonuses[i];
+            let dx = canvasX - b.x, dy = canvasY - b.y;
+            if (Math.sqrt(dx*dx+dy*dy) < b.radius) {
+                applyBonus(b);
+                bonuses.splice(i,1);
+                return;
+            }
+        }
+        
         aiming = true;
-        aimStartX = bibedjon.x + bibedjon.width/2;
-        aimStartY = bibedjon.y - 20;
+        aimStartX = bibedjon.x;
+        aimStartY = bibedjon.y - 40;
         aimCurrentX = canvasX;
         aimCurrentY = canvasY;
-        
         charging = true;
         powerCharge = 0;
         if (chargeInterval) clearInterval(chargeInterval);
         chargeInterval = setInterval(() => {
-            if (charging && gameActive) {
-                powerCharge = Math.min(powerCharge + 3, 100);
-                updatePowerBar();
-            }
+            if (charging && gameActive) { powerCharge = Math.min(powerCharge + 2.5, 100); updatePowerBar(); }
         }, 30);
     }
     
@@ -287,35 +498,19 @@
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
-        aimCurrentX = canvasX;
-        aimCurrentY = canvasY;
+        let cx, cy;
+        if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; e.preventDefault(); }
+        else { cx = e.clientX; cy = e.clientY; }
+        aimCurrentX = (cx - rect.left) * scaleX;
+        aimCurrentY = (cy - rect.top) * scaleY;
     }
     
     function handlePointerUp(e) {
-        if (!aiming || !gameActive) {
-            aiming = false;
-            charging = false;
-            if (chargeInterval) clearInterval(chargeInterval);
-            updatePowerBar();
-            return;
-        }
+        if (!aiming) { charging=false; if(chargeInterval) clearInterval(chargeInterval); return; }
         aiming = false;
         charging = false;
         if (chargeInterval) clearInterval(chargeInterval);
-        
-        // бросок с текущей силой
-        shootProjectile(aimStartX, aimStartY, aimCurrentX, aimCurrentY, powerCharge);
+        if (gameActive) shootProjectile(aimStartX, aimStartY, aimCurrentX, aimCurrentY, powerCharge);
         powerCharge = 0;
         updatePowerBar();
     }
@@ -327,254 +522,105 @@
     window.addEventListener('touchmove', handlePointerMove);
     window.addEventListener('touchend', handlePointerUp);
     
-    resetBtn.addEventListener('click', () => {
-        gameActive = true;
-        gameOverFlag = false;
-        score = 0;
-        lives = 3;
-        projectiles = [];
-        enemies = [];
-        particles = [];
-        aiming = false;
-        charging = false;
-        if (chargeInterval) clearInterval(chargeInterval);
-        powerCharge = 0;
-        updatePowerBar();
-        updateUI();
-        lastEnemySpawn = Date.now();
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'KeyR') { e.preventDefault(); fireRage(); }
     });
     
-    // ЛОГИКА ИГРЫ
-    function updateGame(delta) {
-        if (!gameActive) return;
-        
-        // спавн врагов
-        let now = Date.now();
-        if (now - lastEnemySpawn > 1100 - Math.min(500, score/5)) {
-            spawnEnemy();
-            lastEnemySpawn = now;
-        }
-        
-        // движение врагов
-        for(let i=0; i<enemies.length; i++) {
-            let e = enemies[i];
-            e.y += e.speed * delta * 60;
-            if (e.y + e.height > bibedjon.y + 20) {
-                // враг добрался до Бибеджона
-                enemies.splice(i,1);
-                i--;
-                lives--;
-                updateUI();
-                playLoseLifeSound();
-                screenShake = 12;
-                if (lives <= 0) {
-                    gameActive = false;
-                    gameOverFlag = true;
-                }
-                continue;
-            }
-        }
-        
-        // движение снарядов и столкновения
-        for(let i=0; i<projectiles.length; i++) {
-            let p = projectiles[i];
-            p.x += p.vx * delta * 60;
-            p.y += p.vy * delta * 60;
-            if (p.x < -50 || p.x > canvas.width+50 || p.y < -50 || p.y > canvas.height+100) {
-                projectiles.splice(i,1);
-                i--;
-                continue;
-            }
-            let hit = false;
-            for(let j=0; j<enemies.length; j++) {
-                let e = enemies[j];
-                if (p.x + p.radius > e.x && p.x - p.radius < e.x + e.width &&
-                    p.y + p.radius > e.y && p.y - p.radius < e.y + e.height) {
-                    // попадание
-                    enemies.splice(j,1);
-                    hit = true;
-                    score++;
-                    updateUI();
-                    addParticles(p.x, p.y, "#ffaa66", 8);
-                    playHitSound();
-                    screenShake = 5;
-                    break;
-                }
-            }
-            if (hit) {
-                projectiles.splice(i,1);
-                i--;
-            }
-        }
-        
-        // обновление частиц
-        for(let i=0; i<particles.length; i++) {
-            let p = particles[i];
-            p.x += p.vx * delta * 60;
-            p.y += p.vy * delta * 60;
-            p.life -= delta * 2;
-            if (p.life <= 0) {
-                particles.splice(i,1);
-                i--;
-            }
-        }
-        
-        if (screenShake > 0) screenShake -= delta * 50;
-    }
+    resetBtn.addEventListener('click', () => {
+        gameActive = true; gameOverFlag = false; score = 0; lives = 3; combo = 1; comboCounter = 0; rage = 0;
+        projectiles = []; enemies = []; bonuses = []; boss = null; particles = [];
+        bananaStorm.active = false; doubleSpeed.active = false; shotgunMode.active = false;
+        updateUI(); lastEnemySpawn = Date.now();
+    });
     
-    // РЕНДЕР
+    // ========== РЕНДЕР ==========
     function drawBackground() {
-        ctx.fillStyle = "#2a6b55";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // балкон
-        ctx.fillStyle = "#b87a4a";
-        ctx.fillRect(0, canvas.height-90, canvas.width, 90);
-        ctx.fillStyle = "#9e5e3a";
-        ctx.fillRect(0, canvas.height-90, canvas.width, 12);
-        // перила
-        ctx.fillStyle = "#c4966a";
-        for(let i=0; i<12; i++) {
-            ctx.fillRect(40 + i*80, canvas.height-100, 12, 30);
-        }
+        ctx.fillStyle = "#2a6b55"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#b87a4a"; ctx.fillRect(0, canvas.height-90, canvas.width, 90);
+        ctx.fillStyle = "#9e5e3a"; ctx.fillRect(0, canvas.height-90, canvas.width, 12);
+        for(let i=0;i<12;i++) ctx.fillRect(40+i*80, canvas.height-100, 12, 30);
     }
     
     function drawBibedjon() {
-        let x = bibedjon.x - bibedjon.width/2;
-        let y = bibedjon.y - bibedjon.height;
-        ctx.fillStyle = "#8b5a2b";
-        ctx.fillRect(x+15, y+20, 40, 50);
-        ctx.fillStyle = "#c49a6c";
-        ctx.beginPath();
-        ctx.ellipse(x+bibedjon.width/2, y+15, 25, 30, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = "#2c2c2c";
-        ctx.fillRect(x+20, y+8, 8, 8);
-        ctx.fillRect(x+42, y+8, 8, 8);
-        ctx.fillStyle = "#aa6644";
-        ctx.fillRect(x+30, y+25, 12, 8);
-        // корона
-        ctx.fillStyle = "#ffcc44";
-        ctx.fillRect(x+22, y-8, 26, 12);
+        let x = bibedjon.x - 35, y = bibedjon.y - 80;
+        ctx.fillStyle = "#8b5a2b"; ctx.fillRect(x+15, y+20, 40, 50);
+        ctx.fillStyle = "#c49a6c"; ctx.beginPath(); ctx.ellipse(x+35, y+15, 25, 30, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#2c2c2c"; ctx.fillRect(x+20, y+8, 8, 8); ctx.fillRect(x+42, y+8, 8, 8);
+        ctx.fillStyle = "#ffcc44"; ctx.fillRect(x+22, y-8, 26, 12);
         for(let i=0;i<3;i++) ctx.fillRect(x+24+i*10, y-14, 4, 10);
-        ctx.fillStyle = "#f0e68c";
-        ctx.font = "bold 20px monospace";
-        ctx.fillText("BIG", x+15, y-18);
+        ctx.fillStyle = "#f0e68c"; ctx.font = "bold 18px monospace"; ctx.fillText("BIG", x+15, y-18);
     }
     
     function drawEnemies() {
         for(let e of enemies) {
-            ctx.fillStyle = "#6a8eb0";
-            ctx.fillRect(e.x, e.y, e.width, e.height);
-            ctx.fillStyle = "#3a5a7a";
-            ctx.fillRect(e.x+8, e.y+8, 8, 8);
-            ctx.fillRect(e.x+e.width-16, e.y+8, 8, 8);
-            ctx.fillStyle = "#cc4444";
-            ctx.fillRect(e.x+15, e.y+30, 18, 8);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 10px monospace";
-            ctx.fillText("РОБОПОЛ", e.x+5, e.y+48);
+            ctx.fillStyle = e.type.color; ctx.fillRect(e.x, e.y, e.width, e.height);
+            ctx.fillStyle = "#ffffff"; ctx.font = "16px monospace"; ctx.fillText(e.type.icon, e.x+12, e.y+32);
+            if (e.hp > 1) { ctx.fillStyle = "#ffaa66"; ctx.fillRect(e.x, e.y-8, (e.hp/e.maxHp)*e.width, 5); }
         }
     }
     
-    function drawProjectiles() {
+    function drawBoss() {
+        if (!boss) return;
+        ctx.fillStyle = "#aa4444"; ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+        ctx.fillStyle = "#cc6666"; ctx.fillRect(boss.x+10, boss.y+10, 30, 20); ctx.fillRect(boss.x+boss.width-40, boss.y+10, 30, 20);
+        ctx.fillStyle = "#ffcc44"; ctx.font = "bold 14px monospace"; ctx.fillText("☠️ BOSS ☠️", boss.x+20, boss.y-5);
+        ctx.fillStyle = "#ffaa66"; ctx.fillRect(boss.x, boss.y-12, (boss.hp/boss.maxHp)*boss.width, 8);
+    }
+    
+    function drawBonuses() {
+        for(let b of bonuses) {
+            ctx.fillStyle = b.type.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#000"; ctx.font = "18px monospace"; ctx.fillText(b.type.icon, b.x-9, b.y+7);
+        }
+    }
+    
+    function drawProjectilesAndEffects() {
         for(let p of projectiles) {
-            ctx.fillStyle = "#ffcc55";
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius-2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#aa8833";
-            ctx.beginPath();
-            ctx.arc(p.x-2, p.y-2, 4, 0, Math.PI*2);
-            ctx.fill();
+            if (p.isFireball) { ctx.fillStyle = "#ff6600"; ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI*2); ctx.fill(); }
+            else if (p.isBanana) { ctx.fillStyle = "#ffcc44"; ctx.fillRect(p.x-6, p.y-4, 12, 8); }
+            else { ctx.fillStyle = "#ffcc55"; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius-2, 0, Math.PI*2); ctx.fill(); }
         }
+        for(let p of particles) { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill(); }
     }
     
-    function drawAimLine() {
+    function drawAim() {
         if (!aiming) return;
-        ctx.beginPath();
-        ctx.moveTo(aimStartX, aimStartY);
-        ctx.lineTo(aimCurrentX, aimCurrentY);
-        ctx.strokeStyle = "#ffaa66";
-        ctx.lineWidth = 3;
-        ctx.setLineDash([6, 8]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        // кружок силы
-        let radius = 15 + (powerCharge / 3);
-        ctx.beginPath();
-        ctx.arc(aimCurrentX, aimCurrentY, radius, 0, Math.PI*2);
-        ctx.strokeStyle = "#ff8844";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = `rgba(255, 140, 50, ${powerCharge/150})`;
-        ctx.fill();
+        ctx.beginPath(); ctx.moveTo(aimStartX, aimStartY); ctx.lineTo(aimCurrentX, aimCurrentY);
+        ctx.strokeStyle = "#ffaa66"; ctx.lineWidth = 3; ctx.setLineDash([6,8]); ctx.stroke(); ctx.setLineDash([]);
+        let rad = 15 + powerCharge/4;
+        ctx.beginPath(); ctx.arc(aimCurrentX, aimCurrentY, rad, 0, Math.PI*2);
+        ctx.strokeStyle = "#ff8844"; ctx.stroke(); ctx.fillStyle = `rgba(255,140,50,${powerCharge/150})`; ctx.fill();
     }
     
-    function drawParticles() {
-        for(let p of particles) {
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
-            ctx.fill();
-        }
-    }
-    
-    function drawGameOver() {
-        if (gameOverFlag && !gameActive) {
-            ctx.fillStyle = "#000000aa";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ffcc88";
-            ctx.font = "bold 42px monospace";
-            ctx.textAlign = "center";
-            ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2 - 40);
-            ctx.font = "24px monospace";
-            ctx.fillStyle = "#ffaa66";
-            ctx.fillText("Нажми НОВАЯ ИГРА", canvas.width/2, canvas.height/2 + 40);
+    function drawUI() {
+        if (bananaStorm.active) ctx.fillText("🍌 БАНАНОВЫЙ ШТОРМ", 20, 80);
+        if (doubleSpeed.active) ctx.fillText("⚡ УСКОРЕНИЕ", 20, 105);
+        if (shotgunMode.active) ctx.fillText("🔫 ДРОБОВИК", 20, 130);
+        if (!gameActive && gameOverFlag) {
+            ctx.fillStyle = "#000000aa"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#ffcc88"; ctx.font = "bold 42px monospace"; ctx.textAlign = "center";
+            ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+            ctx.font = "20px monospace"; ctx.fillText("Нажми ЗАНОВО", canvas.width/2, canvas.height/2+60);
             ctx.textAlign = "left";
         }
-    }
-    
-    function drawUIHints() {
-        ctx.fillStyle = "#ffffcc";
-        ctx.font = "bold 14px monospace";
-        ctx.fillText("ЗАЖМИ ЛКМ → ПРИЦЕЛ → ОТПУСТИ (сила броска)", 20, 40);
     }
     
     let lastTime = 0;
     function gameLoop(now) {
         let delta = Math.min(0.033, (now - lastTime) / 1000);
-        if (delta > 0.01) {
-            updateGame(delta);
-        }
-        lastTime = now;
+        if (delta > 0.01) updateGame(delta);
+        lastTime = now; frame++;
         
-        // тряска экрана
-        let shakeX = 0, shakeY = 0;
-        if (screenShake > 0) {
-            shakeX = (Math.random() - 0.5) * screenShake;
-            shakeY = (Math.random() - 0.5) * screenShake;
-            ctx.save();
-            ctx.translate(shakeX, shakeY);
-        }
+        let shakeX=0, shakeY=0;
+        if(screenShake>0){ shakeX=(Math.random()-0.5)*screenShake; shakeY=(Math.random()-0.5)*screenShake; ctx.save(); ctx.translate(shakeX,shakeY); }
         
-        drawBackground();
-        drawEnemies();
-        drawProjectiles();
-        drawBibedjon();
-        drawAimLine();
-        drawParticles();
-        drawGameOver();
-        drawUIHints();
-        
-        if (screenShake > 0) ctx.restore();
-        
+        drawBackground(); drawEnemies(); drawBoss(); drawBonuses(); drawProjectilesAndEffects();
+        drawBibedjon(); drawAim(); drawUI();
+        if(screenShake>0) ctx.restore();
         requestAnimationFrame(gameLoop);
     }
     
-    updateUI();
-    updatePowerBar();
-    requestAnimationFrame(gameLoop);
-    lastEnemySpawn = Date.now();
+    updateUI(); lastEnemySpawn = Date.now(); requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
