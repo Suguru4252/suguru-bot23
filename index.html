@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥚 СУСЛОВ: На Корм</title>
+    <title>🥚 СУСЛОВ: Престиж Корм</title>
     <style>
         * {
             box-sizing: border-box;
@@ -47,6 +47,18 @@
         h1 span {
             font-size: 2.2rem;
         }
+        .prestige-badge {
+            background: #6a4e2e;
+            color: #ffd966;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 2px solid #eebb55;
+            box-shadow: inset 0 1px 5px #3d2e1c, 0 4px 0 #3a281a;
+        }
         .suslov-area {
             background: #b18b62;
             background: linear-gradient(135deg, #ccb094, #a5835e);
@@ -62,6 +74,7 @@
             filter: drop-shadow(8px 16px 6px rgba(0,0,0,0.2));
             transition: transform 0.1s ease;
             margin-bottom: 5px;
+            cursor: pointer;
         }
         .belly-bar-container {
             background: #2c1e12;
@@ -225,6 +238,12 @@
     <h1>
         <span>🐹</span> СУСЛОВ <span>🐹</span>
     </h1>
+    
+    <!-- Престиж счётчик -->
+    <div class="prestige-badge" id="prestigeDisplay">
+        ⭐ Престиж: <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
+    </div>
+
     <!-- Зона Суслова -->
     <div class="suslov-area">
         <div class="suslov-emoji" id="suslovEmoji">🐭</div>
@@ -280,9 +299,9 @@
     <!-- Сообщение о финале и рестарт -->
     <div id="gameOverMessage" class="gameover-message"></div>
     <div class="reset-area">
-        <button id="resetBtn">🔄 ЗАНОВО (Престиж)</button>
+        <button id="resetBtn">🔄 НАЧАТЬ ЗАНОВО (Престиж +5%)</button>
     </div>
-    <div class="footer-note">купи еду → корми → лопни живот → пройди игру</div>
+    <div class="footer-note">купи еду → корми → лопни → престиж → +5% к сытости</div>
 </div>
 
 <script>
@@ -290,11 +309,18 @@
         "use strict";
 
         // ---------- СОСТОЯНИЕ ----------
-        let money = 20;                // начальные деньги
-        let foodItems = 0;            // купленная еда (штук)
-        let belly = 0;               // 0..100 (%)
-        let gameFinished = false;     // true если лопнул
-
+        let money = 20;                
+        let foodItems = 0;            
+        let belly = 0;               
+        let gameFinished = false;     
+        
+        // НОВОЕ: Уровень престижа и бонус
+        let prestigeLevel = 0;                // сколько раз лопнул
+        let prestigeBonusPercent = 0;         // +5% за каждый престиж
+        
+        // Базовый прирост за 1 еду (будет увеличиваться)
+        const BASE_FOOD_GAIN = 14;
+        
         // DOM элементы
         const moneySpan = document.getElementById('moneyValue');
         const foodSpan = document.getElementById('foodCount');
@@ -308,6 +334,10 @@
         const buyCake = document.getElementById('buyCake');
         const resetBtn = document.getElementById('resetBtn');
         const container = document.getElementById('gameContainer');
+        
+        // Престиж элементы
+        const prestigeLevelSpan = document.getElementById('prestigeLevel');
+        const prestigeBonusSpan = document.getElementById('prestigeBonus');
 
         // Еда: { цена, прирост сытости (%) }
         const FOOD_DATA = {
@@ -316,58 +346,68 @@
             cake:   { price: 30, gain: 35 }
         };
 
-        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+        // ---------- ВЫЧИСЛЕНИЕ ТЕКУЩЕГО ПРИРОСТА С УЧЁТОМ ПРЕСТИЖА ----------
+        function getCurrentFoodGain() {
+            // базовый + бонус престижа (5% за уровень)
+            let bonusMultiplier = 1 + (prestigeBonusPercent / 100);
+            return Math.floor(BASE_FOOD_GAIN * bonusMultiplier);
+        }
+
+        // ---------- ОБНОВЛЕНИЕ UI ----------
         function updateUI() {
-            // обновить текст денег и еды
             moneySpan.textContent = money;
             foodSpan.textContent = foodItems;
 
-            // процент сытости
             const bellyValue = Math.min(belly, 100);
             const percent = Math.floor(bellyValue);
             bellyFill.style.width = percent + '%';
             bellyPercent.textContent = percent + '%';
 
-            // Эмодзи меняется в зависимости от сытости
+            // Обновление престиж инфо
+            prestigeLevelSpan.textContent = prestigeLevel;
+            prestigeBonusSpan.textContent = prestigeBonusPercent;
+
+            // Эмодзи
             if (gameFinished) {
-                suslovEmoji.textContent = '💥🐽';   // лопнул
+                suslovEmoji.textContent = '💥🐽';
             } else {
-                if (belly >= 95) suslovEmoji.textContent = '🐡'; // почти лопнет
+                if (belly >= 95) suslovEmoji.textContent = '🐡';
                 else if (belly >= 70) suslovEmoji.textContent = '🐹🤰';
                 else if (belly >= 35) suslovEmoji.textContent = '🐭🍔';
                 else suslovEmoji.textContent = '🐭';
             }
 
-            // блокировка кнопок если игра завершена
+            // Блокировка кнопок
             const btns = [feedBtn, buyCarrot, buyBurger, buyCake];
             btns.forEach(btn => { btn.disabled = gameFinished; });
 
-            // если лопнул — показываем сообщение
             if (gameFinished) {
-                gameOverMsg.innerHTML = '💥 ЖИВОТ ЛОПНУЛ! ИГРА ПРОЙДЕНА! 💥';
+                gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! ПРЕСТИЖ ${prestigeLevel} 💥`;
             } else {
                 gameOverMsg.innerHTML = '';
             }
-
-            // особый случай: нельзя купить если денег не хватает (но это проверяется в обработчиках)
+            
+            // Обновляем текст на кнопке кормления с текущим приростом
+            feedBtn.innerHTML = `🍽️ КОРМИТЬ (+${getCurrentFoodGain()}%)`;
         }
 
-        // Проверка на "предел" — лопание
+        // Проверка на предел
         function checkBellyLimit() {
             if (belly >= 100 && !gameFinished) {
-                // ЛОПНУЛ!
+                // ЛОПНУЛ! Увеличиваем престиж
                 gameFinished = true;
-                // фиксируем 100%
                 belly = 100;
                 
-                // добавляем эффект тряски
+                // Увеличиваем престиж на 1 и бонус на 5%
+                prestigeLevel += 1;
+                prestigeBonusPercent += 5;
+                
                 container.classList.add('pop-effect');
                 setTimeout(() => container.classList.remove('pop-effect'), 400);
                 
                 updateUI();
-                // дополнительно меняем смайл
                 suslovEmoji.textContent = '💥🐽';
-                gameOverMsg.innerHTML = '💥 ЖИВОТ ЛОПНУЛ! ИГРА ПРОЙДЕНА! 💥';
+                gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! ПРЕСТИЖ ${prestigeLevel} (+${prestigeBonusPercent}% бонус) 💥`;
             } else {
                 updateUI();
             }
@@ -379,7 +419,6 @@
             const data = FOOD_DATA[type];
             if (!data) return false;
             if (money < data.price) {
-                // эффект "не хватает денег" (быстрое мигание)
                 moneySpan.style.transition = '0.1s';
                 moneySpan.style.color = '#ff8989';
                 setTimeout(() => moneySpan.style.color = '#ffd966', 150);
@@ -392,64 +431,39 @@
             return true;
         }
 
-        // КОРМЛЕНИЕ (использовать 1 еду)
+        // КОРМЛЕНИЕ
         function feedSuslov() {
-            if (gameFinished) {
-                return;
-            }
+            if (gameFinished) return;
             if (foodItems <= 0) {
-                // нет еды — подсветка
                 foodSpan.style.color = '#ffa098';
                 setTimeout(() => foodSpan.style.color = '#ffd966', 200);
                 return;
             }
             if (belly >= 100) {
-                checkBellyLimit(); // на всякий случай
+                checkBellyLimit();
                 return;
             }
 
-            // Кушаем: уменьшаем еду, прибавляем сытость (в среднем, но можно сделать разную логику? 
-            // Но по механике: у нас нет привязки еды к типу, так как мы храним просто количество.
-            // В классической "суслов" механике: каждая единица еды даёт фиксированный прирост, 
-            // но у нас магазин с разной едой. Упростим: одна еда = +10%? 
-            // Но игрок ожидает что купленная еда различается. 
-            // Сделаем хитрее: храним не только кол-во, но и «силу» последней купленной? 
-            // Для честности лучше при покупке сразу начислять сытость. Но тогда еда не складируется. 
-            // Игрок писал: "покупать еду за деньги и кормить суслова". 
-            // Я переделаю: каждая покупка — это +определенный процент, но и еда как предмет не нужна. 
-            // В ТЗ было «купить еду за деньги и кормить», упростим: при покупке сразу прибавляется сытость, 
-            // а счетчик «Еда» убираем. Погоди, но в интерфейсе есть блок «еда». 
-            // Давай сделаем правильно: при покупке мы получаем «порцию» и кнопка КОРМИТЬ использует одну порцию.
-            // Чтобы игрок чувствовал прогресс: будем хранить массив купленных процентов? 
-            // Я сделаю проще: foodItems — количество еды, но каждая единица даёт 15% (усреднённо). 
-            // Это лучше, чем путаница. 
-            // Альтернатива: при покупке добавляем в «инвентарь» объект. 
-            // Но для краткости используем среднее значение: 1 еда = +12% (морковь слабее, бургер/торт сильнее)
-            // Пользователь покупает разную еду, но при кормлении используется накопленная «единица еды».
-            // Игрок в описании не требовал учитывать тип еды при кормлении, так что ок.
-            // Чтобы было чуть интереснее: прирост = 14% за 1 еду.
+            const gain = getCurrentFoodGain();  // прирост с учётом престижа!
             
-            const GAIN_PER_FOOD = 14;  // процентов
-
             foodItems -= 1;
-            belly = Math.min(belly + GAIN_PER_FOOD, 100);
+            belly = Math.min(belly + gain, 100);
             
-            // анимация кормления
             suslovEmoji.style.transform = 'scale(1.1)';
             setTimeout(() => suslovEmoji.style.transform = 'scale(1)', 100);
 
             updateUI();
-            checkBellyLimit();   // если >=100 лопнет
+            checkBellyLimit();
         }
 
-        // СБРОС ИГРЫ (новая игра+)
+        // СБРОС ИГРЫ (Новая игра с сохранением престижа)
         function resetGame() {
-            money = 25;          // чуть больше стартового для веселья
+            // Сбрасываем только текущий забег, НО престиж остаётся!
+            money = 25 + (prestigeLevel * 5);     // стартовый капитал растёт с престижем
             foodItems = 0;
             belly = 0;
             gameFinished = false;
             
-            // убираем сообщения
             gameOverMsg.innerHTML = '';
             container.classList.remove('pop-effect');
             
@@ -457,45 +471,30 @@
             suslovEmoji.style.transform = 'scale(1)';
         }
 
+        // ПОЛНЫЙ СБРОС (если нужно, но не будем)
+        // Но можно добавить скрытую функцию
+        
         // ---------- ОБРАБОТЧИКИ ----------
-        buyCarrot.addEventListener('click', () => {
-            if (buyFood('carrot')) {
-                // небольшой отклик
-            }
-        });
-        buyBurger.addEventListener('click', () => {
-            buyFood('burger');
-        });
-        buyCake.addEventListener('click', () => {
-            buyFood('cake');
-        });
+        buyCarrot.addEventListener('click', () => buyFood('carrot'));
+        buyBurger.addEventListener('click', () => buyFood('burger'));
+        buyCake.addEventListener('click', () => buyFood('cake'));
 
         feedBtn.addEventListener('click', feedSuslov);
-
-        resetBtn.addEventListener('click', () => {
-            resetGame();
-        });
-
-        // дополнительно: при клике на самого суслова можно покормить если есть еда (удобно)
         suslovEmoji.addEventListener('click', feedSuslov);
 
-        // Дополнительно: заработать деньги можно только кликом? В оригинале "деньги" появляются пассивно? 
-        // Добавим клик по суслову для заработка? Но не нужно, т.к. стартовых денег хватит.
-        // Для интереса: при лопании можно добавить рестарт через кнопку.
-        
-        // Инициализация
-        updateUI();
+        resetBtn.addEventListener('click', resetGame);
 
-        // небольшой секрет: если денег мало, можно нажать на блок денег чтобы читерски добавить? Нет, не будем.
-        // Но для теста оставлю легальный способ: двойной клик по монетке добавит 5 монет (не документировано)
+        // Двойной клик по монетке — секретный бонус (небольшая помощь)
         const moneyBlock = document.querySelector('.money-block');
         moneyBlock.addEventListener('dblclick', () => {
             if (!gameFinished) {
-                money += 8;
+                money += 8 + (prestigeLevel * 2);
                 updateUI();
             }
         });
-        // на всякий случай уберу возможность сломать: не дадим бесконечно.
+        
+        // Инициализация
+        updateUI();
     })();
 </script>
 </body>
