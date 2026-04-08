@@ -5,24 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>3D Object Grab - NetErrror</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 10px 15px;
-            border-radius: 8px;
-            pointer-events: none;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-            font-size: 14px;
-        }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         #status {
             position: absolute;
             bottom: 30px;
@@ -36,16 +19,10 @@
             font-weight: bold;
             pointer-events: none;
             z-index: 10;
-            font-family: monospace;
-            letter-spacing: 1px;
         }
-        @media (max-width: 600px) {
-            #info { font-size: 10px; top: 10px; left: 10px; }
-            #status { font-size: 14px; bottom: 15px; padding: 8px; }
-        }
-        .instruction {
+        #instruction {
             position: absolute;
-            bottom: 80px;
+            bottom: 100px;
             right: 20px;
             background: rgba(0,0,0,0.5);
             color: #ccc;
@@ -53,23 +30,17 @@
             border-radius: 5px;
             font-size: 12px;
             pointer-events: none;
-            font-family: monospace;
+        }
+        @media (max-width: 600px) {
+            #status { font-size: 14px; bottom: 15px; }
+            #instruction { bottom: 70px; }
         }
     </style>
 </head>
 <body>
-    <div id="info">
-        🧪 NetErrror | 3D Grab Object<br>
-        📱 Телефон поддерживается
-    </div>
-    <div id="status">
-        ✨ Объект свободен | Нажмите на него, чтобы взять ✨
-    </div>
-    <div class="instruction">
-        👆 Нажмите на объект = взять/отпустить
-    </div>
+    <div id="status">✨ Нажми на объект, чтобы взять ✨</div>
+    <div id="instruction">👆 Тап по объекту = взять/отпустить</div>
 
-    <!-- Подключаем Three.js и доп. библиотеки -->
     <script type="importmap">
         {
             "imports": {
@@ -82,222 +53,23 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-        // --- Инициализация сцены, камеры, рендереров ---
+        // Сцена
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050b1a);
-        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+        scene.background = new THREE.Color(0x0a0a2a);
+        scene.fog = new THREE.FogExp2(0x0a0a2a, 0.02);
 
-        // Камера от первого лица для мобильного восприятия (OrbitControls позволит вращать, но объект будет привязан при захвате)
+        // Камера
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.6, 3);
-        camera.lookAt(0, 0.5, 0);
-
+        camera.position.set(0, 1.2, 3);
+        
+        // Рендерер
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // тени для эффектности
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // CSS2 рендерер для текста (статус можно дублировать в 3D, но оставим как есть)
-        // --- Освещение ---
-        // Ambient
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
-        // Главный направленный свет
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(2, 5, 3);
-        dirLight.castShadow = true;
-        dirLight.receiveShadow = false;
-        scene.add(dirLight);
-        // Заполняющий свет сзади
-        const backLight = new THREE.PointLight(0x4466cc, 0.4);
-        backLight.position.set(-1, 1, -2);
-        scene.add(backLight);
-        // Цветной динамический свет снизу
-        const fillLight = new THREE.PointLight(0xff44aa, 0.5);
-        fillLight.position.set(0, -1, 0.5);
-        scene.add(fillLight);
-        
-        // Вспомогательная сфера для атмосферы
-        const gridHelper = new THREE.GridHelper(10, 20, 0x88aaff, 0x335588);
-        gridHelper.position.y = -0.8;
-        scene.add(gridHelper);
-        
-        // Простой пол с отражением (полупрозрачный)
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.4, metalness: 0.7, transparent: true, opacity: 0.6 });
-        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMat);
-        groundPlane.rotation.x = -Math.PI / 2;
-        groundPlane.position.y = -0.75;
-        groundPlane.receiveShadow = true;
-        scene.add(groundPlane);
-        
-        // --- СОЗДАНИЕ ОБЪЕКТА (абстрактная форма, напоминающая указанный предмет, но стилизованная под "трофей") ---
-        // Группа для объекта, чтобы можно было легко управлять положением при взятии
-        const objectGroup = new THREE.Group();
-        
-        // Основное тело - вытянутая форма с закруглением
-        const bodyGeo = new THREE.CylinderGeometry(0.28, 0.32, 0.9, 32);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdd55ff, emissive: 0x331133, roughness: 0.2, metalness: 0.8 });
-        const mainBody = new THREE.Mesh(bodyGeo, bodyMat);
-        mainBody.castShadow = true;
-        mainBody.receiveShadow = false;
-        mainBody.position.y = 0;
-        objectGroup.add(mainBody);
-        
-        // Головка (верхняя часть)
-        const tipGeo = new THREE.SphereGeometry(0.32, 32, 32);
-        const tipMat = new THREE.MeshStandardMaterial({ color: 0xff88ff, emissive: 0x441144, roughness: 0.1 });
-        const tip = new THREE.Mesh(tipGeo, tipMat);
-        tip.position.y = 0.5;
-        tip.castShadow = true;
-        objectGroup.add(tip);
-        
-        // Декоративные кольца
-        const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 32, 64);
-        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
-        const ring1 = new THREE.Mesh(ringGeo, ringMat);
-        ring1.rotation.x = Math.PI / 2;
-        ring1.position.y = 0.15;
-        objectGroup.add(ring1);
-        
-        const ring2 = new THREE.Mesh(ringGeo, ringMat);
-        ring2.rotation.x = Math.PI / 2;
-        ring2.position.y = -0.15;
-        objectGroup.add(ring2);
-        
-        // Небольшие шипы/кристаллы для футуристичности
-        const spikeMat = new THREE.MeshStandardMaterial({ color: 0xff66cc });
-        for (let i = 0; i < 6; i++) {
-            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.2, 6), spikeMat);
-            const angle = (i / 6) * Math.PI * 2;
-            spike.position.x = Math.cos(angle) * 0.45;
-            spike.position.z = Math.sin(angle) * 0.45;
-            spike.position.y = -0.3;
-            spike.castShadow = true;
-            objectGroup.add(spike);
-        }
-        
-        // Добавляем свечение (точечный свет внутри группы)
-        const glowLight = new THREE.PointLight(0xff44aa, 0.8, 2);
-        glowLight.position.set(0, 0.2, 0);
-        objectGroup.add(glowLight);
-        
-        objectGroup.position.set(0, 0.2, 0);
-        scene.add(objectGroup);
-        
-        // Добавляем парящие частицы вокруг объекта
-        const particleCount = 200;
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlePositions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions[i*3] = (Math.random() - 0.5) * 2.5;
-            particlePositions[i*3+1] = (Math.random() - 0.5) * 1.5 + 0.2;
-            particlePositions[i*3+2] = (Math.random() - 0.5) * 2;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        const particleMat = new THREE.PointsMaterial({ color: 0xff88aa, size: 0.02, transparent: true, opacity: 0.6 });
-        const particles = new THREE.Points(particlesGeometry, particleMat);
-        scene.add(particles);
-        
-        // --- Логика "взять" ---
-        let isGrabbed = false;
-        // Вектор смещения между объектом и камерой при захвате (в локальных координатах камеры? проще: объект следует за точкой перед камерой)
-        // При захвате будем привязывать объект к позиции, отстоящей от камеры на 1.2 единицы вперед и чуть ниже взгляда.
-        const grabOffset = new THREE.Vector3(0, -0.2, -1.2); // относительно камеры (в пространстве камеры: X вправо, Y вверх, Z назад от камеры => минус Z значит вперед)
-        
-        // Обновление статуса в UI
-        const statusDiv = document.getElementById('status');
-        
-        // Рейкастер для определения клика по объекту
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        
-        // Функция обработки нажатия (для мыши и тач)
-        function onPointerDown(event) {
-            // Вычисляем координаты указателя в нормализованных координатах (-1 до +1)
-            const rect = renderer.domElement.getBoundingClientRect();
-            let clientX, clientY;
-            if (event.touches) {
-                // touch событие
-                clientX = event.touches[0].clientX;
-                clientY = event.touches[0].clientY;
-                event.preventDefault();
-            } else {
-                clientX = event.clientX;
-                clientY = event.clientY;
-            }
-            
-            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            // Проверяем пересечение с объектом (группа objectGroup, но рейкастер работает с Mesh внутри группы)
-            const intersects = raycaster.intersectObject(objectGroup, true);
-            
-            if (intersects.length > 0) {
-                // Нажали на объект
-                if (!isGrabbed) {
-                    // ВЗЯТЬ
-                    isGrabbed = true;
-                    statusDiv.innerHTML = "🔴 СХВАЧЕНО | Объект следует за вами | Нажмите снова, чтобы отпустить 🔴";
-                    statusDiv.style.color = "#ffaaaa";
-                    // Эффект при взятии: увеличиваем свечение
-                    glowLight.intensity = 1.5;
-                    // Меняем цвет материала на более яркий
-                    mainBody.material.emissiveIntensity = 0.5;
-                    tip.material.emissiveIntensity = 0.6;
-                } else {
-                    // ОТПУСТИТЬ
-                    isGrabbed = false;
-                    statusDiv.innerHTML = "✨ Объект свободен | Нажмите на него, чтобы взять ✨";
-                    statusDiv.style.color = "white";
-                    glowLight.intensity = 0.8;
-                    mainBody.material.emissiveIntensity = 0.2;
-                    tip.material.emissiveIntensity = 0.2;
-                    // Возвращаем объект на исходную позицию относительно мира (сохраняем позицию перед камерой? нет, лучше вернуть на место перед взятием)
-                    // При отпускании оставляем объект там, где он был в момент отпускания (перед камерой), но для удобства - пусть остается.
-                    // Ничего дополнительно не делаем, просто отключаем следование.
-                }
-                // Небольшая вибрация на телефоне если поддерживается
-                if (navigator.vibrate) navigator.vibrate(50);
-            }
-        }
-        
-        // Добавляем слушатели для касаний и мыши
-        renderer.domElement.addEventListener('mousedown', onPointerDown);
-        renderer.domElement.addEventListener('touchstart', onPointerDown, { passive: false });
-        
-        // --- Вспомогательные элементы: звездное небо (текстура или просто частицы) ---
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 800;
-        const starPos = [];
-        for (let i = 0; i < starCount; i++) {
-            starPos.push((Math.random() - 0.5) * 200);
-            starPos.push((Math.random() - 0.5) * 100);
-            starPos.push((Math.random() - 0.5) * 80 - 40);
-        }
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08, transparent: true, opacity: 0.6 });
-        const stars = new THREE.Points(starGeometry, starMat);
-        scene.add(stars);
-        
-        // --- Анимация вращения объекта, если он не в руке ---
-        let time = 0;
-        
-        // Орбит контрол для удобства на телефоне (чтобы можно было вращать камеру вокруг, но если объект захвачен - лучше отключать? нет, пусть остается)
-        // С OrbitControls конфликт с привязкой объекта к камере, поэтому не используем его.
-        // Вместо этого сделаем простую логику: если объект захвачен, то его позиция обновляется относительно камеры.
-        // Если не захвачен - он медленно вращается и плавает.
-        
-        // Дополнительно: плавное движение камеры? Нет, оставим статичной, пользователь может двигать телефон? но для 3D на телефоне обычно нужен OrbitControls.
-        // Добавим легкий автоматический поворот камеры? Нет, лучше оставить управление за пальцем через стандартное перетаскивание? Сложно без доп библиотек.
-        // Чтобы было удобно на телефоне, добавим Touch-контроль для вращения камеры (минимальный).
-        // Создадим простой контроллер: при перетаскивании пальцем вращаем сцену вокруг объекта, если он не захвачен.
-        // Но для простоты и стабильности я лучше добавлю библиотеку OrbitControls, она отлично работает на телефоне.
-        // Импортируем OrbitControls.
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        // Управление камерой (пальцем)
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
@@ -306,32 +78,120 @@
         controls.enableZoom = true;
         controls.enablePan = false;
         controls.target.set(0, 0.5, 0);
+
+        // Освещение
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
         
-        // Корректируем поведение при захвате: отключаем controls.target обновление? Нет, пусть остается как есть.
-        // Но если объект захвачен, мы хотим, чтобы объект всегда был перед камерой, а камера управляется OrbitControls? Это несовместимо.
-        // Лучше: при захвате временно отключаем OrbitControls и переключаемся в режим "объект привязан к камере". При отпускании возвращаем OrbitControls и фиксируем объект в пространстве.
-        // Сделаем это.
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(2, 3, 2);
+        scene.add(mainLight);
+        
+        const backLight = new THREE.PointLight(0xff66cc, 0.5);
+        backLight.position.set(-1, 1, -2);
+        scene.add(backLight);
+        
+        const fillLight = new THREE.PointLight(0x44aaff, 0.4);
+        fillLight.position.set(1, 0.5, 1);
+        scene.add(fillLight);
+        
+        // Пол
+        const gridHelper = new THREE.GridHelper(8, 20, 0x88aaff, 0x335588);
+        gridHelper.position.y = -0.8;
+        scene.add(gridHelper);
+        
+        // Прозрачная платформа
+        const platformMat = new THREE.MeshStandardMaterial({ color: 0x1a2a4a, roughness: 0.5, metalness: 0.3, transparent: true, opacity: 0.5 });
+        const platform = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), platformMat);
+        platform.rotation.x = -Math.PI / 2;
+        platform.position.y = -0.75;
+        platform.receiveShadow = true;
+        scene.add(platform);
+        
+        // --- СОЗДАНИЕ ОБЪЕКТА (формы) ---
+        const objectGroup = new THREE.Group();
+        
+        // Основное тело - вытянутая форма
+        const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.95, 32);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdd55ff, emissive: 0x331133, roughness: 0.2, metalness: 0.7 });
+        const mainBody = new THREE.Mesh(bodyGeo, bodyMat);
+        mainBody.castShadow = true;
+        mainBody.position.y = 0;
+        objectGroup.add(mainBody);
+        
+        // Верхняя часть (головка)
+        const tipGeo = new THREE.SphereGeometry(0.34, 32, 32);
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0xff88ff, emissive: 0x441144, roughness: 0.1 });
+        const tip = new THREE.Mesh(tipGeo, tipMat);
+        tip.position.y = 0.55;
+        tip.castShadow = true;
+        objectGroup.add(tip);
+        
+        // Декоративные кольца
+        const ringGeo = new THREE.TorusGeometry(0.32, 0.06, 32, 64);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x442200 });
+        const ring1 = new THREE.Mesh(ringGeo, ringMat);
+        ring1.rotation.x = Math.PI / 2;
+        ring1.position.y = 0.15;
+        objectGroup.add(ring1);
+        
+        const ring2 = new THREE.Mesh(ringGeo, ringMat);
+        ring2.rotation.x = Math.PI / 2;
+        ring2.position.y = -0.2;
+        objectGroup.add(ring2);
+        
+        // Основание
+        const baseGeo = new THREE.CylinderGeometry(0.4, 0.45, 0.12, 8);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xaa66ff, metalness: 0.5 });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        base.position.y = -0.48;
+        objectGroup.add(base);
+        
+        objectGroup.position.set(0, 0.2, 0);
+        scene.add(objectGroup);
+        
+        // Светящиеся частицы
+        const particleCount = 300;
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i*3] = (Math.random() - 0.5) * 3;
+            particlePositions[i*3+1] = (Math.random() - 0.5) * 2 + 0.2;
+            particlePositions[i*3+2] = (Math.random() - 0.5) * 2.5;
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0xff88cc, size: 0.02, transparent: true });
+        const particles = new THREE.Points(particlesGeo, particleMat);
+        scene.add(particles);
+        
+        // Звёзды
+        const starsGeo = new THREE.BufferGeometry();
+        const starsPos = [];
+        for (let i = 0; i < 1000; i++) {
+            starsPos.push((Math.random() - 0.5) * 200);
+            starsPos.push((Math.random() - 0.5) * 100);
+            starsPos.push((Math.random() - 0.5) * 80 - 40);
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starsPos), 3));
+        const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+        const stars = new THREE.Points(starsGeo, starsMat);
+        scene.add(stars);
+        
+        // --- Логика захвата ---
+        let isGrabbed = false;
+        const statusDiv = document.getElementById('status');
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
         
         let controlsEnabled = true;
         
         function setControlsEnabled(enabled) {
             controls.enabled = enabled;
             controlsEnabled = enabled;
-            if (enabled) {
-                // При включении контролов, синхронизируем цель с текущей позицией объекта или мира
-                if (!isGrabbed) {
-                    controls.target.copy(objectGroup.position);
-                } else {
-                    controls.target.set(0, 0.5, 0);
-                }
-            }
         }
         
-        // Модифицируем функцию взятия/отпускания
-        const originalOnPointerDown = onPointerDown;
-        // Переопределим обработчик с учетом переключения контролов
-        window.onPointerDown = function(event) {
-            // сначала проверим пересечение как ранее
+        function onTap(event) {
+            // Получаем координаты касания/клика
             const rect = renderer.domElement.getBoundingClientRect();
             let clientX, clientY;
             if (event.touches) {
@@ -342,80 +202,76 @@
                 clientX = event.clientX;
                 clientY = event.clientY;
             }
+            
             mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+            
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(objectGroup, true);
             
             if (intersects.length > 0) {
                 if (!isGrabbed) {
+                    // Взять
                     isGrabbed = true;
-                    statusDiv.innerHTML = "🔴 СХВАЧЕНО | Объект следует за вами | Нажмите снова, чтобы отпустить 🔴";
+                    statusDiv.innerHTML = "🔴 СХВАЧЕНО! Объект следует за тобой 🔴";
                     statusDiv.style.color = "#ffaaaa";
-                    glowLight.intensity = 1.5;
-                    mainBody.material.emissiveIntensity = 0.5;
-                    tip.material.emissiveIntensity = 0.6;
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    // Отключаем OrbitControls
                     setControlsEnabled(false);
-                    // Запоминаем смещение между объектом и камерой
-                    // Но при отключенных контролах камера фиксирована, но пользователь мог повернуть камеру ранее.
-                    // Объект должен прыгнуть перед камерой.
+                    
+                    // Эффект
+                    mainBody.material.emissiveIntensity = 0.6;
+                    tip.material.emissiveIntensity = 0.7;
+                    
+                    // Размещаем объект перед камерой
                     const camDir = new THREE.Vector3();
                     camera.getWorldDirection(camDir);
-                    const grabPos = camera.position.clone().add(camDir.multiplyScalar(1.2));
-                    grabPos.y -= 0.2;
+                    const grabPos = camera.position.clone().add(camDir.multiplyScalar(1.3));
+                    grabPos.y -= 0.15;
                     objectGroup.position.copy(grabPos);
+                    
+                    if (navigator.vibrate) navigator.vibrate(50);
                 } else {
+                    // Отпустить
                     isGrabbed = false;
-                    statusDiv.innerHTML = "✨ Объект свободен | Нажмите на него, чтобы взять ✨";
+                    statusDiv.innerHTML = "✨ Объект свободен | Нажми на него, чтобы взять ✨";
                     statusDiv.style.color = "white";
-                    glowLight.intensity = 0.8;
+                    setControlsEnabled(true);
+                    controls.target.copy(objectGroup.position);
+                    
                     mainBody.material.emissiveIntensity = 0.2;
                     tip.material.emissiveIntensity = 0.2;
+                    
                     if (navigator.vibrate) navigator.vibrate(50);
-                    // Включаем OrbitControls обратно
-                    setControlsEnabled(true);
-                    // Устанавливаем цель контролов на текущую позицию объекта
-                    controls.target.copy(objectGroup.position);
                 }
             }
-        };
+        }
         
-        renderer.domElement.removeEventListener('mousedown', onPointerDown);
-        renderer.domElement.removeEventListener('touchstart', onPointerDown);
-        renderer.domElement.addEventListener('mousedown', window.onPointerDown);
-        renderer.domElement.addEventListener('touchstart', window.onPointerDown, { passive: false });
+        renderer.domElement.addEventListener('mousedown', onTap);
+        renderer.domElement.addEventListener('touchstart', onTap, { passive: false });
         
-        // Анимация: если объект захвачен, обновляем его позицию относительно камеры
+        // Анимация
+        let time = 0;
+        
         function animate() {
             requestAnimationFrame(animate);
             time += 0.016;
             
             if (isGrabbed) {
-                // Объект следует за камерой
+                // Следование за камерой
                 const camDir = new THREE.Vector3();
                 camera.getWorldDirection(camDir);
-                const desiredPos = camera.position.clone().add(camDir.multiplyScalar(1.2));
-                desiredPos.y -= 0.2;
-                objectGroup.position.lerp(desiredPos, 0.3);
-                // Небольшое вращение объекта в руке
-                objectGroup.rotation.y = Math.sin(time * 8) * 0.2;
-                objectGroup.rotation.x = Math.sin(time * 5) * 0.1;
+                const desiredPos = camera.position.clone().add(camDir.multiplyScalar(1.3));
+                desiredPos.y -= 0.15;
+                objectGroup.position.lerp(desiredPos, 0.4);
+                objectGroup.rotation.y = Math.sin(time * 10) * 0.2;
+                objectGroup.rotation.x = Math.sin(time * 8) * 0.1;
             } else {
-                // Свободное вращение и парение
+                // Свободное вращение
                 objectGroup.rotation.y += 0.01;
-                objectGroup.rotation.x = Math.sin(time * 0.8) * 0.2;
-                objectGroup.position.y = 0.2 + Math.sin(time * 1.5) * 0.05;
-                // Частицы вокруг
-                particles.rotation.y += 0.005;
-                particles.rotation.x = Math.sin(time * 0.2) * 0.1;
+                objectGroup.rotation.x = Math.sin(time * 0.7) * 0.15;
+                objectGroup.position.y = 0.2 + Math.sin(time * 1.2) * 0.04;
+                particles.rotation.y += 0.003;
             }
             
-            // Динамический свет
-            fillLight.intensity = 0.5 + Math.sin(time * 3) * 0.2;
-            
-            // Обновляем controls только если они включены
             if (controlsEnabled) {
                 controls.update();
             }
@@ -425,15 +281,13 @@
         
         animate();
         
-        // Адаптация под размер экрана
-        window.addEventListener('resize', onWindowResize, false);
-        function onWindowResize() {
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+        });
         
-        console.log("NetErrror: 3D игра загружена. Объект создан.");
+        console.log('NetErrror: 3D игра загружена');
     </script>
 </body>
-    </html>
+</html>
