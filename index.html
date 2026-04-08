@@ -3,612 +3,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Свадьба Ильи и Артёма | Интерактивная игра</title>
+    <title>Свадьба Ильи и Артёма | Сюжетное приключение</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
-            background: linear-gradient(145deg, #f9e7d2 0%, #f5d0b8 100%);
+            background: linear-gradient(135deg, #1a0f0a 0%, #3d2a1f 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Playfair Display', serif;
-            margin: 0;
+            font-family: 'Segoe UI', 'Quicksand', 'Georgia', serif;
             padding: 20px;
         }
 
-        /* главный контейнер игры */
-        .game-container {
-            max-width: 550px;
+        .game-wrapper {
+            max-width: 700px;
             width: 100%;
-            background: #fffef7;
-            border-radius: 72px 72px 64px 64px;
-            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 245, 215, 0.8) inset;
+            background: #fffaf0;
+            border-radius: 48px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.4), 0 0 0 2px #ffd793 inset;
             overflow: hidden;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
-        /* шапка с именами */
-        .hero {
-            background: #b3413b;
-            background-image: radial-gradient(circle at 10% 20%, #c95a53, #9e2e28);
-            padding: 24px 20px 20px;
+        /* Шапка с именами и прогрессом */
+        .header {
+            background: linear-gradient(145deg, #c4453e, #9b2e28);
+            padding: 20px 24px;
             text-align: center;
-            color: #ffefcf;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            border-bottom: 5px solid #ffd966;
+            color: #fff3cf;
+            border-bottom: 4px solid #ffcd7e;
         }
 
-        .hero h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            font-family: 'Playfair Display', serif;
-            letter-spacing: 2px;
-        }
-
-        .hero h1 span {
-            display: inline-block;
-            background: #fbe8a4;
-            color: #a1322c;
-            font-size: 1.8rem;
-            padding: 0 12px;
-            border-radius: 60px;
-            margin: 0 6px;
-            box-shadow: inset 0 -1px 0 #cc9f4b, 0 2px 6px rgba(0,0,0,0.1);
-        }
-
-        .hero p {
-            margin: 8px 0 0;
-            font-style: italic;
-            font-weight: 500;
-        }
-
-        /* панель прогресса */
-        .progress-panel {
-            background: #fef1e0;
-            padding: 18px 20px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-bottom: 2px dashed #f7cfaa;
-        }
-
-        .stat {
-            background: white;
-            border-radius: 48px;
-            padding: 8px 18px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-            flex: 1;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #b45a3b;
-        }
-
-        .stat-value {
+        .header h1 {
             font-size: 1.9rem;
-            font-weight: 800;
-            color: #673d2c;
-            line-height: 1;
-            margin-top: 4px;
-        }
-
-        /* основная игровая зона */
-        .game-area {
-            padding: 20px 24px 28px;
-            background: #fffaf3;
-        }
-
-        .event-message {
-            background: #fff0e0;
-            border-radius: 56px;
-            padding: 14px 20px;
-            margin-bottom: 24px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-align: center;
-            color: #994b3c;
-            border-left: 8px solid #ffb882;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.15s;
-        }
-
-        /* кнопка главного действия */
-        .action-btn {
-            background: radial-gradient(ellipse at top, #ffcc88, #e6a157);
-            border: none;
-            width: 100%;
-            padding: 18px 12px;
-            border-radius: 60px;
-            font-size: 1.7rem;
-            font-weight: bold;
-            font-family: inherit;
-            color: #3a281f;
-            text-shadow: 0 1px 0 #fff0c0;
-            box-shadow: 0 10px 0 #a2592c;
-            cursor: pointer;
-            transition: 0.07s linear;
-            margin-bottom: 20px;
             letter-spacing: 2px;
+            font-family: 'Playfair Display', serif;
         }
 
-        .action-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 5px 0 #a2592c;
+        .header h1 span {
+            background: #ffeaac;
+            color: #9b2e28;
+            padding: 0 12px;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 0 5px;
+            font-size: 1.7rem;
         }
 
-        /* апгрейды и улучшения */
-        .upgrades {
-            background: #fce9d4;
-            border-radius: 48px;
-            padding: 14px 18px;
-            margin-top: 10px;
-        }
-
-        .upgrades h3 {
-            margin: 0 0 12px 0;
-            font-size: 1.2rem;
-            color: #7b3f2c;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .upgrade-item {
-            background: white;
-            border-radius: 60px;
+        .wedding-stats {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 8px 15px 8px 20px;
-            margin-bottom: 10px;
-            transition: 0.1s;
-            border: 1px solid #ffddb0;
+            margin-top: 15px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .upgrade-info {
-            font-weight: bold;
-        }
-
-        .upgrade-name {
-            font-size: 1rem;
-            color: #773d28;
-        }
-
-        .upgrade-price {
-            font-size: 0.8rem;
-            background: #f2e0cf;
-            border-radius: 30px;
-            padding: 2px 10px;
-            margin-left: 8px;
-        }
-
-        .upgrade-btn {
-            background: #b3413b;
-            border: none;
-            color: white;
-            font-weight: bold;
+        .stat-card {
+            background: rgba(255,245,215,0.2);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
             padding: 6px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.1s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            flex: 1;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
 
-        .upgrade-btn:active {
-            transform: scale(0.96);
+        /* Основная сюжетная зона */
+        .story-area {
+            padding: 28px 26px;
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
-        .upgrade-btn.disabled {
-            background: #c29a89;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        /* подвал */
-        .footer-tip {
-            background: #ffe6d5;
+        .scene-image {
             text-align: center;
+            font-size: 5rem;
+            filter: drop-shadow(2px 6px 12px rgba(0,0,0,0.2));
+            background: #fceae7;
+            border-radius: 60px;
+            padding: 20px;
+        }
+
+        .scene-text {
+            background: #ffffffdb;
+            border-radius: 40px;
+            padding: 24px;
+            font-size: 1.15rem;
+            line-height: 1.45;
+            color: #3a2418;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            border: 1px solid #ffe1b9;
+        }
+
+        .scene-text p {
+            margin-bottom: 12px;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .choice-btn {
+            background: #f5e2d0;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #4a2a1a;
+            border-left: 8px solid #e6a157;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .choice-btn:hover {
+            background: #ffefdd;
+            transform: translateX(5px);
+            border-left-color: #c2571a;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.99);
+        }
+
+        .reset-btn {
+            background: #b78664;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            transition: 0.1s;
+        }
+
+        .reset-btn:hover {
+            background: #9a6848;
+        }
+
+        .footer {
+            background: #faead9;
             padding: 14px;
-            font-size: 0.75rem;
-            color: #ad6b52;
-            border-top: 1px solid #fadabc;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #b47c5a;
+            border-top: 1px solid #f0cfb3;
         }
 
-        button {
-            touch-action: manipulation;
+        .progress-badge {
+            background: #ffdfb3;
+            border-radius: 40px;
+            padding: 5px 12px;
+            display: inline-block;
+            font-size: 0.8rem;
         }
 
-        @media (max-width: 480px) {
-            .stat-value { font-size: 1.5rem; }
-            .action-btn { font-size: 1.3rem; padding: 14px; }
-            .hero h1 { font-size: 1.6rem; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .story-area > * {
+            animation: fadeSlide 0.3s ease-out;
+        }
+
+        @media (max-width: 550px) {
+            .story-area { padding: 20px; }
+            .scene-text { font-size: 1rem; padding: 18px; }
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="hero">
-        <h1>💍 <span>Илья</span> 🤵 + 👰 <span>Артём</span> 💒</h1>
-        <p>✨ Великая свадьба любви и приключений ✨</p>
-    </div>
-    <div class="progress-panel">
-        <div class="stat">
-            <div class="stat-label">💗 Свадебная Готовность</div>
-            <div class="stat-value" id="pointsValue">0</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">🎁 Сила любви (клик)</div>
-            <div class="stat-value" id="clickPowerValue">1</div>
-        </div>
-        <div class="stat">
-            <div class="stat-label">👫 Пассивный доход</div>
-            <div class="stat-value" id="passiveValue">0</div>
+<div class="game-wrapper" id="gameRoot">
+    <div class="header">
+        <h1>💍 <span>Илья</span> 🤵❤️👰 <span>Артём</span> 💒</h1>
+        <div class="wedding-stats">
+            <div class="stat-card">💗 Свадебная гармония: <strong id="harmonyValue">50</strong>%</div>
+            <div class="stat-card">🎉 Главы: <strong id="chapterName">Знакомство</strong></div>
         </div>
     </div>
-    <div class="game-area">
-        <div class="event-message" id="eventMessage">
-            💖 Помоги Илье и Артёму организовать идеальную свадьбу! Нажимай на торт 💖
-        </div>
-        <button class="action-btn" id="clickBtn">🍰 ОРГАНИЗОВАТЬ СВАДЬБУ +<span id="clickAdd">1</span> 🍾</button>
-
-        <div class="upgrades">
-            <h3>🎉 Свадебные улучшения 🎉</h3>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">💒 Аренда зала</span>
-                    <span class="upgrade-price">(урон +2)</span>
-                </div>
-                <button class="upgrade-btn" id="upgradeClickBtn">📈 Купить за <span id="clickUpgradeCost">15</span> 💗</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">🎵 Живой оркестр</span>
-                    <span class="upgrade-price">(пассив: +1/сек)</span>
-                </div>
-                <button class="upgrade-btn" id="upgradePassiveBtn">🎶 Купить за <span id="passiveUpgradeCost">30</span> 💗</button>
-            </div>
-            <div class="upgrade-item">
-                <div class="upgrade-info">
-                    <span class="upgrade-name">✨ Фейерверк & фото ✨</span>
-                    <span class="upgrade-price">(улучшает всё!)</span>
-                </div>
-                <button class="upgrade-btn" id="prestigeUpgradeBtn">🎆 Свадебный пакет «Люкс» за <span id="prestigeCost">120</span> 💗</button>
-            </div>
-        </div>
+    <div class="story-area" id="storyArea">
+        <!-- динамический контент -->
     </div>
-    <div class="footer-tip">
-        🕊️ Нажми на торт — добавь свадебную готовность! Пассивная любовь работает даже когда ты не кликаешь. Сделайте свадьбу Ильи и Артёма незабываемой!
+    <div class="footer">
+        ✨ История любви Ильи и Артёма. Каждое решение меняет свадьбу! ✨
     </div>
 </div>
 
 <script>
-    // ------------------- ИГРА: СВАДЬБА ИЛЬИ И АРТЁМА -------------------
-    // Основные переменные
-    let points = 0;               // свадебная готовность (очки)
-    let clickPower = 1;          // сила клика
-    let passiveIncome = 0;       // пассивный доход в секунду
-    let prestigeMulti = 1;       // множитель от пакета "Люкс" (влияет на клик и пассив)
-    let prestigeActive = false;   // куплен ли люкс-пакет (визуально и множитель)
+    // ~~~~~~~~~~~~~~~~~~ СВАДЕБНОЕ ПРИКЛЮЧЕНИЕ: ИЛЬЯ + АРТЁМ ~~~~~~~~~~~~~~~~~~
+    // Игровое состояние
+    let gameState = {
+        harmony: 50,        // 0-100% влияет на финал и события
+        chapter: "start",   // id текущей сцены
+        flags: {
+            // особые флаги для разных веток
+            ringReady: false,
+            parentsBlessing: false,
+            dancingMastered: false,
+            cakeSaved: false,
+            speechEpic: false,
+            surpriseDone: false
+        },
+        inventory: ["💌 открытка-признание"] // стартовый предмет
+    };
 
-    // Цены на улучшения
-    let clickUpgradeBaseCost = 15;
-    let passiveUpgradeBaseCost = 30;
-    let prestigeBaseCost = 120;
-
-    // Текущие стоимости (будут пересчитываться, но сохраним для динамики)
-    let currentClickCost = clickUpgradeBaseCost;
-    let currentPassiveCost = passiveUpgradeBaseCost;
-    let currentPrestigeCost = prestigeBaseCost;
-
-    // DOM элементы
-    const pointsSpan = document.getElementById('pointsValue');
-    const clickPowerSpan = document.getElementById('clickPowerValue');
-    const passiveSpan = document.getElementById('passiveValue');
-    const eventMessageDiv = document.getElementById('eventMessage');
-    const clickBtn = document.getElementById('clickBtn');
-    const clickAddSpan = document.getElementById('clickAdd');
-
-    // Кнопки улучшений
-    const upgradeClickBtn = document.getElementById('upgradeClickBtn');
-    const upgradePassiveBtn = document.getElementById('upgradePassiveBtn');
-    const prestigeUpgradeBtn = document.getElementById('prestigeUpgradeBtn');
-
-    // Отображение цен
-    const clickUpgradeCostSpan = document.getElementById('clickUpgradeCost');
-    const passiveUpgradeCostSpan = document.getElementById('passiveUpgradeCost');
-    const prestigeCostSpan = document.getElementById('prestigeCost');
-
-    // Вспомогательная функция обновления UI (цифры, текст, кнопки)
-    function updateUI() {
-        // Отображаем текущие очки
-        pointsSpan.innerText = Math.floor(points);
-        // Отображаем силу клика с учётом множителя люкс
-        let finalClick = clickPower * prestigeMulti;
-        clickPowerSpan.innerText = finalClick;
-        clickAddSpan.innerText = finalClick;
-        // Отображаем пассивный доход (с учётом множителя)
-        let finalPassive = passiveIncome * prestigeMulti;
-        passiveSpan.innerText = finalPassive;
-
-        // Обновление состояния кнопок улучшений (доступность по очкам)
-        if (points >= currentClickCost) {
-            upgradeClickBtn.classList.remove('disabled');
-            upgradeClickBtn.disabled = false;
-        } else {
-            upgradeClickBtn.classList.add('disabled');
-            upgradeClickBtn.disabled = true;
+    // ---- СЮЖЕТНЫЕ СЦЕНЫ (интерактивное повествование) ----
+    const scenes = {
+        // СЦЕНА 0: начало знакомства / предложение
+        start: {
+            title: "💕 Как всё начиналось",
+            emoji: "🏳️‍🌈💖",
+            text: "Илья и Артём встретились в уютном книжном кафе под дождём. Три года свиданий, смеха, путешествий — и вот он, долгожданный день свадьбы! Но прежде чем сказать «ГОРЬКО!», нужно пройти через череду забавных испытаний. Свадебный координатор — непослушный кот Мурзик, а гости приготовили сюрпризы.",
+            choices: [
+                { text: "💍 Поехать выбирать обручальные кольца", nextScene: "rings", harmonyDelta: 5 },
+                { text: "🎭 Устроить костюмированную репетицию танца", nextScene: "dance", harmonyDelta: 3 },
+                { text: "🍰 Встретиться с организатором и обсудить меню", nextScene: "catering", harmonyDelta: 2 }
+            ]
+        },
+        // Кольца
+        rings: {
+            title: "💎 Легендарные кольца",
+            emoji: "💍✨",
+            text: "В ювелирном салоне Илья хочет классические платиновые кольца, а Артём — с гравировкой «Навеки вместе» и маленьким сюрпризом внутри. Продавщица предлагает уникальную пару с рубинами. Внезапно появляется бывшая подруга невесты (условно) и пытается переубедить.",
+            choices: [
+                { text: "💖 Выбрать кольца с гравировкой и секретом (+ гармония)", nextScene: "parentMeeting", harmonyDelta: 10, setFlag: "ringReady", flagValue: true },
+                { text: "😬 Взять стандартные, чтобы не рисковать", nextScene: "parentMeeting", harmonyDelta: 0, setFlag: "ringReady", flagValue: false },
+                { text: "🎭 Импровизировать: сделать кольца своими руками в мастерской", nextScene: "parentMeeting", harmonyDelta: 8, setFlag: "ringReady", flagValue: true }
+            ]
+        },
+        // Танец
+        dance: {
+            title: "💃 Вальс или тверк?",
+            emoji: "🕺💃",
+            text: "Хореограф предлагает современный танец — смесь вальса и латины. Илья стесняется, Артём в восторге. Родители ждут классику. А ещё бабушка Артёма хочет исполнить цыганочку!",
+            choices: [
+                { text: "✨ Разучить элегантный вальс (консервативно)", nextScene: "parentMeeting", harmonyDelta: 5, setFlag: "dancingMastered", flagValue: true },
+                { text: "🔥 Устроить зажигательный флешмоб с гостями", nextScene: "parentMeeting", harmonyDelta: 12, setFlag: "dancingMastered", flagValue: true },
+                { text: "🎤 Пусть каждый танец, что хочет — будет весело", nextScene: "parentMeeting", harmonyDelta: 2, setFlag: "dancingMastered", flagValue: false }
+            ]
+        },
+        // Кейтеринг
+        catering: {
+            title: "🍽️ Кулинарная битва",
+            emoji: "🍕🍰",
+            text: "Организатор предлагает шведский стол с авторскими блюдами. Но внезапно повар-конкурент подсыпал странные специи. Нужно пробовать и спасать ужин! Илья любит мясо, Артём — рыбу. Компромисс?",
+            choices: [
+                { text: "👨‍🍳 Устроить кулинарное шоу с дегустацией для всех", nextScene: "parentMeeting", harmonyDelta: 8, setFlag: "cakeSaved", flagValue: true },
+                { text: "🍝 Заказать пиццу и сделать уютно по-домашнему", nextScene: "parentMeeting", harmonyDelta: 3, setFlag: "cakeSaved", flagValue: false },
+                { text: "🍣 Сделать фьюжн-меню (суши + пельмени) + оригинально", nextScene: "parentMeeting", harmonyDelta: 12, setFlag: "cakeSaved", flagValue: true }
+            ]
+        },
+        // Встреча с родителями / благословение
+        parentMeeting: {
+            title: "👪 Семейный совет",
+            emoji: "🏠❤️",
+            text: "Родители Ильи и Артёма собираются вместе. Мама Ильи переживает, что свадьба будет слишком современной. Папа Артёма хочет тост с медведем. Нужно получить благословение и всех примирить!",
+            choices: [
+                { text: "🤝 Душевный разговор и чай с пирогами (благословение получено!)", nextScene: "speech", harmonyDelta: 15, setFlag: "parentsBlessing", flagValue: true },
+                { text: "🎸 Устроить семейный концерт с гитарой", nextScene: "speech", harmonyDelta: 10, setFlag: "parentsBlessing", flagValue: true },
+                { text: "😅 Сбежать от родительского давления", nextScene: "speech", harmonyDelta: -10, setFlag: "parentsBlessing", flagValue: false }
+            ]
+        },
+        // Клятвы и тосты
+        speech: {
+            title: "📜 Свадебные клятвы",
+            emoji: "📖🔥",
+            text: "Церемония почти готова. Осталось написать клятвы. Илья хочет смешную, Артём — трогательную до слёз. Регистратор ждёт текст. Ещё нужно придумать тост, который запомнят все!",
+            choices: [
+                { text: "❤️‍🔥 Написать искреннюю клятву в стихах (растрогает всех)", nextScene: "surprise", harmonyDelta: 12, setFlag: "speechEpic", flagValue: true },
+                { text: "😂 Клятва с мемами и шутками (гости поржут)", nextScene: "surprise", harmonyDelta: 5, setFlag: "speechEpic", flagValue: false },
+                { text: "🎤 Импровизация прямо на месте", nextScene: "surprise", harmonyDelta: 8, setFlag: "speechEpic", flagValue: true }
+            ]
+        },
+        // Сюрпризный этап
+        surprise: {
+            title: "🎁 Секретный сюрприз",
+            emoji: "🎆🎁",
+            text: "Артём тайно подготовил для Ильи фейерверк и видео с воспоминаниями. Илья же пригласил любимую группу Артёма выступить акустически. Как объединить два сюрприза, чтобы никто не обиделся?",
+            choices: [
+                { text: "🌟 Устроить совместный сюрприз: фейерверк под живую музыку (магия!)", nextScene: "finale", harmonyDelta: 20, setFlag: "surpriseDone", flagValue: true },
+                { text: "🎈 Сначала видео, потом концерт — всё по очереди", nextScene: "finale", harmonyDelta: 10, setFlag: "surpriseDone", flagValue: true },
+                { text: "😬 Отменить всё, чтобы избежать стресса", nextScene: "finale", harmonyDelta: -15, setFlag: "surpriseDone", flagValue: false }
+            ]
+        },
+        // ФИНАЛ (различные концовки)
+        finale: {
+            title: "💒 Долгожданная свадьба!",
+            emoji: "🎉💍",
+            text: "", // динамический текст
+            choices: [] // будет динамика
         }
+    };
 
-        if (points >= currentPassiveCost) {
-            upgradePassiveBtn.classList.remove('disabled');
-            upgradePassiveBtn.disabled = false;
-        } else {
-            upgradePassiveBtn.classList.add('disabled');
-            upgradePassiveBtn.disabled = true;
-        }
-
-        if (!prestigeActive && points >= currentPrestigeCost) {
-            prestigeUpgradeBtn.classList.remove('disabled');
-            prestigeUpgradeBtn.disabled = false;
-        } else if (prestigeActive) {
-            // если уже куплен, делаем кнопку неактивной и меняем текст
-            prestigeUpgradeBtn.classList.add('disabled');
-            prestigeUpgradeBtn.disabled = true;
-            prestigeUpgradeBtn.innerText = '✨ Пакет активирован ✨';
-        } else {
-            prestigeUpgradeBtn.classList.add('disabled');
-            prestigeUpgradeBtn.disabled = true;
-        }
-
-        // Обновляем отображение цен (актуальные)
-        clickUpgradeCostSpan.innerText = currentClickCost;
-        passiveUpgradeCostSpan.innerText = currentPassiveCost;
-        if(!prestigeActive) prestigeCostSpan.innerText = currentPrestigeCost;
-        else prestigeCostSpan.innerText = '0';
-    }
-
-    // Сохраняем игру в localStorage (состояние)
-    function saveGame() {
-        const saveData = {
-            points: points,
-            clickPower: clickPower,
-            passiveIncome: passiveIncome,
-            prestigeMulti: prestigeMulti,
-            prestigeActive: prestigeActive,
-            currentClickCost: currentClickCost,
-            currentPassiveCost: currentPassiveCost,
-            currentPrestigeCost: currentPrestigeCost
-        };
-        localStorage.setItem('ilyaArtemWeddingSave', JSON.stringify(saveData));
-    }
-
-    // Загрузка сохранения
-    function loadGame() {
-        const raw = localStorage.getItem('ilyaArtemWeddingSave');
-        if (!raw) return false;
-        try {
-            const data = JSON.parse(raw);
-            points = data.points ?? 0;
-            clickPower = data.clickPower ?? 1;
-            passiveIncome = data.passiveIncome ?? 0;
-            prestigeMulti = data.prestigeMulti ?? 1;
-            prestigeActive = data.prestigeActive ?? false;
-            currentClickCost = data.currentClickCost ?? clickUpgradeBaseCost;
-            currentPassiveCost = data.currentPassiveCost ?? passiveUpgradeBaseCost;
-            currentPrestigeCost = data.currentPrestigeCost ?? prestigeBaseCost;
-
-            // валидация: если люкс куплен, но множитель меньше 2 — исправим
-            if (prestigeActive && prestigeMulti < 2) {
-                prestigeMulti = 2;
-            } else if (!prestigeActive && prestigeMulti === 2) {
-                // странный случай, сбросим множитель
-                prestigeMulti = 1;
-            }
-            // если куплен люкс но множитель не 2
-            if(prestigeActive && prestigeMulti !== 2) prestigeMulti = 2;
-            if(!prestigeActive && prestigeMulti ===2) prestigeMulti =1;
-            updateUI();
-            showMessage("💾 Свадебные хлопоты восстановлены! Продолжаем готовиться к торжеству!");
-            return true;
-        } catch(e) { console.warn(e); return false; }
-    }
-
-    // вывод милых сообщений в центр
-    function showMessage(msg, isError = false) {
-        eventMessageDiv.innerHTML = msg;
-        eventMessageDiv.style.background = isError ? '#ffe0db' : '#fff0e0';
-        setTimeout(() => {
-            if (eventMessageDiv.innerHTML === msg) {
-                // не перебиваем, если через 2 секунды не поменялось, вернем нейтралку
-                if(!isError) eventMessageDiv.style.background = '#fff0e0';
-            }
-        }, 2000);
-    }
-
-    // добавить очки с учётом возможных бонусных сообщений
-    function addPoints(amount) {
-        let oldPoints = points;
-        points += amount;
-        if (Math.floor(points) !== Math.floor(oldPoints) && points > oldPoints) {
-            // приятный эффект
-            if(amount > 0) {
-                let eventText = "";
-                if(amount >= 50) eventText = "💥 БОЛЬШОЙ ВАЛЬС! +"+amount+" 💗";
-                else if(amount >= 15) eventText = "🎶 Искры счастья! +"+amount+" 💗";
-                else eventText = "💍 Шаг к алтарю! +"+amount+" 💗";
-                showMessage(eventText);
-            }
-        }
-        if(points < 0) points = 0;
-        updateUI();
-        saveGame();
-        checkWinEvent();
-    }
-
-    // проверка достижения цели (пасхалка при 500 очках)
-    function checkWinEvent() {
-        if(points >= 500 && !window._winCelebrated) {
-            window._winCelebrated = true;
-            showMessage("🎉💒 ПОЗДРАВЛЯЕМ! Илья и Артём поженились при 500+ готовности! Идеальная свадьба! 💒🎉", false);
-            setTimeout(() => {
-                showMessage("⭐ Продолжайте улучшать свадьбу! Уровень любви безграничен! ⭐");
-            }, 4000);
-        } else if(points >= 1000 && !window._epicCelebrated) {
-            window._epicCelebrated = true;
-            showMessage("🏆 ЛЕГЕНДАРНАЯ СВАДЬБА! 1000 очков! Пригласили всех голубей мира! 🕊️🏆");
-        }
-    }
-
-    // обработка клика
-    function handleClick() {
-        let gain = clickPower * prestigeMulti;
-        addPoints(gain);
-        // анимация кнопки уже через CSS
-        // добавим тактильный отклик сообщения
-        if(gain > 0 && points % 37 === 0 && gain > 0) {
-            showMessage("❤️‍🔥 Илья и Артём обмениваются нежными взглядами! +"+gain+" 💗");
-        }
-    }
-
-    // Улучшение силы клика (аренда зала)
-    function upgradeClick() {
-        if(points >= currentClickCost) {
-            points -= currentClickCost;
-            clickPower += 2;   // каждый уровень +2 к базовой силе
-            // цена растёт
-            currentClickCost = Math.floor(currentClickCost * 1.45);
-            if(currentClickCost > 1500) currentClickCost = 1500;
-            updateUI();
-            saveGame();
-            showMessage("🏛️ Арендовали шикарный зал! Сила клика +2. Теперь Илья и Артём готовят грандиозный банкет!");
-        } else {
-            showMessage("❌ Не хватает свадебной готовности! Организуйте больше мероприятий! ❌", true);
-        }
-    }
-
-    // Улучшение пассивного дохода (оркестр)
-    function upgradePassive() {
-        if(points >= currentPassiveCost) {
-            points -= currentPassiveCost;
-            passiveIncome += 1;
-            currentPassiveCost = Math.floor(currentPassiveCost * 1.5);
-            if(currentPassiveCost > 2000) currentPassiveCost = 2000;
-            updateUI();
-            saveGame();
-            showMessage("🎻 Живой оркестр играет вальс! Теперь каждую секунду приносит +1 свадебную готовность (пассивно) 🎵");
-        } else {
-            showMessage("💔 Не хватает очков для найма оркестра! Пригласите гостей на торт! 💔", true);
-        }
-    }
-
-    // Престиж улучшение: "Свадебный пакет Люкс" – удваивает силу клика и пассивный доход навсегда
-    function upgradePrestige() {
-        if(prestigeActive) {
-            showMessage("🎆 Люкс-пакет уже активирован! Свадьба сияет как звезда!", true);
+    // Функция обновления интерфейса и обработки логики
+    function updateGameUI() {
+        const currentSceneId = gameState.chapter;
+        const scene = scenes[currentSceneId];
+        if (!scene) {
+            // fallback
+            renderEnding("Ошибка сюжета, но Илья и Артём всё равно поженились! 🌈");
             return;
         }
-        if(points >= currentPrestigeCost) {
-            points -= currentPrestigeCost;
-            prestigeActive = true;
-            prestigeMulti = 2;
-            // После активации меняем внешний вид кнопки и больше не даём купить повторно
-            updateUI();
-            saveGame();
-            showMessage("💎✨ СВАДЕБНЫЙ ПАКЕТ ЛЮКС АКТИВИРОВАН! ВСЕ БОНУСЫ УДВОЕНЫ! Фейерверк, хрусталь и любовь до небес! ✨💎");
-            // Доп. эстетика - перерисовка текста
-            prestigeUpgradeBtn.innerText = '✨ Пакет активирован ✨';
-        } else {
-            showMessage("🌙 Недостаточно свадебной готовности для люкс-пакета (нужно "+currentPrestigeCost+" 💗). Продолжайте подготовку! 🌙", true);
-        }
-    }
 
-    // пассивный доход (интервал)
-    let passiveInterval;
-    function startPassiveIncome() {
-        if(passiveInterval) clearInterval(passiveInterval);
-        passiveInterval = setInterval(() => {
-            let passiveGain = (passiveIncome * prestigeMulti);
-            if(passiveGain > 0) {
-                points += passiveGain;
-                updateUI();
-                saveGame();
-                // не спамим сообщения каждую секунду, только если есть крутой эффект (иногда)
-                if(passiveGain > 0 && points % 85 === 0 && passiveGain > 0) {
-                    showMessage(`🎶 Оркестр играет, гости танцуют! +${passiveGain} готовности от пассивной любви.`);
+        // ФИНАЛЬНАЯ сцена с динамикой в зависимости от гармонии и флагов
+        if (currentSceneId === "finale") {
+            let finalText = "";
+            let finalEmoji = "";
+            let finalHarmony = gameState.harmony;
+            let extraMessage = "";
+            
+            if (finalHarmony >= 80) {
+                finalEmoji = "🏆💖👑";
+                finalText = "✨🌟 ИДЕАЛЬНАЯ СВАДЬБА! 🌟✨ Гости плачут от счастья, родители танцуют, а Илья и Артём обмениваются кольцами под фейерверк любви. Вся жизнь впереди — полная гармонии и смеха. Кот Мурзик принёс подарок — золотую корону молодожёнам! Это лучшая свадьба в истории!";
+                if (gameState.flags.speechEpic) extraMessage += " Ваши проникновенные стихи растрогали даже ведущего. ";
+                if (gameState.flags.surpriseDone) extraMessage += " Совместный сюрприз стал гвоздём программы! ";
+                finalText += extraMessage + " Счастью нет предела! ❤️‍🔥";
+            } 
+            else if (finalHarmony >= 50) {
+                finalEmoji = "🥂💕🎶";
+                finalText = "Хорошая, душевная свадьба! Были небольшие накладки (кто-то перепутал бокалы, а тамада уронил торт), но Илья и Артём сияют от радости. Гости говорят, что это был очень тёплый праздник. Любовь победила хаос! 💒";
+                if (gameState.flags.parentsBlessing) finalText += " Родители дали благословение и пустили слезу.";
+                else finalText += " Родители немного ворчали, но в конце обнялись.";
+            } 
+            else if (finalHarmony >= 20) {
+                finalEmoji = "😅🍰💪";
+                finalText = "Свадьба вышла комичной и немного хаотичной: пропали кольца, нашлись в торте, диджей уснул. Но Илья с Артёмом не унывают! Они всё равно поженились и устроили весёлый импровизированный банкет. Главное — они вместе, а остальное — приключение!";
+            } 
+            else {
+                finalEmoji = "🌀😅💔";
+                finalText = "Ох… Свадьба прошла с большими скандалами: потеряли кольца, порвали костюмы, приехала бывшая с шариками, и упала люстра. НО! Илья и Артём взялись за руки, рассмеялись и сбежали на крышу, где тайно обменялись обещаниями. И это их личный триумф. Иногда любовь сильнее церемоний. ❤️‍🩹";
+            }
+            
+            finalText += "\n\n✨ Спасибо за игру! История Ильи и Артёма запомнится надолго. ✨";
+            
+            renderEnding(finalText, finalEmoji);
+            return;
+        }
+        
+        // отрисовка обычной сцены
+        const storyDiv = document.getElementById("storyArea");
+        if (!storyDiv) return;
+        
+        let choicesHtml = "";
+        scene.choices.forEach((choice, idx) => {
+            choicesHtml += `<button class="choice-btn" data-choice-index="${idx}">${choice.text}</button>`;
+        });
+        
+        const harmonyPercent = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
+        document.getElementById("harmonyValue").innerText = harmonyPercent;
+        document.getElementById("chapterName").innerText = scene.title;
+        
+        const sceneHtml = `
+            <div class="scene-image">${scene.emoji}</div>
+            <div class="scene-text">
+                <p><strong>📖 ${scene.title}</strong></p>
+                <p>${scene.text}</p>
+                ${gameState.inventory.length > 0 ? `<div class="progress-badge">🎒 В инвентаре: ${gameState.inventory.join(", ")}</div>` : ""}
+            </div>
+            <div class="choices">
+                ${choicesHtml}
+            </div>
+            <button class="reset-btn" id="resetGameBtn">🔄 Начать историю заново</button>
+        `;
+        
+        storyDiv.innerHTML = sceneHtml;
+        
+        // привязываем обработчики к кнопкам выбора
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(btn.dataset.choiceIndex);
+                if (!isNaN(index) && scene.choices[index]) {
+                    applyChoice(scene.choices[index]);
                 }
-                checkWinEvent();
-            }
-        }, 1000);
+            });
+        });
+        
+        const resetBtn = document.getElementById("resetGameBtn");
+        if (resetBtn) resetBtn.addEventListener("click", resetGame);
     }
-
-    // сброс рекордных флагов (чисто для загрузки)
-    function resetWinFlagsOnLoad() {
-        if(points >= 500) window._winCelebrated = true;
-        else window._winCelebrated = false;
-        if(points >= 1000) window._epicCelebrated = true;
-        else window._epicCelebrated = false;
-    }
-
-    // инициализация игры (загрузка или новая игра)
-    function initGame() {
-        const loaded = loadGame();
-        if (!loaded) {
-            // Новая игра: значения по умолчанию
-            points = 0;
-            clickPower = 1;
-            passiveIncome = 0;
-            prestigeMulti = 1;
-            prestigeActive = false;
-            currentClickCost = clickUpgradeBaseCost;
-            currentPassiveCost = passiveUpgradeBaseCost;
-            currentPrestigeCost = prestigeBaseCost;
-            updateUI();
-            showMessage("🍾 Добро пожаловать на свадьбу Ильи и Артёма! Нажимайте на торт, чтобы организовать торжество! 🍾");
-        } else {
-            // перепроверим множитель
-            if(prestigeActive && prestigeMulti !== 2) {
-                prestigeMulti = 2;
-                updateUI();
-            }
-            if(!prestigeActive && prestigeMulti ===2){
-                prestigeMulti =1;
-                updateUI();
-            }
-            resetWinFlagsOnLoad();
-            updateUI();
-            if(points > 0) showMessage("💒 С возвращением! Продолжаем готовить лучшую свадьбу для Ильи и Артёма! 💒");
+    
+    function applyChoice(choice) {
+        // меняем гармонию
+        let delta = choice.harmonyDelta || 0;
+        let newHarmony = gameState.harmony + delta;
+        gameState.harmony = Math.min(100, Math.max(0, newHarmony));
+        
+        // устанавливаем флаги если нужно
+        if (choice.setFlag) {
+            gameState.flags[choice.setFlag] = choice.flagValue;
         }
-        startPassiveIncome();
+        
+        // добавим предметы в инвентарь для веселья
+        if (choice.nextScene === "rings" && choice.text.includes("гравировкой")) {
+            if (!gameState.inventory.includes("💍 кольца с гравировкой")) gameState.inventory.push("💍 кольца с гравировкой");
+        }
+        if (choice.nextScene === "surprise" && choice.text.includes("искреннюю")) {
+            if (!gameState.inventory.includes("📜 стихи-клятва")) gameState.inventory.push("📜 стихи-клятва");
+        }
+        if (choice.nextScene === "finale" && choice.harmonyDelta >= 15) {
+            gameState.inventory.push("🎁 магия любви");
+        }
+        
+        // переход на следующую сцену
+        gameState.chapter = choice.nextScene;
+        
+        // если гармония упала ниже 0 или особые эффекты — не блокируем, но можно добавить событие
+        updateGameUI();
+        // автосохраняем в localStorage
+        saveGameProgress();
     }
-
-    // Привязка событий
-    clickBtn.addEventListener('click', handleClick);
-    upgradeClickBtn.addEventListener('click', upgradeClick);
-    upgradePassiveBtn.addEventListener('click', upgradePassive);
-    prestigeUpgradeBtn.addEventListener('click', upgradePrestige);
-
-    // предотвращение двойного запуска интервала при повторной инициализации
-    initGame();
-    // при уходе со страницы сохраняем (доп)
-    window.addEventListener('beforeunload', () => {
-        saveGame();
-    });
+    
+    // Финальный рендер без выборов (только перезапуск)
+    function renderEnding(text, emoji = "💒🎉") {
+        const storyDiv = document.getElementById("storyArea");
+        if (!storyDiv) return;
+        const harmonyVal = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
+        document.getElementById("harmonyValue").innerText = harmonyVal;
+        document.getElementById("chapterName").innerText = "Финал 💖";
+        
+        const endingHtml = `
+            <div class="scene-image">${emoji || "💍🎊"}</div>
+            <div class="scene-text">
+                <p style="font-size:1.2rem; font-weight:bold;">✨ ${text.split("\n")[0]} ✨</p>
+                <p>${text.replace(/\n/g, '<br>')}</p>
+                <p style="margin-top: 15px;">🏆 Итоговая гармония: ${harmonyVal}% 🏆</p>
+                <button class="reset-btn" id="resetGameBtnEnd">🌟 Прожить свадебную историю заново 🌟</button>
+            </div>
+        `;
+        storyDiv.innerHTML = endingHtml;
+        const resetEnd = document.getElementById("resetGameBtnEnd");
+        if (resetEnd) resetEnd.addEventListener("click", resetGame);
+    }
+    
+    // Сохранение и загрузка прогресса
+    function saveGameProgress() {
+        const save = {
+            harmony: gameState.harmony,
+            chapter: gameState.chapter,
+            flags: gameState.flags,
+            inventory: gameState.inventory
+        };
+        localStorage.setItem("ilyaArtemWeddingStory", JSON.stringify(save));
+    }
+    
+    function loadGameProgress() {
+        const saved = localStorage.getItem("ilyaArtemWeddingStory");
+        if (!saved) return false;
+        try {
+            const data = JSON.parse(saved);
+            gameState.harmony = data.harmony ?? 50;
+            gameState.chapter = data.chapter ?? "start";
+            gameState.flags = data.flags || { ringReady: false, parentsBlessing: false, dancingMastered: false, cakeSaved: false, speechEpic: false, surpriseDone: false };
+            gameState.inventory = data.inventory || ["💌 открытка-признание"];
+            // валидация: если глава finale или не существует, корректируем
+            if (!scenes[gameState.chapter] && gameState.chapter !== "finale") gameState.chapter = "start";
+            if (gameState.harmony < 0) gameState.harmony = 50;
+            return true;
+        } catch(e) { return false; }
+    }
+    
+    function resetGame() {
+        // сброс до стандартных параметров
+        gameState = {
+            harmony: 50,
+            chapter: "start",
+            flags: {
+                ringReady: false,
+                parentsBlessing: false,
+                dancingMastered: false,
+                cakeSaved: false,
+                speechEpic: false,
+                surpriseDone: false
+            },
+            inventory: ["💌 открытка-признание"]
+        };
+        localStorage.removeItem("ilyaArtemWeddingStory");
+        updateGameUI();
+        // дополнительно обновляем отображение
+        document.getElementById("harmonyValue").innerText = "50";
+        document.getElementById("chapterName").innerText = "Знакомство";
+    }
+    
+    // инициализация игры
+    function initStoryGame() {
+        const loaded = loadGameProgress();
+        if (!loaded) {
+            // установка начальных значений
+            gameState.chapter = "start";
+            gameState.harmony = 50;
+            gameState.flags = { ringReady: false, parentsBlessing: false, dancingMastered: false, cakeSaved: false, speechEpic: false, surpriseDone: false };
+            gameState.inventory = ["💌 открытка-признание"];
+        }
+        updateGameUI();
+    }
+    
+    initStoryGame();
 </script>
 </body>
 </html>
