@@ -1,512 +1,750 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - ТРАССА СУСЛОВА: КЛИКАЙ ПО КРУГЛИШКАМ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NetErrror - BIG Бибеджон: Мобильная версия</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f0a, #030803);
+            background: linear-gradient(145deg, #0a2f2a, #051a15);
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', 'MS Gothic', monospace;
             overflow: hidden;
-            touch-action: manipulation;
+            touch-action: none;
+            padding: 8px;
         }
         .game-container {
-            background: #1a2a14;
-            border-radius: 48px;
-            padding: 16px;
-            box-shadow: 0 20px 40px black, inset 0 1px 2px rgba(255,255,255,0.1);
-            border: 2px solid #7a9f6a;
+            background: #1e3a2f;
+            border-radius: 28px;
+            padding: 12px;
+            box-shadow: 0 20px 40px black;
+            border: 2px solid #d4b87a;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
         }
         canvas {
             display: block;
             margin: 0 auto;
-            border-radius: 24px;
-            box-shadow: 0 0 0 4px #2b3b24, 0 10px 30px black;
-            cursor: pointer;
+            border-radius: 20px;
+            box-shadow: 0 0 0 3px #2b4a3a, 0 10px 30px black;
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+            background: #2a6b55;
         }
         .ui-panel {
-            margin-top: 16px;
+            margin-top: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            background: #0c140acc;
+            gap: 8px;
+            background: #0c1a16cc;
             backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 60px;
-            border: 1px solid #8ab87a;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid #c4a86a;
+            flex-wrap: wrap;
         }
         .stat {
             background: #1f2c1a;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: #eaffc4;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-shadow: 0 0 4px #3c8c2a;
-            font-family: monospace;
-        }
-        button {
-            background: #4a6e3a;
-            border: none;
-            color: #f0ffd0;
-            font-weight: bold;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-family: monospace;
-            cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 3px 6px black;
-        }
-        button:active {
-            transform: scale(0.94);
-            background: #6e9658;
-        }
-        .warning {
-            font-size: 0.7rem;
-            background: #2a1f1a;
-            padding: 4px 12px;
+            padding: 6px 12px;
             border-radius: 30px;
-            color: #ffb878;
+            color: #f7e05e;
+            font-weight: bold;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .lives {
+            color: #ff7777;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            background: #1f2c1a;
+            padding: 4px 10px;
+            border-radius: 30px;
+        }
+        .combo {
+            background: #3a1f2f;
+            color: #ffaa88;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .rage-bar {
+            width: 100px;
+            height: 10px;
+            background: #2a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .rage-fill {
+            width: 0%;
+            height: 100%;
+            background: #ff4444;
+            transition: width 0.1s linear;
+        }
+        .power-bar {
+            width: 80px;
+            height: 8px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .power-fill {
+            width: 0%;
+            height: 100%;
+            background: #ffaa44;
+        }
+        .start-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            background: rgba(0,0,0,0.92);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            text-align: center;
+            padding: 20px;
+        }
+        .start-btn {
+            background: #ffaa44;
+            color: #1a2a1a;
+            font-size: 1.5rem;
+            padding: 14px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            border: none;
+            width: 80%;
+            max-width: 250px;
+        }
+        .start-btn:active { transform: scale(0.96); background: #ffcc66; }
+        .overlay-title {
+            font-size: 1.8rem;
+            color: #ffdd88;
+            text-shadow: 0 0 10px #ff6600;
+            margin-bottom: 15px;
+        }
+        .overlay-sub {
+            color: #aaffaa;
+            font-size: 0.8rem;
+            margin: 5px 0;
+        }
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aacf9a;
+            background: rgba(0,0,0,0.5);
+            padding: 4px;
+            border-radius: 20px;
+            width: 90%;
+            margin: 0 auto;
+            pointer-events: none;
+        }
+        @media (max-width: 600px) {
+            .ui-panel { gap: 6px; padding: 6px 10px; }
+            .stat { font-size: 0.7rem; padding: 4px 8px; }
+            .lives { font-size: 0.9rem; padding: 3px 8px; }
+            .combo { font-size: 0.7rem; padding: 3px 8px; }
+            .rage-bar { width: 70px; height: 8px; }
+            .power-bar { width: 60px; }
+            .overlay-title { font-size: 1.4rem; }
+            .start-btn { font-size: 1.2rem; padding: 12px 20px; }
         }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="950" height="520"></canvas>
-        <div class="ui-panel">
-            <div class="stat">🚗 СУСЛОВ: <span id="suslovLevel">0</span></div>
-            <div class="stat">🍆 МИНЕТЫ: <span id="bjTotal">0</span></div>
-            <button id="resetBtn">💀 СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ КЛИКАЙ ПО КРУГЛИШКАМ (+5%)</div>
-        </div>
+<div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas" width="1000" height="550" style="width:100%; height:auto; max-width:1000px; aspect-ratio:1000/550"></canvas>
+    <div class="ui-panel">
+        <div class="stat">🐒 <span id="scoreSpan">0</span></div>
+        <div class="lives" id="livesSpan">❤️❤️❤️</div>
+        <div class="combo">⚡ x<span id="comboSpan">1</span></div>
+        <div class="rage-bar"><div class="rage-fill" id="rageFill"></div></div>
+        <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
+    </div>
+    <div id="startOverlay" class="start-overlay">
+        <div class="overlay-title">🐒 BIG БИБЕДЖОН 🥥</div>
+        <div class="overlay-sub">👇 ЗАЖМИ ПАЛЬЦЕМ → ПРИЦЕЛЬСЯ → ОТПУСТИ</div>
+        <div class="overlay-sub">💥 НАЖМИ НА КОКОС-ГРАНАТУ</div>
+        <div class="overlay-sub">🔥 R или ПРОБЕЛ = ОГНЕННЫЙ ШАР</div>
+        <button class="start-btn" id="startGameBtn">🍆 ИГРАТЬ 🍆</button>
     </div>
 </div>
+<div class="controls-hint" id="controlsHint">💪 ЗАЖМИ → ПРИЦЕЛ → ОТПУСТИ | КОКОС = ВЗРЫВ</div>
 
 <script>
-    // ========== МИНЕТ + КЛИКАБЕЛЬНЫЕ КРУГЛИШКИ ==========
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // ----- СУСЛОВ НА ТРАССЕ -----
-    let suslov = {
-        x: 180, y: 320, dir: 1, speed: 1.3,
-        w: 52, h: 56, walkCycle: 0,
-        isHitching: true
-    };
-    
-    // ----- МИНИ-ИГРА -----
-    let minigame = {
-        active: false,
-        pleasure: 0,
-        maxPleasure: 100,
-        headBobAngle: 0,
-        mouthWide: 0,
-        screenFlash: 0,
-        finishFlash: 0,
-        finishTextTimer: 0,
-        finishResetTimer: 0,   // таймер на перезапуск после КОНЧИЛ
-        fallingDrops: []       // падающие круглишки
-    };
-    
-    let suslovLevel = 0;
-    let totalBj = 0;
-    
-    const suslovLevelSpan = document.getElementById('suslovLevel');
-    const bjTotalSpan = document.getElementById('bjTotal');
-    const resetBtn = document.getElementById('resetBtn');
-    
-    let roadOffset = 0;
-    let lastDropSpawn = 0;
-    
-    function updateUI() {
-        suslovLevelSpan.innerText = suslovLevel;
-        bjTotalSpan.innerText = totalBj;
-    }
-    
-    let audioCtx = null;
-    function playSound(freq = 660) {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-        osc.frequency.value = freq;
-        gain.gain.value = 0.2;
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
-        osc.start();
-        osc.stop(now + 0.2);
-    }
-    
-    function startMinigame() {
-        if (minigame.active) return;
-        minigame.active = true;
-        minigame.pleasure = 0;
-        minigame.headBobAngle = 0;
-        minigame.mouthWide = 0;
-        minigame.screenFlash = 0;
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
-        minigame.fallingDrops = [];
-        lastDropSpawn = 0;
-        suslov.isHitching = false;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    
-    function completeMinigame() {
-        if (!minigame.active) return;
-        minigame.active = false;
-        totalBj++;
-        suslovLevel++;
-        updateUI();
+    (function(){
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startOverlay = document.getElementById('startOverlay');
+        const startBtn = document.getElementById('startGameBtn');
         
-        // Эффект КОНЧИЛ: белый экран + чёрная надпись на 5 секунд
-        minigame.finishFlash = 35;
-        minigame.finishTextTimer = 150;  // ~5 секунд (30fps * 5)
-        minigame.finishResetTimer = 150; // через 5 секунд перезапуск
-        minigame.fallingDrops = [];
-        suslov.isHitching = false; // Суслов стоит на месте
+        // РАЗМЕРЫ CANVAS фиксированные для логики, но отображается масштабированно
+        const CANVAS_W = 1000;
+        const CANVAS_H = 550;
+        canvas.width = CANVAS_W;
+        canvas.height = CANVAS_H;
         
-        playSound(880);
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-    
-    // Добавление удовольствия
-    function addPleasure(amount) {
-        if (!minigame.active) return;
-        minigame.pleasure = Math.min(minigame.pleasure + amount, minigame.maxPleasure);
-        minigame.mouthWide = 16;
-        minigame.screenFlash = 8;
-        playSound(520);
+        let bibedjon = { x: CANVAS_W/2, y: CANVAS_H - 70, width: 70, height: 80 };
+        let projectiles = [];
+        let enemies = [];
+        let bonuses = [];
+        let grenade = null;
+        let boss = null;
+        let particles = [];
+        let screenShake = 0;
         
-        if (navigator.vibrate) navigator.vibrate(30);
+        let score = 0;
+        let lives = 3;
+        let gameActive = false;
+        let gameOverFlag = false;
+        let combo = 1;
+        let comboCounter = 0;
+        let lastHitFrame = 0;
         
-        if (minigame.pleasure >= minigame.maxPleasure) {
-            completeMinigame();
-        }
-    }
-    
-    // СПАВН КРУГЛИШКИ
-    function spawnDrop() {
-        if (!minigame.active) return;
-        let x = 50 + Math.random() * (canvas.width - 100);
-        minigame.fallingDrops.push({
-            x: x,
-            y: 30,
-            radius: 20,
-            speed: 1.0 + Math.random() * 1.8
-        });
-    }
-    
-    function updateFallingDrops(delta) {
-        if (!minigame.active) return;
-        let now = Date.now();
-        // спавн каждые 0.7-1.2 секунды
-        if (now - lastDropSpawn > 700 + Math.random() * 500) {
-            spawnDrop();
-            lastDropSpawn = now;
+        let rage = 0;
+        let maxRage = 100;
+        
+        let doubleSpeed = { active: false, endTime: 0 };
+        let shotgunMode = { active: false, endTime: 0 };
+        
+        let aiming = false;
+        let aimStartX, aimStartY, aimCurrentX, aimCurrentY;
+        let powerCharge = 0;
+        let charging = false;
+        let chargeInterval = null;
+        
+        const scoreSpan = document.getElementById('scoreSpan');
+        const livesSpan = document.getElementById('livesSpan');
+        const comboSpan = document.getElementById('comboSpan');
+        const rageFill = document.getElementById('rageFill');
+        const powerFillDiv = document.getElementById('powerFill');
+        
+        let lastEnemySpawn = 0;
+        let frame = 0;
+        
+        function updateUI() {
+            scoreSpan.innerText = score;
+            let hearts = "";
+            for(let i=0; i<lives; i++) hearts += "❤️";
+            for(let i=lives; i<3; i++) hearts += "🖤";
+            livesSpan.innerText = hearts;
+            comboSpan.innerText = combo;
+            rageFill.style.width = (rage / maxRage * 100) + "%";
         }
         
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            d.y += d.speed * delta * 60;
-            if (d.y > canvas.height - 70) {
-                minigame.fallingDrops.splice(i,1);
-                i--;
-            }
-        }
-    }
-    
-    // ПРОВЕРКА КЛИКА ПО КРУГЛИШКЕ
-    function handleDropClick(canvasX, canvasY) {
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            let dx = canvasX - d.x;
-            let dy = canvasY - d.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < d.radius) {
-                // ПОПАЛ! +5%
-                addPleasure(5);
-                minigame.fallingDrops.splice(i,1);
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    function isPointInSuslov(x, y) {
-        return (x >= suslov.x && x <= suslov.x + suslov.w &&
-                y >= suslov.y - 8 && y <= suslov.y + suslov.h);
-    }
-    
-    function handleCanvasClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
+        function updatePowerBar() { powerFillDiv.style.width = powerCharge + "%"; }
         
-        if (minigame.active) {
-            // сначала проверяем попадание по круглишке
-            let hit = handleDropClick(canvasX, canvasY);
-            if (!hit) {
-                // клик мимо - ничего не происходит
-                // можно добавить звук промаха, но по задаче не нужно
-            }
-        } else if (isPointInSuslov(canvasX, canvasY) && minigame.finishResetTimer === 0) {
-            startMinigame();
+        let audioCtx = null;
+        function playSound(freq, vol=0.12, duration=0.2) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
         }
-    }
-    
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
-    });
-    
-    resetBtn.addEventListener('click', () => {
-        minigame.active = false;
-        suslov = { x: 180, y: 320, dir: 1, speed: 1.3, w: 52, h: 56, walkCycle: 0, isHitching: true };
-        suslovLevel = 0;
-        totalBj = 0;
-        minigame.fallingDrops = [];
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
-        updateUI();
-    });
-    
-    function updateSuslov(delta) {
-        if (minigame.active) return;
-        if (minigame.finishResetTimer > 0) return; // после КОНЧИЛ стоит
-        let step = suslov.speed * delta * 60;
-        suslov.x += suslov.dir * step;
-        if (suslov.x <= 40) { suslov.x = 40; suslov.dir = 1; }
-        if (suslov.x >= canvas.width - suslov.w - 40) { suslov.x = canvas.width - suslov.w - 40; suslov.dir = -1; }
-        suslov.walkCycle = (suslov.walkCycle + delta * 14) % (Math.PI * 2);
-    }
-    
-    function updateEffects(delta) {
-        if (minigame.active) {
-            minigame.mouthWide = Math.max(4, minigame.mouthWide - delta * 40);
-            minigame.headBobAngle = (minigame.headBobAngle + delta * 20) % (Math.PI * 2);
-            if (minigame.screenFlash > 0) minigame.screenFlash -= delta * 100;
+        
+        const enemyTypes = [
+            { name: "пехотинец", color1: "#6a8eb0", color2: "#4a6e90", hp: 1, speed: 0.8, width: 44, height: 48, score: 10, icon: "🤖", eyes: "#ffffff" },
+            { name: "щитовик", color1: "#5a9e6a", color2: "#3a7e4a", hp: 2, speed: 0.6, width: 48, height: 52, score: 20, icon: "🛡️", eyes: "#ffffaa" },
+            { name: "ниндзя", color1: "#cc6666", color2: "#aa4444", hp: 1, speed: 1.4, width: 42, height: 46, score: 15, icon: "⚡", eyes: "#ff6666" },
+            { name: "летающий", color1: "#eebb55", color2: "#cc9933", hp: 1, speed: 1.0, width: 46, height: 40, score: 1"🕊️", flying: true, eyes: "#ffeeaa" }
+        ];
+        
+        function spawnEnemy() {
+            if (!gameActive) return;
+            let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            let x = 40 + Math.random() * (CANVAS_W - 80);
+            let y = type.flying ? 60 + Math.random() * 100 : 40;
+            enemies.push({
+                x: x, y: y, type: type, hp: type.hp, maxHp: type.hp,
+                width: type.width, height: type.height, speed: type.speed,
+                flying: type.flying || false, wobble: 0
+            });
         }
-        if (minigame.finishFlash > 0) minigame.finishFlash -= delta * 70;
-        if (minigame.finishTextTimer > 0) {
-            minigame.finishTextTimer -= delta * 30;
-            if (minigame.finishTextTimer <= 0) {
-                minigame.finishFlash = 0;
-            }
+        
+        function spawnBoss() {
+            if (boss) return;
+            boss = {
+                x: CANVAS_W/2 - 60, y: 60, width: 130, height: 110, hp: 5, maxHp: 5,
+                speed: 0.35, direction: 1, shootTimer: 0
+            };
+            playSound(300, 0.3, 0.5);
         }
-        if (minigame.finishResetTimer > 0) {
-            minigame.finishResetTimer -= delta * 30;
-            if (minigame.finishResetTimer <= 0) {
-                // ПЕРЕЗАПУСК ИГРЫ: Суслов снова ходит, можно начинать новый минет
-                minigame.active = false;
-                suslov.isHitching = true;
-                minigame.finishFlash = 0;
-                minigame.finishTextTimer = 0;
-                minigame.fallingDrops = [];
+        
+        function updateBoss(delta) {
+            if (!boss || !gameActive) return;
+            boss.x += boss.direction * boss.speed * delta * 60;
+            if (boss.x <= 30) boss.direction = 1;
+            if (boss.x >= CANVAS_W - boss.width - 30) boss.direction = -1;
+            boss.shootTimer += delta;
+            if (boss.shootTimer > 1.5) {
+                boss.shootTimer = 0;
+                projectiles.push({
+                    x: boss.x + boss.width/2, y: boss.y + boss.height-10,
+                    vx: (Math.random() - 0.5) * 1.5, vy: 3, radius: 10, isBomb: true
+                });
+                playSound(440, 0.15);
             }
         }
-    }
-    
-    // ========== РЕНДЕР ==========
-    function drawRoad() {
-        ctx.fillStyle = "#2a3824";
-        ctx.fillRect(0, 280, canvas.width, 160);
-        ctx.fillStyle = "#d4c47a";
-        for(let i = 0; i < 14; i++) {
-            let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
-            ctx.fillRect(dashX, 352, 40, 6);
+        
+        function spawnCoconutGrenade(x, y) {
+            if (grenade) return;
+            grenade = { x: x, y: y, radius: 20, active: true };
         }
-        ctx.fillStyle = "#9e7e5a";
-        ctx.fillRect(0, 425, canvas.width, 14);
-        ctx.fillStyle = "#4a7a3a";
-        ctx.fillRect(0, 258, canvas.width, 24);
-        roadOffset = (roadOffset + 2.2) % 50;
-    }
-    
-    function drawCar() {
-        ctx.fillStyle = "#5a7a9a";
-        ctx.fillRect(70, 338, 72, 48);
-        ctx.fillStyle = "#3a4f66";
-        ctx.fillRect(80, 328, 22, 12);
-        ctx.fillStyle = "#1a1a2a";
-        ctx.beginPath();
-        ctx.arc(88, 378, 9, 0, Math.PI*2);
-        ctx.arc(126, 378, 9, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = "#ffcc66";
-        ctx.fillRect(135, 352, 8, 6);
-    }
-    
-    function drawFallingDrops() {
-        for(let d of minigame.fallingDrops) {
-            ctx.fillStyle = "#ffffaa";
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffaa66";
-            ctx.beginPath();
-            ctx.arc(d.x-4, d.y-4, 6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#000000cc";
-            ctx.font = "bold 16px monospace";
-            ctx.fillText("💦", d.x-10, d.y+6);
-            ctx.fillStyle = "#ffffffcc";
-            ctx.font = "bold 12px monospace";
-            ctx.fillText("+5%", d.x-12, d.y-12);
-            ctx.shadowBlur = 0;
-        }
-    }
-    
-    function drawSuslov() {
-        if (minigame.active) {
-            let centerX = suslov.x + suslov.w/2;
-            let centerY = suslov.y + 30;
-            let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
-            let headY = -20 + bobOffset;
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
-            ctx.rotate(tilt);
-            ctx.fillStyle = "#dba878";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#3d5230";
-            ctx.fillRect(-18, 12, 36, 22);
-            ctx.fillStyle = "#f2cfa0";
-            ctx.beginPath();
-            ctx.arc(0, headY, 18, 0, Math.PI*2);
-            ctx.fill();
-            let mouthHeight = minigame.mouthWide;
-            let mouthYOffset = -12 + (mouthHeight / 2);
-            ctx.fillStyle = "#441122";
-            ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            if (minigame.pleasure > 30) {
-                ctx.fillStyle = "#dd6688";
-                let tongueOut = Math.sin(Date.now() * 0.025) * 3;
-                ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
+        
+        function explodeGrenade() {
+            if (!grenade || !gameActive) return;
+            let ex = grenade.x, ey = grenade.y;
+            for(let i=0; i<enemies.length; i++) {
+                let e = enemies[i];
+                let cx = e.x + e.width/2, cy = e.y + e.height/2;
+                if (Math.hypot(ex - cx, ey - cy) < 150) {
+                    score += e.type.score * combo;
+                    rage = Math.min(rage + 10, maxRage);
+                    addCombo();
+                    enemies.splice(i,1);
+                    i--;
+                    for(let k=0;k<6;k++) particles.push({ x: ex, y: ey, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 0.5, color: "#ffaa44" });
+                }
             }
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(-12, headY-10, 6, 5);
-            ctx.fillRect(6, headY-10, 6, 5);
-            ctx.restore();
+            if (boss) {
+                let bx = boss.x + boss.width/2, by = boss.y + boss.height/2;
+                if (Math.hypot(ex - bx, ey - by) < 150) {
+                    boss.hp -= 2;
+                    playSound(600, 0.25);
+                    for(let k=0;k<15;k++) particles.push({ x: ex, y: ey, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 0.6, color: "#ff8844" });
+                    if (boss.hp <= 0) {
+                        score += 100 * combo;
+                        boss = null;
+                        playSound(300, 0.4, 0.8);
+                        for(let k=0;k<40;k++) particles.push({ x: ex, y: ey, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 0.7, color: "#ffaa44" });
+                    }
+                }
+            }
+            screenShake = 12;
+            playSound(200, 0.35, 0.5);
+            grenade = null;
+        }
+        
+        function spawnBonus(x, y) {
+            if (!gameActive) return;
+            if (Math.random() < 0.35) {
+                spawnCoconutGrenade(x, y);
+            } else {
+                const bonusTypes = [
+                    { name: "medkit", color: "#ff7777", effect: "medkit", icon: "💊" },
+                    { name: "speed", color: "#88ffaa", effect: "doubleSpeed", duration: 6000, icon: "⚡" },
+                    { name: "shotgun", color: "#ffaa66", effect: "shotgun", duration: 5000, icon: "🔫" }
+                ];
+                let type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+                bonuses.push({ x: x, y: y, type: type, radius: 14 });
+            }
+        }
+        
+        function applyBonus(bonus) {
+            switch(bonus.type.effect) {
+                case "medkit":
+                    lives = Math.min(lives + 1, 5);
+                    updateUI();
+                    playSound(880, 0.15);
+                    break;
+                case "doubleSpeed":
+                    doubleSpeed.active = true;
+                    doubleSpeed.endTime = Date.now() + 6000;
+                    playSound(550, 0.15);
+                    break;
+                case "shotgun":
+                    shotgunMode.active = true;
+                    shotgunMode.endTime = Date.now() + 5000;
+                    playSound(770, 0.15);
+                    break;
+            }
+        }
+        
+        function fireRage() {
+            if (!gameActive) return;
+            if (rage < maxRage) return;
+            rage = 0;
+            updateUI();
+            playSound(300, 0.35, 0.6);
+            screenShake = 12;
+            projectiles.push({ x: bibedjon.x, y: bibedjon.y - 40, vx: 0, vy: -9, radius: 22, isFireball: true });
+            for(let i=0;i<20;i++) particles.push({ x: bibedjon.x, y: bibedjon.y-30, vx: (Math.random()-0.5)*6, vy: -Math.random()*5, life: 0.6, color: "#ff8844" });
+        }
+        
+        function shootProjectile(fromX, fromY, toX, toY, chargePower) {
+            if (!gameActive) return;
+            let dx = toX - fromX, dy = toY - fromY;
+            let len = Math.hypot(dx, dy);
+            if (len < 0.1) return;
+            let normX = dx/len, normY = dy/len;
+            let speed = 6 + (chargePower / 12);
+            if (shotgunMode.active) {
+                for(let i=-1;i<=1;i++) {
+                    let angle = Math.atan2(normY, normX) + i*0.25;
+                    let vx = Math.cos(angle)*speed, vy = Math.sin(angle)*speed;
+                    projectiles.push({ x: fromX, y: fromY, vx: vx, vy: vy, radius: 10 });
+                }
+            } else {
+                projectiles.push({ x: fromX, y: fromY, vx: normX*speed, vy: normY*speed, radius: 12 });
+            }
+            playSound(480, 0.1);
+        }
+        
+        function addCombo() {
+            comboCounter++;
+            if (comboCounter >= 3) { combo = Math.min(combo+1, 6); comboCounter = 0; }
+            lastHitFrame = frame;
+        }
+        
+        function resetCombo() {
+            if (frame - lastHitFrame > 60) { combo = 1; comboCounter = 0; }
+        }
+        
+        function fullRestart() {
+            gameActive = true;
+            gameOverFlag = false;
+            score = 0;
+            lives = 3;
+            combo = 1;
+            comboCounter = 0;
+            rage = 0;
+            projectiles = [];
+            enemies = [];
+            bonuses = [];
+            grenade = null;
+            boss = null;
+            particles = [];
+            doubleSpeed.active = false;
+            shotgunMode.active = false;
+            aiming = false;
+            charging = false;
+            if (chargeInterval) clearInterval(chargeInterval);
+            powerCharge = 0;
+            updatePowerBar();
+            updateUI();
+            lastEnemySpawn = Date.now();
+            startOverlay.style.display = 'none';
+        }
+        
+        function updateGame(delta) {
+            if (!gameActive) return;
             
-            let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
-            ctx.fillStyle = "#ff8844";
-            ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
-        } else {
-            ctx.fillStyle = "#dcab7a";
-            ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
-            ctx.fillStyle = "#f2cf9a";
-            ctx.beginPath();
-            ctx.arc(suslov.x + suslov.w/2, suslov.y + 16, 19, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
-            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
-            ctx.fillStyle = "#5f704a";
-            ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
-            ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            ctx.fillStyle = "#ffffcc";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 12, suslov.y - 16);
-            ctx.fillStyle = "#dd9966";
-            ctx.font = "12px monospace";
-            ctx.fillText("(сын бляди)", suslov.x + 14, suslov.y - 2);
+            if (doubleSpeed.active && Date.now() > doubleSpeed.endTime) doubleSpeed.active = false;
+            if (shotgunMode.active && Date.now() > shotgunMode.endTime) shotgunMode.active = false;
+            
+            let now = Date.now();
+            let spawnDelay = Math.max(600, 1100 - Math.floor(score/8));
+            if (!boss && now - lastEnemySpawn > spawnDelay) { spawnEnemy(); lastEnemySpawn = now; }
+            
+            if (score >= 20 && !boss && !gameOverFlag) spawnBoss();
+            if (boss) updateBoss(delta);
+            
+            for(let i=0; i<enemies.length; i++) {
+                let e = enemies[i];
+                let spd = e.speed * (doubleSpeed.active ? 1.5 : 1) * delta * 60;
+                if (e.flying) {
+                    e.wobble = (e.wobble + delta*8) % (Math.PI*2);
+                    e.x += Math.sin(e.wobble) * 0.8;
+                    e.y += spd;
+                } else { e.y += spd; }
+                if (e.y + e.height > bibedjon.y + 15) {
+                    enemies.splice(i,1); i--;
+                    lives--;
+                    updateUI();
+                    playSound(220, 0.25);
+                    screenShake = 8;
+                    if (lives <= 0) {
+                        gameActive = false;
+                        gameOverFlag = true;
+                        startOverlay.style.display = 'flex';
+                        startOverlay.querySelector('.overlay-title').innerHTML = '💀 ТЫ ПРОИГРАЛ 💀';
+                        startBtn.innerText = '🔄 ЕЩЁ РАЗ';
+                    }
+                }
+            }
+            
+            for(let i=0; i<projectiles.length; i++) {
+                let p = projectiles[i];
+                p.x += p.vx * delta * 60;
+                p.y += p.vy * delta * 60;
+                if (p.x < -100 || p.x > CANVAS_W+100 || p.y < -100 || p.y > CANVAS_H+150) {
+                    projectiles.splice(i,1); i--; continue;
+                }
+                let hit = false;
+                for(let j=0; j<enemies.length; j++) {
+                    let e = enemies[j];
+                    if (p.x + p.radius > e.x && p.x - p.radius < e.x + e.width &&
+                        p.y + p.radius > e.y && p.y - p.radius < e.y + e.height) {
+                        e.hp--;
+                        hit = true;
+                        if (e.hp <= 0) {
+                            score += e.type.score * combo;
+                            rage = Math.min(rage + 10, maxRage);
+                            addCombo();
+                            spawnBonus(e.x + e.width/2, e.y + e.height/2);
+                            enemies.splice(j,1);
+                            playSound(680, 0.12);
+                            screenShake = 3;
+                            for(let k=0;k<6;k++) particles.push({ x: p.x, y: p.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 0.5, color: "#ffaa66" });
+                        } else { playSound(540, 0.08); }
+                        break;
+                    }
+                }
+                if (!hit && boss && p.x + p.radius > boss.x && p.x - p.radius < boss.x + boss.width &&
+                    p.y + p.radius > boss.y && p.y - p.radius < boss.y + boss.height) {
+                    boss.hp--;
+                    hit = true;
+                    rage = Math.min(rage + 15, maxRage);
+                    addCombo();
+                    playSound(800, 0.18);
+                    screenShake = 6;
+                    for(let k=0;k<10;k++) particles.push({ x: p.x, y: p.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 0.5, color: "#ff8844" });
+                    if (boss.hp <= 0) {
+                        score += 100 * combo;
+                        boss = null;
+                        playSound(300, 0.35, 0.8);
+                        for(let k=0;k<35;k++) particles.push({ x: p.x, y: p.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 0.7, color: "#ffaa44" });
+                    }
+                }
+                if (hit) { projectiles.splice(i,1); i--; }
+            }
+            
+            resetCombo();
+            updateUI();
+            
+            for(let i=0; i<particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx * delta * 60;
+                p.y += p.vy * delta * 60;
+                p.life -= delta * 2;
+                if (p.life <= 0) particles.splice(i,1), i--;
+            }
+            if (screenShake > 0) screenShake -= delta * 50;
         }
-    }
-    
-    function drawFinishEffect() {
-        if (minigame.finishFlash > 0) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, minigame.finishFlash / 12)})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        if (minigame.finishTextTimer > 0) {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 64px monospace";
-            ctx.shadowBlur = 0;
-            ctx.textAlign = "center";
-            ctx.fillText("КОНЧИЛ", canvas.width/2, canvas.height/2);
-            ctx.textAlign = "left";
-        }
-    }
-    
-    function drawFlash() {
-        if (minigame.screenFlash > 0 && minigame.finishFlash <= 0) {
-            ctx.fillStyle = `rgba(255, 220, 100, ${minigame.screenFlash / 12})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    
-    function drawInstructions() {
-        if (!minigame.active) return;
-        ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 42);
-        ctx.fillStyle = "#ffcc99";
-        ctx.font = "bold 14px monospace";
-        ctx.fillText("🍆 КЛИКАЙ ПО ЖЁЛТЫМ КРУГЛИШКАМ - КАЖДАЯ ДАЁТ +5% 🍆", canvas.width/2 - 270, 28);
-    }
-    
-    let lastTime = 0;
-    function gameLoop(now) {
-        let delta = Math.min(0.033, (now - lastTime) / 1000);
-        if (delta > 0.01) {
-            updateSuslov(delta);
-            updateFallingDrops(delta);
-            updateEffects(delta);
-        }
-        lastTime = now;
         
-        drawRoad();
-        drawCar();
-        drawFallingDrops();
-        drawSuslov();
-        drawFlash();
-        drawFinishEffect();
-        drawInstructions();
+        // ТАЧ-СОБЫТИЯ с правильными координатами
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = CANVAS_W / rect.width;
+            const scaleY = CANVAS_H / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            return { x: Math.min(Math.max(canvasX, 0), CANVAS_W), y: Math.min(Math.max(canvasY, 0), CANVAS_H) };
+        }
         
+        function handlePointerDown(e) {
+            e.preventDefault();
+            if (!gameActive) return;
+            let { x: canvasX, y: canvasY } = getCanvasCoords(e);
+            
+            if (grenade && Math.hypot(canvasX - grenade.x, canvasY - grenade.y) < grenade.radius) {
+                explodeGrenade();
+                return;
+            }
+            for(let i=0; i<bonuses.length; i++) {
+                let b = bonuses[i];
+                if (Math.hypot(canvasX - b.x, canvasY - b.y) < b.radius) {
+                    applyBonus(b);
+                    bonuses.splice(i,1);
+                    return;
+                }
+            }
+            aiming = true;
+            aimStartX = bibedjon.x;
+            aimStartY = bibedjon.y - 40;
+            aimCurrentX = canvasX;
+            aimCurrentY = canvasY;
+            charging = true;
+            powerCharge = 0;
+            if (chargeInterval) clearInterval(chargeInterval);
+            chargeInterval = setInterval(() => {
+                if (charging && gameActive) { powerCharge = Math.min(powerCharge + 2.8, 100); updatePowerBar(); }
+            }, 30);
+        }
+        
+        function handlePointerMove(e) {
+            if (!aiming || !gameActive) return;
+            e.preventDefault();
+            let { x: canvasX, y: canvasY } = getCanvasCoords(e);
+            aimCurrentX = canvasX;
+            aimCurrentY = canvasY;
+        }
+        
+        function handlePointerUp(e) {
+            e.preventDefault();
+            if (!aiming) { charging=false; if(chargeInterval) clearInterval(chargeInterval); return; }
+            aiming = false;
+            charging = false;
+            if (chargeInterval) clearInterval(chargeInterval);
+            if (gameActive) shootProjectile(aimStartX, aimStartY, aimCurrentX, aimCurrentY, powerCharge);
+            powerCharge = 0;
+            updatePowerBar();
+        }
+        
+        canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+        canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+        canvas.addEventListener('touchend', handlePointerUp);
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'KeyR') { e.preventDefault(); fireRage(); }
+        });
+        
+        startBtn.addEventListener('click', () => { fullRestart(); });
+        
+        // ========== РЕНДЕР ==========
+        function drawBackground() {
+            ctx.fillStyle = "#2a6b55"; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+            ctx.fillStyle = "#b87a4a"; ctx.fillRect(0, CANVAS_H-90, CANVAS_W, 90);
+            ctx.fillStyle = "#9e5e3a"; ctx.fillRect(0, CANVAS_H-90, CANVAS_W, 12);
+            for(let i=0;i<12;i++) ctx.fillRect(40+i*80, CANVAS_H-100, 12, 30);
+        }
+        
+        function drawBibedjon() {
+            let x = bibedjon.x - 35, y = bibedjon.y - 80;
+            ctx.fillStyle = "#8b5a2b"; ctx.fillRect(x+15, y+20, 40, 50);
+            ctx.fillStyle = "#c49a6c"; ctx.beginPath(); ctx.ellipse(x+35, y+15, 25, 30, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#2c2c2c"; ctx.fillRect(x+20, y+8, 8, 8); ctx.fillRect(x+42, y+8, 8, 8);
+            ctx.fillStyle = "#ffcc44"; ctx.fillRect(x+22, y-8, 26, 12);
+            for(let i=0;i<3;i++) ctx.fillRect(x+24+i*10, y-14, 4, 10);
+            ctx.fillStyle = "#f0e68c"; ctx.font = "bold 18px monospace"; ctx.fillText("BIG", x+15, y-18);
+        }
+        
+        function drawEnemies() {
+            for(let e of enemies) {
+                let grad = ctx.createLinearGradient(e.x, e.y, e.x, e.y+e.height);
+                grad.addColorStop(0, e.type.color1); grad.addColorStop(1, e.type.color2);
+                ctx.fillStyle = grad; ctx.fillRect(e.x, e.y, e.width, e.height);
+                ctx.fillStyle = "#222"; ctx.fillRect(e.x+8, e.y+8, 8, 8); ctx.fillRect(e.x+e.width-16, e.y+8, 8, 8);
+                ctx.fillStyle = e.type.eyes; ctx.fillRect(e.x+10, e.y+10, 4, 4); ctx.fillRect(e.x+e.width-14, e.y+10, 4, 4);
+                ctx.fillStyle = "#ff6666"; ctx.fillRect(e.x+e.width/2-5, e.y+e.height-12, 10, 6);
+                ctx.fillStyle = "#fff"; ctx.font = "18px monospace"; ctx.fillText(e.type.icon, e.x+12, e.y+32);
+                if (e.hp > 1) { ctx.fillStyle = "#ffaa66"; ctx.fillRect(e.x, e.y-8, (e.hp/e.maxHp)*e.width, 5); }
+            }
+        }
+        
+        function drawBoss() {
+            if (!boss) return;
+            let grad = ctx.createLinearGradient(boss.x, boss.y, boss.x, boss.y+boss.height);
+            grad.addColorStop(0, "#cc5555"); grad.addColorStop(1, "#882222");
+            ctx.fillStyle = grad; ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+            ctx.fillStyle = "#ffcc88"; ctx.fillRect(boss.x+15, boss.y+15, 30, 20); ctx.fillRect(boss.x+boss.width-45, boss.y+15, 30, 20);
+            ctx.fillStyle = "#ff4444"; ctx.fillRect(boss.x+20, boss.y+18, 8, 8); ctx.fillRect(boss.x+boss.width-38, boss.y+18, 8, 8);
+            ctx.fillStyle = "#ffffaa"; ctx.font = "bold 16px monospace"; ctx.fillText("☠️ BOSS ☠️", boss.x+25, boss.y-5);
+            ctx.fillStyle = "#ffaa66"; ctx.fillRect(boss.x, boss.y-12, (boss.hp/boss.maxHp)*boss.width, 8);
+            ctx.fillStyle = "#ffaa44"; ctx.font = "20px monospace"; ctx.fillText("👑", boss.x+boss.width/2-10, boss.y-18);
+        }
+        
+        function drawBonuses() {
+            for(let b of bonuses) {
+                ctx.fillStyle = b.type.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#000"; ctx.font = "22px monospace"; ctx.fillText(b.type.icon, b.x-11, b.y+9);
+            }
+            if (grenade) {
+                ctx.fillStyle = "#aa8844"; ctx.beginPath(); ctx.arc(grenade.x, grenade.y, grenade.radius, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#664422"; ctx.beginPath(); ctx.arc(grenade.x-4, grenade.y-4, 7, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffcc66"; ctx.font = "22px monospace"; ctx.fillText("🥥", grenade.x-12, grenade.y+9);
+                ctx.fillStyle = "#ffaa44"; ctx.font = "bold 11px monospace"; ctx.fillText("ВЗРЫВ", grenade.x-20, grenade.y-10);
+            }
+        }
+        
+        function drawProjectilesAndEffects() {
+            for(let p of projectiles) {
+                if (p.isFireball) {
+                    ctx.fillStyle = "#ff6600"; ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.arc(p.x-3, p.y-3, 6, 0, Math.PI*2); ctx.fill();
+                } else if (p.isBomb) {
+                    ctx.fillStyle = "#884444"; ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+                } else {
+                    ctx.fillStyle = "#ffcc55"; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius-2, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = "#aa8833"; ctx.beginPath(); ctx.arc(p.x-3, p.y-3, 4, 0, Math.PI*2); ctx.fill();
+                }
+            }
+            for(let p of particles) { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill(); }
+        }
+        
+        function drawAim() {
+            if (!aiming) return;
+            ctx.beginPath(); ctx.moveTo(aimStartX, aimStartY); ctx.lineTo(aimCurrentX, aimCurrentY);
+            ctx.strokeStyle = "#ffaa66"; ctx.lineWidth = 4; ctx.setLineDash([8,10]); ctx.stroke(); ctx.setLineDash([]);
+            let rad = 15 + powerCharge/4;
+            ctx.beginPath(); ctx.arc(aimCurrentX, aimCurrentY, rad, 0, Math.PI*2);
+            ctx.strokeStyle = "#ff8844"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = `rgba(255,140,50,${powerCharge/150})`; ctx.fill();
+        }
+        
+        function drawUI() {
+            ctx.fillStyle = "#ffffcc"; ctx.font = "bold 12px monospace";
+            if (doubleSpeed.active) ctx.fillText("⚡ УСКОРЕНИЕ", 15, 75);
+            if (shotgunMode.active) ctx.fillText("🔫 ДРОБОВИК", 15, 100);
+        }
+        
+        let lastTime = 0;
+        function gameLoop(now) {
+            let delta = Math.min(0.033, (now - lastTime) / 1000);
+            if (delta > 0.01) updateGame(delta);
+            lastTime = now; frame++;
+            
+            let shakeX=0, shakeY=0;
+            if(screenShake>0){ shakeX=(Math.random()-0.5)*screenShake; shakeY=(Math.random()-0.5)*screenShake; ctx.save(); ctx.translate(shakeX,shakeY); }
+            
+            drawBackground(); drawEnemies(); drawBoss(); drawBonuses(); drawProjectilesAndEffects();
+            drawBibedjon(); drawAim(); drawUI();
+            if(screenShake>0) ctx.restore();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        updateUI();
+        lastEnemySpawn = Date.now();
         requestAnimationFrame(gameLoop);
-    }
-    
-    updateUI();
-    requestAnimationFrame(gameLoop);
+    })();
 </script>
 </body>
 </html>
+```
