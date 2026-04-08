@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥚 СУСЛОВ: Престиж Корм</title>
+    <title>🥚 СУСЛОВ: Продажа Жира</title>
     <style>
         * {
             box-sizing: border-box;
@@ -47,6 +47,12 @@
         h1 span {
             font-size: 2.2rem;
         }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 5px;
+        }
         .prestige-badge {
             background: #6a4e2e;
             color: #ffd966;
@@ -55,9 +61,17 @@
             font-weight: bold;
             font-size: 1.3rem;
             display: inline-block;
-            margin-bottom: 10px;
             border: 2px solid #eebb55;
             box-shadow: inset 0 1px 5px #3d2e1c, 0 4px 0 #3a281a;
+        }
+        .spent-badge {
+            background: #4a3a2a;
+            color: #c9b896;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 2px solid #9e8b72;
         }
         .suslov-area {
             background: #b18b62;
@@ -198,20 +212,24 @@
             box-shadow: 0 5px 0 #7b451b;
             pointer-events: none;
         }
-        .reset-area {
-            margin-top: 28px;
+        .sell-area {
+            margin-top: 20px;
         }
-        #resetBtn {
-            background: #7c9a7a;
-            box-shadow: 0 5px 0 #3f5a3a, 0 2px 8px black;
-            border-color: #bcd0b0;
-            color: #0f1f0a;
-            font-size: 1.4rem;
-            padding: 14px 30px;
+        #sellFatBtn {
+            background: #c9a87c;
+            box-shadow: 0 5px 0 #7a5d3e, 0 2px 8px black;
+            border-color: #ebd5b0;
+            color: #1f140a;
+            font-size: 1.8rem;
+            padding: 16px 30px;
+            width: 100%;
+        }
+        #sellFatBtn:disabled {
+            opacity: 0.4;
         }
         .gameover-message {
-            margin: 20px 0 10px;
-            font-size: 1.8rem;
+            margin: 15px 0 5px;
+            font-size: 1.6rem;
             font-weight: 900;
             color: #ad1f1f;
             text-shadow: 2px 2px 0 #ffc857;
@@ -219,7 +237,7 @@
         }
         .footer-note {
             color: #594d3c;
-            margin-top: 20px;
+            margin-top: 16px;
             font-style: italic;
             font-weight: 500;
         }
@@ -239,9 +257,13 @@
         <span>🐹</span> СУСЛОВ <span>🐹</span>
     </h1>
     
-    <!-- Престиж счётчик -->
-    <div class="prestige-badge" id="prestigeDisplay">
-        ⭐ Престиж: <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
+    <div class="stats-row">
+        <div class="prestige-badge" id="prestigeDisplay">
+            ⭐ Престиж: <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
+        </div>
+        <div class="spent-badge" id="spentDisplay">
+            💸 Потрачено: <span id="totalSpent">0</span>🪙
+        </div>
     </div>
 
     <!-- Зона Суслова -->
@@ -261,7 +283,7 @@
     <!-- Статистика -->
     <div class="stats-panel">
         <div class="money-block">
-            <span>🪙</span> <span id="moneyValue">20</span>
+            <span>🪙</span> <span id="moneyValue">30</span>
         </div>
         <div class="food-block">
             <span>🍱</span> <span id="foodCount">0</span>
@@ -296,12 +318,15 @@
     <!-- Кнопка КОРМИТЬ -->
     <button id="feedBtn" style="background:#f5b342; font-size:2rem; padding:16px; margin: 10px 0 0;">🍽️ КОРМИТЬ</button>
 
-    <!-- Сообщение о финале и рестарт -->
+    <!-- Сообщение о финале -->
     <div id="gameOverMessage" class="gameover-message"></div>
-    <div class="reset-area">
-        <button id="resetBtn">🔄 НАЧАТЬ ЗАНОВО (Престиж +5%)</button>
+    
+    <!-- КНОПКА ПРОДАТЬ ЖИР (вместо ЗАНОВО) -->
+    <div class="sell-area">
+        <button id="sellFatBtn">💰 ПРОДАТЬ ЖИР (+5% от потраченного)</button>
     </div>
-    <div class="footer-note">купи еду → корми → лопни → престиж → +5% к сытости</div>
+    
+    <div class="footer-note">купи еду → корми → лопни → продай жир → +5% возврат</div>
 </div>
 
 <script>
@@ -309,16 +334,17 @@
         "use strict";
 
         // ---------- СОСТОЯНИЕ ----------
-        let money = 20;                
+        let money = 30;                
         let foodItems = 0;            
         let belly = 0;               
         let gameFinished = false;     
         
-        // НОВОЕ: Уровень престижа и бонус
-        let prestigeLevel = 0;                // сколько раз лопнул
-        let prestigeBonusPercent = 0;         // +5% за каждый престиж
+        // Престиж и потраченные деньги
+        let prestigeLevel = 0;               
+        let prestigeBonusPercent = 0;        
+        let totalSpentMoney = 0;             // сколько всего монет потрачено за ВСЕ забеги
         
-        // Базовый прирост за 1 еду (будет увеличиваться)
+        // Базовый прирост за 1 еду
         const BASE_FOOD_GAIN = 14;
         
         // DOM элементы
@@ -332,12 +358,13 @@
         const buyCarrot = document.getElementById('buyCarrot');
         const buyBurger = document.getElementById('buyBurger');
         const buyCake = document.getElementById('buyCake');
-        const resetBtn = document.getElementById('resetBtn');
+        const sellFatBtn = document.getElementById('sellFatBtn');
         const container = document.getElementById('gameContainer');
         
-        // Престиж элементы
+        // Престиж и потрачено
         const prestigeLevelSpan = document.getElementById('prestigeLevel');
         const prestigeBonusSpan = document.getElementById('prestigeBonus');
+        const totalSpentSpan = document.getElementById('totalSpent');
 
         // Еда: { цена, прирост сытости (%) }
         const FOOD_DATA = {
@@ -346,9 +373,8 @@
             cake:   { price: 30, gain: 35 }
         };
 
-        // ---------- ВЫЧИСЛЕНИЕ ТЕКУЩЕГО ПРИРОСТА С УЧЁТОМ ПРЕСТИЖА ----------
+        // ---------- ВЫЧИСЛЕНИЕ ПРИРОСТА С УЧЁТОМ ПРЕСТИЖА ----------
         function getCurrentFoodGain() {
-            // базовый + бонус престижа (5% за уровень)
             let bonusMultiplier = 1 + (prestigeBonusPercent / 100);
             return Math.floor(BASE_FOOD_GAIN * bonusMultiplier);
         }
@@ -363,9 +389,10 @@
             bellyFill.style.width = percent + '%';
             bellyPercent.textContent = percent + '%';
 
-            // Обновление престиж инфо
+            // Престиж и потрачено
             prestigeLevelSpan.textContent = prestigeLevel;
             prestigeBonusSpan.textContent = prestigeBonusPercent;
+            totalSpentSpan.textContent = totalSpentMoney;
 
             // Эмодзи
             if (gameFinished) {
@@ -377,9 +404,12 @@
                 else suslovEmoji.textContent = '🐭';
             }
 
-            // Блокировка кнопок
+            // Блокировка кнопок магазина и кормления если игра окончена
             const btns = [feedBtn, buyCarrot, buyBurger, buyCake];
             btns.forEach(btn => { btn.disabled = gameFinished; });
+            
+            // Кнопка "Продать жир" активна ТОЛЬКО когда игра окончена (живот лопнул)
+            sellFatBtn.disabled = !gameFinished;
 
             if (gameFinished) {
                 gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! ПРЕСТИЖ ${prestigeLevel} 💥`;
@@ -387,27 +417,24 @@
                 gameOverMsg.innerHTML = '';
             }
             
-            // Обновляем текст на кнопке кормления с текущим приростом
             feedBtn.innerHTML = `🍽️ КОРМИТЬ (+${getCurrentFoodGain()}%)`;
         }
 
-        // Проверка на предел
+        // Проверка на предел (лопание)
         function checkBellyLimit() {
             if (belly >= 100 && !gameFinished) {
-                // ЛОПНУЛ! Увеличиваем престиж
                 gameFinished = true;
                 belly = 100;
                 
-                // Увеличиваем престиж на 1 и бонус на 5%
-                prestigeLevel += 1;
-                prestigeBonusPercent += 5;
+                // При лопании НЕ увеличиваем престиж автоматически!
+                // Престиж растёт только при продаже жира (см. sellFat)
                 
                 container.classList.add('pop-effect');
                 setTimeout(() => container.classList.remove('pop-effect'), 400);
                 
                 updateUI();
                 suslovEmoji.textContent = '💥🐽';
-                gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! ПРЕСТИЖ ${prestigeLevel} (+${prestigeBonusPercent}% бонус) 💥`;
+                gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! ЖМИ "ПРОДАТЬ ЖИР" 💥`;
             } else {
                 updateUI();
             }
@@ -426,6 +453,7 @@
             }
 
             money -= data.price;
+            totalSpentMoney += data.price;    // УЧИТЫВАЕМ ПОТРАЧЕННОЕ
             foodItems += 1;
             updateUI();
             return true;
@@ -444,7 +472,7 @@
                 return;
             }
 
-            const gain = getCurrentFoodGain();  // прирост с учётом престижа!
+            const gain = getCurrentFoodGain();
             
             foodItems -= 1;
             belly = Math.min(belly + gain, 100);
@@ -456,24 +484,37 @@
             checkBellyLimit();
         }
 
-        // СБРОС ИГРЫ (Новая игра с сохранением престижа)
-        function resetGame() {
-            // Сбрасываем только текущий забег, НО престиж остаётся!
-            money = 25 + (prestigeLevel * 5);     // стартовый капитал растёт с престижем
+        // ПРОДАТЬ ЖИР — основная фишка!
+        function sellFat() {
+            if (!gameFinished) return;   // продать можно только когда лопнул
+            
+            // 1. Возврат 5% от ВСЕХ потраченных денег
+            const refund = Math.floor(totalSpentMoney * 0.05);
+            money += refund;
+            
+            // 2. Увеличиваем престиж и бонус
+            prestigeLevel += 1;
+            prestigeBonusPercent += 5;
+            
+            // 3. Сбрасываем текущий забег, но totalSpentMoney НЕ сбрасываем (копим вечно)
             foodItems = 0;
             belly = 0;
             gameFinished = false;
+            
+            // Немного стартового капитала (база + престиж)
+            money = Math.max(money, 25 + prestigeLevel * 3);  // чтобы не уйти в минус
             
             gameOverMsg.innerHTML = '';
             container.classList.remove('pop-effect');
             
             updateUI();
             suslovEmoji.style.transform = 'scale(1)';
+            
+            // Эффект радости
+            suslovEmoji.textContent = '🤑🐹';
+            setTimeout(() => updateUI(), 300);
         }
 
-        // ПОЛНЫЙ СБРОС (если нужно, но не будем)
-        // Но можно добавить скрытую функцию
-        
         // ---------- ОБРАБОТЧИКИ ----------
         buyCarrot.addEventListener('click', () => buyFood('carrot'));
         buyBurger.addEventListener('click', () => buyFood('burger'));
@@ -482,13 +523,13 @@
         feedBtn.addEventListener('click', feedSuslov);
         suslovEmoji.addEventListener('click', feedSuslov);
 
-        resetBtn.addEventListener('click', resetGame);
+        sellFatBtn.addEventListener('click', sellFat);
 
-        // Двойной клик по монетке — секретный бонус (небольшая помощь)
+        // Двойной клик по монетке (секрет)
         const moneyBlock = document.querySelector('.money-block');
         moneyBlock.addEventListener('dblclick', () => {
             if (!gameFinished) {
-                money += 8 + (prestigeLevel * 2);
+                money += 8;
                 updateUI();
             }
         });
@@ -498,4 +539,4 @@
     })();
 </script>
 </body>
-</html>
+    </html>
