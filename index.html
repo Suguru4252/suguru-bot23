@@ -2,511 +2,1054 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - ТРАССА СУСЛОВА: КЛИКАЙ ПО КРУГЛИШКАМ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>KROPOTKIN — Работы по уровням | Мини-игры</title>
     <style>
         * {
-            user-select: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            margin: 0;
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f0a, #030803);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', 'MS Gothic', monospace;
-            overflow: hidden;
+            background: #0a0c12;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            overflow-x: hidden;
+            color: #ffffff;
             touch-action: manipulation;
         }
-        .game-container {
-            background: #1a2a14;
-            border-radius: 48px;
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #121724, #020408);
             padding: 16px;
-            box-shadow: 0 20px 40px black, inset 0 1px 2px rgba(255,255,255,0.1);
-            border: 2px solid #7a9f6a;
+            animation: fadeIn 0.3s ease;
         }
-        canvas {
-            display: block;
-            margin: 0 auto;
+        .screen.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: rgba(12, 16, 28, 0.94);
+            backdrop-filter: blur(14px);
             border-radius: 24px;
-            box-shadow: 0 0 0 4px #2b3b24, 0 10px 30px black;
-            cursor: pointer;
+            border: 1px solid rgba(220, 50, 50, 0.4);
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
-        .ui-panel {
-            margin-top: 16px;
+
+        .btn {
+            background: linear-gradient(95deg, #b91c1c, #7f1a1a);
+            border: none;
+            padding: 16px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.1s;
+            margin-top: 12px;
+            touch-action: manipulation;
+        }
+        .btn:active { transform: scale(0.97); background: #9b1d1d; }
+        
+        .btn-large { padding: 18px; font-size: 20px; }
+        
+        .btn-small {
+            background: #2c2f48;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            width: auto;
+            display: inline-block;
+            margin-right: 10px;
+            margin-top: 8px;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+            touch-action: manipulation;
+        }
+        .btn-small:active { transform: scale(0.96); }
+        
+        .btn-success { background: #2d6a4f; }
+        .btn-danger { background: #9d0208; }
+        .btn-warning { background: #e67e22; }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            background: #1a1e30;
+            border: 1px solid #e03a3a;
+            border-radius: 60px;
+            color: white;
+            font-size: 16px;
+            margin: 10px 0;
+            -webkit-appearance: none;
+        }
+
+        .server-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .server-item {
+            background: #12172a;
+            padding: 14px 20px;
+            border-radius: 60px;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            border-left: 3px solid #e03a3a;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        .server-item.selected {
+            background: #a12222;
+            box-shadow: 0 0 12px #ff4f4f;
+            border-left-color: #ffcc88;
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #ff4f4f, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            background: #0c140acc;
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
+            margin-bottom: 20px;
+            background: #000000aa;
+            padding: 12px 18px;
             border-radius: 60px;
-            border: 1px solid #8ab87a;
+            font-size: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .stat {
-            background: #1f2c1a;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: #eaffc4;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-shadow: 0 0 4px #3c8c2a;
-            font-family: monospace;
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        button {
-            background: #4a6e3a;
+        .tab-btn {
+            background: #1b1e30;
             border: none;
-            color: #f0ffd0;
-            font-weight: bold;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-family: monospace;
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: #ddddff;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 3px 6px black;
+            flex: 1;
+            min-width: 70px;
+            text-align: center;
         }
-        button:active {
-            transform: scale(0.94);
-            background: #6e9658;
+        .active-tab {
+            background: #b91c1c;
+            color: white;
+            box-shadow: 0 0 10px #ff6666;
         }
-        .warning {
-            font-size: 0.7rem;
-            background: #2a1f1a;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #ffb878;
+
+        .work-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .work-item {
+            background: #0f1222;
+            padding: 16px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .work-info { flex: 1; }
+        .work-name { font-size: 18px; font-weight: bold; color: #ffcc88; }
+        .work-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
+        .work-stats { font-size: 12px; color: #6fcf97; margin-top: 4px; }
+        .work-lock { font-size: 12px; color: #ff8888; margin-top: 4px; }
+
+        /* МИНИ-ИГРЫ */
+        .minigame-area {
+            background: #0a0e1a;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .minigame-title {
+            font-size: 20px;
+            color: #ffcc88;
+            margin-bottom: 15px;
+        }
+        .clicker-button {
+            background: #e67e22;
+            padding: 20px;
+            border-radius: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px auto;
+            width: 80%;
+        }
+        .progress-bar {
+            height: 20px;
+            background: #2a2e44;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #6fcf97;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .memory-card {
+            background: #1a1e30;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .slider {
+            width: 100%;
+            margin: 15px 0;
+        }
+        .qrcode {
+            font-family: monospace;
+            font-size: 24px;
+            letter-spacing: 4px;
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .bj-game { text-align: center; }
+        .bj-cards { background: #0a0e1a; border-radius: 20px; padding: 15px; margin: 15px 0; }
+        .bj-hand { margin-bottom: 20px; }
+        .bj-hand-title { color: #ffcc88; font-size: 14px; margin-bottom: 8px; }
+        .bj-cards-list { font-size: 28px; letter-spacing: 8px; background: #1a1e30; padding: 12px; border-radius: 16px; font-family: monospace; }
+        .bj-score { color: #6fcf97; font-size: 20px; font-weight: bold; margin-top: 8px; }
+        .bj-buttons { display: flex; gap: 12px; justify-content: center; margin: 15px 0; }
+        .timer-box { background: #1a1e30; padding: 12px; border-radius: 60px; text-align: center; margin: 15px 0; font-size: 16px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2a2e44; flex-wrap: wrap; gap: 10px; }
+        .stat-label { color: #ffcc88; font-weight: 500; }
+        .stat-value { color: white; }
+
+        hr { border-color: #3a2e4a; margin: 15px 0; }
+        .locked { opacity: 0.5; filter: grayscale(0.3); }
+        .req-level { color: #ffaa66; font-size: 11px; }
+
+        @media (max-width: 480px) {
+            .screen { padding: 12px; }
+            .logo { font-size: 36px; }
+            .tab-btn { font-size: 13px; padding: 10px 12px; }
+            .bj-cards-list { font-size: 22px; letter-spacing: 4px; }
+            .clicker-button { font-size: 20px; padding: 15px; }
         }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="950" height="520"></canvas>
-        <div class="ui-panel">
-            <div class="stat">🚗 СУСЛОВ: <span id="suslovLevel">0</span></div>
-            <div class="stat">🍆 МИНЕТЫ: <span id="bjTotal">0</span></div>
-            <button id="resetBtn">💀 СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ КЛИКАЙ ПО КРУГЛИШКАМ (+5%)</div>
+
+<!-- ЭКРАН РЕГИСТРАЦИИ -->
+<div id="registerScreen" class="screen active">
+    <div class="glass-card" style="max-width: 450px; margin: 20px auto;">
+        <div class="logo">KROPOTKIN</div>
+        <div style="text-align: center; margin-bottom: 20px; color: #ffcc88;">⚡ Работы по уровням | Мини-игры ⚡</div>
+        <input type="text" id="nicknameInput" class="input-field" placeholder="Ник (Имя_Фамилия)">
+        <div class="server-list">
+            <div class="server-item selected" data-server="KROPOTKIN#1">#1</div>
+            <div class="server-item" data-server="KROPOTKIN#2">#2</div>
+            <div class="server-item" data-server="KROPOTKIN#3">#3</div>
+        </div>
+        <button class="btn btn-large" id="startGameBtn">▶ ВОЙТИ</button>
+    </div>
+</div>
+
+<!-- ЗАГРУЗКА -->
+<div id="loadingScreen" class="screen">
+    <div class="glass-card" style="max-width: 350px; margin: 30vh auto; text-align: center;">
+        <div style="font-size: 48px;">🚔</div>
+        <div style="margin: 15px;">Подключение к <span id="loadingServerName">KROPOTKIN</span></div>
+        <div id="loadingStep" style="color:#ffcc88;">Авторизация</div>
+        <div style="height: 6px; background: #2a2e44; border-radius: 10px;">
+            <div id="loadingBar" style="width:0%; height:6px; background:#e63946; border-radius:10px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ГЛАВНОЕ МЕНЮ -->
+<div id="mainMenuScreen" class="screen">
+    <div class="top-bar">
+        <div>🎮 <span id="mainNick" style="color:#ffaa66;">----</span></div>
+        <div>🟢 <span id="mainServerName">---</span></div>
+        <div>💰 <span id="moneyAmount" style="color:#6fcf97;">0</span> ₽</div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active-tab" data-tab="profile">👤 Профиль</button>
+        <button class="tab-btn" data-tab="work">💼 Работы</button>
+        <button class="tab-btn" data-tab="minigame">🎮 Мини-игра</button>
+        <button class="tab-btn" data-tab="casino">♠️ Black Jack</button>
+        <button class="tab-btn" data-tab="shop">🏪 Магазин</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+    </div>
+
+    <!-- ПРОФИЛЬ -->
+    <div id="profileTab" class="tab-content active-tab-content">
+        <div class="glass-card">
+            <div class="stat-row"><span class="stat-label">🔰 ID:</span><span class="stat-value" id="userId">----</span></div>
+            <div class="stat-row"><span class="stat-label">⭐ Уровень:</span><span class="stat-value" id="userLvl">1</span></div>
+            <div class="stat-row"><span class="stat-label">🏆 Опыт (XP):</span><span class="stat-value" id="userXp">0</span>/<span id="nextLevelXp">1000</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Работа:</span><span class="stat-value" id="currentJob">Нет</span></div>
+            <div class="stat-row"><span class="stat-label">📈 До след. уровня:</span><span class="stat-value" id="xpToNext">1000</span></div>
+        </div>
+    </div>
+
+    <!-- РАБОТЫ (по уровням) -->
+    <div id="workTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88; margin-bottom: 15px;">💼 Работы (открываются по уровням)</h3>
+            <div id="workList" class="work-list"></div>
+            <div id="workMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- МИНИ-ИГРА ДЛЯ РАБОТЫ -->
+    <div id="minigameTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88; margin-bottom: 15px;" id="minigameJobName">Выберите работу</h3>
+            <div id="minigameArea" class="minigame-area">
+                <div style="text-align: center; color: #aaa;">Сначала выберите работу во вкладке "Работы"</div>
+            </div>
+            <div id="minigameResult" style="text-align: center; margin-top: 15px; font-size: 16px;"></div>
+        </div>
+    </div>
+
+    <!-- BLACK JACK -->
+    <div id="casinoTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88; text-align: center;">♠️ BLACK JACK ♥️</h3>
+            <div style="margin: 15px 0;">
+                <label style="color:#aaa;">💰 Сумма ставки:</label>
+                <input type="number" id="betAmount" class="input-field bet-input" value="100" min="10" step="10">
+            </div>
+            <div id="bjGameArea" class="bj-game">
+                <div class="bj-cards">
+                    <div class="bj-hand">
+                        <div class="bj-hand-title">🤵 ДИЛЕР</div>
+                        <div class="bj-cards-list" id="dealerCards">???</div>
+                        <div class="bj-score" id="dealerScore">?</div>
+                    </div>
+                    <div class="bj-hand">
+                        <div class="bj-hand-title">🎲 ИГРОК</div>
+                        <div class="bj-cards-list" id="playerCards">-</div>
+                        <div class="bj-score" id="playerScore">0</div>
+                    </div>
+                </div>
+                <div class="bj-buttons" id="bjButtons">
+                    <button id="bjHitBtn" class="btn-small btn-success">🎴 ЕЩЁ</button>
+                    <button id="bjStandBtn" class="btn-small btn-danger">✋ ХВАТИТ</button>
+                </div>
+            </div>
+            <button id="startBlackjackBtn" class="btn">🎲 НАЧАТЬ РАУНД</button>
+            <div id="bjTimer" class="timer-box">⏳ Готов к игре</div>
+            <div id="bjMessage" style="text-align: center; font-size: 16px; margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- МАГАЗИН -->
+    <div id="shopTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88; margin-bottom: 15px;">🏪 Магазин</h3>
+            <div id="shopList" class="work-list"></div>
+            <div id="shopMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- СТАТИСТИКА -->
+    <div id="statsTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88; margin-bottom: 15px;">📊 Статистика</h3>
+            <div class="stat-row"><span class="stat-label">💰 Всего заработано:</span><span class="stat-value" id="totalEarned">0</span></div>
+            <div class="stat-row"><span class="stat-label">🎰 Выиграно в Black Jack:</span><span class="stat-value" id="totalWon">0</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Смен отработано:</span><span class="stat-value" id="workCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">🎮 Мини-игр пройдено:</span><span class="stat-value" id="minigameCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">📅 В игре (дней):</span><span class="stat-value" id="daysPlayed">1</span></div>
+            <hr>
+            <div class="stat-row"><span class="stat-label">♠️ Игр в Black Jack:</span><span class="stat-value" id="bjGamesCount">0</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    // ========== МИНЕТ + КЛИКАБЕЛЬНЫЕ КРУГЛИШКИ ==========
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // ----- СУСЛОВ НА ТРАССЕ -----
-    let suslov = {
-        x: 180, y: 320, dir: 1, speed: 1.3,
-        w: 52, h: 56, walkCycle: 0,
-        isHitching: true
+    // ==================== ДАННЫЕ ИГРОКА ====================
+    let player = {
+        nick: "",
+        server: "KROPOTKIN#1",
+        money: 5000,
+        level: 1,
+        exp: 0,
+        currentJob: null,
+        totalEarned: 0,
+        totalWon: 0,
+        workCount: 0,
+        minigameCount: 0,
+        bjGamesCount: 0,
+        joinDate: Date.now()
     };
     
-    // ----- МИНИ-ИГРА -----
-    let minigame = {
-        active: false,
-        pleasure: 0,
-        maxPleasure: 100,
-        headBobAngle: 0,
-        mouthWide: 0,
-        screenFlash: 0,
-        finishFlash: 0,
-        finishTextTimer: 0,
-        finishResetTimer: 0,   // таймер на перезапуск после КОНЧИЛ
-        fallingDrops: []       // падающие круглишки
-    };
+    // ==================== РАБОТЫ ПО УРОВНЯМ ====================
+    const jobs = [
+        { name: "📦 Курьер", levelReq: 1, income: 3000, expReward: 1, desc: "Развоз заказов по городу", minigame: "clicker", target: 10 },
+        { name: "🌾 Фермер", levelReq: 1, income: 3500, expReward: 1, desc: "Сбор урожая на поле", minigame: "clicker", target: 12 },
+        { name: "🏭 Завод", levelReq: 2, income: 4000, expReward: 2, desc: "Работа на конвейере", minigame: "qrcode", target: 4 },
+        { name: "🚕 Таксист", levelReq: 2, income: 4500, expReward: 2, desc: "Перевозка пассажиров", minigame: "slider", target: 80 },
+        { name: "🔧 Механик", levelReq: 3, income: 5500, expReward: 3, desc: "Ремонт автомобилей", minigame: "memory", target: 4 },
+        { name: "🛍️ Продавец", levelReq: 3, income: 5000, expReward: 3, desc: "Работа в магазине", minigame: "clicker", target: 15 },
+        { name: "⛏️ Шахтёр", levelReq: 4, income: 7000, expReward: 4, desc: "Добыча руды", minigame: "clicker", target: 20 },
+        { name: "🚛 Дальнобойщик", levelReq: 5, income: 9000, expReward: 5, desc: "Доставка грузов по трассе", minigame: "slider", target: 90 }
+    ];
     
-    let suslovLevel = 0;
-    let totalBj = 0;
+    // Состояние текущей мини-игры
+    let currentMinigame = null;
+    let minigameProgress = 0;
+    let minigameTarget = 0;
+    let memorySequence = [];
+    let memoryUserInput = [];
+    let sliderValue = 50;
     
-    const suslovLevelSpan = document.getElementById('suslovLevel');
-    const bjTotalSpan = document.getElementById('bjTotal');
-    const resetBtn = document.getElementById('resetBtn');
+    // Магазин
+    const shopItems = [
+        { name: "🍔 Еда", price: 200, desc: "Восстанавливает здоровье" },
+        { name: "💊 Аптечка", price: 500, desc: "Лечит раны" },
+        { name: "📱 Сим-карта", price: 1000, desc: "Для звонков" },
+        { name: "🔫 Травмат", price: 5000, desc: "Для самообороны" },
+        { name: "🚗 Права", price: 15000, desc: "Категория B" }
+    ];
     
-    let roadOffset = 0;
-    let lastDropSpawn = 0;
-    
-    function updateUI() {
-        suslovLevelSpan.innerText = suslovLevel;
-        bjTotalSpan.innerText = totalBj;
+    // ==================== ФУНКЦИИ УРОВНЕЙ И ОПЫТА ====================
+    function getExpForNextLevel() {
+        return 1000;
     }
     
-    let audioCtx = null;
-    function playSound(freq = 660) {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function addExp(amount) {
+        player.exp += amount;
+        let leveled = false;
+        const expNeeded = getExpForNextLevel();
+        while (player.exp >= expNeeded) {
+            player.level++;
+            player.exp -= expNeeded;
+            leveled = true;
         }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-        osc.frequency.value = freq;
-        gain.gain.value = 0.2;
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
-        osc.start();
-        osc.stop(now + 0.2);
-    }
-    
-    function startMinigame() {
-        if (minigame.active) return;
-        minigame.active = true;
-        minigame.pleasure = 0;
-        minigame.headBobAngle = 0;
-        minigame.mouthWide = 0;
-        minigame.screenFlash = 0;
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
-        minigame.fallingDrops = [];
-        lastDropSpawn = 0;
-        suslov.isHitching = false;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    
-    function completeMinigame() {
-        if (!minigame.active) return;
-        minigame.active = false;
-        totalBj++;
-        suslovLevel++;
         updateUI();
-        
-        // Эффект КОНЧИЛ: белый экран + чёрная надпись на 5 секунд
-        minigame.finishFlash = 35;
-        minigame.finishTextTimer = 150;  // ~5 секунд (30fps * 5)
-        minigame.finishResetTimer = 150; // через 5 секунд перезапуск
-        minigame.fallingDrops = [];
-        suslov.isHitching = false; // Суслов стоит на месте
-        
-        playSound(880);
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        if (leveled) {
+            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы ${player.level} уровень! 🏆\n⭐ Открылись новые работы!`);
+            renderWorkList();
+        }
+        saveGame();
     }
     
-    // Добавление удовольствия
-    function addPleasure(amount) {
-        if (!minigame.active) return;
-        minigame.pleasure = Math.min(minigame.pleasure + amount, minigame.maxPleasure);
-        minigame.mouthWide = 16;
-        minigame.screenFlash = 8;
-        playSound(520);
+    function addMoney(amount) {
+        player.money += amount;
+        player.totalEarned += amount;
+        updateUI();
+        saveGame();
+    }
+    
+    function completeWork() {
+        if (!player.currentJob) {
+            alert("❌ Сначала выберите работу во вкладке Работы!");
+            return;
+        }
         
-        if (navigator.vibrate) navigator.vibrate(30);
+        // Проверка уровня
+        if (player.level < player.currentJob.levelReq) {
+            alert(`❌ Требуется ${player.currentJob.levelReq} уровень! У вас ${player.level}`);
+            return;
+        }
         
-        if (minigame.pleasure >= minigame.maxPleasure) {
-            completeMinigame();
+        // Показываем мини-игру
+        startMinigame(player.currentJob);
+    }
+    
+    function finishWork(success) {
+        if (success) {
+            const income = player.currentJob.income;
+            const expGain = player.currentJob.expReward;
+            addMoney(income);
+            addExp(expGain);
+            player.workCount++;
+            player.minigameCount++;
+            updateUI();
+            alert(`✅ Смена на ${player.currentJob.name} завершена!\n💰 +${income}₽\n✨ +${expGain} XP`);
+            document.getElementById('minigameResult').innerHTML = `✅ Работа выполнена! +${income}₽, +${expGain} XP`;
+            setTimeout(() => {
+                const msgDiv = document.getElementById('minigameResult');
+                if (msgDiv) msgDiv.innerHTML = '';
+            }, 3000);
+        } else {
+            alert(`❌ Вы провалили мини-игру! Попробуйте ещё раз.`);
+            document.getElementById('minigameResult').innerHTML = `❌ Провал! Попробуйте снова.`;
+            setTimeout(() => {
+                const msgDiv = document.getElementById('minigameResult');
+                if (msgDiv) msgDiv.innerHTML = '';
+            }, 2000);
+        }
+        saveGame();
+    }
+    
+    // ==================== МИНИ-ИГРЫ ====================
+    function startMinigame(job) {
+        currentMinigame = job.minigame;
+        minigameTarget = job.target;
+        minigameProgress = 0;
+        
+        const area = document.getElementById('minigameArea');
+        const title = document.getElementById('minigameJobName');
+        title.innerHTML = `🎮 ${job.name} — мини-игра`;
+        
+        if (job.minigame === 'clicker') {
+            area.innerHTML = `
+                <div class="minigame-title">👆 Нажимай на кнопку! Нужно ${job.target} раз(а)</div>
+                <div class="clicker-button" id="clickerBtn">👆 НАЖМИ МЕНЯ</div>
+                <div class="progress-bar"><div class="progress-fill" id="clickerProgress" style="width: 0%"></div></div>
+                <div style="font-size: 14px;">Прогресс: <span id="clickerCount">0</span>/${job.target}</div>
+                <button id="clickerFinishBtn" class="btn-small btn-success" style="margin-top: 15px;">✅ ЗАВЕРШИТЬ РАБОТУ</button>
+            `;
+            
+            let count = 0;
+            const clickBtn = document.getElementById('clickerBtn');
+            const progressFill = document.getElementById('clickerProgress');
+            const countSpan = document.getElementById('clickerCount');
+            const finishBtn = document.getElementById('clickerFinishBtn');
+            
+            clickBtn.onclick = () => {
+                count = Math.min(count + 1, job.target);
+                if (countSpan) countSpan.innerText = count;
+                if (progressFill) progressFill.style.width = (count / job.target * 100) + '%';
+                if (count === job.target) {
+                    clickBtn.style.opacity = '0.5';
+                    clickBtn.disabled = true;
+                }
+            };
+            
+            finishBtn.onclick = () => {
+                if (count >= job.target) {
+                    finishWork(true);
+                } else {
+                    finishWork(false);
+                }
+            };
+        }
+        else if (job.minigame === 'qrcode') {
+            const code = Math.floor(Math.random() * 9000 + 1000);
+            area.innerHTML = `
+                <div class="minigame-title">📷 Отсканируй QR-код! Введи число: ${code}</div>
+                <div class="qrcode">[ ${code} ]</div>
+                <input type="number" id="qrInput" class="input-field" placeholder="Введите код" style="margin-top: 15px;">
+                <button id="qrSubmitBtn" class="btn-small btn-success">✅ ПРОВЕРИТЬ</button>
+            `;
+            const submitBtn = document.getElementById('qrSubmitBtn');
+            submitBtn.onclick = () => {
+                const input = document.getElementById('qrInput').value;
+                if (parseInt(input) === code) {
+                    finishWork(true);
+                } else {
+                    finishWork(false);
+                }
+            };
+        }
+        else if (job.minigame === 'slider') {
+            const targetValue = Math.floor(Math.random() * 41 + 30);
+            area.innerHTML = `
+                <div class="minigame-title">🎚️ Установи значение на ${targetValue}!</div>
+                <input type="range" id="sliderInput" class="slider" min="0" max="100" value="50">
+                <div style="font-size: 24px; margin: 10px;">Текущее: <span id="sliderValue">50</span></div>
+                <button id="sliderSubmitBtn" class="btn-small btn-success">✅ ПРОВЕРИТЬ</button>
+            `;
+            const slider = document.getElementById('sliderInput');
+            const valueSpan = document.getElementById('sliderValue');
+            slider.oninput = () => {
+                valueSpan.innerText = slider.value;
+            };
+            const submitBtn = document.getElementById('sliderSubmitBtn');
+            submitBtn.onclick = () => {
+                const val = parseInt(slider.value);
+                if (Math.abs(val - targetValue) <= 5) {
+                    finishWork(true);
+                } else {
+                    finishWork(false);
+                }
+            };
+        }
+        else if (job.minigame === 'memory') {
+            const numbers = ['🍎', '🍐', '🍊', '🍋', '🍉', '🍒'];
+            memorySequence = [];
+            memoryUserInput = [];
+            for (let i = 0; i < 4; i++) {
+                memorySequence.push(numbers[Math.floor(Math.random() * numbers.length)]);
+            }
+            area.innerHTML = `
+                <div class="minigame-title">🧠 Запомни последовательность!</div>
+                <div style="font-size: 36px; letter-spacing: 10px; margin: 15px;" id="sequenceDisplay">${memorySequence.join(' ')}</div>
+                <div style="font-size: 14px; color: #aaa;">Запомни, через 3 секунды исчезнет...</div>
+                <div id="memoryGameArea" style="margin-top: 15px;"></div>
+                <button id="memoryCheckBtn" class="btn-small btn-success" style="display: none;">✅ ПРОВЕРИТЬ</button>
+            `;
+            const seqDiv = document.getElementById('sequenceDisplay');
+            setTimeout(() => {
+                seqDiv.style.display = 'none';
+                const gameArea = document.getElementById('memoryGameArea');
+                gameArea.innerHTML = `
+                    <div class="memory-grid" id="memoryGrid"></div>
+                `;
+                const grid = document.getElementById('memoryGrid');
+                const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+                for (let i = 0; i < 6; i++) {
+                    const btn = document.createElement('div');
+                    btn.className = 'memory-card';
+                    btn.innerText = shuffled[i];
+                    btn.onclick = () => {
+                        if (memoryUserInput.length < 4) {
+                            memoryUserInput.push(shuffled[i]);
+                            btn.style.opacity = '0.5';
+                            btn.disabled = true;
+                        }
+                    };
+                    grid.appendChild(btn);
+                }
+                const checkBtn = document.getElementById('memoryCheckBtn');
+                checkBtn.style.display = 'inline-block';
+                checkBtn.onclick = () => {
+                    let correct = true;
+                    for (let i = 0; i < 4; i++) {
+                        if (memoryUserInput[i] !== memorySequence[i]) correct = false;
+                    }
+                    if (correct && memoryUserInput.length === 4) {
+                        finishWork(true);
+                    } else {
+                        finishWork(false);
+                    }
+                };
+            }, 3000);
         }
     }
     
-    // СПАВН КРУГЛИШКИ
-    function spawnDrop() {
-        if (!minigame.active) return;
-        let x = 50 + Math.random() * (canvas.width - 100);
-        minigame.fallingDrops.push({
-            x: x,
-            y: 30,
-            radius: 20,
-            speed: 1.0 + Math.random() * 1.8
+    // ==================== UI ФУНКЦИИ ====================
+    function updateUI() {
+        document.getElementById('moneyAmount').innerText = player.money.toLocaleString();
+        document.getElementById('userLvl').innerText = player.level;
+        document.getElementById('userXp').innerText = player.exp;
+        document.getElementById('nextLevelXp').innerText = getExpForNextLevel();
+        document.getElementById('mainNick').innerText = player.nick;
+        document.getElementById('mainServerName').innerText = player.server;
+        document.getElementById('totalEarned').innerText = player.totalEarned.toLocaleString();
+        document.getElementById('totalWon').innerText = player.totalWon.toLocaleString();
+        document.getElementById('workCount').innerText = player.workCount;
+        document.getElementById('minigameCount').innerText = player.minigameCount;
+        document.getElementById('bjGamesCount').innerText = player.bjGamesCount;
+        
+        const daysPlayed = Math.floor((Date.now() - player.joinDate) / 86400000) + 1;
+        document.getElementById('daysPlayed').innerText = daysPlayed;
+        
+        const xpToNext = getExpForNextLevel() - player.exp;
+        document.getElementById('xpToNext').innerText = xpToNext > 0 ? xpToNext : 0;
+        
+        if (player.currentJob) {
+            document.getElementById('currentJob').innerHTML = `${player.currentJob.name}`;
+        } else {
+            document.getElementById('currentJob').innerText = "Нет";
+        }
+    }
+    
+    function setJob(job) {
+        if (player.level < job.levelReq) {
+            alert(`❌ Работа "${job.name}" требует ${job.levelReq} уровень! У вас ${player.level}`);
+            return;
+        }
+        player.currentJob = job;
+        updateUI();
+        const msgDiv = document.getElementById('workMessage');
+        if (msgDiv) {
+            msgDiv.innerHTML = `✅ Выбрана работа: ${job.name}. Перейдите в "Мини-игра" чтобы работать!`;
+            setTimeout(() => { msgDiv.innerHTML = ''; }, 3000);
+        }
+        saveGame();
+    }
+    
+    function renderWorkList() {
+        const container = document.getElementById('workList');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i];
+            const isUnlocked = player.level >= job.levelReq;
+            const div = document.createElement('div');
+            div.className = 'work-item' + (isUnlocked ? '' : ' locked');
+            div.innerHTML = `
+                <div class="work-info">
+                    <div class="work-name">${job.name} ${!isUnlocked ? `🔒` : ''}</div>
+                    <div class="work-desc">${job.desc}</div>
+                    <div class="work-stats">💰 +${job.income}₽ | ✨ +${job.expReward} XP</div>
+                    <div class="work-lock">${!isUnlocked ? `⭐ Требуется ${job.levelReq} уровень` : `✅ Доступна`}</div>
+                </div>
+                <button class="btn-small" data-job-index="${i}" ${!isUnlocked ? 'disabled style="opacity:0.5;"' : ''}>Выбрать</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        document.querySelectorAll('[data-job-index]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.getAttribute('data-job-index'));
+                if (player.level >= jobs[idx].levelReq) {
+                    setJob(jobs[idx]);
+                }
+            });
         });
     }
     
-    function updateFallingDrops(delta) {
-        if (!minigame.active) return;
-        let now = Date.now();
-        // спавн каждые 0.7-1.2 секунды
-        if (now - lastDropSpawn > 700 + Math.random() * 500) {
-            spawnDrop();
-            lastDropSpawn = now;
+    function renderShop() {
+        const container = document.getElementById('shopList');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < shopItems.length; i++) {
+            const item = shopItems[i];
+            const div = document.createElement('div');
+            div.className = 'work-item';
+            div.innerHTML = `
+                <div class="work-info">
+                    <div class="work-name">${item.name}</div>
+                    <div class="work-desc">${item.desc}</div>
+                    <div class="work-stats">💰 ${item.price.toLocaleString()} ₽</div>
+                </div>
+                <button class="btn-small" data-shop-index="${i}">Купить</button>
+            `;
+            container.appendChild(div);
         }
         
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            d.y += d.speed * delta * 60;
-            if (d.y > canvas.height - 70) {
-                minigame.fallingDrops.splice(i,1);
-                i--;
-            }
+        document.querySelectorAll('[data-shop-index]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.getAttribute('data-shop-index'));
+                const item = shopItems[idx];
+                if (player.money >= item.price) {
+                    player.money -= item.price;
+                    updateUI();
+                    document.getElementById('shopMessage').innerHTML = `✅ Куплено: ${item.name}`;
+                    saveGame();
+                    setTimeout(() => {
+                        const msg = document.getElementById('shopMessage');
+                        if (msg) msg.innerHTML = '';
+                    }, 2000);
+                } else {
+                    document.getElementById('shopMessage').innerHTML = `❌ Не хватает ${item.price - player.money}₽`;
+                    setTimeout(() => {
+                        const msg = document.getElementById('shopMessage');
+                        if (msg) msg.innerHTML = '';
+                    }, 2000);
+                }
+            });
+        });
+    }
+    
+    // ==================== BLACK JACK ====================
+    let bjGameActive = false;
+    let bjCooldown = false;
+    let bjCooldownInterval = null;
+    let bjCooldownSeconds = 0;
+    let playerHand = [];
+    let dealerHand = [];
+    let currentBet = 0;
+    
+    function getCardValue(card) {
+        if (card === 'A') return 11;
+        if (['K', 'Q', 'J'].includes(card)) return 10;
+        return parseInt(card);
+    }
+    
+    function calculateScore(hand) {
+        let score = 0;
+        let aces = 0;
+        for (let card of hand) {
+            if (card === 'A') { aces++; score += 11; }
+            else { score += getCardValue(card); }
         }
+        while (score > 21 && aces > 0) { score -= 10; aces--; }
+        return score;
     }
     
-    // ПРОВЕРКА КЛИКА ПО КРУГЛИШКЕ
-    function handleDropClick(canvasX, canvasY) {
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            let dx = canvasX - d.x;
-            let dy = canvasY - d.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < d.radius) {
-                // ПОПАЛ! +5%
-                addPleasure(5);
-                minigame.fallingDrops.splice(i,1);
-                return true;
-            }
-        }
-        return false;
+    function getRandomCard() {
+        const cards = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        return cards[Math.floor(Math.random() * cards.length)];
     }
     
-    function isPointInSuslov(x, y) {
-        return (x >= suslov.x && x <= suslov.x + suslov.w &&
-                y >= suslov.y - 8 && y <= suslov.y + suslov.h);
-    }
-    
-    function handleCanvasClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
+    function updateBJUI() {
+        const playerCardsDiv = document.getElementById('playerCards');
+        const dealerCardsDiv = document.getElementById('dealerCards');
+        const playerScoreDiv = document.getElementById('playerScore');
+        const dealerScoreDiv = document.getElementById('dealerScore');
+        
+        if (playerCardsDiv) playerCardsDiv.innerHTML = playerHand.map(c => c).join(' ');
+        if (playerScoreDiv) playerScoreDiv.innerText = calculateScore(playerHand);
+        
+        if (bjGameActive) {
+            if (dealerCardsDiv) dealerCardsDiv.innerHTML = dealerHand[0] + ' ?';
+            if (dealerScoreDiv) dealerScoreDiv.innerText = '?';
         } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
-        
-        if (minigame.active) {
-            // сначала проверяем попадание по круглишке
-            let hit = handleDropClick(canvasX, canvasY);
-            if (!hit) {
-                // клик мимо - ничего не происходит
-                // можно добавить звук промаха, но по задаче не нужно
-            }
-        } else if (isPointInSuslov(canvasX, canvasY) && minigame.finishResetTimer === 0) {
-            startMinigame();
+            if (dealerCardsDiv && dealerHand.length > 0) dealerCardsDiv.innerHTML = dealerHand.join(' ');
+            if (dealerScoreDiv && dealerHand.length > 0) dealerScoreDiv.innerText = calculateScore(dealerHand);
         }
     }
     
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
-    });
-    
-    resetBtn.addEventListener('click', () => {
-        minigame.active = false;
-        suslov = { x: 180, y: 320, dir: 1, speed: 1.3, w: 52, h: 56, walkCycle: 0, isHitching: true };
-        suslovLevel = 0;
-        totalBj = 0;
-        minigame.fallingDrops = [];
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
+    function endBJGame(result, winAmount) {
+        bjGameActive = false;
+        const hitBtn = document.getElementById('bjHitBtn');
+        const standBtn = document.getElementById('bjStandBtn');
+        const startBtn = document.getElementById('startBlackjackBtn');
+        const messageDiv = document.getElementById('bjMessage');
+        
+        if (hitBtn) hitBtn.disabled = true;
+        if (standBtn) standBtn.disabled = true;
+        if (startBtn) startBtn.disabled = false;
+        
+        if (result === 'win') {
+            player.money += winAmount;
+            player.totalWon += winAmount;
+            messageDiv.innerHTML = `🎉 ПОБЕДА! +${winAmount}₽ 🎉`;
+        } else if (result === 'lose') {
+            messageDiv.innerHTML = `😞 ПРОИГРЫШ! -${currentBet}₽ 😞`;
+        } else if (result === 'push') {
+            player.money += currentBet;
+            messageDiv.innerHTML = `🤝 НИЧЬЯ! Возврат ${currentBet}₽ 🤝`;
+        } else if (result === 'blackjack') {
+            player.money += winAmount;
+            player.totalWon += winAmount;
+            messageDiv.innerHTML = `🃏 BLACKJACK! +${winAmount}₽ 🃏`;
+        }
+        
+        player.bjGamesCount++;
         updateUI();
+        updateBJUI();
+        saveGame();
+        startBJCooldown();
+        
+        setTimeout(() => { if (messageDiv) messageDiv.innerHTML = ''; }, 3000);
+    }
+    
+    function dealerPlay() {
+        while (calculateScore(dealerHand) < 17) dealerHand.push(getRandomCard());
+        const dealerScore = calculateScore(dealerHand);
+        const playerScore = calculateScore(playerHand);
+        updateBJUI();
+        if (dealerScore > 21) endBJGame('win', currentBet * 2);
+        else if (dealerScore > playerScore) endBJGame('lose', 0);
+        else if (dealerScore < playerScore) endBJGame('win', currentBet * 2);
+        else endBJGame('push', currentBet);
+    }
+    
+    function playerHit() {
+        if (!bjGameActive) return;
+        playerHand.push(getRandomCard());
+        updateBJUI();
+        if (calculateScore(playerHand) > 21) endBJGame('lose', 0);
+    }
+    
+    function playerStand() {
+        if (!bjGameActive) return;
+        bjGameActive = false;
+        dealerPlay();
+    }
+    
+    function startBJCooldown() {
+        bjCooldown = true;
+        bjCooldownSeconds = 30;
+        const timerDiv = document.getElementById('bjTimer');
+        const startBtn = document.getElementById('startBlackjackBtn');
+        if (startBtn) startBtn.disabled = true;
+        if (bjCooldownInterval) clearInterval(bjCooldownInterval);
+        bjCooldownInterval = setInterval(() => {
+            bjCooldownSeconds--;
+            if (timerDiv) timerDiv.innerHTML = `⏳ Ждите ${bjCooldownSeconds} сек...`;
+            if (bjCooldownSeconds <= 0) {
+                clearInterval(bjCooldownInterval);
+                bjCooldown = false;
+                if (timerDiv) timerDiv.innerHTML = `✅ Можно начинать новую игру!`;
+                if (startBtn) startBtn.disabled = false;
+                setTimeout(() => {
+                    if (timerDiv && timerDiv.innerHTML === `✅ Можно начинать новую игру!`) {
+                        timerDiv.innerHTML = `⏳ Готов к игре`;
+                    }
+                }, 2000);
+            }
+        }, 1000);
+    }
+    
+    function startBlackjack() {
+        if (bjCooldown) {
+            document.getElementById('bjMessage').innerHTML = `⏳ Подождите ${bjCooldownSeconds} секунд!`;
+            return;
+        }
+        const bet = parseInt(document.getElementById('betAmount').value);
+        if (isNaN(bet) || bet < 10) { alert('Минимальная ставка 10₽'); return; }
+        if (bet > player.money) { alert('Не хватает денег!'); return; }
+        
+        currentBet = bet;
+        player.money -= currentBet;
+        updateUI();
+        playerHand = [getRandomCard(), getRandomCard()];
+        dealerHand = [getRandomCard(), getRandomCard()];
+        bjGameActive = true;
+        
+        document.getElementById('bjHitBtn').disabled = false;
+        document.getElementById('bjStandBtn').disabled = false;
+        document.getElementById('startBlackjackBtn').disabled = true;
+        updateBJUI();
+        
+        if (calculateScore(playerHand) === 21) endBJGame('blackjack', currentBet * 2.5);
+        saveGame();
+    }
+    
+    // ==================== СОХРАНЕНИЕ ====================
+    function saveGame() {
+        localStorage.setItem('kropotkin_save', JSON.stringify({ player: player }));
+    }
+    
+    function loadGame() {
+        const saved = localStorage.getItem('kropotkin_save');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.player) player = data.player;
+            } catch(e) {}
+        }
+        updateUI();
+    }
+    
+    // ==================== ЗАГРУЗКА ====================
+    function simulateLoading(callback) {
+        let progress = 0;
+        const steps = ["Соединение...", "Мир KROPOTKIN", "Синхронизация", "Вход"];
+        let stepIdx = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 20 + 10;
+            if (progress >= 100) {
+                clearInterval(interval);
+                document.getElementById('loadingBar').style.width = '100%';
+                setTimeout(callback, 400);
+            } else {
+                document.getElementById('loadingBar').style.width = Math.min(progress, 100) + '%';
+                if (stepIdx < steps.length && progress > (stepIdx + 1) * 22) {
+                    document.getElementById('loadingStep').innerText = steps[stepIdx];
+                    stepIdx++;
+                }
+            }
+        }, 200);
+    }
+    
+    const startBtn = document.getElementById('startGameBtn');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const registerScreen = document.getElementById('registerScreen');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainMenu = document.getElementById('mainMenuScreen');
+    const userIdSpan = document.getElementById('userId');
+    
+    startBtn.addEventListener('click', () => {
+        let nick = nicknameInput.value.trim();
+        if (nick === "") { alert("Введите ник (пример: Artem_Kropotkin)"); return; }
+        if (!nick.includes("_")) { alert("Ник должен содержать '_'"); return; }
+        
+        const selectedServer = document.querySelector('.server-item.selected');
+        player.nick = nick;
+        player.server = selectedServer ? selectedServer.getAttribute('data-server') : "KROPOTKIN#1";
+        player.money = 5000;
+        player.level = 1;
+        player.exp = 0;
+        player.totalEarned = 0;
+        player.totalWon = 0;
+        player.workCount = 0;
+        player.minigameCount = 0;
+        player.bjGamesCount = 0;
+        player.joinDate = Date.now();
+        player.currentJob = null;
+        
+        registerScreen.classList.remove('active');
+        loadingScreen.classList.add('active');
+        document.getElementById('loadingServerName').innerText = player.server;
+        
+        simulateLoading(() => {
+            loadingScreen.classList.remove('active');
+            mainMenu.classList.add('active');
+            userIdSpan.innerText = Math.floor(Math.random() * 9000 + 1000);
+            updateUI();
+            loadGame();
+            renderWorkList();
+            renderShop();
+            
+            document.getElementById('startBlackjackBtn').onclick = startBlackjack;
+            document.getElementById('bjHitBtn').onclick = playerHit;
+            document.getElementById('bjStandBtn').onclick = playerStand;
+            document.getElementById('bjHitBtn').disabled = true;
+            document.getElementById('bjStandBtn').disabled = true;
+        });
     });
     
-    function updateSuslov(delta) {
-        if (minigame.active) return;
-        if (minigame.finishResetTimer > 0) return; // после КОНЧИЛ стоит
-        let step = suslov.speed * delta * 60;
-        suslov.x += suslov.dir * step;
-        if (suslov.x <= 40) { suslov.x = 40; suslov.dir = 1; }
-        if (suslov.x >= canvas.width - suslov.w - 40) { suslov.x = canvas.width - suslov.w - 40; suslov.dir = -1; }
-        suslov.walkCycle = (suslov.walkCycle + delta * 14) % (Math.PI * 2);
-    }
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabsMap = {
+        profile: document.getElementById('profileTab'),
+        work: document.getElementById('workTab'),
+        minigame: document.getElementById('minigameTab'),
+        casino: document.getElementById('casinoTab'),
+        shop: document.getElementById('shopTab'),
+        stats: document.getElementById('statsTab')
+    };
     
-    function updateEffects(delta) {
-        if (minigame.active) {
-            minigame.mouthWide = Math.max(4, minigame.mouthWide - delta * 40);
-            minigame.headBobAngle = (minigame.headBobAngle + delta * 20) % (Math.PI * 2);
-            if (minigame.screenFlash > 0) minigame.screenFlash -= delta * 100;
-        }
-        if (minigame.finishFlash > 0) minigame.finishFlash -= delta * 70;
-        if (minigame.finishTextTimer > 0) {
-            minigame.finishTextTimer -= delta * 30;
-            if (minigame.finishTextTimer <= 0) {
-                minigame.finishFlash = 0;
-            }
-        }
-        if (minigame.finishResetTimer > 0) {
-            minigame.finishResetTimer -= delta * 30;
-            if (minigame.finishResetTimer <= 0) {
-                // ПЕРЕЗАПУСК ИГРЫ: Суслов снова ходит, можно начинать новый минет
-                minigame.active = false;
-                suslov.isHitching = true;
-                minigame.finishFlash = 0;
-                minigame.finishTextTimer = 0;
-                minigame.fallingDrops = [];
-            }
-        }
-    }
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            Object.values(tabsMap).forEach(content => { if (content) content.style.display = 'none'; });
+            if (tabsMap[tabId]) tabsMap[tabId].style.display = 'block';
+            tabBtns.forEach(b => b.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+        });
+    });
     
-    // ========== РЕНДЕР ==========
-    function drawRoad() {
-        ctx.fillStyle = "#2a3824";
-        ctx.fillRect(0, 280, canvas.width, 160);
-        ctx.fillStyle = "#d4c47a";
-        for(let i = 0; i < 14; i++) {
-            let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
-            ctx.fillRect(dashX, 352, 40, 6);
-        }
-        ctx.fillStyle = "#9e7e5a";
-        ctx.fillRect(0, 425, canvas.width, 14);
-        ctx.fillStyle = "#4a7a3a";
-        ctx.fillRect(0, 258, canvas.width, 24);
-        roadOffset = (roadOffset + 2.2) % 50;
-    }
+    document.querySelectorAll('.server-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.server-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+        });
+    });
     
-    function drawCar() {
-        ctx.fillStyle = "#5a7a9a";
-        ctx.fillRect(70, 338, 72, 48);
-        ctx.fillStyle = "#3a4f66";
-        ctx.fillRect(80, 328, 22, 12);
-        ctx.fillStyle = "#1a1a2a";
-        ctx.beginPath();
-        ctx.arc(88, 378, 9, 0, Math.PI*2);
-        ctx.arc(126, 378, 9, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = "#ffcc66";
-        ctx.fillRect(135, 352, 8, 6);
-    }
-    
-    function drawFallingDrops() {
-        for(let d of minigame.fallingDrops) {
-            ctx.fillStyle = "#ffffaa";
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffaa66";
-            ctx.beginPath();
-            ctx.arc(d.x-4, d.y-4, 6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#000000cc";
-            ctx.font = "bold 16px monospace";
-            ctx.fillText("💦", d.x-10, d.y+6);
-            ctx.fillStyle = "#ffffffcc";
-            ctx.font = "bold 12px monospace";
-            ctx.fillText("+5%", d.x-12, d.y-12);
-            ctx.shadowBlur = 0;
-        }
-    }
-    
-    function drawSuslov() {
-        if (minigame.active) {
-            let centerX = suslov.x + suslov.w/2;
-            let centerY = suslov.y + 30;
-            let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
-            let headY = -20 + bobOffset;
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
-            ctx.rotate(tilt);
-            ctx.fillStyle = "#dba878";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#3d5230";
-            ctx.fillRect(-18, 12, 36, 22);
-            ctx.fillStyle = "#f2cfa0";
-            ctx.beginPath();
-            ctx.arc(0, headY, 18, 0, Math.PI*2);
-            ctx.fill();
-            let mouthHeight = minigame.mouthWide;
-            let mouthYOffset = -12 + (mouthHeight / 2);
-            ctx.fillStyle = "#441122";
-            ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            if (minigame.pleasure > 30) {
-                ctx.fillStyle = "#dd6688";
-                let tongueOut = Math.sin(Date.now() * 0.025) * 3;
-                ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
-            }
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(-12, headY-10, 6, 5);
-            ctx.fillRect(6, headY-10, 6, 5);
-            ctx.restore();
-            
-            let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
-            ctx.fillStyle = "#ff8844";
-            ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
-        } else {
-            ctx.fillStyle = "#dcab7a";
-            ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
-            ctx.fillStyle = "#f2cf9a";
-            ctx.beginPath();
-            ctx.arc(suslov.x + suslov.w/2, suslov.y + 16, 19, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
-            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
-            ctx.fillStyle = "#5f704a";
-            ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
-            ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            ctx.fillStyle = "#ffffcc";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 12, suslov.y - 16);
-            ctx.fillStyle = "#dd9966";
-            ctx.font = "12px monospace";
-            ctx.fillText("(сын бляди)", suslov.x + 14, suslov.y - 2);
-        }
-    }
-    
-    function drawFinishEffect() {
-        if (minigame.finishFlash > 0) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, minigame.finishFlash / 12)})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        if (minigame.finishTextTimer > 0) {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 64px monospace";
-            ctx.shadowBlur = 0;
-            ctx.textAlign = "center";
-            ctx.fillText("КОНЧИЛ", canvas.width/2, canvas.height/2);
-            ctx.textAlign = "left";
-        }
-    }
-    
-    function drawFlash() {
-        if (minigame.screenFlash > 0 && minigame.finishFlash <= 0) {
-            ctx.fillStyle = `rgba(255, 220, 100, ${minigame.screenFlash / 12})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    
-    function drawInstructions() {
-        if (!minigame.active) return;
-        ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 42);
-        ctx.fillStyle = "#ffcc99";
-        ctx.font = "bold 14px monospace";
-        ctx.fillText("🍆 КЛИКАЙ ПО ЖЁЛТЫМ КРУГЛИШКАМ - КАЖДАЯ ДАЁТ +5% 🍆", canvas.width/2 - 270, 28);
-    }
-    
-    let lastTime = 0;
-    function gameLoop(now) {
-        let delta = Math.min(0.033, (now - lastTime) / 1000);
-        if (delta > 0.01) {
-            updateSuslov(delta);
-            updateFallingDrops(delta);
-            updateEffects(delta);
-        }
-        lastTime = now;
-        
-        drawRoad();
-        drawCar();
-        drawFallingDrops();
-        drawSuslov();
-        drawFlash();
-        drawFinishEffect();
-        drawInstructions();
-        
-        requestAnimationFrame(gameLoop);
-    }
-    
-    updateUI();
-    requestAnimationFrame(gameLoop);
+    renderWorkList();
+    renderShop();
 </script>
 </body>
 </html>
