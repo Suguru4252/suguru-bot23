@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KROPOTKIN — Полноценный лаунчер | Ролевая игра 2026</title>
+    <title>KROPOTKIN — Лаунчер | Ролевая игра</title>
     <style>
-        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* чтобы текст не выделялся при кликах */
         }
 
         body {
@@ -20,7 +18,6 @@
             color: #ffffff;
         }
 
-        /* ===== СИСТЕМА ЭКРАНОВ ===== */
         .screen {
             display: none;
             min-height: 100vh;
@@ -28,15 +25,12 @@
             padding: 1.5rem;
             animation: fadeIn 0.4s ease;
         }
-        .screen.active {
-            display: block;
-        }
+        .screen.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.98); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* ===== СТЕКЛЯННЫЕ КАРТОЧКИ ===== */
         .glass-card {
             background: rgba(12, 16, 28, 0.92);
             backdrop-filter: blur(14px);
@@ -47,7 +41,6 @@
             color: #ffffff;
         }
 
-        /* ===== КНОПКИ ===== */
         .btn {
             background: linear-gradient(95deg, #b91c1c, #7f1a1a);
             border: none;
@@ -63,18 +56,19 @@
         }
         .btn-small {
             background: #2c2f48;
+            border: none;
             padding: 0.5rem 1rem;
             font-size: 0.8rem;
             width: auto;
             display: inline-block;
             margin-right: 0.5rem;
             margin-top: 0.3rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            color: white;
         }
-        .btn:active, .btn-small:active {
-            transform: scale(0.97);
-        }
+        .btn-small:active, .btn:active { transform: scale(0.97); }
 
-        /* ===== ПОЛЯ ВВОДА ===== */
         .input-field {
             width: 100%;
             padding: 1rem;
@@ -85,11 +79,8 @@
             font-size: 1rem;
             margin: 0.7rem 0;
         }
-        .input-field::placeholder {
-            color: #aaaacc;
-        }
+        .input-field::placeholder { color: #aaaacc; }
 
-        /* ===== ВЫБОР СЕРВЕРА ===== */
         .server-list {
             display: flex;
             gap: 1rem;
@@ -106,16 +97,13 @@
             cursor: pointer;
             transition: 0.1s;
             color: #eef2ff;
-            font-weight: 500;
         }
         .server-item.selected {
             background: #a12222;
             box-shadow: 0 0 12px #ff4f4f;
             border-left-color: #ffcc88;
-            color: white;
         }
 
-        /* ===== ЛОГОТИП ===== */
         .logo {
             font-size: 3rem;
             font-weight: 900;
@@ -127,7 +115,6 @@
             letter-spacing: 3px;
         }
 
-        /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -136,37 +123,21 @@
             background: #00000099;
             padding: 0.5rem 1rem;
             border-radius: 3rem;
-            color: white;
         }
 
-        .status {
-            color: #6fcf97;
-            font-size: 0.7rem;
-        }
+        .status { color: #6fcf97; font-size: 0.7rem; }
+        .price { color: #ffaa66; font-weight: bold; }
 
-        .price {
-            color: #ffaa66;
-            font-weight: bold;
-        }
-
-        /* ===== КОМАНДЫ (MONOSPACE) ===== */
         .cmd {
             background: #1e1f30;
-            font-family: 'Fira Code', 'Courier New', monospace;
+            font-family: monospace;
             padding: 0.2rem 0.7rem;
             border-radius: 20px;
-            font-size: 0.85rem;
             color: #ffb347;
             display: inline-block;
             margin: 0.2rem;
-            font-weight: 500;
         }
 
-        .cmd-desc {
-            color: #cbd5e6;
-        }
-
-        /* ===== ВКЛАДКИ ===== */
         .tab-btn {
             background: #1b1e30;
             border: none;
@@ -174,630 +145,500 @@
             border-radius: 2rem;
             color: #ddddff;
             cursor: pointer;
-            font-weight: 500;
-            transition: 0.1s;
         }
-        .active-tab {
-            background: #b91c1c;
-            color: white;
-            box-shadow: 0 0 8px #ff6666;
-        }
+        .active-tab { background: #b91c1c; color: white; box-shadow: 0 0 8px #ff6666; }
 
-        /* ===== СЕТКИ ДЛЯ ГАРАЖА, МАГАЗИНА, ДРУЗЕЙ ===== */
-        .car-grid, .shop-grid, .friends-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 1rem;
+        .work-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
             margin-top: 1rem;
         }
-        .car-card, .shop-item {
-            background: #12172a;
-            border-radius: 1.2rem;
-            padding: 0.7rem;
-            text-align: center;
-            border: 1px solid #e03a3a;
-        }
-
-        /* ===== КАРТА (SVG-ПОДЛОЖКА) ===== */
-        .map-placeholder {
-            background: #0a0e1c;
-            border-radius: 1.5rem;
-            height: 250px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="%23131a2c"/><path d="M200,150 L350,100 L500,180 L620,120 L700,220 L550,300 L400,260 L250,310 L120,240 Z" fill="%23222d4a" stroke="%23ff6666" stroke-width="2"/><circle cx="400" cy="220" r="12" fill="%23ff3a3a"/><text x="360" y="210" fill="white" font-size="12">KROPOTKIN CENTRAL</text><rect x="520" y="330" width="60" height="40" fill="%23334455" stroke="%23ffaa66"/><text x="530" y="355" fill="white" font-size="9">АЗС</text></svg>');
-            background-size: cover;
-            background-position: center;
-            cursor: pointer;
-        }
-
-        .location-marker {
-            background: #1f2937;
-            margin: 0.3rem;
-            padding: 0.3rem;
+        .work-item {
+            background: #0f1222;
+            padding: 0.8rem;
             border-radius: 1rem;
-            font-size: 0.7rem;
-            display: inline-block;
-        }
-
-        hr {
-            border-color: #3a2e4a;
-            margin: 1rem 0;
-        }
-
-        /* ===== КНОПКА МУЗЫКИ (ПЛАВАЮЩАЯ) ===== */
-        .music-control {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1e1f30;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            border: 1px solid #e03a3a;
-            font-size: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        /* ===== АДАПТИВНОСТЬ ===== */
         @media (max-width: 500px) {
-            .screen {
-                padding: 1rem;
-            }
-            .logo {
-                font-size: 2rem;
-            }
+            .screen { padding: 1rem; }
+            .logo { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- ==================== ЭКРАН 1: РЕГИСТРАЦИЯ И ВЫБОР СЕРВЕРА ==================== -->
+<!-- ЭКРАН РЕГИСТРАЦИИ -->
 <div id="registerScreen" class="screen active">
     <div class="glass-card" style="max-width: 450px; margin: 2rem auto;">
         <div class="logo">KROPOTKIN</div>
-        <div style="text-align: center; margin: 0.5rem 0 1.5rem; color: #ffcc88;">
-            ⚡ Сервер нового поколения ⚡
-        </div>
+        <div style="text-align: center; margin: 0.5rem 0 1.5rem; color: #ffcc88;">⚡ Сервер нового поколения ⚡</div>
         
-        <!-- Поле ввода ника -->
-        <input type="text" id="nicknameInput" class="input-field" placeholder="Введите ник (Имя_Фамилия)" maxlength="24">
-        <div style="font-size: 0.7rem; color: #aaaacc; margin-bottom: 1rem;">
-            Пример: Dmitriy_Kropotkin
-        </div>
+        <input type="text" id="nicknameInput" class="input-field" placeholder="Введите ник (Имя_Фамилия)">
         
-        <!-- Список серверов -->
-        <div style="font-weight: bold; margin: 0.5rem 0; color: #ffcc88;">🌍 Выберите мир:</div>
+        <div style="font-weight: bold; margin: 0.5rem 0; color: #ffcc88;">🌍 Выберите сервер:</div>
         <div class="server-list" id="serverListContainer">
-            <div class="server-item selected" data-server="KROPOTKIN#1 [RP]">
-                KROPOTKIN#1 [RP] <span style="color:#6fcf97;">● 1248 игр.</span>
-            </div>
-            <div class="server-item" data-server="KROPOTKIN#2 [ЭКОНОМИКА]">
-                KROPOTKIN#2 [ЭКОН] <span style="color:#6fcf97;">● 892 игр.</span>
-            </div>
-            <div class="server-item" data-server="KROPOTKIN#3 [КРИМИНАЛ]">
-                KROPOTKIN#3 [КРИМИНАЛ] <span style="color:#ffaa66;">● 2103 игр.</span>
-            </div>
+            <div class="server-item selected" data-server="KROPOTKIN#1">KROPOTKIN#1</div>
+            <div class="server-item" data-server="KROPOTKIN#2">KROPOTKIN#2</div>
+            <div class="server-item" data-server="KROPOTKIN#3">KROPOTKIN#3</div>
         </div>
         
-        <!-- Кнопка входа -->
         <button class="btn" id="startGameBtn">▶ ВОЙТИ В МИР KROPOTKIN</button>
     </div>
 </div>
 
-<!-- ==================== ЭКРАН 2: ЗАГРУЗКА ==================== -->
+<!-- ЭКРАН ЗАГРУЗКИ -->
 <div id="loadingScreen" class="screen">
     <div class="glass-card" style="max-width: 400px; margin: 30vh auto; text-align: center;">
         <div style="font-size: 2rem;">🚔</div>
-        <div style="font-weight: bold; margin: 1rem; color: white;">
-            Подключение к серверу <span id="loadingServerName" style="color:#ffaa66;">KROPOTKIN</span>...
-        </div>
-        <div class="status" id="loadingStep" style="color:#ffcc88;">Авторизация</div>
+        <div style="margin: 1rem;">Подключение к <span id="loadingServerName">KROPOTKIN</span>...</div>
+        <div id="loadingStep" style="color:#ffcc88;">Авторизация</div>
         <div style="height: 6px; background: #2a2e44; border-radius: 10px; margin: 1rem 0;">
-            <div id="loadingBar" style="width: 0%; height: 6px; background: #e63946; border-radius: 10px;"></div>
+            <div id="loadingBar" style="width:0%; height:6px; background:#e63946; border-radius:10px;"></div>
         </div>
-        <div style="font-size: 0.7rem; color: #aaa;">загрузка мира KROPOTKIN, пожалуйста, ждите</div>
     </div>
 </div>
 
-<!-- ==================== ЭКРАН 3: ОСНОВНОЕ МЕНЮ (ЛАУНЧЕР) ==================== -->
+<!-- ГЛАВНОЕ МЕНЮ -->
 <div id="mainMenuScreen" class="screen">
-    <!-- Верхняя панель с ником, сервером, деньгами -->
     <div class="top-bar">
         <div>🎮 <span id="mainNick" style="color:#ffaa66;">Player</span></div>
-        <div><span class="status">🟢 сервер: <span id="mainServerName" style="color:#ffaa66;">-</span></span></div>
-        <div>💰 <span id="moneyAmount" style="color:#6fcf97;">125000</span> ₽</div>
+        <div><span class="status">🟢 сервер: <span id="mainServerName">-</span></span></div>
+        <div>💰 <span id="moneyAmount">5000</span> ₽</div>
     </div>
 
-    <!-- Вкладки (табы) -->
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
         <button class="tab-btn active-tab" data-tab="profile">👤 Профиль</button>
-        <button class="tab-btn" data-tab="garage">🚗 Гараж</button>
-        <button class="tab-btn" data-tab="shop">🛒 Магазин</button>
-        <button class="tab-btn" data-tab="friends">👥 Друзья</button>
-        <button class="tab-btn" data-tab="map">🗺️ Карта</button>
-        <button class="tab-btn" data-tab="faction">⚔️ Фракция</button>
-        <button class="tab-btn" data-tab="quests">📜 Квесты</button>
+        <button class="tab-btn" data-tab="work">💼 Работа</button>
         <button class="tab-btn" data-tab="casino">🎲 Казино</button>
         <button class="tab-btn" data-tab="commands">📟 Команды</button>
     </div>
 
-    <!-- ===== ВКЛАДКА ПРОФИЛЬ ===== -->
+    <!-- ПРОФИЛЬ -->
     <div id="profileTab" class="tab-content active-tab-content">
         <div class="glass-card">
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-                <div><strong style="color:#ffcc88;">🔰 ID:</strong> #<span id="userId">4271</span></div>
-                <div><strong style="color:#ffcc88;">⭐ Уровень:</strong> <span id="userLvl">12</span></div>
-                <div><strong style="color:#ffcc88;">🏆 XP:</strong> <span id="userXp">2450</span>/5000</div>
+                <div><strong>🔰 ID:</strong> <span id="userId">----</span></div>
+                <div><strong>⭐ Уровень:</strong> <span id="userLvl">1</span></div>
+                <div><strong>🏆 XP:</strong> <span id="userXp">0</span>/1000</div>
             </div>
             <hr>
-            <div><strong style="color:#ffcc88;">🚗 Авто:</strong> <span style="color:white;">Audi RS6</span> | <strong style="color:#ffcc88;">🏠 Дом:</strong> <span style="color:white;">Квартира в центре</span></div>
-            <div><strong style="color:#ffcc88;">💼 Работа:</strong> <span style="color:white;">Дальнобойщик (доход ~50.000 ₽/рейс)</span></div>
-            <div><strong style="color:#ffcc88;">🎨 Скин:</strong> <span id="currentSkin" style="color:#ffaa66;">Боевой</span>
-                <button id="changeSkinBtn" class="btn-small" style="background:#4a2f5e;">Сменить скин</button>
-            </div>
-            <button id="fakeWorkBtn" class="btn">📦 Симуляция рейса (+деньги / XP)</button>
-            <button id="bankBtn" class="btn" style="background:#2a4b7a;">🏦 Банк (депозит 5% в день)</button>
+            <div><strong>💼 Текущая работа:</strong> <span id="currentJob">Не выбрана</span></div>
+            <div><strong>📊 Всего заработано:</strong> <span id="totalEarned">0</span> ₽</div>
         </div>
     </div>
 
-    <!-- ===== ВКЛАДКА ГАРАЖ ===== -->
-    <div id="garageTab" class="tab-content" style="display: none;">
+    <!-- РАБОТЫ -->
+    <div id="workTab" class="tab-content" style="display: none;">
         <div class="glass-card">
-            <h3 style="color:#ffcc88;">🚘 Мой автопарк (KROPOTKIN)</h3>
-            <div id="garageList" class="car-grid"></div>
+            <h3 style="color:#ffcc88;">💼 Доступные работы</h3>
+            <div class="work-list" id="workList"></div>
+            <div id="workMessage" style="margin-top: 1rem; color: #ffaa66;"></div>
         </div>
     </div>
 
-    <!-- ===== ВКЛАДКА МАГАЗИН ===== -->
-    <div id="shopTab" class="tab-content" style="display: none;">
-        <div class="glass-card">
-            <h3 style="color:#ffcc88;">🛒 Black Market KROPOTKIN</h3>
-            <div id="shopItems" class="shop-grid"></div>
-            <div id="shopMessage" style="color:#ffaa66; margin-top: 1rem;"></div>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА ДРУЗЬЯ ===== -->
-    <div id="friendsTab" class="tab-content" style="display: none;">
-        <div class="glass-card">
-            <h3 style="color:#ffcc88;">👥 Друзья онлайн</h3>
-            <div id="friendsList" class="friends-list"></div>
-            <input type="text" id="addFriendInput" class="input-field" placeholder="Введите ID друга" style="margin-top: 1rem;">
-            <button id="addFriendBtn" class="btn-small">➕ Добавить друга</button>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА КАРТА ===== -->
-    <div id="mapTab" class="tab-content" style="display: none;">
-        <div class="glass-card">
-            <h3 style="color:#ffcc88;">🗺️ Интерактивная карта KROPOTKIN</h3>
-            <div class="map-placeholder" id="clickableMap"></div>
-            <div id="mapInfo" style="margin-top: 0.8rem; color: #aaaacc;">Нажмите на здание на карте</div>
-            <div style="font-size: 0.8rem; margin-top: 0.8rem;">
-                📍 Основные районы: Южный (банк), Арзамас (больница), Лыткарино (ФСБ), Батырево (завод)
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА ФРАКЦИЯ ===== -->
-    <div id="factionTab" class="tab-content" style="display: none;">
-        <div class="glass-card">
-            <h3 style="color:#ffcc88;">⚔️ Выберите сторону</h3>
-            <div id="factionStatus" style="margin-bottom: 1rem;">Текущая фракция: Нейтрал</div>
-            <button id="joinPolice" class="btn-small">👮 Вступить в Полицию</button>
-            <button id="joinMafia" class="btn-small">🔫 Вступить в Мафию</button>
-            <button id="factionMissionBtn" class="btn">💥 Выполнить рейд (+репутация)</button>
-            <div id="factionRep" style="margin-top: 0.8rem; color:#ffaa66;">Репутация: 0</div>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА КВЕСТЫ ===== -->
-    <div id="questsTab" class="tab-content" style="display: none;">
-        <div class="glass-card">
-            <h3 style="color:#ffcc88;">📜 Ежедневные задания</h3>
-            <div id="questList"></div>
-            <div id="questTimer" style="color: #ffaa66; margin-top: 1rem;"></div>
-        </div>
-    </div>
-
-    <!-- ===== ВКЛАДКА КАЗИНО ===== -->
+    <!-- КАЗИНО -->
     <div id="casinoTab" class="tab-content" style="display: none;">
         <div class="glass-card">
             <h3 style="color:#ffcc88;">🎲 Казино KROPOTKIN</h3>
-            <div style="margin-bottom: 1rem;">🎰 Слот-машина: <span id="slotResult">???</span></div>
-            <button id="spinSlot" class="btn-small">Крутить (1000₽)</button>
-            <div style="margin: 1rem 0;">🎲 Рулетка: <span id="rouletteResult">---</span></div>
-            <button id="playRoulette" class="btn-small">Ставка на красное (500₽)</button>
-            <div id="casinoMsg" style="margin-top: 0.8rem; color:#ffaa66;"></div>
+            
+            <div style="margin: 1rem 0;">
+                <label style="color:#aaa;">💰 Ваша ставка:</label>
+                <input type="number" id="betAmount" class="input-field" placeholder="Сумма ставки" value="100" min="10" style="margin: 0.5rem 0;">
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button id="slotButton" class="btn-small">🎰 Крутить слоты</button>
+                <button id="rouletteButton" class="btn-small">🎲 Ставка на красное</button>
+            </div>
+            
+            <div id="casinoTimer" style="margin: 1rem 0; color: #ffaa66; font-size: 0.9rem;">⏳ Готов к игре</div>
+            <div id="casinoResult" style="margin: 0.5rem 0; font-size: 1rem;"></div>
+            <div id="casinoMessage" style="color: #6fcf97;"></div>
         </div>
     </div>
 
-    <!-- ===== ВКЛАДКА КОМАНДЫ ===== -->
+    <!-- КОМАНДЫ -->
     <div id="commandsTab" class="tab-content" style="display: none;">
         <div class="glass-card">
-            <h3 style="color:#ffcc88;">📟 Быстрые команды KROPOTKIN</h3>
-            <div style="margin-bottom: 1rem;">
-                <span class="cmd">/menu</span> <span class="cmd-desc">— главное меню</span><br>
-                <span class="cmd">/stats</span> <span class="cmd-desc">— статистика</span><br>
-                <span class="cmd">/inv</span> <span class="cmd-desc">— инвентарь</span><br>
-                <span class="cmd">/bank</span> <span class="cmd-desc">— банк</span><br>
-                <span class="cmd">/mask</span> <span class="cmd-desc">— скрыть лицо</span><br>
-                <span class="cmd">/duel [ID]</span> <span class="cmd-desc">— дуэль 2026</span>
-            </div>
-            <button id="fakeEventBtn" class="btn">🏆 Получить достижение "Автопробег"</button>
-            <div id="achievementsList" style="margin-top: 1rem;"></div>
+            <h3 style="color:#ffcc88;">📟 Основные команды</h3>
+            <span class="cmd">/menu</span> <span class="cmd-desc">— главное меню</span><br>
+            <span class="cmd">/stats</span> <span class="cmd-desc">— статистика</span><br>
+            <span class="cmd">/work</span> <span class="cmd-desc">— начать работу</span><br>
+            <span class="cmd">/pay [ID] [сумма]</span> <span class="cmd-desc">— передать деньги</span>
         </div>
     </div>
 </div>
 
-<!-- ПЛАВАЮЩАЯ КНОПКА МУЗЫКИ -->
-<div class="music-control" id="musicToggle">🔇</div>
-<audio id="bgMusic" loop></audio>
-
 <script>
-    // ==================== ГЛОБАЛЬНЫЕ ДАННЫЕ ИГРОКА ====================
-    let playerData = {
+    // ==================== ДАННЫЕ ИГРОКА ====================
+    let player = {
         nick: "",
-        server: "KROPOTKIN#1 [RP]",
-        money: 125000,
-        level: 12,
-        experience: 2450,
-        faction: "Нейтрал",
-        reputation: 0,
-        skin: "Боевой"
+        server: "KROPOTKIN#1",
+        money: 5000,
+        level: 1,
+        exp: 0,
+        currentJob: null,
+        totalEarned: 0
     };
-
-    // Машины в гараже
-    let garageCars = [
-        { name: "Audi RS6", price: "8.5M" },
-        { name: "BMW X6M", price: "8.2M" },
-        { name: "ВАЗ 2107", price: "150k" }
+    
+    // Список доступных работ
+    const jobs = [
+        { name: "🚛 Дальнобойщик", income: 8000, expReward: 50, description: "Доставка грузов по трассе" },
+        { name: "📦 Курьер", income: 5000, expReward: 30, description: "Развоз заказов по городу" },
+        { name: "🏭 Завод", income: 3500, expReward: 20, description: "Работа на конвейере" },
+        { name: "🌾 Фермер", income: 3000, expReward: 20, description: "Сбор урожая" },
+        { name: "🚕 Таксист", income: 4500, expReward: 25, description: "Перевозка пассажиров" },
+        { name: "🔧 Механик", income: 6000, expReward: 40, description: "Ремонт автомобилей" }
     ];
-
-    // Товары в магазине
-    let shopItemsList = [
-        { name: "Пистолет Glock", price: 25000, type: "оружие" },
-        { name: "Бронежилет", price: 40000, type: "броня" },
-        { name: "Аптечка", price: 5000, type: "лечение" },
-        { name: "Спортивная машина Nissan GT-R", price: 3200000, type: "авто" }
-    ];
-
-    // Список друзей
-    let friendsList = [
-        { id: 1001, name: "Alex_Volkov", online: true },
-        { id: 1002, name: "Vika_Orlova", online: false }
-    ];
-
-    // Ежедневные квесты
-    let dailyQuestsList = [
-        { text: "Совершить 3 доставки", progress: 0, target: 3, reward: 15000, done: false },
-        { text: "Заработать 50.000₽", progress: 0, target: 50000, reward: 20000, done: false },
-        { text: "Прокачать навык вождения", progress: 0, target: 1, reward: 5000, done: false }
-    ];
-
-    // Список полученных достижений
-    let achievementsList = [];
     
-    // Время последнего сброса квестов
-    let lastDailyResetTime = Date.now();
-
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+    // ==================== КАЗИНО: ТАЙМЕР ====================
+    let casinoCooldown = false;
+    let casinoTimerInterval = null;
+    let casinoSecondsLeft = 0;
     
-    // Обновление всех элементов интерфейса
-    function updateAllUI() {
-        document.getElementById('moneyAmount').innerText = playerData.money.toLocaleString();
-        document.getElementById('userLvl').innerText = playerData.level;
-        document.getElementById('userXp').innerText = playerData.experience;
-        document.getElementById('mainNick').innerText = playerData.nick;
-        document.getElementById('mainServerName').innerText = playerData.server;
-        document.getElementById('currentSkin').innerText = playerData.skin;
+    function startCasinoCooldown() {
+        casinoCooldown = true;
+        casinoSecondsLeft = 30;
+        const timerDiv = document.getElementById('casinoTimer');
+        const slotBtn = document.getElementById('slotButton');
+        const rouletteBtn = document.getElementById('rouletteButton');
         
-        if (document.getElementById('factionRep')) {
-            document.getElementById('factionRep').innerText = `Репутация: ${playerData.reputation}`;
-        }
-        if (document.getElementById('factionStatus')) {
-            document.getElementById('factionStatus').innerText = `Текущая фракция: ${playerData.faction}`;
-        }
+        if (slotBtn) slotBtn.disabled = true;
+        if (rouletteBtn) rouletteBtn.disabled = true;
         
-        renderGarage();
-        renderShop();
-        renderFriends();
-        renderQuests();
-        renderAchievements();
-    }
-    
-    // Добавление денег
-    function addMoney(amount) {
-        playerData.money += amount;
-        updateAllUI();
-        saveGameToLocalStorage();
-    }
-    
-    // Добавление опыта (с автоматическим повышением уровня)
-    function addExperience(amount) {
-        playerData.experience += amount;
-        while (playerData.experience >= 5000) {
-            playerData.level++;
-            playerData.experience -= 5000;
-            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы ${playerData.level} уровень!`);
-        }
-        updateAllUI();
-        saveGameToLocalStorage();
-    }
-    
-    // Выдача достижения (если ещё не получено)
-    function unlockAchievement(title) {
-        if (!achievementsList.includes(title)) {
-            achievementsList.push(title);
-            alert(`🏅 НОВОЕ ДОСТИЖЕНИЕ: ${title}`);
-            renderAchievements();
-            saveGameToLocalStorage();
-        }
-    }
-    
-    // Сохранение игры в localStorage
-    function saveGameToLocalStorage() {
-        const gameSave = {
-            playerData: playerData,
-            garageCars: garageCars,
-            friendsList: friendsList,
-            achievementsList: achievementsList,
-            dailyQuestsList: dailyQuestsList,
-            lastDailyResetTime: lastDailyResetTime
-        };
-        localStorage.setItem('kropotkin_save', JSON.stringify(gameSave));
-    }
-    
-    // Загрузка сохранения из localStorage
-    function loadGameFromLocalStorage() {
-        const savedData = localStorage.getItem('kropotkin_save');
-        if (savedData) {
-            const save = JSON.parse(savedData);
-            playerData = save.playerData;
-            garageCars = save.garageCars;
-            friendsList = save.friendsList;
-            achievementsList = save.achievementsList;
-            dailyQuestsList = save.dailyQuestsList;
-            lastDailyResetTime = save.lastDailyResetTime;
-            updateAllUI();
-        }
-    }
-    
-    // ==================== ОТРИСОВКА КОНТЕНТА ПО ВКЛАДКАМ ====================
-    
-    function renderGarage() {
-        const container = document.getElementById('garageList');
-        if (!container) return;
+        if (casinoTimerInterval) clearInterval(casinoTimerInterval);
         
-        container.innerHTML = '';
-        for (let car of garageCars) {
-            const carCard = document.createElement('div');
-            carCard.className = 'car-card';
-            carCard.innerHTML = `
-                🏎️ ${car.name}<br>
-                <span class="price">${car.price} ₽</span>
-            `;
-            container.appendChild(carCard);
-        }
-    }
-    
-    function renderShop() {
-        const container = document.getElementById('shopItems');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        for (let i = 0; i < shopItemsList.length; i++) {
-            const item = shopItemsList[i];
-            const shopItemDiv = document.createElement('div');
-            shopItemDiv.className = 'shop-item';
-            shopItemDiv.innerHTML = `
-                ${item.name}<br>
-                <span class="price">${item.price.toLocaleString()} ₽</span><br>
-                <button class="btn-small" data-buy-index="${i}">Купить</button>
-            `;
-            container.appendChild(shopItemDiv);
-        }
-        
-        // Добавляем обработчики на кнопки "Купить"
-        document.querySelectorAll('[data-buy-index]').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const index = parseInt(event.target.getAttribute('data-buy-index'));
-                const item = shopItemsList[index];
-                const messageDiv = document.getElementById('shopMessage');
-                
-                if (playerData.money >= item.price) {
-                    addMoney(-item.price);
-                    messageDiv.innerText = `✅ Вы купили: ${item.name}`;
-                    
-                    if (item.type === 'авто') {
-                        garageCars.push({ name: item.name, price: item.price.toLocaleString() });
-                        renderGarage();
-                        unlockAchievement('Коллекционер авто');
-                    } else if (item.type === 'оружие') {
-                        unlockAchievement('Вооружён и опасен');
-                    } else if (item.type === 'лечение') {
-                        messageDiv.innerText += ' Здоровье восстановлено!';
-                    }
-                    saveGameToLocalStorage();
-                } else {
-                    messageDiv.innerText = '❌ Недостаточно денег!';
-                }
+        casinoTimerInterval = setInterval(() => {
+            casinoSecondsLeft--;
+            if (timerDiv) {
+                timerDiv.innerHTML = `⏳ Подождите ${casinoSecondsLeft} секунд до следующей ставки...`;
+            }
+            if (casinoSecondsLeft <= 0) {
+                clearInterval(casinoTimerInterval);
+                casinoCooldown = false;
+                if (timerDiv) timerDiv.innerHTML = `✅ Можно делать новую ставку!`;
+                if (slotBtn) slotBtn.disabled = false;
+                if (rouletteBtn) rouletteBtn.disabled = false;
                 setTimeout(() => {
-                    if (messageDiv) messageDiv.innerText = '';
-                }, 2000);
-            });
-        });
-    }
-    
-    function renderFriends() {
-        const container = document.getElementById('friendsList');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        for (let friend of friendsList) {
-            const friendCard = document.createElement('div');
-            friendCard.className = 'car-card';
-            friendCard.innerHTML = `
-                ${friend.name}<br>
-                ${friend.online ? '🟢 онлайн' : '⚫ оффлайн'}<br>
-                <button class="btn-small" data-friend-id="${friend.id}">💬 Написать</button>
-            `;
-            container.appendChild(friendCard);
-        }
-        
-        document.querySelectorAll('[data-friend-id]').forEach(button => {
-            button.addEventListener('click', (event) => {
-                alert('✉️ Сообщение отправлено другу (демо-режим)');
-            });
-        });
-    }
-    
-    function renderQuests() {
-        const container = document.getElementById('questList');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        for (let i = 0; i < dailyQuestsList.length; i++) {
-            const quest = dailyQuestsList[i];
-            const questDiv = document.createElement('div');
-            questDiv.style.marginBottom = '0.8rem';
-            questDiv.style.padding = '0.5rem';
-            questDiv.style.background = '#0f1222';
-            questDiv.style.borderRadius = '1rem';
-            
-            if (quest.done) {
-                questDiv.innerHTML = `
-                    ✅ ${quest.text} (${quest.progress}/${quest.target}) — награда: ${quest.reward}₽
-                    <span style="color:#6fcf97;"> [ВЫПОЛНЕНО]</span>
-                `;
-            } else {
-                questDiv.innerHTML = `
-                    📌 ${quest.text} (${quest.progress}/${quest.target}) — награда: ${quest.reward}₽
-                    <button class="btn-small" data-quest-index="${i}">Выполнить шаг</button>
-                `;
-            }
-            container.appendChild(questDiv);
-        }
-        
-        document.querySelectorAll('[data-quest-index]').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const index = parseInt(event.target.getAttribute('data-quest-index'));
-                const quest = dailyQuestsList[index];
-                if (!quest.done) {
-                    quest.progress = Math.min(quest.target, quest.progress + 1);
-                    if (quest.progress >= quest.target) {
-                        quest.done = true;
-                        addMoney(quest.reward);
-                        addExperience(100);
-                        unlockAchievement('Квестёр');
-                        alert(`✅ Квест выполнен! +${quest.reward}₽, +100 XP`);
+                    if (timerDiv && timerDiv.innerHTML === `✅ Можно делать новую ставку!`) {
+                        timerDiv.innerHTML = `⏳ Готов к игре`;
                     }
-                    renderQuests();
-                    saveGameToLocalStorage();
-                }
+                }, 3000);
+            }
+        }, 1000);
+    }
+    
+    // ==================== ФУНКЦИИ ИГРОКА ====================
+    function updateUI() {
+        document.getElementById('moneyAmount').innerText = player.money.toLocaleString();
+        document.getElementById('userLvl').innerText = player.level;
+        document.getElementById('userXp').innerText = player.exp;
+        document.getElementById('mainNick').innerText = player.nick;
+        document.getElementById('mainServerName').innerText = player.server;
+        document.getElementById('totalEarned').innerText = player.totalEarned.toLocaleString();
+        
+        if (player.currentJob) {
+            document.getElementById('currentJob').innerHTML = `${player.currentJob.name} <button id="doWorkBtn" class="btn-small" style="margin-left: 0.5rem;">💼 Выполнить смену</button>`;
+            const workBtn = document.getElementById('doWorkBtn');
+            if (workBtn) {
+                workBtn.onclick = () => doWork();
+            }
+        } else {
+            document.getElementById('currentJob').innerText = "Не выбрана";
+        }
+    }
+    
+    function addMoney(amount) {
+        player.money += amount;
+        player.totalEarned += amount;
+        updateUI();
+        saveGame();
+    }
+    
+    function addExp(amount) {
+        player.exp += amount;
+        while (player.exp >= 1000) {
+            player.level++;
+            player.exp -= 1000;
+            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы ${player.level} уровень!`);
+        }
+        updateUI();
+        saveGame();
+    }
+    
+    function doWork() {
+        if (!player.currentJob) {
+            alert("Сначала выберите работу!");
+            return;
+        }
+        const income = player.currentJob.income;
+        const expGain = player.currentJob.expReward;
+        addMoney(income);
+        addExp(expGain);
+        alert(`✅ Вы отработали смену ${player.currentJob.name}!\n💰 +${income}₽\n✨ +${expGain} XP`);
+        saveGame();
+    }
+    
+    function setJob(job) {
+        player.currentJob = job;
+        updateUI();
+        document.getElementById('workMessage').innerHTML = `✅ Вы устроились на работу: ${job.name}`;
+        setTimeout(() => {
+            const msgDiv = document.getElementById('workMessage');
+            if (msgDiv) msgDiv.innerHTML = '';
+        }, 3000);
+        saveGame();
+    }
+    
+    // ==================== КАЗИНО: ИГРЫ ====================
+    function playSlots(betAmount) {
+        if (betAmount > player.money) {
+            document.getElementById('casinoMessage').innerHTML = '❌ Недостаточно денег!';
+            return false;
+        }
+        if (betAmount < 10) {
+            document.getElementById('casinoMessage').innerHTML = '❌ Минимальная ставка 10₽';
+            return false;
+        }
+        
+        const symbols = ['🍒', '🍋', '🔔', '7️⃣', '💎'];
+        const result1 = symbols[Math.floor(Math.random() * symbols.length)];
+        const result2 = symbols[Math.floor(Math.random() * symbols.length)];
+        const result3 = symbols[Math.floor(Math.random() * symbols.length)];
+        const resultText = `${result1} | ${result2} | ${result3}`;
+        
+        let win = false;
+        let winAmount = 0;
+        
+        if (result1 === result2 && result2 === result3) {
+            if (result1 === '7️⃣') winAmount = betAmount * 10;
+            else if (result1 === '💎') winAmount = betAmount * 5;
+            else winAmount = betAmount * 3;
+            win = true;
+        } else if (result1 === result2 || result2 === result3 || result1 === result3) {
+            winAmount = betAmount * 1.5;
+            win = true;
+        }
+        
+        player.money -= betAmount;
+        
+        if (win) {
+            player.money += winAmount;
+            document.getElementById('casinoResult').innerHTML = `🎰 Результат: ${resultText}<br>🏆 ВЫИГРЫШ: ${Math.floor(winAmount)}₽!`;
+            document.getElementById('casinoMessage').innerHTML = `🎉 Поздравляем! +${Math.floor(winAmount)}₽`;
+        } else {
+            document.getElementById('casinoResult').innerHTML = `🎰 Результат: ${resultText}<br>😞 Проигрыш: -${betAmount}₽`;
+            document.getElementById('casinoMessage').innerHTML = `😞 Повезёт в следующий раз!`;
+        }
+        
+        updateUI();
+        saveGame();
+        return true;
+    }
+    
+    function playRoulette(betAmount) {
+        if (betAmount > player.money) {
+            document.getElementById('casinoMessage').innerHTML = '❌ Недостаточно денег!';
+            return false;
+        }
+        if (betAmount < 10) {
+            document.getElementById('casinoMessage').innerHTML = '❌ Минимальная ставка 10₽';
+            return false;
+        }
+        
+        const number = Math.floor(Math.random() * 37);
+        const isRed = (number % 2 === 0 && number !== 0);
+        
+        player.money -= betAmount;
+        
+        if (isRed) {
+            const winAmount = betAmount * 2;
+            player.money += winAmount;
+            document.getElementById('casinoResult').innerHTML = `🎲 Выпало: ${number} (КРАСНОЕ)<br>🏆 ВЫИГРЫШ: ${winAmount}₽!`;
+            document.getElementById('casinoMessage').innerHTML = `🎉 +${winAmount}₽`;
+        } else {
+            document.getElementById('casinoResult').innerHTML = `🎲 Выпало: ${number} (ЧЁРНОЕ)<br>😞 Проигрыш: -${betAmount}₽`;
+            document.getElementById('casinoMessage').innerHTML = `😞 В следующий раз повезёт!`;
+        }
+        
+        updateUI();
+        saveGame();
+        return true;
+    }
+    
+    // ==================== ОБРАБОТЧИКИ КАЗИНО С ТАЙМЕРОМ ====================
+    function handleSlot() {
+        if (casinoCooldown) {
+            document.getElementById('casinoMessage').innerHTML = `⏳ Подождите ${casinoSecondsLeft} секунд!`;
+            return;
+        }
+        const bet = parseInt(document.getElementById('betAmount').value);
+        if (isNaN(bet) || bet <= 0) {
+            document.getElementById('casinoMessage').innerHTML = 'Введите корректную сумму ставки';
+            return;
+        }
+        playSlots(bet);
+        startCasinoCooldown();
+    }
+    
+    function handleRoulette() {
+        if (casinoCooldown) {
+            document.getElementById('casinoMessage').innerHTML = `⏳ Подождите ${casinoSecondsLeft} секунд!`;
+            return;
+        }
+        const bet = parseInt(document.getElementById('betAmount').value);
+        if (isNaN(bet) || bet <= 0) {
+            document.getElementById('casinoMessage').innerHTML = 'Введите корректную сумму ставки';
+            return;
+        }
+        playRoulette(bet);
+        startCasinoCooldown();
+    }
+    
+    // ==================== ОТРИСОВКА РАБОТ ====================
+    function renderWorkList() {
+        const container = document.getElementById('workList');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i];
+            const jobDiv = document.createElement('div');
+            jobDiv.className = 'work-item';
+            jobDiv.innerHTML = `
+                <div>
+                    <strong style="color:#ffcc88;">${job.name}</strong><br>
+                    <span style="font-size: 0.8rem;">${job.description}</span><br>
+                    <span style="font-size: 0.7rem; color:#aaa;">💰 доход: ${job.income}₽ | ✨ опыт: +${job.expReward} XP</span>
+                </div>
+                <button class="btn-small" data-job-index="${i}">Выбрать</button>
+            `;
+            container.appendChild(jobDiv);
+        }
+        
+        document.querySelectorAll('[data-job-index]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-job-index'));
+                setJob(jobs[index]);
             });
         });
-        
-        // Таймер до сброса квестов
-        const timerDiv = document.getElementById('questTimer');
-        if (timerDiv) {
-            const hoursLeft = 24 - Math.floor((Date.now() - lastDailyResetTime) / 3600000);
-            timerDiv.innerText = `⏰ Сброс квестов через: ${hoursLeft} часов`;
-        }
     }
     
-    function renderAchievements() {
-        const container = document.getElementById('achievementsList');
-        if (!container) return;
-        
-        if (achievementsList.length === 0) {
-            container.innerHTML = '<div style="color:#aaa;">Пока нет достижений. Выполняйте задания!</div>';
-        } else {
-            container.innerHTML = '<strong style="color:#ffcc88;">🏆 ПОЛУЧЕННЫЕ ДОСТИЖЕНИЯ:</strong><br>';
-            for (let ach of achievementsList) {
-                container.innerHTML += `<div style="margin: 0.3rem 0;">⭐ ${ach}</div>`;
-            }
-        }
+    // ==================== СОХРАНЕНИЕ ====================
+    function saveGame() {
+        const save = {
+            player: player,
+            version: 1
+        };
+        localStorage.setItem('kropotkin_save', JSON.stringify(save));
     }
     
-    // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+    function loadGame() {
+        const saved = localStorage.getItem('kropotkin_save');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.player) {
+                    player = data.player;
+                }
+            } catch(e) {}
+        }
+        updateUI();
+    }
     
-    // Симуляция загрузки при входе в игру
-    function simulateGameLoading(callback) {
+    // ==================== ЗАГРУЗКА И СТАРТ ====================
+    function simulateLoading(callback) {
         let progress = 0;
-        const steps = ["Подключение к серверу KROPOTKIN", "Загрузка карты мира", "Синхронизация игроков", "Вход в мир"];
-        let stepIndex = 0;
-        const loadingStepDiv = document.getElementById('loadingStep');
-        const loadingBarDiv = document.getElementById('loadingBar');
-        
+        let steps = ["Соединение...", "Загрузка мира KROPOTKIN", "Синхронизация", "Добро пожаловать!"];
+        let stepIdx = 0;
         const interval = setInterval(() => {
-            progress += Math.random() * 20 + 8;
+            progress += Math.random() * 20 + 10;
             if (progress >= 100) {
-                progress = 100;
                 clearInterval(interval);
-                if (loadingStepDiv) loadingStepDiv.innerText = "Готово! Добро пожаловать.";
-                if (loadingBarDiv) loadingBarDiv.style.width = "100%";
+                document.getElementById('loadingBar').style.width = '100%';
                 setTimeout(callback, 500);
             } else {
-                if (loadingBarDiv) loadingBarDiv.style.width = Math.min(progress, 100) + "%";
-                if (stepIndex < steps.length && progress > (stepIndex + 1) * 25) {
-                    if (loadingStepDiv) loadingStepDiv.innerText = steps[stepIndex];
-                    stepIndex++;
+                document.getElementById('loadingBar').style.width = Math.min(progress, 100) + '%';
+                if (stepIdx < steps.length && progress > (stepIdx + 1) * 22) {
+                    document.getElementById('loadingStep').innerText = steps[stepIdx];
+                    stepIdx++;
                 }
             }
-        }, 280);
+        }, 200);
     }
     
-    // Обработчик кнопки "Войти"
-    const startButton = document.getElementById('startGameBtn');
+    const startBtn = document.getElementById('startGameBtn');
     const nicknameInput = document.getElementById('nicknameInput');
-    const registerScreenDiv = document.getElementById('registerScreen');
-    const loadingScreenDiv = document.getElementById('loadingScreen');
-    const mainMenuScreenDiv = document.getElementById('mainMenuScreen');
-    const loadingServerSpan = document.getElementById('loadingServerName');
+    const registerScreen = document.getElementById('registerScreen');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainMenu = document.getElementById('mainMenuScreen');
     const userIdSpan = document.getElementById('userId');
     
-    startButton.addEventListener('click', () => {
-        const rawNick = nicknameInput.value.trim();
-        if (rawNick === "") {
-            alert("Введите ник в формате Имя_Фамилия (например, Artem_Kropotkin)");
+    startBtn.addEventListener('click', () => {
+        let nick = nicknameInput.value.trim();
+        if (nick === "") {
+            alert("Введите ник (например, Artem_Kropotkin)");
             return;
         }
-        if (!rawNick.includes("_")) {
-            alert("Ник должен содержать символ '_' . Пример: Roma_Kropotkin");
+        if (!nick.includes("_")) {
+            alert("Ник должен содержать '_' (пример: Artem_Kropotkin)");
             return;
         }
         
-        // Получаем выбранный сервер
-        const selectedServerItem = document.querySelector('.server-item.selected');
-        const selectedServerName = selectedServerItem ? selectedServerItem.getAttribute('data-server') : "KROPOTKIN#1 [RP]";
+        const selectedServer = document.querySelector('.server-item.selected');
+        player.nick = nick;
+        player.server = selectedServer ? selectedServer.getAttribute('data-server') : "KROPOTKIN#1";
+        player.money = 5000;
+        player.level = 1;
+        player.exp = 0;
+        player.totalEarned = 0;
         
-        playerData.nick = rawNick;
-        playerData.server = selectedServerName;
+        registerScreen.classList.remove('active');
+        loadingScreen.classList.add('active');
+        document.getElementById('loadingServerName').innerText = player.server;
         
-        // Показываем экран загрузки
-        registerScreenDiv.classList.remove('active');
-        loadingScreenDiv.classList.add('active');
-        if (loadingServerSpan) loadingServerSpan.innerText = selectedServerName;
-        
-        simulateGameLoading(() => {
-            loadingScreenDiv.classList.remove('active');
-            mainMenuScreenDiv.classList.add('active');
+        simulateLoading(() => {
+            loadingScreen.classList.remove('active');
+            mainMenu.classList.add('active');
+            userIdSpan.innerText = Math.floor(Math.random() * 9000 + 1000);
+            updateUI();
+            loadGame();
+            renderWorkList();
             
-            // Генерируем случайный ID
-            if (userIdSpan) userIdSpan.innerText = Math.floor(Math.random() * 9000 + 1000);
-            
-            updateAllUI();
-            loadGameFromLocalStorage();
-            renderQuests();
-            renderAchievements();
+            // Назначаем обработчики казино
+            const slotBtn = document.getElementById('slotButton');
+            const rouletteBtn = document.getElementById('rouletteButton');
+            if (slotBtn) slotBtn.onclick = handleSlot;
+            if (rouletteBtn) rouletteBtn.onclick = handleRoulette;
         });
     });
     
-    // Выбор сервера (клик по элементу)
+    // Переключение вкладок
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContentsMap = {
+        profile: document.getElementById('profileTab'),
+        work: document.getElementById('workTab'),
+        casino: document.getElementById('casinoTab'),
+        commands: document.getElementById('commandsTab')
+    };
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            Object.values(tabContentsMap).forEach(content => {
+                if (content) content.style.display = 'none';
+            });
+            if (tabContentsMap[tabId]) tabContentsMap[tabId].style.display = 'block';
+            tabBtns.forEach(b => b.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+        });
+    });
+    
+    // Выбор сервера
     const serverItems = document.querySelectorAll('.server-item');
     serverItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -806,276 +647,7 @@
         });
     });
     
-    // Переключение вкладок (табов)
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = {
-        profile: document.getElementById('profileTab'),
-        garage: document.getElementById('garageTab'),
-        shop: document.getElementById('shopTab'),
-        friends: document.getElementById('friendsTab'),
-        map: document.getElementById('mapTab'),
-        faction: document.getElementById('factionTab'),
-        quests: document.getElementById('questsTab'),
-        casino: document.getElementById('casinoTab'),
-        commands: document.getElementById('commandsTab')
-    };
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const tabId = button.getAttribute('data-tab');
-            
-            // Скрываем все содержимое вкладок
-            Object.values(tabContents).forEach(content => {
-                if (content) content.style.display = 'none';
-            });
-            
-            // Показываем выбранную
-            if (tabContents[tabId]) tabContents[tabId].style.display = 'block';
-            
-            // Убираем активный класс со всех кнопок
-            tabButtons.forEach(btn => btn.classList.remove('active-tab'));
-            button.classList.add('active-tab');
-        });
-    });
-    
-    // Кнопка "Рейс" (работа)
-    const workButton = document.getElementById('fakeWorkBtn');
-    if (workButton) {
-        workButton.addEventListener('click', () => {
-            const earnings = Math.floor(Math.random() * 15000 + 20000);
-            const expGain = Math.floor(Math.random() * 150 + 50);
-            addMoney(earnings);
-            addExperience(expGain);
-            alert(`🚛 Рейс успешно завершён!\n💰 +${earnings}₽\n✨ +${expGain} XP`);
-            unlockAchievement('Первая работа');
-        });
-    }
-    
-    // Кнопка "Банк" (депозит)
-    const bankButton = document.getElementById('bankBtn');
-    if (bankButton) {
-        bankButton.addEventListener('click', () => {
-            const percentBonus = Math.floor(playerData.money * 0.05);
-            addMoney(percentBonus);
-            alert(`🏦 Банк начислил проценты по вкладу: +${percentBonus}₽`);
-            unlockAchievement('Инвестор');
-        });
-    }
-    
-    // Смена скина
-    const changeSkinButton = document.getElementById('changeSkinBtn');
-    if (changeSkinButton) {
-        changeSkinButton.addEventListener('click', () => {
-            const skins = ['Боевой', 'Классика', 'Мафиози', 'Спорт', 'Теневой', 'VIP'];
-            const newSkin = skins[Math.floor(Math.random() * skins.length)];
-            playerData.skin = newSkin;
-            updateAllUI();
-            alert(`🎨 Вы сменили скин на "${newSkin}"`);
-            saveGameToLocalStorage();
-        });
-    }
-    
-    // Добавление друга
-    const addFriendButton = document.getElementById('addFriendBtn');
-    const addFriendInput = document.getElementById('addFriendInput');
-    if (addFriendButton) {
-        addFriendButton.addEventListener('click', () => {
-            const friendId = addFriendInput.value.trim();
-            if (friendId) {
-                const newId = friendsList.length + 1003;
-                friendsList.push({
-                    id: newId,
-                    name: `Player_${friendId}`,
-                    online: Math.random() > 0.5
-                });
-                renderFriends();
-                saveGameToLocalStorage();
-                addFriendInput.value = '';
-                alert('✅ Друг добавлен в список!');
-            } else {
-                alert('Введите ID друга');
-            }
-        });
-    }
-    
-    // Фракции: полиция
-    const joinPoliceButton = document.getElementById('joinPolice');
-    if (joinPoliceButton) {
-        joinPoliceButton.addEventListener('click', () => {
-            playerData.faction = "Полиция";
-            playerData.reputation = 10;
-            updateAllUI();
-            alert('👮 Вы вступили в полицию KROPOTKIN!');
-            saveGameToLocalStorage();
-        });
-    }
-    
-    // Фракции: мафия
-    const joinMafiaButton = document.getElementById('joinMafia');
-    if (joinMafiaButton) {
-        joinMafiaButton.addEventListener('click', () => {
-            playerData.faction = "Мафия";
-            playerData.reputation = 10;
-            updateAllUI();
-            alert('🔫 Вы стали частью криминального мира!');
-            saveGameToLocalStorage();
-        });
-    }
-    
-    // Рейд фракции
-    const factionMissionButton = document.getElementById('factionMissionBtn');
-    if (factionMissionButton) {
-        factionMissionButton.addEventListener('click', () => {
-            if (playerData.faction === "Нейтрал") {
-                alert('❌ Сначала вступите во фракцию!');
-                return;
-            }
-            playerData.reputation += 5;
-            addMoney(8000);
-            alert(`💥 Рейд выполнен! +5 репутации, +8000₽`);
-            updateAllUI();
-            saveGameToLocalStorage();
-            unlockAchievement('Верный боец');
-        });
-    }
-    
-    // Казино: слот
-    const spinSlotButton = document.getElementById('spinSlot');
-    const slotResultSpan = document.getElementById('slotResult');
-    const casinoMsgDiv = document.getElementById('casinoMsg');
-    if (spinSlotButton) {
-        spinSlotButton.addEventListener('click', () => {
-            if (playerData.money >= 1000) {
-                addMoney(-1000);
-                const symbols = ['🍒', '🍋', '🔔', '7️⃣'];
-                const result = symbols[Math.floor(Math.random() * symbols.length)];
-                if (slotResultSpan) slotResultSpan.innerText = result;
-                if (result === '7️⃣') {
-                    const winAmount = 5000;
-                    addMoney(winAmount);
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = `🎉 ДЖЕКПОТ! Вы выиграли ${winAmount}₽! 🎉`;
-                    unlockAchievement('Джекпот');
-                } else {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = '😞 Не повезло, попробуйте ещё раз!';
-                }
-                setTimeout(() => {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = '';
-                }, 2000);
-            } else {
-                if (casinoMsgDiv) casinoMsgDiv.innerText = '❌ Не хватает 1000₽!';
-                setTimeout(() => {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = '';
-                }, 1500);
-            }
-        });
-    }
-    
-    // Казино: рулетка
-    const playRouletteButton = document.getElementById('playRoulette');
-    const rouletteResultSpan = document.getElementById('rouletteResult');
-    if (playRouletteButton) {
-        playRouletteButton.addEventListener('click', () => {
-            if (playerData.money >= 500) {
-                addMoney(-500);
-                const number = Math.floor(Math.random() * 37);
-                const isRed = (number % 2 === 0 && number !== 0);
-                if (rouletteResultSpan) rouletteResultSpan.innerText = `${number} (${isRed ? 'КРАСНОЕ' : 'ЧЁРНОЕ'})`;
-                if (isRed) {
-                    const winAmount = 1000;
-                    addMoney(winAmount);
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = `🎉 Выпало ${number} (красное)! Вы выиграли ${winAmount}₽!`;
-                    unlockAchievement('Везунчик');
-                } else {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = `😞 Выпало ${number} (чёрное) — проигрыш.`;
-                }
-                setTimeout(() => {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = '';
-                }, 2000);
-            } else {
-                if (casinoMsgDiv) casinoMsgDiv.innerText = '❌ Не хватает 500₽!';
-                setTimeout(() => {
-                    if (casinoMsgDiv) casinoMsgDiv.innerText = '';
-                }, 1500);
-            }
-        });
-    }
-    
-    // Достижение "Автопробег"
-    const eventButton = document.getElementById('fakeEventBtn');
-    if (eventButton) {
-        eventButton.addEventListener('click', () => {
-            unlockAchievement('Мастер автопробега');
-            addMoney(15000);
-            alert('🏁 Автопробег пройден! +15000₽');
-        });
-    }
-    
-    // Кликабельная карта
-    const clickableMapDiv = document.getElementById('clickableMap');
-    const mapInfoDiv = document.getElementById('mapInfo');
-    if (clickableMapDiv) {
-        clickableMapDiv.addEventListener('click', (event) => {
-            const rect = clickableMapDiv.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const width = rect.width;
-            const height = rect.height;
-            
-            // Координаты привязаны к SVG внутри background
-            const scaleX = 800 / width;
-            const scaleY = 500 / height;
-            const mapX = x * scaleX;
-            const mapY = y * scaleY;
-            
-            if (mapX > 350 && mapX < 450 && mapY > 180 && mapY < 240) {
-                if (mapInfoDiv) mapInfoDiv.innerText = "📍 Кропоткин Централ — главная площадь города";
-            } else if (mapX > 500 && mapX < 600 && mapY > 300 && mapY < 360) {
-                if (mapInfoDiv) mapInfoDiv.innerText = "⛽ АЗС KROPOTKIN — можно заправить авто";
-            } else {
-                if (mapInfoDiv) mapInfoDiv.innerText = "📍 Обычный район города. Здесь много домов и магазинов.";
-            }
-        });
-    }
-    
-    // Музыка (имитация)
-    let isMusicPlaying = false;
-    const musicToggleButton = document.getElementById('musicToggle');
-    const audioElement = document.getElementById('bgMusic');
-    
-    if (musicToggleButton) {
-        musicToggleButton.addEventListener('click', () => {
-            isMusicPlaying = !isMusicPlaying;
-            musicToggleButton.innerText = isMusicPlaying ? '🔊' : '🔇';
-            if (isMusicPlaying) {
-                // В реальной игре тут был бы URL с музыкой, но для демо используем тишину
-                console.log('Музыка включена (в реальной игре здесь играет фоновая музыка)');
-            } else {
-                console.log('Музыка выключена');
-            }
-        });
-    }
-    
-    // Сброс квестов раз в сутки
-    setInterval(() => {
-        const now = Date.now();
-        if (now - lastDailyResetTime > 86400000) { // 24 часа
-            for (let quest of dailyQuestsList) {
-                quest.progress = 0;
-                quest.done = false;
-            }
-            lastDailyResetTime = now;
-            renderQuests();
-            saveGameToLocalStorage();
-            alert('📅 ЕЖЕДНЕВНЫЕ ЗАДАНИЯ ОБНОВЛЕНЫ!');
-        }
-    }, 60000); // Проверяем каждую минуту
-    
-    // Начальная отрисовка
-    renderGarage();
-    renderShop();
-    renderFriends();
-    renderQuests();
-    renderAchievements();
+    renderWorkList();
 </script>
 </body>
 </html>
