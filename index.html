@@ -2,698 +2,438 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>ГАЗАН СИКС СЕВЕЕН | 67 RUSH | Full Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Object Grab - NetErrror</title>
     <style>
-        * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
-        }
-
         body {
             margin: 0;
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f1e, #041212);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', 'Press Start 2P', 'Monaco', monospace;
-            touch-action: pan-x pan-y; /* разрешаем зум, но свайпы по канвасу ловим отдельно */
-            overflow-x: hidden;
-            position: relative;
-            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        /* главный враппер — на весь экран с отступами для безопасности */
-        .game-fullscreen {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #00000033;
-            backdrop-filter: blur(2px);
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 15px;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            font-size: 14px;
         }
-
-        .canvas-wrapper {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-            margin: 10px 0;
-            touch-action: pan-x pan-y; /* зум пальцами работает, но внутренние движения обрабатываем */
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            width: auto;
-            height: auto;
-            max-width: 98vw;
-            max-height: 75vh;
-            border-radius: 28px;
-            box-shadow: 0 0 0 5px #ffd966, 0 0 0 10px #b97f44, 0 25px 40px rgba(0,0,0,0.5);
-            cursor: pointer;
-            background-color: #2b2b2b;
-            /* сохраняем соотношение сторон 600/500 = 1.2 */
-            aspect-ratio: 600 / 500;
-        }
-
-        /* масштабирование: при широком экране канвас растягивается по ширине, но с сохранением пропорций */
-        @media (min-width: 700px) {
-            canvas {
-                max-width: 85vw;
-                max-height: 70vh;
-            }
+        #status {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            font-family: monospace;
+            letter-spacing: 1px;
         }
         @media (max-width: 600px) {
-            canvas {
-                max-width: 96vw;
-                max-height: 65vh;
-            }
+            #info { font-size: 10px; top: 10px; left: 10px; }
+            #status { font-size: 14px; bottom: 15px; padding: 8px; }
         }
-
-        .ui-panel {
+        .instruction {
             position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            color: #ccc;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
             pointer-events: none;
-            z-index: 20;
-            width: 100%;
-        }
-
-        .score-board, .best-board {
-            background: #000000bb;
-            backdrop-filter: blur(8px);
-            padding: 6px 18px;
-            border-radius: 60px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #f9f3c1;
-            text-shadow: 0 0 5px #ff9900, 1px 1px 0 #6b2e00;
-            letter-spacing: 1px;
             font-family: monospace;
-            border: 1px solid #ffcd7e;
-            white-space: nowrap;
-        }
-
-        .best-board {
-            background: #1e2a1fcc;
-        }
-
-        .controls-mobile {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .ctrl-btn {
-            pointer-events: auto;
-            background: #000000cc;
-            backdrop-filter: blur(12px);
-            border: 2px solid #ffb347;
-            color: #ffdd99;
-            font-size: 2rem;
-            font-weight: bold;
-            width: 70px;
-            height: 70px;
-            border-radius: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-family: monospace;
-            transition: 0.05s linear;
-            box-shadow: 0 6px 0 #7a3e0e;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        .ctrl-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #7a3e0e;
-        }
-
-        .restart-area {
-            position: absolute;
-            bottom: 110px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .restart-btn {
-            pointer-events: auto;
-            background: #e25822ee;
-            border: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 10px 28px;
-            border-radius: 60px;
-            color: white;
-            font-family: monospace;
-            backdrop-filter: blur(4px);
-            cursor: pointer;
-            transition: 0.1s;
-            box-shadow: 0 5px 0 #7a2a0a;
-            white-space: nowrap;
-        }
-
-        .restart-btn:active {
-            transform: translateY(3px);
-            box-shadow: none;
-        }
-
-        .status-text {
-            position: absolute;
-            top: 40%;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #ffefb9;
-            text-shadow: 3px 3px 0 #b43b00;
-            background: #000000aa;
-            width: fit-content;
-            margin: auto;
-            padding: 8px 24px;
-            border-radius: 60px;
-            backdrop-filter: blur(10px);
-            white-space: nowrap;
-            pointer-events: none;
-            font-family: 'Courier New', monospace;
-            z-index: 25;
-        }
-
-        /* подсказка про зум */
-        .zoom-hint {
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
-            background: #00000077;
-            border-radius: 40px;
-            padding: 3px 12px;
-            font-size: 10px;
-            color: #ffd58c;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 22;
-            backdrop-filter: blur(4px);
-        }
-
-        footer {
-            position: absolute;
-            bottom: 5px;
-            left: 12px;
-            font-size: 9px;
-            color: #ffd58c;
-            background: #00000066;
-            border-radius: 40px;
-            padding: 2px 10px;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 22;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 550px) {
-            .ctrl-btn { width: 60px; height: 60px; font-size: 1.6rem; }
-            .score-board, .best-board { font-size: 0.9rem; padding: 4px 12px; }
-            .restart-btn { font-size: 1rem; padding: 6px 20px; }
-            .status-text { font-size: 1.1rem; top: 38%; white-space: nowrap; padding: 5px 16px;}
         }
     </style>
 </head>
 <body>
-<div class="game-fullscreen">
-    <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="600" height="500"></canvas>
+    <div id="info">
+        🧪 NetErrror | 3D Grab Object<br>
+        📱 Телефон поддерживается
     </div>
-    <div class="ui-panel">
-        <div class="score-board">🏆 СЧЁТ: <span id="scoreValue">0</span></div>
-        <div class="best-board">⭐ РЕКОРД: <span id="bestValue">0</span></div>
+    <div id="status">
+        ✨ Объект свободен | Нажмите на него, чтобы взять ✨
     </div>
-    <div class="controls-mobile">
-        <div class="ctrl-btn" id="leftBtn">◀ ЛЕВО</div>
-        <div class="ctrl-btn" id="rightBtn">ПРАВО ▶</div>
+    <div class="instruction">
+        👆 Нажмите на объект = взять/отпустить
     </div>
-    <div class="restart-area">
-        <button class="restart-btn" id="restartBtn">🚀 ГАЗАН, ПОГНАЛИ!</button>
-    </div>
-    <div id="statusMessage" class="status-text" style="display: none;">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
-    <div class="zoom-hint">🔍 Пальцы → масштаб</div>
-    <footer>⚡ ГАЗАН 67 | СВАЙП/КЛИК | МИРЫ МЕНЯЮТСЯ</footer>
-</div>
 
-<script>
-    (function(){
-        // ---------- КАНВАС (координаты всегда 600x500, но отображение резиновое) ----------
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <!-- Подключаем Three.js и доп. библиотеки -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
 
-        // Игровая логика работает в фиксированной сетке 600x500
-        const LANE_COUNT = 3;
-        const LANE_WIDTH = 600 / LANE_COUNT; // 200px
-        const GROUND_Y = 500 - 70;   // 430
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- Инициализация сцены, камеры, рендереров ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b1a);
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+
+        // Камера от первого лица для мобильного восприятия (OrbitControls позволит вращать, но объект будет привязан при захвате)
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 3);
+        camera.lookAt(0, 0.5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // тени для эффектности
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // CSS2 рендерер для текста (статус можно дублировать в 3D, но оставим как есть)
+        // --- Освещение ---
+        // Ambient
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        // Главный направленный свет
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(2, 5, 3);
+        dirLight.castShadow = true;
+        dirLight.receiveShadow = false;
+        scene.add(dirLight);
+        // Заполняющий свет сзади
+        const backLight = new THREE.PointLight(0x4466cc, 0.4);
+        backLight.position.set(-1, 1, -2);
+        scene.add(backLight);
+        // Цветной динамический свет снизу
+        const fillLight = new THREE.PointLight(0xff44aa, 0.5);
+        fillLight.position.set(0, -1, 0.5);
+        scene.add(fillLight);
         
-        const GAZAN_SIZE = 48;
-        let lane = 1;
-        let playerY = GROUND_Y - GAZAN_SIZE + 6;
+        // Вспомогательная сфера для атмосферы
+        const gridHelper = new THREE.GridHelper(10, 20, 0x88aaff, 0x335588);
+        gridHelper.position.y = -0.8;
+        scene.add(gridHelper);
         
-        let obstacles = [];
-        const OBSTACLE_WIDTH = 54;
-        const OBSTACLE_HEIGHT = 62;
-        let frameCounter = 0;
-        let spawnGap = 55;
-        let gameSpeed = 5;
-        let score = 0;
-        let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
-        let gameRunning = true;
+        // Простой пол с отражением (полупрозрачный)
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.4, metalness: 0.7, transparent: true, opacity: 0.6 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.75;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
         
-        // Смена миров
-        let currentWorldTheme = 0;
-        let nextThemeScore = 0;
-        let worldChangeFlag = false;
+        // --- СОЗДАНИЕ ОБЪЕКТА (абстрактная форма, напоминающая указанный предмет, но стилизованная под "трофей") ---
+        // Группа для объекта, чтобы можно было легко управлять положением при взятии
+        const objectGroup = new THREE.Group();
         
-        const WORLDS = [
-            {   skyTop: "#0f2027", skyBottom: "#2c5364", railColor: "#8b5a2b", trackColor: "#5d3a1a",
-                obstacleMain: "#b87333", obstacleDetail: "#e09d32", textGlow: "#ffbc6e", platformColor: "#4a3b28" },
-            {   skyTop: "#1a0033", skyBottom: "#4a1d6d", railColor: "#ff44cc", trackColor: "#aa22aa",
-                obstacleMain: "#ff2266", obstacleDetail: "#ffaa44", textGlow: "#ff66ff", platformColor: "#331155" },
-            {   skyTop: "#c94b1f", skyBottom: "#ffb347", railColor: "#b87c4f", trackColor: "#9c5e2c",
-                obstacleMain: "#cd7a32", obstacleDetail: "#e6a865", textGlow: "#ffe6b3", platformColor: "#bc6f3a" },
-            {   skyTop: "#b3e5fc", skyBottom: "#e1f5fe", railColor: "#4fc3f7", trackColor: "#0288d1",
-                obstacleMain: "#81d4fa", obstacleDetail: "#ffffff", textGlow: "#e0f7fa", platformColor: "#a6c9e0" }
-        ];
+        // Основное тело - вытянутая форма с закруглением
+        const bodyGeo = new THREE.CylinderGeometry(0.28, 0.32, 0.9, 32);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdd55ff, emissive: 0x331133, roughness: 0.2, metalness: 0.8 });
+        const mainBody = new THREE.Mesh(bodyGeo, bodyMat);
+        mainBody.castShadow = true;
+        mainBody.receiveShadow = false;
+        mainBody.position.y = 0;
+        objectGroup.add(mainBody);
         
-        function changeWorldRandomly() {
-            let newTheme = currentWorldTheme;
-            while(newTheme === currentWorldTheme && WORLDS.length > 1) {
-                newTheme = Math.floor(Math.random() * WORLDS.length);
-            }
-            currentWorldTheme = newTheme;
-            let increment = 450 + Math.floor(Math.random() * 700);
-            nextThemeScore = Math.floor(score) + increment;
-            worldChangeFlag = true;
+        // Головка (верхняя часть)
+        const tipGeo = new THREE.SphereGeometry(0.32, 32, 32);
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0xff88ff, emissive: 0x441144, roughness: 0.1 });
+        const tip = new THREE.Mesh(tipGeo, tipMat);
+        tip.position.y = 0.5;
+        tip.castShadow = true;
+        objectGroup.add(tip);
+        
+        // Декоративные кольца
+        const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 32, 64);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
+        const ring1 = new THREE.Mesh(ringGeo, ringMat);
+        ring1.rotation.x = Math.PI / 2;
+        ring1.position.y = 0.15;
+        objectGroup.add(ring1);
+        
+        const ring2 = new THREE.Mesh(ringGeo, ringMat);
+        ring2.rotation.x = Math.PI / 2;
+        ring2.position.y = -0.15;
+        objectGroup.add(ring2);
+        
+        // Небольшие шипы/кристаллы для футуристичности
+        const spikeMat = new THREE.MeshStandardMaterial({ color: 0xff66cc });
+        for (let i = 0; i < 6; i++) {
+            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.2, 6), spikeMat);
+            const angle = (i / 6) * Math.PI * 2;
+            spike.position.x = Math.cos(angle) * 0.45;
+            spike.position.z = Math.sin(angle) * 0.45;
+            spike.position.y = -0.3;
+            spike.castShadow = true;
+            objectGroup.add(spike);
         }
         
-        function checkWorldTransition() {
-            if(gameRunning && Math.floor(score) >= nextThemeScore && nextThemeScore > 0) {
-                changeWorldRandomly();
-            }
+        // Добавляем свечение (точечный свет внутри группы)
+        const glowLight = new THREE.PointLight(0xff44aa, 0.8, 2);
+        glowLight.position.set(0, 0.2, 0);
+        objectGroup.add(glowLight);
+        
+        objectGroup.position.set(0, 0.2, 0);
+        scene.add(objectGroup);
+        
+        // Добавляем парящие частицы вокруг объекта
+        const particleCount = 200;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i*3] = (Math.random() - 0.5) * 2.5;
+            particlePositions[i*3+1] = (Math.random() - 0.5) * 1.5 + 0.2;
+            particlePositions[i*3+2] = (Math.random() - 0.5) * 2;
         }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0xff88aa, size: 0.02, transparent: true, opacity: 0.6 });
+        const particles = new THREE.Points(particlesGeometry, particleMat);
+        scene.add(particles);
         
-        function getCurrentPalette() {
-            return WORLDS[currentWorldTheme];
-        }
+        // --- Логика "взять" ---
+        let isGrabbed = false;
+        // Вектор смещения между объектом и камерой при захвате (в локальных координатах камеры? проще: объект следует за точкой перед камерой)
+        // При захвате будем привязывать объект к позиции, отстоящей от камеры на 1.2 единицы вперед и чуть ниже взгляда.
+        const grabOffset = new THREE.Vector3(0, -0.2, -1.2); // относительно камеры (в пространстве камеры: X вправо, Y вверх, Z назад от камеры => минус Z значит вперед)
         
-        // UI элементы
-        const scoreSpan = document.getElementById('scoreValue');
-        const bestSpan = document.getElementById('bestValue');
-        const statusMsgDiv = document.getElementById('statusMessage');
-        const restartBtn = document.getElementById('restartBtn');
+        // Обновление статуса в UI
+        const statusDiv = document.getElementById('status');
         
-        function updateScoreUI(){
-            scoreSpan.innerText = Math.floor(score);
-            if(score > bestScore){
-                bestScore = Math.floor(score);
-                bestSpan.innerText = bestScore;
-                localStorage.setItem('gazanBest', bestScore);
-            }
-        }
+        // Рейкастер для определения клика по объекту
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
         
-        function spawnObstacle(){
-            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
-            let lastInLane = obstacles.find(obs => obs.lane === laneIdx && obs.y > 500 - 150);
-            if(lastInLane) return;
-            obstacles.push({
-                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_WIDTH/2),
-                lane: laneIdx,
-                y: -OBSTACLE_HEIGHT,
-                width: OBSTACLE_WIDTH,
-                height: OBSTACLE_HEIGHT,
-            });
-        }
-        
-        function updateGame(){
-            if(!gameRunning) return;
-            
-            for(let i=0; i<obstacles.length; i++){
-                obstacles[i].y += gameSpeed;
-            }
-            obstacles = obstacles.filter(obs => obs.y < 600);
-            
-            let dynamicSpawn = Math.max(28, spawnGap - Math.floor(score / 380));
-            if(frameCounter >= dynamicSpawn){
-                spawnObstacle();
-                frameCounter = 0;
+        // Функция обработки нажатия (для мыши и тач)
+        function onPointerDown(event) {
+            // Вычисляем координаты указателя в нормализованных координатах (-1 до +1)
+            const rect = renderer.domElement.getBoundingClientRect();
+            let clientX, clientY;
+            if (event.touches) {
+                // touch событие
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+                event.preventDefault();
             } else {
-                frameCounter++;
+                clientX = event.clientX;
+                clientY = event.clientY;
             }
             
-            gameSpeed = Math.min(5 + Math.floor(score / 650), 13.2);
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
             
-            const playerRect = {
-                x: lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2),
-                y: playerY,
-                w: GAZAN_SIZE,
-                h: GAZAN_SIZE
-            };
+            raycaster.setFromCamera(mouse, camera);
+            // Проверяем пересечение с объектом (группа objectGroup, но рейкастер работает с Mesh внутри группы)
+            const intersects = raycaster.intersectObject(objectGroup, true);
             
-            for(let obs of obstacles){
-                const obsRect = {
-                    x: obs.x,
-                    y: obs.y,
-                    w: OBSTACLE_WIDTH,
-                    h: OBSTACLE_HEIGHT
-                };
-                if(playerRect.x < obsRect.x + obsRect.w &&
-                    playerRect.x + playerRect.w > obsRect.x &&
-                    playerRect.y < obsRect.y + obsRect.h &&
-                    playerRect.y + playerRect.h > obsRect.y){
-                    gameRunning = false;
-                    statusMsgDiv.style.display = "block";
-                    restartBtn.classList.remove("hidden");
-                    break;
+            if (intersects.length > 0) {
+                // Нажали на объект
+                if (!isGrabbed) {
+                    // ВЗЯТЬ
+                    isGrabbed = true;
+                    statusDiv.innerHTML = "🔴 СХВАЧЕНО | Объект следует за вами | Нажмите снова, чтобы отпустить 🔴";
+                    statusDiv.style.color = "#ffaaaa";
+                    // Эффект при взятии: увеличиваем свечение
+                    glowLight.intensity = 1.5;
+                    // Меняем цвет материала на более яркий
+                    mainBody.material.emissiveIntensity = 0.5;
+                    tip.material.emissiveIntensity = 0.6;
+                } else {
+                    // ОТПУСТИТЬ
+                    isGrabbed = false;
+                    statusDiv.innerHTML = "✨ Объект свободен | Нажмите на него, чтобы взять ✨";
+                    statusDiv.style.color = "white";
+                    glowLight.intensity = 0.8;
+                    mainBody.material.emissiveIntensity = 0.2;
+                    tip.material.emissiveIntensity = 0.2;
+                    // Возвращаем объект на исходную позицию относительно мира (сохраняем позицию перед камерой? нет, лучше вернуть на место перед взятием)
+                    // При отпускании оставляем объект там, где он был в момент отпускания (перед камерой), но для удобства - пусть остается.
+                    // Ничего дополнительно не делаем, просто отключаем следование.
+                }
+                // Небольшая вибрация на телефоне если поддерживается
+                if (navigator.vibrate) navigator.vibrate(50);
+            }
+        }
+        
+        // Добавляем слушатели для касаний и мыши
+        renderer.domElement.addEventListener('mousedown', onPointerDown);
+        renderer.domElement.addEventListener('touchstart', onPointerDown, { passive: false });
+        
+        // --- Вспомогательные элементы: звездное небо (текстура или просто частицы) ---
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 800;
+        const starPos = [];
+        for (let i = 0; i < starCount; i++) {
+            starPos.push((Math.random() - 0.5) * 200);
+            starPos.push((Math.random() - 0.5) * 100);
+            starPos.push((Math.random() - 0.5) * 80 - 40);
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08, transparent: true, opacity: 0.6 });
+        const stars = new THREE.Points(starGeometry, starMat);
+        scene.add(stars);
+        
+        // --- Анимация вращения объекта, если он не в руке ---
+        let time = 0;
+        
+        // Орбит контрол для удобства на телефоне (чтобы можно было вращать камеру вокруг, но если объект захвачен - лучше отключать? нет, пусть остается)
+        // С OrbitControls конфликт с привязкой объекта к камере, поэтому не используем его.
+        // Вместо этого сделаем простую логику: если объект захвачен, то его позиция обновляется относительно камеры.
+        // Если не захвачен - он медленно вращается и плавает.
+        
+        // Дополнительно: плавное движение камеры? Нет, оставим статичной, пользователь может двигать телефон? но для 3D на телефоне обычно нужен OrbitControls.
+        // Добавим легкий автоматический поворот камеры? Нет, лучше оставить управление за пальцем через стандартное перетаскивание? Сложно без доп библиотек.
+        // Чтобы было удобно на телефоне, добавим Touch-контроль для вращения камеры (минимальный).
+        // Создадим простой контроллер: при перетаскивании пальцем вращаем сцену вокруг объекта, если он не захвачен.
+        // Но для простоты и стабильности я лучше добавлю библиотеку OrbitControls, она отлично работает на телефоне.
+        // Импортируем OrbitControls.
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 1.0;
+        controls.zoomSpeed = 1.0;
+        controls.enableZoom = true;
+        controls.enablePan = false;
+        controls.target.set(0, 0.5, 0);
+        
+        // Корректируем поведение при захвате: отключаем controls.target обновление? Нет, пусть остается как есть.
+        // Но если объект захвачен, мы хотим, чтобы объект всегда был перед камерой, а камера управляется OrbitControls? Это несовместимо.
+        // Лучше: при захвате временно отключаем OrbitControls и переключаемся в режим "объект привязан к камере". При отпускании возвращаем OrbitControls и фиксируем объект в пространстве.
+        // Сделаем это.
+        
+        let controlsEnabled = true;
+        
+        function setControlsEnabled(enabled) {
+            controls.enabled = enabled;
+            controlsEnabled = enabled;
+            if (enabled) {
+                // При включении контролов, синхронизируем цель с текущей позицией объекта или мира
+                if (!isGrabbed) {
+                    controls.target.copy(objectGroup.position);
+                } else {
+                    controls.target.set(0, 0.5, 0);
                 }
             }
-            
-            if(gameRunning){
-                score += 0.28;
-                updateScoreUI();
-                checkWorldTransition();
-            }
         }
         
-        // Отрисовка с палитрой
-        function drawBackground() {
-            const pal = getCurrentPalette();
-            const gradSky = ctx.createLinearGradient(0, 0, 0, GROUND_Y-40);
-            gradSky.addColorStop(0, pal.skyTop);
-            gradSky.addColorStop(0.7, pal.skyBottom);
-            ctx.fillStyle = gradSky;
-            ctx.fillRect(0, 0, 600, GROUND_Y-30);
+        // Модифицируем функцию взятия/отпускания
+        const originalOnPointerDown = onPointerDown;
+        // Переопределим обработчик с учетом переключения контролов
+        window.onPointerDown = function(event) {
+            // сначала проверим пересечение как ранее
+            const rect = renderer.domElement.getBoundingClientRect();
+            let clientX, clientY;
+            if (event.touches) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+                event.preventDefault();
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(objectGroup, true);
             
-            ctx.fillStyle = pal.textGlow + "aa";
-            ctx.font = "bold 26monospace";
-            ctx.fillText("🚇 67 RUSH", 30, 70);
-            ctx.fillStyle = pal.textGlow + "cc";
-            ctx.fillText("GAZAN 6IX 9EVEN", 600-200, 110);
+            if (intersects.length > 0) {
+                if (!isGrabbed) {
+                    isGrabbed = true;
+                    statusDiv.innerHTML = "🔴 СХВАЧЕНО | Объект следует за вами | Нажмите снова, чтобы отпустить 🔴";
+                    statusDiv.style.color = "#ffaaaa";
+                    glowLight.intensity = 1.5;
+                    mainBody.material.emissiveIntensity = 0.5;
+                    tip.material.emissiveIntensity = 0.6;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    // Отключаем OrbitControls
+                    setControlsEnabled(false);
+                    // Запоминаем смещение между объектом и камерой
+                    // Но при отключенных контролах камера фиксирована, но пользователь мог повернуть камеру ранее.
+                    // Объект должен прыгнуть перед камерой.
+                    const camDir = new THREE.Vector3();
+                    camera.getWorldDirection(camDir);
+                    const grabPos = camera.position.clone().add(camDir.multiplyScalar(1.2));
+                    grabPos.y -= 0.2;
+                    objectGroup.position.copy(grabPos);
+                } else {
+                    isGrabbed = false;
+                    statusDiv.innerHTML = "✨ Объект свободен | Нажмите на него, чтобы взять ✨";
+                    statusDiv.style.color = "white";
+                    glowLight.intensity = 0.8;
+                    mainBody.material.emissiveIntensity = 0.2;
+                    tip.material.emissiveIntensity = 0.2;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    // Включаем OrbitControls обратно
+                    setControlsEnabled(true);
+                    // Устанавливаем цель контролов на текущую позицию объекта
+                    controls.target.copy(objectGroup.position);
+                }
+            }
+        };
+        
+        renderer.domElement.removeEventListener('mousedown', onPointerDown);
+        renderer.domElement.removeEventListener('touchstart', onPointerDown);
+        renderer.domElement.addEventListener('mousedown', window.onPointerDown);
+        renderer.domElement.addEventListener('touchstart', window.onPointerDown, { passive: false });
+        
+        // Анимация: если объект захвачен, обновляем его позицию относительно камеры
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
             
-            ctx.fillStyle = pal.platformColor;
-            ctx.fillRect(0, GROUND_Y-10, 600, 12);
-            ctx.fillStyle = pal.railColor;
-            for(let i=0;i<LANE_COUNT+1;i++){
-                ctx.fillRect(i*LANE_WIDTH-4, GROUND_Y-15, 8, 28);
-            }
-            ctx.fillStyle = pal.trackColor;
-            for(let i=0;i<15;i++){
-                ctx.fillRect(i*70, GROUND_Y-5, 40, 10);
-            }
-            ctx.fillStyle = "#ddccaa";
-            for(let r=0;r<LANE_COUNT;r++){
-                ctx.fillRect(r*LANE_WIDTH+10, GROUND_Y-3, LANE_WIDTH-20, 6);
-            }
-        }
-        
-        function drawObstacles() {
-            const pal = getCurrentPalette();
-            for(let obs of obstacles){
-                ctx.fillStyle = pal.obstacleMain;
-                ctx.shadowBlur = 4;
-                ctx.fillRect(obs.x, obs.y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
-                ctx.fillStyle = pal.obstacleDetail;
-                ctx.fillRect(obs.x+6, obs.y+10, OBSTACLE_WIDTH-12, 14);
-                ctx.fillStyle = "#2c2c2c";
-                ctx.fillRect(obs.x+8, obs.y+32, 12, 16);
-                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+32, 12, 16);
-                // цифра 67 с характерным стилем
-                ctx.font = `bold ${Math.floor(OBSTACLE_WIDTH * 0.55)}px "Courier New", monospace`;
-                ctx.fillStyle = "#fff6b0";
-                ctx.shadowBlur = 3;
-                ctx.shadowColor = "#ff7700";
-                ctx.fillText("67", obs.x + 10, obs.y + 52);
-                ctx.font = "bold 18px monospace";
-                ctx.fillStyle = "#ffeb99";
-                ctx.fillText("⚡", obs.x + OBSTACLE_WIDTH-16, obs.y + 28);
-                ctx.fillStyle = "#ffcc44";
-                for(let s=0;s<3;s++) ctx.rect(obs.x+6+s*12, obs.y+OBSTACLE_HEIGHT-8, 5, 7);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawGazans() {
-            const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = "#f5a623";
-            ctx.beginPath();
-            ctx.roundRect(playerX, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
-            ctx.fill();
-            ctx.fillStyle = "#3b2a1f";
-            ctx.beginPath();
-            ctx.arc(playerX+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
-            ctx.arc(playerX+GAZAN_SIZE*0.3, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(playerX+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
-            ctx.arc(playerX+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#000";
-            ctx.fillRect(playerX+GAZAN_SIZE*0.5, playerY+GAZAN_SIZE*0.2, 12, 4);
-            ctx.fillRect(playerX+GAZAN_SIZE*0.2, playerY+GAZAN_SIZE*0.2, 12, 4);
-            ctx.fillStyle = "#ffd966";
-            ctx.fillRect(playerX+15, playerY+42, 22, 6);
-            ctx.fillStyle = "#dc143c";
-            ctx.fillRect(playerX+8, playerY-10, 38, 14);
-            ctx.fillStyle = "#ff0000aa";
-            ctx.fillRect(playerX+18, playerY-6, 18, 8);
-            ctx.font = "bold 12px monospace";
-            ctx.fillStyle = "black";
-            ctx.fillText("GAZAN", playerX+8, playerY+GAZAN_SIZE-8);
-            ctx.fillStyle = "#333";
-            ctx.fillRect(playerX+8, playerY+GAZAN_SIZE-8, 14, 8);
-            ctx.fillRect(playerX+28, playerY+GAZAN_SIZE-8, 14, 8);
-            ctx.shadowBlur = 0;
-            for(let s=0; s<5; s++){
-                ctx.beginPath();
-                ctx.moveTo(playerX-10-s*2, playerY+GAZAN_SIZE/2);
-                ctx.lineTo(playerX-22-s*3, playerY+GAZAN_SIZE/2 + (s%2===0? -6:6));
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = `rgba(255,200,100,${0.7-s*0.1})`;
-                ctx.stroke();
-            }
-        }
-        
-        function drawUIandEffects() {
-            const pal = getCurrentPalette();
-            ctx.font = "bold 18px monospace";
-            ctx.fillStyle = "#FFF5cf";
-            ctx.fillText(`🚄 SPEED: ${Math.floor(gameSpeed*2)}`, 600-130, 45);
-            ctx.fillStyle = pal.textGlow;
-            ctx.fillText(`🏁 ЛЕВО/ПРАВО`, 600-150, 85);
-            
-            if(worldChangeFlag) {
-                ctx.font = "bold 14px monospace";
-                ctx.fillStyle = "#ffdd88";
-                ctx.shadowBlur = 6;
-                ctx.fillText("✨ МИР СМЕНИЛСЯ! ✨", 600/2-85, GROUND_Y-45);
-                setTimeout(()=>{ worldChangeFlag = false; }, 400);
-                worldChangeFlag = false;
+            if (isGrabbed) {
+                // Объект следует за камерой
+                const camDir = new THREE.Vector3();
+                camera.getWorldDirection(camDir);
+                const desiredPos = camera.position.clone().add(camDir.multiplyScalar(1.2));
+                desiredPos.y -= 0.2;
+                objectGroup.position.lerp(desiredPos, 0.3);
+                // Небольшое вращение объекта в руке
+                objectGroup.rotation.y = Math.sin(time * 8) * 0.2;
+                objectGroup.rotation.x = Math.sin(time * 5) * 0.1;
+            } else {
+                // Свободное вращение и парение
+                objectGroup.rotation.y += 0.01;
+                objectGroup.rotation.x = Math.sin(time * 0.8) * 0.2;
+                objectGroup.position.y = 0.2 + Math.sin(time * 1.5) * 0.05;
+                // Частицы вокруг
+                particles.rotation.y += 0.005;
+                particles.rotation.x = Math.sin(time * 0.2) * 0.1;
             }
             
-            if(!gameRunning){
-                ctx.font = "bold 32px monospace";
-                ctx.fillStyle = "#ffddbb";
-                ctx.fillText("❌ GAME OVER ❌", 600/2-130, 500/2-40);
-                ctx.font = "16px monospace";
-                ctx.fillStyle = "yellow";
-                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", 600/2-125, 500/2+25);
+            // Динамический свет
+            fillLight.intensity = 0.5 + Math.sin(time * 3) * 0.2;
+            
+            // Обновляем controls только если они включены
+            if (controlsEnabled) {
+                controls.update();
             }
             
-            if(gameRunning && frameCounter % 45 < 20){
-                ctx.fillStyle = "#fff9c4cc";
-                ctx.font = "bold 14px monospace";
-                ctx.fillText("👆 СВАЙП / КНОПКИ 👆", 600-180, GROUND_Y-18);
-            }
+            renderer.render(scene, camera);
         }
         
-        function draw() {
-            drawBackground();
-            drawObstacles();
-            drawGazans();
-            drawUIandEffects();
+        animate();
+        
+        // Адаптация под размер экрана
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
-        // Управление
-        function moveLeft(){
-            if(!gameRunning) return;
-            if(lane > 0) lane--;
-        }
-        function moveRight(){
-            if(!gameRunning) return;
-            if(lane < LANE_COUNT-1) lane++;
-        }
-        
-        function restartGame(){
-            gameRunning = true;
-            score = 0;
-            gameSpeed = 5;
-            obstacles = [];
-            lane = 1;
-            frameCounter = 0;
-            updateScoreUI();
-            statusMsgDiv.style.display = "none";
-            restartBtn.classList.add("hidden");
-            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
-            nextThemeScore = 500 + Math.floor(Math.random() * 700);
-            worldChangeFlag = false;
-        }
-        
-        // --- Обработчики (с поддержкой зума и тач событий без конфликта) ---
-        function handleKey(e){
-            const key = e.key;
-            if(key === 'ArrowLeft' || key === 'Left' || key === 'a' || key === 'A'){
-                e.preventDefault();
-                moveLeft();
-            } else if(key === 'ArrowRight' || key === 'Right' || key === 'd' || key === 'D'){
-                e.preventDefault();
-                moveRight();
-            }
-            if((key === ' ' || key === 'Space' || key === 'r' || key === 'R') && !gameRunning){
-                e.preventDefault();
-                restartGame();
-            }
-        }
-        
-        // Преобразование координат клика/тача в логику дорожек (для свайпа)
-        let touchStartX = 0;
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;   // 600 / отображаемая ширина
-            const touch = e.touches[0];
-            let canvasRelativeX = (touch.clientX - rect.left) * scaleX;
-            touchStartX = canvasRelativeX;
-        }
-        
-        function handleTouchMove(e) {
-            if(!gameRunning) return;
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const touch = e.touches[0];
-            let currentX = (touch.clientX - rect.left) * scaleX;
-            let diff = currentX - touchStartX;
-            if(Math.abs(diff) > 30) {
-                if(diff > 0) moveRight();
-                else moveLeft();
-                touchStartX = currentX;
-            }
-        }
-        
-        let mouseDownX = 0;
-        let isDragging = false;
-        function handleMouseDown(e) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            mouseDownX = (e.clientX - rect.left) * scaleX;
-            isDragging = true;
-        }
-        
-        function handleMouseMove(e) {
-            if(!isDragging || !gameRunning) return;
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            let currentX = (e.clientX - rect.left) * scaleX;
-            let diff = currentX - mouseDownX;
-            if(Math.abs(diff) > 30) {
-                if(diff > 0) moveRight();
-                else moveLeft();
-                mouseDownX = currentX;
-            }
-        }
-        
-        function handleMouseUp(e) { isDragging = false; }
-        
-        // Инициализация и цикл
-        bestSpan.innerText = bestScore;
-        
-        window.addEventListener('load', ()=>{
-            document.getElementById('leftBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveLeft(); });
-            document.getElementById('rightBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveRight(); });
-            restartBtn.addEventListener('click', ()=>{ if(!gameRunning) restartGame(); });
-            
-            window.addEventListener('keydown', handleKey);
-            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
-            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
-            canvas.addEventListener('touchend', (e)=> e.preventDefault());
-            canvas.addEventListener('mousedown', handleMouseDown);
-            canvas.addEventListener('mousemove', handleMouseMove);
-            canvas.addEventListener('mouseup', handleMouseUp);
-            canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
-            
-            gameRunning = true;
-            score = 0;
-            gameSpeed = 5;
-            obstacles = [];
-            lane = 1;
-            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
-            nextThemeScore = 500 + Math.floor(Math.random() * 700);
-            updateScoreUI();
-            statusMsgDiv.style.display = "none";
-            restartBtn.classList.add("hidden");
-            
-            function gameLoop(){
-                updateGame();
-                draw();
-                requestAnimationFrame(gameLoop);
-            }
-            gameLoop();
-        });
-        
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-                if (w < 2 * r) r = w / 2;
-                if (h < 2 * r) r = h / 2;
-                this.moveTo(x+r, y);
-                this.lineTo(x+w-r, y);
-                this.quadraticCurveTo(x+w, y, x+w, y+r);
-                this.lineTo(x+w, y+h-r);
-                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-                this.lineTo(x+r, y+h);
-                this.quadraticCurveTo(x, y+h, x, y+h-r);
-                this.lineTo(x, y+r);
-                this.quadraticCurveTo(x, y, x+r, y);
-                return this;
-            };
-        }
-    })();
-</script>
+        console.log("NetErrror: 3D игра загружена. Объект создан.");
+    </script>
 </body>
     </html>
