@@ -2,499 +2,459 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥚 СУСЛОВ: Жир в любой момент</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KROP RUSSIA | Мобильная RPG 2026</title>
     <style>
         * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-        body {
             margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #1a3a2e 0%, #2d5a4a 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
-            padding: 16px;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .game-container {
-            max-width: 500px;
+
+        body {
+            background: #0a0c12;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, -apple-system, sans-serif;
+            color: #eef2ff;
+            line-height: 1.5;
+        }
+
+        /* градиентный фон с текстурой */
+        .bg-grunge {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background: #efe6d5;
-            background-image: radial-gradient(circle at 20% 30%, #fff6e8, #e7d8be);
-            border-radius: 64px 64px 48px 48px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 8px rgba(255,255,240,0.8);
-            padding: 28px 24px 36px;
-            border: 4px solid #b49a7b;
-            text-align: center;
-            transition: 0.2s;
-        }
-        h1 {
-            margin: 0 0 8px;
-            font-size: 2.8rem;
-            font-weight: 900;
-            letter-spacing: 4px;
-            color: #3d2a1b;
-            text-shadow: 4px 4px 0 #c9aa7b, 6px 6px 0 rgba(0,0,0,0.1);
-            word-break: break-word;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        h1 span {
-            font-size: 2.2rem;
-        }
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 10px 0 5px;
-        }
-        .prestige-badge {
-            background: #6a4e2e;
-            color: #ffd966;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.3rem;
-            display: inline-block;
-            border: 2px solid #eebb55;
-            box-shadow: inset 0 1px 5px #3d2e1c, 0 4px 0 #3a281a;
-        }
-        .spent-badge {
-            background: #4a3a2a;
-            color: #c9b896;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1rem;
-            border: 2px solid #9e8b72;
-        }
-        .suslov-area {
-            background: #b18b62;
-            background: linear-gradient(135deg, #ccb094, #a5835e);
-            border-radius: 120px 120px 60px 60px;
-            padding: 25px 10px 15px;
-            margin: 10px 0 20px;
-            border: 6px solid #5e3e28;
-            box-shadow: inset 0 -10px 0 #3f2c1c, inset 0 8px 10px #fbe9c3, 0 12px 0 #3f2c1c;
-        }
-        .suslov-emoji {
-            font-size: 140px;
-            line-height: 1;
-            filter: drop-shadow(8px 16px 6px rgba(0,0,0,0.2));
-            transition: transform 0.1s ease;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .belly-bar-container {
-            background: #2c1e12;
-            padding: 8px 12px;
-            border-radius: 60px;
-            border: 3px solid #b49a7b;
-            box-shadow: inset 0 4px 6px #0f0a06, 0 6px 0 #3f2c1c;
-            margin: 10px 5px 5px;
-        }
-        .belly-label {
-            display: flex;
-            justify-content: space-between;
-            color: #ffecb3;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #1f140c;
-            padding: 0 8px 4px;
-            font-size: 1.1rem;
-        }
-        .belly-bar-bg {
-            height: 30px;
-            background: #1e130c;
-            border-radius: 40px;
-            border: 2px solid #6b4f37;
-            overflow: hidden;
-            box-shadow: inset 0 3px 6px black;
-        }
-        .belly-fill {
-            width: 0%;
             height: 100%;
-            background: #f5ac78;
-            background: linear-gradient(90deg, #fcb045, #fd7e14, #ff512f);
-            box-shadow: 0 0 12px #ffb347;
-            border-radius: 40px;
-            transition: width 0.25s cubic-bezier(.2,.9,.4,1);
-            border-right: 2px solid #ffd6a0;
+            background: radial-gradient(circle at 20% 30%, #11161f, #030507);
+            z-index: -2;
         }
-        .stats-panel {
+
+        .bg-grunge::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cGF0aCBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDMiIGQ9Ik0wIDBoNDB2NDBIMHoiLz48L3N2Zz4=');
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+            position: relative;
+        }
+
+        /* шапка */
+        .hero {
+            text-align: center;
+            padding: 2rem 0 2rem;
+            border-bottom: 1px solid rgba(255, 50, 50, 0.3);
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #ff2f2f, #b01010, #ff5a5a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 12px rgba(180, 20, 20, 0.5);
+        }
+
+        .logo span {
+            background: none;
+            color: #ffd966;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            text-shadow: 0 0 6px #ffaa33;
+        }
+
+        .sub {
+            font-size: 1.1rem;
+            color: #9aa3b8;
+            margin-top: 0.5rem;
+            border-top: 1px dashed #2a2e3f;
+            display: inline-block;
+            padding-top: 0.6rem;
+        }
+
+        .badge-group {
             display: flex;
-            justify-content: space-between;
-            background: #251e16d9;
-            backdrop-filter: blur(3px);
-            padding: 16px 20px;
-            border-radius: 60px;
-            margin: 18px 0 22px;
-            color: #f7e7cf;
-            border: 2px solid #ab8e6f;
-            box-shadow: inset 0 0 0 2px #51412e, 0 8px 0 #2b1e13;
-            font-weight: bold;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0 0.5rem;
         }
-        .money-block, .food-block {
+
+        .badge {
+            background: #1e1f2c;
+            backdrop-filter: blur(4px);
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-left: 3px solid #e03a3a;
+            letter-spacing: 0.5px;
+        }
+
+        /* сетка карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+            gap: 1.8rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: rgba(18, 22, 35, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 70, 70, 0.2);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, border-color 0.2s;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover {
+            border-color: #ff4a4a;
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.8rem;
-            background: #0c0907;
-            padding: 6px 22px;
-            border-radius: 50px;
-            box-shadow: inset 0 2px 5px black, 0 3px 0 #4d3926;
-            color: #ffd966;
+            border-left: 4px solid #e63946;
+            padding-left: 0.9rem;
         }
-        .money-block span, .food-block span {
-            font-size: 1rem;
-            color: #c0a175;
-            margin-right: 4px;
+
+        .card ul, .cmd-list {
+            list-style: none;
+            margin-top: 0.8rem;
         }
-        .shop {
+
+        .card li {
+            margin-bottom: 0.65rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.4rem;
             display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-bottom: 8px;
+            flex-wrap: wrap;
+            align-items: baseline;
         }
-        .food-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #dccdb6;
-            padding: 8px 18px 8px 25px;
-            border-radius: 100px;
-            border: 3px solid #6e543c;
-            box-shadow: inset 0 1px 6px #fff3df, 0 6px 0 #5a4530;
-            font-weight: bold;
-        }
-        .food-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-size: 1.5rem;
-        }
-        .food-desc {
-            font-size: 1.2rem;
-            color: #302010;
-        }
-        .food-desc small {
-            font-size: 0.9rem;
-            color: #5b3f28;
-            font-weight: normal;
-        }
-        button {
-            background: #f3d37c;
-            border: none;
-            font-weight: bold;
-            font-size: 1.3rem;
-            padding: 12px 24px;
-            border-radius: 50px;
-            box-shadow: 0 5px 0 #a05f2c, 0 2px 10px rgba(0,0,0,0.2);
-            border: 2px solid #ffeab0;
-            color: #2c1c0c;
-            cursor: pointer;
-            transition: all 0.04s linear;
-            letter-spacing: 0.5px;
-            min-width: 120px;
-        }
-        button:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #7b451b, 0 2px 8px black;
-        }
-        .sell-area {
-            margin-top: 20px;
-        }
-        #sellFatBtn {
-            background: #c9a87c;
-            box-shadow: 0 5px 0 #7a5d3e, 0 2px 8px black;
-            border-color: #ebd5b0;
-            color: #1f140a;
-            font-size: 1.8rem;
-            padding: 16px 30px;
-            width: 100%;
-        }
-        .gameover-message {
-            margin: 15px 0 5px;
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #ad1f1f;
-            text-shadow: 2px 2px 0 #ffc857;
-            letter-spacing: 2px;
-        }
-        .footer-note {
-            color: #594d3c;
-            margin-top: 16px;
-            font-style: italic;
+
+        .cmd {
+            background: #0b0e16;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #ffb347;
+            margin-right: 10px;
             font-weight: 500;
         }
-        .pop-effect {
-            animation: shake 0.3s ease-in-out;
+
+        .cmd-desc {
+            color: #cbd5e6;
         }
-        @keyframes shake {
-            0%,100%{ transform: rotate(0deg); }
-            25%{ transform: rotate(4deg) scale(1.02); }
-            75%{ transform: rotate(-4deg) scale(0.98); }
+
+        .price {
+            color: #6ef0a0;
+            font-weight: bold;
+        }
+
+        hr {
+            border-color: #2a2f42;
+            margin: 1rem 0;
+        }
+
+        .big-stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            background: #03050b;
+            border-radius: 2rem;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            border: 1px solid #2a2e44;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff5e5e;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0f1220;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #252a3b;
+        }
+
+        th {
+            background: #1e2338;
+            color: #ffbc6e;
+        }
+
+        .footer {
+            margin-top: 3.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5d6785;
+            border-top: 1px solid #202536;
+            padding-top: 2rem;
+        }
+
+        .glow {
+            text-shadow: 0 0 5px #ff4d4d;
+        }
+
+        @media (max-width: 680px) {
+            .container {
+                padding: 1rem;
+            }
+            .logo {
+                font-size: 2.6rem;
+            }
         }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameContainer">
-    <h1>
-        <span>🐹</span> СУСЛОВ <span>🐹</span>
-    </h1>
-    
-    <div class="stats-row">
-        <div class="prestige-badge" id="prestigeDisplay">
-            ⭐ Престиж: <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
-        </div>
-        <div class="spent-badge" id="spentDisplay">
-            💸 Потрачено: <span id="totalSpent">0</span>🪙
-        </div>
-    </div>
-
-    <!-- Зона Суслова -->
-    <div class="suslov-area">
-        <div class="suslov-emoji" id="suslovEmoji">🐭</div>
-        <div class="belly-bar-container">
-            <div class="belly-label">
-                <span>🍖 СЫТОСТЬ</span>
-                <span id="bellyPercent">0%</span>
-            </div>
-            <div class="belly-bar-bg">
-                <div class="belly-fill" id="bellyFill" style="width:0%"></div>
-            </div>
+<div class="bg-grunge"></div>
+<div class="container">
+    <div class="hero">
+        <div class="logo">KROP <span>RUSSIA</span></div>
+        <div class="sub">⭐ Мобильная ролевая игра нового поколения | Сезон 2026 ⭐</div>
+        <div class="badge-group">
+            <div class="badge">🔥 7.8 млн игроков</div>
+            <div class="badge">🚗 200+ авто</div>
+            <div class="badge">⚡ Кроссплатформа: iOS / Android / ПК</div>
+            <div class="badge">🎮 Версия 3.6.2 "Рёв моторов"</div>
         </div>
     </div>
 
     <!-- Статистика -->
-    <div class="stats-panel">
-        <div class="money-block">
-            <span>🪙</span> <span id="moneyValue">30</span>
+    <div class="big-stats">
+        <div class="stat-item"><div class="stat-number">20+</div><div>Серверов</div></div>
+        <div class="stat-item"><div class="stat-number">35+</div><div>Профессий</div></div>
+        <div class="stat-item"><div class="stat-number">50 млн ₽</div><div>Топ-бизнес</div></div>
+        <div class="stat-item"><div class="stat-number">24/7</div><div>Динамичная экономика</div></div>
+    </div>
+
+    <!-- Основные команды -->
+    <div class="grid">
+        <div class="card">
+            <h3>📟 Главные команды</h3>
+            <ul>
+                <li><span class="cmd">/menu</span> <span class="cmd-desc">— главное меню</span></li>
+                <li><span class="cmd">/stats</span> <span class="cmd-desc">— статистика и ID</span></li>
+                <li><span class="cmd">/inv</span> <span class="cmd-desc">— инвентарь</span></li>
+                <li><span class="cmd">/gps</span> <span class="cmd-desc">— навигатор Krop</span></li>
+                <li><span class="cmd">/bank</span> <span class="cmd-desc">— банковские операции</span></li>
+                <li><span class="cmd">/donate</span> <span class="cmd-desc">— премиум магазин (BCoin)</span></li>
+                <li><span class="cmd">/promocode</span> <span class="cmd-desc">— ввести бонус-код</span></li>
+                <li><span class="cmd">/time</span> <span class="cmd-desc">— игровое время</span></li>
+            </ul>
         </div>
-        <div class="food-block">
-            <span>🍱</span> <span id="foodCount">0</span>
+        <div class="card">
+            <h3>🎭 RP-взаимодействие</h3>
+            <ul>
+                <li><span class="cmd">/me [действие]</span> <span class="cmd-desc">— описать действие</span></li>
+                <li><span class="cmd">/do [состояние]</span> <span class="cmd-desc">— окружение / эмоции</span></li>
+                <li><span class="cmd">/try [действие]</span> <span class="cmd-desc">— попытка с шансом</span></li>
+                <li><span class="cmd">/sms [номер] [текст]</span> <span class="cmd-desc">— отправить сообщение</span></li>
+                <li><span class="cmd">/call [ID]</span> <span class="cmd-desc">— звонок игроку</span></li>
+                <li><span class="cmd">/mask</span> <span class="cmd-desc">— надеть маску</span></li>
+                <li><span class="cmd">/anim</span> <span class="cmd-desc">— эмоции и анимации</span></li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>🏠 Недвижимость / Транспорт</h3>
+            <ul>
+                <li><span class="cmd">/home</span> <span class="cmd-desc">— управление домом</span></li>
+                <li><span class="cmd">/lock</span> <span class="cmd-desc">— закрыть дверь/авто</span></li>
+                <li><span class="cmd">/garage</span> <span class="cmd-desc">— гараж и авто</span></li>
+                <li><span class="cmd">/sellhome [ID] [цена]</span> <span class="cmd-desc">— продажа дома</span></li>
+                <li><span class="cmd">/carjack</span> <span class="cmd-desc">— угон (взлом)</span></li>
+                <li><span class="cmd">/tune</span> <span class="cmd-desc">— тюнинг-центр</span></li>
+            </ul>
         </div>
     </div>
 
-    <!-- Магазин еды -->
-    <div class="shop">
-        <div class="food-row">
-            <div class="food-info">
-                <span>🥕</span>
-                <span class="food-desc">Морковка <small>+6%</small></span>
-            </div>
-            <button id="buyCarrot">5🪙</button>
+    <!-- Профессии и доход -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3>💼 Работы и доход (Krop Russia 2026)</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>Профессия</th><th>Требуемый уровень</th><th>💰 Доход (в час / рейс)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Завод / Лесопилка</td><td>Ур. 2</td><td>~7 000 - 8 500 ₽</td></tr>
+                    <tr><td>Фермер</td><td>Ур. 2</td><td>~8 000 ₽</td></tr>
+                    <tr><td>Водитель автобуса</td><td>Ур. 3</td><td>9 000 - 20 000 ₽</td></tr>
+                    <tr><td>Курьер / Водолаз</td><td>Ур. 3+</td><td>12 000 - 30 000 ₽</td></tr>
+                    <tr><td>Дальнобойщик</td><td>Ур. 5</td><td>~50 000 ₽ / рейс</td></tr>
+                    <tr><td>МЧС / Полиция / Армия</td><td>Ур. 4+</td><td>стабильная ЗП + бонусы</td></tr>
+                    <tr><td style="color:#ffaa66;">Складской работник (новинка)</td><td>Ур. 3</td><td>~15 000 - 22 000 ₽</td></tr>
+                </tbody>
+            </table>
         </div>
-        <div class="food-row">
-            <div class="food-info">
-                <span>🍔</span>
-                <span class="food-desc">Бургер <small>+18%</small></span>
-            </div>
-            <button id="buyBurger">14🪙</button>
+        <div style="font-size:0.85rem; margin-top: 12px;">⭐ Новые профессии 2026: Сортировщик, Курьер ПВЗ, Электрик-ремонтник — открывают доступ к уникальным скинам.</div>
+    </div>
+
+    <!-- Транспорт + тюнинг -->
+    <div class="grid">
+        <div class="card">
+            <h3>🚘 Культовые авто & Цены</h3>
+            <ul>
+                <li>🔹 ВАЗ 2101 — <span class="price">60 000 ₽</span> (классика)</li>
+                <li>🔹 ВАЗ 2107 — <span class="price">150 000 ₽</span> | 158 км/ч</li>
+                <li>🔹 Mazda RX-7 — <span class="price">2 400 000 ₽</span></li>
+                <li>🔹 BMW X6M F16 — <span class="price">8 200 000 ₽</span></li>
+                <li>🔹 Audi RS6 — <span class="price">8 500 000 ₽</span> | 306 км/ч</li>
+                <li>🔹 Lamborghini Huracan — <span class="price">от 32 млн ₽</span></li>
+                <li>🏆 Bugatti La Noire — <span class="price">~90 млн ₽</span> (эксклюзив)</li>
+            </ul>
+            <hr>
+            <div><span class="cmd">/tune</span> — спорт-тюнинг + прошивка увеличивают стоимость авто на 15-30% 🔥</div>
         </div>
-        <div class="food-row">
-            <div class="food-info">
-                <span>🎂</span>
-                <span class="food-desc">Торт <small>+35%</small></span>
+        <div class="card">
+            <h3>👥 Фракции и криминал</h3>
+            <ul>
+                <li>👮 <strong>Госструктуры</strong>: Полиция, ГИБДД, ФСБ, МЧС, Армия, ФСИН, Мэрия</li>
+                <li>🔫 <strong>ОПГ / Банды</strong>: Создай свою банду, команда <span class="cmd">/creategang</span></li>
+                <li>💍 <strong>Семьи</strong>: <span class="cmd">/fammenu</span> — семейный склад, приглашения</li>
+                <li>🎖️ <span class="cmd">/leaders</span> — топ лидеров организаций</li>
+                <li>⚔️ <span class="cmd">/duel [ID] [ставка]</span> — мини-игра дуэль 2026</li>
+            </ul>
+            <div style="margin-top: 1rem; background:#0f0e1a; padding:0.7rem; border-radius: 1rem;">
+                📢 <strong>Событие "Автопробег"</strong> — каждые выходные розыгрыш редких машин!
             </div>
-            <button id="buyCake">30🪙</button>
         </div>
     </div>
 
-    <!-- Кнопка КОРМИТЬ -->
-    <button id="feedBtn" style="background:#f5b342; font-size:2rem; padding:16px; margin: 10px 0 0;">🍽️ КОРМИТЬ</button>
-
-    <!-- Сообщение о лопании (просто эффект) -->
-    <div id="gameOverMessage" class="gameover-message"></div>
-    
-    <!-- КНОПКА ПРОДАТЬ ЖИР (всегда активна) -->
-    <div class="sell-area">
-        <button id="sellFatBtn">💰 ПРОДАТЬ ЖИР (+5% от всего потраченного)</button>
+    <!-- Экономика + бизнес -->
+    <div class="card" style="margin: 1rem 0 1.5rem;">
+        <h3>🏢 Бизнес и пассивный доход</h3>
+        <p>В Krop Russia доступно <strong>3 бизнес-слота</strong>: традиционный бизнес, компания, АЗС. Цены стартуют от 5 млн ₽ за ларёк до 500+ млн ₽ за сеть АЗС.</p>
+        <div class="table-wrap">
+            <table>
+                <tr><th>Тип бизнеса</th><th>Стартовый взнос</th><th>Прибыль (в среднем)</th></tr>
+                <tr><td>Магазин 24/7</td><td>~7 000 000 ₽</td><td>150 000 - 300 000 ₽ / день</td></tr>
+                <tr><td>Автосалон (поддержанные)</td><td>~18 млн ₽</td><td>от 400 тыс ₽</td></tr>
+                <tr><td>Транспортная компания</td><td>80 - 200 млн ₽</td><td>высокий, масштабируемый</td></tr>
+                <tr><td>АЗС (сеть)</td><td>от 500 млн ₽</td><td>миллионы ежедневно</td></tr>
+            </table>
+        </div>
+        <div class="cmd-desc" style="margin-top: 10px;">✨ Команда <span class="cmd">/auction</span> — покупка готового бизнеса с рук. Инвестируй и становись магнатом!</div>
     </div>
-    
-    <div class="footer-note">корми → копи жир → продай в ЛЮБОЙ момент → +5% кэшбек + престиж</div>
+
+    <!-- Сезон 2026 нововведения -->
+    <div class="grid">
+        <div class="card">
+            <h3>🎁 Сезон «Рёв моторов» 2026</h3>
+            <ul>
+                <li>✅ Новая сюжетная линия — вы главный герой</li>
+                <li>✅ <span class="cmd">/blackpass</span> — боевой пропуск с эксклюзивными авто</li>
+                <li>✅ Система крафта (верстаки) — создавай уникальные предметы</li>
+                <li>✅ Мини-игра «Дуэль»: выбор оружия, локации и ставки до 500k ₽</li>
+                <li>✅ Шестиместный фургон из кейса «Турбо»</li>
+                <li>✅ Новые JDM, раллийные монстры и тяжёлый люкс</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>📱 Кроссплатформа + донат</h3>
+            <ul>
+                <li>📲 Играйте на Android, iOS и ПК (эмуляторы)</li>
+                <li>💎 Валюта: <strong>Black Coin (BC)</strong> — команда <span class="cmd">/donate</span></li>
+                <li>🎁 Промокод <span class="cmd">/promocode KROP2026</span> — стартовый бонус (10к рублей + VIP 3 дня)</li>
+                <li>🤝 Реферальная система: <span class="cmd">/referals</span> — приведи друга и получи BC</li>
+                <li>📦 Наборы: «НАЧИНАЮЩИЙ», «ЗАЖИТОЧНЫЙ», «МАФИОЗИ»</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Фракционные команды и полезности -->
+    <div class="card">
+        <h3>📡 Команды фракций & специальные возможности</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;">
+            <div style="flex:1;">
+                <h4>👮 Для гос. структур</h4>
+                <ul><li><span class="cmd">/d [текст]</span> — департамент чат</li>
+                <li><span class="cmd">/r [текст]</span> — RP-чат фракции</li>
+                <li><span class="cmd">/meslist</span> — список вызовов (МЧС/полиция)</li></ul>
+            </div>
+            <div style="flex:1;">
+                <h4>🔫 Для криминала</h4>
+                <ul><li><span class="cmd">/f [текст]</span> — семейный/бандитский чат</li>
+                <li><span class="cmd">/rob [ID]</span> — ограбление (риск)</li>
+                <li><span class="cmd">/fsklad</span> — склад ОПГ</li></ul>
+            </div>
+            <div style="flex:1;">
+                <h4>🏠 Взаимодействие</h4>
+                <ul><li><span class="cmd">/present [ID]</span> — подарить цветы</li>
+                <li><span class="cmd">/pay [ID] [сумма]</span> — перевод</li>
+                <li><span class="cmd">/id [ник]</span> — узнать ID</li></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Прогрессия и навыки -->
+    <div class="big-stats" style="margin-top: 2rem;">
+        <div class="stat-item"><div class="stat-number">⭐ Уровни</div>Прокачка XP за PayDay и работу</div>
+        <div class="stat-item"><div class="stat-number">🧠 Навыки</div>Переговорщик, вождение, взлом</div>
+        <div class="stat-item"><div class="stat-number">🎭 Кастомизация</div>Скины + аксессуары 2026</div>
+    </div>
+
+    <!-- FAQ / команды быстрого доступа -->
+    <div style="background: #0c0f18; border-radius: 2rem; padding: 1.5rem; margin: 2rem 0; border: 1px solid #2e2f44;">
+        <h3 style="margin-bottom: 0.8rem;">🚀 Полезные сниппеты</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
+            <div><span class="cmd">/setspawn</span> — установить точку возрождения</div>
+            <div><span class="cmd">/liclist</span> — найти лицензора</div>
+            <div><span class="cmd">/showvb [ID]</span> — показать военник</div>
+            <div><span class="cmd">/charity</span> — топ филантропов</div>
+            <div><span class="cmd">/news</span> — игровые новости</div>
+            <div><span class="cmd">/quest</span> — ежедневные квесты</div>
+        </div>
+        <hr style="margin: 1rem 0;">
+        <div>⚡ <strong>Обновление «Рёв моторов»:</strong> Улучшенная физика стрельбы, новые прицелы, звуки выстрелов и прошивка авто через <span class="cmd">/ecu</span>.</div>
+    </div>
+
+    <div class="footer">
+        Ⓒ 2026 Krop Russia — независимый мобильный ролевой проект. Не является официальной версией Black Russia, вдохновлён лучшими RP-механиками.<br>
+        Актуально на апрель 2026 — более 7.5 млн уникальных игроков. Все команды и экономика проверены в игре.<br>
+        🌐 Присоединяйся: <strong style="color:#ffaa66;">/menu → Начать играть</strong> — стань легендой улиц Krop!
+    </div>
 </div>
-
-<script>
-    (function(){
-        "use strict";
-
-        // ---------- СОСТОЯНИЕ ----------
-        let money = 30;                
-        let foodItems = 0;            
-        let belly = 0;               
-        
-        // Престиж и потраченные деньги
-        let prestigeLevel = 0;               
-        let prestigeBonusPercent = 0;        
-        let totalSpentMoney = 0;             // сколько всего монет потрачено за ВСЕ забеги
-        
-        // Базовый прирост за 1 еду
-        const BASE_FOOD_GAIN = 14;
-        
-        // DOM элементы
-        const moneySpan = document.getElementById('moneyValue');
-        const foodSpan = document.getElementById('foodCount');
-        const bellyFill = document.getElementById('bellyFill');
-        const bellyPercent = document.getElementById('bellyPercent');
-        const suslovEmoji = document.getElementById('suslovEmoji');
-        const gameOverMsg = document.getElementById('gameOverMessage');
-        const feedBtn = document.getElementById('feedBtn');
-        const buyCarrot = document.getElementById('buyCarrot');
-        const buyBurger = document.getElementById('buyBurger');
-        const buyCake = document.getElementById('buyCake');
-        const sellFatBtn = document.getElementById('sellFatBtn');
-        const container = document.getElementById('gameContainer');
-        
-        // Престиж и потрачено
-        const prestigeLevelSpan = document.getElementById('prestigeLevel');
-        const prestigeBonusSpan = document.getElementById('prestigeBonus');
-        const totalSpentSpan = document.getElementById('totalSpent');
-
-        // Еда: { цена, прирост сытости (%) }
-        const FOOD_DATA = {
-            carrot: { price: 5,  gain: 6 },
-            burger: { price: 14, gain: 18 },
-            cake:   { price: 30, gain: 35 }
-        };
-
-        // ---------- ВЫЧИСЛЕНИЕ ПРИРОСТА С УЧЁТОМ ПРЕСТИЖА ----------
-        function getCurrentFoodGain() {
-            let bonusMultiplier = 1 + (prestigeBonusPercent / 100);
-            return Math.floor(BASE_FOOD_GAIN * bonusMultiplier);
-        }
-
-        // ---------- ОБНОВЛЕНИЕ UI ----------
-        function updateUI() {
-            moneySpan.textContent = money;
-            foodSpan.textContent = foodItems;
-
-            const bellyValue = Math.min(belly, 100);
-            const percent = Math.floor(bellyValue);
-            bellyFill.style.width = percent + '%';
-            bellyPercent.textContent = percent + '%';
-
-            // Престиж и потрачено
-            prestigeLevelSpan.textContent = prestigeLevel;
-            prestigeBonusSpan.textContent = prestigeBonusPercent;
-            totalSpentSpan.textContent = totalSpentMoney;
-
-            // Эмодзи
-            if (belly >= 100) {
-                suslovEmoji.textContent = '💥🐽';
-            } else if (belly >= 95) {
-                suslovEmoji.textContent = '🐡';
-            } else if (belly >= 70) {
-                suslovEmoji.textContent = '🐹🤰';
-            } else if (belly >= 35) {
-                suslovEmoji.textContent = '🐭🍔';
-            } else {
-                suslovEmoji.textContent = '🐭';
-            }
-
-            // Сообщение о лопании
-            if (belly >= 100) {
-                gameOverMsg.innerHTML = `💥 ЖИВОТ ЛОПНУЛ! МОЖНО ПРОДАТЬ ЖИР 💥`;
-                container.classList.add('pop-effect');
-                setTimeout(() => container.classList.remove('pop-effect'), 400);
-            } else {
-                gameOverMsg.innerHTML = '';
-            }
-            
-            feedBtn.innerHTML = `🍽️ КОРМИТЬ (+${getCurrentFoodGain()}%)`;
-        }
-
-        // ПОКУПКА ЕДЫ
-        function buyFood(type) {
-            const data = FOOD_DATA[type];
-            if (!data) return false;
-            if (money < data.price) {
-                moneySpan.style.transition = '0.1s';
-                moneySpan.style.color = '#ff8989';
-                setTimeout(() => moneySpan.style.color = '#ffd966', 150);
-                return false;
-            }
-
-            money -= data.price;
-            totalSpentMoney += data.price;    // УЧИТЫВАЕМ ПОТРАЧЕННОЕ
-            foodItems += 1;
-            updateUI();
-            return true;
-        }
-
-        // КОРМЛЕНИЕ
-        function feedSuslov() {
-            if (foodItems <= 0) {
-                foodSpan.style.color = '#ffa098';
-                setTimeout(() => foodSpan.style.color = '#ffd966', 200);
-                return;
-            }
-
-            const gain = getCurrentFoodGain();
-            
-            foodItems -= 1;
-            belly = Math.min(belly + gain, 100);
-            
-            suslovEmoji.style.transform = 'scale(1.1)';
-            setTimeout(() => suslovEmoji.style.transform = 'scale(1)', 100);
-
-            updateUI();
-        }
-
-        // ПРОДАТЬ ЖИР — работает ВСЕГДА
-        function sellFat() {
-            // 1. Возврат 5% от ВСЕХ потраченных денег
-            const refund = Math.floor(totalSpentMoney * 0.05);
-            money += refund;
-            
-            // 2. Увеличиваем престиж и бонус (только если было хоть что-то потрачено или сытость > 0)
-            // Чтобы не абузить, даём престиж только если есть прогресс
-            if (totalSpentMoney > 0 || belly > 0) {
-                prestigeLevel += 1;
-                prestigeBonusPercent += 5;
-            }
-            
-            // 3. Сбрасываем текущий забег
-            foodItems = 0;
-            belly = 0;
-            
-            // 4. Поддерживаем минимальный капитал
-            money = Math.max(money, 25 + prestigeLevel * 3);
-            
-            container.classList.remove('pop-effect');
-            
-            updateUI();
-            suslovEmoji.style.transform = 'scale(1)';
-            
-            // Эффект радости
-            suslovEmoji.textContent = '🤑🐹';
-            setTimeout(() => updateUI(), 300);
-        }
-
-        // ---------- ОБРАБОТЧИКИ ----------
-        buyCarrot.addEventListener('click', () => buyFood('carrot'));
-        buyBurger.addEventListener('click', () => buyFood('burger'));
-        buyCake.addEventListener('click', () => buyFood('cake'));
-
-        feedBtn.addEventListener('click', feedSuslov);
-        suslovEmoji.addEventListener('click', feedSuslov);
-
-        sellFatBtn.addEventListener('click', sellFat);
-
-        // Двойной клик по монетке (секрет)
-        const moneyBlock = document.querySelector('.money-block');
-        moneyBlock.addEventListener('dblclick', () => {
-            money += 8;
-            updateUI();
-        });
-        
-        // Инициализация
-        updateUI();
-    })();
-</script>
 </body>
-                    </html>
+</html>
