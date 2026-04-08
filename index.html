@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D VIEWER - NetErrror</title>
+    <title>3D DILDO VIEWER - NetErrror</title>
     <style>
         body {
             margin: 0;
@@ -17,21 +17,21 @@
             left: 0;
             right: 0;
             text-align: center;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.6);
             color: #ffdd99;
             padding: 10px;
             font-size: 14px;
             font-family: monospace;
             pointer-events: none;
             z-index: 10;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(4px);
         }
         #instruction {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.6);
-            color: #ccc;
+            background: rgba(0,0,0,0.5);
+            color: #ffccaa;
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
@@ -40,14 +40,14 @@
             z-index: 10;
         }
         @media (max-width: 600px) {
-            #info { font-size: 11px; bottom: 10px; }
+            #info { font-size: 10px; bottom: 10px; }
             #instruction { font-size: 10px; top: 12px; right: 12px; }
         }
     </style>
 </head>
 <body>
-    <div id="info">🖱️ ПАЛЬЦЕМ / МЫШЬЮ — ВРАЩАТЬ, ПРИБЛИЖАТЬ, ОТДАЛЯТЬ | 3D МОДЕЛЬ 🖱️</div>
-    <div id="instruction">✨ Бежевый дилдо + яйца ✨</div>
+    <div id="info">🖱️ ПАЛЕЦ/МЫШЬ — ВРАЩАТЬ, ПРИБЛИЖАТЬ, ОТДАЛЯТЬ | 3D МОДЕЛЬ 🖱️</div>
+    <div id="instruction">🍆 БЕЖЕВЫЙ ДИЛДО + ЯЙЦА | КАЧЕСТВЕННАЯ МОДЕЛЬ 🍆</div>
 
     <script type="importmap">
         {
@@ -61,215 +61,214 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         // --- СЦЕНА ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a1a);
-        scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
-
+        // Красивый градиентный фон через CSS + прозрачный Three.js фон, чтобы не грузить
+        scene.background = new THREE.Color(0x0a0a2a);
+        
         // --- КАМЕРА ---
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(2, 1.5, 3);
+        camera.position.set(2.2, 1.6, 3.2);
         camera.lookAt(0, 0.5, 0);
 
         // --- РЕНДЕРЕР ---
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
         // --- УПРАВЛЕНИЕ (вращение, приближение, отдаление) ---
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;          // плавность
-        controls.dampingFactor = 0.05;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
         controls.rotateSpeed = 1.5;
         controls.zoomSpeed = 1.2;
-        controls.panSpeed = 0.8;
         controls.enableZoom = true;
         controls.enablePan = true;
-        controls.zoomSpeed = 1.0;
         controls.target.set(0, 0.6, 0);
 
-        // --- ОСВЕЩЕНИЕ (красивое, объемное) ---
-        // Ambient
+        // --- КРАСИВЫЙ ЗАДНИЙ ФОН (без звезд, просто плавный градиент через текстуру) ---
+        // Создаем canvas текстуру с градиентом
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#0a0a2a');
+        gradient.addColorStop(0.4, '#1a1a4a');
+        gradient.addColorStop(0.7, '#2a1a3a');
+        gradient.addColorStop(1, '#0a0a1a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const backgroundTexture = new THREE.CanvasTexture(canvas);
+        scene.background = backgroundTexture;
+        
+        // Добавляем легкий туман для глубины (не нагружает)
+        scene.fog = new THREE.FogExp2(0x0a0a2a, 0.012);
+
+        // --- ОСВЕЩЕНИЕ (объемное, но оптимизированное) ---
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
         
-        // Главный свет спереди-сверху
-        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.3);
         mainLight.position.set(2, 3, 2);
         mainLight.castShadow = true;
         mainLight.receiveShadow = false;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
         scene.add(mainLight);
         
-        // Заполняющий теплый свет сзади
-        const backLight = new THREE.PointLight(0xffaa66, 0.5);
+        const backLight = new THREE.PointLight(0xffaa66, 0.6);
         backLight.position.set(-1, 1.2, -2);
         scene.add(backLight);
         
-        // Холодный свет снизу для объема
-        const fillLight = new THREE.PointLight(0x88aaff, 0.4);
-        fillLight.position.set(0.5, -0.8, 0.8);
+        const fillLight = new THREE.PointLight(0x88aaff, 0.5);
+        fillLight.position.set(0.5, -0.6, 0.8);
         scene.add(fillLight);
         
-        // Контровой свет
-        const rimLight = new THREE.PointLight(0xffaa88, 0.6);
-        rimLight.position.set(1, 1.5, -1.5);
+        const rimLight = new THREE.PointLight(0xffaa88, 0.7);
+        rimLight.position.set(1.2, 1.5, -1.8);
         scene.add(rimLight);
         
-        // Декоративный пол (полупрозрачная платформа с отражением)
-        const gridHelper = new THREE.GridHelper(6, 20, 0xccaa88, 0x886644);
-        gridHelper.position.y = -0.6;
+        // --- ПОЛ (простой, без лишних деталей) ---
+        const gridHelper = new THREE.GridHelper(5, 16, 0xccaa88, 0x886644);
+        gridHelper.position.y = -0.65;
         gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.4;
+        gridHelper.material.opacity = 0.35;
         scene.add(gridHelper);
         
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x332211, roughness: 0.4, metalness: 0.7, transparent: true, opacity: 0.3 });
-        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMat);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0a, roughness: 0.5, metalness: 0.2, transparent: true, opacity: 0.25 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 4.5), planeMat);
         groundPlane.rotation.x = -Math.PI / 2;
-        groundPlane.position.y = -0.6;
+        groundPlane.position.y = -0.68;
         groundPlane.receiveShadow = true;
         scene.add(groundPlane);
         
-        // --- СОЗДАНИЕ МОДЕЛИ: ДИЛДО БЕЖЕВЫЙ + 2 БЕЖЕВЫХ ЯЙЦА ---
+        // --- КАЧЕСТВЕННАЯ МОДЕЛЬ: ДИЛДО + 2 ЯЙЦА (детализированная) ---
         const modelGroup = new THREE.Group();
         
-        // 1. Дилдо (основная часть)
-        // Тело - вытянутый цилиндр с закруглением
-        const shaftGeo = new THREE.CylinderGeometry(0.28, 0.32, 1.2, 48);
-        const beigeMat = new THREE.MeshStandardMaterial({ color: 0xd4b48c, roughness: 0.3, metalness: 0.1, emissive: 0x221100 });
-        const shaft = new THREE.Mesh(shaftGeo, beigeMat);
+        // Материалы
+        const beigeMain = new THREE.MeshStandardMaterial({ color: 0xd4b48c, roughness: 0.25, metalness: 0.08, emissive: 0x221100 });
+        const beigeTip = new THREE.MeshStandardMaterial({ color: 0xe8c8a0, roughness: 0.2, metalness: 0.05 });
+        const beigeDark = new THREE.MeshStandardMaterial({ color: 0xc8a878, roughness: 0.35 });
+        const eggMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 0.28, metalness: 0.04 });
+        
+        // 1. Ствол дилдо (слегка изогнутый эффект за счет масштаба)
+        const shaftGeo = new THREE.CylinderGeometry(0.3, 0.34, 1.25, 64);
+        const shaft = new THREE.Mesh(shaftGeo, beigeMain);
         shaft.castShadow = true;
         shaft.position.y = 0;
         modelGroup.add(shaft);
         
-        // Головка (верхняя часть) - сфера чуть шире
-        const tipGeo = new THREE.SphereGeometry(0.34, 48, 48);
-        const tipMat = new THREE.MeshStandardMaterial({ color: 0xe0c0a0, roughness: 0.2, metalness: 0.05 });
-        const tip = new THREE.Mesh(tipGeo, tipMat);
-        tip.position.y = 0.68;
+        // Головка (детализированная сфера)
+        const tipGeo = new THREE.SphereGeometry(0.38, 64, 64);
+        const tip = new THREE.Mesh(tipGeo, beigeTip);
+        tip.position.y = 0.72;
         tip.castShadow = true;
         modelGroup.add(tip);
         
-        // Основание (присоска/низ)
-        const baseGeo = new THREE.CylinderGeometry(0.42, 0.48, 0.12, 32);
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0xc8a87c, roughness: 0.4 });
+        // Второй слой головки (блик)
+        const tipInnerGeo = new THREE.SphereGeometry(0.32, 48, 48);
+        const tipInnerMat = new THREE.MeshStandardMaterial({ color: 0xf0d0b0, roughness: 0.15, emissive: 0x331a00 });
+        const tipInner = new THREE.Mesh(tipInnerGeo, tipInnerMat);
+        tipInner.position.y = 0.73;
+        tipInner.castShadow = true;
+        modelGroup.add(tipInner);
+        
+        // Основание (присоска)
+        const baseGeo = new THREE.CylinderGeometry(0.45, 0.5, 0.13, 48);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xc0a070, roughness: 0.4 });
         const base = new THREE.Mesh(baseGeo, baseMat);
-        base.position.y = -0.62;
+        base.position.y = -0.66;
         base.castShadow = true;
         modelGroup.add(base);
         
-        // Деталька - желобок под головкой
-        const grooveGeo = new THREE.TorusGeometry(0.32, 0.05, 32, 64);
-        const grooveMat = new THREE.MeshStandardMaterial({ color: 0xb8946a, roughness: 0.5 });
+        // Желобок под головкой (деталь)
+        const grooveGeo = new THREE.TorusGeometry(0.355, 0.055, 48, 96);
+        const grooveMat = new THREE.MeshStandardMaterial({ color: 0xb8946a, roughness: 0.45 });
         const groove = new THREE.Mesh(grooveGeo, grooveMat);
         groove.rotation.x = Math.PI / 2;
-        groove.position.y = 0.45;
+        groove.position.y = 0.48;
         modelGroup.add(groove);
         
-        // 2. ЯЙЦА (два бежевых шара, слегка сплюснутых)
-        const eggMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 0.25, metalness: 0.05 });
-        
-        // Левое яйцо
-        const leftEggGeo = new THREE.SphereGeometry(0.32, 48, 48);
-        const leftEgg = new THREE.Mesh(leftEggGeo, eggMat);
-        leftEgg.scale.set(0.95, 0.85, 0.9);
-        leftEgg.position.set(-0.55, -0.35, 0.2);
-        leftEgg.castShadow = true;
-        modelGroup.add(leftEgg);
-        
-        // Правое яйцо
-        const rightEggGeo = new THREE.SphereGeometry(0.32, 48, 48);
-        const rightEgg = new THREE.Mesh(rightEggGeo, eggMat);
-        rightEgg.scale.set(0.95, 0.85, 0.9);
-        rightEgg.position.set(0.55, -0.35, 0.2);
-        rightEgg.castShadow = true;
-        modelGroup.add(rightEgg);
-        
-        // Добавляем небольшие блики на яйца (капельки)
-        const highlightMat = new THREE.MeshStandardMaterial({ color: 0xf5e5c0, emissive: 0x442200 });
-        const leftHighlight = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), highlightMat);
-        leftHighlight.position.set(-0.65, -0.15, 0.45);
-        modelGroup.add(leftHighlight);
-        
-        const rightHighlight = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), highlightMat);
-        rightHighlight.position.set(0.65, -0.15, 0.45);
-        modelGroup.add(rightHighlight);
-        
-        // Добавим текстуру/полоски на дилдо для реализма (несколько колец)
-        const ringMatDetail = new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.6 });
-        for (let i = -0.3; i <= 0.3; i += 0.3) {
-            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.04, 24, 48), ringMatDetail);
+        // Дополнительные кольца по стволу
+        const ringMatDetail = new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.5 });
+        for (let i = -0.35; i <= 0.25; i += 0.3) {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.045, 32, 64), ringMatDetail);
             ring.rotation.x = Math.PI / 2;
             ring.position.y = i;
             modelGroup.add(ring);
         }
         
-        modelGroup.position.set(0, 0.15, 0);
+        // 2. ЯЙЦА (два, более реалистичной формы)
+        const leftEggGeo = new THREE.SphereGeometry(0.36, 64, 64);
+        const leftEgg = new THREE.Mesh(leftEggGeo, eggMat);
+        leftEgg.scale.set(0.92, 0.82, 0.88);
+        leftEgg.position.set(-0.62, -0.4, 0.22);
+        leftEgg.castShadow = true;
+        modelGroup.add(leftEgg);
+        
+        const rightEggGeo = new THREE.SphereGeometry(0.36, 64, 64);
+        const rightEgg = new THREE.Mesh(rightEggGeo, eggMat);
+        rightEgg.scale.set(0.92, 0.82, 0.88);
+        rightEgg.position.set(0.62, -0.4, 0.22);
+        rightEgg.castShadow = true;
+        modelGroup.add(rightEgg);
+        
+        // Блики на яйцах (маленькие сферы)
+        const highlightMat = new THREE.MeshStandardMaterial({ color: 0xf0d8b0, emissive: 0x442200 });
+        const leftHL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 24), highlightMat);
+        leftHL.position.set(-0.74, -0.2, 0.52);
+        modelGroup.add(leftHL);
+        
+        const rightHL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 24), highlightMat);
+        rightHL.position.set(0.74, -0.2, 0.52);
+        modelGroup.add(rightHL);
+        
+        // Венозные детали на стволе (небольшие цилиндры)
+        const veinMat = new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.6 });
+        for (let i = 0; i < 5; i++) {
+            const vein = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.25, 6), veinMat);
+            const angle = (i / 5) * Math.PI * 2;
+            vein.position.x = Math.cos(angle) * 0.33;
+            vein.position.z = Math.sin(angle) * 0.33;
+            vein.position.y = -0.1 + (i * 0.2);
+            vein.castShadow = true;
+            modelGroup.add(vein);
+        }
+        
+        modelGroup.position.set(0, 0.12, 0);
         scene.add(modelGroup);
         
-        // --- ДЕКОРАТИВНЫЕ ЭЛЕМЕНТЫ: парящие частицы для атмосферы ---
-        const particleCount = 400;
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlePositions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions[i*3] = (Math.random() - 0.5) * 4;
-            particlePositions[i*3+1] = (Math.random() - 0.5) * 2.5 + 0.3;
-            particlePositions[i*3+2] = (Math.random() - 0.5) * 3;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        const particleMat = new THREE.PointsMaterial({ color: 0xffaa88, size: 0.012, transparent: true, opacity: 0.5 });
-        const particles = new THREE.Points(particlesGeometry, particleMat);
-        scene.add(particles);
-        
-        // Звездный фон (мелкие точки)
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 1200;
-        const starPositions = new Float32Array(starCount * 3);
-        for (let i = 0; i < starCount; i++) {
-            starPositions[i*3] = (Math.random() - 0.5) * 200;
-            starPositions[i*3+1] = (Math.random() - 0.5) * 100;
-            starPositions[i*3+2] = (Math.random() - 0.5) * 80 - 40;
-        }
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.06, transparent: true, opacity: 0.7 });
-        const stars = new THREE.Points(starGeometry, starMat);
-        scene.add(stars);
-        
-        // --- МАЛЕНЬКИЙ СВЕТ ОТ ОБЪЕКТА (для красоты) ---
-        const glowLight = new THREE.PointLight(0xd4a070, 0.5, 2.5);
-        glowLight.position.set(0, 0.4, 0.3);
+        // --- МАЛЕНЬКИЙ СВЕТ ОТ ОБЪЕКТА ---
+        const glowLight = new THREE.PointLight(0xd4a070, 0.45, 2.2);
+        glowLight.position.set(0, 0.4, 0.4);
         scene.add(glowLight);
         
-        // --- АНИМАЦИЯ (легкое парение модели и частиц) ---
+        // --- ПРОСТАЯ АНИМАЦИЯ (легкое покачивание) ---
         let time = 0;
         
         function animate() {
             requestAnimationFrame(animate);
             time += 0.012;
             
-            // Плавное покачивание модели (очень легкое)
-            modelGroup.rotation.y = Math.sin(time * 0.4) * 0.03;
-            modelGroup.position.y = 0.15 + Math.sin(time * 0.8) * 0.005;
-            
-            // Вращение частиц
-            particles.rotation.y += 0.002;
-            particles.rotation.x = Math.sin(time * 0.2) * 0.05;
+            // Очень плавное движение
+            modelGroup.rotation.y = Math.sin(time * 0.35) * 0.025;
+            modelGroup.position.y = 0.12 + Math.sin(time * 0.7) * 0.004;
             
             // Мерцание света
-            glowLight.intensity = 0.5 + Math.sin(time * 3) * 0.15;
+            glowLight.intensity = 0.45 + Math.sin(time * 2.5) * 0.1;
             
-            // Обновление управления
             controls.update();
-            
             renderer.render(scene, camera);
         }
         
         animate();
         
-        // --- АДАПТАЦИЯ ПОД РАЗМЕР ЭКРАНА ---
+        // --- АДАПТАЦИЯ ПОД ЭКРАН ---
         window.addEventListener('resize', onWindowResize, false);
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -277,7 +276,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
-        console.log("NetErrror: 3D модель загружена — бежевый дилдо + 2 яйца. Вращение/приближение/отдаление работает.");
+        console.log("NetErrror: 3D модель готова — детализированный дилдо + яйца, оптимизировано");
     </script>
 </body>
 </html>
