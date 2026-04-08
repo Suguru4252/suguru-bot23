@@ -2,481 +2,698 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - Соседняя комната: Дима слушает</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ГАЗАН СИКС СЕВЕЕН | 67 RUSH | Full Screen</title>
     <style>
         * {
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
 
         body {
-            background: linear-gradient(145deg, #0a0c14 0%, #03050a 100%);
+            margin: 0;
             min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a1f1e, #041212);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            padding: 16px;
-            margin: 0;
+            font-family: 'Courier New', 'Press Start 2P', 'Monaco', monospace;
+            touch-action: pan-x pan-y; /* разрешаем зум, но свайпы по канвасу ловим отдельно */
+            overflow-x: hidden;
+            position: relative;
+            padding: 0;
         }
 
-        .game-wrapper {
-            max-width: 1300px;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(6px);
-            border-radius: 64px;
-            border: 1px solid #ff66aa50;
-            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
-            padding: 20px;
-        }
-
-        /* две комнаты + профили */
-        .duo-rooms {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: center;
-        }
-
-        .room-card {
-            flex: 1;
-            min-width: 280px;
-            background: #0f121ed9;
-            border-radius: 48px;
-            padding: 20px 16px;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        }
-
-        .mom-area {
-            border-bottom: 5px solid #ff77aa;
-            background: radial-gradient(circle at 20% 10%, #2a1a2c, #0a020f);
-        }
-
-        .dima-area {
-            border-bottom: 5px solid #55ccff;
-            background: radial-gradient(circle at 90% 20%, #141c2c, #02050c);
-        }
-
-        .person {
+        /* главный враппер — на весь экран с отступами для безопасности */
+        .game-fullscreen {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            background: #00000033;
+            backdrop-filter: blur(2px);
         }
 
-        .avatar {
-            font-size: 80px;
-            filter: drop-shadow(0 8px 12px black);
-            transition: transform 0.2s ease;
-        }
-
-        .mom-avatar { text-shadow: 0 0 8px #ff66aa; }
-        .dima-avatar { text-shadow: 0 0 5px #33aaff; }
-
-        .person h3 {
-            margin: 8px 0 4px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ffbb88, #ff88aa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .dima-area .person h3 {
-            background: linear-gradient(135deg, #aaffff, #88ccff);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-
-        .status-badge {
-            background: #000000aa;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-
-        .money-counter {
-            background: #1e1a2f;
-            padding: 10px;
-            border-radius: 60px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.7rem;
-            color: #f5c542;
-            margin: 12px 0;
-            border: 1px solid gold;
-            font-family: monospace;
-        }
-
-        button {
-            background: #2a1e3a;
-            border: none;
-            font-family: inherit;
-            font-weight: bold;
-            padding: 12px 18px;
-            border-radius: 60px;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.08s linear;
-            margin-top: 8px;
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
-            box-shadow: 0 3px 6px black;
+            flex: 1;
+            min-height: 0;
+            margin: 10px 0;
+            touch-action: pan-x pan-y; /* зум пальцами работает, но внутренние движения обрабатываем */
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: auto;
+            height: auto;
+            max-width: 98vw;
+            max-height: 75vh;
+            border-radius: 28px;
+            box-shadow: 0 0 0 5px #ffd966, 0 0 0 10px #b97f44, 0 25px 40px rgba(0,0,0,0.5);
+            cursor: pointer;
+            background-color: #2b2b2b;
+            /* сохраняем соотношение сторон 600/500 = 1.2 */
+            aspect-ratio: 600 / 500;
+        }
+
+        /* масштабирование: при широком экране канвас растягивается по ширине, но с сохранением пропорций */
+        @media (min-width: 700px) {
+            canvas {
+                max-width: 85vw;
+                max-height: 70vh;
+            }
+        }
+        @media (max-width: 600px) {
+            canvas {
+                max-width: 96vw;
+                max-height: 65vh;
+            }
+        }
+
+        .ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 20;
+            width: 100%;
+        }
+
+        .score-board, .best-board {
+            background: #000000bb;
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #f9f3c1;
+            text-shadow: 0 0 5px #ff9900, 1px 1px 0 #6b2e00;
+            letter-spacing: 1px;
+            font-family: monospace;
+            border: 1px solid #ffcd7e;
+            white-space: nowrap;
+        }
+
+        .best-board {
+            background: #1e2a1fcc;
+        }
+
+        .controls-mobile {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .ctrl-btn {
+            pointer-events: auto;
+            background: #000000cc;
+            backdrop-filter: blur(12px);
+            border: 2px solid #ffb347;
+            color: #ffdd99;
+            font-size: 2rem;
+            font-weight: bold;
+            width: 70px;
+            height: 70px;
+            border-radius: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-        }
-
-        button:active {
-            transform: scale(0.96);
-        }
-
-        .mom-action-btn {
-            background: #b32d5a;
-            border-bottom: 3px solid #ffb347;
-        }
-
-        .listen-btn {
-            background: #1f6390;
-            border-bottom: 3px solid #aaffdd;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .listen-animation {
-            animation: pulseListen 0.4s ease;
-        }
-
-        @keyframes pulseListen {
-            0% { transform: scale(1); background: #1f6390; }
-            50% { transform: scale(1.03); background: #4aa3df; box-shadow: 0 0 12px #88ddff; }
-            100% { transform: scale(1); }
-        }
-
-        .dima-listen-effect {
-            animation: dimaToWall 0.35s cubic-bezier(0.2, 1.2, 0.8, 1);
-        }
-
-        @keyframes dimaToWall {
-            0% { transform: translateX(0px) rotate(0deg); }
-            50% { transform: translateX(15px) rotate(5deg); }
-            100% { transform: translateX(0px) rotate(0deg); }
-        }
-
-        .room-sounds {
-            background: #03030ad9;
-            border-radius: 36px;
-            padding: 14px;
-            margin: 16px 0 0;
-            min-height: 200px;
-            max-height: 260px;
-            overflow-y: auto;
-            font-size: 0.85rem;
-            border: 1px solid #ff66aa30;
-        }
-
-        .sound-entry {
-            border-left: 4px solid #ff99cc;
-            padding: 8px 10px;
-            margin: 8px 0;
-            background: #ffffff08;
-            border-radius: 18px;
-            color: #f0f0f0;
+            cursor: pointer;
             font-family: monospace;
+            transition: 0.05s linear;
+            box-shadow: 0 6px 0 #7a3e0e;
+            user-select: none;
+            touch-action: manipulation;
         }
 
-        .dima-sound {
-            border-left-color: #55ccff;
-            background: #11335530;
+        .ctrl-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #7a3e0e;
         }
 
-        .mom-sound {
-            border-left-color: #ffaa88;
+        .restart-area {
+            position: absolute;
+            bottom: 110px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
         }
 
-        .reset-btn {
-            background: #2c2c3a;
-            width: auto;
-            margin-top: 8px;
-            font-size: 0.8rem;
+        .restart-btn {
+            pointer-events: auto;
+            background: #e25822ee;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 28px;
+            border-radius: 60px;
+            color: white;
+            font-family: monospace;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 5px 0 #7a2a0a;
+            white-space: nowrap;
         }
 
-        .flex-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 6px;
+        .restart-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .status-text {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffefb9;
+            text-shadow: 3px 3px 0 #b43b00;
+            background: #000000aa;
+            width: fit-content;
+            margin: auto;
+            padding: 8px 24px;
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            z-index: 25;
+        }
+
+        /* подсказка про зум */
+        .zoom-hint {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            background: #00000077;
+            border-radius: 40px;
+            padding: 3px 12px;
+            font-size: 10px;
+            color: #ffd58c;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 22;
+            backdrop-filter: blur(4px);
         }
 
         footer {
-            font-size: 0.65rem;
-            text-align: center;
-            margin-top: 24px;
-            color: #aaa6;
+            position: absolute;
+            bottom: 5px;
+            left: 12px;
+            font-size: 9px;
+            color: #ffd58c;
+            background: #00000066;
+            border-radius: 40px;
+            padding: 2px 10px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 22;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 550px) {
+            .ctrl-btn { width: 60px; height: 60px; font-size: 1.6rem; }
+            .score-board, .best-board { font-size: 0.9rem; padding: 4px 12px; }
+            .restart-btn { font-size: 1rem; padding: 6px 20px; }
+            .status-text { font-size: 1.1rem; top: 38%; white-space: nowrap; padding: 5px 16px;}
         }
     </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <div class="duo-rooms">
-        <!-- КОМНАТА МАМЫ (кухня/гостиная) -->
-        <div class="room-card mom-area">
-            <div class="person">
-                <div class="avatar mom-avatar">💃👩</div>
-                <h3>МАМА (Люда)</h3>
-                <div class="status-badge" id="momStatusText">🏠 Дома (готовит)</div>
-            </div>
-            <div class="money-counter">
-                💰 <span id="moneyAmount">0</span> ₽
-            </div>
-            <button id="callManBtn" class="mom-action-btn">🚪🔞 ПРИВЕСТИ МУЖИКА</button>
-            <div style="font-size: 0.7rem; margin-top: 10px; text-align: center;">*клиент приходит → мама делает минет, ебется, грязные стоны*</div>
-            <!-- зона звуков из комнаты мамы (что там происходит) -->
-            <div class="room-sounds" id="momSoundsArea">
-                <div class="sound-entry mom-sound">🍳 Мама на кухне, гремит посудой.</div>
-                <div class="sound-entry mom-sound">📺 Смотрит сериал, скучно...</div>
-            </div>
-        </div>
-
-        <!-- КОМНАТА ДИМЫ с анимацией прикладывания уха -->
-        <div class="room-card dima-area">
-            <div class="person">
-                <div class="avatar dima-avatar" id="dimaAvatar">🧑🎧</div>
-                <h3>ДИМА (сын)</h3>
-                <div class="status-badge">🔇 сидит в своей комнате</div>
-            </div>
-            <button id="listenWallBtn" class="listen-btn">👂 ПРИЛОЖИТЬ УХО К СТЕНЕ И ПОДСЛУШИВАТЬ</button>
-            <div class="flex-btns">
-                <button id="resetGameBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
-            </div>
-            <!-- что слышит Дима -->
-            <div class="room-sounds" id="dimaHearArea">
-                <div class="sound-entry dima-sound">🔇 Дима сидит тихо, слышит только шаги мамы на кухне.</div>
-            </div>
-            <div style="font-size:0.7rem; margin-top:8px;">👇 приложи ухо — услышишь всё: минет, стоны, шлепки, крики</div>
-        </div>
+<div class="game-fullscreen">
+    <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="600" height="500"></canvas>
     </div>
-    <footer>NetErrror || симуляция без границ. Дима подслушивает маму с клиентами. Каждый акт приносит деньги.</footer>
+    <div class="ui-panel">
+        <div class="score-board">🏆 СЧЁТ: <span id="scoreValue">0</span></div>
+        <div class="best-board">⭐ РЕКОРД: <span id="bestValue">0</span></div>
+    </div>
+    <div class="controls-mobile">
+        <div class="ctrl-btn" id="leftBtn">◀ ЛЕВО</div>
+        <div class="ctrl-btn" id="rightBtn">ПРАВО ▶</div>
+    </div>
+    <div class="restart-area">
+        <button class="restart-btn" id="restartBtn">🚀 ГАЗАН, ПОГНАЛИ!</button>
+    </div>
+    <div id="statusMessage" class="status-text" style="display: none;">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
+    <div class="zoom-hint">🔍 Пальцы → масштаб</div>
+    <footer>⚡ ГАЗАН 67 | СВАЙП/КЛИК | МИРЫ МЕНЯЮТСЯ</footer>
 </div>
 
 <script>
-    // -------------------- СОСТОЯНИЕ ИГРЫ --------------------
-    let money = 0;
-    let momState = "home_idle";     // home_idle, with_man (делает минет/ебется)
-    let manTimer = null;
-    let currentAct = null;          // детали секса
+    (function(){
+        // ---------- КАНВАС (координаты всегда 600x500, но отображение резиновое) ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-    // элементы UI
-    const moneySpan = document.getElementById('moneyAmount');
-    const momStatusSpan = document.getElementById('momStatusText');
-    const momSoundsDiv = document.getElementById('momSoundsArea');
-    const dimaHearDiv = document.getElementById('dimaHearArea');
-    const dimaAvatar = document.getElementById('dimaAvatar');
-
-    // ---- библиотека грязных фраз/звуков для разных действий мамы с мужиком ----
-    const sexActions = [
-        { action: "минет", sounds: ["👅 *чавкающие звуки* Мама делает минет на коленях", "🤤 *слышно как мужик стонет* О да, глубже...", "💦 *звуки глубокого минета, мама давится*", "👄 'Так, сосни ещё, шлюха' — командует мужик", "😩 *громкий всхлип* Мама: 'Ммм...'"] },
-        { action: "ебля в позе раком", sounds: ["🍑 *шлепки, влажные удары* Маму трахают сзади", "🔞 *скрип дивана* 'Да, еби её сильнее!'", "😫 *мамин стон* 'О да, еще, ТРАХАЙ'", "💢 *мужик дышит* Какая же ты шлюха, мать", "🥵 *оргазмические крики* Аааааххх!"] },
-        { action: "классическая ебля", sounds: ["🎙️ *тяжелое дыхание, стоны* 'Раздвинь ноги шире'", "🔊 *крики* О да-да-да, кончаю! ", "💸 *звук денег* 'получай, шалава'", "😈 *диалог* 'Сколько за анал? - Плати больше'", "🤪 *мамин визг* Ещё, не останавливайся!!!"] },
-        { action: "групповуха", sounds: ["👥 *два мужика* 'отсоси у моего друга', мама стонет", "💢 *звуки двойного проникновения*", "🤑 'за двойную цену поработай', звон монет", "😵 *мама задыхается от минета и ебли*"] },
-        { action: "жесткий секс", sounds: ["⛓️ *пощёчины, стоны* 'Да, грязная сучка'", "😫 *мама кричит от боли/удовольствия*", "💥 *удары тел, шлепки по лицу*", "🧴 *звук смазки и влажные толчки*"] }
-    ];
-
-    // фразы когда мама одна дома (кухня/быт)
-    const homeSounds = [
-        "🍳 Мама на кухне жарит яичницу, напевает песенку.",
-        "📞 Мама говорит по телефону подруге: 'устала, денег нет...'",
-        "🧹 Мама пылесосит ковёр в гостиной.",
-        "📺 Смотрит 'Дом-2', смеётся в одиночестве.",
-        "🚿 Мама принимает душ, мычит мелодию.",
-        "🍷 Открывает бутылку дешёвого вина, вздыхает."
-    ];
-
-    // звуки которые слышит ДИМА (при подслушивании)
-    function generateHearFromMom() {
-        if (momState === "with_man" && currentAct) {
-            // выбираем случайный звук из текущего акта (секс/минет)
-            const actionPack = currentAct.sounds;
-            const randomIdx = Math.floor(Math.random() * actionPack.length);
-            let rawSound = actionPack[randomIdx];
-            // иногда добавляем специфику про деньги
-            if (Math.random() < 0.4) {
-                rawSound += " 💰 (мама получила чаевые)";
-                let bonus = Math.floor(Math.random() * 300) + 100;
-                money += bonus;
-                updateMoney();
-                addMomLog(`💵 БОНУС! Пока Дима слушал, мужик кинул ${bonus}₽.`, true);
+        // Игровая логика работает в фиксированной сетке 600x500
+        const LANE_COUNT = 3;
+        const LANE_WIDTH = 600 / LANE_COUNT; // 200px
+        const GROUND_Y = 500 - 70;   // 430
+        
+        const GAZAN_SIZE = 48;
+        let lane = 1;
+        let playerY = GROUND_Y - GAZAN_SIZE + 6;
+        
+        let obstacles = [];
+        const OBSTACLE_WIDTH = 54;
+        const OBSTACLE_HEIGHT = 62;
+        let frameCounter = 0;
+        let spawnGap = 55;
+        let gameSpeed = 5;
+        let score = 0;
+        let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
+        let gameRunning = true;
+        
+        // Смена миров
+        let currentWorldTheme = 0;
+        let nextThemeScore = 0;
+        let worldChangeFlag = false;
+        
+        const WORLDS = [
+            {   skyTop: "#0f2027", skyBottom: "#2c5364", railColor: "#8b5a2b", trackColor: "#5d3a1a",
+                obstacleMain: "#b87333", obstacleDetail: "#e09d32", textGlow: "#ffbc6e", platformColor: "#4a3b28" },
+            {   skyTop: "#1a0033", skyBottom: "#4a1d6d", railColor: "#ff44cc", trackColor: "#aa22aa",
+                obstacleMain: "#ff2266", obstacleDetail: "#ffaa44", textGlow: "#ff66ff", platformColor: "#331155" },
+            {   skyTop: "#c94b1f", skyBottom: "#ffb347", railColor: "#b87c4f", trackColor: "#9c5e2c",
+                obstacleMain: "#cd7a32", obstacleDetail: "#e6a865", textGlow: "#ffe6b3", platformColor: "#bc6f3a" },
+            {   skyTop: "#b3e5fc", skyBottom: "#e1f5fe", railColor: "#4fc3f7", trackColor: "#0288d1",
+                obstacleMain: "#81d4fa", obstacleDetail: "#ffffff", textGlow: "#e0f7fa", platformColor: "#a6c9e0" }
+        ];
+        
+        function changeWorldRandomly() {
+            let newTheme = currentWorldTheme;
+            while(newTheme === currentWorldTheme && WORLDS.length > 1) {
+                newTheme = Math.floor(Math.random() * WORLDS.length);
             }
-            return `👂 ДИМА СЛЫШИТ через стену: ${rawSound}`;
-        } 
-        else if (momState === "with_man" && !currentAct) {
-            // fallback
-            return `👂 ДИМА СЛЫШИТ: странные влажные звуки и стоны... мама явно с мужиком`;
+            currentWorldTheme = newTheme;
+            let increment = 450 + Math.floor(Math.random() * 700);
+            nextThemeScore = Math.floor(score) + increment;
+            worldChangeFlag = true;
         }
-        else {
-            // мама одна
-            const randomHome = homeSounds[Math.floor(Math.random() * homeSounds.length)];
-            return `👂 ДИМА СЛЫШИТ: ${randomHome} (никаких мужчин)`;
+        
+        function checkWorldTransition() {
+            if(gameRunning && Math.floor(score) >= nextThemeScore && nextThemeScore > 0) {
+                changeWorldRandomly();
+            }
         }
-    }
-
-    // добавить лог в зону мамы (что происходит в её комнате)
-    function addMomLog(message, isBonus = false) {
-        const div = document.createElement('div');
-        div.className = 'sound-entry mom-sound';
-        div.innerHTML = isBonus ? `✨ ${message}` : `💬 ${message}`;
-        momSoundsDiv.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        while (momSoundsDiv.children.length > 22) momSoundsDiv.removeChild(momSoundsDiv.firstChild);
-    }
-
-    // добавить лог в зону Димы (что он слышит)
-    function addDimaLog(message) {
-        const div = document.createElement('div');
-        div.className = 'sound-entry dima-sound';
-        div.innerHTML = message;
-        dimaHearDiv.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        while (dimaHearDiv.children.length > 24) dimaHearDiv.removeChild(dimaHearDiv.firstChild);
-    }
-
-    function updateMoney() {
-        moneySpan.innerText = Math.floor(money);
-    }
-
-    // завершить визит мужика
-    function endManVisit() {
-        if (momState !== "with_man") return;
-        if (manTimer) clearTimeout(manTimer);
-        const earnedThisTime = Math.floor(Math.random() * 900) + 500;
-        money += earnedThisTime;
-        updateMoney();
-        momState = "home_idle";
-        currentAct = null;
-        momStatusSpan.innerHTML = "🏠 Дома (готовит/отдыхает)";
-        addMomLog(`🚪 Мужик ушёл, мама заработала ${earnedThisTime}₽. Теперь она одна на кухне.`, false);
-        addMomLog(`🍲 Мама переодевается и идёт пить чай.`);
-        // также добавим для димы намёк
-        addDimaLog(`🔇 Звуки за стеной затихли. Дима слышит только шаги мамы. Мужик ушёл.`);
-        // обновляем аватарку мамы
-    }
-
-    // начать акт с мужиком (минет, ебля и тп)
-    function bringMan() {
-        if (momState === "with_man") {
-            addMomLog(`⚠️ Мама уже трахается с клиентом! Дождись окончания.`, false);
-            return;
+        
+        function getCurrentPalette() {
+            return WORLDS[currentWorldTheme];
         }
-        // выбираем случайный тип секса
-        const randomAct = sexActions[Math.floor(Math.random() * sexActions.length)];
-        currentAct = randomAct;
-        momState = "with_man";
-        momStatusSpan.innerHTML = "🔞 С КЛИЕНТОМ (делает минет, ебётся)";
         
-        const visitDuration = 8000 + Math.random() * 9000; // 8-17 секунд
-        addMomLog(`🚪🔞 ПРИШЁЛ МУЖИК! Мама сразу начала ${randomAct.action}. Слышны пошлые звуки.`, false);
-        addMomLog(`💢 (стонет, шлепки, неприличные фразы...)`, false);
+        // UI элементы
+        const scoreSpan = document.getElementById('scoreValue');
+        const bestSpan = document.getElementById('bestValue');
+        const statusMsgDiv = document.getElementById('statusMessage');
+        const restartBtn = document.getElementById('restartBtn');
         
-        // показать в логах Димы первое уведомление
-        addDimaLog(`🚨 Дима услышал мужской голос и дверной звонок. Мама с кем-то зашла в комнату!`);
+        function updateScoreUI(){
+            scoreSpan.innerText = Math.floor(score);
+            if(score > bestScore){
+                bestScore = Math.floor(score);
+                bestSpan.innerText = bestScore;
+                localStorage.setItem('gazanBest', bestScore);
+            }
+        }
         
-        if (manTimer) clearTimeout(manTimer);
-        manTimer = setTimeout(() => {
-            endManVisit();
-        }, visitDuration);
+        function spawnObstacle(){
+            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
+            let lastInLane = obstacles.find(obs => obs.lane === laneIdx && obs.y > 500 - 150);
+            if(lastInLane) return;
+            obstacles.push({
+                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_WIDTH/2),
+                lane: laneIdx,
+                y: -OBSTACLE_HEIGHT,
+                width: OBSTACLE_WIDTH,
+                height: OBSTACLE_HEIGHT,
+            });
+        }
         
-        // каждые 3 секунды во время акта автоматически пишем в комнату мамы грязные детали (опционально)
-        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
-        window.autoSexInterval = setInterval(() => {
-            if (momState === "with_man" && currentAct) {
-                const randomAuto = currentAct.sounds[Math.floor(Math.random() * currentAct.sounds.length)];
-                addMomLog(`🔞 ${randomAuto}`, false);
+        function updateGame(){
+            if(!gameRunning) return;
+            
+            for(let i=0; i<obstacles.length; i++){
+                obstacles[i].y += gameSpeed;
+            }
+            obstacles = obstacles.filter(obs => obs.y < 600);
+            
+            let dynamicSpawn = Math.max(28, spawnGap - Math.floor(score / 380));
+            if(frameCounter >= dynamicSpawn){
+                spawnObstacle();
+                frameCounter = 0;
             } else {
-                clearInterval(window.autoSexInterval);
+                frameCounter++;
             }
-        }, 4000);
-    }
-
-    // ---- ПОДСЛУШИВАНИЕ с анимацией Димы ----
-    function listenToWall() {
-        // Анимация: Дима прикладывает ухо к стене
-        dimaAvatar.classList.add('dima-listen-effect');
-        const listenBtn = document.getElementById('listenWallBtn');
-        listenBtn.classList.add('listen-animation');
-        setTimeout(() => {
-            dimaAvatar.classList.remove('dima-listen-effect');
-            listenBtn.classList.remove('listen-animation');
-        }, 350);
-        
-        // получаем что слышит Дима в зависимости от состояния мамы
-        const hearMessage = generateHearFromMom();
-        addDimaLog(hearMessage);
-        
-        // если мама с мужиком, дополнительный бонус - иногда подслушивание приносит деньги (типа нашёл в коридоре)
-        if (momState === "with_man" && Math.random() < 0.25) {
-            const foundMoney = Math.floor(Math.random() * 150) + 20;
-            money += foundMoney;
-            updateMoney();
-            addDimaLog(`💸 Дима нашёл в коридоре купюру (вероятно, мужик обронил) +${foundMoney}₽`);
+            
+            gameSpeed = Math.min(5 + Math.floor(score / 650), 13.2);
+            
+            const playerRect = {
+                x: lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2),
+                y: playerY,
+                w: GAZAN_SIZE,
+                h: GAZAN_SIZE
+            };
+            
+            for(let obs of obstacles){
+                const obsRect = {
+                    x: obs.x,
+                    y: obs.y,
+                    w: OBSTACLE_WIDTH,
+                    h: OBSTACLE_HEIGHT
+                };
+                if(playerRect.x < obsRect.x + obsRect.w &&
+                    playerRect.x + playerRect.w > obsRect.x &&
+                    playerRect.y < obsRect.y + obsRect.h &&
+                    playerRect.y + playerRect.h > obsRect.y){
+                    gameRunning = false;
+                    statusMsgDiv.style.display = "block";
+                    restartBtn.classList.remove("hidden");
+                    break;
+                }
+            }
+            
+            if(gameRunning){
+                score += 0.28;
+                updateScoreUI();
+                checkWorldTransition();
+            }
         }
         
-        // Дополнительная реакция: если мама делает минет, то Дима слышит очень чётко
-        if (momState === "with_man" && currentAct && currentAct.action === "минет") {
-            addDimaLog(`😨 Дима отодвинулся от стены, услышав как мама давится членом. Отвращение и стыд.`);
+        // Отрисовка с палитрой
+        function drawBackground() {
+            const pal = getCurrentPalette();
+            const gradSky = ctx.createLinearGradient(0, 0, 0, GROUND_Y-40);
+            gradSky.addColorStop(0, pal.skyTop);
+            gradSky.addColorStop(0.7, pal.skyBottom);
+            ctx.fillStyle = gradSky;
+            ctx.fillRect(0, 0, 600, GROUND_Y-30);
+            
+            ctx.fillStyle = pal.textGlow + "aa";
+            ctx.font = "bold 26monospace";
+            ctx.fillText("🚇 67 RUSH", 30, 70);
+            ctx.fillStyle = pal.textGlow + "cc";
+            ctx.fillText("GAZAN 6IX 9EVEN", 600-200, 110);
+            
+            ctx.fillStyle = pal.platformColor;
+            ctx.fillRect(0, GROUND_Y-10, 600, 12);
+            ctx.fillStyle = pal.railColor;
+            for(let i=0;i<LANE_COUNT+1;i++){
+                ctx.fillRect(i*LANE_WIDTH-4, GROUND_Y-15, 8, 28);
+            }
+            ctx.fillStyle = pal.trackColor;
+            for(let i=0;i<15;i++){
+                ctx.fillRect(i*70, GROUND_Y-5, 40, 10);
+            }
+            ctx.fillStyle = "#ddccaa";
+            for(let r=0;r<LANE_COUNT;r++){
+                ctx.fillRect(r*LANE_WIDTH+10, GROUND_Y-3, LANE_WIDTH-20, 6);
+            }
         }
-        if (momState === "with_man" && currentAct && currentAct.action.includes("групповуха")) {
-            addDimaLog(`🤯 Дима в шоке: похоже у мамы сразу несколько мужиков! Слышны голоса со всех сторон.`);
+        
+        function drawObstacles() {
+            const pal = getCurrentPalette();
+            for(let obs of obstacles){
+                ctx.fillStyle = pal.obstacleMain;
+                ctx.shadowBlur = 4;
+                ctx.fillRect(obs.x, obs.y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
+                ctx.fillStyle = pal.obstacleDetail;
+                ctx.fillRect(obs.x+6, obs.y+10, OBSTACLE_WIDTH-12, 14);
+                ctx.fillStyle = "#2c2c2c";
+                ctx.fillRect(obs.x+8, obs.y+32, 12, 16);
+                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+32, 12, 16);
+                // цифра 67 с характерным стилем
+                ctx.font = `bold ${Math.floor(OBSTACLE_WIDTH * 0.55)}px "Courier New", monospace`;
+                ctx.fillStyle = "#fff6b0";
+                ctx.shadowBlur = 3;
+                ctx.shadowColor = "#ff7700";
+                ctx.fillText("67", obs.x + 10, obs.y + 52);
+                ctx.font = "bold 18px monospace";
+                ctx.fillStyle = "#ffeb99";
+                ctx.fillText("⚡", obs.x + OBSTACLE_WIDTH-16, obs.y + 28);
+                ctx.fillStyle = "#ffcc44";
+                for(let s=0;s<3;s++) ctx.rect(obs.x+6+s*12, obs.y+OBSTACLE_HEIGHT-8, 5, 7);
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
         }
-    }
-    
-    // полный сброс игры
-    function fullReset() {
-        if (manTimer) clearTimeout(manTimer);
-        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
-        money = 0;
-        momState = "home_idle";
-        currentAct = null;
-        updateMoney();
-        momStatusSpan.innerHTML = "🏠 Дома (готовит)";
-        // очистить логи
-        momSoundsDiv.innerHTML = '';
-        dimaHearDiv.innerHTML = '';
-        addMomLog(`🔄 СИСТЕМА ПЕРЕЗАПУЩЕНА. Мама снова на кухне.`, false);
-        addMomLog(`🍳 Готовит ужин, Дима в своей комнате.`);
-        addDimaLog(`🔇 Тишина. Дима сидит в углу.`);
-        addDimaLog(`👂 Может приложить ухо к стене и подслушивать...`);
-        // добавим пару стандартных
-        addMomLog(`📺 Включила телевизор, ждёт "клиентов"`);
-    }
-    
-    // инициализация кнопок и начальное состояние
-    document.getElementById('callManBtn').addEventListener('click', () => {
-        bringMan();
-    });
-    document.getElementById('listenWallBtn').addEventListener('click', () => {
-        listenToWall();
-    });
-    document.getElementById('resetGameBtn').addEventListener('click', () => {
-        fullReset();
-    });
-    
-    // имитация бытовых звуков когда мама одна (каждые 10-15 секунд)
-    setInterval(() => {
-        if (momState === "home_idle") {
-            const randomHomeSound = homeSounds[Math.floor(Math.random() * homeSounds.length)];
-            addMomLog(randomHomeSound, false);
+        
+        function drawGazans() {
+            const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = "#f5a623";
+            ctx.beginPath();
+            ctx.roundRect(playerX, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
+            ctx.fill();
+            ctx.fillStyle = "#3b2a1f";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.3, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.fillRect(playerX+GAZAN_SIZE*0.5, playerY+GAZAN_SIZE*0.2, 12, 4);
+            ctx.fillRect(playerX+GAZAN_SIZE*0.2, playerY+GAZAN_SIZE*0.2, 12, 4);
+            ctx.fillStyle = "#ffd966";
+            ctx.fillRect(playerX+15, playerY+42, 22, 6);
+            ctx.fillStyle = "#dc143c";
+            ctx.fillRect(playerX+8, playerY-10, 38, 14);
+            ctx.fillStyle = "#ff0000aa";
+            ctx.fillRect(playerX+18, playerY-6, 18, 8);
+            ctx.font = "bold 12px monospace";
+            ctx.fillStyle = "black";
+            ctx.fillText("GAZAN", playerX+8, playerY+GAZAN_SIZE-8);
+            ctx.fillStyle = "#333";
+            ctx.fillRect(playerX+8, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.fillRect(playerX+28, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.shadowBlur = 0;
+            for(let s=0; s<5; s++){
+                ctx.beginPath();
+                ctx.moveTo(playerX-10-s*2, playerY+GAZAN_SIZE/2);
+                ctx.lineTo(playerX-22-s*3, playerY+GAZAN_SIZE/2 + (s%2===0? -6:6));
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = `rgba(255,200,100,${0.7-s*0.1})`;
+                ctx.stroke();
+            }
         }
-    }, 11000);
-    
-    // начальная загрузка
-    fullReset();
+        
+        function drawUIandEffects() {
+            const pal = getCurrentPalette();
+            ctx.font = "bold 18px monospace";
+            ctx.fillStyle = "#FFF5cf";
+            ctx.fillText(`🚄 SPEED: ${Math.floor(gameSpeed*2)}`, 600-130, 45);
+            ctx.fillStyle = pal.textGlow;
+            ctx.fillText(`🏁 ЛЕВО/ПРАВО`, 600-150, 85);
+            
+            if(worldChangeFlag) {
+                ctx.font = "bold 14px monospace";
+                ctx.fillStyle = "#ffdd88";
+                ctx.shadowBlur = 6;
+                ctx.fillText("✨ МИР СМЕНИЛСЯ! ✨", 600/2-85, GROUND_Y-45);
+                setTimeout(()=>{ worldChangeFlag = false; }, 400);
+                worldChangeFlag = false;
+            }
+            
+            if(!gameRunning){
+                ctx.font = "bold 32px monospace";
+                ctx.fillStyle = "#ffddbb";
+                ctx.fillText("❌ GAME OVER ❌", 600/2-130, 500/2-40);
+                ctx.font = "16px monospace";
+                ctx.fillStyle = "yellow";
+                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", 600/2-125, 500/2+25);
+            }
+            
+            if(gameRunning && frameCounter % 45 < 20){
+                ctx.fillStyle = "#fff9c4cc";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText("👆 СВАЙП / КНОПКИ 👆", 600-180, GROUND_Y-18);
+            }
+        }
+        
+        function draw() {
+            drawBackground();
+            drawObstacles();
+            drawGazans();
+            drawUIandEffects();
+        }
+        
+        // Управление
+        function moveLeft(){
+            if(!gameRunning) return;
+            if(lane > 0) lane--;
+        }
+        function moveRight(){
+            if(!gameRunning) return;
+            if(lane < LANE_COUNT-1) lane++;
+        }
+        
+        function restartGame(){
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            frameCounter = 0;
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            restartBtn.classList.add("hidden");
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            worldChangeFlag = false;
+        }
+        
+        // --- Обработчики (с поддержкой зума и тач событий без конфликта) ---
+        function handleKey(e){
+            const key = e.key;
+            if(key === 'ArrowLeft' || key === 'Left' || key === 'a' || key === 'A'){
+                e.preventDefault();
+                moveLeft();
+            } else if(key === 'ArrowRight' || key === 'Right' || key === 'd' || key === 'D'){
+                e.preventDefault();
+                moveRight();
+            }
+            if((key === ' ' || key === 'Space' || key === 'r' || key === 'R') && !gameRunning){
+                e.preventDefault();
+                restartGame();
+            }
+        }
+        
+        // Преобразование координат клика/тача в логику дорожек (для свайпа)
+        let touchStartX = 0;
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;   // 600 / отображаемая ширина
+            const touch = e.touches[0];
+            let canvasRelativeX = (touch.clientX - rect.left) * scaleX;
+            touchStartX = canvasRelativeX;
+        }
+        
+        function handleTouchMove(e) {
+            if(!gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const touch = e.touches[0];
+            let currentX = (touch.clientX - rect.left) * scaleX;
+            let diff = currentX - touchStartX;
+            if(Math.abs(diff) > 30) {
+                if(diff > 0) moveRight();
+                else moveLeft();
+                touchStartX = currentX;
+            }
+        }
+        
+        let mouseDownX = 0;
+        let isDragging = false;
+        function handleMouseDown(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            mouseDownX = (e.clientX - rect.left) * scaleX;
+            isDragging = true;
+        }
+        
+        function handleMouseMove(e) {
+            if(!isDragging || !gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            let currentX = (e.clientX - rect.left) * scaleX;
+            let diff = currentX - mouseDownX;
+            if(Math.abs(diff) > 30) {
+                if(diff > 0) moveRight();
+                else moveLeft();
+                mouseDownX = currentX;
+            }
+        }
+        
+        function handleMouseUp(e) { isDragging = false; }
+        
+        // Инициализация и цикл
+        bestSpan.innerText = bestScore;
+        
+        window.addEventListener('load', ()=>{
+            document.getElementById('leftBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveLeft(); });
+            document.getElementById('rightBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveRight(); });
+            restartBtn.addEventListener('click', ()=>{ if(!gameRunning) restartGame(); });
+            
+            window.addEventListener('keydown', handleKey);
+            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+            canvas.addEventListener('touchend', (e)=> e.preventDefault());
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+            
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            restartBtn.classList.add("hidden");
+            
+            function gameLoop(){
+                updateGame();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+            gameLoop();
+        });
+        
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x+r, y);
+                this.lineTo(x+w-r, y);
+                this.quadraticCurveTo(x+w, y, x+w, y+r);
+                this.lineTo(x+w, y+h-r);
+                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                this.lineTo(x+r, y+h);
+                this.quadraticCurveTo(x, y+h, x, y+h-r);
+                this.lineTo(x, y+r);
+                this.quadraticCurveTo(x, y, x+r, y);
+                return this;
+            };
+        }
+    })();
 </script>
 </body>
-</html>
+    </html>
