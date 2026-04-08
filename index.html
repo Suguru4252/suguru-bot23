@@ -2,1076 +2,697 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NetErrror - BIG Бибеджон: 500 уровней (СТАБИЛЬНАЯ)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ГАЗАН СИКС СЕВЕЕН | 67 RUSH | Full Screen</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            background: linear-gradient(145deg, #0a2f2a, #051a15);
-            overflow: hidden;
-            font-family: 'Courier New', monospace;
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a1f1e, #041212);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Press Start 2P', 'Monaco', monospace;
+            touch-action: pan-x pan-y; /* разрешаем зум, но свайпы по канвасу ловим отдельно */
+            overflow-x: hidden;
+            position: relative;
+            padding: 0;
         }
+
+        /* главный враппер — на весь экран с отступами для безопасности */
         .game-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: relative;
             width: 100vw;
             height: 100vh;
-            background: #1e3a2f;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #00000033;
+            backdrop-filter: blur(2px);
         }
-        canvas {
-            display: block;
+
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
             flex: 1;
-            background: #2a6b55;
-            touch-action: none;
+            min-height: 0;
+            margin: 10px 0;
+            touch-action: pan-x pan-y; /* зум пальцами работает, но внутренние движения обрабатываем */
         }
-        .ui-panel {
-            background: rgba(12, 26, 22, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            border-top: 2px solid #c4a86a;
-        }
-        .stat {
-            background: #1f2c1a;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #f7e05e;
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
-        .lives { color: #ff7777; background: #1f2c1a; padding: 4px 10px; border-radius: 30px; }
-        .combo { background: #3a1f2f; color: #ffaa88; padding: 4px 10px; border-radius: 30px; }
-        .level-badge { background: #4a2e6e; color: #eebbff; padding: 4px 12px; border-radius: 30px; }
-        .progress-bar { width: 100px; height: 8px; background: #2a2a2a; border-radius: 8px; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: #88ff88; transition: width 0.2s; }
-        .rage-bar { width: 80px; height: 8px; background: #2a1a1a; border-radius: 10px; overflow: hidden; }
-        .rage-fill { width: 0%; height: 100%; background: #ff4444; }
-        .power-bar { width: 70px; height: 6px; background: #2a2a2a; border-radius: 8px; overflow: hidden; }
-        .power-fill { width: 0%; height: 100%; background: #ffaa44; }
-        
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            padding: 20px;
-        }
-        .menu-btn {
-            background: #ffaa44;
-            color: #1a2a1a;
-            font-size: 1.6rem;
-            padding: 14px 40px;
-            border-radius: 60px;
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: auto;
+            height: auto;
+            max-width: 98vw;
+            max-height: 75vh;
+            border-radius: 28px;
+            box-shadow: 0 0 0 5px #ffd966, 0 0 0 10px #b97f44, 0 25px 40px rgba(0,0,0,0.5);
             cursor: pointer;
-            font-weight: bold;
-            margin: 12px;
-            border: none;
-            width: 80%;
-            max-width: 280px;
+            background-color: #2b2b2b;
+            /* сохраняем соотношение сторон 600/500 = 1.2 */
+            aspect-ratio: 600 / 500;
         }
-        .menu-btn:active { transform: scale(0.96); background: #ffcc66; }
-        .menu-title {
-            font-size: 2rem;
-            color: #ffdd88;
-            text-shadow: 0 0 15px #ff6600;
-            margin-bottom: 30px;
-        }
-        .levels-container {
-            background: rgba(30, 40, 30, 0.95);
-            border-radius: 40px;
-            padding: 20px;
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-        }
-        .level-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .level-nav-btn {
-            background: #6e4a2e;
-            color: white;
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .level-nav-btn:active { background: #9e6e4e; transform: scale(0.95); }
-        .level-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #ffdd88;
-            background: #1a2a1a;
-            padding: 10px 25px;
-            border-radius: 50px;
-        }
-        .level-select-btn {
-            background: #88aa44;
-            color: #1a2a1a;
-            font-size: 1.3rem;
-            padding: 12px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        .back-btn { background: #6a4a2e; margin-top: 15px; font-size: 1rem; padding: 8px 20px; }
-        .result-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a2a;
-            border: 3px solid #ffaa44;
-            border-radius: 40px;
-            padding: 25px;
-            text-align: center;
-            z-index: 200;
-            min-width: 280px;
-            backdrop-filter: blur(20px);
-        }
-        .result-title { font-size: 1.8rem; margin-bottom: 20px; }
-        .win { color: #88ff88; }
-        .lose { color: #ff8888; }
-        .result-btn {
-            background: #ffaa44;
-            padding: 10px 20px;
-            border-radius: 40px;
-            margin: 8px;
-            cursor: pointer;
-            font-weight: bold;
+
+        /* масштабирование: при широком экране канвас растягивается по ширине, но с сохранением пропорций */
+        @media (min-width: 700px) {
+            canvas {
+                max-width: 85vw;
+                max-height: 70vh;
+            }
         }
         @media (max-width: 600px) {
-            .menu-btn { font-size: 1.2rem; padding: 12px 25px; }
-            .menu-title { font-size: 1.5rem; }
-            .level-number { font-size: 1.8rem; }
+            canvas {
+                max-width: 96vw;
+                max-height: 65vh;
+            }
+        }
+
+        .ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 20;
+            width: 100%;
+        }
+
+        .score-board, .best-board {
+            background: #000000bb;
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #f9f3c1;
+            text-shadow: 0 0 5px #ff9900, 1px 1px 0 #6b2e00;
+            letter-spacing: 1px;
+            font-family: monospace;
+            border: 1px solid #ffcd7e;
+            white-space: nowrap;
+        }
+
+        .best-board {
+            background: #1e2a1fcc;
+        }
+
+        .controls-mobile {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .ctrl-btn {
+            pointer-events: auto;
+            background: #000000cc;
+            backdrop-filter: blur(12px);
+            border: 2px solid #ffb347;
+            color: #ffdd99;
+            font-size: 2rem;
+            font-weight: bold;
+            width: 70px;
+            height: 70px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.05s linear;
+            box-shadow: 0 6px 0 #7a3e0e;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .ctrl-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #7a3e0e;
+        }
+
+        .restart-area {
+            position: absolute;
+            bottom: 110px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .restart-btn {
+            pointer-events: auto;
+            background: #e25822ee;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 28px;
+            border-radius: 60px;
+            color: white;
+            font-family: monospace;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 5px 0 #7a2a0a;
+            white-space: nowrap;
+        }
+
+        .restart-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .status-text {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffefb9;
+            text-shadow: 3px 3px 0 #b43b00;
+            background: #000000aa;
+            width: fit-content;
+            margin: auto;
+            padding: 8px 24px;
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            z-index: 25;
+        }
+
+        /* подсказка про зум */
+        .zoom-hint {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            background: #00000077;
+            border-radius: 40px;
+            padding: 3px 12px;
+            font-size: 10px;
+            color: #ffd58c;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 22;
+            backdrop-filter: blur(4px);
+        }
+
+        footer {
+            position: absolute;
+            bottom: 5px;
+            left: 12px;
+            font-size: 9px;
+            color: #ffd58c;
+            background: #00000066;
+            border-radius: 40px;
+            padding: 2px 10px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 22;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 550px) {
+            .ctrl-btn { width: 60px; height: 60px; font-size: 1.6rem; }
+            .score-board, .best-board { font-size: 0.9rem; padding: 4px 12px; }
+            .restart-btn { font-size: 1rem; padding: 6px 20px; }
+            .status-text { font-size: 1.1rem; top: 38%; white-space: nowrap; padding: 5px 16px;}
         }
     </style>
 </head>
 <body>
 <div class="game-fullscreen">
-    <canvas id="gameCanvas"></canvas>
+    <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="600" height="500"></canvas>
+    </div>
     <div class="ui-panel">
-        <div class="stat">🐒 <span id="scoreSpan">0</span></div>
-        <div class="lives" id="livesSpan">❤️❤️❤️</div>
-        <div class="combo">⚡ x<span id="comboSpan">1</span></div>
-        <div class="level-badge">📊 УР <span id="levelSpan">1</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="rage-bar"><div class="rage-fill" id="rageFill"></div></div>
-        <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
+        <div class="score-board">🏆 СЧЁТ: <span id="scoreValue">0</span></div>
+        <div class="best-board">⭐ РЕКОРД: <span id="bestValue">0</span></div>
     </div>
-</div>
-
-<div id="mainMenu" class="menu-overlay">
-    <div class="menu-title">🐒 BIG БИБЕДЖОН 🥥</div>
-    <button class="menu-btn" id="startGameBtn">▶ НАЧАТЬ ИГРУ</button>
-    <button class="menu-btn" id="levelsMenuBtn">📜 УРОВНИ (1-500)</button>
-</div>
-
-<div id="levelsMenu" class="menu-overlay" style="display:none;">
-    <div class="levels-container">
-        <div class="menu-title" style="font-size:1.5rem;">📜 ВЫБОР УРОВНЯ</div>
-        <div class="level-nav">
-            <div class="level-nav-btn" id="levelPrevBtn">◀</div>
-            <div class="level-number" id="selectedLevelNum">1</div>
-            <div class="level-nav-btn" id="levelNextBtn">▶</div>
-        </div>
-        <div class="level-list" id="levelList" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:15px 0; max-height:200px; overflow-y:auto;"></div>
-        <button class="level-select-btn" id="confirmLevelBtn">🎮 ИГРАТЬ УРОВЕНЬ</button>
-        <button class="back-btn menu-btn" id="backToMainFromLevels" style="font-size:1rem; padding:8px 20px;">🏠 ГЛАВНОЕ МЕНЮ</button>
+    <div class="controls-mobile">
+        <div class="ctrl-btn" id="leftBtn">◀ ЛЕВО</div>
+        <div class="ctrl-btn" id="rightBtn">ПРАВО ▶</div>
     </div>
-</div>
-
-<div id="winPopup" style="display:none;" class="result-popup">
-    <div class="result-title win">🏆 ВЫ ВЫИГРАЛИ! 🏆</div>
-    <button class="result-btn" id="nextLevelBtn">➡ СЛЕДУЮЩИЙ УРОВЕНЬ</button>
-    <button class="result-btn" id="winToMainBtn">🏠 ГЛАВНОЕ МЕНЮ</button>
-</div>
-
-<div id="losePopup" style="display:none;" class="result-popup">
-    <div class="result-title lose">💀 ВЫ ПРОИГРАЛИ 💀</div>
-    <button class="result-btn" id="loseToMainBtn">🏠 ГЛАВНОЕ МЕНЮ</button>
+    <div class="restart-area">
+        <button class="restart-btn" id="restartBtn">🚀 ГАЗАН, ПОГНАЛИ!</button>
+    </div>
+    <div id="statusMessage" class="status-text" style="display: none;">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
+    <div class="zoom-hint">🔍 Пальцы → масштаб</div>
+    <footer>⚡ ГАЗАН 67 | СВАЙП/КЛИК | МИРЫ МЕНЯЮТСЯ</footer>
 </div>
 
 <script>
     (function(){
+        // ---------- КАНВАС (координаты всегда 600x500, но отображение резиновое) ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        // Игровая логика работает в фиксированной сетке 600x500
+        const LANE_COUNT = 3;
+        const LANE_WIDTH = 600 / LANE_COUNT; // 200px
+        const GROUND_Y = 500 - 70;   // 430
         
-        // === ЭЛЕМЕНТЫ МЕНЮ ===
-        const mainMenu = document.getElementById('mainMenu');
-        const levelsMenu = document.getElementById('levelsMenu');
-        const startGameBtn = document.getElementById('startGameBtn');
-        const levelsMenuBtn = document.getElementById('levelsMenuBtn');
-        const backToMainFromLevels = document.getElementById('backToMainFromLevels');
-        const confirmLevelBtn = document.getElementById('confirmLevelBtn');
-        const levelPrevBtn = document.getElementById('levelPrevBtn');
-        const levelNextBtn = document.getElementById('levelNextBtn');
-        const selectedLevelNumSpan = document.getElementById('selectedLevelNum');
-        const levelListDiv = document.getElementById('levelList');
-        const winPopup = document.getElementById('winPopup');
-        const losePopup = document.getElementById('losePopup');
-        const nextLevelBtn = document.getElementById('nextLevelBtn');
-        const winToMainBtn = document.getElementById('winToMainBtn');
-        const loseToMainBtn = document.getElementById('loseToMainBtn');
-        const progressFill = document.getElementById('progressFill');
+        const GAZAN_SIZE = 48;
+        let lane = 1;
+        let playerY = GROUND_Y - GAZAN_SIZE + 6;
         
-        let canvasW = window.innerWidth;
-        let canvasH = window.innerHeight - 70;
-        canvas.width = canvasW;
-        canvas.height = canvasH;
-        
-        window.addEventListener('resize', () => {
-            canvasW = window.innerWidth;
-            canvasH = window.innerHeight - 70;
-            canvas.width = canvasW;
-            canvas.height = canvasH;
-            bibedjon.x = canvasW/2;
-        });
-        
-        // === ПЕРЕМЕННЫЕ ИГРЫ ===
-        let currentLevel = 1;
-        let selectedLevel = 1;
-        let gameActive = false;
+        let obstacles = [];
+        const OBSTACLE_WIDTH = 54;
+        const OBSTACLE_HEIGHT = 62;
+        let frameCounter = 0;
+        let spawnGap = 55;
+        let gameSpeed = 5;
         let score = 0;
-        let lives = 3;
-        let combo = 1;
-        let comboCounter = 0;
-        let lastHitFrame = 0;
-        let rage = 0;
-        let maxRage = 100;
-        let doubleSpeed = { active: false, endTime: 0 };
-        let shotgunMode = { active: false, endTime: 0 };
+        let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
+        let gameRunning = true;
         
-        let projectiles = [];
-        let enemies = [];
-        let bonuses = [];
-        let grenade = null;
-        let boss = null;
-        let particles = [];
-        let screenShake = 0;
+        // Смена миров
+        let currentWorldTheme = 0;
+        let nextThemeScore = 0;
+        let worldChangeFlag = false;
         
-        let bibedjon = { x: canvasW/2, y: canvasH - 70, width: 70, height: 80 };
-        
-        let aiming = false;
-        let aimStartX, aimStartY, aimCurrentX, aimCurrentY;
-        let powerCharge = 0;
-        let charging = false;
-        let chargeInterval = null;
-        
-        let frame = 0;
-        let enemiesToKill = 0;      // сколько нужно убить для завершения уровня
-        let enemiesKilled = 0;       // сколько уже убито
-        
-        // === UI ===
-        const scoreSpan = document.getElementById('scoreSpan');
-        const livesSpan = document.getElementById('livesSpan');
-        const comboSpan = document.getElementById('comboSpan');
-        const levelSpan = document.getElementById('levelSpan');
-        const rageFill = document.getElementById('rageFill');
-        const powerFillDiv = document.getElementById('powerFill');
-        
-        function updateUI() {
-            scoreSpan.innerText = score;
-            let hearts = "";
-            for(let i=0; i<lives; i++) hearts += "❤️";
-            for(let i=lives; i<3; i++) hearts += "🖤";
-            livesSpan.innerText = hearts;
-            comboSpan.innerText = combo;
-            levelSpan.innerText = currentLevel;
-            rageFill.style.width = (rage / maxRage * 100) + "%";
-            if(enemiesToKill > 0) {
-                progressFill.style.width = (enemiesKilled / enemiesToKill * 100) + "%";
-            } else {
-                progressFill.style.width = "0%";
-            }
-        }
-        function updatePowerBar() { powerFillDiv.style.width = powerCharge + "%"; }
-        
-        // === ЗВУК ===
-        let audioCtx = null;
-        function playSound(freq, vol=0.12, duration=0.2) {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = freq;
-                gain.gain.value = vol;
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
-        }
-        
-        // === ТИПЫ ВРАГОВ ===
-        const enemyTypes = [
-            { name: "пехотинец", color1: "#6a8eb0", color2: "#4a6e90", hp: 1, speed: 0.8, width: 44, height: 48, score: 10, icon: "🤖", eyes: "#fff" },
-            { name: "щитовик", color1: "#5a9e6a", color2: "#3a7e4a", hp: 2, speed: 0.6, width: 48, height: 52, score: 20, icon: "🛡️", eyes: "#ffa" },
-            { name: "ниндзя", color1: "#cc6666", color2: "#aa4444", hp: 1, speed: 1.4, width: 42, height: 46, score: 15, icon: "⚡", eyes: "#f66" },
-            { name: "летающий", color1: "#eebb55", color2: "#cc9933", hp: 1, speed: 1.0, width: 46, height: 40, score: 12, icon: "🕊️", flying: true, eyes: "#fea" }
+        const WORLDS = [
+            {   skyTop: "#0f2027", skyBottom: "#2c5364", railColor: "#8b5a2b", trackColor: "#5d3a1a",
+                obstacleMain: "#b87333", obstacleDetail: "#e09d32", textGlow: "#ffbc6e", platformColor: "#4a3b28" },
+            {   skyTop: "#1a0033", skyBottom: "#4a1d6d", railColor: "#ff44cc", trackColor: "#aa22aa",
+                obstacleMain: "#ff2266", obstacleDetail: "#ffaa44", textGlow: "#ff66ff", platformColor: "#331155" },
+            {   skyTop: "#c94b1f", skyBottom: "#ffb347", railColor: "#b87c4f", trackColor: "#9c5e2c",
+                obstacleMain: "#cd7a32", obstacleDetail: "#e6a865", textGlow: "#ffe6b3", platformColor: "#bc6f3a" },
+            {   skyTop: "#b3e5fc", skyBottom: "#e1f5fe", railColor: "#4fc3f7", trackColor: "#0288d1",
+                obstacleMain: "#81d4fa", obstacleDetail: "#ffffff", textGlow: "#e0f7fa", platformColor: "#a6c9e0" }
         ];
         
-        function spawnEnemy() {
-            if (!gameActive) return;
-            let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-            let x = 40 + Math.random() * (canvasW - 80);
-            let y = type.flying ? 60 + Math.random() * 100 : 40;
-            enemies.push({
-                x, y, type, hp: type.hp, maxHp: type.hp,
-                width: type.width, height: type.height, 
-                speed: type.speed + (currentLevel * 0.02),
-                flying: type.flying || false, wobble: 0
+        function changeWorldRandomly() {
+            let newTheme = currentWorldTheme;
+            while(newTheme === currentWorldTheme && WORLDS.length > 1) {
+                newTheme = Math.floor(Math.random() * WORLDS.length);
+            }
+            currentWorldTheme = newTheme;
+            let increment = 450 + Math.floor(Math.random() * 700);
+            nextThemeScore = Math.floor(score) + increment;
+            worldChangeFlag = true;
+        }
+        
+        function checkWorldTransition() {
+            if(gameRunning && Math.floor(score) >= nextThemeScore && nextThemeScore > 0) {
+                changeWorldRandomly();
+            }
+        }
+        
+        function getCurrentPalette() {
+            return WORLDS[currentWorldTheme];
+        }
+        
+        // UI элементы
+        const scoreSpan = document.getElementById('scoreValue');
+        const bestSpan = document.getElementById('bestValue');
+        const statusMsgDiv = document.getElementById('statusMessage');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        function updateScoreUI(){
+            scoreSpan.innerText = Math.floor(score);
+            if(score > bestScore){
+                bestScore = Math.floor(score);
+                bestSpan.innerText = bestScore;
+                localStorage.setItem('gazanBest', bestScore);
+            }
+        }
+        
+        function spawnObstacle(){
+            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
+            let lastInLane = obstacles.find(obs => obs.lane === laneIdx && obs.y > 500 - 150);
+            if(lastInLane) return;
+            obstacles.push({
+                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_WIDTH/2),
+                lane: laneIdx,
+                y: -OBSTACLE_HEIGHT,
+                width: OBSTACLE_WIDTH,
+                height: OBSTACLE_HEIGHT,
             });
         }
         
-        // === ГЕНЕРАЦИЯ УРОВНЯ (СТАБИЛЬНАЯ) ===
-        function generateLevel() {
-            // Очищаем всё
-            enemies = [];
-            bonuses = [];
-            grenade = null;
-            boss = null;
-            projectiles = [];
-            particles = [];
-            enemiesKilled = 0;
+        function updateGame(){
+            if(!gameRunning) return;
             
-            // Определяем босс-уровень (каждые 10 уровней)
-            let isBossLevel = (currentLevel % 10 === 0);
+            for(let i=0; i<obstacles.length; i++){
+                obstacles[i].y += gameSpeed;
+            }
+            obstacles = obstacles.filter(obs => obs.y < 600);
             
-            if (isBossLevel) {
-                enemiesToKill = 1; // босс считается за 1 убийство
-                boss = {
-                    x: canvasW/2 - 60, 
-                    y: 60, 
-                    width: 130, 
-                    height: 110, 
-                    hp: 5 + Math.floor(currentLevel / 5), 
-                    maxHp: 5 + Math.floor(currentLevel / 5),
-                    speed: 0.35, 
-                    direction: 1, 
-                    shootTimer: 0
-                };
-                playSound(300, 0.3, 0.5);
+            let dynamicSpawn = Math.max(28, spawnGap - Math.floor(score / 380));
+            if(frameCounter >= dynamicSpawn){
+                spawnObstacle();
+                frameCounter = 0;
             } else {
-                // Обычный уровень: количество врагов = 3 + уровень/2 (но не более 8)
-                enemiesToKill = Math.min(3 + Math.floor(currentLevel / 2), 8);
-                for(let i = 0; i < enemiesToKill; i++) {
-                    spawnEnemy();
-                }
+                frameCounter++;
             }
             
-            updateUI();
-        }
-        
-        // === ПРОВЕРКА ЗАВЕРШЕНИЯ УРОВНЯ ===
-        function checkLevelComplete() {
-            if (!gameActive) return false;
+            gameSpeed = Math.min(5 + Math.floor(score / 650), 13.2);
             
-            let completed = false;
-            if (boss) {
-                if (boss.hp <= 0) {
-                    completed = true;
-                    boss = null;
-                }
-            } else {
-                if (enemiesKilled >= enemiesToKill && enemies.length === 0) {
-                    completed = true;
-                }
-            }
+            const playerRect = {
+                x: lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2),
+                y: playerY,
+                w: GAZAN_SIZE,
+                h: GAZAN_SIZE
+            };
             
-            if (completed) {
-                gameActive = false;
-                winPopup.style.display = 'flex';
-                return true;
-            }
-            return false;
-        }
-        
-        // === ОБНОВЛЕНИЕ БОССА ===
-        function updateBoss(delta) {
-            if (!boss || !gameActive) return;
-            boss.x += boss.direction * boss.speed * delta * 60;
-            if (boss.x <= 30) boss.direction = 1;
-            if (boss.x >= canvasW - boss.width - 30) boss.direction = -1;
-            boss.shootTimer += delta;
-            if (boss.shootTimer > 1.2) {
-                boss.shootTimer = 0;
-                projectiles.push({
-                    x: boss.x + boss.width/2, 
-                    y: boss.y + boss.height - 10,
-                    vx: (Math.random() - 0.5) * 1.5, 
-                    vy: 3, 
-                    radius: 10, 
-                    isBomb: true
-                });
-                playSound(440, 0.15);
-            }
-        }
-        
-        // === БОНУСЫ ===
-        function spawnCoconutGrenade(x, y) { 
-            if (grenade) return; 
-            grenade = { x, y, radius: 20 }; 
-        }
-        
-        function explodeGrenade() {
-            if (!grenade || !gameActive) return;
-            let ex = grenade.x, ey = grenade.y;
-            // Урон врагам
-            for(let i=0; i<enemies.length; i++) {
-                let e = enemies[i];
-                let cx = e.x + e.width/2, cy = e.y + e.height/2;
-                if (Math.hypot(ex - cx, ey - cy) < 150) {
-                    score += e.type.score * combo;
-                    rage = Math.min(rage + 10, maxRage);
-                    addCombo();
-                    enemiesKilled++;
-                    enemies.splice(i,1); 
-                    i--;
-                    for(let k=0;k<8;k++) particles.push({ x: ex, y: ey, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 0.5, color: "#ffaa44" });
-                }
-            }
-            // Урон боссу
-            if (boss) {
-                let bx = boss.x + boss.width/2, by = boss.y + boss.height/2;
-                if (Math.hypot(ex - bx, ey - by) < 150) {
-                    boss.hp -= 2;
-                    playSound(600, 0.25);
-                    for(let k=0;k<15;k++) particles.push({ x: ex, y: ey, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 0.6, color: "#ff8844" });
-                    if (boss.hp <= 0) checkLevelComplete();
-                }
-            }
-            screenShake = 12;
-            playSound(200, 0.35, 0.5);
-            grenade = null;
-            updateUI();
-        }
-        
-        function spawnBonus(x, y) {
-            if (!gameActive) return;
-            if (Math.random() < 0.3) { 
-                spawnCoconutGrenade(x, y); 
-                return; 
-            }
-            const bonusTypes = [
-                { name: "medkit", color: "#ff7777", effect: "medkit", icon: "💊" },
-                { name: "speed", color: "#88ffaa", effect: "doubleSpeed", duration: 6000, icon: "⚡" },
-                { name: "shotgun", color: "#ffaa66", effect: "shotgun", duration: 5000, icon: "🔫" }
-            ];
-            let type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-            bonuses.push({ x, y, type, radius: 14 });
-        }
-        
-        function applyBonus(bonus) {
-            switch(bonus.type.effect) {
-                case "medkit": 
-                    lives = Math.min(lives+1, 5); 
-                    updateUI(); 
-                    playSound(880,0.15); 
-                    break;
-                case "doubleSpeed": 
-                    doubleSpeed.active=true; 
-                    doubleSpeed.endTime=Date.now()+6000; 
-                    playSound(550,0.15); 
-                    break;
-                case "shotgun": 
-                    shotgunMode.active=true; 
-                    shotgunMode.endTime=Date.now()+5000; 
-                    playSound(770,0.15); 
-                    break;
-            }
-        }
-        
-        // === СПЕЦСПОСОБНОСТЬ ===
-        function fireRage() {
-            if (!gameActive || rage < maxRage) return;
-            rage = 0; 
-            updateUI(); 
-            playSound(300,0.35,0.6); 
-            screenShake = 12;
-            projectiles.push({ 
-                x: bibedjon.x, 
-                y: bibedjon.y - 40, 
-                vx: 0, 
-                vy: -9, 
-                radius: 22, 
-                isFireball: true 
-            });
-            for(let i=0;i<20;i++) particles.push({ 
-                x: bibedjon.x, 
-                y: bibedjon.y-30, 
-                vx: (Math.random()-0.5)*6, 
-                vy: -Math.random()*5, 
-                life: 0.6, 
-                color: "#ff8844" 
-            });
-        }
-        
-        // === БРОСОК ===
-        function shootProjectile(fromX, fromY, toX, toY, chargePower) {
-            if (!gameActive) return;
-            let dx = toX - fromX, dy = toY - fromY;
-            let len = Math.hypot(dx, dy);
-            if (len < 0.1) return;
-            let normX = dx/len, normY = dy/len;
-            let speed = 7 + (chargePower / 10);
-            if (shotgunMode.active) {
-                for(let i = -1; i <= 1; i++) { 
-                    let angle = Math.atan2(normY, normX) + i * 0.25; 
-                    projectiles.push({ 
-                        x: fromX, y: fromY, 
-                        vx: Math.cos(angle) * speed, 
-                        vy: Math.sin(angle) * speed, 
-                        radius: 10 
-                    }); 
-                }
-            } else { 
-                projectiles.push({ 
-                    x: fromX, y: fromY, 
-                    vx: normX * speed, 
-                    vy: normY * speed, 
-                    radius: 12 
-                }); 
-            }
-            playSound(480,0.1);
-        }
-        
-        function addCombo() { 
-            comboCounter++; 
-            if(comboCounter >= 3) { 
-                combo = Math.min(combo + 1, 8); 
-                comboCounter = 0; 
-            } 
-            lastHitFrame = frame; 
-        }
-        
-        function resetCombo() { 
-            if(frame - lastHitFrame > 60) { 
-                combo = 1; 
-                comboCounter = 0; 
-            } 
-        }
-        
-        // === ЗАПУСК ИГРЫ С УРОВНЯ ===
-        function startGameFromLevel(level) {
-            currentLevel = Math.min(level, 500);
-            gameActive = true;
-            score = 0;
-            lives = 3;
-            combo = 1;
-            comboCounter = 0;
-            rage = 0;
-            projectiles = [];
-            enemies = [];
-            bonuses = [];
-            grenade = null;
-            particles = [];
-            doubleSpeed.active = false;
-            shotgunMode.active = false;
-            aiming = false;
-            if(chargeInterval) clearInterval(chargeInterval);
-            powerCharge = 0;
-            updatePowerBar();
-            generateLevel();
-            updateUI();
-            mainMenu.style.display = 'none';
-            levelsMenu.style.display = 'none';
-            winPopup.style.display = 'none';
-            losePopup.style.display = 'none';
-        }
-        
-        // === ОСНОВНОЙ ИГРОВОЙ ЦИКЛ ===
-        function updateGame(delta) {
-            if (!gameActive) return;
-            
-            // Обновление бонусов
-            if(doubleSpeed.active && Date.now() > doubleSpeed.endTime) doubleSpeed.active = false;
-            if(shotgunMode.active && Date.now() > shotgunMode.endTime) shotgunMode.active = false;
-            
-            // Обновление босса
-            if(boss) updateBoss(delta);
-            
-            // Движение врагов
-            for(let i = 0; i < enemies.length; i++) {
-                let e = enemies[i];
-                let spd = e.speed * (doubleSpeed.active ? 1.5 : 1) * delta * 60;
-                if(e.flying) { 
-                    e.wobble = (e.wobble + delta * 8) % (Math.PI * 2); 
-                    e.x += Math.sin(e.wobble) * 0.8; 
-                    e.y += spd; 
-                } else { 
-                    e.y += spd; 
-                }
-                if(e.y + e.height > bibedjon.y + 15) {
-                    enemies.splice(i,1); 
-                    i--; 
-                    lives--; 
-                    updateUI(); 
-                    playSound(220,0.25); 
-                    screenShake = 8;
-                    if(lives <= 0) { 
-                        gameActive = false; 
-                        losePopup.style.display = 'flex'; 
-                    }
-                }
-            }
-            
-            // Движение снарядов и столкновения
-            for(let i = 0; i < projectiles.length; i++) {
-                let p = projectiles[i];
-                p.x += p.vx * delta * 60;
-                p.y += p.vy * delta * 60;
-                if(p.x < -100 || p.x > canvasW + 100 || p.y < -100 || p.y > canvasH + 150) {
-                    projectiles.splice(i,1); 
-                    i--; 
-                    continue;
-                }
-                let hit = false;
-                
-                // Столкновение с врагами
-                for(let j = 0; j < enemies.length; j++) {
-                    let e = enemies[j];
-                    if(p.x + p.radius > e.x && p.x - p.radius < e.x + e.width &&
-                       p.y + p.radius > e.y && p.y - p.radius < e.y + e.height) {
-                        e.hp--;
-                        hit = true;
-                        if(e.hp <= 0) {
-                            score += e.type.score * combo;
-                            rage = Math.min(rage + 10, maxRage);
-                            addCombo();
-                            enemiesKilled++;
-                            spawnBonus(e.x + e.width/2, e.y + e.height/2);
-                            enemies.splice(j,1);
-                            playSound(680,0.12);
-                            screenShake = 3;
-                            for(let k=0;k<8;k++) particles.push({ 
-                                x: p.x, y: p.y, 
-                                vx: (Math.random()-0.5)*4, 
-                                vy: (Math.random()-0.5)*4, 
-                                life: 0.5, 
-                                color: "#ffaa66" 
-                            });
-                            updateUI();
-                            checkLevelComplete();
-                        } else { 
-                            playSound(540,0.08); 
-                        }
-                        break;
-                    }
-                }
-                
-                // Столкновение с боссом
-                if(!hit && boss && p.x + p.radius > boss.x && p.x - p.radius < boss.x + boss.width &&
-                   p.y + p.radius > boss.y && p.y - p.radius < boss.y + boss.height) {
-                    boss.hp--;
-                    hit = true;
-                    rage = Math.min(rage + 15, maxRage);
-                    addCombo();
-                    playSound(800,0.18);
-                    screenShake = 6;
-                    for(let k=0;k<12;k++) particles.push({ 
-                        x: p.x, y: p.y, 
-                        vx: (Math.random()-0.5)*5, 
-                        vy: (Math.random()-0.5)*5, 
-                        life: 0.5, 
-                        color: "#ff8844" 
-                    });
-                    updateUI();
-                    if(boss.hp <= 0) checkLevelComplete();
-                }
-                
-                if(hit) { 
-                    projectiles.splice(i,1); 
-                    i--; 
-                }
-            }
-            
-            resetCombo();
-            
-            // Частицы
-            for(let i = 0; i < particles.length; i++) { 
-                let p = particles[i]; 
-                p.x += p.vx * delta * 60; 
-                p.y += p.vy * delta * 60; 
-                p.life -= delta * 2; 
-                if(p.life <= 0) particles.splice(i,1), i--; 
-            }
-            if(screenShake > 0) screenShake -= delta * 50;
-        }
-        
-        // === УПРАВЛЕНИЕ ===
-        function getCanvasCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvasW / rect.width;
-            const scaleY = canvasH / rect.height;
-            let clientX, clientY;
-            if(e.touches) { 
-                clientX = e.touches[0].clientX; 
-                clientY = e.touches[0].clientY; 
-                e.preventDefault(); 
-            } else { 
-                clientX = e.clientX; 
-                clientY = e.clientY; 
-            }
-            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-        }
-        
-        function handlePointerDown(e) {
-            e.preventDefault();
-            if(!gameActive) return;
-            let {x:cx, y:cy} = getCanvasCoords(e);
-            if(grenade && Math.hypot(cx - grenade.x, cy - grenade.y) < grenade.radius) { 
-                explodeGrenade(); 
-                return; 
-            }
-            for(let i = 0; i < bonuses.length; i++) { 
-                let b = bonuses[i]; 
-                if(Math.hypot(cx - b.x, cy - b.y) < b.radius) { 
-                    applyBonus(b); 
-                    bonuses.splice(i,1); 
-                    return; 
-                } 
-            }
-            aiming = true;
-            aimStartX = bibedjon.x; 
-            aimStartY = bibedjon.y - 40;
-            aimCurrentX = cx; 
-            aimCurrentY = cy;
-            charging = true; 
-            powerCharge = 0;
-            if(chargeInterval) clearInterval(chargeInterval);
-            chargeInterval = setInterval(() => { 
-                if(charging && gameActive) { 
-                    powerCharge = Math.min(powerCharge + 3, 100); 
-                    updatePowerBar(); 
-                } 
-            }, 30);
-        }
-        
-        function handlePointerMove(e) { 
-            if(!aiming || !gameActive) return; 
-            e.preventDefault(); 
-            let {x:cx, y:cy} = getCanvasCoords(e); 
-            aimCurrentX = cx; 
-            aimCurrentY = cy; 
-        }
-        
-        function handlePointerUp(e) { 
-            e.preventDefault(); 
-            if(!aiming) { 
-                charging = false; 
-                if(chargeInterval) clearInterval(chargeInterval); 
-                return; 
-            } 
-            aiming = false; 
-            charging = false; 
-            if(chargeInterval) clearInterval(chargeInterval); 
-            if(gameActive) shootProjectile(aimStartX, aimStartY, aimCurrentX, aimCurrentY, powerCharge); 
-            powerCharge = 0; 
-            updatePowerBar(); 
-        }
-        
-        canvas.addEventListener('touchstart', handlePointerDown, {passive: false});
-        canvas.addEventListener('touchmove', handlePointerMove, {passive: false});
-        canvas.addEventListener('touchend', handlePointerUp);
-        canvas.addEventListener('mousedown', handlePointerDown);
-        window.addEventListener('mousemove', handlePointerMove);
-        window.addEventListener('mouseup', handlePointerUp);
-        window.addEventListener('keydown', (e) => { 
-            if(e.code === 'Space' || e.code === 'KeyR') { 
-                e.preventDefault(); 
-                fireRage(); 
-            } 
-        });
-        
-        // === МЕНЮ ===
-        startGameBtn.addEventListener('click', () => { startGameFromLevel(1); });
-        levelsMenuBtn.addEventListener('click', () => { 
-            mainMenu.style.display = 'none'; 
-            levelsMenu.style.display = 'flex'; 
-            generateLevelList(); 
-        });
-        backToMainFromLevels.addEventListener('click', () => { 
-            levelsMenu.style.display = 'none'; 
-            mainMenu.style.display = 'flex'; 
-        });
-        
-        function generateLevelList() {
-            levelListDiv.innerHTML = '';
-            let start = Math.max(1, selectedLevel - 5);
-            let end = Math.min(500, selectedLevel + 5);
-            for(let i = start; i <= end; i++) {
-                let div = document.createElement('div');
-                div.className = 'level-item';
-                div.style.background = '#2a3a2a';
-                div.style.color = '#aaffaa';
-                div.style.padding = '8px 12px';
-                div.style.borderRadius = '30px';
-                div.style.cursor = 'pointer';
-                div.style.fontSize = '0.8rem';
-                div.innerText = `УР ${i}`;
-                div.onclick = () => { 
-                    selectedLevel = i; 
-                    selectedLevelNumSpan.innerText = selectedLevel; 
-                    generateLevelList(); 
+            for(let obs of obstacles){
+                const obsRect = {
+                    x: obs.x,
+                    y: obs.y,
+                    w: OBSTACLE_WIDTH,
+                    h: OBSTACLE_HEIGHT
                 };
-                levelListDiv.appendChild(div);
+                if(playerRect.x < obsRect.x + obsRect.w &&
+                    playerRect.x + playerRect.w > obsRect.x &&
+                    playerRect.y < obsRect.y + obsRect.h &&
+                    playerRect.y + playerRect.h > obsRect.y){
+                    gameRunning = false;
+                    statusMsgDiv.style.display = "block";
+                    restartBtn.classList.remove("hidden");
+                    break;
+                }
+            }
+            
+            if(gameRunning){
+                score += 0.28;
+                updateScoreUI();
+                checkWorldTransition();
             }
         }
         
-        levelPrevBtn.addEventListener('click', () => { 
-            if(selectedLevel > 1) { 
-                selectedLevel--; 
-                selectedLevelNumSpan.innerText = selectedLevel; 
-                generateLevelList(); 
-            } 
-        });
-        levelNextBtn.addEventListener('click', () => { 
-            if(selectedLevel < 500) { 
-                selectedLevel++; 
-                selectedLevelNumSpan.innerText = selectedLevel; 
-                generateLevelList(); 
-            } 
-        });
-        confirmLevelBtn.addEventListener('click', () => { startGameFromLevel(selectedLevel); });
-        
-        nextLevelBtn.addEventListener('click', () => {
-            let next = currentLevel + 1;
-            if(next <= 500) startGameFromLevel(next);
-            else { winPopup.style.display = 'none'; mainMenu.style.display = 'flex'; }
-        });
-        winToMainBtn.addEventListener('click', () => { winPopup.style.display = 'none'; mainMenu.style.display = 'flex'; });
-        loseToMainBtn.addEventListener('click', () => { losePopup.style.display = 'none'; mainMenu.style.display = 'flex'; });
-        
-        // === РЕНДЕР ===
+        // Отрисовка с палитрой
         function drawBackground() {
-            ctx.fillStyle = "#2a6b55"; 
-            ctx.fillRect(0, 0, canvasW, canvasH);
-            ctx.fillStyle = "#b87a4a"; 
-            ctx.fillRect(0, canvasH-90, canvasW, 90);
-            ctx.fillStyle = "#9e5e3a"; 
-            ctx.fillRect(0, canvasH-90, canvasW, 12);
-            for(let i = 0; i < 12; i++) ctx.fillRect(40 + i * 80, canvasH-100, 12, 30);
+            const pal = getCurrentPalette();
+            const gradSky = ctx.createLinearGradient(0, 0, 0, GROUND_Y-40);
+            gradSky.addColorStop(0, pal.skyTop);
+            gradSky.addColorStop(0.7, pal.skyBottom);
+            ctx.fillStyle = gradSky;
+            ctx.fillRect(0, 0, 600, GROUND_Y-30);
+            
+            ctx.fillStyle = pal.textGlow + "aa";
+            ctx.font = "bold 26monospace";
+            ctx.fillText("🚇 67 RUSH", 30, 70);
+            ctx.fillStyle = pal.textGlow + "cc";
+            ctx.fillText("GAZAN 6IX 9EVEN", 600-200, 110);
+            
+            ctx.fillStyle = pal.platformColor;
+            ctx.fillRect(0, GROUND_Y-10, 600, 12);
+            ctx.fillStyle = pal.railColor;
+            for(let i=0;i<LANE_COUNT+1;i++){
+                ctx.fillRect(i*LANE_WIDTH-4, GROUND_Y-15, 8, 28);
+            }
+            ctx.fillStyle = pal.trackColor;
+            for(let i=0;i<15;i++){
+                ctx.fillRect(i*70, GROUND_Y-5, 40, 10);
+            }
+            ctx.fillStyle = "#ddccaa";
+            for(let r=0;r<LANE_COUNT;r++){
+                ctx.fillRect(r*LANE_WIDTH+10, GROUND_Y-3, LANE_WIDTH-20, 6);
+            }
         }
         
-        function drawBibedjon() {
-            let x = bibedjon.x - 35, y = bibedjon.y - 80;
-            ctx.fillStyle = "#8b5a2b"; 
-            ctx.fillRect(x+15, y+20, 40, 50);
-            ctx.fillStyle = "#c49a6c"; 
-            ctx.beginPath(); 
-            ctx.ellipse(x+35, y+15, 25, 30, 0, 0, Math.PI*2); 
+        function drawObstacles() {
+            const pal = getCurrentPalette();
+            for(let obs of obstacles){
+                ctx.fillStyle = pal.obstacleMain;
+                ctx.shadowBlur = 4;
+                ctx.fillRect(obs.x, obs.y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
+                ctx.fillStyle = pal.obstacleDetail;
+                ctx.fillRect(obs.x+6, obs.y+10, OBSTACLE_WIDTH-12, 14);
+                ctx.fillStyle = "#2c2c2c";
+                ctx.fillRect(obs.x+8, obs.y+32, 12, 16);
+                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+32, 12, 16);
+                // цифра 67 с характерным стилем
+                ctx.font = `bold ${Math.floor(OBSTACLE_WIDTH * 0.55)}px "Courier New", monospace`;
+                ctx.fillStyle = "#fff6b0";
+                ctx.shadowBlur = 3;
+                ctx.shadowColor = "#ff7700";
+                ctx.fillText("67", obs.x + 10, obs.y + 52);
+                ctx.font = "bold 18px monospace";
+                ctx.fillStyle = "#ffeb99";
+                ctx.fillText("⚡", obs.x + OBSTACLE_WIDTH-16, obs.y + 28);
+                ctx.fillStyle = "#ffcc44";
+                for(let s=0;s<3;s++) ctx.rect(obs.x+6+s*12, obs.y+OBSTACLE_HEIGHT-8, 5, 7);
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawGazans() {
+            const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = "#f5a623";
+            ctx.beginPath();
+            ctx.roundRect(playerX, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
             ctx.fill();
-            ctx.fillStyle = "#2c2c2c"; 
-            ctx.fillRect(x+20, y+8, 8, 8); 
-            ctx.fillRect(x+42, y+8, 8, 8);
-            ctx.fillStyle = "#ffcc44"; 
-            ctx.fillRect(x+22, y-8, 26, 12);
-            for(let i = 0; i < 3; i++) ctx.fillRect(x+24 + i*10, y-14, 4, 10);
-            ctx.fillStyle = "#f0e68c"; 
-            ctx.font = "bold 18px monospace"; 
-            ctx.fillText("BIG", x+15, y-18);
-        }
-        
-        function drawEnemies() {
-            for(let e of enemies) {
-                let grad = ctx.createLinearGradient(e.x, e.y, e.x, e.y + e.height);
-                grad.addColorStop(0, e.type.color1); 
-                grad.addColorStop(1, e.type.color2);
-                ctx.fillStyle = grad; 
-                ctx.fillRect(e.x, e.y, e.width, e.height);
-                ctx.fillStyle = "#222"; 
-                ctx.fillRect(e.x+8, e.y+8, 8, 8); 
-                ctx.fillRect(e.x+e.width-16, e.y+8, 8, 8);
-                ctx.fillStyle = e.type.eyes; 
-                ctx.fillRect(e.x+10, e.y+10, 4, 4); 
-                ctx.fillRect(e.x+e.width-14, e.y+10, 4, 4);
-                ctx.fillStyle = "#ff6666"; 
-                ctx.fillRect(e.x+e.width/2-5, e.y+e.height-12, 10, 6);
-                ctx.fillStyle = "#fff"; 
-                ctx.font = "18px monospace"; 
-                ctx.fillText(e.type.icon, e.x+12, e.y+32);
-                if(e.hp > 1) { 
-                    ctx.fillStyle = "#ffaa66"; 
-                    ctx.fillRect(e.x, e.y-8, (e.hp/e.maxHp) * e.width, 5); 
-                }
-            }
-        }
-        
-        function drawBoss() {
-            if(!boss) return;
-            let grad = ctx.createLinearGradient(boss.x, boss.y, boss.x, boss.y + boss.height);
-            grad.addColorStop(0, "#cc5555"); 
-            grad.addColorStop(1, "#882222");
-            ctx.fillStyle = grad; 
-            ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
-            ctx.fillStyle = "#ffcc88"; 
-            ctx.fillRect(boss.x+15, boss.y+15, 30, 20); 
-            ctx.fillRect(boss.x+boss.width-45, boss.y+15, 30, 20);
-            ctx.fillStyle = "#ff4444"; 
-            ctx.fillRect(boss.x+20, boss.y+18, 8, 8); 
-            ctx.fillRect(boss.x+boss.width-38, boss.y+18, 8, 8);
-            ctx.fillStyle = "#ffffaa"; 
-            ctx.font = "bold 16px monospace"; 
-            ctx.fillText("☠️ BOSS ☠️", boss.x+25, boss.y-5);
-            ctx.fillStyle = "#ffaa66"; 
-            ctx.fillRect(boss.x, boss.y-12, (boss.hp/boss.maxHp) * boss.width, 8);
-        }
-        
-        function drawBonuses() {
-            for(let b of bonuses) { 
-                ctx.fillStyle = b.type.color; 
-                ctx.beginPath(); 
-                ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); 
-                ctx.fill(); 
-                ctx.fillStyle = "#000"; 
-                ctx.font = "22px monospace"; 
-                ctx.fillText(b.type.icon, b.x-11, b.y+9); 
-            }
-            if(grenade) { 
-                ctx.fillStyle = "#aa8844"; 
-                ctx.beginPath(); 
-                ctx.arc(grenade.x, grenade.y, grenade.radius, 0, Math.PI*2); 
-                ctx.fill(); 
-                ctx.fillStyle = "#664422"; 
-                ctx.beginPath(); 
-                ctx.arc(grenade.x-4, grenade.y-4, 7, 0, Math.PI*2); 
-                ctx.fill(); 
-                ctx.fillStyle = "#ffcc66"; 
-                ctx.font = "24px monospace"; 
-                ctx.fillText("🥥", grenade.x-12, grenade.y+9); 
-                ctx.fillStyle = "#ffaa44"; 
-                ctx.font = "bold 10px monospace"; 
-                ctx.fillText("ВЗРЫВ", grenade.x-18, grenade.y-10); 
-            }
-        }
-        
-        function drawProjectiles() {
-            for(let p of projectiles) {
-                if(p.isFireball) { 
-                    ctx.fillStyle = "#ff6600"; 
-                    ctx.beginPath(); 
-                    ctx.arc(p.x, p.y, 18, 0, Math.PI*2); 
-                    ctx.fill(); 
-                    ctx.fillStyle = "#ffaa44"; 
-                    ctx.beginPath(); 
-                    ctx.arc(p.x-3, p.y-3, 6, 0, Math.PI*2); 
-                    ctx.fill(); 
-                } else if(p.isBomb) { 
-                    ctx.fillStyle = "#884444"; 
-                    ctx.beginPath(); 
-                    ctx.arc(p.x, p.y, 8, 0, Math.PI*2); 
-                    ctx.fill(); 
-                } else { 
-                    ctx.fillStyle = "#ffcc55"; 
-                    ctx.beginPath(); 
-                    ctx.arc(p.x, p.y, p.radius-2, 0, Math.PI*2); 
-                    ctx.fill(); 
-                    ctx.fillStyle = "#aa8833"; 
-                    ctx.beginPath(); 
-                    ctx.arc(p.x-3, p.y-3, 4, 0, Math.PI*2); 
-                    ctx.fill(); 
-                }
-            }
-            for(let p of particles) { 
-                ctx.fillStyle = p.color; 
-                ctx.beginPath(); 
-                ctx.arc(p.x, p.y, 4, 0, Math.PI*2); 
-                ctx.fill(); 
-            }
-        }
-        
-        function drawAim() {
-            if(!aiming) return;
-            ctx.beginPath(); 
-            ctx.moveTo(aimStartX, aimStartY); 
-            ctx.lineTo(aimCurrentX, aimCurrentY);
-            ctx.strokeStyle = "#ffaa66"; 
-            ctx.lineWidth = 4; 
-            ctx.setLineDash([8,10]); 
-            ctx.stroke(); 
-            ctx.setLineDash([]);
-            let rad = 15 + powerCharge/4;
-            ctx.beginPath(); 
-            ctx.arc(aimCurrentX, aimCurrentY, rad, 0, Math.PI*2);
-            ctx.strokeStyle = "#ff8844"; 
-            ctx.lineWidth = 3; 
-            ctx.stroke();
-            ctx.fillStyle = `rgba(255,140,50,${powerCharge/150})`; 
+            ctx.fillStyle = "#3b2a1f";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.3, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
             ctx.fill();
-        }
-        
-        function drawUItext() {
-            ctx.fillStyle = "#ffffcc"; 
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.fillRect(playerX+GAZAN_SIZE*0.5, playerY+GAZAN_SIZE*0.2, 12, 4);
+            ctx.fillRect(playerX+GAZAN_SIZE*0.2, playerY+GAZAN_SIZE*0.2, 12, 4);
+            ctx.fillStyle = "#ffd966";
+            ctx.fillRect(playerX+15, playerY+42, 22, 6);
+            ctx.fillStyle = "#dc143c";
+            ctx.fillRect(playerX+8, playerY-10, 38, 14);
+            ctx.fillStyle = "#ff0000aa";
+            ctx.fillRect(playerX+18, playerY-6, 18, 8);
             ctx.font = "bold 12px monospace";
-            if(doubleSpeed.active) ctx.fillText("⚡ УСКОРЕНИЕ", 15, 75);
-            if(shotgunMode.active) ctx.fillText("🔫 ДРОБОВИК", 15, 100);
+            ctx.fillStyle = "black";
+            ctx.fillText("GAZAN", playerX+8, playerY+GAZAN_SIZE-8);
+            ctx.fillStyle = "#333";
+            ctx.fillRect(playerX+8, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.fillRect(playerX+28, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.shadowBlur = 0;
+            for(let s=0; s<5; s++){
+                ctx.beginPath();
+                ctx.moveTo(playerX-10-s*2, playerY+GAZAN_SIZE/2);
+                ctx.lineTo(playerX-22-s*3, playerY+GAZAN_SIZE/2 + (s%2===0? -6:6));
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = `rgba(255,200,100,${0.7-s*0.1})`;
+                ctx.stroke();
+            }
         }
         
-        let lastTime = 0;
-        function gameLoop(now) {
-            let delta = Math.min(0.033, (now - lastTime) / 1000);
-            if(delta > 0.01) updateGame(delta);
-            lastTime = now; 
-            frame++;
+        function drawUIandEffects() {
+            const pal = getCurrentPalette();
+            ctx.font = "bold 18px monospace";
+            ctx.fillStyle = "#FFF5cf";
+            ctx.fillText(`🚄 SPEED: ${Math.floor(gameSpeed*2)}`, 600-130, 45);
+            ctx.fillStyle = pal.textGlow;
+            ctx.fillText(`🏁 ЛЕВО/ПРАВО`, 600-150, 85);
             
-            let shakeX = 0, shakeY = 0;
-            if(screenShake > 0) { 
-                shakeX = (Math.random() - 0.5) * screenShake; 
-                shakeY = (Math.random() - 0.5) * screenShake; 
-                ctx.save(); 
-                ctx.translate(shakeX, shakeY); 
+            if(worldChangeFlag) {
+                ctx.font = "bold 14px monospace";
+                ctx.fillStyle = "#ffdd88";
+                ctx.shadowBlur = 6;
+                ctx.fillText("✨ МИР СМЕНИЛСЯ! ✨", 600/2-85, GROUND_Y-45);
+                setTimeout(()=>{ worldChangeFlag = false; }, 400);
+                worldChangeFlag = false;
             }
             
-            drawBackground(); 
-            drawEnemies(); 
-            drawBoss(); 
-            drawBonuses(); 
-            drawProjectiles(); 
-            drawBibedjon(); 
-            drawAim(); 
-            drawUItext();
+            if(!gameRunning){
+                ctx.font = "bold 32px monospace";
+                ctx.fillStyle = "#ffddbb";
+                ctx.fillText("❌ GAME OVER ❌", 600/2-130, 500/2-40);
+                ctx.font = "16px monospace";
+                ctx.fillStyle = "yellow";
+                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", 600/2-125, 500/2+25);
+            }
             
-            if(screenShake > 0) ctx.restore();
-            requestAnimationFrame(gameLoop);
+            if(gameRunning && frameCounter % 45 < 20){
+                ctx.fillStyle = "#fff9c4cc";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText("👆 СВАЙП / КНОПКИ 👆", 600-180, GROUND_Y-18);
+            }
         }
         
-        generateLevelList();
-        gameLoop();
+        function draw() {
+            drawBackground();
+            drawObstacles();
+            drawGazans();
+            drawUIandEffects();
+        }
+        
+        // Управление
+        function moveLeft(){
+            if(!gameRunning) return;
+            if(lane > 0) lane--;
+        }
+        function moveRight(){
+            if(!gameRunning) return;
+            if(lane < LANE_COUNT-1) lane++;
+        }
+        
+        function restartGame(){
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            frameCounter = 0;
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            restartBtn.classList.add("hidden");
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            worldChangeFlag = false;
+        }
+        
+        // --- Обработчики (с поддержкой зума и тач событий без конфликта) ---
+        function handleKey(e){
+            const key = e.key;
+            if(key === 'ArrowLeft' || key === 'Left' || key === 'a' || key === 'A'){
+                e.preventDefault();
+                moveLeft();
+            } else if(key === 'ArrowRight' || key === 'Right' || key === 'd' || key === 'D'){
+                e.preventDefault();
+                moveRight();
+            }
+            if((key === ' ' || key === 'Space' || key === 'r' || key === 'R') && !gameRunning){
+                e.preventDefault();
+                restartGame();
+            }
+        }
+        
+        // Преобразование координат клика/тача в логику дорожек (для свайпа)
+        let touchStartX = 0;
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;   // 600 / отображаемая ширина
+            const touch = e.touches[0];
+            let canvasRelativeX = (touch.clientX - rect.left) * scaleX;
+            touchStartX = canvasRelativeX;
+        }
+        
+        function handleTouchMove(e) {
+            if(!gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const touch = e.touches[0];
+            let currentX = (touch.clientX - rect.left) * scaleX;
+            let diff = currentX - touchStartX;
+            if(Math.abs(diff) > 30) {
+                if(diff > 0) moveRight();
+                else moveLeft();
+                touchStartX = currentX;
+            }
+        }
+        
+        let mouseDownX = 0;
+        let isDragging = false;
+        function handleMouseDown(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            mouseDownX = (e.clientX - rect.left) * scaleX;
+            isDragging = true;
+        }
+        
+        function handleMouseMove(e) {
+            if(!isDragging || !gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            let currentX = (e.clientX - rect.left) * scaleX;
+            let diff = currentX - mouseDownX;
+            if(Math.abs(diff) > 30) {
+                if(diff > 0) moveRight();
+                else moveLeft();
+                mouseDownX = currentX;
+            }
+        }
+        
+        function handleMouseUp(e) { isDragging = false; }
+        
+        // Инициализация и цикл
+        bestSpan.innerText = bestScore;
+        
+        window.addEventListener('load', ()=>{
+            document.getElementById('leftBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveLeft(); });
+            document.getElementById('rightBtn').addEventListener('click', (e)=>{ e.preventDefault(); moveRight(); });
+            restartBtn.addEventListener('click', ()=>{ if(!gameRunning) restartGame(); });
+            
+            window.addEventListener('keydown', handleKey);
+            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+            canvas.addEventListener('touchend', (e)=> e.preventDefault());
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+            
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            restartBtn.classList.add("hidden");
+            
+            function gameLoop(){
+                updateGame();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+            gameLoop();
+        });
+        
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x+r, y);
+                this.lineTo(x+w-r, y);
+                this.quadraticCurveTo(x+w, y, x+w, y+r);
+                this.lineTo(x+w, y+h-r);
+                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                this.lineTo(x+r, y+h);
+                this.quadraticCurveTo(x, y+h, x, y+h-r);
+                this.lineTo(x, y+r);
+                this.quadraticCurveTo(x, y, x+r, y);
+                return this;
+            };
+        }
     })();
 </script>
 </body>
