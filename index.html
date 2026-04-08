@@ -1,45 +1,53 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Object Grab - NetErrror</title>
+    <title>3D VIEWER - NetErrror</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        #status {
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #info {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             left: 0;
             right: 0;
             text-align: center;
-            color: white;
             background: rgba(0,0,0,0.7);
-            padding: 12px;
-            font-size: 18px;
-            font-weight: bold;
+            color: #ffdd99;
+            padding: 10px;
+            font-size: 14px;
+            font-family: monospace;
             pointer-events: none;
             z-index: 10;
+            backdrop-filter: blur(5px);
         }
         #instruction {
             position: absolute;
-            bottom: 100px;
+            top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             color: #ccc;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-family: monospace;
             pointer-events: none;
+            z-index: 10;
         }
         @media (max-width: 600px) {
-            #status { font-size: 14px; bottom: 15px; }
-            #instruction { bottom: 70px; }
+            #info { font-size: 11px; bottom: 10px; }
+            #instruction { font-size: 10px; top: 12px; right: 12px; }
         }
     </style>
 </head>
 <body>
-    <div id="status">✨ Нажми на объект, чтобы взять ✨</div>
-    <div id="instruction">👆 Тап по объекту = взять/отпустить</div>
+    <div id="info">🖱️ ПАЛЬЦЕМ / МЫШЬЮ — ВРАЩАТЬ, ПРИБЛИЖАТЬ, ОТДАЛЯТЬ | 3D МОДЕЛЬ 🖱️</div>
+    <div id="instruction">✨ Бежевый дилдо + яйца ✨</div>
 
     <script type="importmap">
         {
@@ -53,241 +61,224 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-        // Сцена
+        // --- СЦЕНА ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a2a);
-        scene.fog = new THREE.FogExp2(0x0a0a2a, 0.02);
+        scene.background = new THREE.Color(0x0a0a1a);
+        scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
 
-        // Камера
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.2, 3);
-        
-        // Рендерер
+        // --- КАМЕРА ---
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(2, 1.5, 3);
+        camera.lookAt(0, 0.5, 0);
+
+        // --- РЕНДЕРЕР ---
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Управление камерой (пальцем)
+        // --- УПРАВЛЕНИЕ (вращение, приближение, отдаление) ---
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
+        controls.enableDamping = true;          // плавность
         controls.dampingFactor = 0.05;
-        controls.rotateSpeed = 1.0;
-        controls.zoomSpeed = 1.0;
+        controls.rotateSpeed = 1.5;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
         controls.enableZoom = true;
-        controls.enablePan = false;
-        controls.target.set(0, 0.5, 0);
+        controls.enablePan = true;
+        controls.zoomSpeed = 1.0;
+        controls.target.set(0, 0.6, 0);
 
-        // Освещение
+        // --- ОСВЕЩЕНИЕ (красивое, объемное) ---
+        // Ambient
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
         
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        // Главный свет спереди-сверху
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
         mainLight.position.set(2, 3, 2);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = false;
         scene.add(mainLight);
         
-        const backLight = new THREE.PointLight(0xff66cc, 0.5);
-        backLight.position.set(-1, 1, -2);
+        // Заполняющий теплый свет сзади
+        const backLight = new THREE.PointLight(0xffaa66, 0.5);
+        backLight.position.set(-1, 1.2, -2);
         scene.add(backLight);
         
-        const fillLight = new THREE.PointLight(0x44aaff, 0.4);
-        fillLight.position.set(1, 0.5, 1);
+        // Холодный свет снизу для объема
+        const fillLight = new THREE.PointLight(0x88aaff, 0.4);
+        fillLight.position.set(0.5, -0.8, 0.8);
         scene.add(fillLight);
         
-        // Пол
-        const gridHelper = new THREE.GridHelper(8, 20, 0x88aaff, 0x335588);
-        gridHelper.position.y = -0.8;
+        // Контровой свет
+        const rimLight = new THREE.PointLight(0xffaa88, 0.6);
+        rimLight.position.set(1, 1.5, -1.5);
+        scene.add(rimLight);
+        
+        // Декоративный пол (полупрозрачная платформа с отражением)
+        const gridHelper = new THREE.GridHelper(6, 20, 0xccaa88, 0x886644);
+        gridHelper.position.y = -0.6;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.4;
         scene.add(gridHelper);
         
-        // Прозрачная платформа
-        const platformMat = new THREE.MeshStandardMaterial({ color: 0x1a2a4a, roughness: 0.5, metalness: 0.3, transparent: true, opacity: 0.5 });
-        const platform = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), platformMat);
-        platform.rotation.x = -Math.PI / 2;
-        platform.position.y = -0.75;
-        platform.receiveShadow = true;
-        scene.add(platform);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x332211, roughness: 0.4, metalness: 0.7, transparent: true, opacity: 0.3 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.6;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
         
-        // --- СОЗДАНИЕ ОБЪЕКТА (формы) ---
-        const objectGroup = new THREE.Group();
+        // --- СОЗДАНИЕ МОДЕЛИ: ДИЛДО БЕЖЕВЫЙ + 2 БЕЖЕВЫХ ЯЙЦА ---
+        const modelGroup = new THREE.Group();
         
-        // Основное тело - вытянутая форма
-        const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.95, 32);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdd55ff, emissive: 0x331133, roughness: 0.2, metalness: 0.7 });
-        const mainBody = new THREE.Mesh(bodyGeo, bodyMat);
-        mainBody.castShadow = true;
-        mainBody.position.y = 0;
-        objectGroup.add(mainBody);
+        // 1. Дилдо (основная часть)
+        // Тело - вытянутый цилиндр с закруглением
+        const shaftGeo = new THREE.CylinderGeometry(0.28, 0.32, 1.2, 48);
+        const beigeMat = new THREE.MeshStandardMaterial({ color: 0xd4b48c, roughness: 0.3, metalness: 0.1, emissive: 0x221100 });
+        const shaft = new THREE.Mesh(shaftGeo, beigeMat);
+        shaft.castShadow = true;
+        shaft.position.y = 0;
+        modelGroup.add(shaft);
         
-        // Верхняя часть (головка)
-        const tipGeo = new THREE.SphereGeometry(0.34, 32, 32);
-        const tipMat = new THREE.MeshStandardMaterial({ color: 0xff88ff, emissive: 0x441144, roughness: 0.1 });
+        // Головка (верхняя часть) - сфера чуть шире
+        const tipGeo = new THREE.SphereGeometry(0.34, 48, 48);
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0xe0c0a0, roughness: 0.2, metalness: 0.05 });
         const tip = new THREE.Mesh(tipGeo, tipMat);
-        tip.position.y = 0.55;
+        tip.position.y = 0.68;
         tip.castShadow = true;
-        objectGroup.add(tip);
+        modelGroup.add(tip);
         
-        // Декоративные кольца
-        const ringGeo = new THREE.TorusGeometry(0.32, 0.06, 32, 64);
-        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x442200 });
-        const ring1 = new THREE.Mesh(ringGeo, ringMat);
-        ring1.rotation.x = Math.PI / 2;
-        ring1.position.y = 0.15;
-        objectGroup.add(ring1);
-        
-        const ring2 = new THREE.Mesh(ringGeo, ringMat);
-        ring2.rotation.x = Math.PI / 2;
-        ring2.position.y = -0.2;
-        objectGroup.add(ring2);
-        
-        // Основание
-        const baseGeo = new THREE.CylinderGeometry(0.4, 0.45, 0.12, 8);
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0xaa66ff, metalness: 0.5 });
+        // Основание (присоска/низ)
+        const baseGeo = new THREE.CylinderGeometry(0.42, 0.48, 0.12, 32);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xc8a87c, roughness: 0.4 });
         const base = new THREE.Mesh(baseGeo, baseMat);
-        base.position.y = -0.48;
-        objectGroup.add(base);
+        base.position.y = -0.62;
+        base.castShadow = true;
+        modelGroup.add(base);
         
-        objectGroup.position.set(0, 0.2, 0);
-        scene.add(objectGroup);
+        // Деталька - желобок под головкой
+        const grooveGeo = new THREE.TorusGeometry(0.32, 0.05, 32, 64);
+        const grooveMat = new THREE.MeshStandardMaterial({ color: 0xb8946a, roughness: 0.5 });
+        const groove = new THREE.Mesh(grooveGeo, grooveMat);
+        groove.rotation.x = Math.PI / 2;
+        groove.position.y = 0.45;
+        modelGroup.add(groove);
         
-        // Светящиеся частицы
-        const particleCount = 300;
-        const particlesGeo = new THREE.BufferGeometry();
+        // 2. ЯЙЦА (два бежевых шара, слегка сплюснутых)
+        const eggMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 0.25, metalness: 0.05 });
+        
+        // Левое яйцо
+        const leftEggGeo = new THREE.SphereGeometry(0.32, 48, 48);
+        const leftEgg = new THREE.Mesh(leftEggGeo, eggMat);
+        leftEgg.scale.set(0.95, 0.85, 0.9);
+        leftEgg.position.set(-0.55, -0.35, 0.2);
+        leftEgg.castShadow = true;
+        modelGroup.add(leftEgg);
+        
+        // Правое яйцо
+        const rightEggGeo = new THREE.SphereGeometry(0.32, 48, 48);
+        const rightEgg = new THREE.Mesh(rightEggGeo, eggMat);
+        rightEgg.scale.set(0.95, 0.85, 0.9);
+        rightEgg.position.set(0.55, -0.35, 0.2);
+        rightEgg.castShadow = true;
+        modelGroup.add(rightEgg);
+        
+        // Добавляем небольшие блики на яйца (капельки)
+        const highlightMat = new THREE.MeshStandardMaterial({ color: 0xf5e5c0, emissive: 0x442200 });
+        const leftHighlight = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), highlightMat);
+        leftHighlight.position.set(-0.65, -0.15, 0.45);
+        modelGroup.add(leftHighlight);
+        
+        const rightHighlight = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), highlightMat);
+        rightHighlight.position.set(0.65, -0.15, 0.45);
+        modelGroup.add(rightHighlight);
+        
+        // Добавим текстуру/полоски на дилдо для реализма (несколько колец)
+        const ringMatDetail = new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.6 });
+        for (let i = -0.3; i <= 0.3; i += 0.3) {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.04, 24, 48), ringMatDetail);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = i;
+            modelGroup.add(ring);
+        }
+        
+        modelGroup.position.set(0, 0.15, 0);
+        scene.add(modelGroup);
+        
+        // --- ДЕКОРАТИВНЫЕ ЭЛЕМЕНТЫ: парящие частицы для атмосферы ---
+        const particleCount = 400;
+        const particlesGeometry = new THREE.BufferGeometry();
         const particlePositions = new Float32Array(particleCount * 3);
         for (let i = 0; i < particleCount; i++) {
-            particlePositions[i*3] = (Math.random() - 0.5) * 3;
-            particlePositions[i*3+1] = (Math.random() - 0.5) * 2 + 0.2;
-            particlePositions[i*3+2] = (Math.random() - 0.5) * 2.5;
+            particlePositions[i*3] = (Math.random() - 0.5) * 4;
+            particlePositions[i*3+1] = (Math.random() - 0.5) * 2.5 + 0.3;
+            particlePositions[i*3+2] = (Math.random() - 0.5) * 3;
         }
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        const particleMat = new THREE.PointsMaterial({ color: 0xff88cc, size: 0.02, transparent: true });
-        const particles = new THREE.Points(particlesGeo, particleMat);
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0xffaa88, size: 0.012, transparent: true, opacity: 0.5 });
+        const particles = new THREE.Points(particlesGeometry, particleMat);
         scene.add(particles);
         
-        // Звёзды
-        const starsGeo = new THREE.BufferGeometry();
-        const starsPos = [];
-        for (let i = 0; i < 1000; i++) {
-            starsPos.push((Math.random() - 0.5) * 200);
-            starsPos.push((Math.random() - 0.5) * 100);
-            starsPos.push((Math.random() - 0.5) * 80 - 40);
+        // Звездный фон (мелкие точки)
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 1200;
+        const starPositions = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 200;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 100;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 80 - 40;
         }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starsPos), 3));
-        const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
-        const stars = new THREE.Points(starsGeo, starsMat);
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.06, transparent: true, opacity: 0.7 });
+        const stars = new THREE.Points(starGeometry, starMat);
         scene.add(stars);
         
-        // --- Логика захвата ---
-        let isGrabbed = false;
-        const statusDiv = document.getElementById('status');
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+        // --- МАЛЕНЬКИЙ СВЕТ ОТ ОБЪЕКТА (для красоты) ---
+        const glowLight = new THREE.PointLight(0xd4a070, 0.5, 2.5);
+        glowLight.position.set(0, 0.4, 0.3);
+        scene.add(glowLight);
         
-        let controlsEnabled = true;
-        
-        function setControlsEnabled(enabled) {
-            controls.enabled = enabled;
-            controlsEnabled = enabled;
-        }
-        
-        function onTap(event) {
-            // Получаем координаты касания/клика
-            const rect = renderer.domElement.getBoundingClientRect();
-            let clientX, clientY;
-            if (event.touches) {
-                clientX = event.touches[0].clientX;
-                clientY = event.touches[0].clientY;
-                event.preventDefault();
-            } else {
-                clientX = event.clientX;
-                clientY = event.clientY;
-            }
-            
-            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(objectGroup, true);
-            
-            if (intersects.length > 0) {
-                if (!isGrabbed) {
-                    // Взять
-                    isGrabbed = true;
-                    statusDiv.innerHTML = "🔴 СХВАЧЕНО! Объект следует за тобой 🔴";
-                    statusDiv.style.color = "#ffaaaa";
-                    setControlsEnabled(false);
-                    
-                    // Эффект
-                    mainBody.material.emissiveIntensity = 0.6;
-                    tip.material.emissiveIntensity = 0.7;
-                    
-                    // Размещаем объект перед камерой
-                    const camDir = new THREE.Vector3();
-                    camera.getWorldDirection(camDir);
-                    const grabPos = camera.position.clone().add(camDir.multiplyScalar(1.3));
-                    grabPos.y -= 0.15;
-                    objectGroup.position.copy(grabPos);
-                    
-                    if (navigator.vibrate) navigator.vibrate(50);
-                } else {
-                    // Отпустить
-                    isGrabbed = false;
-                    statusDiv.innerHTML = "✨ Объект свободен | Нажми на него, чтобы взять ✨";
-                    statusDiv.style.color = "white";
-                    setControlsEnabled(true);
-                    controls.target.copy(objectGroup.position);
-                    
-                    mainBody.material.emissiveIntensity = 0.2;
-                    tip.material.emissiveIntensity = 0.2;
-                    
-                    if (navigator.vibrate) navigator.vibrate(50);
-                }
-            }
-        }
-        
-        renderer.domElement.addEventListener('mousedown', onTap);
-        renderer.domElement.addEventListener('touchstart', onTap, { passive: false });
-        
-        // Анимация
+        // --- АНИМАЦИЯ (легкое парение модели и частиц) ---
         let time = 0;
         
         function animate() {
             requestAnimationFrame(animate);
-            time += 0.016;
+            time += 0.012;
             
-            if (isGrabbed) {
-                // Следование за камерой
-                const camDir = new THREE.Vector3();
-                camera.getWorldDirection(camDir);
-                const desiredPos = camera.position.clone().add(camDir.multiplyScalar(1.3));
-                desiredPos.y -= 0.15;
-                objectGroup.position.lerp(desiredPos, 0.4);
-                objectGroup.rotation.y = Math.sin(time * 10) * 0.2;
-                objectGroup.rotation.x = Math.sin(time * 8) * 0.1;
-            } else {
-                // Свободное вращение
-                objectGroup.rotation.y += 0.01;
-                objectGroup.rotation.x = Math.sin(time * 0.7) * 0.15;
-                objectGroup.position.y = 0.2 + Math.sin(time * 1.2) * 0.04;
-                particles.rotation.y += 0.003;
-            }
+            // Плавное покачивание модели (очень легкое)
+            modelGroup.rotation.y = Math.sin(time * 0.4) * 0.03;
+            modelGroup.position.y = 0.15 + Math.sin(time * 0.8) * 0.005;
             
-            if (controlsEnabled) {
-                controls.update();
-            }
+            // Вращение частиц
+            particles.rotation.y += 0.002;
+            particles.rotation.x = Math.sin(time * 0.2) * 0.05;
+            
+            // Мерцание света
+            glowLight.intensity = 0.5 + Math.sin(time * 3) * 0.15;
+            
+            // Обновление управления
+            controls.update();
             
             renderer.render(scene, camera);
         }
         
         animate();
         
-        window.addEventListener('resize', () => {
+        // --- АДАПТАЦИЯ ПОД РАЗМЕР ЭКРАНА ---
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }
         
-        console.log('NetErrror: 3D игра загружена');
+        console.log("NetErrror: 3D модель загружена — бежевый дилдо + 2 яйца. Вращение/приближение/отдаление работает.");
     </script>
 </body>
 </html>
+```
