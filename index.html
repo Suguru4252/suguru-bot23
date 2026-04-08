@@ -2,459 +2,405 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>KROP RUSSIA | Мобильная RPG 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KROPOTKIN | Black Russia Style Launcher</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
 
         body {
             background: #0a0c12;
-            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, -apple-system, sans-serif;
-            color: #eef2ff;
-            line-height: 1.5;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* градиентный фон с текстурой */
-        .bg-grunge {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* главный контейнер с переключением экранов */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #121724, #020408);
+            padding: 1.5rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* стили карточек */
+        .glass-card {
+            background: rgba(12, 16, 28, 0.85);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            border: 1px solid rgba(220, 50, 50, 0.4);
+            padding: 1.6rem;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            background: linear-gradient(95deg, #b91c1c, #7f1a1a);
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 3rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: white;
             width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 30%, #11161f, #030507);
-            z-index: -2;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 12px rgba(180,0,0,0.3);
         }
 
-        .bg-grunge::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
+        .btn:active { transform: scale(0.97); background: #9b1d1d; }
+
+        .input-field {
             width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cGF0aCBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDMiIGQ9Ik0wIDBoNDB2NDBIMHoiLz48L3N2Zz4=');
-            opacity: 0.2;
-            pointer-events: none;
-            z-index: -1;
+            padding: 1rem;
+            background: #0f111f;
+            border: 1px solid #3a2e3e;
+            border-radius: 1.5rem;
+            color: white;
+            font-size: 1rem;
+            margin: 0.7rem 0;
         }
 
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 1.5rem 2rem 4rem;
-            position: relative;
+        .server-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
         }
-
-        /* шапка */
-        .hero {
+        .server-item {
+            background: #0b0e1a;
+            padding: 0.8rem 1.3rem;
+            border-radius: 2rem;
             text-align: center;
-            padding: 2rem 0 2rem;
-            border-bottom: 1px solid rgba(255, 50, 50, 0.3);
-            margin-bottom: 2.5rem;
+            flex: 1;
+            border-left: 3px solid #e03a3a;
+            cursor: pointer;
+            transition: 0.1s;
         }
-
+        .server-item.selected {
+            background: #a12222;
+            box-shadow: 0 0 12px #ff4f4f;
+            border-left-color: #ffcc88;
+        }
         .logo {
-            font-size: 4rem;
-            font-weight: 800;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #ff2f2f, #b01010, #ff5a5a);
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #ff4f4f, #ffb347);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 0 12px rgba(180, 20, 20, 0.5);
+            letter-spacing: 3px;
         }
 
-        .logo span {
-            background: none;
-            color: #ffd966;
-            -webkit-background-clip: unset;
-            background-clip: unset;
-            text-shadow: 0 0 6px #ffaa33;
-        }
-
-        .sub {
-            font-size: 1.1rem;
-            color: #9aa3b8;
-            margin-top: 0.5rem;
-            border-top: 1px dashed #2a2e3f;
-            display: inline-block;
-            padding-top: 0.6rem;
-        }
-
-        .badge-group {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin: 1.5rem 0 0.5rem;
-        }
-
-        .badge {
-            background: #1e1f2c;
-            backdrop-filter: blur(4px);
-            padding: 0.4rem 1rem;
-            border-radius: 60px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border-left: 3px solid #e03a3a;
-            letter-spacing: 0.5px;
-        }
-
-        /* сетка карточек */
-        .grid {
+        .car-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-            gap: 1.8rem;
-            margin: 2rem 0;
+            grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .car-card {
+            background: #0f1322;
+            border-radius: 1.2rem;
+            padding: 0.7rem;
+            text-align: center;
+            border: 1px solid #2f2a3a;
         }
 
-        .card {
-            background: rgba(18, 22, 35, 0.75);
-            backdrop-filter: blur(10px);
-            border-radius: 2rem;
-            border: 1px solid rgba(255, 70, 70, 0.2);
-            padding: 1.5rem;
-            transition: transform 0.2s ease, border-color 0.2s;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        .map-placeholder {
+            background: #0a0e1c;
+            border-radius: 1.5rem;
+            height: 250px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none"><rect width="800" height="500" fill="%23131a2c"/><path d="M200,150 L350,100 L500,180 L620,120 L700,220 L550,300 L400,260 L250,310 L120,240 Z" fill="%23222d4a" stroke="%23ff6666" stroke-width="2"/><circle cx="400" cy="220" r="12" fill="%23ff3a3a"/><text x="380" y="210" fill="white" font-size="12">KROPOTKIN CENTRAL</text><rect x="520" y="330" width="60" height="40" fill="%23334455" stroke="%23ffaa66"/><text x="530" y="355" fill="white" font-size="9">АЗС</text></svg>');
+            background-size: cover;
+            background-position: center;
         }
 
-        .card:hover {
-            border-color: #ff4a4a;
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid #e63946;
-            padding-left: 0.9rem;
-        }
-
-        .card ul, .cmd-list {
-            list-style: none;
-            margin-top: 0.8rem;
-        }
-
-        .card li {
-            margin-bottom: 0.65rem;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 0.4rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-        }
-
-        .cmd {
-            background: #0b0e16;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            color: #ffb347;
-            margin-right: 10px;
-            font-weight: 500;
-        }
-
-        .cmd-desc {
-            color: #cbd5e6;
-        }
-
-        .price {
-            color: #6ef0a0;
-            font-weight: bold;
-        }
-
-        hr {
-            border-color: #2a2f42;
-            margin: 1rem 0;
-        }
-
-        .big-stats {
+        .top-bar {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            background: #03050b;
-            border-radius: 2rem;
-            padding: 1.5rem 2rem;
-            margin: 2rem 0;
-            border: 1px solid #2a2e44;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: #00000055;
+            padding: 0.5rem 1rem;
+            border-radius: 3rem;
         }
 
-        .stat-item {
-            text-align: center;
-            flex: 1;
+        .status {
+            color: #6fcf97;
+            font-size: 0.7rem;
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #ff5e5e;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #0f1220;
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 0.8rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid #252a3b;
-        }
-
-        th {
-            background: #1e2338;
-            color: #ffbc6e;
-        }
-
-        .footer {
-            margin-top: 3.5rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #5d6785;
-            border-top: 1px solid #202536;
-            padding-top: 2rem;
-        }
-
-        .glow {
-            text-shadow: 0 0 5px #ff4d4d;
-        }
-
-        @media (max-width: 680px) {
-            .container {
-                padding: 1rem;
-            }
-            .logo {
-                font-size: 2.6rem;
-            }
+        @media (max-width: 500px) {
+            .screen { padding: 1rem; }
+            .logo { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
-<div class="bg-grunge"></div>
-<div class="container">
-    <div class="hero">
-        <div class="logo">KROP <span>RUSSIA</span></div>
-        <div class="sub">⭐ Мобильная ролевая игра нового поколения | Сезон 2026 ⭐</div>
-        <div class="badge-group">
-            <div class="badge">🔥 7.8 млн игроков</div>
-            <div class="badge">🚗 200+ авто</div>
-            <div class="badge">⚡ Кроссплатформа: iOS / Android / ПК</div>
-            <div class="badge">🎮 Версия 3.6.2 "Рёв моторов"</div>
-        </div>
-    </div>
 
-    <!-- Статистика -->
-    <div class="big-stats">
-        <div class="stat-item"><div class="stat-number">20+</div><div>Серверов</div></div>
-        <div class="stat-item"><div class="stat-number">35+</div><div>Профессий</div></div>
-        <div class="stat-item"><div class="stat-number">50 млн ₽</div><div>Топ-бизнес</div></div>
-        <div class="stat-item"><div class="stat-number">24/7</div><div>Динамичная экономика</div></div>
-    </div>
-
-    <!-- Основные команды -->
-    <div class="grid">
-        <div class="card">
-            <h3>📟 Главные команды</h3>
-            <ul>
-                <li><span class="cmd">/menu</span> <span class="cmd-desc">— главное меню</span></li>
-                <li><span class="cmd">/stats</span> <span class="cmd-desc">— статистика и ID</span></li>
-                <li><span class="cmd">/inv</span> <span class="cmd-desc">— инвентарь</span></li>
-                <li><span class="cmd">/gps</span> <span class="cmd-desc">— навигатор Krop</span></li>
-                <li><span class="cmd">/bank</span> <span class="cmd-desc">— банковские операции</span></li>
-                <li><span class="cmd">/donate</span> <span class="cmd-desc">— премиум магазин (BCoin)</span></li>
-                <li><span class="cmd">/promocode</span> <span class="cmd-desc">— ввести бонус-код</span></li>
-                <li><span class="cmd">/time</span> <span class="cmd-desc">— игровое время</span></li>
-            </ul>
+<!-- ЭКРАН РЕГИСТРАЦИИ / ВЫБОР СЕРВЕРА -->
+<div id="registerScreen" class="screen active">
+    <div class="glass-card" style="max-width: 450px; margin: 2rem auto;">
+        <div class="logo">KROPOTKIN</div>
+        <div style="text-align: center; margin: 0.5rem 0 1.5rem;">⚡ Официальный сервер Black Russia Style ⚡</div>
+        
+        <input type="text" id="nicknameInput" class="input-field" placeholder="Введите ник (Имя_Фамилия)" maxlength="24">
+        <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 1rem;">Пример: Dmitriy_Kropotkin</div>
+        
+        <div style="font-weight: bold; margin: 0.5rem 0;">🌍 Выберите мир:</div>
+        <div class="server-list" id="serverListContainer">
+            <div class="server-item" data-server="KROPOTKIN#1 [RP]">KROPOTKIN#1 [RP] <span style="color:#6fcf97;">● 1248 игр.</span></div>
+            <div class="server-item" data-server="KROPOTKIN#2 [ЭКОНОМИКА]">KROPOTKIN#2 [ЭКОН] <span style="color:#6fcf97;">● 892 игр.</span></div>
+            <div class="server-item" data-server="KROPOTKIN#3 [КРИМИНАЛ]">KROPOTKIN#3 [КРИМИНАЛ] <span style="color:#ffaa66;">● 2103 игр.</span></div>
         </div>
-        <div class="card">
-            <h3>🎭 RP-взаимодействие</h3>
-            <ul>
-                <li><span class="cmd">/me [действие]</span> <span class="cmd-desc">— описать действие</span></li>
-                <li><span class="cmd">/do [состояние]</span> <span class="cmd-desc">— окружение / эмоции</span></li>
-                <li><span class="cmd">/try [действие]</span> <span class="cmd-desc">— попытка с шансом</span></li>
-                <li><span class="cmd">/sms [номер] [текст]</span> <span class="cmd-desc">— отправить сообщение</span></li>
-                <li><span class="cmd">/call [ID]</span> <span class="cmd-desc">— звонок игроку</span></li>
-                <li><span class="cmd">/mask</span> <span class="cmd-desc">— надеть маску</span></li>
-                <li><span class="cmd">/anim</span> <span class="cmd-desc">— эмоции и анимации</span></li>
-            </ul>
-        </div>
-        <div class="card">
-            <h3>🏠 Недвижимость / Транспорт</h3>
-            <ul>
-                <li><span class="cmd">/home</span> <span class="cmd-desc">— управление домом</span></li>
-                <li><span class="cmd">/lock</span> <span class="cmd-desc">— закрыть дверь/авто</span></li>
-                <li><span class="cmd">/garage</span> <span class="cmd-desc">— гараж и авто</span></li>
-                <li><span class="cmd">/sellhome [ID] [цена]</span> <span class="cmd-desc">— продажа дома</span></li>
-                <li><span class="cmd">/carjack</span> <span class="cmd-desc">— угон (взлом)</span></li>
-                <li><span class="cmd">/tune</span> <span class="cmd-desc">— тюнинг-центр</span></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Профессии и доход -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h3>💼 Работы и доход (Krop Russia 2026)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                <tr><th>Профессия</th><th>Требуемый уровень</th><th>💰 Доход (в час / рейс)</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Завод / Лесопилка</td><td>Ур. 2</td><td>~7 000 - 8 500 ₽</td></tr>
-                    <tr><td>Фермер</td><td>Ур. 2</td><td>~8 000 ₽</td></tr>
-                    <tr><td>Водитель автобуса</td><td>Ур. 3</td><td>9 000 - 20 000 ₽</td></tr>
-                    <tr><td>Курьер / Водолаз</td><td>Ур. 3+</td><td>12 000 - 30 000 ₽</td></tr>
-                    <tr><td>Дальнобойщик</td><td>Ур. 5</td><td>~50 000 ₽ / рейс</td></tr>
-                    <tr><td>МЧС / Полиция / Армия</td><td>Ур. 4+</td><td>стабильная ЗП + бонусы</td></tr>
-                    <tr><td style="color:#ffaa66;">Складской работник (новинка)</td><td>Ур. 3</td><td>~15 000 - 22 000 ₽</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div style="font-size:0.85rem; margin-top: 12px;">⭐ Новые профессии 2026: Сортировщик, Курьер ПВЗ, Электрик-ремонтник — открывают доступ к уникальным скинам.</div>
-    </div>
-
-    <!-- Транспорт + тюнинг -->
-    <div class="grid">
-        <div class="card">
-            <h3>🚘 Культовые авто & Цены</h3>
-            <ul>
-                <li>🔹 ВАЗ 2101 — <span class="price">60 000 ₽</span> (классика)</li>
-                <li>🔹 ВАЗ 2107 — <span class="price">150 000 ₽</span> | 158 км/ч</li>
-                <li>🔹 Mazda RX-7 — <span class="price">2 400 000 ₽</span></li>
-                <li>🔹 BMW X6M F16 — <span class="price">8 200 000 ₽</span></li>
-                <li>🔹 Audi RS6 — <span class="price">8 500 000 ₽</span> | 306 км/ч</li>
-                <li>🔹 Lamborghini Huracan — <span class="price">от 32 млн ₽</span></li>
-                <li>🏆 Bugatti La Noire — <span class="price">~90 млн ₽</span> (эксклюзив)</li>
-            </ul>
-            <hr>
-            <div><span class="cmd">/tune</span> — спорт-тюнинг + прошивка увеличивают стоимость авто на 15-30% 🔥</div>
-        </div>
-        <div class="card">
-            <h3>👥 Фракции и криминал</h3>
-            <ul>
-                <li>👮 <strong>Госструктуры</strong>: Полиция, ГИБДД, ФСБ, МЧС, Армия, ФСИН, Мэрия</li>
-                <li>🔫 <strong>ОПГ / Банды</strong>: Создай свою банду, команда <span class="cmd">/creategang</span></li>
-                <li>💍 <strong>Семьи</strong>: <span class="cmd">/fammenu</span> — семейный склад, приглашения</li>
-                <li>🎖️ <span class="cmd">/leaders</span> — топ лидеров организаций</li>
-                <li>⚔️ <span class="cmd">/duel [ID] [ставка]</span> — мини-игра дуэль 2026</li>
-            </ul>
-            <div style="margin-top: 1rem; background:#0f0e1a; padding:0.7rem; border-radius: 1rem;">
-                📢 <strong>Событие "Автопробег"</strong> — каждые выходные розыгрыш редких машин!
-            </div>
-        </div>
-    </div>
-
-    <!-- Экономика + бизнес -->
-    <div class="card" style="margin: 1rem 0 1.5rem;">
-        <h3>🏢 Бизнес и пассивный доход</h3>
-        <p>В Krop Russia доступно <strong>3 бизнес-слота</strong>: традиционный бизнес, компания, АЗС. Цены стартуют от 5 млн ₽ за ларёк до 500+ млн ₽ за сеть АЗС.</p>
-        <div class="table-wrap">
-            <table>
-                <tr><th>Тип бизнеса</th><th>Стартовый взнос</th><th>Прибыль (в среднем)</th></tr>
-                <tr><td>Магазин 24/7</td><td>~7 000 000 ₽</td><td>150 000 - 300 000 ₽ / день</td></tr>
-                <tr><td>Автосалон (поддержанные)</td><td>~18 млн ₽</td><td>от 400 тыс ₽</td></tr>
-                <tr><td>Транспортная компания</td><td>80 - 200 млн ₽</td><td>высокий, масштабируемый</td></tr>
-                <tr><td>АЗС (сеть)</td><td>от 500 млн ₽</td><td>миллионы ежедневно</td></tr>
-            </table>
-        </div>
-        <div class="cmd-desc" style="margin-top: 10px;">✨ Команда <span class="cmd">/auction</span> — покупка готового бизнеса с рук. Инвестируй и становись магнатом!</div>
-    </div>
-
-    <!-- Сезон 2026 нововведения -->
-    <div class="grid">
-        <div class="card">
-            <h3>🎁 Сезон «Рёв моторов» 2026</h3>
-            <ul>
-                <li>✅ Новая сюжетная линия — вы главный герой</li>
-                <li>✅ <span class="cmd">/blackpass</span> — боевой пропуск с эксклюзивными авто</li>
-                <li>✅ Система крафта (верстаки) — создавай уникальные предметы</li>
-                <li>✅ Мини-игра «Дуэль»: выбор оружия, локации и ставки до 500k ₽</li>
-                <li>✅ Шестиместный фургон из кейса «Турбо»</li>
-                <li>✅ Новые JDM, раллийные монстры и тяжёлый люкс</li>
-            </ul>
-        </div>
-        <div class="card">
-            <h3>📱 Кроссплатформа + донат</h3>
-            <ul>
-                <li>📲 Играйте на Android, iOS и ПК (эмуляторы)</li>
-                <li>💎 Валюта: <strong>Black Coin (BC)</strong> — команда <span class="cmd">/donate</span></li>
-                <li>🎁 Промокод <span class="cmd">/promocode KROP2026</span> — стартовый бонус (10к рублей + VIP 3 дня)</li>
-                <li>🤝 Реферальная система: <span class="cmd">/referals</span> — приведи друга и получи BC</li>
-                <li>📦 Наборы: «НАЧИНАЮЩИЙ», «ЗАЖИТОЧНЫЙ», «МАФИОЗИ»</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Фракционные команды и полезности -->
-    <div class="card">
-        <h3>📡 Команды фракций & специальные возможности</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;">
-            <div style="flex:1;">
-                <h4>👮 Для гос. структур</h4>
-                <ul><li><span class="cmd">/d [текст]</span> — департамент чат</li>
-                <li><span class="cmd">/r [текст]</span> — RP-чат фракции</li>
-                <li><span class="cmd">/meslist</span> — список вызовов (МЧС/полиция)</li></ul>
-            </div>
-            <div style="flex:1;">
-                <h4>🔫 Для криминала</h4>
-                <ul><li><span class="cmd">/f [текст]</span> — семейный/бандитский чат</li>
-                <li><span class="cmd">/rob [ID]</span> — ограбление (риск)</li>
-                <li><span class="cmd">/fsklad</span> — склад ОПГ</li></ul>
-            </div>
-            <div style="flex:1;">
-                <h4>🏠 Взаимодействие</h4>
-                <ul><li><span class="cmd">/present [ID]</span> — подарить цветы</li>
-                <li><span class="cmd">/pay [ID] [сумма]</span> — перевод</li>
-                <li><span class="cmd">/id [ник]</span> — узнать ID</li></ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Прогрессия и навыки -->
-    <div class="big-stats" style="margin-top: 2rem;">
-        <div class="stat-item"><div class="stat-number">⭐ Уровни</div>Прокачка XP за PayDay и работу</div>
-        <div class="stat-item"><div class="stat-number">🧠 Навыки</div>Переговорщик, вождение, взлом</div>
-        <div class="stat-item"><div class="stat-number">🎭 Кастомизация</div>Скины + аксессуары 2026</div>
-    </div>
-
-    <!-- FAQ / команды быстрого доступа -->
-    <div style="background: #0c0f18; border-radius: 2rem; padding: 1.5rem; margin: 2rem 0; border: 1px solid #2e2f44;">
-        <h3 style="margin-bottom: 0.8rem;">🚀 Полезные сниппеты</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
-            <div><span class="cmd">/setspawn</span> — установить точку возрождения</div>
-            <div><span class="cmd">/liclist</span> — найти лицензора</div>
-            <div><span class="cmd">/showvb [ID]</span> — показать военник</div>
-            <div><span class="cmd">/charity</span> — топ филантропов</div>
-            <div><span class="cmd">/news</span> — игровые новости</div>
-            <div><span class="cmd">/quest</span> — ежедневные квесты</div>
-        </div>
-        <hr style="margin: 1rem 0;">
-        <div>⚡ <strong>Обновление «Рёв моторов»:</strong> Улучшенная физика стрельбы, новые прицелы, звуки выстрелов и прошивка авто через <span class="cmd">/ecu</span>.</div>
-    </div>
-
-    <div class="footer">
-        Ⓒ 2026 Krop Russia — независимый мобильный ролевой проект. Не является официальной версией Black Russia, вдохновлён лучшими RP-механиками.<br>
-        Актуально на апрель 2026 — более 7.5 млн уникальных игроков. Все команды и экономика проверены в игре.<br>
-        🌐 Присоединяйся: <strong style="color:#ffaa66;">/menu → Начать играть</strong> — стань легендой улиц Krop!
+        
+        <button class="btn" id="startGameBtn">▶ ВОЙТИ В МИР KROPOTKIN</button>
+        <div style="font-size: 0.65rem; text-align: center; margin-top: 1rem;">⭐ 7.8 млн игроков | Версия 3.6.2 "Рёв моторов"</div>
     </div>
 </div>
+
+<!-- ЭКРАН ЗАГРУЗКИ -->
+<div id="loadingScreen" class="screen">
+    <div class="glass-card" style="max-width: 400px; margin: 30vh auto; text-align: center;">
+        <div style="font-size: 2rem;">🚔</div>
+        <div style="font-weight: bold; margin: 1rem;">Подключение к серверу <span id="loadingServerName">KROPOTKIN</span>...</div>
+        <div class="status" id="loadingStep">Авторизация</div>
+        <div style="height: 6px; background:#2a2e44; border-radius: 10px; margin: 1rem 0;">
+            <div id="loadingBar" style="width: 0%; height: 6px; background:#e63946; border-radius: 10px;"></div>
+        </div>
+        <div style="font-size: 0.7rem;">загрузка мира KROPOTKIN, пожалуйста, ждите</div>
+    </div>
+</div>
+
+<!-- ОСНОВНОЙ ИГРОВОЙ ЛАУНЧЕР / МЕНЮ -->
+<div id="mainMenuScreen" class="screen">
+    <div class="top-bar">
+        <div>🎮 <span id="mainNick">Player</span></div>
+        <div><span class="status">🟢 сервер: <span id="mainServerName">-</span></span></div>
+        <div>💰 <span id="moneyAmount">125.000</span> ₽</div>
+    </div>
+
+    <!-- вкладки -->
+    <div style="display: flex; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap;">
+        <button class="tab-btn active-tab" data-tab="profile">👤 Профиль</button>
+        <button class="tab-btn" data-tab="garage">🚗 Гараж</button>
+        <button class="tab-btn" data-tab="map">🗺️ Карта KROPOTKIN</button>
+        <button class="tab-btn" data-tab="commands">📟 Команды</button>
+    </div>
+
+    <!-- панель профиля -->
+    <div id="profileTab" class="tab-content active-tab-content">
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                <div><strong>🔰 ID:</strong> #<span id="userId">4271</span></div>
+                <div><strong>⭐ Уровень:</strong> <span id="userLvl">12</span></div>
+                <div><strong>🏆 XP:</strong> <span id="userXp">2450</span>/5000</div>
+            </div>
+            <hr style="margin: 1rem 0; border-color:#2f354a;">
+            <div><strong>🚗 Авто:</strong> Audi RS6 | 🏠 Дом: Квартира в центре</div>
+            <div><strong>💼 Работа:</strong> Дальнобойщик (доход ~50.000 ₽/рейс)</div>
+            <div><strong>🔫 Навыки:</strong> Переговорщик Lv.3 | Вождение Lv.7</div>
+            <button class="btn" id="fakeWorkBtn" style="margin-top: 1rem; background:#2c2f48;">📦 Симуляция рейса (+XP)</button>
+        </div>
+    </div>
+
+    <!-- гараж -->
+    <div id="garageTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3>🚘 Мой автопарк (KROPOTKIN)</h3>
+            <div class="car-grid">
+                <div class="car-card">🏎️ Audi RS6<br>306 км/ч<br><span class="price">8.5 млн ₽</span></div>
+                <div class="car-card">🚙 BMW X6M<br>284 км/ч<br><span class="price">8.2 млн ₽</span></div>
+                <div class="car-card">🛻 ВАЗ 2107<br>158 км/ч<br><span class="price">150k ₽</span></div>
+                <div class="car-card">🏁 Mazda RX-7<br>JDM<br><span class="price">2.4 млн ₽</span></div>
+            </div>
+            <div class="btn" id="fakeTuneBtn" style="margin-top: 1rem;">⚙️ Тюнинг-центр (демо)</div>
+        </div>
+    </div>
+
+    <!-- карта -->
+    <div id="mapTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3>🗺️ Интерактивная карта KROPOTKIN</h3>
+            <div class="map-placeholder"></div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="cmd">/gps</span> <span class="cmd-desc">— показать маршрут</span>
+                <span class="cmd">/home</span> <span class="cmd-desc">— вернуться домой</span>
+            </div>
+            <div style="font-size: 0.8rem;">📍 Основные районы: Южный (банк), Арзамас (больница), Лыткарино (ФСБ), Батырево (завод)</div>
+        </div>
+    </div>
+
+    <!-- команды -->
+    <div id="commandsTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3>📟 Быстрые команды KROPOTKIN</h3>
+            <ul style="list-style: none;">
+                <li><span class="cmd">/menu</span> — главное меню</li>
+                <li><span class="cmd">/stats</span> — статистика</li>
+                <li><span class="cmd">/inv</span> — инвентарь</li>
+                <li><span class="cmd">/bank</span> — банк</li>
+                <li><span class="cmd">/mask</span> — скрыть лицо</li>
+                <li><span class="cmd">/duel [ID]</span> — дуэль 2026</li>
+            </ul>
+            <div class="btn" id="fakeEventBtn" style="margin-top: 1rem; background:#3a2e4a;">🎲 Автопробег KROPOTKIN (симуляция)</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Состояние
+    let selectedServer = "KROPOTKIN#1 [RP]";
+    let playerNick = "";
+    let playerMoney = 125000;
+    let playerLvl = 12;
+    let playerXp = 2450;
+
+    // Элементы
+    const registerScreen = document.getElementById('registerScreen');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainMenuScreen = document.getElementById('mainMenuScreen');
+    const startBtn = document.getElementById('startGameBtn');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const serverItems = document.querySelectorAll('.server-item');
+    const loadingServerSpan = document.getElementById('loadingServerName');
+    const loadingBar = document.getElementById('loadingBar');
+    const loadingStep = document.getElementById('loadingStep');
+    const mainNickSpan = document.getElementById('mainNick');
+    const mainServerSpan = document.getElementById('mainServerName');
+    const moneySpan = document.getElementById('moneyAmount');
+    const userIdSpan = document.getElementById('userId');
+    const userLvlSpan = document.getElementById('userLvl');
+    const userXpSpan = document.getElementById('userXp');
+
+    // выбор сервера
+    serverItems.forEach(item => {
+        item.addEventListener('click', () => {
+            serverItems.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            selectedServer = item.getAttribute('data-server') || item.innerText.split('[')[0].trim();
+        });
+        // по умолчанию выделить первый
+        if(item.getAttribute('data-server')?.includes('KROPOTKIN#1')) item.classList.add('selected');
+    });
+
+    // симуляция загрузки
+    function simulateLoading(callback) {
+        let progress = 0;
+        const steps = ["Подключение к серверу KROPOTKIN", "Загрузка карты мира", "Синхронизация игроков", "Вход в мир"];
+        let stepIdx = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 20 + 8;
+            if(progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                loadingStep.innerText = "Готово! Добро пожаловать.";
+                setTimeout(() => {
+                    callback();
+                }, 600);
+            }
+            loadingBar.style.width = Math.min(progress,100) + "%";
+            if(stepIdx < steps.length && progress > (stepIdx+1)*25) {
+                loadingStep.innerText = steps[stepIdx];
+                stepIdx++;
+            }
+        }, 280);
+    }
+
+    // регистрация / вход
+    startBtn.addEventListener('click', () => {
+        let rawNick = nicknameInput.value.trim();
+        if(rawNick === "") {
+            alert("Введите ник в формате Имя_Фамилия (например, Artem_Kropotkin)");
+            return;
+        }
+        if(!rawNick.includes("_")) {
+            alert("Ник должен содержать '_' . Пример: Roma_Kropotkin");
+            return;
+        }
+        playerNick = rawNick;
+        // показываем загрузку
+        registerScreen.classList.remove('active');
+        loadingScreen.classList.add('active');
+        loadingServerSpan.innerText = selectedServer;
+        simulateLoading(() => {
+            loadingScreen.classList.remove('active');
+            mainMenuScreen.classList.add('active');
+            // обновляем UI
+            mainNickSpan.innerText = playerNick;
+            mainServerSpan.innerText = selectedServer;
+            moneySpan.innerText = playerMoney.toLocaleString();
+            userIdSpan.innerText = Math.floor(Math.random() * 9000 + 1000);
+            userLvlSpan.innerText = playerLvl;
+            userXpSpan.innerText = playerXp;
+        });
+    });
+
+    // Табы
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = {
+        profile: document.getElementById('profileTab'),
+        garage: document.getElementById('garageTab'),
+        map: document.getElementById('mapTab'),
+        commands: document.getElementById('commandsTab')
+    };
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            Object.keys(tabContents).forEach(key => {
+                tabContents[key].style.display = 'none';
+            });
+            tabContents[tabId].style.display = 'block';
+            tabBtns.forEach(b => b.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+        });
+    });
+
+    // симуляция работы (рейс дальнобойщика)
+    document.getElementById('fakeWorkBtn')?.addEventListener('click', () => {
+        let addMoney = Math.floor(Math.random() * 15000 + 20000);
+        let addXp = Math.floor(Math.random() * 180 + 50);
+        playerMoney += addMoney;
+        playerXp += addXp;
+        if(playerXp >= 5000) {
+            playerLvl++;
+            playerXp -= 5000;
+            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь вы ${playerLvl} уровень!`);
+        }
+        moneySpan.innerText = playerMoney.toLocaleString();
+        userLvlSpan.innerText = playerLvl;
+        userXpSpan.innerText = playerXp;
+        alert(`✅ Рейс выполнен! +${addMoney}₽ , +${addXp} XP`);
+    });
+
+    document.getElementById('fakeTuneBtn')?.addEventListener('click', () => {
+        alert("🔧 Тюнинг центр KROPOTKIN: спорт-прошивка +30% к цене авто. Доступно в автосервисе (демо).");
+    });
+    document.getElementById('fakeEventBtn')?.addEventListener('click', () => {
+        alert("🏁 АВТОПРОБЕГ НА KROPOTKIN! Вы получили временный Nissan GT-R на 24 часа (симуляция)");
+    });
+
+    // Стили для активной вкладки
+    const style = document.createElement('style');
+    style.textContent = `
+        .tab-btn { background:#1b1e30; border:none; padding:0.6rem 1.2rem; border-radius:2rem; color:#ccc; cursor:pointer; }
+        .active-tab { background:#b91c1c; color:white; box-shadow:0 0 8px #ff6666; }
+        .cmd { background:#0f0f1c; padding:0.2rem 0.7rem; border-radius:20px; font-family:monospace; color:#ffb347; display:inline-block; margin:0.2rem; }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
