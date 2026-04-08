@@ -16,6 +16,7 @@
             background: #0a0c12;
             font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
             overflow-x: hidden;
+            color: #ffffff;
         }
 
         /* главный контейнер с переключением экранов */
@@ -38,12 +39,13 @@
 
         /* стили карточек */
         .glass-card {
-            background: rgba(12, 16, 28, 0.85);
+            background: rgba(12, 16, 28, 0.9);
             backdrop-filter: blur(14px);
             border-radius: 2rem;
-            border: 1px solid rgba(220, 50, 50, 0.4);
+            border: 1px solid rgba(220, 50, 50, 0.5);
             padding: 1.6rem;
             box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            color: #ffffff;
         }
 
         .btn {
@@ -65,12 +67,15 @@
         .input-field {
             width: 100%;
             padding: 1rem;
-            background: #0f111f;
-            border: 1px solid #3a2e3e;
+            background: #1a1e30;
+            border: 1px solid #e03a3a;
             border-radius: 1.5rem;
             color: white;
             font-size: 1rem;
             margin: 0.7rem 0;
+        }
+        .input-field::placeholder {
+            color: #aaaacc;
         }
 
         .server-list {
@@ -80,7 +85,7 @@
             margin: 1rem 0;
         }
         .server-item {
-            background: #0b0e1a;
+            background: #12172a;
             padding: 0.8rem 1.3rem;
             border-radius: 2rem;
             text-align: center;
@@ -88,11 +93,14 @@
             border-left: 3px solid #e03a3a;
             cursor: pointer;
             transition: 0.1s;
+            color: #eef2ff;
+            font-weight: 500;
         }
         .server-item.selected {
             background: #a12222;
             box-shadow: 0 0 12px #ff4f4f;
             border-left-color: #ffcc88;
+            color: white;
         }
         .logo {
             font-size: 3rem;
@@ -112,11 +120,12 @@
             margin-top: 1rem;
         }
         .car-card {
-            background: #0f1322;
+            background: #12172a;
             border-radius: 1.2rem;
             padding: 0.7rem;
             text-align: center;
-            border: 1px solid #2f2a3a;
+            border: 1px solid #e03a3a;
+            color: #f0f3ff;
         }
 
         .map-placeholder {
@@ -133,9 +142,10 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            background: #00000055;
+            background: #00000099;
             padding: 0.5rem 1rem;
             border-radius: 3rem;
+            color: white;
         }
 
         .status {
@@ -143,9 +153,61 @@
             font-size: 0.7rem;
         }
 
+        .price {
+            color: #ffaa66;
+            font-weight: bold;
+        }
+
+        hr {
+            border-color: #3a2e4a;
+            margin: 1rem 0;
+        }
+
+        .cmd {
+            background: #1e1f30;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #ffb347;
+            display: inline-block;
+            margin: 0.2rem;
+            font-weight: 500;
+        }
+
+        .cmd-desc {
+            color: #cbd5e6;
+        }
+
+        .tab-btn {
+            background: #1b1e30;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            color: #ddddff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .active-tab {
+            background: #b91c1c;
+            color: white;
+            box-shadow: 0 0 8px #ff6666;
+        }
+
         @media (max-width: 500px) {
             .screen { padding: 1rem; }
             .logo { font-size: 2rem; }
+        }
+
+        a, .clickable {
+            color: #ffaa66;
+        }
+        .glass-card h3 {
+            color: #ffcc88;
+            margin-bottom: 0.8rem;
+        }
+        .glass-card li, .glass-card p, .glass-card div {
+            color: #eef2ff;
         }
     </style>
 </head>
@@ -155,12 +217,12 @@
 <div id="registerScreen" class="screen active">
     <div class="glass-card" style="max-width: 450px; margin: 2rem auto;">
         <div class="logo">KROPOTKIN</div>
-        <div style="text-align: center; margin: 0.5rem 0 1.5rem;">⚡ Официальный сервер Black Russia Style ⚡</div>
+        <div style="text-align: center; margin: 0.5rem 0 1.5rem; color: #ffcc88;">⚡ Официальный сервер Black Russia Style ⚡</div>
         
         <input type="text" id="nicknameInput" class="input-field" placeholder="Введите ник (Имя_Фамилия)" maxlength="24">
-        <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 1rem;">Пример: Dmitriy_Kropotkin</div>
+        <div style="font-size: 0.7rem; color: #aaaacc; margin-bottom: 1rem;">Пример: Dmitriy_Kropotkin</div>
         
-        <div style="font-weight: bold; margin: 0.5rem 0;">🌍 Выберите мир:</div>
+        <div style="font-weight: bold; margin: 0.5rem 0; color: #ffcc88;">🌍 Выберите мир:</div>
         <div class="server-list" id="serverListContainer">
             <div class="server-item" data-server="KROPOTKIN#1 [RP]">KROPOTKIN#1 [RP] <span style="color:#6fcf97;">● 1248 игр.</span></div>
             <div class="server-item" data-server="KROPOTKIN#2 [ЭКОНОМИКА]">KROPOTKIN#2 [ЭКОН] <span style="color:#6fcf97;">● 892 игр.</span></div>
@@ -168,7 +230,7 @@
         </div>
         
         <button class="btn" id="startGameBtn">▶ ВОЙТИ В МИР KROPOTKIN</button>
-        <div style="font-size: 0.65rem; text-align: center; margin-top: 1rem;">⭐ 7.8 млн игроков | Версия 3.6.2 "Рёв моторов"</div>
+        <div style="font-size: 0.65rem; text-align: center; margin-top: 1rem; color: #aaa;">⭐ 7.8 млн игроков | Версия 3.6.2 "Рёв моторов"</div>
     </div>
 </div>
 
@@ -176,21 +238,21 @@
 <div id="loadingScreen" class="screen">
     <div class="glass-card" style="max-width: 400px; margin: 30vh auto; text-align: center;">
         <div style="font-size: 2rem;">🚔</div>
-        <div style="font-weight: bold; margin: 1rem;">Подключение к серверу <span id="loadingServerName">KROPOTKIN</span>...</div>
-        <div class="status" id="loadingStep">Авторизация</div>
+        <div style="font-weight: bold; margin: 1rem; color: white;">Подключение к серверу <span id="loadingServerName" style="color:#ffaa66;">KROPOTKIN</span>...</div>
+        <div class="status" id="loadingStep" style="color:#ffcc88;">Авторизация</div>
         <div style="height: 6px; background:#2a2e44; border-radius: 10px; margin: 1rem 0;">
             <div id="loadingBar" style="width: 0%; height: 6px; background:#e63946; border-radius: 10px;"></div>
         </div>
-        <div style="font-size: 0.7rem;">загрузка мира KROPOTKIN, пожалуйста, ждите</div>
+        <div style="font-size: 0.7rem; color: #aaa;">загрузка мира KROPOTKIN, пожалуйста, ждите</div>
     </div>
 </div>
 
 <!-- ОСНОВНОЙ ИГРОВОЙ ЛАУНЧЕР / МЕНЮ -->
 <div id="mainMenuScreen" class="screen">
     <div class="top-bar">
-        <div>🎮 <span id="mainNick">Player</span></div>
-        <div><span class="status">🟢 сервер: <span id="mainServerName">-</span></span></div>
-        <div>💰 <span id="moneyAmount">125.000</span> ₽</div>
+        <div>🎮 <span id="mainNick" style="color:#ffaa66;">Player</span></div>
+        <div><span class="status">🟢 сервер: <span id="mainServerName" style="color:#ffaa66;">-</span></span></div>
+        <div>💰 <span id="moneyAmount" style="color:#6fcf97;">125.000</span> ₽</div>
     </div>
 
     <!-- вкладки -->
@@ -205,14 +267,14 @@
     <div id="profileTab" class="tab-content active-tab-content">
         <div class="glass-card">
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-                <div><strong>🔰 ID:</strong> #<span id="userId">4271</span></div>
-                <div><strong>⭐ Уровень:</strong> <span id="userLvl">12</span></div>
-                <div><strong>🏆 XP:</strong> <span id="userXp">2450</span>/5000</div>
+                <div><strong style="color:#ffcc88;">🔰 ID:</strong> #<span id="userId">4271</span></div>
+                <div><strong style="color:#ffcc88;">⭐ Уровень:</strong> <span id="userLvl">12</span></div>
+                <div><strong style="color:#ffcc88;">🏆 XP:</strong> <span id="userXp">2450</span>/5000</div>
             </div>
-            <hr style="margin: 1rem 0; border-color:#2f354a;">
-            <div><strong>🚗 Авто:</strong> Audi RS6 | 🏠 Дом: Квартира в центре</div>
-            <div><strong>💼 Работа:</strong> Дальнобойщик (доход ~50.000 ₽/рейс)</div>
-            <div><strong>🔫 Навыки:</strong> Переговорщик Lv.3 | Вождение Lv.7</div>
+            <hr>
+            <div><strong style="color:#ffcc88;">🚗 Авто:</strong> <span style="color:white;">Audi RS6</span> | <strong style="color:#ffcc88;">🏠 Дом:</strong> <span style="color:white;">Квартира в центре</span></div>
+            <div><strong style="color:#ffcc88;">💼 Работа:</strong> <span style="color:white;">Дальнобойщик (доход ~50.000 ₽/рейс)</span></div>
+            <div><strong style="color:#ffcc88;">🔫 Навыки:</strong> <span style="color:white;">Переговорщик Lv.3 | Вождение Lv.7</span></div>
             <button class="btn" id="fakeWorkBtn" style="margin-top: 1rem; background:#2c2f48;">📦 Симуляция рейса (+XP)</button>
         </div>
     </div>
@@ -240,7 +302,7 @@
                 <span class="cmd">/gps</span> <span class="cmd-desc">— показать маршрут</span>
                 <span class="cmd">/home</span> <span class="cmd-desc">— вернуться домой</span>
             </div>
-            <div style="font-size: 0.8rem;">📍 Основные районы: Южный (банк), Арзамас (больница), Лыткарино (ФСБ), Батырево (завод)</div>
+            <div style="font-size: 0.8rem; color: #aaaacc;">📍 Основные районы: Южный (банк), Арзамас (больница), Лыткарино (ФСБ), Батырево (завод)</div>
         </div>
     </div>
 
@@ -249,12 +311,12 @@
         <div class="glass-card">
             <h3>📟 Быстрые команды KROPOTKIN</h3>
             <ul style="list-style: none;">
-                <li><span class="cmd">/menu</span> — главное меню</li>
-                <li><span class="cmd">/stats</span> — статистика</li>
-                <li><span class="cmd">/inv</span> — инвентарь</li>
-                <li><span class="cmd">/bank</span> — банк</li>
-                <li><span class="cmd">/mask</span> — скрыть лицо</li>
-                <li><span class="cmd">/duel [ID]</span> — дуэль 2026</li>
+                <li><span class="cmd">/menu</span> <span class="cmd-desc">— главное меню</span></li>
+                <li><span class="cmd">/stats</span> <span class="cmd-desc">— статистика</span></li>
+                <li><span class="cmd">/inv</span> <span class="cmd-desc">— инвентарь</span></li>
+                <li><span class="cmd">/bank</span> <span class="cmd-desc">— банк</span></li>
+                <li><span class="cmd">/mask</span> <span class="cmd-desc">— скрыть лицо</span></li>
+                <li><span class="cmd">/duel [ID]</span> <span class="cmd-desc">— дуэль 2026</span></li>
             </ul>
             <div class="btn" id="fakeEventBtn" style="margin-top: 1rem; background:#3a2e4a;">🎲 Автопробег KROPOTKIN (симуляция)</div>
         </div>
@@ -392,15 +454,6 @@
     document.getElementById('fakeEventBtn')?.addEventListener('click', () => {
         alert("🏁 АВТОПРОБЕГ НА KROPOTKIN! Вы получили временный Nissan GT-R на 24 часа (симуляция)");
     });
-
-    // Стили для активной вкладки
-    const style = document.createElement('style');
-    style.textContent = `
-        .tab-btn { background:#1b1e30; border:none; padding:0.6rem 1.2rem; border-radius:2rem; color:#ccc; cursor:pointer; }
-        .active-tab { background:#b91c1c; color:white; box-shadow:0 0 8px #ff6666; }
-        .cmd { background:#0f0f1c; padding:0.2rem 0.7rem; border-radius:20px; font-family:monospace; color:#ffb347; display:inline-block; margin:0.2rem; }
-    `;
-    document.head.appendChild(style);
 </script>
 </body>
 </html>
