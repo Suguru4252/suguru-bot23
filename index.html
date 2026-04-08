@@ -3,438 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - Соседняя комната</title>
+    <title>ГАЗАН СИКС СЕВЕЕН 🔥 | Беги как Subway Surfers</title>
     <style>
         * {
             user-select: none;
-            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: linear-gradient(145deg, #1a1e2b 0%, #0c0f17 100%);
+            margin: 0;
             min-height: 100vh;
+            background: linear-gradient(145deg, #0a1f1e 0%, #0c2a2a 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', 'Fira Code', monospace;
-            padding: 16px;
-            margin: 0;
+            font-family: 'Courier New', 'Press Start 2P', 'Monaco', monospace;
+            touch-action: manipulation;
         }
 
-        /* основной контейнер игры */
         .game-container {
-            max-width: 600px;
-            width: 100%;
-            background: #0f121cb3;
-            backdrop-filter: blur(4px);
-            border-radius: 48px;
-            border: 1px solid #ff66aa40;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-            overflow: hidden;
-            padding: 20px 20px 28px;
-            transition: all 0.2s;
-        }
-
-        /* заголовок с "сын шлюхи (Дима)" - жестко, но по заданию */
-        .game-title {
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #ffb347, #ff6b6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 5px #ff000030;
-            margin-bottom: 8px;
-            word-break: keep-all;
-        }
-
-        .sub {
-            text-align: center;
-            color: #ff99ccaa;
-            font-size: 0.7rem;
-            border-top: 1px dashed #ff44aa40;
-            padding-top: 6px;
-            margin-bottom: 20px;
-        }
-
-        /* комнаты: мама и дима */
-        .rooms {
+            position: relative;
+            padding: 20px 0;
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 25px;
+            justify-content: center;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            border-radius: 48px;
+            background: rgba(0,0,0,0.2);
         }
 
-        .room {
-            flex: 1;
-            background: #00000055;
-            border-radius: 28px;
-            padding: 16px 12px;
-            backdrop-filter: blur(8px);
-            border: 1px solid #ffffff1a;
-            transition: all 0.2s;
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 32px;
+            box-shadow: 0 0 0 6px #ffd966, 0 0 0 12px #b97f44, 0 20px 30px rgba(0,0,0,0.4);
+            cursor: pointer;
+            background-color: #2b2b2b;
         }
 
-        .mom-room {
-            background: radial-gradient(ellipse at 30% 40%, #2a1a2c, #11000c);
-            border-left: 4px solid #ff66aa;
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 35px;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        .dima-room {
-            background: radial-gradient(ellipse at 70% 30%, #1c252e, #050a10);
-            border-right: 4px solid #66ccff;
+        .score-board, .best-board {
+            background: #000000aa;
+            backdrop-filter: blur(4px);
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.7rem;
+            color: #f9f3c1;
+            text-shadow: 0 0 5px #ff9900, 2px 2px 0 #6b2e00;
+            letter-spacing: 2px;
+            font-family: monospace;
+            border: 1px solid #ffcd7e;
         }
 
-        .room h2 {
-            font-size: 1.4rem;
-            margin: 0 0 8px 0;
+        .best-board {
+            background: #1e2a1faa;
+        }
+
+        .controls-mobile {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .ctrl-btn {
+            pointer-events: auto;
+            background: #000000bb;
+            backdrop-filter: blur(12px);
+            border: 2px solid #ffb347;
+            color: #ffdd99;
+            font-size: 2.8rem;
+            font-weight: bold;
+            width: 85px;
+            height: 85px;
+            border-radius: 100px;
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .mom-room h2 { color: #ff99cc; }
-        .dima-room h2 { color: #88ddff; }
-
-        .cash {
-            background: #1e1a2f;
-            padding: 8px 12px;
-            border-radius: 60px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: #f5c542;
-            margin: 12px 0;
-            font-family: monospace;
-            border: 1px solid gold;
-        }
-
-        button {
-            background: #2a1e3a;
-            border: none;
-            font-family: inherit;
-            font-weight: bold;
-            padding: 10px 16px;
-            border-radius: 60px;
-            color: white;
-            font-size: 1rem;
+            justify-content: center;
             cursor: pointer;
-            transition: 0.1s linear;
-            margin-top: 8px;
-            width: 100%;
-            box-shadow: 0 2px 5px black;
-        }
-
-        button:active {
-            transform: scale(0.96);
-        }
-
-        .mom-btn {
-            background: #d43f6b;
-            color: white;
-            text-shadow: 0 1px 0 #400;
-        }
-
-        .listen-btn {
-            background: #2c5f8a;
-            border-bottom: 3px solid #aaddff;
-        }
-
-        .log-area {
-            background: #03030ad9;
-            border-radius: 32px;
-            padding: 12px 16px;
-            margin-top: 20px;
-            min-height: 150px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 0.85rem;
             font-family: monospace;
-            border: 1px solid #ff66aa30;
+            transition: 0.07s linear;
+            box-shadow: 0 8px 0 #7a3e0e;
+            user-select: none;
+            touch-action: manipulation;
         }
 
-        .log-line {
-            border-left: 3px solid #ff66aa;
-            padding: 5px 8px;
-            margin: 6px 0;
-            background: #ffffff08;
-            color: #dddddd;
-            word-break: break-word;
+        .ctrl-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #7a3e0e;
         }
 
-        .dima-thought {
-            border-left-color: #66ccff;
-            color: #bbffff;
+        .restart-area {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            pointer-events: none;
+            z-index: 12;
         }
 
-        .mom-event {
-            border-left-color: #ffa07a;
-            color: #ffcfaf;
-        }
-
-        .reset-area {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 16px;
-        }
-
-        .reset-btn {
-            background: #333;
-            width: auto;
-            padding: 5px 15px;
-            font-size: 0.8rem;
-        }
-
-        .money-icon {
+        .restart-btn {
+            pointer-events: auto;
+            background: #e25822dd;
+            border: none;
             font-size: 1.4rem;
+            font-weight: bold;
+            padding: 10px 30px;
+            border-radius: 60px;
+            color: white;
+            font-family: monospace;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 5px 0 #7a2a0a;
+        }
+
+        .restart-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .status-text {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffefb9;
+            text-shadow: 3px 3px 0 #b43b00;
+            background: #00000099;
+            width: fit-content;
+            margin: auto;
+            padding: 12px 28px;
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 700px) {
+            .ctrl-btn { width: 70px; height: 70px; font-size: 2.2rem; }
+            .score-board, .best-board { font-size: 1.2rem; padding: 4px 12px; }
+            .status-text { font-size: 1.2rem; white-space: nowrap; top: 35%;}
+        }
+
+        @media (max-width: 550px) {
+            .ctrl-btn { width: 60px; height: 60px; font-size: 1.8rem; }
+            .controls-mobile { gap: 20px; bottom: 12px; }
         }
 
         footer {
-            font-size: 0.6rem;
-            text-align: center;
-            color: #aaa6;
-            margin-top: 20px;
+            position: absolute;
+            bottom: 8px;
+            font-size: 11px;
+            color: #ffd58c;
+            background: #00000077;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
 <div class="game-container">
-    <div class="game-title">❌ СЫН ШЛЮХИ ❌<br><span style="font-size:1rem;">ДИМА</span></div>
-    <div class="sub">[ NetErrror | Симуляция без границ ]</div>
-
-    <div class="rooms">
-        <!-- Комната мамы -->
-        <div class="room mom-room">
-            <h2>💃 МАМА</h2>
-            <div class="cash">
-                <span class="money-icon">💰</span> <span id="moneyAmount">0</span> ₽
-            </div>
-            <button id="walkBtn" class="mom-btn">🚪 ПОЙТИ К МУЖИКУ</button>
-            <div style="font-size: 0.7rem; margin-top: 8px; opacity: 0.7;">*ушла на час-другой*</div>
-        </div>
-
-        <!-- Комната Димы -->
-        <div class="room dima-room">
-            <h2>🎧 ДИМА (сын)</h2>
-            <button id="listenBtn" class="listen-btn">👂 ПРИСЛУШАТЬСЯ ИЗ КОМНАТЫ</button>
-            <div style="font-size: 0.7rem; margin-top: 8px;">каждый звук за стеной...</div>
-        </div>
+    <canvas id="gameCanvas" width="600" height="500"></canvas>
+    <div class="ui-panel">
+        <div class="score-board">🏆 СЧЁТ: <span id="scoreValue">0</span></div>
+        <div class="best-board">⭐ РЕКОРД: <span id="bestValue">0</span></div>
     </div>
-
-    <!-- Лог событий — что слышит Дима и что происходит -->
-    <div class="log-area" id="logArea">
-        <div class="log-line dima-thought">🔇 Дима сидит в своей комнате. Тишина...</div>
-        <div class="log-line mom-event">👩 Мама дома, пока никуда не уходила.</div>
+    <div class="controls-mobile">
+        <div class="ctrl-btn" id="leftBtn">◀ ЛЕВО</div>
+        <div class="ctrl-btn" id="rightBtn">ПРАВО ▶</div>
     </div>
-
-    <div class="reset-area">
-        <button id="resetBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
+    <div class="restart-area">
+        <button class="restart-btn" id="restartBtn">🚀 ГАЗАН, ПОГНАЛИ!</button>
     </div>
-    <footer>Симуляция. Каждый звук = деньги мамы. Дима слышит всё.</footer>
+    <div id="statusMessage" class="status-text" style="display: none;">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
 </div>
+<footer>⚡ ГАЗАН СИКС СЕВЕЕН | СВАЙПАЙ/КЛИКАЙ → УВОРАЧИВАЙСЯ ОТ ПОЕЗДОВ!</footer>
 
 <script>
-    // ---------- СТАТУС ИГРЫ ----------
-    let money = 0;               // сколько заработала мама
-    let momStatus = "home";     // home / away
-    let awayTimer = null;       // таймер возвращения мамы
-    let currentEncounter = null; // детали текущего "визита" для звуков
+    (function(){
+        // ---------- КАНВАС ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-    // массив фраз / звуков которые слышит Дима в зависимости от интим-прогресса
-    // грязные, пошлые, но строго в рамках симуляции NetErrror
-    const moanPhrases = [
-        "😩 О да, ещё... *звуки страсти*",
-        "💦 Аххх... сильнее! *скрип кровати*",
-        "👄 Мммм... *сдавленные стоны*",
-        "🔊 О-о-о да, ТАК! *громкие шлепки*",
-        "🤤 *прерывистое дыхание* Денежка упала на тумбочку...",
-        "🥴 Ещё, ещё, не останавливайся! *вздохи*",
-        "💸 Ох, чувствую купюры... *тяжелый шепот*",
-        "😈 *смех мужчины* и мамин стон...",
-        "🎤 *диалог* - 'Сколько? - Всё как договаривались, сладкая'"
-    ];
-
-    // фразы возвращения домой
-    const returnPhrases = [
-        "🔑 Хлопнула дверь, мама вернулась домой. В руке пачка денег.",
-        "🚪 Мама тихо зашла, слышен звон монет.",
-        "💄 Мама пришла, в спальне запах чужих духов и купюры в кармане.",
-        "🕯️ Мама вернулась уставшая, но довольная. Деньги звенят."
-    ];
-
-    // логирование
-    const logArea = document.getElementById('logArea');
-    const moneySpan = document.getElementById('moneyAmount');
-
-    function addLog(message, type = 'dima') {
-        const logDiv = document.createElement('div');
-        logDiv.className = type === 'dima' ? 'log-line dima-thought' : 'log-line mom-event';
-        logDiv.innerHTML = message;
-        logArea.appendChild(logDiv);
-        logDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        // ограничим длину лога (не более 35 записей)
-        while (logArea.children.length > 38) {
-            logArea.removeChild(logArea.firstChild);
-        }
-    }
-
-    function updateMoneyUI() {
-        moneySpan.innerText = money;
-    }
-
-    // мама возвращается домой после визита
-    function momReturnsHome() {
-        if (momStatus !== 'away') return;
-        momStatus = 'home';
-        if (awayTimer) {
-            clearTimeout(awayTimer);
-            awayTimer = null;
-        }
-        // случайная фраза возвращения
-        const randomReturn = returnPhrases[Math.floor(Math.random() * returnPhrases.length)];
-        addLog(randomReturn, 'mom');
-        addLog(`🔇 Дима слышит: мама ходит по квартире, больше посторонних звуков нет.`, 'dima');
-        currentEncounter = null;
-    }
-
-    // симуляция "мама ушла к мужику"
-    function startMomWalk() {
-        if (momStatus === 'away') {
-            addLog(`⚠️ Мама уже ушла с другим мужиком! Дима слышит, как она развлекается. Подожди возвращения.`, 'mom');
-            return;
-        }
-
-        // уходим
-        momStatus = 'away';
-        const earned = Math.floor(Math.random() * 800) + 400; // от 400 до 1200
-        money += earned;
-        updateMoneyUI();
-
-        // запоминаем "встречу" для последующих подслушиваний
-        const visitId = Date.now();
-        currentEncounter = {
-            earned: earned,
-            startTime: Date.now(),
-            durationSec: 6 + Math.floor(Math.random() * 10)  // от 6 до 15 секунд "акта", но можно слушать несколько раз
-        };
-
-        addLog(`💃 Мама ушла к очередному мужику. (заработает ~${earned}₽, вернётся через ${Math.floor(currentEncounter.durationSec/2)+2}-${Math.floor(currentEncounter.durationSec/1.5)} сек)`, 'mom');
-        addLog(`😶 Дима остался один в комнате, за стеной пока тихо...`, 'dima');
-
-        // установить таймер возвращения (длительность визита: от 8 до 18 секунд)
-        const visitDuration = 7000 + Math.random() * 8000; // 7-15 секунд игровых
-        awayTimer = setTimeout(() => {
-            if (momStatus === 'away') {
-                momReturnsHome();
+        // Размеры дорожек и колёсики стиля Subway Surfers
+        const LANE_COUNT = 3;
+        const LANE_WIDTH = canvas.width / LANE_COUNT;  // 200px
+        const GROUND_Y = canvas.height - 70;   // линия рельс
+        
+        // Параметры ГАЗАНА
+        const GAZAN_SIZE = 48;
+        let lane = 1;          // 0 левая, 1 центр, 2 правая
+        let playerY = GROUND_Y - GAZAN_SIZE + 6; // немножко над рельсами
+        
+        // Препятствия (поезда / вагоны)
+        let obstacles = [];
+        const OBSTACLE_WIDTH = 52;
+        const OBSTACLE_HEIGHT = 58;
+        let frameCounter = 0;
+        let spawnGap = 55;      // через сколько фреймов спавнить новый поезд
+        let gameSpeed = 5;      // скорость движения поездов вниз (к игроку)
+        let score = 0;
+        let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
+        let gameRunning = true;
+        let invincibleFlash = 0;   // для анимации мигания при столкновении (не используется, просто визуал)
+        
+        // UI элементы
+        const scoreSpan = document.getElementById('scoreValue');
+        const bestSpan = document.getElementById('bestValue');
+        const statusMsgDiv = document.getElementById('statusMessage');
+        
+        bestSpan.innerText = bestScore;
+        
+        // --- Вспомогательные функции ---
+        function updateScoreUI(){
+            scoreSpan.innerText = Math.floor(score);
+            if(score > bestScore){
+                bestScore = Math.floor(score);
+                bestSpan.innerText = bestScore;
+                localStorage.setItem('gazanBest', bestScore);
             }
-        }, visitDuration);
-    }
-
-    // действие "прислушаться" — Дима слышит пошлые звуки если мама с мужиком
-    function listenAsDima() {
-        if (momStatus === 'away' && currentEncounter) {
-            // мама сейчас не дома, зарабатывает деньги сексом — Дима слышит
-            // но при каждом подслушивании можно добавить бонус? нет, но добавим эмоциональную реакцию
-            const randomSound = moanPhrases[Math.floor(Math.random() * moanPhrases.length)];
-            // дополнительные унизительные/грязные детали для атмосферы
-            const extraShame = [
-                " Дима сжимает наушники, но звуки пробиваются сквозь стены.",
-                " Дима слышит мужской смех и звон монет.",
-                " Дима краснеет и затыкает уши подушкой.",
-                " В голове Димы: 'мама опять...'",
-                " Слышно как открывается бутылка и женский смех."
-            ];
-            const randomShame = extraShame[Math.floor(Math.random() * extraShame.length)];
-            const hearMessage = `👂 ДИМА СЛЫШИТ: ${randomSound} ${randomShame}`;
-            addLog(hearMessage, 'dima');
-
-            // иногда при подслушивании можно добавить "психологический" урон? по условию не нужно, но для атмосферы
-            // небольшая вероятность что мама заработает ещё бонус (имитация что клиент добавил чаевые)
-            if (Math.random() < 0.3) {
-                const bonus = Math.floor(Math.random() * 200) + 50;
-                money += bonus;
-                updateMoneyUI();
-                addLog(`💸 БОНУС! Пока Дима слушал, мужик кинул лишние ${bonus}₽ маме под дверь.`, 'mom');
+        }
+        
+        // Спавн нового поезда (стиль "вагон метро")
+        function spawnObstacle(){
+            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
+            // проверка, чтобы не было двух одинаковых препятствий слишком близко (баланс)
+            let lastInLane = obstacles.find(obs => obs.lane === laneIdx && obs.y > canvas.height - 150);
+            if(lastInLane) return; // немного уменьшаем спам
+            obstacles.push({
+                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_WIDTH/2),
+                lane: laneIdx,
+                y: -OBSTACLE_HEIGHT,
+                width: OBSTACLE_WIDTH,
+                height: OBSTACLE_HEIGHT
+            });
+        }
+        
+        // Обновление логики
+        function updateGame(){
+            if(!gameRunning) return;
+            
+            // 1. Движение препятствий
+            for(let i=0; i<obstacles.length; i++){
+                obstacles[i].y += gameSpeed;
             }
-        } 
-        else if (momStatus === 'away' && !currentEncounter) {
-            // подстраховка: если currentEncounter потерян но статус away
-            addLog(`👂 Дима напрягает слух: за стеной странные звуки... похоже мама с кем-то, но ничего чёткого.`, 'dima');
-            // подчищаем: создадим минимальный currentEncounter
-            currentEncounter = { earned: 0, startTime: Date.now(), durationSec: 5 };
+            // удаляем уехавшие за экран или ниже игровой зоны
+            obstacles = obstacles.filter(obs => obs.y < canvas.height + 100);
+            
+            // 2. Спавн с динамической частотой (чем выше счёт, тем чаще поезда)
+            let dynamicSpawn = Math.max(28, spawnGap - Math.floor(score / 380));
+            if(frameCounter >= dynamicSpawn){
+                spawnObstacle();
+                frameCounter = 0;
+            } else {
+                frameCounter++;
+            }
+            
+            // 3. Увеличение сложности: скорость растёт с очками (но не более 13)
+            gameSpeed = Math.min(5 + Math.floor(score / 700), 13);
+            
+            // 4. КОЛЛИЗИЯ (прямоугольники)
+            const playerRect = {
+                x: lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2),
+                y: playerY,
+                w: GAZAN_SIZE,
+                h: GAZAN_SIZE
+            };
+            
+            for(let obs of obstacles){
+                const obsRect = {
+                    x: obs.x,
+                    y: obs.y,
+                    w: OBSTACLE_WIDTH,
+                    h: OBSTACLE_HEIGHT
+                };
+                if(playerRect.x < obsRect.x + obsRect.w &&
+                    playerRect.x + playerRect.w > obsRect.x &&
+                    playerRect.y < obsRect.y + obsRect.h &&
+                    playerRect.y + playerRect.h > obsRect.y){
+                    // СТОЛКНОВЕНИЕ! КОНЕЦ ИГРЫ
+                    gameRunning = false;
+                    statusMsgDiv.style.display = "block";
+                    // эффект тряски можно добавить, но оставим классику
+                    break;
+                }
+            }
+            
+            // 5. Начисление очков за время жизни (чем дальше, тем больше)
+            if(gameRunning){
+                score += 0.25;
+                updateScoreUI();
+            }
         }
-        else {
-            // мама дома
-            const sadListens = [
-                "🔇 Тишина. Мама дома, смотрит телевизор. Никаких мужчин поблизости.",
-                "😐 Дима слышит только шаги мамы на кухне. Скучно.",
-                "🍜 Мама греет суп. Дима ничего неприличного не слышит.",
-                "📺 Из комнаты мамы доносится сериал. Никаких признаков клиентов."
-            ];
-            const randomQuiet = sadListens[Math.floor(Math.random() * sadListens.length)];
-            addLog(`👂 Дима прислушивается: ${randomQuiet}`, 'dima');
+        
+        // ---------- ОТРИСОВКА ВСЕГО ЭТОГО БЕЗУМИЯ (Стиль Subway Surfers x Газан) ----------
+        function draw(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // --- НЕБО И ГОРОДСКОЙ ФОН ---
+            const gradSky = ctx.createLinearGradient(0, 0, 0, GROUND_Y-40);
+            gradSky.addColorStop(0, "#16213e");
+            gradSky.addColorStop(0.7, "#2c5a6e");
+            ctx.fillStyle = gradSky;
+            ctx.fillRect(0, 0, canvas.width, GROUND_Y-30);
+            // облака/граффити
+            ctx.fillStyle = "#ffbc6e88";
+            ctx.font = "bold 26monospace";
+            ctx.fillText("🚇 67 RUSH", 30, 70);
+            ctx.fillStyle = "#c2e0f0aa";
+            ctx.fillText("GAZAN 6IX 9EVEN", canvas.width-200, 110);
+            // рельсы и пути
+            ctx.fillStyle = "#4a3b28";
+            ctx.fillRect(0, GROUND_Y-10, canvas.width, 12);
+            ctx.fillStyle = "#a97c50";
+            for(let i=0;i<LANE_COUNT+1;i++){
+                ctx.fillRect(i*LANE_WIDTH-4, GROUND_Y-15, 8, 28);
+            }
+            // шпалы
+            ctx.fillStyle = "#6b4c3b";
+            for(let i=0;i<15;i++){
+                ctx.fillRect(i*70, GROUND_Y-5, 40, 10);
+            }
+            // металлические рельсы
+            ctx.fillStyle = "#ddccaa";
+            for(let r=0;r<LANE_COUNT;r++){
+                ctx.fillRect(r*LANE_WIDTH+10, GROUND_Y-3, LANE_WIDTH-20, 6);
+            }
+            
+            // --- ОТРИСОВКА ПОЕЗДОВ (ВАГОНЫ СТИЛЬ METRO) ---
+            for(let obs of obstacles){
+                // вагон метро
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "#b87333";
+                ctx.fillRect(obs.x, obs.y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
+                ctx.fillStyle = "#e09d32";
+                ctx.fillRect(obs.x+6, obs.y+8, OBSTACLE_WIDTH-12, 12);
+                ctx.fillStyle = "#2c2c2c";
+                ctx.fillRect(obs.x+8, obs.y+28, 12, 16);
+                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+28, 12, 16);
+                ctx.fillStyle = "#f5cb5c";
+                ctx.font = "bold 26px monospace";
+                ctx.fillText("🚆", obs.x+12, obs.y+48);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 12px monospace";
+                ctx.fillText("67", obs.x+18, obs.y+24);
+                // Опасные искры
+                ctx.fillStyle = "#ff7700";
+                ctx.beginPath();
+                for(let s=0;s<3;s++) ctx.rect(obs.x+5+s*12, obs.y+OBSTACLE_HEIGHT-6, 4, 6);
+                ctx.fill();
+            }
+            
+            // --- ГАЗАН (бегун с характером) ---
+            const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
+            // тень
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "black";
+            // рисуем крутого персонажа
+            ctx.fillStyle = "#f5a623";
+            ctx.beginPath();
+            ctx.roundRect(playerX, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
+            ctx.fill();
+            ctx.fillStyle = "#3b2a1f";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.3, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(playerX+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.arc(playerX+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
+            ctx.fill();
+            // брови
+            ctx.fillStyle = "#000";
+            ctx.fillRect(playerX+GAZAN_SIZE*0.5, playerY+GAZAN_SIZE*0.2, 12, 4);
+            ctx.fillRect(playerX+GAZAN_SIZE*0.2, playerY+GAZAN_SIZE*0.2, 12, 4);
+            // золотая цепь
+            ctx.fillStyle = "#ffd966";
+            ctx.fillRect(playerX+15, playerY+42, 22, 6);
+            // кепка
+            ctx.fillStyle = "#dc143c";
+            ctx.fillRect(playerX+8, playerY-10, 38, 14);
+            ctx.fillStyle = "#ff0000aa";
+            ctx.fillRect(playerX+18, playerY-6, 18, 8);
+            // надпись GAZAN
+            ctx.font = "bold 10px monospace";
+            ctx.fillStyle = "black";
+            ctx.fillText("GAZAN", playerX+8, playerY+GAZAN_SIZE-8);
+            // кроссовки
+            ctx.fillStyle = "#333";
+            ctx.fillRect(playerX+8, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.fillRect(playerX+28, playerY+GAZAN_SIZE-8, 14, 8);
+            ctx.shadowBlur = 0;
+            
+            // эффект скорости (линии)
+            for(let s=0; s<5; s++){
+                ctx.beginPath();
+                ctx.moveTo(playerX-10-s*2, playerY+GAZAN_SIZE/2);
+                ctx.lineTo(playerX-22-s*3, playerY+GAZAN_SIZE/2 + (s%2===0? -6:6));
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = `rgba(255,200,100,${0.7-s*0.1})`;
+                ctx.stroke();
+            }
+            
+            // --- ПОКАЗАТЕЛЬ СКОРОСТИ / ПОДСКАЗКА ---
+            ctx.font = "bold 18px monospace";
+            ctx.fillStyle = "#FFF5cf";
+            ctx.shadowBlur = 2;
+            ctx.fillText(`🚄 SPEED: ${Math.floor(gameSpeed*2)}`, canvas.width-130, 45);
+            ctx.fillStyle = "#ffbc6e";
+            ctx.fillText(`🏁 ЛЕВО/ПРАВО`, canvas.width-150, 85);
+            
+            // полоса очков и бонусов
+            if(!gameRunning){
+                ctx.font = "bold 30px monospace";
+                ctx.fillStyle = "#ffddbb";
+                ctx.shadowBlur = 8;
+                ctx.fillText("❌ GAME OVER ❌", canvas.width/2-130, canvas.height/2-30);
+                ctx.font = "18px monospace";
+                ctx.fillStyle = "yellow";
+                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", canvas.width/2-130, canvas.height/2+30);
+            }
+            
+            // отрисовка подсказки свайпа (пальцы)
+            if(gameRunning && frameCounter % 45 < 20){
+                ctx.fillStyle = "#fff9c4cc";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText("👆 СВАЙП / КНОПКИ 👆", canvas.width-180, GROUND_Y-18);
+            }
         }
-    }
-
-    // полный сброс игры
-    function resetGame() {
-        // сброс таймера если мама в отъезде
-        if (awayTimer) {
-            clearTimeout(awayTimer);
-            awayTimer = null;
+        
+        // --- Управление (Смена полосы) ---
+        function moveLeft(){
+            if(!gameRunning) return;
+            if(lane > 0) lane--;
+            else lane = 0;
         }
-        money = 0;
-        momStatus = "home";
-        currentEncounter = null;
-        updateMoneyUI();
-        // очистка логов
-        logArea.innerHTML = '';
-        addLog("🔄 ИГРА ПЕРЕЗАПУЩЕНА. Дима и мама заново.", 'mom');
-        addLog("🔇 Дима сидит в своей комнате. Пока ничего не происходит.", 'dima');
-        addLog("👩 Мама дома, ждёт 'клиентов'...", 'mom');
-    }
-
-    // принудительный возврат мамы (если зависнет - защита)
-    function safetyCheck() {
-        if (momStatus === 'away' && awayTimer === null) {
-            console.warn("системный фикс: мама ушла без таймера");
-            momStatus = 'home';
-            addLog("⚠️ Сбой симуляции устранён: мама вернулась домой (системный фикс).", 'mom');
+        
+        function moveRight(){
+            if(!gameRunning) return;
+            if(lane < LANE_COUNT-1) lane++;
+            else lane = LANE_COUNT-1;
         }
-    }
-
-    // инициализация кнопок
-    document.getElementById('walkBtn').addEventListener('click', () => {
-        startMomWalk();
-        safetyCheck();
-    });
-    document.getElementById('listenBtn').addEventListener('click', () => {
-        listenAsDima();
-        safetyCheck();
-    });
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        resetGame();
-        safetyCheck();
-    });
-
-    // каждые 5 секунд проверка целостности
-    setInterval(() => {
-        safetyCheck();
-    }, 5000);
-
-    // дополнительный эффект: если мама на свидании слишком долго (больше 20 сек) то принудительный возврат
-    setInterval(() => {
-        if (momStatus === 'away' && currentEncounter && (Date.now() - currentEncounter.startTime) > 22000) {
-            if (awayTimer) clearTimeout(awayTimer);
-            momStatus = 'home';
-            addLog("⚠️ [СИСТЕМА] Максимальное время встречи. Мама вернулась домой.", 'mom');
-            updateMoneyUI();
-            currentEncounter = null;
-            awayTimer = null;
+        
+        // Рестарт игры
+        function restartGame(){
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            frameCounter = 0;
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            // не сбрасываем рекорд, он уже в bestScore
         }
-    }, 1000);
+        
+        // --- Обработчики событий (мышь/тач/клавиатура) ---
+        function handleKey(e){
+            const key = e.key;
+            if(key === 'ArrowLeft' || key === 'Left' || key === 'a' || key === 'A'){
+                e.preventDefault();
+                moveLeft();
+            } else if(key === 'ArrowRight' || key === 'Right' || key === 'd' || key === 'D'){
+                e.preventDefault();
+                moveRight();
+            }
+            // пробел для рестарта удобно
+            if(key === ' ' || key === 'Space' || key === 'r' || key === 'R'){
+                if(!gameRunning){
+                    e.preventDefault();
+                    restartGame();
+                }
+            }
+        }
+        
+        // для мобильных тач-событий (но у нас есть кнопки, дополнительный свайп по холсту)
+        let touchStartX = 0;
+        function handleTouchStart(e){
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            touchStartX = touch.clientX - rect.left;
+        }
+        
+        function handleTouchMove(e){
+            if(!gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            let currentX = touch.clientX - rect.left;
+            let diff = currentX - touchStartX;
+            if(Math.abs(diff) > 25){
+                if(diff > 0){
+                    moveRight();
+                } else {
+                    moveLeft();
+                }
+                touchStartX = currentX; // сброс для предотвращения спама
+            }
+        }
+        
+        // Добавим поддержку мыши (драг)
+        let mouseDownX = 0;
+        let isDragging = false;
+        function handleMouseDown(e){
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            mouseDownX = e.clientX - rect.left;
+            isDragging = true;
+        }
+        
+        function handleMouseMove(e){
+            if(!isDragging || !gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            let currentX = e.clientX - rect.left;
+            let diff = currentX - mouseDownX;
+            if(Math.abs(diff) > 25){
+                if(diff > 0){
+                    moveRight();
+                } else {
+                    moveLeft();
+                }
+                mouseDownX = currentX;
+            }
+        }
+        
+        function handleMouseUp(e){
+            isDragging = false;
+        }
+        
+        // --- Анимация игрового цикла ---
+        function gameLoop(){
+            updateGame();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Привязка всех UI элементов и старт
+        window.addEventListener('load', ()=>{
+            // кнопки
+            document.getElementById('leftBtn').addEventListener('click', (e)=>{
+                e.preventDefault();
+                moveLeft();
+            });
+            document.getElementById('rightBtn').addEventListener('click', (e)=>{
+                e.preventDefault();
+                moveRight();
+            });
+            document.getElementById('restartBtn').addEventListener('click', ()=>{
+                restartGame();
+            });
+            
+            // клавиатура
+            window.addEventListener('keydown', handleKey);
+            // тач и мышь для свайпа по канвасу (аналог сабвея)
+            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+            canvas.addEventListener('touchend', (e)=> e.preventDefault());
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            // запрет контекстного меню на канвасе
+            canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+            
+            // старт!
+            restartGame();
+            gameLoop();
+        });
+        
+        // Вспомогательный метод roundRect (если не поддерживается)
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x+r, y);
+                this.lineTo(x+w-r, y);
+                this.quadraticCurveTo(x+w, y, x+w, y+r);
+                this.lineTo(x+w, y+h-r);
+                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                this.lineTo(x+r, y+h);
+                this.quadraticCurveTo(x, y+h, x, y+h-r);
+                this.lineTo(x, y+r);
+                this.quadraticCurveTo(x, y, x+r, y);
+                return this;
+            };
+        }
+    })();
 </script>
 </body>
 </html>
