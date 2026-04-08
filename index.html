@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>KROPOTKIN — Полная версия | ВСЁ РАБОТАЕТ</title>
+    <title>KROPOTKIN — ВСЁ РАБОТАЕТ</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
 
         body {
             background: #0a0c12;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             overflow-x: hidden;
             color: #ffffff;
             touch-action: manipulation;
@@ -140,10 +140,10 @@
         .tab-btn {
             background: #1b1e30;
             border: none;
-            padding: 12px 18px;
+            padding: 12px 12px;
             border-radius: 60px;
             color: #ddddff;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             flex: 1;
@@ -161,7 +161,7 @@
             flex-direction: column;
             gap: 12px;
             margin-top: 15px;
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
         }
         .work-item, .shop-item, .property-item, .car-item, .business-item {
@@ -175,9 +175,9 @@
             gap: 12px;
         }
         .work-info, .shop-info, .property-info, .car-info, .business-info { flex: 1; }
-        .work-name, .shop-name, .property-name, .car-name, .business-name { font-size: 18px; font-weight: bold; color: #ffcc88; }
-        .work-desc, .shop-desc, .property-desc, .car-desc, .business-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
-        .work-stats, .shop-price, .property-price, .car-price, .business-profit { font-size: 12px; color: #6fcf97; margin-top: 4px; }
+        .work-name, .shop-name, .property-name, .car-name, .business-name { font-size: 16px; font-weight: bold; color: #ffcc88; }
+        .work-desc, .shop-desc, .property-desc, .car-desc, .business-desc { font-size: 12px; color: #aaa; margin-top: 4px; }
+        .work-stats, .shop-price, .property-price, .car-price, .business-profit { font-size: 11px; color: #6fcf97; margin-top: 4px; }
 
         .minigame-area {
             background: #0a0e1a;
@@ -254,7 +254,7 @@
 <div id="registerScreen" class="screen active">
     <div class="glass-card" style="max-width: 450px; margin: 20px auto;">
         <div class="logo">KROPOTKIN</div>
-        <div style="text-align: center; margin-bottom: 20px; color: #ffcc88;">⚡ ВСЁ РАБОТАЕТ | 50+ МАШИН ⚡</div>
+        <div style="text-align: center; margin-bottom: 20px; color: #ffcc88;">⚡ ВСЁ РАБОТАЕТ ⚡</div>
         <input type="text" id="nicknameInput" class="input-field" placeholder="Ник (Имя_Фамилия)">
         <div class="server-list">
             <div class="server-item selected" data-server="KROPOTKIN#1">#1</div>
@@ -332,7 +332,7 @@
         </div>
     </div>
 
-    <!-- ГАРАЖ (МАШИНЫ) -->
+    <!-- ГАРАЖ -->
     <div id="carsTab" class="tab-content" style="display: none;">
         <div class="glass-card">
             <h3 style="color:#ffcc88;">🚗 МОЙ ГАРАЖ</h3>
@@ -356,7 +356,7 @@
         </div>
     </div>
 
-    <!-- БИЗНЕС (ПАССИВНЫЙ ДОХОД) -->
+    <!-- БИЗНЕС -->
     <div id="businessTab" class="tab-content" style="display: none;">
         <div class="glass-card">
             <h3 style="color:#ffcc88;">💼 МОЙ БИЗНЕС</h3>
@@ -396,7 +396,7 @@
         </div>
     </div>
 
-    <!-- РАСШИРЕННЫЙ МАГАЗИН -->
+    <!-- МАГАЗИН -->
     <div id="shopTab" class="tab-content" style="display: none;">
         <div class="glass-card">
             <h3 style="color:#ffcc88;">🏪 РАСШИРЕННЫЙ МАГАЗИН</h3>
@@ -438,7 +438,7 @@
         businesses: []
     };
     
-    // ==================== ВСЕ МАШИНЫ (50+ штук) ====================
+    // ==================== ВСЕ МАШИНЫ ====================
     const carsForSale = [
         { name: "ZAZ 968", price: 20000, class: "Низкий", speed: 100, desc: "Запорожец" },
         { name: "VAZ 1111 (Ока)", price: 30000, class: "Низкий", speed: 110, desc: "Малолитражка" },
@@ -540,7 +540,6 @@
     ];
     
     // Состояние мини-игр
-    let currentMinigame = null;
     let memorySequence = [];
     let memoryUserInput = [];
     
@@ -780,7 +779,6 @@
             alert("Сначала выберите работу во вкладке Работы!");
             return;
         }
-        currentMinigame = job.minigame;
         const area = document.getElementById('minigameArea');
         const title = document.getElementById('minigameJobName');
         title.innerHTML = `🎮 ${job.name} — мини-игра`;
@@ -1042,6 +1040,11 @@
         const saved = localStorage.getItem('kropotkin_save');
         if(saved) try { const data = JSON.parse(saved); if(data.player) player = data.player; } catch(e){}
         updateUI();
+        renderWorkList();
+        renderCarLists();
+        renderPropertyLists();
+        renderBusinessLists();
+        renderShop();
     }
     
     // ==================== ЗАГРУЗКА ====================
@@ -1102,11 +1105,6 @@
             userIdSpan.innerText = Math.floor(Math.random()*9000+1000);
             updateUI();
             loadGame();
-            renderWorkList();
-            renderShop();
-            renderCarLists();
-            renderPropertyLists();
-            renderBusinessLists();
             
             document.getElementById('startBlackjackBtn').onclick = startBlackjack;
             document.getElementById('bjHitBtn').onclick = playerHit;
@@ -1153,6 +1151,13 @@
             item.classList.add('selected');
         });
     });
+    
+    // Первоначальный рендер
+    renderWorkList();
+    renderCarLists();
+    renderPropertyLists();
+    renderBusinessLists();
+    renderShop();
 </script>
 </body>
 </html>
