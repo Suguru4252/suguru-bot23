@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ГАЗАН СИКС СЕВЕЕН 🔥 | Беги как Subway Surfers</title>
+    <title>ГАЗАН СИКС СЕВЕЕН | 67 RUSH</title>
     <style>
         * {
             user-select: none;
@@ -183,6 +183,10 @@
             padding: 2px 12px;
             font-family: monospace;
         }
+        
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -201,7 +205,7 @@
     </div>
     <div id="statusMessage" class="status-text" style="display: none;">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
 </div>
-<footer>⚡ ГАЗАН СИКС СЕВЕЕН | СВАЙПАЙ/КЛИКАЙ → УВОРАЧИВАЙСЯ ОТ ПОЕЗДОВ!</footer>
+<footer>⚡ ГАЗАН СИКС СЕВЕЕН | 67 | СВАЙП/КЛИК → УВОРАЧИВАЙСЯ ОТ ПОЕЗДОВ!</footer>
 
 <script>
     (function(){
@@ -209,34 +213,100 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Размеры дорожек и колёсики стиля Subway Surfers
+        // Размеры дорожек
         const LANE_COUNT = 3;
-        const LANE_WIDTH = canvas.width / LANE_COUNT;  // 200px
-        const GROUND_Y = canvas.height - 70;   // линия рельс
+        const LANE_WIDTH = canvas.width / LANE_COUNT;
+        const GROUND_Y = canvas.height - 70;
         
-        // Параметры ГАЗАНА
+        // Газан
         const GAZAN_SIZE = 48;
-        let lane = 1;          // 0 левая, 1 центр, 2 правая
-        let playerY = GROUND_Y - GAZAN_SIZE + 6; // немножко над рельсами
+        let lane = 1;
+        let playerY = GROUND_Y - GAZAN_SIZE + 6;
         
-        // Препятствия (поезда / вагоны)
+        // Препятствия
         let obstacles = [];
-        const OBSTACLE_WIDTH = 52;
-        const OBSTACLE_HEIGHT = 58;
+        const OBSTACLE_WIDTH = 54;
+        const OBSTACLE_HEIGHT = 62;
         let frameCounter = 0;
-        let spawnGap = 55;      // через сколько фреймов спавнить новый поезд
-        let gameSpeed = 5;      // скорость движения поездов вниз (к игроку)
+        let spawnGap = 55;
+        let gameSpeed = 5;
         let score = 0;
         let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
         let gameRunning = true;
-        let invincibleFlash = 0;   // для анимации мигания при столкновении (не используется, просто визуал)
         
-        // UI элементы
-        const scoreSpan = document.getElementById('scoreValue');
-        const bestSpan = document.getElementById('bestValue');
-        const statusMsgDiv = document.getElementById('statusMessage');
+        // --- СИСТЕМА СМЕНЫ МИРА (рандомные счёта) ---
+        let currentWorldTheme = 0;      // 0,1,2,3 разные цветовые схемы
+        let nextThemeScore = 0;          // при каком счёте сменится мир
+        let worldChangeFlag = false;
         
-        bestSpan.innerText = bestScore;
+        // Определяем цветовые палитры для миров
+        const WORLDS = [
+            {   // МИР 0: КЛАССИЧЕСКИЙ САБВЕЙ (ночь/город)
+                skyTop: "#0f2027",
+                skyBottom: "#2c5364",
+                railColor: "#8b5a2b",
+                trackColor: "#5d3a1a",
+                obstacleMain: "#b87333",
+                obstacleDetail: "#e09d32",
+                textGlow: "#ffbc6e",
+                platformColor: "#4a3b28"
+            },
+            {   // МИР 1: КИСЛОТНЫЙ / НЕОН (киберпанк)
+                skyTop: "#1a0033",
+                skyBottom: "#4a1d6d",
+                railColor: "#ff44cc",
+                trackColor: "#aa22aa",
+                obstacleMain: "#ff2266",
+                obstacleDetail: "#ffaa44",
+                textGlow: "#ff66ff",
+                platformColor: "#331155"
+            },
+            {   // МИР 2: ПУСТЫНЯ / ЗАКАТ (жаркий)
+                skyTop: "#c94b1f",
+                skyBottom: "#ffb347",
+                railColor: "#b87c4f",
+                trackColor: "#9c5e2c",
+                obstacleMain: "#cd7a32",
+                obstacleDetail: "#e6a865",
+                textGlow: "#ffe6b3",
+                platformColor: "#bc6f3a"
+            },
+            {   // МИР 3: ЛЕДЯНОЙ / АРКТИКА
+                skyTop: "#b3e5fc",
+                skyBottom: "#e1f5fe",
+                railColor: "#4fc3f7",
+                trackColor: "#0288d1",
+                obstacleMain: "#81d4fa",
+                obstacleDetail: "#ffffff",
+                textGlow: "#e0f7fa",
+                platformColor: "#a6c9e0"
+            }
+        ];
+        
+        // Функция смены мира (вызывается при достижении порога)
+        function changeWorldRandomly() {
+            let newTheme = currentWorldTheme;
+            while(newTheme === currentWorldTheme && WORLDS.length > 1) {
+                newTheme = Math.floor(Math.random() * WORLDS.length);
+            }
+            currentWorldTheme = newTheme;
+            // Устанавливаем следующий порог смены мира (рандомный счёт + от 450 до 1100 очков)
+            let increment = 450 + Math.floor(Math.random() * 700);
+            nextThemeScore = Math.floor(score) + increment;
+            worldChangeFlag = true;
+        }
+        
+        // Проверка смены мира каждый кадр
+        function checkWorldTransition() {
+            if(gameRunning && Math.floor(score) >= nextThemeScore && nextThemeScore > 0) {
+                changeWorldRandomly();
+            }
+        }
+        
+        // Получить текущую палитру
+        function getCurrentPalette() {
+            return WORLDS[currentWorldTheme];
+        }
         
         // --- Вспомогательные функции ---
         function updateScoreUI(){
@@ -248,33 +318,31 @@
             }
         }
         
-        // Спавн нового поезда (стиль "вагон метро")
+        // Спавн поезда с цифрой 67
         function spawnObstacle(){
             let laneIdx = Math.floor(Math.random() * LANE_COUNT);
-            // проверка, чтобы не было двух одинаковых препятствий слишком близко (баланс)
             let lastInLane = obstacles.find(obs => obs.lane === laneIdx && obs.y > canvas.height - 150);
-            if(lastInLane) return; // немного уменьшаем спам
+            if(lastInLane) return;
             obstacles.push({
                 x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_WIDTH/2),
                 lane: laneIdx,
                 y: -OBSTACLE_HEIGHT,
                 width: OBSTACLE_WIDTH,
-                height: OBSTACLE_HEIGHT
+                height: OBSTACLE_HEIGHT,
+                numberEffect: Math.random() > 0.3   // для вариативности отрисовки 67
             });
         }
         
-        // Обновление логики
         function updateGame(){
             if(!gameRunning) return;
             
-            // 1. Движение препятствий
+            // Движение препятствий
             for(let i=0; i<obstacles.length; i++){
                 obstacles[i].y += gameSpeed;
             }
-            // удаляем уехавшие за экран или ниже игровой зоны
-            obstacles = obstacles.filter(obs => obs.y < canvas.height + 100);
+            obstacles = obstacles.filter(obs => obs.y < canvas.height + 120);
             
-            // 2. Спавн с динамической частотой (чем выше счёт, тем чаще поезда)
+            // Спавн
             let dynamicSpawn = Math.max(28, spawnGap - Math.floor(score / 380));
             if(frameCounter >= dynamicSpawn){
                 spawnObstacle();
@@ -283,10 +351,10 @@
                 frameCounter++;
             }
             
-            // 3. Увеличение сложности: скорость растёт с очками (но не более 13)
-            gameSpeed = Math.min(5 + Math.floor(score / 700), 13);
+            // Скорость
+            gameSpeed = Math.min(5 + Math.floor(score / 650), 13.5);
             
-            // 4. КОЛЛИЗИЯ (прямоугольники)
+            // Коллизия
             const playerRect = {
                 x: lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2),
                 y: playerY,
@@ -305,89 +373,94 @@
                     playerRect.x + playerRect.w > obsRect.x &&
                     playerRect.y < obsRect.y + obsRect.h &&
                     playerRect.y + playerRect.h > obsRect.y){
-                    // СТОЛКНОВЕНИЕ! КОНЕЦ ИГРЫ
                     gameRunning = false;
                     statusMsgDiv.style.display = "block";
-                    // эффект тряски можно добавить, но оставим классику
+                    restartBtn.classList.remove("hidden");   // показываем кнопку при смерти
                     break;
                 }
             }
             
-            // 5. Начисление очков за время жизни (чем дальше, тем больше)
             if(gameRunning){
-                score += 0.25;
+                score += 0.28;
                 updateScoreUI();
+                checkWorldTransition();  // проверяем, не пора ли сменить мир
             }
         }
         
-        // ---------- ОТРИСОВКА ВСЕГО ЭТОГО БЕЗУМИЯ (Стиль Subway Surfers x Газан) ----------
-        function draw(){
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // --- НЕБО И ГОРОДСКОЙ ФОН ---
+        // ---------- ОТРИСОВКА МИРА С ТЕКУЩЕЙ ПАЛИТРОЙ ----------
+        function drawBackground() {
+            const pal = getCurrentPalette();
             const gradSky = ctx.createLinearGradient(0, 0, 0, GROUND_Y-40);
-            gradSky.addColorStop(0, "#16213e");
-            gradSky.addColorStop(0.7, "#2c5a6e");
+            gradSky.addColorStop(0, pal.skyTop);
+            gradSky.addColorStop(0.7, pal.skyBottom);
             ctx.fillStyle = gradSky;
             ctx.fillRect(0, 0, canvas.width, GROUND_Y-30);
-            // облака/граффити
-            ctx.fillStyle = "#ffbc6e88";
+            
+            // Декоративные облака/граффити в стиле мира
+            ctx.fillStyle = pal.textGlow + "aa";
             ctx.font = "bold 26monospace";
             ctx.fillText("🚇 67 RUSH", 30, 70);
-            ctx.fillStyle = "#c2e0f0aa";
+            ctx.fillStyle = pal.textGlow + "cc";
             ctx.fillText("GAZAN 6IX 9EVEN", canvas.width-200, 110);
-            // рельсы и пути
-            ctx.fillStyle = "#4a3b28";
+            
+            // Платформа и рельсы
+            ctx.fillStyle = pal.platformColor;
             ctx.fillRect(0, GROUND_Y-10, canvas.width, 12);
-            ctx.fillStyle = "#a97c50";
+            ctx.fillStyle = pal.railColor;
             for(let i=0;i<LANE_COUNT+1;i++){
                 ctx.fillRect(i*LANE_WIDTH-4, GROUND_Y-15, 8, 28);
             }
-            // шпалы
-            ctx.fillStyle = "#6b4c3b";
+            ctx.fillStyle = pal.trackColor;
             for(let i=0;i<15;i++){
                 ctx.fillRect(i*70, GROUND_Y-5, 40, 10);
             }
-            // металлические рельсы
             ctx.fillStyle = "#ddccaa";
             for(let r=0;r<LANE_COUNT;r++){
                 ctx.fillRect(r*LANE_WIDTH+10, GROUND_Y-3, LANE_WIDTH-20, 6);
             }
-            
-            // --- ОТРИСОВКА ПОЕЗДОВ (ВАГОНЫ СТИЛЬ METRO) ---
+        }
+        
+        function drawObstacles() {
+            const pal = getCurrentPalette();
             for(let obs of obstacles){
-                // вагон метро
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = "#b87333";
+                // Рисуем стилизованный вагон с цифрой 67
+                ctx.fillStyle = pal.obstacleMain;
+                ctx.shadowBlur = 4;
                 ctx.fillRect(obs.x, obs.y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
-                ctx.fillStyle = "#e09d32";
-                ctx.fillRect(obs.x+6, obs.y+8, OBSTACLE_WIDTH-12, 12);
+                ctx.fillStyle = pal.obstacleDetail;
+                ctx.fillRect(obs.x+6, obs.y+10, OBSTACLE_WIDTH-12, 14);
                 ctx.fillStyle = "#2c2c2c";
-                ctx.fillRect(obs.x+8, obs.y+28, 12, 16);
-                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+28, 12, 16);
-                ctx.fillStyle = "#f5cb5c";
-                ctx.font = "bold 26px monospace";
-                ctx.fillText("🚆", obs.x+12, obs.y+48);
-                ctx.fillStyle = "white";
-                ctx.font = "bold 12px monospace";
-                ctx.fillText("67", obs.x+18, obs.y+24);
-                // Опасные искры
-                ctx.fillStyle = "#ff7700";
+                ctx.fillRect(obs.x+8, obs.y+32, 12, 16);
+                ctx.fillRect(obs.x+OBSTACLE_WIDTH-20, obs.y+32, 12, 16);
+                
+                // ГЛАВНОЕ: цифра 67 с характерным стилем
+                ctx.font = `bold ${Math.floor(OBSTACLE_WIDTH * 0.55)}px "Courier New", monospace`;
+                ctx.fillStyle = "#fff6b0";
+                ctx.shadowBlur = 3;
+                ctx.shadowColor = "#ff7700";
+                ctx.fillText("67", obs.x + 10, obs.y + 52);
+                ctx.font = "bold 18px monospace";
+                ctx.fillStyle = "#ffeb99";
+                ctx.fillText("⚡", obs.x + OBSTACLE_WIDTH-16, obs.y + 28);
+                // дополнительные детали
+                ctx.fillStyle = "#ffcc44";
                 ctx.beginPath();
-                for(let s=0;s<3;s++) ctx.rect(obs.x+5+s*12, obs.y+OBSTACLE_HEIGHT-6, 4, 6);
+                for(let s=0;s<3;s++) ctx.rect(obs.x+6+s*12, obs.y+OBSTACLE_HEIGHT-8, 5, 7);
                 ctx.fill();
             }
-            
-            // --- ГАЗАН (бегун с характером) ---
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawGazans() {
             const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
-            // тень
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 8;
             ctx.shadowColor = "black";
-            // рисуем крутого персонажа
+            // тело
             ctx.fillStyle = "#f5a623";
             ctx.beginPath();
             ctx.roundRect(playerX, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
             ctx.fill();
+            // лицо
             ctx.fillStyle = "#3b2a1f";
             ctx.beginPath();
             ctx.arc(playerX+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 8, 0, Math.PI*2);
@@ -398,29 +471,23 @@
             ctx.arc(playerX+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
             ctx.arc(playerX+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 3, 0, Math.PI*2);
             ctx.fill();
-            // брови
             ctx.fillStyle = "#000";
             ctx.fillRect(playerX+GAZAN_SIZE*0.5, playerY+GAZAN_SIZE*0.2, 12, 4);
             ctx.fillRect(playerX+GAZAN_SIZE*0.2, playerY+GAZAN_SIZE*0.2, 12, 4);
-            // золотая цепь
             ctx.fillStyle = "#ffd966";
             ctx.fillRect(playerX+15, playerY+42, 22, 6);
-            // кепка
             ctx.fillStyle = "#dc143c";
             ctx.fillRect(playerX+8, playerY-10, 38, 14);
             ctx.fillStyle = "#ff0000aa";
             ctx.fillRect(playerX+18, playerY-6, 18, 8);
-            // надпись GAZAN
-            ctx.font = "bold 10px monospace";
+            ctx.font = "bold 12px monospace";
             ctx.fillStyle = "black";
             ctx.fillText("GAZAN", playerX+8, playerY+GAZAN_SIZE-8);
-            // кроссовки
             ctx.fillStyle = "#333";
             ctx.fillRect(playerX+8, playerY+GAZAN_SIZE-8, 14, 8);
             ctx.fillRect(playerX+28, playerY+GAZAN_SIZE-8, 14, 8);
             ctx.shadowBlur = 0;
-            
-            // эффект скорости (линии)
+            // эффект скорости
             for(let s=0; s<5; s++){
                 ctx.beginPath();
                 ctx.moveTo(playerX-10-s*2, playerY+GAZAN_SIZE/2);
@@ -429,27 +496,36 @@
                 ctx.strokeStyle = `rgba(255,200,100,${0.7-s*0.1})`;
                 ctx.stroke();
             }
-            
-            // --- ПОКАЗАТЕЛЬ СКОРОСТИ / ПОДСКАЗКА ---
+        }
+        
+        function drawUIandEffects() {
+            const pal = getCurrentPalette();
             ctx.font = "bold 18px monospace";
             ctx.fillStyle = "#FFF5cf";
-            ctx.shadowBlur = 2;
             ctx.fillText(`🚄 SPEED: ${Math.floor(gameSpeed*2)}`, canvas.width-130, 45);
-            ctx.fillStyle = "#ffbc6e";
+            ctx.fillStyle = pal.textGlow;
             ctx.fillText(`🏁 ЛЕВО/ПРАВО`, canvas.width-150, 85);
             
-            // полоса очков и бонусов
-            if(!gameRunning){
-                ctx.font = "bold 30px monospace";
-                ctx.fillStyle = "#ffddbb";
-                ctx.shadowBlur = 8;
-                ctx.fillText("❌ GAME OVER ❌", canvas.width/2-130, canvas.height/2-30);
-                ctx.font = "18px monospace";
-                ctx.fillStyle = "yellow";
-                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", canvas.width/2-130, canvas.height/2+30);
+            // Индикатор смены мира (красивый эффект)
+            if(worldChangeFlag) {
+                ctx.font = "bold 14px monospace";
+                ctx.fillStyle = "#ffdd88";
+                ctx.shadowBlur = 6;
+                ctx.fillText("✨ МИР СМЕНИЛСЯ! ✨", canvas.width/2-85, GROUND_Y-45);
+                worldChangeFlag = false;
+                setTimeout(()=>{ worldChangeFlag = false; }, 500);
             }
             
-            // отрисовка подсказки свайпа (пальцы)
+            if(!gameRunning){
+                ctx.font = "bold 32px monospace";
+                ctx.fillStyle = "#ffddbb";
+                ctx.shadowBlur = 8;
+                ctx.fillText("❌ GAME OVER ❌", canvas.width/2-130, canvas.height/2-40);
+                ctx.font = "16px monospace";
+                ctx.fillStyle = "yellow";
+                ctx.fillText("НАЖМИ 'ГАЗАН, ПОГНАЛИ!'", canvas.width/2-125, canvas.height/2+25);
+            }
+            
             if(gameRunning && frameCounter % 45 < 20){
                 ctx.fillStyle = "#fff9c4cc";
                 ctx.font = "bold 14px monospace";
@@ -457,20 +533,24 @@
             }
         }
         
-        // --- Управление (Смена полосы) ---
+        function draw() {
+            drawBackground();
+            drawObstacles();
+            drawGazans();
+            drawUIandEffects();
+        }
+        
+        // --- Управление ---
         function moveLeft(){
             if(!gameRunning) return;
             if(lane > 0) lane--;
-            else lane = 0;
         }
         
         function moveRight(){
             if(!gameRunning) return;
             if(lane < LANE_COUNT-1) lane++;
-            else lane = LANE_COUNT-1;
         }
         
-        // Рестарт игры
         function restartGame(){
             gameRunning = true;
             score = 0;
@@ -480,10 +560,16 @@
             frameCounter = 0;
             updateScoreUI();
             statusMsgDiv.style.display = "none";
-            // не сбрасываем рекорд, он уже в bestScore
+            restartBtn.classList.add("hidden");   // прячем кнопку при живом геймплее
+            
+            // Сброс миров: первый мир случайный, но классический приятный
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            // Устанавливаем первый порог смены мира (чтобы не сразу, а через 500-1000 очков)
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            worldChangeFlag = false;
         }
         
-        // --- Обработчики событий (мышь/тач/клавиатура) ---
+        // --- Обработчики ---
         function handleKey(e){
             const key = e.key;
             if(key === 'ArrowLeft' || key === 'Left' || key === 'a' || key === 'A'){
@@ -493,16 +579,12 @@
                 e.preventDefault();
                 moveRight();
             }
-            // пробел для рестарта удобно
-            if(key === ' ' || key === 'Space' || key === 'r' || key === 'R'){
-                if(!gameRunning){
-                    e.preventDefault();
-                    restartGame();
-                }
+            if((key === ' ' || key === 'Space' || key === 'r' || key === 'R') && !gameRunning){
+                e.preventDefault();
+                restartGame();
             }
         }
         
-        // для мобильных тач-событий (но у нас есть кнопки, дополнительный свайп по холсту)
         let touchStartX = 0;
         function handleTouchStart(e){
             e.preventDefault();
@@ -519,16 +601,12 @@
             let currentX = touch.clientX - rect.left;
             let diff = currentX - touchStartX;
             if(Math.abs(diff) > 25){
-                if(diff > 0){
-                    moveRight();
-                } else {
-                    moveLeft();
-                }
-                touchStartX = currentX; // сброс для предотвращения спама
+                if(diff > 0) moveRight();
+                else moveLeft();
+                touchStartX = currentX;
             }
         }
         
-        // Добавим поддержку мыши (драг)
         let mouseDownX = 0;
         let isDragging = false;
         function handleMouseDown(e){
@@ -545,11 +623,8 @@
             let currentX = e.clientX - rect.left;
             let diff = currentX - mouseDownX;
             if(Math.abs(diff) > 25){
-                if(diff > 0){
-                    moveRight();
-                } else {
-                    moveLeft();
-                }
+                if(diff > 0) moveRight();
+                else moveLeft();
                 mouseDownX = currentX;
             }
         }
@@ -558,16 +633,15 @@
             isDragging = false;
         }
         
-        // --- Анимация игрового цикла ---
-        function gameLoop(){
-            updateGame();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
+        // --- UI элементы и старт---
+        const scoreSpan = document.getElementById('scoreValue');
+        const bestSpan = document.getElementById('bestValue');
+        const statusMsgDiv = document.getElementById('statusMessage');
+        const restartBtn = document.getElementById('restartBtn');
         
-        // Привязка всех UI элементов и старт
+        bestSpan.innerText = bestScore;
+        
         window.addEventListener('load', ()=>{
-            // кнопки
             document.getElementById('leftBtn').addEventListener('click', (e)=>{
                 e.preventDefault();
                 moveLeft();
@@ -576,28 +650,40 @@
                 e.preventDefault();
                 moveRight();
             });
-            document.getElementById('restartBtn').addEventListener('click', ()=>{
-                restartGame();
+            restartBtn.addEventListener('click', ()=>{
+                if(!gameRunning) restartGame();
             });
             
-            // клавиатура
             window.addEventListener('keydown', handleKey);
-            // тач и мышь для свайпа по канвасу (аналог сабвея)
             canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
             canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
             canvas.addEventListener('touchend', (e)=> e.preventDefault());
             canvas.addEventListener('mousedown', handleMouseDown);
             canvas.addEventListener('mousemove', handleMouseMove);
             canvas.addEventListener('mouseup', handleMouseUp);
-            // запрет контекстного меню на канвасе
             canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
             
-            // старт!
-            restartGame();
+            // ИНИЦИАЛИЗАЦИЯ: при первом запуске игра активна, кнопка рестарта спрятана
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            lane = 1;
+            frameCounter = 0;
+            currentWorldTheme = Math.floor(Math.random() * WORLDS.length);
+            nextThemeScore = 500 + Math.floor(Math.random() * 700);
+            updateScoreUI();
+            statusMsgDiv.style.display = "none";
+            restartBtn.classList.add("hidden");   // прячем кнопку при старте
+            
+            function gameLoop(){
+                updateGame();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
             gameLoop();
         });
         
-        // Вспомогательный метод roundRect (если не поддерживается)
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
                 if (w < 2 * r) r = w / 2;
@@ -617,4 +703,4 @@
     })();
 </script>
 </body>
-</html>
+    </html>
