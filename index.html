@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NetErrror - BIG Бибеджон: Мобильная версия</title>
+    <title>NetErrror - BIG Бибеджон</title>
     <style>
         * {
             user-select: none;
@@ -18,7 +18,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', 'MS Gothic', monospace;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
             touch-action: none;
             padding: 8px;
@@ -40,7 +40,7 @@
             margin: 0 auto;
             border-radius: 20px;
             box-shadow: 0 0 0 3px #2b4a3a, 0 10px 30px black;
-            cursor: crosshair;
+            touch-action: none;
             width: 100%;
             height: auto;
             background: #2a6b55;
@@ -65,12 +65,10 @@
             color: #f7e05e;
             font-weight: bold;
             font-size: 0.85rem;
-            white-space: nowrap;
         }
         .lives {
             color: #ff7777;
             font-size: 1.1rem;
-            letter-spacing: 2px;
             background: #1f2c1a;
             padding: 4px 10px;
             border-radius: 30px;
@@ -81,7 +79,6 @@
             padding: 4px 10px;
             border-radius: 30px;
             font-weight: bold;
-            font-size: 0.85rem;
         }
         .rage-bar {
             width: 100px;
@@ -94,7 +91,7 @@
             width: 0%;
             height: 100%;
             background: #ff4444;
-            transition: width 0.1s linear;
+            transition: width 0.1s;
         }
         .power-bar {
             width: 80px;
@@ -114,16 +111,17 @@
             left: 12px;
             right: 12px;
             bottom: 12px;
-            background: rgba(0,0,0,0.92);
+            background: rgba(0,0,0,0.95);
             border-radius: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10;
+            z-index: 20;
             backdrop-filter: blur(8px);
             text-align: center;
             padding: 20px;
+            pointer-events: auto;
         }
         .start-btn {
             background: #ffaa44;
@@ -137,6 +135,8 @@
             border: none;
             width: 80%;
             max-width: 250px;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
         .start-btn:active { transform: scale(0.96); background: #ffcc66; }
         .overlay-title {
@@ -149,21 +149,6 @@
             color: #aaffaa;
             font-size: 0.8rem;
             margin: 5px 0;
-        }
-        .controls-hint {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #aacf9a;
-            background: rgba(0,0,0,0.5);
-            padding: 4px;
-            border-radius: 20px;
-            width: 90%;
-            margin: 0 auto;
-            pointer-events: none;
         }
         @media (max-width: 600px) {
             .ui-panel { gap: 6px; padding: 6px 10px; }
@@ -179,7 +164,7 @@
 </head>
 <body>
 <div class="game-container" id="gameContainer">
-    <canvas id="gameCanvas" width="1000" height="550" style="width:100%; height:auto; max-width:1000px; aspect-ratio:1000/550"></canvas>
+    <canvas id="gameCanvas" width="1000" height="550" style="width:100%; height:auto; aspect-ratio:1000/550; touch-action:none"></canvas>
     <div class="ui-panel">
         <div class="stat">🐒 <span id="scoreSpan">0</span></div>
         <div class="lives" id="livesSpan">❤️❤️❤️</div>
@@ -195,7 +180,6 @@
         <button class="start-btn" id="startGameBtn">🍆 ИГРАТЬ 🍆</button>
     </div>
 </div>
-<div class="controls-hint" id="controlsHint">💪 ЗАЖМИ → ПРИЦЕЛ → ОТПУСТИ | КОКОС = ВЗРЫВ</div>
 
 <script>
     (function(){
@@ -204,12 +188,12 @@
         const startOverlay = document.getElementById('startOverlay');
         const startBtn = document.getElementById('startGameBtn');
         
-        // РАЗМЕРЫ CANVAS фиксированные для логики, но отображается масштабированно
         const CANVAS_W = 1000;
         const CANVAS_H = 550;
         canvas.width = CANVAS_W;
         canvas.height = CANVAS_H;
         
+        // Игровые переменные
         let bibedjon = { x: CANVAS_W/2, y: CANVAS_H - 70, width: 70, height: 80 };
         let projectiles = [];
         let enemies = [];
@@ -222,7 +206,6 @@
         let score = 0;
         let lives = 3;
         let gameActive = false;
-        let gameOverFlag = false;
         let combo = 1;
         let comboCounter = 0;
         let lastHitFrame = 0;
@@ -278,10 +261,10 @@
         }
         
         const enemyTypes = [
-            { name: "пехотинец", color1: "#6a8eb0", color2: "#4a6e90", hp: 1, speed: 0.8, width: 44, height: 48, score: 10, icon: "🤖", eyes: "#ffffff" },
-            { name: "щитовик", color1: "#5a9e6a", color2: "#3a7e4a", hp: 2, speed: 0.6, width: 48, height: 52, score: 20, icon: "🛡️", eyes: "#ffffaa" },
-            { name: "ниндзя", color1: "#cc6666", color2: "#aa4444", hp: 1, speed: 1.4, width: 42, height: 46, score: 15, icon: "⚡", eyes: "#ff6666" },
-            { name: "летающий", color1: "#eebb55", color2: "#cc9933", hp: 1, speed: 1.0, width: 46, height: 40, score: 1"🕊️", flying: true, eyes: "#ffeeaa" }
+            { name: "пехотинец", color1: "#6a8eb0", color2: "#4a6e90", hp: 1, speed: 0.8, width: 44, height: 48, score: 10, icon: "🤖", eyes: "#fff" },
+            { name: "щитовик", color1: "#5a9e6a", color2: "#3a7e4a", hp: 2, speed: 0.6, width: 48, height: 52, score: 20, icon: "🛡️", eyes: "#ffa" },
+            { name: "ниндзя", color1: "#cc6666", color2: "#aa4444", hp: 1, speed: 1.4, width: 42, height: 46, score: 15, icon: "⚡", eyes: "#f66" },
+            { name: "летающий", color1: "#eebb55", color2: "#cc9933", hp: 1, speed: 1.0, width: 46, height: 40, score: 12, icon: "🕊️", flying: true, eyes: "#fea" }
         ];
         
         function spawnEnemy() {
@@ -290,7 +273,7 @@
             let x = 40 + Math.random() * (CANVAS_W - 80);
             let y = type.flying ? 60 + Math.random() * 100 : 40;
             enemies.push({
-                x: x, y: y, type: type, hp: type.hp, maxHp: type.hp,
+                x, y, type, hp: type.hp, maxHp: type.hp,
                 width: type.width, height: type.height, speed: type.speed,
                 flying: type.flying || false, wobble: 0
             });
@@ -323,7 +306,7 @@
         
         function spawnCoconutGrenade(x, y) {
             if (grenade) return;
-            grenade = { x: x, y: y, radius: 20, active: true };
+            grenade = { x, y, radius: 20 };
         }
         
         function explodeGrenade() {
@@ -371,7 +354,7 @@
                     { name: "shotgun", color: "#ffaa66", effect: "shotgun", duration: 5000, icon: "🔫" }
                 ];
                 let type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-                bonuses.push({ x: x, y: y, type: type, radius: 14 });
+                bonuses.push({ x, y, type, radius: 14 });
             }
         }
         
@@ -417,7 +400,7 @@
                 for(let i=-1;i<=1;i++) {
                     let angle = Math.atan2(normY, normX) + i*0.25;
                     let vx = Math.cos(angle)*speed, vy = Math.sin(angle)*speed;
-                    projectiles.push({ x: fromX, y: fromY, vx: vx, vy: vy, radius: 10 });
+                    projectiles.push({ x: fromX, y: fromY, vx, vy, radius: 10 });
                 }
             } else {
                 projectiles.push({ x: fromX, y: fromY, vx: normX*speed, vy: normY*speed, radius: 12 });
@@ -437,7 +420,6 @@
         
         function fullRestart() {
             gameActive = true;
-            gameOverFlag = false;
             score = 0;
             lives = 3;
             combo = 1;
@@ -471,7 +453,7 @@
             let spawnDelay = Math.max(600, 1100 - Math.floor(score/8));
             if (!boss && now - lastEnemySpawn > spawnDelay) { spawnEnemy(); lastEnemySpawn = now; }
             
-            if (score >= 20 && !boss && !gameOverFlag) spawnBoss();
+            if (score >= 20 && !boss) spawnBoss();
             if (boss) updateBoss(delta);
             
             for(let i=0; i<enemies.length; i++) {
@@ -490,7 +472,6 @@
                     screenShake = 8;
                     if (lives <= 0) {
                         gameActive = false;
-                        gameOverFlag = true;
                         startOverlay.style.display = 'flex';
                         startOverlay.querySelector('.overlay-title').innerHTML = '💀 ТЫ ПРОИГРАЛ 💀';
                         startBtn.innerText = '🔄 ЕЩЁ РАЗ';
@@ -557,7 +538,6 @@
             if (screenShake > 0) screenShake -= delta * 50;
         }
         
-        // ТАЧ-СОБЫТИЯ с правильными координатами
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = CANVAS_W / rect.width;
@@ -636,7 +616,10 @@
             if (e.code === 'Space' || e.code === 'KeyR') { e.preventDefault(); fireRage(); }
         });
         
-        startBtn.addEventListener('click', () => { fullRestart(); });
+        startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fullRestart();
+        });
         
         // ========== РЕНДЕР ==========
         function drawBackground() {
