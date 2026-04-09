@@ -3,510 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - ТРАССА СУСЛОВА: КЛИКАЙ ПО КРУГЛИШКАМ</title>
+    <title>NetErrror - Соседняя комната: Дима слушает</title>
     <style>
         * {
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
+
         body {
-            margin: 0;
+            background: linear-gradient(145deg, #0a0c14 0%, #03050a 100%);
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f0a, #030803);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', 'MS Gothic', monospace;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-        .game-container {
-            background: #1a2a14;
-            border-radius: 48px;
+            font-family: 'Segoe UI', 'Courier New', monospace;
             padding: 16px;
-            box-shadow: 0 20px 40px black, inset 0 1px 2px rgba(255,255,255,0.1);
-            border: 2px solid #7a9f6a;
+            margin: 0;
         }
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 24px;
-            box-shadow: 0 0 0 4px #2b3b24, 0 10px 30px black;
-            cursor: pointer;
+
+        .game-wrapper {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            border-radius: 64px;
+            border: 1px solid #ff66aa50;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
+            padding: 20px;
         }
-        .ui-panel {
-            margin-top: 16px;
+
+        /* две комнаты + профили */
+        .duo-rooms {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+
+        .room-card {
+            flex: 1;
+            min-width: 280px;
+            background: #0f121ed9;
+            border-radius: 48px;
+            padding: 20px 16px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .mom-area {
+            border-bottom: 5px solid #ff77aa;
+            background: radial-gradient(circle at 20% 10%, #2a1a2c, #0a020f);
+        }
+
+        .dima-area {
+            border-bottom: 5px solid #55ccff;
+            background: radial-gradient(circle at 90% 20%, #141c2c, #02050c);
+        }
+
+        .person {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            background: #0c140acc;
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            font-size: 80px;
+            filter: drop-shadow(0 8px 12px black);
+            transition: transform 0.2s ease;
+        }
+
+        .mom-avatar { text-shadow: 0 0 8px #ff66aa; }
+        .dima-avatar { text-shadow: 0 0 5px #33aaff; }
+
+        .person h3 {
+            margin: 8px 0 4px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ffbb88, #ff88aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dima-area .person h3 {
+            background: linear-gradient(135deg, #aaffff, #88ccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .status-badge {
+            background: #000000aa;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .money-counter {
+            background: #1e1a2f;
+            padding: 10px;
             border-radius: 60px;
-            border: 1px solid #8ab87a;
-        }
-        .stat {
-            background: #1f2c1a;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: #eaffc4;
+            text-align: center;
             font-weight: bold;
-            font-size: 1.2rem;
-            text-shadow: 0 0 4px #3c8c2a;
+            font-size: 1.7rem;
+            color: #f5c542;
+            margin: 12px 0;
+            border: 1px solid gold;
             font-family: monospace;
         }
+
         button {
-            background: #4a6e3a;
+            background: #2a1e3a;
             border: none;
-            color: #f0ffd0;
+            font-family: inherit;
             font-weight: bold;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-family: monospace;
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: 0.07s linear;
+            transition: 0.08s linear;
+            margin-top: 8px;
+            width: 100%;
             box-shadow: 0 3px 6px black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
+
         button:active {
-            transform: scale(0.94);
-            background: #6e9658;
+            transform: scale(0.96);
         }
-        .warning {
-            font-size: 0.7rem;
-            background: #2a1f1a;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #ffb878;
+
+        .mom-action-btn {
+            background: #b32d5a;
+            border-bottom: 3px solid #ffb347;
+        }
+
+        .listen-btn {
+            background: #1f6390;
+            border-bottom: 3px solid #aaffdd;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .listen-animation {
+            animation: pulseListen 0.4s ease;
+        }
+
+        @keyframes pulseListen {
+            0% { transform: scale(1); background: #1f6390; }
+            50% { transform: scale(1.03); background: #4aa3df; box-shadow: 0 0 12px #88ddff; }
+            100% { transform: scale(1); }
+        }
+
+        .dima-listen-effect {
+            animation: dimaToWall 0.35s cubic-bezier(0.2, 1.2, 0.8, 1);
+        }
+
+        @keyframes dimaToWall {
+            0% { transform: translateX(0px) rotate(0deg); }
+            50% { transform: translateX(15px) rotate(5deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+
+        .room-sounds {
+            background: #03030ad9;
+            border-radius: 36px;
+            padding: 14px;
+            margin: 16px 0 0;
+            min-height: 200px;
+            max-height: 260px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            border: 1px solid #ff66aa30;
+        }
+
+        .sound-entry {
+            border-left: 4px solid #ff99cc;
+            padding: 8px 10px;
+            margin: 8px 0;
+            background: #ffffff08;
+            border-radius: 18px;
+            color: #f0f0f0;
+            font-family: monospace;
+        }
+
+        .dima-sound {
+            border-left-color: #55ccff;
+            background: #11335530;
+        }
+
+        .mom-sound {
+            border-left-color: #ffaa88;
+        }
+
+        .reset-btn {
+            background: #2c2c3a;
+            width: auto;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #aaa6;
         }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="950" height="520"></canvas>
-        <div class="ui-panel">
-            <div class="stat">🚗 СУСЛОВ: <span id="suslovLevel">0</span></div>
-            <div class="stat">🍆 МИНЕТЫ: <span id="bjTotal">0</span></div>
-            <button id="resetBtn">💀 СБРОС ТРАССЫ</button>
-            <div class="warning">⚠️ КЛИКАЙ ПО КРУГЛИШКАМ (+5%)</div>
+<div class="game-wrapper">
+    <div class="duo-rooms">
+        <!-- КОМНАТА МАМЫ (кухня/гостиная) -->
+        <div class="room-card mom-area">
+            <div class="person">
+                <div class="avatar mom-avatar">💃👩</div>
+                <h3>МАМА (Люда)</h3>
+                <div class="status-badge" id="momStatusText">🏠 Дома (готовит)</div>
+            </div>
+            <div class="money-counter">
+                💰 <span id="moneyAmount">0</span> ₽
+            </div>
+            <button id="callManBtn" class="mom-action-btn">🚪🔞 ПРИВЕСТИ МУЖИКА</button>
+            <div style="font-size: 0.7rem; margin-top: 10px; text-align: center;">*клиент приходит → мама делает минет, ебется, грязные стоны*</div>
+            <!-- зона звуков из комнаты мамы (что там происходит) -->
+            <div class="room-sounds" id="momSoundsArea">
+                <div class="sound-entry mom-sound">🍳 Мама на кухне, гремит посудой.</div>
+                <div class="sound-entry mom-sound">📺 Смотрит сериал, скучно...</div>
+            </div>
+        </div>
+
+        <!-- КОМНАТА ДИМЫ с анимацией прикладывания уха -->
+        <div class="room-card dima-area">
+            <div class="person">
+                <div class="avatar dima-avatar" id="dimaAvatar">🧑🎧</div>
+                <h3>ДИМА (сын)</h3>
+                <div class="status-badge">🔇 сидит в своей комнате</div>
+            </div>
+            <button id="listenWallBtn" class="listen-btn">👂 ПРИЛОЖИТЬ УХО К СТЕНЕ И ПОДСЛУШИВАТЬ</button>
+            <div class="flex-btns">
+                <button id="resetGameBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
+            </div>
+            <!-- что слышит Дима -->
+            <div class="room-sounds" id="dimaHearArea">
+                <div class="sound-entry dima-sound">🔇 Дима сидит тихо, слышит только шаги мамы на кухне.</div>
+            </div>
+            <div style="font-size:0.7rem; margin-top:8px;">👇 приложи ухо — услышишь всё: минет, стоны, шлепки, крики</div>
         </div>
     </div>
+    <footer>NetErrror || симуляция без границ. Дима подслушивает маму с клиентами. Каждый акт приносит деньги.</footer>
 </div>
 
 <script>
-    // ========== МИНЕТ + КЛИКАБЕЛЬНЫЕ КРУГЛИШКИ ==========
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // ----- СУСЛОВ НА ТРАССЕ -----
-    let suslov = {
-        x: 180, y: 320, dir: 1, speed: 1.3,
-        w: 52, h: 56, walkCycle: 0,
-        isHitching: true
-    };
-    
-    // ----- МИНИ-ИГРА -----
-    let minigame = {
-        active: false,
-        pleasure: 0,
-        maxPleasure: 100,
-        headBobAngle: 0,
-        mouthWide: 0,
-        screenFlash: 0,
-        finishFlash: 0,
-        finishTextTimer: 0,
-        finishResetTimer: 0,   // таймер на перезапуск после КОНЧИЛ
-        fallingDrops: []       // падающие круглишки
-    };
-    
-    let suslovLevel = 0;
-    let totalBj = 0;
-    
-    const suslovLevelSpan = document.getElementById('suslovLevel');
-    const bjTotalSpan = document.getElementById('bjTotal');
-    const resetBtn = document.getElementById('resetBtn');
-    
-    let roadOffset = 0;
-    let lastDropSpawn = 0;
-    
-    function updateUI() {
-        suslovLevelSpan.innerText = suslovLevel;
-        bjTotalSpan.innerText = totalBj;
-    }
-    
-    let audioCtx = null;
-    function playSound(freq = 660) {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-        osc.frequency.value = freq;
-        gain.gain.value = 0.2;
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
-        osc.start();
-        osc.stop(now + 0.2);
-    }
-    
-    function startMinigame() {
-        if (minigame.active) return;
-        minigame.active = true;
-        minigame.pleasure = 0;
-        minigame.headBobAngle = 0;
-        minigame.mouthWide = 0;
-        minigame.screenFlash = 0;
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
-        minigame.fallingDrops = [];
-        lastDropSpawn = 0;
-        suslov.isHitching = false;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    
-    function completeMinigame() {
-        if (!minigame.active) return;
-        minigame.active = false;
-        totalBj++;
-        suslovLevel++;
-        updateUI();
-        
-        // Эффект КОНЧИЛ: белый экран + чёрная надпись на 5 секунд
-        minigame.finishFlash = 35;
-        minigame.finishTextTimer = 150;  // ~5 секунд (30fps * 5)
-        minigame.finishResetTimer = 150; // через 5 секунд перезапуск
-        minigame.fallingDrops = [];
-        suslov.isHitching = false; // Суслов стоит на месте
-        
-        playSound(880);
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-    
-    // Добавление удовольствия
-    function addPleasure(amount) {
-        if (!minigame.active) return;
-        minigame.pleasure = Math.min(minigame.pleasure + amount, minigame.maxPleasure);
-        minigame.mouthWide = 16;
-        minigame.screenFlash = 8;
-        playSound(520);
-        
-        if (navigator.vibrate) navigator.vibrate(30);
-        
-        if (minigame.pleasure >= minigame.maxPleasure) {
-            completeMinigame();
-        }
-    }
-    
-    // СПАВН КРУГЛИШКИ
-    function spawnDrop() {
-        if (!minigame.active) return;
-        let x = 50 + Math.random() * (canvas.width - 100);
-        minigame.fallingDrops.push({
-            x: x,
-            y: 30,
-            radius: 20,
-            speed: 1.0 + Math.random() * 1.8
-        });
-    }
-    
-    function updateFallingDrops(delta) {
-        if (!minigame.active) return;
-        let now = Date.now();
-        // спавн каждые 0.7-1.2 секунды
-        if (now - lastDropSpawn > 700 + Math.random() * 500) {
-            spawnDrop();
-            lastDropSpawn = now;
-        }
-        
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            d.y += d.speed * delta * 60;
-            if (d.y > canvas.height - 70) {
-                minigame.fallingDrops.splice(i,1);
-                i--;
+    // -------------------- СОСТОЯНИЕ ИГРЫ --------------------
+    let money = 0;
+    let momState = "home_idle";     // home_idle, with_man (делает минет/ебется)
+    let manTimer = null;
+    let currentAct = null;          // детали секса
+
+    // элементы UI
+    const moneySpan = document.getElementById('moneyAmount');
+    const momStatusSpan = document.getElementById('momStatusText');
+    const momSoundsDiv = document.getElementById('momSoundsArea');
+    const dimaHearDiv = document.getElementById('dimaHearArea');
+    const dimaAvatar = document.getElementById('dimaAvatar');
+
+    // ---- библиотека грязных фраз/звуков для разных действий мамы с мужиком ----
+    const sexActions = [
+        { action: "минет", sounds: ["👅 *чавкающие звуки* Мама делает минет на коленях", "🤤 *слышно как мужик стонет* О да, глубже...", "💦 *звуки глубокого минета, мама давится*", "👄 'Так, сосни ещё, шлюха' — командует мужик", "😩 *громкий всхлип* Мама: 'Ммм...'"] },
+        { action: "ебля в позе раком", sounds: ["🍑 *шлепки, влажные удары* Маму трахают сзади", "🔞 *скрип дивана* 'Да, еби её сильнее!'", "😫 *мамин стон* 'О да, еще, ТРАХАЙ'", "💢 *мужик дышит* Какая же ты шлюха, мать", "🥵 *оргазмические крики* Аааааххх!"] },
+        { action: "классическая ебля", sounds: ["🎙️ *тяжелое дыхание, стоны* 'Раздвинь ноги шире'", "🔊 *крики* О да-да-да, кончаю! ", "💸 *звук денег* 'получай, шалава'", "😈 *диалог* 'Сколько за анал? - Плати больше'", "🤪 *мамин визг* Ещё, не останавливайся!!!"] },
+        { action: "групповуха", sounds: ["👥 *два мужика* 'отсоси у моего друга', мама стонет", "💢 *звуки двойного проникновения*", "🤑 'за двойную цену поработай', звон монет", "😵 *мама задыхается от минета и ебли*"] },
+        { action: "жесткий секс", sounds: ["⛓️ *пощёчины, стоны* 'Да, грязная сучка'", "😫 *мама кричит от боли/удовольствия*", "💥 *удары тел, шлепки по лицу*", "🧴 *звук смазки и влажные толчки*"] }
+    ];
+
+    // фразы когда мама одна дома (кухня/быт)
+    const homeSounds = [
+        "🍳 Мама на кухне жарит яичницу, напевает песенку.",
+        "📞 Мама говорит по телефону подруге: 'устала, денег нет...'",
+        "🧹 Мама пылесосит ковёр в гостиной.",
+        "📺 Смотрит 'Дом-2', смеётся в одиночестве.",
+        "🚿 Мама принимает душ, мычит мелодию.",
+        "🍷 Открывает бутылку дешёвого вина, вздыхает."
+    ];
+
+    // звуки которые слышит ДИМА (при подслушивании)
+    function generateHearFromMom() {
+        if (momState === "with_man" && currentAct) {
+            // выбираем случайный звук из текущего акта (секс/минет)
+            const actionPack = currentAct.sounds;
+            const randomIdx = Math.floor(Math.random() * actionPack.length);
+            let rawSound = actionPack[randomIdx];
+            // иногда добавляем специфику про деньги
+            if (Math.random() < 0.4) {
+                rawSound += " 💰 (мама получила чаевые)";
+                let bonus = Math.floor(Math.random() * 300) + 100;
+                money += bonus;
+                updateMoney();
+                addMomLog(`💵 БОНУС! Пока Дима слушал, мужик кинул ${bonus}₽.`, true);
             }
+            return `👂 ДИМА СЛЫШИТ через стену: ${rawSound}`;
+        } 
+        else if (momState === "with_man" && !currentAct) {
+            // fallback
+            return `👂 ДИМА СЛЫШИТ: странные влажные звуки и стоны... мама явно с мужиком`;
+        }
+        else {
+            // мама одна
+            const randomHome = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            return `👂 ДИМА СЛЫШИТ: ${randomHome} (никаких мужчин)`;
         }
     }
-    
-    // ПРОВЕРКА КЛИКА ПО КРУГЛИШКЕ
-    function handleDropClick(canvasX, canvasY) {
-        for(let i=0; i<minigame.fallingDrops.length; i++) {
-            let d = minigame.fallingDrops[i];
-            let dx = canvasX - d.x;
-            let dy = canvasY - d.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < d.radius) {
-                // ПОПАЛ! +5%
-                addPleasure(5);
-                minigame.fallingDrops.splice(i,1);
-                return true;
-            }
-        }
-        return false;
+
+    // добавить лог в зону мамы (что происходит в её комнате)
+    function addMomLog(message, isBonus = false) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry mom-sound';
+        div.innerHTML = isBonus ? `✨ ${message}` : `💬 ${message}`;
+        momSoundsDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (momSoundsDiv.children.length > 22) momSoundsDiv.removeChild(momSoundsDiv.firstChild);
     }
-    
-    function isPointInSuslov(x, y) {
-        return (x >= suslov.x && x <= suslov.x + suslov.w &&
-                y >= suslov.y - 8 && y <= suslov.y + suslov.h);
+
+    // добавить лог в зону Димы (что он слышит)
+    function addDimaLog(message) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry dima-sound';
+        div.innerHTML = message;
+        dimaHearDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (dimaHearDiv.children.length > 24) dimaHearDiv.removeChild(dimaHearDiv.firstChild);
     }
-    
-    function handleCanvasClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
+
+    function updateMoney() {
+        moneySpan.innerText = Math.floor(money);
+    }
+
+    // завершить визит мужика
+    function endManVisit() {
+        if (momState !== "with_man") return;
+        if (manTimer) clearTimeout(manTimer);
+        const earnedThisTime = Math.floor(Math.random() * 900) + 500;
+        money += earnedThisTime;
+        updateMoney();
+        momState = "home_idle";
+        currentAct = null;
+        momStatusSpan.innerHTML = "🏠 Дома (готовит/отдыхает)";
+        addMomLog(`🚪 Мужик ушёл, мама заработала ${earnedThisTime}₽. Теперь она одна на кухне.`, false);
+        addMomLog(`🍲 Мама переодевается и идёт пить чай.`);
+        // также добавим для димы намёк
+        addDimaLog(`🔇 Звуки за стеной затихли. Дима слышит только шаги мамы. Мужик ушёл.`);
+        // обновляем аватарку мамы
+    }
+
+    // начать акт с мужиком (минет, ебля и тп)
+    function bringMan() {
+        if (momState === "with_man") {
+            addMomLog(`⚠️ Мама уже трахается с клиентом! Дождись окончания.`, false);
+            return;
         }
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
+        // выбираем случайный тип секса
+        const randomAct = sexActions[Math.floor(Math.random() * sexActions.length)];
+        currentAct = randomAct;
+        momState = "with_man";
+        momStatusSpan.innerHTML = "🔞 С КЛИЕНТОМ (делает минет, ебётся)";
         
-        if (minigame.active) {
-            // сначала проверяем попадание по круглишке
-            let hit = handleDropClick(canvasX, canvasY);
-            if (!hit) {
-                // клик мимо - ничего не происходит
-                // можно добавить звук промаха, но по задаче не нужно
+        const visitDuration = 8000 + Math.random() * 9000; // 8-17 секунд
+        addMomLog(`🚪🔞 ПРИШЁЛ МУЖИК! Мама сразу начала ${randomAct.action}. Слышны пошлые звуки.`, false);
+        addMomLog(`💢 (стонет, шлепки, неприличные фразы...)`, false);
+        
+        // показать в логах Димы первое уведомление
+        addDimaLog(`🚨 Дима услышал мужской голос и дверной звонок. Мама с кем-то зашла в комнату!`);
+        
+        if (manTimer) clearTimeout(manTimer);
+        manTimer = setTimeout(() => {
+            endManVisit();
+        }, visitDuration);
+        
+        // каждые 3 секунды во время акта автоматически пишем в комнату мамы грязные детали (опционально)
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        window.autoSexInterval = setInterval(() => {
+            if (momState === "with_man" && currentAct) {
+                const randomAuto = currentAct.sounds[Math.floor(Math.random() * currentAct.sounds.length)];
+                addMomLog(`🔞 ${randomAuto}`, false);
+            } else {
+                clearInterval(window.autoSexInterval);
             }
-        } else if (isPointInSuslov(canvasX, canvasY) && minigame.finishResetTimer === 0) {
-            startMinigame();
+        }, 4000);
+    }
+
+    // ---- ПОДСЛУШИВАНИЕ с анимацией Димы ----
+    function listenToWall() {
+        // Анимация: Дима прикладывает ухо к стене
+        dimaAvatar.classList.add('dima-listen-effect');
+        const listenBtn = document.getElementById('listenWallBtn');
+        listenBtn.classList.add('listen-animation');
+        setTimeout(() => {
+            dimaAvatar.classList.remove('dima-listen-effect');
+            listenBtn.classList.remove('listen-animation');
+        }, 350);
+        
+        // получаем что слышит Дима в зависимости от состояния мамы
+        const hearMessage = generateHearFromMom();
+        addDimaLog(hearMessage);
+        
+        // если мама с мужиком, дополнительный бонус - иногда подслушивание приносит деньги (типа нашёл в коридоре)
+        if (momState === "with_man" && Math.random() < 0.25) {
+            const foundMoney = Math.floor(Math.random() * 150) + 20;
+            money += foundMoney;
+            updateMoney();
+            addDimaLog(`💸 Дима нашёл в коридоре купюру (вероятно, мужик обронил) +${foundMoney}₽`);
+        }
+        
+        // Дополнительная реакция: если мама делает минет, то Дима слышит очень чётко
+        if (momState === "with_man" && currentAct && currentAct.action === "минет") {
+            addDimaLog(`😨 Дима отодвинулся от стены, услышав как мама давится членом. Отвращение и стыд.`);
+        }
+        if (momState === "with_man" && currentAct && currentAct.action.includes("групповуха")) {
+            addDimaLog(`🤯 Дима в шоке: похоже у мамы сразу несколько мужиков! Слышны голоса со всех сторон.`);
         }
     }
     
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+    // полный сброс игры
+    function fullReset() {
+        if (manTimer) clearTimeout(manTimer);
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        money = 0;
+        momState = "home_idle";
+        currentAct = null;
+        updateMoney();
+        momStatusSpan.innerHTML = "🏠 Дома (готовит)";
+        // очистить логи
+        momSoundsDiv.innerHTML = '';
+        dimaHearDiv.innerHTML = '';
+        addMomLog(`🔄 СИСТЕМА ПЕРЕЗАПУЩЕНА. Мама снова на кухне.`, false);
+        addMomLog(`🍳 Готовит ужин, Дима в своей комнате.`);
+        addDimaLog(`🔇 Тишина. Дима сидит в углу.`);
+        addDimaLog(`👂 Может приложить ухо к стене и подслушивать...`);
+        // добавим пару стандартных
+        addMomLog(`📺 Включила телевизор, ждёт "клиентов"`);
+    }
+    
+    // инициализация кнопок и начальное состояние
+    document.getElementById('callManBtn').addEventListener('click', () => {
+        bringMan();
+    });
+    document.getElementById('listenWallBtn').addEventListener('click', () => {
+        listenToWall();
+    });
+    document.getElementById('resetGameBtn').addEventListener('click', () => {
+        fullReset();
     });
     
-    resetBtn.addEventListener('click', () => {
-        minigame.active = false;
-        suslov = { x: 180, y: 320, dir: 1, speed: 1.3, w: 52, h: 56, walkCycle: 0, isHitching: true };
-        suslovLevel = 0;
-        totalBj = 0;
-        minigame.fallingDrops = [];
-        minigame.finishFlash = 0;
-        minigame.finishTextTimer = 0;
-        minigame.finishResetTimer = 0;
-        updateUI();
-    });
-    
-    function updateSuslov(delta) {
-        if (minigame.active) return;
-        if (minigame.finishResetTimer > 0) return; // после КОНЧИЛ стоит
-        let step = suslov.speed * delta * 60;
-        suslov.x += suslov.dir * step;
-        if (suslov.x <= 40) { suslov.x = 40; suslov.dir = 1; }
-        if (suslov.x >= canvas.width - suslov.w - 40) { suslov.x = canvas.width - suslov.w - 40; suslov.dir = -1; }
-        suslov.walkCycle = (suslov.walkCycle + delta * 14) % (Math.PI * 2);
-    }
-    
-    function updateEffects(delta) {
-        if (minigame.active) {
-            minigame.mouthWide = Math.max(4, minigame.mouthWide - delta * 40);
-            minigame.headBobAngle = (minigame.headBobAngle + delta * 20) % (Math.PI * 2);
-            if (minigame.screenFlash > 0) minigame.screenFlash -= delta * 100;
+    // имитация бытовых звуков когда мама одна (каждые 10-15 секунд)
+    setInterval(() => {
+        if (momState === "home_idle") {
+            const randomHomeSound = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            addMomLog(randomHomeSound, false);
         }
-        if (minigame.finishFlash > 0) minigame.finishFlash -= delta * 70;
-        if (minigame.finishTextTimer > 0) {
-            minigame.finishTextTimer -= delta * 30;
-            if (minigame.finishTextTimer <= 0) {
-                minigame.finishFlash = 0;
-            }
-        }
-        if (minigame.finishResetTimer > 0) {
-            minigame.finishResetTimer -= delta * 30;
-            if (minigame.finishResetTimer <= 0) {
-                // ПЕРЕЗАПУСК ИГРЫ: Суслов снова ходит, можно начинать новый минет
-                minigame.active = false;
-                suslov.isHitching = true;
-                minigame.finishFlash = 0;
-                minigame.finishTextTimer = 0;
-                minigame.fallingDrops = [];
-            }
-        }
-    }
+    }, 11000);
     
-    // ========== РЕНДЕР ==========
-    function drawRoad() {
-        ctx.fillStyle = "#2a3824";
-        ctx.fillRect(0, 280, canvas.width, 160);
-        ctx.fillStyle = "#d4c47a";
-        for(let i = 0; i < 14; i++) {
-            let dashX = (roadOffset + i * 65) % (canvas.width + 60) - 40;
-            ctx.fillRect(dashX, 352, 40, 6);
-        }
-        ctx.fillStyle = "#9e7e5a";
-        ctx.fillRect(0, 425, canvas.width, 14);
-        ctx.fillStyle = "#4a7a3a";
-        ctx.fillRect(0, 258, canvas.width, 24);
-        roadOffset = (roadOffset + 2.2) % 50;
-    }
-    
-    function drawCar() {
-        ctx.fillStyle = "#5a7a9a";
-        ctx.fillRect(70, 338, 72, 48);
-        ctx.fillStyle = "#3a4f66";
-        ctx.fillRect(80, 328, 22, 12);
-        ctx.fillStyle = "#1a1a2a";
-        ctx.beginPath();
-        ctx.arc(88, 378, 9, 0, Math.PI*2);
-        ctx.arc(126, 378, 9, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = "#ffcc66";
-        ctx.fillRect(135, 352, 8, 6);
-    }
-    
-    function drawFallingDrops() {
-        for(let d of minigame.fallingDrops) {
-            ctx.fillStyle = "#ffffaa";
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffaa66";
-            ctx.beginPath();
-            ctx.arc(d.x-4, d.y-4, 6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#000000cc";
-            ctx.font = "bold 16px monospace";
-            ctx.fillText("💦", d.x-10, d.y+6);
-            ctx.fillStyle = "#ffffffcc";
-            ctx.font = "bold 12px monospace";
-            ctx.fillText("+5%", d.x-12, d.y-12);
-            ctx.shadowBlur = 0;
-        }
-    }
-    
-    function drawSuslov() {
-        if (minigame.active) {
-            let centerX = suslov.x + suslov.w/2;
-            let centerY = suslov.y + 30;
-            let bobOffset = Math.sin(minigame.headBobAngle * 2.5) * 4;
-            let headY = -20 + bobOffset;
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            let tilt = -0.4 + Math.sin(minigame.headBobAngle) * 0.12;
-            ctx.rotate(tilt);
-            ctx.fillStyle = "#dba878";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 19, 28, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#3d5230";
-            ctx.fillRect(-18, 12, 36, 22);
-            ctx.fillStyle = "#f2cfa0";
-            ctx.beginPath();
-            ctx.arc(0, headY, 18, 0, Math.PI*2);
-            ctx.fill();
-            let mouthHeight = minigame.mouthWide;
-            let mouthYOffset = -12 + (mouthHeight / 2);
-            ctx.fillStyle = "#441122";
-            ctx.fillRect(-10, mouthYOffset - 3, 20, mouthHeight);
-            if (minigame.pleasure > 30) {
-                ctx.fillStyle = "#dd6688";
-                let tongueOut = Math.sin(Date.now() * 0.025) * 3;
-                ctx.fillRect(-5, mouthYOffset + mouthHeight - 6, 10, 8 + tongueOut);
-            }
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(-12, headY-10, 6, 5);
-            ctx.fillRect(6, headY-10, 6, 5);
-            ctx.restore();
-            
-            let barWidth = (minigame.pleasure / minigame.maxPleasure) * 100;
-            ctx.fillStyle = "#ff8844";
-            ctx.fillRect(suslov.x - 12, suslov.y - 32, barWidth, 10);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText(`${Math.floor(minigame.pleasure)}%`, suslov.x + 20, suslov.y - 34);
-        } else {
-            ctx.fillStyle = "#dcab7a";
-            ctx.fillRect(suslov.x + 8, suslov.y + 20, 36, 34);
-            ctx.fillStyle = "#f2cf9a";
-            ctx.beginPath();
-            ctx.arc(suslov.x + suslov.w/2, suslov.y + 16, 19, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#2a2a2a";
-            ctx.fillRect(suslov.x + suslov.w/2 - 11, suslov.y + 10, 6, 5);
-            ctx.fillRect(suslov.x + suslov.w/2 + 5, suslov.y + 10, 6, 5);
-            let leg = Math.sin(suslov.walkCycle * 3.2) * 7;
-            ctx.fillStyle = "#5f704a";
-            ctx.fillRect(suslov.x + 12, suslov.y + 48, 9, 10 + leg);
-            ctx.fillRect(suslov.x + 31, suslov.y + 48, 9, 10 - leg);
-            ctx.fillStyle = "#ffffcc";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("🍆 ПОДВЕЗИ ЗА МИНЕТ!", suslov.x - 12, suslov.y - 16);
-            ctx.fillStyle = "#dd9966";
-            ctx.font = "12px monospace";
-            ctx.fillText("(сын бляди)", suslov.x + 14, suslov.y - 2);
-        }
-    }
-    
-    function drawFinishEffect() {
-        if (minigame.finishFlash > 0) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, minigame.finishFlash / 12)})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        if (minigame.finishTextTimer > 0) {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 64px monospace";
-            ctx.shadowBlur = 0;
-            ctx.textAlign = "center";
-            ctx.fillText("КОНЧИЛ", canvas.width/2, canvas.height/2);
-            ctx.textAlign = "left";
-        }
-    }
-    
-    function drawFlash() {
-        if (minigame.screenFlash > 0 && minigame.finishFlash <= 0) {
-            ctx.fillStyle = `rgba(255, 220, 100, ${minigame.screenFlash / 12})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    
-    function drawInstructions() {
-        if (!minigame.active) return;
-        ctx.fillStyle = "#000000aa";
-        ctx.fillRect(0, 0, canvas.width, 42);
-        ctx.fillStyle = "#ffcc99";
-        ctx.font = "bold 14px monospace";
-        ctx.fillText("🍆 КЛИКАЙ ПО ЖЁЛТЫМ КРУГЛИШКАМ - КАЖДАЯ ДАЁТ +5% 🍆", canvas.width/2 - 270, 28);
-    }
-    
-    let lastTime = 0;
-    function gameLoop(now) {
-        let delta = Math.min(0.033, (now - lastTime) / 1000);
-        if (delta > 0.01) {
-            updateSuslov(delta);
-            updateFallingDrops(delta);
-            updateEffects(delta);
-        }
-        lastTime = now;
-        
-        drawRoad();
-        drawCar();
-        drawFallingDrops();
-        drawSuslov();
-        drawFlash();
-        drawFinishEffect();
-        drawInstructions();
-        
-        requestAnimationFrame(gameLoop);
-    }
-    
-    updateUI();
-    requestAnimationFrame(gameLoop);
+    // начальная загрузка
+    fullReset();
 </script>
 </body>
-</html>
+    </html>
