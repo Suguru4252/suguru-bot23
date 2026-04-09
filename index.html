@@ -1,562 +1,624 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>🥩 СИСЯ ДИМЫ ДАУНА · ПИТОМЕЦ ДАВИД</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', 'Comic Sans MS', 'Impact', sans-serif;
-      padding: 12px;
-    }
-
-    .game-container {
-      max-width: 550px;
-      width: 100%;
-      background: #fbe9c3;
-      background-image: radial-gradient(circle at 20% 30%, #fff3d6, #f0d5a8);
-      border-radius: 60px 60px 30px 30px;
-      box-shadow: 0 20px 0 #6b3e1f, 0 30px 30px rgba(0,0,0,0.4);
-      padding: 24px 18px 30px;
-      border: 4px solid #ac6f3c;
-      text-align: center;
-      transition: 0.2s;
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: 2.2rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      color: #3d1f09;
-      text-shadow: 5px 5px 0 #e7b87b, 2px 2px 0 #a6531e;
-      word-break: break-word;
-      transform: rotate(-1deg);
-    }
-
-    .dima-zone {
-      background: #b38b60;
-      padding: 20px 10px 25px;
-      border-radius: 80px 80px 40px 40px;
-      box-shadow: inset 0 -6px 0 #5d3a22, 0 12px 0 #4d2f19, 0 8px 15px black;
-      margin-bottom: 18px;
-      border: 3px solid #eeb574;
-    }
-
-    .sisi-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .sisya {
-      font-size: 7rem;
-      line-height: 1;
-      filter: drop-shadow(6px 10px 0 rgba(0,0,0,0.3));
-      cursor: pointer;
-      transition: 0.1s ease;
-      transform: scale(1);
-      background: #fad6b3;
-      padding: 0 10px 10px 10px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-    .sisya:active {
-      transform: scale(0.88);
-      filter: drop-shadow(2px 4px 0 #251608);
-    }
-
-    .sisi-stats {
-      background: #2c1a0b;
-      padding: 14px 10px;
-      border-radius: 50px;
-      box-shadow: inset 0 2px 6px black, 0 6px 0 #1a0f06;
-      color: #ffdead;
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin: 15px 0 5px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      border: 2px solid #bc8f4b;
-    }
-
-    .sisi-size {
-      background: #51321b;
-      padding: 8px 18px;
-      border-radius: 40px;
-      box-shadow: inset 0 2px 5px black;
-      color: #ffd78a;
-      text-shadow: 2px 2px 0 #1f0f03;
-    }
-
-    .crit-meter {
-      background: #241407;
-      border-radius: 30px;
-      padding: 6px 14px;
-      color: #ffb882;
-      font-size: 1.2rem;
-    }
-
-    .pet-david {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #6e4d2e;
-      margin: 20px 0 16px;
-      padding: 12px 18px;
-      border-radius: 100px 40px 100px 40px;
-      box-shadow: inset 0 1px 6px #eebb77, 0 8px 0 #3a281a, 0 5px 10px black;
-      border: 2px solid #efc48c;
-      color: #fff3db;
-      font-weight: bold;
-    }
-
-    .pet-avatar {
-      font-size: 3.5rem;
-      background: #2d1c0b;
-      padding: 5px 18px;
-      border-radius: 60px;
-      box-shadow: inset 0 0 0 3px #b47b44;
-      line-height: 1.2;
-    }
-
-    .pet-status {
-      text-align: right;
-    }
-
-    .pet-status div {
-      font-size: 1.3rem;
-      background: #1f1309;
-      padding: 6px 14px;
-      border-radius: 30px;
-      margin: 4px 0;
-      border: 1px solid #c89a5b;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-      margin: 8px 0 10px;
-    }
-
-    .btn {
-      background: #d68f3c;
-      border: none;
-      font-weight: bold;
-      font-size: 1.4rem;
-      padding: 12px 22px;
-      border-radius: 60px;
-      box-shadow: 0 7px 0 #7a451b, 0 4px 8px black;
-      color: #1f0f02;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: 0.07s;
-      border: 2px solid #feda9b;
-      flex: 1 0 140px;
-      letter-spacing: 2px;
-      transform: rotate(-0.5deg);
-    }
-
-    .btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 2px 0 #7a451b, 0 4px 8px black;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      filter: grayscale(0.5);
-      transform: none;
-      box-shadow: 0 5px 0 #5f371a;
-      pointer-events: none;
-    }
-
-    .crit-log {
-      background: #0c0702d0;
-      backdrop-filter: blur(2px);
-      padding: 10px 14px;
-      border-radius: 40px;
-      margin-top: 18px;
-      color: #ffe3ae;
-      font-size: 1.2rem;
-      font-weight: bold;
-      min-height: 70px;
-      border: 2px dashed #f3b35e;
-      box-shadow: inset 0 0 10px #37200b;
-      transition: 0.2s;
-    }
-
-    .glow-crit {
-      text-shadow: 0 0 15px rgb(255, 200, 0), 0 0 30px rgb(255, 80, 0);
-      animation: shake 0.3s;
-    }
-
-    @keyframes shake {
-      0%,100%{ transform: translateX(0); }
-      25%{ transform: translateX(-6px); }
-      75%{ transform: translateX(6px); }
-    }
-
-    .reset-area {
-      margin-top: 10px;
-      opacity: 0.9;
-    }
-
-    .small-btn {
-      background: #684527;
-      box-shadow: 0 4px 0 #3f2818;
-      font-size: 1rem;
-      padding: 8px 18px;
-    }
-
-    .counter-highlight {
-      color: #ffd966;
-      font-size: 2rem;
-    }
-
-    .flex-row {
-      display: flex;
-      gap: 6px;
-      align-items: baseline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🥚 СУСЛОВ: Полный Фарш</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1a3a2e 0%, #2d5a4a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            padding: 12px;
+        }
+        .game-container {
+            max-width: 520px;
+            width: 100%;
+            background: #efe6d5;
+            background-image: radial-gradient(circle at 20% 30%, #fff6e8, #e7d8be);
+            border-radius: 48px 48px 40px 40px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 8px rgba(255,255,240,0.8);
+            padding: 20px 18px 28px;
+            border: 4px solid #b49a7b;
+            text-align: center;
+        }
+        h1 {
+            margin: 0 0 4px;
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #3d2a1b;
+            text-shadow: 3px 3px 0 #c9aa7b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0 5px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .prestige-badge, .spent-badge, .combo-badge {
+            background: #6a4e2e;
+            color: #ffd966;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 2px solid #eebb55;
+            box-shadow: inset 0 1px 3px #3d2e1c, 0 3px 0 #3a281a;
+        }
+        .combo-badge {
+            background: #7a3e2e;
+            border-color: #ff9966;
+            color: #ffe0b3;
+        }
+        .suslov-area {
+            background: #b18b62;
+            background: linear-gradient(135deg, #ccb094, #a5835e);
+            border-radius: 100px 100px 50px 50px;
+            padding: 15px 8px 10px;
+            margin: 8px 0 15px;
+            border: 5px solid #5e3e28;
+            box-shadow: inset 0 -8px 0 #3f2c1c, inset 0 5px 8px #fbe9c3, 0 10px 0 #3f2c1c;
+        }
+        .suslov-emoji {
+            font-size: 120px;
+            line-height: 1;
+            filter: drop-shadow(6px 12px 4px rgba(0,0,0,0.2));
+            transition: transform 0.1s ease;
+            cursor: pointer;
+        }
+        .belly-bar-container {
+            background: #2c1e12;
+            padding: 6px 10px;
+            border-radius: 40px;
+            border: 3px solid #b49a7b;
+            box-shadow: inset 0 3px 5px #0f0a06, 0 5px 0 #3f2c1c;
+            margin: 8px 4px 4px;
+        }
+        .belly-label {
+            display: flex;
+            justify-content: space-between;
+            color: #ffecb3;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #1f140c;
+            padding: 0 6px 3px;
+            font-size: 0.95rem;
+        }
+        .belly-bar-bg {
+            height: 26px;
+            background: #1e130c;
+            border-radius: 30px;
+            border: 2px solid #6b4f37;
+            overflow: hidden;
+        }
+        .belly-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #fcb045, #fd7e14, #ff512f);
+            box-shadow: 0 0 10px #ffb347;
+            border-radius: 30px;
+            transition: width 0.2s ease;
+        }
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #251e16d9;
+            padding: 10px 15px;
+            border-radius: 40px;
+            margin: 12px 0 16px;
+            color: #f7e7cf;
+            border: 2px solid #ab8e6f;
+            box-shadow: inset 0 0 0 2px #51412e, 0 6px 0 #2b1e13;
+            font-weight: bold;
+        }
+        .money-block, .food-block {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.5rem;
+            background: #0c0907;
+            padding: 4px 18px;
+            border-radius: 30px;
+            box-shadow: inset 0 2px 4px black, 0 3px 0 #4d3926;
+            color: #ffd966;
+        }
+        .shop {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .food-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #dccdb6;
+            padding: 6px 14px 6px 18px;
+            border-radius: 60px;
+            border: 3px solid #6e543c;
+            box-shadow: inset 0 1px 5px #fff3df, 0 5px 0 #5a4530;
+            font-weight: bold;
+        }
+        .food-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+        .food-desc {
+            font-size: 1rem;
+            color: #302010;
+        }
+        button {
+            background: #f3d37c;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 0 #a05f2c, 0 2px 8px rgba(0,0,0,0.2);
+            border: 2px solid #ffeab0;
+            color: #2c1c0c;
+            cursor: pointer;
+            transition: all 0.04s linear;
+        }
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #7b451b, 0 2px 6px black;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        #feedBtn {
+            background: #f5b342;
+            font-size: 1.6rem;
+            padding: 12px;
+            flex: 2;
+        }
+        #autoFeedBtn {
+            background: #6a8e7c;
+            box-shadow: 0 4px 0 #3a5a4a;
+            border-color: #a0c0b0;
+            color: #0f1f0a;
+            font-size: 1rem;
+            flex: 1;
+        }
+        #autoFeedBtn.active {
+            background: #8bc34a;
+            box-shadow: 0 2px 0 #558b2f;
+            transform: translateY(2px);
+        }
+        .sell-area {
+            margin-top: 15px;
+        }
+        #sellFatBtn {
+            background: #c9a87c;
+            box-shadow: 0 4px 0 #7a5d3e;
+            border-color: #ebd5b0;
+            color: #1f140a;
+            font-size: 1.3rem;
+            padding: 14px 20px;
+            width: 100%;
+        }
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: gold;
+            color: #2c1c0c;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 0 #b8860b, 0 10px 20px black;
+            z-index: 1000;
+            animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown {
+            from { top: -60px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        .crit-effect {
+            color: #ffd700 !important;
+            text-shadow: 0 0 10px #ffaa00;
+        }
+        .footer-note {
+            color: #594d3c;
+            margin-top: 12px;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
-<div class="game-container">
-  <h1>🥩ДИМА ДАУН🥩</h1>
-  <div class="dima-zone">
-    <div class="sisi-container">
-      <span class="sisya" id="sisiEmoji">🥩</span>
-      <span style="font-size:3.5rem; filter:drop-shadow(2px 2px 0 #3e281a);">🤜💥</span>
+<div class="game-container" id="gameContainer">
+    <h1>
+        <span>🐹</span> СУСЛОВ <span>🐹</span>
+    </h1>
+    
+    <div class="stats-row">
+        <div class="prestige-badge">
+            ⭐ <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
+        </div>
+        <div class="spent-badge">
+            💸 <span id="totalSpent">0</span>🪙
+        </div>
+        <div class="combo-badge" id="comboDisplay" style="display:none;">
+            🔥 x<span id="comboCount">0</span>
+        </div>
     </div>
-    <div class="sisi-stats">
-      <span class="sisi-size">🍖 РАЗМЕР: <span id="sizeValue">1.0</span> см</span>
-      <span class="crit-meter">⚡КРИТ: <span id="critChanceDisplay">25</span>%</span>
+
+    <div class="suslov-area">
+        <div class="suslov-emoji" id="suslovEmoji">🐭</div>
+        <div class="belly-bar-container">
+            <div class="belly-label">
+                <span>🍖 СЫТОСТЬ</span>
+                <span id="bellyPercent">0%</span>
+            </div>
+            <div class="belly-bar-bg">
+                <div class="belly-fill" id="bellyFill" style="width:0%"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ПИТОМЕЦ ДАВИД -->
-  <div class="pet-david">
-    <span class="pet-avatar">🐕‍🦺 ДАВИД</span>
-    <div class="pet-status">
-      <div>❤️ <span id="petLove">50</span>% любви</div>
-      <div>🦴 сытость <span id="petHunger">100</span>%</div>
+    <div class="stats-panel">
+        <div class="money-block">
+            <span>🪙</span> <span id="moneyValue">40</span>
+        </div>
+        <div class="food-block">
+            <span>🍱</span> <span id="foodCount">0</span>
+        </div>
     </div>
-  </div>
 
-  <!-- кнопки ударов -->
-  <div class="action-buttons">
-    <button class="btn" id="hitBtn">🤜 БИТЬ СИСЮ</button>
-    <button class="btn" id="feedDavidBtn">🍖 КОРМИТЬ ДАВИДА</button>
-  </div>
-  <div class="action-buttons">
-    <button class="btn" id="specialCritBtn" style="background:#b5642a;">💦 КРИТ-ГЛОТОК</button>
-    <button class="btn" id="playDavidBtn" style="background:#7a5a3a;">🎾 ИГРАТЬ С ДАВИДОМ</button>
-  </div>
+    <div class="shop">
+        <div class="food-row">
+            <div class="food-info">
+                <span>🥕</span>
+                <span class="food-desc">Морковка <small>+3%</small></span>
+            </div>
+            <button id="buyCarrot">5🪙</button>
+        </div>
+        <div class="food-row">
+            <div class="food-info">
+                <span>🍔</span>
+                <span class="food-desc">Бургер <small>+8%</small></span>
+            </div>
+            <button id="buyBurger">12🪙</button>
+        </div>
+        <div class="food-row">
+            <div class="food-info">
+                <span>🎂</span>
+                <span class="food-desc">Торт <small>+15%</small></span>
+            </div>
+            <button id="buyCake">22🪙</button>
+        </div>
+    </div>
 
-  <!-- лог критов/событий -->
-  <div class="crit-log" id="logBox">
-    💬 ЖМИ НА СИСЮ ИЛИ БИТЬ...
-  </div>
+    <div class="action-buttons">
+        <button id="feedBtn">🍽️ КОРМИТЬ</button>
+        <button id="autoFeedBtn">🤖 АВТОКОРМ (50🪙)</button>
+    </div>
 
-  <!-- сброс и инфо -->
-  <div class="reset-area">
-    <button class="btn small-btn" id="resetBtn">🔄 НАЧАТЬ ЗАНОВО</button>
-    <div style="margin-top: 8px; color:#3f280e;">👅 ДИМА КОНЧАЕТ НА СОСКИ · ГЛОТАЕТ</div>
-  </div>
+    <div id="gameOverMessage" style="min-height: 24px; font-weight: bold; color: #ad1f1f;"></div>
+    
+    <div class="sell-area">
+        <button id="sellFatBtn">💰 ПРОДАТЬ ЖИР (+5% кэшбек + престиж)</button>
+    </div>
+    
+    <div class="footer-note">🥕+3% 🍔+8% 🎂+15% | Крит x2 | Комбо x5 | Автокорм</div>
 </div>
 
 <script>
-  (function(){
-    "use strict";
+    (function(){
+        "use strict";
 
-    // ---------- СОСТОЯНИЕ ----------
-    let sisiSize = 1.0;            // размер сиси (см)
-    let critChance = 0.25;         // 25% базовый шанс крита
-
-    // Питомец Давид
-    let petLove = 50;              // 0-100
-    let petHunger = 100;           // 0-100, уменьшается со временем
-
-    // для анимаций и текста
-    const logBox = document.getElementById('logBox');
-    const sizeSpan = document.getElementById('sizeValue');
-    const critChanceSpan = document.getElementById('critChanceDisplay');
-    const petLoveSpan = document.getElementById('petLove');
-    const petHungerSpan = document.getElementById('petHunger');
-    const sisiEmoji = document.getElementById('sisiEmoji');
-
-    // флаг спец-крита
-    let canSpecialCrit = true;      // перезарядка после использования
-
-    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-    function updateUI() {
-      sizeSpan.textContent = sisiSize.toFixed(2);
-      critChanceSpan.textContent = Math.round(critChance * 100);
-      
-      // эмодзи сиси в зависимости от размера
-      if (sisiSize >= 8.0) sisiEmoji.textContent = '🍖🍖';
-      else if (sisiSize >= 5.0) sisiEmoji.textContent = '🥩🥩';
-      else if (sisiSize >= 2.5) sisiEmoji.textContent = '🥩';
-      else sisiEmoji.textContent = '🥓';
-      
-      // Давид
-      petLove = Math.min(100, Math.max(0, petLove));
-      petHunger = Math.min(100, Math.max(0, petHunger));
-      petLoveSpan.textContent = Math.floor(petLove);
-      petHungerSpan.textContent = Math.floor(petHunger);
-      
-      // если сытость низкая или любовь низкая — Давид грустит, влияет на крит?
-      // просто визуал
-    }
-
-    // лог с подсветкой крита
-    function setLog(message, isCrit = false, isSpecial = false) {
-      logBox.innerHTML = message;
-      if (isCrit || isSpecial) {
-        logBox.classList.add('glow-crit');
-        setTimeout(() => logBox.classList.remove('glow-crit'), 400);
-      }
-    }
-
-    // пассивное снижение сытости Давида (вызывается при действиях)
-    function decayHunger(amount = 2) {
-      petHunger = Math.max(0, petHunger - amount);
-      if (petHunger < 15) {
-        petLove = Math.max(0, petLove - 0.5);
-      }
-      updateUI();
-    }
-
-    // уменьшение любви если голодный
-    function hungerPenalty() {
-      if (petHunger < 20) {
-        petLove = Math.max(0, petLove - 1.5);
-        setLog('💔 ДАВИД ГОЛОДЕН! любовь тает...');
-      } else if (petHunger < 40 && Math.random()<0.3) {
-        petLove = Math.max(0, petLove - 0.7);
-      }
-    }
-
-    // прирост любви
-    function addLove(amount) {
-      petLove = Math.min(100, petLove + amount);
-    }
-
-    // основной удар по сисе (обычный)
-    function hitSisya() {
-      decayHunger(3); // каждый удар утомляет питомца
-      
-      // базовый прирост размера
-      let gain = 0.15 + (Math.random() * 0.2);
-      
-      // модификатор любви Давида (если любовь >70, чуть больше)
-      if (petLove > 70) gain *= 1.25;
-      else if (petLove < 25) gain *= 0.8;
-      
-      // проверка на крит (включая возможное влияние)
-      const rand = Math.random();
-      const effectiveCrit = critChance + (petLove > 85 ? 0.07 : 0); // бонус от любви
-      const isCrit = rand < effectiveCrit;
-      
-      let message = '';
-      let critExtra = 1.0;
-      
-      if (isCrit) {
-        critExtra = 2.2 + (Math.random() * 0.8);
-        gain *= critExtra;
-        // ✨ КРИТ УДАР — ДИМА КОНЧАЕТ НА СОСКИ (текст как в описании)
-        message = `💥💦 КРИТ-УДАР! ДИМА БЬЁТ СЕБЯ ПО СИСЕ И КОНЧАЕТ НА СОСКИ! +${gain.toFixed(2)}см!`;
-        // Давид реагирует
-        if (petHunger > 30) {
-          petLove = Math.min(100, petLove + 4);
-        }
-        // особый шанс что он глотает (уже в отдельной кнопке, но тут доп иммерсия)
-        if (Math.random() < 0.4) {
-          message += ' 👅 ОН СЛИЗЫВАЕТ СПЕРМУ С СОСКОВ!';
-        }
-      } else {
-        message = `👊 ДИМА БЬЁТ ПО СИСЕ. +${gain.toFixed(2)}см.`;
-        // небольшой шанс поднять любовь
-        if (Math.random()<0.2) addLove(1.5);
-      }
-      
-      sisiSize += gain;
-      
-      // небольшой прирост критшанса от размера (каждая единица +0.5%, максимум 45%)
-      critChance = Math.min(0.45, 0.25 + (sisiSize * 0.005));
-      
-      // голод наказывает
-      hungerPenalty();
-      updateUI();
-      
-      // если размер огромный, даём Давиду эмоцию
-      if (sisiSize > 7 && petLove < 80 && Math.random()<0.3) {
-        petLove = Math.min(100, petLove + 2);
-        message += ' 🐕 Давид виляет хвостом!';
-      }
-      
-      setLog(message, isCrit);
-      
-      // вибро-эффект сиси
-      sisiEmoji.style.transform = 'scale(1.2)';
-      setTimeout(()=> sisiEmoji.style.transform = '', 120);
-    }
-
-    // СПЕЦИАЛЬНЫЙ КРИТ-ГЛОТОК (та самая механика)
-    function performSpecialCrit() {
-      if (!canSpecialCrit) {
-        setLog('⏳ ДИМА УСТАЛ... ПОДОЖДИ НЕМНОГО (покорми Давида или ударь)');
-        return;
-      }
-      
-      decayHunger(8);
-      
-      // шанс спецкрита зависит от любви Давида и размера
-      const loveBonus = petLove / 200;  // до 0.5
-      const sizeBonus = Math.min(0.3, sisiSize * 0.02);
-      const success = Math.random() < (0.35 + loveBonus + sizeBonus);
-      
-      if (success) {
-        // МОЩНЫЙ КРИТ УДАР: бьёт себя по сисе, кончает на соски и ГЛОТАЕТ
-        const hugeGain = 1.2 + (sisiSize * 0.18) + (Math.random() * 1.5);
-        sisiSize += hugeGain;
+        // ---------- СОСТОЯНИЕ ----------
+        let money = 40;                
+        let foodItems = 0;            
+        let belly = 0;               
         
-        // ДИМА ГЛОТАЕТ СПЕРМУ — повышает крит шанс + любовь давида
-        critChance = Math.min(0.55, critChance + 0.04);
-        petLove = Math.min(100, petLove + 8);
-        petHunger = Math.min(100, petHunger + 10); // насытился? ну такое )
+        let prestigeLevel = 0;               
+        let prestigeBonusPercent = 0;        
+        let totalSpentMoney = 0;
         
-        const specialMsg = `💦💦💦 СПЕЦ-КРИТ УДАР!!! ДИМА БЬЁТ СЕБЯ ПО СИСЕ, КОНЧАЕТ НА СОСКИ И 👅 ГЛОТАЕТ ВСЮ СПЕРМУ! +${hugeGain.toFixed(2)}см! ДАВИД В ВОСТОРГЕ!`;
-        setLog(specialMsg, true, true);
+        // Комбо и крит
+        let feedCombo = 0;
+        const CRIT_CHANCE = 0.15;  // 15%
+        const COMBO_BONUS = 1;      // +1% за каждые 5 комбо
         
-        // визуал
-        sisiEmoji.style.animation = 'shake 0.4s';
-        setTimeout(()=> sisiEmoji.style.animation = '', 400);
+        // Автокорм
+        let autoFeedActive = false;
+        let autoFeedInterval = null;
+        const AUTO_FEED_COST = 50;
         
-        canSpecialCrit = false;
-        // перезарядка через 3 обычных удара или покормить
-        setTimeout(() => { canSpecialCrit = true; }, 6000);
-      } else {
-        // провал, но всё равно что-то
-        sisiSize += 0.25;
-        setLog('😩 ДИМА ПОПЫТАЛСЯ, НО ТОЛЬКО НЕМНОГО ПОДРОС... попробуй поднять любовь Давида!', false);
-        petLove = Math.max(0, petLove - 2);
-      }
-      
-      hungerPenalty();
-      updateUI();
-    }
+        // Достижения (простые флаги)
+        let achievements = {
+            firstLop: false,
+            richBoy: false,
+            comboKing: false
+        };
+        
+        // DOM элементы
+        const moneySpan = document.getElementById('moneyValue');
+        const foodSpan = document.getElementById('foodCount');
+        const bellyFill = document.getElementById('bellyFill');
+        const bellyPercent = document.getElementById('bellyPercent');
+        const suslovEmoji = document.getElementById('suslovEmoji');
+        const gameOverMsg = document.getElementById('gameOverMessage');
+        const feedBtn = document.getElementById('feedBtn');
+        const buyCarrot = document.getElementById('buyCarrot');
+        const buyBurger = document.getElementById('buyBurger');
+        const buyCake = document.getElementById('buyCake');
+        const sellFatBtn = document.getElementById('sellFatBtn');
+        const autoFeedBtn = document.getElementById('autoFeedBtn');
+        const comboDisplay = document.getElementById('comboDisplay');
+        const comboCountSpan = document.getElementById('comboCount');
+        
+        const prestigeLevelSpan = document.getElementById('prestigeLevel');
+        const prestigeBonusSpan = document.getElementById('prestigeBonus');
+        const totalSpentSpan = document.getElementById('totalSpent');
 
-    // кормить Давида — тратим размер сиси на сытость и любовь
-    function feedDavid() {
-      if (sisiSize < 0.6) {
-        setLog('🥓 СИСЯ СЛИШКОМ МАЛА, ЧТОБЫ КОРМИТЬ! БЕЙ ЕЩЁ!');
-        return;
-      }
-      
-      const cost = 0.4 + (Math.random() * 0.3);
-      sisiSize = Math.max(0.3, sisiSize - cost);
-      
-      petHunger = Math.min(100, petHunger + 25 + Math.floor(petLove/7));
-      petLove = Math.min(100, petLove + 6);
-      
-      // если сильно накормили, разблокируем спецкрит
-      if (!canSpecialCrit && petHunger > 70) {
-        canSpecialCrit = true;
-      }
-      
-      setLog(`🍖 ДИМА ДАЛ КУСОК СИСИ ДАВИДУ! сытость +, любовь +. Размер -${cost.toFixed(2)}см`);
-      decayHunger(-5); // уменьшаем голод но не через decay
-      updateUI();
-    }
+        // Еда: цена, свой % сытости
+        const FOOD_DATA = {
+            carrot: { price: 5,  gain: 3 },
+            burger: { price: 12, gain: 8 },
+            cake:   { price: 22, gain: 15 }
+        };
+        
+        let currentFoodGain = 0; // будет пересчитываться
 
-    // играть с Давидом — повышает любовь, немного тратит сытость
-    function playWithDavid() {
-      if (petHunger < 10) {
-        setLog('🐕 Давид слишком голоден чтобы играть! ПОКОРМИ.');
-        return;
-      }
-      decayHunger(7);
-      const loveGain = 5 + Math.floor(Math.random() * 8);
-      petLove = Math.min(100, petLove + loveGain);
-      
-      // игра иногда увеличивает шанс крита
-      if (Math.random() < 0.4) {
-        critChance = Math.min(0.5, critChance + 0.01);
-      }
-      
-      setLog(`🎾 ДИМА И ДАВИД ИГРАЮТ! любовь +${loveGain}. Давид счастлив!`);
-      
-      if (!canSpecialCrit && petLove > 65) {
-        canSpecialCrit = true;
-        setLog('✨ СПЕЦ-КРИТ СНОВА ДОСТУПЕН!');
-      }
-      updateUI();
-    }
-
-    // сброс
-    function resetGame() {
-      sisiSize = 1.0;
-      critChance = 0.25;
-      petLove = 50;
-      petHunger = 100;
-      canSpecialCrit = true;
-      updateUI();
-      setLog('💬 НОВАЯ ИГРА! РАСТИ СИСЮ ДИМЫ ДАУНА. ДАВИД РЯДОМ.');
-      sisiEmoji.style.animation = '';
-    }
-
-    // клик по эмодзи сиси — тоже удар
-    function handleSisiClick() {
-      hitSisya();
-    }
-
-    // инициализация
-    function init() {
-      updateUI();
-      setLog('🥩 БЕЙ СИСЮ, КОРМИ ДАВИДА. НАКОПИ КРИТ! ДИМА КОНЧАЕТ И ГЛОТАЕТ!');
-      
-      document.getElementById('hitBtn').addEventListener('click', hitSisya);
-      document.getElementById('specialCritBtn').addEventListener('click', performSpecialCrit);
-      document.getElementById('feedDavidBtn').addEventListener('click', feedDavid);
-      document.getElementById('playDavidBtn').addEventListener('click', playWithDavid);
-      document.getElementById('resetBtn').addEventListener('click', resetGame);
-      sisiEmoji.addEventListener('click', handleSisiClick);
-      
-      // пассивное снижение сытости раз в 12 сек
-      setInterval(() => {
-        if (petHunger > 0) {
-          petHunger = Math.max(0, petHunger - 1.2);
-          if (petHunger < 15) petLove = Math.max(0, petLove - 0.8);
-          updateUI();
+        // ---------- УВЕДОМЛЕНИЯ ----------
+        function showAchievement(text) {
+            const pop = document.createElement('div');
+            pop.className = 'achievement-popup';
+            pop.innerHTML = `🏆 ${text} 🏆`;
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 2500);
         }
-        // авто-разблокировка спецкрита если долго ждали
-        if (!canSpecialCrit && petLove > 50 && petHunger > 40 && Math.random()<0.2) {
-          canSpecialCrit = true;
-        }
-      }, 12000);
-    }
 
-    init();
-  })();
+        // ---------- РАСЧЁТ ПРИРОСТА ----------
+        function calcFoodGain(baseGain) {
+            let bonus = 1 + (prestigeBonusPercent / 100);
+            let gain = Math.floor(baseGain * bonus);
+            
+            // Комбо бонус: +1% за каждые 5 комбо
+            if (feedCombo >= 5) {
+                gain += Math.floor(feedCombo / 5) * COMBO_BONUS;
+            }
+            
+            // Крит
+            const isCrit = Math.random() < CRIT_CHANCE;
+            if (isCrit) {
+                gain *= 2;
+                // Визуал крита
+                suslovEmoji.style.filter = 'drop-shadow(0 0 20px gold)';
+                setTimeout(() => suslovEmoji.style.filter = '', 200);
+            }
+            
+            return { gain, isCrit };
+        }
+
+        // ---------- ОБНОВЛЕНИЕ UI ----------
+        function updateUI() {
+            moneySpan.textContent = money;
+            foodSpan.textContent = foodItems;
+
+            const percent = Math.min(belly, 100);
+            bellyFill.style.width = percent + '%';
+            bellyPercent.textContent = percent + '%';
+
+            prestigeLevelSpan.textContent = prestigeLevel;
+            prestigeBonusSpan.textContent = prestigeBonusPercent;
+            totalSpentSpan.textContent = totalSpentMoney;
+            
+            // Комбо отображение
+            if (feedCombo > 0) {
+                comboDisplay.style.display = 'inline-block';
+                comboCountSpan.textContent = feedCombo;
+            } else {
+                comboDisplay.style.display = 'none';
+            }
+
+            // Эмодзи
+            if (belly >= 100) {
+                suslovEmoji.textContent = '💥🐽';
+                gameOverMsg.innerHTML = '💥 ЛОПНУЛ! ЖМИ ПРОДАТЬ ЖИР 💥';
+                if (!achievements.firstLop) {
+                    achievements.firstLop = true;
+                    showAchievement('ПЕРВЫЙ ЛОП! +10🪙');
+                    money += 10;
+                }
+            } else if (belly >= 80) {
+                suslovEmoji.textContent = '🐡';
+                gameOverMsg.innerHTML = '';
+            } else if (belly >= 50) {
+                suslovEmoji.textContent = '🐹🤰';
+                gameOverMsg.innerHTML = '';
+            } else if (belly >= 20) {
+                suslovEmoji.textContent = '🐭🍔';
+                gameOverMsg.innerHTML = '';
+            } else {
+                suslovEmoji.textContent = '🐭';
+                gameOverMsg.innerHTML = '';
+            }
+            
+            // Кнопка автокорма
+            autoFeedBtn.textContent = autoFeedActive ? '⏹️ СТОП' : `🤖 АВТОКОРМ (${AUTO_FEED_COST}🪙)`;
+            
+            // Проверка достижений
+            if (!achievements.richBoy && totalSpentMoney >= 200) {
+                achievements.richBoy = true;
+                showAchievement('ТРАНЖИРА! +25🪙');
+                money += 25;
+            }
+            if (!achievements.comboKing && feedCombo >= 20) {
+                achievements.comboKing = true;
+                showAchievement('КОМБО-КОРОЛЬ! +30🪙');
+                money += 30;
+            }
+        }
+
+        // ---------- КОРМЛЕНИЕ (одно) ----------
+        function feedOnce() {
+            if (foodItems <= 0) {
+                foodSpan.style.color = '#ffa098';
+                setTimeout(() => foodSpan.style.color = '#ffd966', 200);
+                return false;
+            }
+            
+            foodItems -= 1;
+            
+            // Прирост = зависит от типа еды? Упростим: средний прирост 8% + престиж + комбо + крит
+            // Используем базовый прирост 8% для универсальности
+            const { gain, isCrit } = calcFoodGain(8);
+            
+            belly = Math.min(belly + gain, 100);
+            feedCombo += 1;
+            
+            // Анимация
+            suslovEmoji.style.transform = 'scale(1.15)';
+            setTimeout(() => suslovEmoji.style.transform = 'scale(1)', 100);
+            
+            if (isCrit) {
+                gameOverMsg.innerHTML = '💥 КРИТИЧЕСКИЙ КОРМ! x2 💥';
+                setTimeout(() => updateUI(), 300);
+            }
+            
+            updateUI();
+            return true;
+        }
+
+        // Сброс комбо
+        function resetCombo() {
+            feedCombo = 0;
+            updateUI();
+        }
+
+        // ---------- ПОКУПКА ----------
+        function buyFood(type) {
+            const data = FOOD_DATA[type];
+            if (money < data.price) {
+                moneySpan.style.color = '#ff8989';
+                setTimeout(() => moneySpan.style.color = '#ffd966', 150);
+                return;
+            }
+            money -= data.price;
+            totalSpentMoney += data.price;
+            foodItems += 1;
+            updateUI();
+        }
+
+        // ---------- АВТОКОРМ ----------
+        function toggleAutoFeed() {
+            if (autoFeedActive) {
+                clearInterval(autoFeedInterval);
+                autoFeedActive = false;
+                autoFeedBtn.classList.remove('active');
+            } else {
+                if (money < AUTO_FEED_COST) {
+                    moneySpan.style.color = '#ff8989';
+                    setTimeout(() => moneySpan.style.color = '#ffd966', 150);
+                    return;
+                }
+                money -= AUTO_FEED_COST;
+                totalSpentMoney += AUTO_FEED_COST;
+                autoFeedActive = true;
+                autoFeedBtn.classList.add('active');
+                autoFeedInterval = setInterval(() => {
+                    if (!feedOnce()) {
+                        // если еда кончилась — автостоп
+                        clearInterval(autoFeedInterval);
+                        autoFeedActive = false;
+                        autoFeedBtn.classList.remove('active');
+                        updateUI();
+                    }
+                }, 2000);
+                updateUI();
+            }
+        }
+
+        // ---------- ПРОДАТЬ ЖИР ----------
+        function sellFat() {
+            const refund = Math.floor(totalSpentMoney * 0.05);
+            money += refund;
+            
+            if (totalSpentMoney > 0 || belly > 0) {
+                prestigeLevel += 1;
+                prestigeBonusPercent += 5;
+            }
+            
+            foodItems = 0;
+            belly = 0;
+            feedCombo = 0;
+            
+            // Остановка автокорма
+            if (autoFeedActive) {
+                clearInterval(autoFeedInterval);
+                autoFeedActive = false;
+                autoFeedBtn.classList.remove('active');
+            }
+            
+            money = Math.max(money, 35 + prestigeLevel * 4);
+            
+            updateUI();
+            suslovEmoji.textContent = '🤑🐹';
+            setTimeout(() => updateUI(), 300);
+        }
+
+        // ---------- ОБРАБОТЧИКИ ----------
+        buyCarrot.addEventListener('click', () => buyFood('carrot'));
+        buyBurger.addEventListener('click', () => buyFood('burger'));
+        buyCake.addEventListener('click', () => buyFood('cake'));
+        
+        feedBtn.addEventListener('click', () => feedOnce());
+        suslovEmoji.addEventListener('click', () => feedOnce());
+        
+        autoFeedBtn.addEventListener('click', toggleAutoFeed);
+        sellFatBtn.addEventListener('click', sellFat);
+        
+        // Сброс комбо если долго не кормили (5 сек)
+        let comboTimer;
+        function resetComboTimer() {
+            clearTimeout(comboTimer);
+            comboTimer = setTimeout(() => {
+                if (feedCombo > 0) {
+                    feedCombo = 0;
+                    updateUI();
+                }
+            }, 5000);
+        }
+        
+        const originalFeed = feedOnce;
+        feedOnce = function() {
+            const result = originalFeed.apply(this, arguments);
+            if (result) resetComboTimer();
+            return result;
+        };
+        
+        // Двойной клик по монетке
+        document.querySelector('.money-block').addEventListener('dblclick', () => {
+            money += 10;
+            updateUI();
+        });
+        
+        updateUI();
+    })();
 </script>
 </body>
-    </html>
+  </html>
