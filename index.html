@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>ГЛУПЫЙ ТИМОФЕЙ · СИМУЛЯТОР</title>
+  <title>ТИМОФЕЙ: АШ 2.0 · ШКОЛЬНЫЙ КВЕСТ</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,165 +13,152 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(145deg, #1b2a1f 0%, #2d3e2c 100%);
+      background: linear-gradient(135deg, #1e3c2c 0%, #2a5a3a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
-      padding: 16px;
+      font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
+      padding: 12px;
     }
 
-    .game-container {
-      max-width: 700px;
+    .game-wrapper {
+      max-width: 950px;
       width: 100%;
-      background: #ecd9b4;
-      background-image: radial-gradient(circle at 20% 30%, #f3e9d2, #dac29c);
-      border-radius: 64px 64px 48px 48px;
-      box-shadow: 0 20px 0 #6b4f2c, 0 30px 30px rgba(0,0,0,0.35);
-      padding: 24px 24px 30px;
-      border: 4px solid #a58357;
-      transition: box-shadow 0.2s;
+      background: #d4c3a3;
+      background-image: linear-gradient(145deg, #e8d8b7, #c8b48c);
+      border-radius: 40px 40px 30px 30px;
+      box-shadow: 0 18px 0 #6b4f32, 0 25px 30px rgba(0,0,0,0.4);
+      padding: 20px 20px 28px;
+      border: 5px solid #b39264;
     }
 
     h1 {
-      margin: 0 0 8px 0;
-      font-size: 3rem;
+      margin: 0 0 5px;
+      font-size: 2.7rem;
       font-weight: 900;
       text-align: center;
-      color: #302010;
-      text-shadow: 4px 4px 0 #c9a96b;
-      letter-spacing: 2px;
+      color: #2a1f0e;
+      text-shadow: 4px 4px 0 #e0b87b;
+      letter-spacing: 3px;
+      filter: drop-shadow(0 6px 2px #5a422a);
       word-break: break-word;
-      filter: drop-shadow(0 6px 2px rgba(0,0,0,0.2));
-      transform: rotate(-1deg);
     }
 
-    .subtitle {
-      text-align: center;
-      margin-top: -8px;
-      margin-bottom: 16px;
-      font-size: 1.2rem;
+    .school-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #5f7a5a;
+      margin: 8px 0 16px;
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 4px solid #3a552f;
+      box-shadow: inset 0 2px 6px #b1c6a4, 0 6px 0 #2f4423;
+      color: #f9f1d2;
       font-weight: bold;
-      color: #4a2e14;
-      background: #fbeec9;
-      display: inline-block;
-      padding: 6px 24px;
-      border-radius: 40px;
-      margin-left: auto;
-      margin-right: auto;
-      width: fit-content;
-      border: 3px dashed #a85e2c;
-      box-shadow: inset 0 1px 4px white, 0 4px 0 #6e4122;
+      font-size: 1.3rem;
     }
 
-    /* Тимофей-зона */
-    .timofey-area {
-      background: #3e5a3c;
-      background: linear-gradient(135deg, #4f7849, #2b4827);
-      border-radius: 120px 120px 60px 60px;
-      padding: 28px 20px 20px;
-      margin-bottom: 24px;
-      border: 6px solid #263f1d;
-      box-shadow: inset 0 -8px 0 #1e3018, 0 12px 0 #3b2e1f, 0 8px 12px black;
-      position: relative;
+    .notes-counter {
+      background: #2d2616;
+      padding: 8px 22px;
+      border-radius: 30px;
+      box-shadow: inset 0 2px 5px #6e5e3e, 0 3px 0 #1a150a;
+      color: #ffecb3;
+      font-size: 1.6rem;
     }
 
-    .face-container {
+    .map-container {
+      background: #4a6741;
+      padding: 16px;
+      border-radius: 30px;
+      border: 6px solid #2f4a2a;
+      box-shadow: inset 0 0 0 4px #72956a, 0 12px 0 #1f331a;
+      margin-bottom: 18px;
+    }
+
+    .school-map {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .room {
+      aspect-ratio: 1 / 1.1;
+      background: #c9af8b;
+      border-radius: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 6px 2px;
+      box-shadow: inset 0 -6px 0 #7b623e, 0 7px 0 #5a4028, 0 3px 8px black;
+      border: 3px solid #a58357;
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+      color: #1f1a0e;
+      transition: 0.05s linear;
+      cursor: pointer;
     }
 
-    canvas {
-      display: block;
-      margin: 0 auto;
-      width: 100%;
-      max-width: 280px;
-      height: auto;
-      aspect-ratio: 1/1;
-      background: #fbe9c3;
-      border-radius: 50% 50% 40% 40%;
-      box-shadow: 0 0 0 8px #ebc47f, 0 10px 0 6px #8b5e2e, inset 0 -6px 6px rgba(0,0,0,0.1);
-      image-rendering: crisp-edges; 
+    .room.timofey {
+      background: #f5cd7a;
+      box-shadow: inset 0 -6px 0 #b38b40, 0 7px 0 #6f4f1f, 0 3px 8px black;
+      border-color: #f3b33d;
+      transform: scale(1.02);
     }
 
-    .status-bars {
+    .room.galina {
+      background: #b58a6c;
+      box-shadow: inset 0 -6px 0 #825e48, 0 7px 0 #543e2e, 0 3px 8px black;
+      border-color: #e0925b;
+    }
+
+    .room.has-note {
+      background: #b0c487;
+      box-shadow: inset 0 -6px 0 #6f884c, 0 7px 0 #41552c, 0 3px 8px black;
+    }
+
+    .room-emoji {
+      font-size: 2.2rem;
+      line-height: 1.2;
+      filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.2));
+    }
+
+    .room-name {
+      font-size: 0.7rem;
+      background: #352d1cc9;
+      padding: 3px 8px;
+      border-radius: 20px;
+      color: #f3eaca;
+      margin-top: 2px;
+    }
+
+    .action-panel {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px 32px;
+      gap: 10px;
       margin: 18px 0 10px;
-      background: #ebd6b0;
-      padding: 12px 20px;
-      border-radius: 60px;
-      border: 3px solid #a76f2e;
-      box-shadow: inset 0 2px 5px #aa8b62, 0 6px 0 #6b4a24;
-    }
-
-    .bar-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: bold;
-      font-size: 1.3rem;
-      color: #2c1c06;
-      text-shadow: 1px 1px 0 #efdba1;
-    }
-
-    .bar-label {
-      min-width: 70px;
-    }
-
-    .bar-bg {
-      width: 130px;
-      height: 24px;
-      background: #412e18;
-      border-radius: 30px;
-      box-shadow: inset 0 3px 5px black, 0 3px 0 #5f4a2e;
-      border: 2px solid #2f210c;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      width: 80%;
-      background: #ecbc2d;
-      background: linear-gradient(90deg, #f5d742, #ffb82e);
-      border-radius: 30px;
-      box-shadow: inset 0 2px 5px #fff9cf, 0 0 6px #ffd966;
-      transition: width 0.2s;
-    }
-
-    .brain-fill {
-      background: #fa6b9b;
-      background: linear-gradient(90deg, #ff98b9, #f9578a);
-    }
-
-    /* Панель действий */
-    .action-panel {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin: 18px 0 12px;
+      justify-content: center;
     }
 
     .btn {
-      background: #fdebb3;
+      background: #fbeba8;
       border: 4px solid #b67936;
-      color: #332010;
+      color: #2b1d0a;
       font-weight: bold;
       font-size: 1.2rem;
-      padding: 14px 8px;
+      padding: 12px 16px;
       border-radius: 40px;
       box-shadow: 0 7px 0 #7b4f24, 0 4px 8px black;
       cursor: pointer;
       text-align: center;
-      transition: all 0.05s ease-in;
+      transition: all 0.05s;
       font-family: inherit;
-      letter-spacing: 0.5px;
       text-transform: uppercase;
-      backdrop-filter: blur(2px);
+      flex: 1 0 130px;
       transform: translateY(-2px);
     }
 
@@ -181,130 +168,68 @@
     }
 
     .btn.special {
-      background: #fdcb6e;
-      border-color: #b3541c;
-      box-shadow: 0 7px 0 #9e431b, 0 4px 8px black;
-      color: #221500;
-    }
-
-    .danger-btn {
-      background: #dd7a6b;
-      border-color: #992b1c;
-      box-shadow: 0 7px 0 #701f13, 0 4px 8px black;
-      color: #faf0d7;
-      text-shadow: 1px 1px 0 #3f160e;
+      background: #f7b05e;
+      border-color: #b85f1a;
+      box-shadow: 0 7px 0 #9e4a1b, 0 4px 8px black;
     }
 
     .log-box {
-      background: #202010d9;
-      color: #e6e3b3;
+      background: #1e2a1acc;
+      backdrop-filter: blur(4px);
+      color: #f0eac1;
       padding: 14px 18px;
       border-radius: 30px;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: bold;
       min-height: 70px;
-      border: 3px solid #ac8c5a;
-      box-shadow: inset 0 0 10px #00000066, 0 6px 0 #584525;
-      backdrop-filter: blur(5px);
+      border: 3px solid #b3924b;
+      box-shadow: inset 0 0 12px #00000077, 0 6px 0 #5f4a26;
       margin: 18px 0 8px;
-      font-family: monospace;
-      word-break: break-word;
-    }
-
-    .stats-panel {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #c9af7e;
-      border-radius: 40px;
-      padding: 6px 18px;
-      border: 3px solid #6e4f28;
-      box-shadow: inset 0 2px 5px #fff2d4, 0 6px 0 #584021;
-      color: #202008;
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-top: 12px;
-    }
-
-    .reset-area {
-      display: flex;
-      justify-content: center;
-      margin-top: 16px;
     }
 
     .reset-btn {
-      background: #525b44;
-      box-shadow: 0 5px 0 #2f3a26, 0 2px 6px black;
-      border-color: #2b4120;
-      color: #f3efcd;
-      font-size: 1rem;
-      padding: 12px 28px;
+      background: #5d6e52;
+      border-color: #2f4028;
+      box-shadow: 0 6px 0 #2b3a22;
+      color: #f5efd7;
     }
 
-    .emote {
-      font-size: 2.4rem;
-      line-height: 1;
-      margin-left: 8px;
+    .galina-zone {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
-<div class="game-container">
-  <h1>ГЛУПЫЙ ТИМОФЕЙ</h1>
-  <div class="subtitle">🤪 СИМУЛЯТОР ВОСПИТАНИЯ 🤪</div>
-
-  <div class="timofey-area">
-    <div class="face-container">
-      <canvas id="timofeyCanvas" width="400" height="400"></canvas>
-    </div>
-
-    <!-- Шкалы -->
-    <div class="status-bars">
-      <div class="bar-item">
-        <span class="bar-label">🍔 СЫТ</span>
-        <div class="bar-bg">
-          <div id="hungerFill" class="bar-fill" style="width: 70%"></div>
-        </div>
-      </div>
-      <div class="bar-item">
-        <span class="bar-label">😴 ЭНЕРГ</span>
-        <div class="bar-bg">
-          <div id="energyFill" class="bar-fill" style="width: 60%"></div>
-        </div>
-      </div>
-      <div class="bar-item">
-        <span class="bar-label">🧠 МОЗГ</span>
-        <div class="bar-bg">
-          <div id="brainFill" class="bar-fill brain-fill" style="width: 30%"></div>
-        </div>
-      </div>
-    </div>
+<div class="game-wrapper">
+  <h1>🏫 ТИМОФЕЙ: АШ 2.0</h1>
+  <div class="school-header">
+    <span>🏃‍♂️ ГЛУПЫЙ ТИМОФЕЙ</span>
+    <span class="notes-counter">📋 <span id="noteCountDisplay">0</span>/5 ЗАПИСОК</span>
+    <span>👩‍🏫 ГАЛИНА В.</span>
   </div>
 
-  <!-- Кнопки управления Тимофеем -->
+  <!-- Карта школы 5x2 (10 кабинетов) -->
+  <div class="map-container">
+    <div class="school-map" id="schoolMap"></div>
+  </div>
+
+  <!-- Кнопки действий -->
   <div class="action-panel">
-    <button class="btn" id="feedBtn">🍕 КОРМИТЬ</button>
-    <button class="btn" id="sleepBtn">😴 СПАТЬ</button>
-    <button class="btn special" id="studyBtn">📚 УЧИТЬ</button>
-    <button class="btn" id="playBtn">⚽ ИГРАТЬ</button>
-    <button class="btn danger-btn" id="stupidBtn">🤡 СОВЕРШИТЬ ГЛУПОСТЬ</button>
-    <button class="btn" id="scoldBtn">😠 РУГАТЬ</button>
+    <button class="btn" id="moveBtn">🚶 ПЕРЕМЕСТИТЬСЯ</button>
+    <button class="btn special" id="takeNoteBtn">📜 ВЗЯТЬ ЗАПИСКУ</button>
+    <button class="btn" id="goToGalinaBtn">👩‍🏫 К ГАЛИНЕ</button>
   </div>
 
-  <!-- Лог событий (вся глупость тут) -->
+  <!-- Лог событий -->
   <div class="log-box" id="logDisplay">
-    Тимофей появился. Он уже хочет есть и глупить...
-  </div>
-
-  <!-- Счетчик глупости и уровень тупости -->
-  <div class="stats-panel">
-    <span>📊 ГЛУПОСТЬ: <span id="stupidityCounter">0</span> / 100</span>
-    <span id="moodEmoji" class="emote">😐</span>
+    🏫 Тимофей в школе. Собери 5 записок и сдай Галине Владимировне на АШ 2.0!
   </div>
 
   <!-- Сброс -->
-  <div class="reset-area">
-    <button class="btn reset-btn" id="resetBtn">🔄 НОВЫЙ ТИМОФЕЙ (СБРОС)</button>
+  <div style="display: flex; justify-content: center; margin-top: 12px;">
+    <button class="btn reset-btn" id="resetBtn">🔄 НОВАЯ ИГРА (СБРОС)</button>
   </div>
 </div>
 
@@ -312,396 +237,211 @@
   (function(){
     "use strict";
 
-    // ---------- СОСТОЯНИЕ ТИМОФЕЯ ----------
-    let hunger = 70;          // 0..100 (0 - голодный, 100 - сытый)
-    let energy = 60;          // 0..100 
-    let brain = 30;           // 0..100 (чем выше - тем умнее, но Тимофей тупой)
-    let stupidity = 0;        // 0..100, при 100 - победа глупости
+    // ---------- КОНФИГУРАЦИЯ ШКОЛЫ ----------
+    const ROOMS = [
+      { name: 'Каб. Физики', emoji: '⚛️', hasNote: true },
+      { name: 'Столовая', emoji: '🍕', hasNote: true },
+      { name: 'Спортзал', emoji: '🏀', hasNote: true },
+      { name: 'Библиотека', emoji: '📚', hasNote: true },
+      { name: 'Каб. Химии', emoji: '🧪', hasNote: true },
+      { name: 'Учительская', emoji: '🚪', hasNote: false },      // Галина здесь
+      { name: 'Рекреация', emoji: '🪑', hasNote: false },
+      { name: 'Туалет', emoji: '🚻', hasNote: false },
+      { name: 'Каб. Информ.', emoji: '💻', hasNote: false },
+      { name: 'Актовый зал', emoji: '🎭', hasNote: false }
+    ];
 
-    // Флаги и таймеры
-    let gameOver = false;
-    let winStupidity = false;  // true если глупость 100
-    
-    // Лог сообщения
+    const GALINA_ROOM_INDEX = 5;   // Учительская
+
+    // Состояние игры
+    let timofeyPosition = 0;            // индекс комнаты (0-9)
+    let collectedNotes = 0;            // сколько записок собрано
+    let notesTaken = new Array(10).fill(false); // true если записка уже взята
+    let gameCompleted = false;         // сдал ли уже на АШ 2.0
+    let gameOver = false;             // флаг завершения (после сдачи)
+
+    // DOM элементы
+    const mapEl = document.getElementById('schoolMap');
+    const noteSpan = document.getElementById('noteCountDisplay');
     const logEl = document.getElementById('logDisplay');
-    const stupiditySpan = document.getElementById('stupidityCounter');
-    const moodEmoji = document.getElementById('moodEmoji');
-    
-    // Canvas
-    const canvas = document.getElementById('timofeyCanvas');
-    const ctx = canvas.getContext('2d');
 
-    // Элементы шкал
-    const hungerFill = document.getElementById('hungerFill');
-    const energyFill = document.getElementById('energyFill');
-    const brainFill = document.getElementById('brainFill');
-
-    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-    function clamp(value, min, max) {
-      return Math.min(max, Math.max(min, value));
+    // Инициализация массива записок (true там где ROOMS.hasNote)
+    function resetNotesState() {
+      for (let i = 0; i < ROOMS.length; i++) {
+        notesTaken[i] = false;
+      }
     }
 
-    // Обновление UI (бары, счетчик, эмодзи)
-    function updateUI() {
-      hungerFill.style.width = clamp(hunger, 0, 100) + '%';
-      energyFill.style.width = clamp(energy, 0, 100) + '%';
-      brainFill.style.width = clamp(brain, 0, 100) + '%';
-      stupiditySpan.textContent = Math.floor(stupidity);
-      
-      // Эмодзи по состоянию
-      if (gameOver) {
-        if (winStupidity) moodEmoji.textContent = '🤡👑';
-        else if (hunger <= 0) moodEmoji.textContent = '💀🍔';
-        else if (energy <= 0) moodEmoji.textContent = '💤⚰️';
-        else moodEmoji.textContent = '😵';
-      } else {
-        if (hunger < 20) moodEmoji.textContent = '🤤';
-        else if (energy < 20) moodEmoji.textContent = '🥱';
-        else if (brain > 70) moodEmoji.textContent = '🤓❓';
-        else if (stupidity > 70) moodEmoji.textContent = '🤪🔥';
-        else if (brain < 20) moodEmoji.textContent = '🫠';
-        else moodEmoji.textContent = '😐';
-      }
-      
-      drawTimofey();
-    }
-
-    // Добавление записи в лог
-    function addLog(message) {
-      logEl.textContent = message;
-    }
-
-    // Проверка на проигрыш (голод/энергия) или победу глупости
-    function checkGameOver() {
-      if (gameOver) return true;
-      
-      if (hunger <= 0) {
-        gameOver = true;
-        addLog('💀 Тимофей УМЕР ОТ ГОЛОДА. Даже глупость не спасла...');
-        updateUI();
-        return true;
-      }
-      if (energy <= 0) {
-        gameOver = true;
-        addLog('💤 Тимофей вырубился НАВСЕГДА. Конец энергии.');
-        updateUI();
-        return true;
-      }
-      if (stupidity >= 100) {
-        gameOver = true;
-        winStupidity = true;
-        addLog('👑 ТИМОФЕЙ ДОСТИГ АБСОЛЮТНОЙ ГЛУПОСТИ! ПОБЕДА ГЛУПОСТИ! Он счастлив.');
-        updateUI();
-        return true;
-      }
-      return false;
-    }
-
-    // Обработка изменения характеристик и глупости
-    function modifyStats(hungerDelta, energyDelta, brainDelta, stupidityDelta, actionMessage) {
-      if (gameOver) {
-        addLog('Игра окончена. Нажми "НОВЫЙ ТИМОФЕЙ".');
-        return;
-      }
-
-      // Применяем изменения
-      hunger = clamp(hunger + hungerDelta, 0, 100);
-      energy = clamp(energy + energyDelta, 0, 100);
-      brain = clamp(brain + brainDelta, 0, 100);
-      
-      // Глупость растёт или падает (но не ниже 0)
-      stupidity = clamp(stupidity + stupidityDelta, 0, 100);
-      
-      // Дополнительные эффекты: если мозг низкий — глупость может расти сама (пассивно)
-      // Добавим немного юмора: если мозг < 20, то глупость увеличивается дополнительно
-      if (brain < 20 && !gameOver) {
-        stupidity = clamp(stupidity + 0.5, 0, 100);
-      }
-      
-      // Если энергия очень низкая — Тимофей делает глупости
-      if (energy < 15 && !gameOver) {
-        stupidity = clamp(stupidity + 0.8, 0, 100);
-      }
-      
-      // Проверка окончания
-      const over = checkGameOver();
-      
-      // Сообщение
-      let finalMsg = actionMessage;
-      if (!over) {
-        if (hunger < 25) finalMsg += ' Тимофей голоден!';
-        if (energy < 25) finalMsg += ' Он хочет спать.';
-        if (brain > 75) finalMsg += ' Кажется, он немного поумнел?';
-        if (stupidity > 85) finalMsg += ' ГЛУПОСТЬ ЗАШКАЛИВАЕТ!';
-      }
-      addLog(finalMsg);
-      updateUI();
-      
-      // Если игра не окончена, но пассивные изменения могли привести к концу
-      if (!gameOver) checkGameOver();
-      updateUI();
-    }
-
-    // ---------- РИСОВАНИЕ ТИМОФЕЯ (выражение лица зависит от состояния) ----------
-    function drawTimofey() {
-      ctx.clearRect(0, 0, 400, 400);
-      
-      // Фон лица
-      ctx.fillStyle = '#fbe9c3';
-      ctx.beginPath();
-      ctx.ellipse(200, 200, 140, 150, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#d49b6a';
-      ctx.lineWidth = 6;
-      ctx.stroke();
-      
-      // Щёки (румянец)
-      ctx.fillStyle = '#f4acb7';
-      ctx.globalAlpha = 0.5 + 0.2 * Math.sin(Date.now() / 500);
-      ctx.beginPath();
-      ctx.arc(120, 220, 24, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(280, 220, 24, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-      
-      // ГЛАЗА (меняются от состояния)
-      // Белки
-      ctx.fillStyle = '#fefee6';
-      ctx.beginPath();
-      ctx.ellipse(140, 170, 24, 28, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(260, 170, 24, 28, 0, 0, Math.PI*2);
-      ctx.fill();
-      
-      // Зрачки (зависят от глупости/мозга)
-      let pupilSize = 10;
-      let crossEye = 0;
-      if (stupidity > 70) {
-        crossEye = 12; // косоглазие
-        pupilSize = 14;
-      } else if (brain < 25) {
-        pupilSize = 14;
-        crossEye = -8;
-      }
-      
-      if (energy < 30) {
-        // сонные веки
-        ctx.fillStyle = '#d9b382';
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.ellipse(140, 155, 28, 14, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(260, 155, 28, 14, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-      }
-      
-      ctx.fillStyle = '#1e2b2c';
-      ctx.beginPath();
-      ctx.arc(140 + crossEye, 175, pupilSize, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(260 - crossEye, 175, pupilSize, 0, 2*Math.PI);
-      ctx.fill();
-      
-      // Блики
-      ctx.fillStyle = '#f5f9ff';
-      ctx.beginPath();
-      ctx.arc(133 + crossEye, 168, 4, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(253 - crossEye, 168, 4, 0, 2*Math.PI);
-      ctx.fill();
-      
-      // БРОВИ (глупость/злость)
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = '#4a2a18';
-      ctx.beginPath();
-      let browY = 130;
-      if (gameOver && winStupidity) {
-        // счастливые брови
-        ctx.moveTo(110, 120);
-        ctx.quadraticCurveTo(140, 100, 170, 120);
-        ctx.moveTo(230, 120);
-        ctx.quadraticCurveTo(260, 100, 290, 120);
-      } else if (stupidity > 60) {
-        ctx.moveTo(110, 135);
-        ctx.lineTo(170, 115);
-        ctx.moveTo(230, 115);
-        ctx.lineTo(290, 135);
-      } else {
-        ctx.moveTo(115, browY);
-        ctx.lineTo(165, browY-8);
-        ctx.moveTo(235, browY-8);
-        ctx.lineTo(285, browY);
-      }
-      ctx.stroke();
-      
-      // РОТ
-      ctx.lineWidth = 6;
-      ctx.strokeStyle = '#a52a2a';
-      ctx.fillStyle = '#992222';
-      ctx.beginPath();
-      let mouthY = 260;
-      if (hunger < 30) {
-        // открытый рот (голод)
-        ctx.beginPath();
-        ctx.ellipse(200, 275, 30, 20, 0, 0, Math.PI*2);
-        ctx.fillStyle = '#6b1a1a';
-        ctx.fill();
-        ctx.fillStyle = '#210a0a';
-        ctx.beginPath();
-        ctx.ellipse(200, 280, 18, 12, 0, 0, Math.PI*2);
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        if (stupidity > 50) {
-          ctx.arc(200, 265, 35, 0.1, Math.PI - 0.1);
-        } else {
-          ctx.arc(200, 260, 30, 0.1, Math.PI - 0.1);
+    // Обновление UI карты
+    function renderMap() {
+      mapEl.innerHTML = '';
+      ROOMS.forEach((room, idx) => {
+        const roomDiv = document.createElement('div');
+        roomDiv.className = 'room';
+        
+        // Особые классы
+        if (idx === timofeyPosition) roomDiv.classList.add('timofey');
+        if (idx === GALINA_ROOM_INDEX) roomDiv.classList.add('galina');
+        
+        // Записка (если ещё не взята и комната содержит записку)
+        if (room.hasNote && !notesTaken[idx] && !gameCompleted) {
+          roomDiv.classList.add('has-note');
         }
-        ctx.lineWidth = 8;
-        ctx.stroke();
-      }
-      
-      // Если глупость почти 100 - корона
-      if (stupidity > 90 && !gameOver) {
-        ctx.font = "bold 38px 'Segoe UI Emoji'";
-        ctx.fillStyle = "#f5c542";
-        ctx.fillText("👑", 155, 70);
-      }
-      
-      if (gameOver && winStupidity) {
-        ctx.font = "bold 48px sans-serif";
-        ctx.fillText("🤡", 160, 340);
-      }
+        
+        // Эмодзи + название
+        let noteIcon = '';
+        if (room.hasNote && !notesTaken[idx] && !gameCompleted) noteIcon = '📋';
+        
+        roomDiv.innerHTML = `
+          <div class="room-emoji">${room.emoji}${noteIcon}</div>
+          <div class="room-name">${room.name}</div>
+        `;
+        
+        // Клик по комнате = попытка перемещения (если игра не завершена)
+        roomDiv.addEventListener('click', (e) => {
+          if (gameCompleted || gameOver) {
+            addLog('🎉 Игра завершена! Начни заново (кнопка сброса).');
+            return;
+          }
+          const targetIdx = idx;
+          if (targetIdx === timofeyPosition) {
+            addLog(`🤨 Тимофей уже в ${ROOMS[targetIdx].name}.`);
+            return;
+          }
+          // Перемещение
+          timofeyPosition = targetIdx;
+          addLog(`🚶 Тимофей перешёл в ${ROOMS[targetIdx].name}.`);
+          
+          // Если комната с запиской и ещё не взята, подсказка
+          if (ROOMS[targetIdx].hasNote && !notesTaken[targetIdx]) {
+            addLog(`📋 В ${ROOMS[targetIdx].name} лежит записка! Нажми "ВЗЯТЬ ЗАПИСКУ".`);
+          }
+          if (targetIdx === GALINA_ROOM_INDEX) {
+            addLog(`👩‍🏫 Ты в Учительской. Галина Владимировна ждёт записки (${collectedNotes}/5).`);
+          }
+          renderMap();
+          updateNoteCounter();
+        });
+        
+        mapEl.appendChild(roomDiv);
+      });
     }
 
-    // ---------- ДЕЙСТВИЯ ----------
-    function feed() {
-      if (gameOver) return;
-      if (hunger >= 95) {
-        addLog('Тимофей лопнет! Не надо больше еды.');
+    // Обновление счётчика записок
+    function updateNoteCounter() {
+      noteSpan.textContent = `${collectedNotes}/5`;
+    }
+
+    // Вывод в лог
+    function addLog(msg) {
+      logEl.textContent = msg;
+    }
+
+    // Взять записку
+    function takeNoteAction() {
+      if (gameCompleted || gameOver) {
+        addLog('⛔ Игра уже завершена. Жми "НОВАЯ ИГРА".');
         return;
       }
-      let msg = '🍕 Тимофей поел.';
-      let stupidityGain = 1;
-      if (brain < 30) stupidityGain = 3;
-      modifyStats(28, -4, 1, stupidityGain, msg);
-    }
-    
-    function sleep() {
-      if (gameOver) return;
-      if (energy >= 95) {
-        addLog('Тимофей не хочет спать, он слишком бодр!');
+      
+      const currentRoom = ROOMS[timofeyPosition];
+      
+      if (!currentRoom.hasNote) {
+        addLog(`❌ В ${currentRoom.name} нет записки. Ищи в других кабинетах!`);
         return;
       }
-      let msg = '😴 Тимофей поспал.';
-      modifyStats(-10, 35, -2, -1, msg);
-    }
-    
-    function study() {
-      if (gameOver) return;
-      if (energy < 10) {
-        addLog('Тимофей слишком устал учиться!');
+      
+      if (notesTaken[timofeyPosition]) {
+        addLog(`📋 Записка из ${currentRoom.name} уже взята.`);
         return;
       }
-      if (brain > 90) {
-        addLog('Мозг Тимофея переполнен знаниями (почти).');
+      
+      // Забираем записку
+      notesTaken[timofeyPosition] = true;
+      collectedNotes++;
+      updateNoteCounter();
+      
+      addLog(`✅ Тимофей взял записку из ${currentRoom.name}! Всего ${collectedNotes}/5.`);
+      
+      if (collectedNotes === 5) {
+        addLog(`🎉 ВСЕ 5 ЗАПИСОК СОБРАНЫ! Иди к Галине Владимировне сдавать на АШ 2.0!`);
       }
-      let msg = '📚 Тимофей УЧИЛСЯ! +мозг, но он скучал.';
-      let stupidityChange = -5;
-      if (stupidity < 10) stupidityChange = 0;
-      modifyStats(-8, -18, 12, stupidityChange, msg);
+      
+      renderMap();
     }
-    
-    function play() {
-      if (gameOver) return;
-      let msg = '⚽ Тимофей играет, счастлив, но немного тупеет.';
-      modifyStats(-12, -12, -3, 7, msg);
+
+    // Пойти к Галине и попытаться сдать
+    function goToGalina() {
+      if (gameCompleted || gameOver) {
+        addLog('🏆 Тимофей уже получил АШ 2.0! Сбрось игру для нового забега.');
+        return;
+      }
+      
+      // Проверка: находится ли Тимофей в учительской
+      if (timofeyPosition !== GALINA_ROOM_INDEX) {
+        addLog(`🚫 Галина Владимировна в Учительской! Сначала доберись до неё (кликни по Учительской).`);
+        return;
+      }
+      
+      // Проверка записок
+      if (collectedNotes < 5) {
+        addLog(`👩‍🏫 Галина Владимировна: "Тимофей, у тебя только ${collectedNotes}/5 записок. Собери все 5!"`);
+        return;
+      }
+      
+      // УСПЕХ! Сдача на АШ 2.0
+      gameCompleted = true;
+      gameOver = true;
+      
+      addLog(`🏆👑 ГАЛИНА ВЛАДИМИРОВНА ПРИНИМАЕТ 5 ЗАПИСОК! ТИМОФЕЙ ПОЛУЧАЕТ "АШ 2.0" !!! ПОБЕДА! 🎓🤡`);
+      
+      // Спецэффект
+      renderMap();
+      updateNoteCounter();
     }
-    
-    function doStupid() {
-      if (gameOver) return;
-      // Специальное действие: совершить глупость
-      let stupidityBoost = 12 + Math.floor(brain / 10); 
-      let msg = '🤡 Тимофей СОВЕРШИЛ НЕВЕРОЯТНУЮ ГЛУПОСТЬ!';
-      modifyStats(-5, -12, -8, stupidityBoost, msg);
+
+    // Перемещение (кнопка "ПЕРЕМЕСТИТЬСЯ" — для удобства, но перемещаться можно кликом по комнатам)
+    function moveAction() {
+      if (gameCompleted || gameOver) {
+        addLog('Игра окончена. Сбрось для новой попытки.');
+        return;
+      }
+      addLog('👆 Кликни по любой комнате на карте, чтобы Тимофей туда пошёл!');
     }
-    
-    function scold() {
-      if (gameOver) return;
-      let msg = '😠 Тимофея отругали. Глупость уменьшилась, но он расстроен.';
-      modifyStats(-4, -10, 2, -9, msg);
-    }
-    
+
+    // Сброс игры
     function resetGame() {
-      hunger = 70;
-      energy = 60;
-      brain = 30;
-      stupidity = 0;
+      timofeyPosition = 0;   // старт в каб. физики
+      collectedNotes = 0;
+      resetNotesState();
+      gameCompleted = false;
       gameOver = false;
-      winStupidity = false;
-      addLog('🔄 Новый Тимофей! Он такой же глупый, но полон сил.');
-      updateUI();
+      
+      addLog('🔄 Новая игра! Тимофей в школе. Собери 5 записок и иди к Галине Владимировне.');
+      renderMap();
+      updateNoteCounter();
     }
 
-    // Пассивное уменьшение характеристик со временем (каждые 2.5 сек)
-    function passiveDecay() {
-      if (gameOver) return;
-      // голод и энергия медленно падают
-      hunger = clamp(hunger - 2.2, 0, 100);
-      energy = clamp(energy - 1.8, 0, 100);
+    // Инициализация
+    function initGame() {
+      resetNotesState();
+      timofeyPosition = 0;
+      collectedNotes = 0;
+      gameCompleted = false;
+      gameOver = false;
       
-      // если мозг маленький - глупость растет
-      if (brain < 30) stupidity = clamp(stupidity + 1.2, 0, 100);
-      else if (brain > 60) stupidity = clamp(stupidity - 0.6, 0, 100);
+      renderMap();
+      updateNoteCounter();
+      addLog('🏫 Тимофей в школе. Собери 5 записок и сдай Галине Владимировне на АШ 2.0!');
       
-      // небольшой шанс случайной глупости
-      if (Math.random() < 0.2 && !gameOver) {
-        stupidity = clamp(stupidity + 1.5, 0, 100);
-      }
-      
-      checkGameOver();
-      updateUI();
-      
-      // Если не конец, иногда выводим пассивное сообщение (не засоряем сильно)
-      if (!gameOver && (Math.random() < 0.3)) {
-        if (hunger < 30) addLog('🍽️ Тимофей урчит животом...');
-        else if (energy < 25) addLog('😪 Тимофей клюёт носом.');
-        else if (stupidity > 75) addLog('🤪 Тимофей тупит сам по себе.');
-      }
-    }
-
-    // Инициализация событий
-    function bindEvents() {
-      document.getElementById('feedBtn').addEventListener('click', feed);
-      document.getElementById('sleepBtn').addEventListener('click', sleep);
-      document.getElementById('studyBtn').addEventListener('click', study);
-      document.getElementById('playBtn').addEventListener('click', play);
-      document.getElementById('stupidBtn').addEventListener('click', doStupid);
-      document.getElementById('scoldBtn').addEventListener('click', scold);
+      // Привязка кнопок
+      document.getElementById('moveBtn').addEventListener('click', moveAction);
+      document.getElementById('takeNoteBtn').addEventListener('click', takeNoteAction);
+      document.getElementById('goToGalinaBtn').addEventListener('click', goToGalina);
       document.getElementById('resetBtn').addEventListener('click', resetGame);
     }
 
-    // Запуск
-    function init() {
-      bindEvents();
-      updateUI();
-      drawTimofey();
-      setInterval(passiveDecay, 2800); // ~ каждые 2.8 сек
-      // Анимация моргания? Просто перерисовка
-      setInterval(() => {
-        if (!gameOver) drawTimofey();
-        else drawTimofey();
-      }, 400);
-    }
-
-    init();
+    initGame();
   })();
 </script>
 </body>
