@@ -2,910 +2,481 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>KROPOTKIN — РАБОЧАЯ ВЕРСИЯ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NetErrror - Соседняя комната: Дима слушает</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
+            user-select: none;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            background: #0a0c12;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: white;
-            padding: 16px;
-            padding-bottom: 80px;
-        }
-        .top-bar {
-            background: #000000aa;
-            padding: 12px 16px;
-            border-radius: 60px;
+            background: linear-gradient(145deg, #0a0c14 0%, #03050a 100%);
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            font-size: 14px;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            padding: 16px;
+            margin: 0;
         }
-        .tabs {
+
+        .game-wrapper {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            border-radius: 64px;
+            border: 1px solid #ff66aa50;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
+            padding: 20px;
+        }
+
+        /* две комнаты + профили */
+        .duo-rooms {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 24px;
+            justify-content: center;
+        }
+
+        .room-card {
+            flex: 1;
+            min-width: 280px;
+            background: #0f121ed9;
+            border-radius: 48px;
+            padding: 20px 16px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .mom-area {
+            border-bottom: 5px solid #ff77aa;
+            background: radial-gradient(circle at 20% 10%, #2a1a2c, #0a020f);
+        }
+
+        .dima-area {
+            border-bottom: 5px solid #55ccff;
+            background: radial-gradient(circle at 90% 20%, #141c2c, #02050c);
+        }
+
+        .person {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-bottom: 20px;
         }
-        .tab-btn {
-            background: #1e1f30;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 40px;
-            color: #ccc;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
+
+        .avatar {
+            font-size: 80px;
+            filter: drop-shadow(0 8px 12px black);
+            transition: transform 0.2s ease;
         }
-        .tab-btn.active {
-            background: #b91c1c;
-            color: white;
-        }
-        .card {
-            background: rgba(18, 22, 40, 0.95);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(220, 60, 60, 0.3);
-        }
-        .card h3 {
-            color: #ffaa66;
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
-        button {
-            background: #b91c1c;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            color: white;
-            font-size: 16px;
+
+        .mom-avatar { text-shadow: 0 0 8px #ff66aa; }
+        .dima-avatar { text-shadow: 0 0 5px #33aaff; }
+
+        .person h3 {
+            margin: 8px 0 4px;
+            font-size: 1.8rem;
             font-weight: bold;
-            cursor: pointer;
+            background: linear-gradient(135deg, #ffbb88, #ff88aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
+
+        .dima-area .person h3 {
+            background: linear-gradient(135deg, #aaffff, #88ccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .status-badge {
+            background: #000000aa;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .money-counter {
+            background: #1e1a2f;
+            padding: 10px;
+            border-radius: 60px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.7rem;
+            color: #f5c542;
+            margin: 12px 0;
+            border: 1px solid gold;
+            font-family: monospace;
+        }
+
+        button {
+            background: #2a1e3a;
+            border: none;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.08s linear;
+            margin-top: 8px;
+            width: 100%;
+            box-shadow: 0 3px 6px black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
         button:active {
             transform: scale(0.96);
         }
-        .btn-small {
-            background: #2c2f48;
-            padding: 8px 16px;
-            font-size: 14px;
+
+        .mom-action-btn {
+            background: #b32d5a;
+            border-bottom: 3px solid #ffb347;
         }
-        .btn-success {
-            background: #2d6a4f;
-        }
-        .job-item {
-            background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .job-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffcc88;
-        }
-        .job-reward {
-            font-size: 11px;
-            color: #6fcf97;
-        }
-        .minigame-area {
-            background: #0a0e1a;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .clicker-btn {
-            background: #e67e22;
-            padding: 20px;
-            font-size: 24px;
-            width: 80%;
-            margin: 10px auto;
-        }
-        .progress-bar {
-            background: #2a2e44;
-            height: 16px;
-            border-radius: 10px;
-            margin: 10px 0;
+
+        .listen-btn {
+            background: #1f6390;
+            border-bottom: 3px solid #aaffdd;
+            position: relative;
             overflow: hidden;
         }
-        .progress-fill {
-            background: #6fcf97;
-            height: 100%;
-            width: 0%;
+
+        .listen-animation {
+            animation: pulseListen 0.4s ease;
         }
-        .memory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
+
+        @keyframes pulseListen {
+            0% { transform: scale(1); background: #1f6390; }
+            50% { transform: scale(1.03); background: #4aa3df; box-shadow: 0 0 12px #88ddff; }
+            100% { transform: scale(1); }
         }
-        .memory-card {
-            background: #1a1e30;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 28px;
-            text-align: center;
-            cursor: pointer;
+
+        .dima-listen-effect {
+            animation: dimaToWall 0.35s cubic-bezier(0.2, 1.2, 0.8, 1);
         }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2e44;
+
+        @keyframes dimaToWall {
+            0% { transform: translateX(0px) rotate(0deg); }
+            50% { transform: translateX(15px) rotate(5deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
         }
-        .stat-label { color: #ffcc88; }
-        hr { border-color: #3a2e4a; margin: 12px 0; }
-        .item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 400px;
+
+        .room-sounds {
+            background: #03030ad9;
+            border-radius: 36px;
+            padding: 14px;
+            margin: 16px 0 0;
+            min-height: 200px;
+            max-height: 260px;
             overflow-y: auto;
+            font-size: 0.85rem;
+            border: 1px solid #ff66aa30;
         }
-        .item-card {
-            background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
+
+        .sound-entry {
+            border-left: 4px solid #ff99cc;
+            padding: 8px 10px;
+            margin: 8px 0;
+            background: #ffffff08;
+            border-radius: 18px;
+            color: #f0f0f0;
+            font-family: monospace;
+        }
+
+        .dima-sound {
+            border-left-color: #55ccff;
+            background: #11335530;
+        }
+
+        .mom-sound {
+            border-left-color: #ffaa88;
+        }
+
+        .reset-btn {
+            background: #2c2c3a;
+            width: auto;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .flex-btns {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: 10px;
+            margin-top: 6px;
         }
-        .item-name { font-weight: bold; color: #ffcc88; }
-        .item-price { color: #6fcf97; font-size: 12px; }
-        .bj-cards {
-            font-size: 28px;
-            letter-spacing: 8px;
-            background: #1a1e30;
-            padding: 12px;
-            border-radius: 16px;
-            margin: 10px 0;
-        }
-        .bj-buttons {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
+
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #aaa6;
         }
     </style>
 </head>
 <body>
-
-<div class="top-bar">
-    <span>🎮 <span id="nickDisplay">----</span></span>
-    <span>💰 <span id="moneyDisplay">5000</span> ₽</span>
-    <span>⭐ Ур. <span id="levelDisplay">1</span></span>
-</div>
-
-<div class="tabs">
-    <button class="tab-btn active" data-tab="profile">👤 Профиль</button>
-    <button class="tab-btn" data-tab="work">💼 Работы</button>
-    <button class="tab-btn" data-tab="minigame">🎮 Мини-игра</button>
-    <button class="tab-btn" data-tab="cars">🚗 Гараж</button>
-    <button class="tab-btn" data-tab="property">🏠 Недвижимость</button>
-    <button class="tab-btn" data-tab="business">💼 Бизнес</button>
-    <button class="tab-btn" data-tab="casino">♠️ Black Jack</button>
-    <button class="tab-btn" data-tab="shop">🏪 Магазин</button>
-    <button class="tab-btn" data-tab="stats">📊 Статистика</button>
-</div>
-
-<!-- ПРОФИЛЬ -->
-<div id="profileTab" class="tab-content" style="display: block;">
-    <div class="card">
-        <div class="stat-row"><span class="stat-label">🔰 ID:</span><span id="userId">12345</span></div>
-        <div class="stat-row"><span class="stat-label">⭐ Уровень:</span><span id="profileLevel">1</span></div>
-        <div class="stat-row"><span class="stat-label">🏆 Опыт (XP):</span><span id="profileExp">0</span> / <span id="nextExp">1000</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Работа:</span><span id="profileJob">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машина:</span><span id="profileCar">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Дом:</span><span id="profileHouse">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнес:</span><span id="profileBusiness">Нет</span></div>
-        <button id="workFromProfileBtn" style="width:100%; margin-top:12px;">💼 ВЫПОЛНИТЬ РАБОТУ</button>
-    </div>
-</div>
-
-<!-- РАБОТЫ -->
-<div id="workTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Работы</h3>
-        <div id="jobsList"></div>
-    </div>
-</div>
-
-<!-- МИНИ-ИГРА -->
-<div id="minigameTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3 id="minigameTitle">🎮 Мини-игра</h3>
-        <div id="minigameArea" class="minigame-area">
-            <div style="color:#aaa;">Выберите работу во вкладке "Работы"</div>
-        </div>
-        <div id="minigameMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- ГАРАЖ -->
-<div id="carsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🚗 Мои машины</h3>
-        <div id="myCarsList" class="item-list"></div>
-        <hr>
-        <h3>🏪 Автосалон</h3>
-        <div id="carsShopList" class="item-list"></div>
-        <div id="carsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- НЕДВИЖИМОСТЬ -->
-<div id="propertyTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏠 Моя недвижимость</h3>
-        <div id="myPropsList" class="item-list"></div>
-        <hr>
-        <h3>🏢 Купить</h3>
-        <div id="propsShopList" class="item-list"></div>
-        <div id="propsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- БИЗНЕС -->
-<div id="businessTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Мой бизнес</h3>
-        <div id="myBusinessList" class="item-list"></div>
-        <div class="stat-row" style="background:#1a1e30; border-radius:16px; margin-top:12px; padding:12px;">
-            <span class="stat-label">📊 Пассивный доход:</span>
-            <span id="passiveIncome">0</span> ₽/час
-        </div>
-        <hr>
-        <h3>🏢 Купить бизнес</h3>
-        <div id="businessShopList" class="item-list"></div>
-        <div id="businessMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- BLACK JACK -->
-<div id="casinoTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>♠️ BLACK JACK</h3>
-        <input type="number" id="bjBet" value="100" min="10" step="10" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin-bottom:10px; color:white; border:1px solid #e03a3a;">
-        <div id="bjGame">
-            <div class="bj-cards" id="dealerArea">🤵 Дилер: ???</div>
-            <div class="bj-cards" id="playerArea">🎲 Игрок: -</div>
-            <div class="bj-buttons">
-                <button id="bjHitBtn" disabled>🎴 Ещё</button>
-                <button id="bjStandBtn" disabled>✋ Хватит</button>
+<div class="game-wrapper">
+    <div class="duo-rooms">
+        <!-- КОМНАТА МАМЫ (кухня/гостиная) -->
+        <div class="room-card mom-area">
+            <div class="person">
+                <div class="avatar mom-avatar">💃👩</div>
+                <h3>МАМА (Люда)</h3>
+                <div class="status-badge" id="momStatusText">🏠 Дома (готовит)</div>
+            </div>
+            <div class="money-counter">
+                💰 <span id="moneyAmount">0</span> ₽
+            </div>
+            <button id="callManBtn" class="mom-action-btn">🚪🔞 ПРИВЕСТИ МУЖИКА</button>
+            <div style="font-size: 0.7rem; margin-top: 10px; text-align: center;">*клиент приходит → мама делает минет, ебется, грязные стоны*</div>
+            <!-- зона звуков из комнаты мамы (что там происходит) -->
+            <div class="room-sounds" id="momSoundsArea">
+                <div class="sound-entry mom-sound">🍳 Мама на кухне, гремит посудой.</div>
+                <div class="sound-entry mom-sound">📺 Смотрит сериал, скучно...</div>
             </div>
         </div>
-        <button id="bjStartBtn">🎲 НАЧАТЬ РАУНД</button>
-        <div id="bjTimer" style="background:#1a1e30; text-align:center; padding:10px; border-radius:40px; margin-top:10px;">⏳ Готов</div>
-        <div id="bjMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
 
-<!-- МАГАЗИН -->
-<div id="shopTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏪 Магазин</h3>
-        <div id="shopList" class="item-list"></div>
-        <div id="shopMsg" style="text-align:center; margin-top:10px;"></div>
+        <!-- КОМНАТА ДИМЫ с анимацией прикладывания уха -->
+        <div class="room-card dima-area">
+            <div class="person">
+                <div class="avatar dima-avatar" id="dimaAvatar">🧑🎧</div>
+                <h3>ДИМА (сын)</h3>
+                <div class="status-badge">🔇 сидит в своей комнате</div>
+            </div>
+            <button id="listenWallBtn" class="listen-btn">👂 ПРИЛОЖИТЬ УХО К СТЕНЕ И ПОДСЛУШИВАТЬ</button>
+            <div class="flex-btns">
+                <button id="resetGameBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
+            </div>
+            <!-- что слышит Дима -->
+            <div class="room-sounds" id="dimaHearArea">
+                <div class="sound-entry dima-sound">🔇 Дима сидит тихо, слышит только шаги мамы на кухне.</div>
+            </div>
+            <div style="font-size:0.7rem; margin-top:8px;">👇 приложи ухо — услышишь всё: минет, стоны, шлепки, крики</div>
+        </div>
     </div>
-</div>
-
-<!-- СТАТИСТИКА -->
-<div id="statsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>📊 Статистика</h3>
-        <div class="stat-row"><span class="stat-label">💰 Всего заработано:</span><span id="totalEarned">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎰 Выиграно в BJ:</span><span id="totalWon">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Смен отработано:</span><span id="workCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎮 Мини-игр пройдено:</span><span id="minigameCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машин куплено:</span><span id="carsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Недвижимости:</span><span id="propsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнесов:</span><span id="businessCount">0</span></div>
-    </div>
+    <footer>NetErrror || симуляция без границ. Дима подслушивает маму с клиентами. Каждый акт приносит деньги.</footer>
 </div>
 
 <script>
-    // ==================== ИГРОВЫЕ ДАННЫЕ ====================
-    let game = {
-        nick: "Игрок",
-        money: 5000,
-        level: 1,
-        exp: 0,
-        currentJob: null,
-        totalEarned: 0,
-        totalWon: 0,
-        workCount: 0,
-        minigameCount: 0,
-        cars: [],
-        currentCar: null,
-        properties: [],
-        businesses: []
-    };
+    // -------------------- СОСТОЯНИЕ ИГРЫ --------------------
+    let money = 0;
+    let momState = "home_idle";     // home_idle, with_man (делает минет/ебется)
+    let manTimer = null;
+    let currentAct = null;          // детали секса
 
-    // Машины для покупки
-    const carsForSale = [
-        { name: "ZAZ 968", price: 20000, speed: 100 },
-        { name: "ВАЗ 2101", price: 60000, speed: 120 },
-        { name: "ВАЗ 2107", price: 150000, speed: 140 },
-        { name: "Audi RS6", price: 8500000, speed: 305 }
+    // элементы UI
+    const moneySpan = document.getElementById('moneyAmount');
+    const momStatusSpan = document.getElementById('momStatusText');
+    const momSoundsDiv = document.getElementById('momSoundsArea');
+    const dimaHearDiv = document.getElementById('dimaHearArea');
+    const dimaAvatar = document.getElementById('dimaAvatar');
+
+    // ---- библиотека грязных фраз/звуков для разных действий мамы с мужиком ----
+    const sexActions = [
+        { action: "минет", sounds: ["👅 *чавкающие звуки* Мама делает минет на коленях", "🤤 *слышно как мужик стонет* О да, глубже...", "💦 *звуки глубокого минета, мама давится*", "👄 'Так, сосни ещё, шлюха' — командует мужик", "😩 *громкий всхлип* Мама: 'Ммм...'"] },
+        { action: "ебля в позе раком", sounds: ["🍑 *шлепки, влажные удары* Маму трахают сзади", "🔞 *скрип дивана* 'Да, еби её сильнее!'", "😫 *мамин стон* 'О да, еще, ТРАХАЙ'", "💢 *мужик дышит* Какая же ты шлюха, мать", "🥵 *оргазмические крики* Аааааххх!"] },
+        { action: "классическая ебля", sounds: ["🎙️ *тяжелое дыхание, стоны* 'Раздвинь ноги шире'", "🔊 *крики* О да-да-да, кончаю! ", "💸 *звук денег* 'получай, шалава'", "😈 *диалог* 'Сколько за анал? - Плати больше'", "🤪 *мамин визг* Ещё, не останавливайся!!!"] },
+        { action: "групповуха", sounds: ["👥 *два мужика* 'отсоси у моего друга', мама стонет", "💢 *звуки двойного проникновения*", "🤑 'за двойную цену поработай', звон монет", "😵 *мама задыхается от минета и ебли*"] },
+        { action: "жесткий секс", sounds: ["⛓️ *пощёчины, стоны* 'Да, грязная сучка'", "😫 *мама кричит от боли/удовольствия*", "💥 *удары тел, шлепки по лицу*", "🧴 *звук смазки и влажные толчки*"] }
     ];
 
-    // Недвижимость для покупки
-    const propertiesForSale = [
-        { name: "Комната", price: 50000, income: 1000 },
-        { name: "1-комн квартира", price: 200000, income: 3000 },
-        { name: "Частный дом", price: 1500000, income: 20000 }
+    // фразы когда мама одна дома (кухня/быт)
+    const homeSounds = [
+        "🍳 Мама на кухне жарит яичницу, напевает песенку.",
+        "📞 Мама говорит по телефону подруге: 'устала, денег нет...'",
+        "🧹 Мама пылесосит ковёр в гостиной.",
+        "📺 Смотрит 'Дом-2', смеётся в одиночестве.",
+        "🚿 Мама принимает душ, мычит мелодию.",
+        "🍷 Открывает бутылку дешёвого вина, вздыхает."
     ];
 
-    // Бизнес для покупки
-    const businessForSale = [
-        { name: "Ларек", price: 100000, profit: 5000 },
-        { name: "Кафе", price: 500000, profit: 20000 },
-        { name: "Магазин", price: 1500000, profit: 50000 }
-    ];
-
-    // Работы
-    const jobs = [
-        { name: "📦 Курьер", levelReq: 1, income: 3000, expReward: 1, gameType: "clicker", target: 8 },
-        { name: "🌾 Фермер", levelReq: 1, income: 3500, expReward: 1, gameType: "clicker", target: 10 },
-        { name: "🏭 Завод", levelReq: 2, income: 4000, expReward: 2, gameType: "qrcode", target: 1 },
-        { name: "🚕 Таксист", levelReq: 2, income: 4500, expReward: 2, gameType: "slider", target: 70 },
-        { name: "🚛 Дальнобойщик", levelReq: 3, income: 9000, expReward: 5, gameType: "slider", target: 85 }
-    ];
-
-    // Магазин
-    const shopItems = [
-        { name: "🍔 Гамбургер", price: 150 },
-        { name: "💊 Аптечка", price: 500 },
-        { name: "🔫 Травмат", price: 5000 }
-    ];
-
-    // ==================== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ====================
-    function updateUI() {
-        document.getElementById('moneyDisplay').innerText = game.money.toLocaleString();
-        document.getElementById('levelDisplay').innerText = game.level;
-        document.getElementById('profileLevel').innerText = game.level;
-        document.getElementById('profileExp').innerText = game.exp;
-        document.getElementById('profileJob').innerText = game.currentJob ? game.currentJob.name : "Нет";
-        document.getElementById('profileCar').innerText = game.currentCar ? game.currentCar.name : "Нет";
-        document.getElementById('profileHouse').innerText = game.properties.length > 0 ? game.properties.length + " шт" : "Нет";
-        document.getElementById('profileBusiness').innerText = game.businesses.length > 0 ? game.businesses.length + " шт" : "Нет";
-        document.getElementById('totalEarned').innerText = game.totalEarned.toLocaleString();
-        document.getElementById('totalWon').innerText = game.totalWon.toLocaleString();
-        document.getElementById('workCount').innerText = game.workCount;
-        document.getElementById('minigameCount').innerText = game.minigameCount;
-        document.getElementById('carsCount').innerText = game.cars.length;
-        document.getElementById('propsCount').innerText = game.properties.length;
-        document.getElementById('businessCount').innerText = game.businesses.length;
-        
-        let passive = 0;
-        game.properties.forEach(p => passive += p.income);
-        game.businesses.forEach(b => passive += b.profit);
-        document.getElementById('passiveIncome').innerText = passive.toLocaleString();
-    }
-
-    function saveGame() {
-        localStorage.setItem('kropotkin_save', JSON.stringify(game));
-    }
-
-    function loadGame() {
-        const saved = localStorage.getItem('kropotkin_save');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                Object.assign(game, data);
-            } catch(e) {}
-        }
-        updateUI();
-    }
-
-    function addMoney(amount) {
-        game.money += amount;
-        game.totalEarned += amount;
-        updateUI();
-        saveGame();
-    }
-
-    function addExp(amount) {
-        game.exp += amount;
-        if (game.exp >= 1000) {
-            game.level++;
-            game.exp -= 1000;
-            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь ${game.level} уровень!`);
-            renderJobs();
-        }
-        updateUI();
-        saveGame();
-    }
-
-    // ==================== РАБОТЫ ====================
-    function selectJob(job) {
-        if (game.level < job.levelReq) {
-            alert(`❌ Требуется ${job.levelReq} уровень!`);
-            return;
-        }
-        game.currentJob = job;
-        updateUI();
-        alert(`✅ Выбрана работа: ${job.name}`);
-        saveGame();
-    }
-
-    function renderJobs() {
-        const container = document.getElementById('jobsList');
-        if (!container) return;
-        container.innerHTML = '';
-        for (let job of jobs) {
-            const available = game.level >= job.levelReq;
-            const div = document.createElement('div');
-            div.className = 'job-item';
-            div.innerHTML = `
-                <div>
-                    <div class="job-name">${job.name} ${available ? '' : '🔒'}</div>
-                    <div class="job-reward">💰 +${job.income}₽ | ✨ +${job.expReward} XP</div>
-                    <div class="job-reward">${available ? '✅ Доступна' : `⭐ Требуется ${job.levelReq} уровень`}</div>
-                </div>
-                <button class="btn-small" data-job-name="${job.name}">Выбрать</button>
-            `;
-            container.appendChild(div);
-            const btn = div.querySelector('button');
-            if (!available) btn.disabled = true;
-            btn.onclick = () => selectJob(job);
-        }
-    }
-
-    // ==================== МИНИ-ИГРЫ ====================
-    let currentGame = null;
-    let clickerCount = 0;
-    let memorySequence = [];
-    let memoryUserInput = [];
-
-    function startMinigame() {
-        const job = game.currentJob;
-        if (!job) {
-            alert("❌ Сначала выберите работу во вкладке 'Работы'!");
-            return;
-        }
-        
-        const area = document.getElementById('minigameArea');
-        const title = document.getElementById('minigameTitle');
-        title.innerHTML = `🎮 ${job.name} — мини-игра`;
-        
-        if (job.gameType === 'clicker') {
-            clickerCount = 0;
-            area.innerHTML = `
-                <div>👆 Нажми ${job.target} раз!</div>
-                <button id="clickBtn" class="clicker-btn">👆 НАЖМИ</button>
-                <div class="progress-bar"><div id="clickProgress" class="progress-fill"></div></div>
-                <div>Прогресс: <span id="clickCount">0</span>/${job.target}</div>
-                <button id="finishClickBtn" class="btn-small btn-success" style="margin-top:10px;">✅ ЗАВЕРШИТЬ</button>
-            `;
-            const clickBtn = document.getElementById('clickBtn');
-            const progressFill = document.getElementById('clickProgress');
-            const countSpan = document.getElementById('clickCount');
-            clickBtn.onclick = () => {
-                clickerCount = Math.min(clickerCount + 1, job.target);
-                progressFill.style.width = (clickerCount/job.target*100)+'%';
-                countSpan.innerText = clickerCount;
-                if (clickerCount === job.target) clickBtn.disabled = true;
-            };
-            document.getElementById('finishClickBtn').onclick = () => {
-                if (clickerCount >= job.target) finishWork(true);
-                else finishWork(false);
-            };
-        }
-        else if (job.gameType === 'qrcode') {
-            const code = Math.floor(Math.random() * 9000 + 1000);
-            area.innerHTML = `
-                <div>Введи код: ${code}</div>
-                <div style="background:white; color:black; padding:15px; border-radius:16px; margin:10px; font-size:24px;">${code}</div>
-                <input id="qrInput" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin:10px 0; color:white; border:1px solid #e03a3a;" placeholder="Введите код">
-                <button id="qrSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
-            document.getElementById('qrSubmitBtn').onclick = () => {
-                const input = document.getElementById('qrInput').value;
-                if (parseInt(input) === code) finishWork(true);
-                else finishWork(false);
-            };
-        }
-        else if (job.gameType === 'slider') {
-            const target = Math.floor(Math.random() * 41 + 30);
-            area.innerHTML = `
-                <div>Установи ползунок на ${target} (±5)</div>
-                <input type="range" id="sliderInput" min="0" max="100" value="50" style="width:100%; margin:10px 0;">
-                <div>Текущее значение: <span id="sliderValue">50</span></div>
-                <button id="sliderSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
-            const slider = document.getElementById('sliderInput');
-            const valueSpan = document.getElementById('sliderValue');
-            slider.oninput = () => { valueSpan.innerText = slider.value; };
-            document.getElementById('sliderSubmitBtn').onclick = () => {
-                const val = parseInt(slider.value);
-                if (Math.abs(val - target) <= 5) finishWork(true);
-                else finishWork(false);
-            };
-        }
-    }
-
-    function finishWork(success) {
-        if (success && game.currentJob) {
-            addMoney(game.currentJob.income);
-            addExp(game.currentJob.expReward);
-            game.workCount++;
-            game.minigameCount++;
-            updateUI();
-            alert(`✅ Работа выполнена! +${game.currentJob.income}₽, +${game.currentJob.expReward} XP`);
-            document.getElementById('minigameMsg').innerHTML = '✅ Успех! +' + game.currentJob.income + '₽';
-        } else {
-            alert(`❌ Провал! Попробуйте ещё раз.`);
-            document.getElementById('minigameMsg').innerHTML = '❌ Провал! Попробуйте снова.';
-        }
-        setTimeout(() => { document.getElementById('minigameMsg').innerHTML = ''; }, 2000);
-        saveGame();
-    }
-
-    // ==================== ГАРАЖ ====================
-    function buyCar(car) {
-        if (game.money >= car.price) {
-            game.money -= car.price;
-            game.cars.push({ ...car });
-            if (!game.currentCar) game.currentCar = car;
-            updateUI();
-            renderCars();
-            document.getElementById('carsMsg').innerHTML = `✅ Куплено: ${car.name}`;
-            setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('carsMsg').innerHTML = `❌ Не хватает ${(car.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function selectCar(car) {
-        game.currentCar = car;
-        updateUI();
-        renderCars();
-        document.getElementById('carsMsg').innerHTML = `🚗 Теперь вы ездите на ${car.name}`;
-        setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-        saveGame();
-    }
-
-    function renderCars() {
-        const myDiv = document.getElementById('myCarsList');
-        if (myDiv) {
-            if (game.cars.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет машин</div>';
-            else {
-                myDiv.innerHTML = game.cars.map((car, idx) => `
-                    <div class="item-card">
-                        <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч</div>
-                        <button class="btn-small" data-select-car="${idx}">${game.currentCar === car ? '✅ Текущая' : 'Выбрать'}</button>
-                    </div>
-                `).join('');
-                document.querySelectorAll('[data-select-car]').forEach(btn => {
-                    btn.onclick = () => selectCar(game.cars[parseInt(btn.getAttribute('data-select-car'))]);
-                });
+    // звуки которые слышит ДИМА (при подслушивании)
+    function generateHearFromMom() {
+        if (momState === "with_man" && currentAct) {
+            // выбираем случайный звук из текущего акта (секс/минет)
+            const actionPack = currentAct.sounds;
+            const randomIdx = Math.floor(Math.random() * actionPack.length);
+            let rawSound = actionPack[randomIdx];
+            // иногда добавляем специфику про деньги
+            if (Math.random() < 0.4) {
+                rawSound += " 💰 (мама получила чаевые)";
+                let bonus = Math.floor(Math.random() * 300) + 100;
+                money += bonus;
+                updateMoney();
+                addMomLog(`💵 БОНУС! Пока Дима слушал, мужик кинул ${bonus}₽.`, true);
             }
+            return `👂 ДИМА СЛЫШИТ через стену: ${rawSound}`;
+        } 
+        else if (momState === "with_man" && !currentAct) {
+            // fallback
+            return `👂 ДИМА СЛЫШИТ: странные влажные звуки и стоны... мама явно с мужиком`;
         }
-        const shopDiv = document.getElementById('carsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = carsForSale.map((car, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч<br><span class="item-price">💰 ${car.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-car="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-car]').forEach(btn => {
-                btn.onclick = () => buyCar(carsForSale[parseInt(btn.getAttribute('data-buy-car'))]);
-            });
+        else {
+            // мама одна
+            const randomHome = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            return `👂 ДИМА СЛЫШИТ: ${randomHome} (никаких мужчин)`;
         }
     }
 
-    // ==================== НЕДВИЖИМОСТЬ ====================
-    function buyProperty(prop) {
-        if (game.money >= prop.price) {
-            game.money -= prop.price;
-            game.properties.push({ ...prop });
-            updateUI();
-            renderProperties();
-            document.getElementById('propsMsg').innerHTML = `✅ Куплено: ${prop.name}`;
-            setTimeout(() => document.getElementById('propsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('propsMsg').innerHTML = `❌ Не хватает ${(prop.price - game.money).toLocaleString()}₽`;
-        }
+    // добавить лог в зону мамы (что происходит в её комнате)
+    function addMomLog(message, isBonus = false) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry mom-sound';
+        div.innerHTML = isBonus ? `✨ ${message}` : `💬 ${message}`;
+        momSoundsDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (momSoundsDiv.children.length > 22) momSoundsDiv.removeChild(momSoundsDiv.firstChild);
     }
 
-    function renderProperties() {
-        const myDiv = document.getElementById('myPropsList');
-        if (myDiv) {
-            if (game.properties.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет недвижимости</div>';
-            else {
-                myDiv.innerHTML = game.properties.map(prop => `
-                    <div class="item-card">
-                        <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('propsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = propertiesForSale.map((prop, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час<br><span class="item-price">💰 ${prop.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-prop="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-prop]').forEach(btn => {
-                btn.onclick = () => buyProperty(propertiesForSale[parseInt(btn.getAttribute('data-buy-prop'))]);
-            });
-        }
+    // добавить лог в зону Димы (что он слышит)
+    function addDimaLog(message) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry dima-sound';
+        div.innerHTML = message;
+        dimaHearDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (dimaHearDiv.children.length > 24) dimaHearDiv.removeChild(dimaHearDiv.firstChild);
     }
 
-    // ==================== БИЗНЕС ====================
-    function buyBusiness(biz) {
-        if (game.money >= biz.price) {
-            game.money -= biz.price;
-            game.businesses.push({ ...biz });
-            updateUI();
-            renderBusiness();
-            document.getElementById('businessMsg').innerHTML = `✅ Куплен бизнес: ${biz.name}`;
-            setTimeout(() => document.getElementById('businessMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('businessMsg').innerHTML = `❌ Не хватает ${(biz.price - game.money).toLocaleString()}₽`;
-        }
+    function updateMoney() {
+        moneySpan.innerText = Math.floor(money);
     }
 
-    function renderBusiness() {
-        const myDiv = document.getElementById('myBusinessList');
-        if (myDiv) {
-            if (game.businesses.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет бизнеса</div>';
-            else {
-                myDiv.innerHTML = game.businesses.map(biz => `
-                    <div class="item-card">
-                        <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('businessShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = businessForSale.map((biz, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час<br><span class="item-price">💰 ${biz.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-biz="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-biz]').forEach(btn => {
-                btn.onclick = () => buyBusiness(businessForSale[parseInt(btn.getAttribute('data-buy-biz'))]);
-            });
-        }
+    // завершить визит мужика
+    function endManVisit() {
+        if (momState !== "with_man") return;
+        if (manTimer) clearTimeout(manTimer);
+        const earnedThisTime = Math.floor(Math.random() * 900) + 500;
+        money += earnedThisTime;
+        updateMoney();
+        momState = "home_idle";
+        currentAct = null;
+        momStatusSpan.innerHTML = "🏠 Дома (готовит/отдыхает)";
+        addMomLog(`🚪 Мужик ушёл, мама заработала ${earnedThisTime}₽. Теперь она одна на кухне.`, false);
+        addMomLog(`🍲 Мама переодевается и идёт пить чай.`);
+        // также добавим для димы намёк
+        addDimaLog(`🔇 Звуки за стеной затихли. Дима слышит только шаги мамы. Мужик ушёл.`);
+        // обновляем аватарку мамы
     }
 
-    // ==================== МАГАЗИН ====================
-    function renderShop() {
-        const container = document.getElementById('shopList');
-        if (!container) return;
-        container.innerHTML = shopItems.map((item, idx) => `
-            <div class="item-card">
-                <div><span class="item-name">${item.name}</span><br><span class="item-price">💰 ${item.price} ₽</span></div>
-                <button class="btn-small" data-buy-item="${idx}">Купить</button>
-            </div>
-        `).join('');
-        document.querySelectorAll('[data-buy-item]').forEach(btn => {
-            btn.onclick = () => {
-                const item = shopItems[parseInt(btn.getAttribute('data-buy-item'))];
-                if (game.money >= item.price) {
-                    game.money -= item.price;
-                    updateUI();
-                    document.getElementById('shopMsg').innerHTML = `✅ Куплено: ${item.name}`;
-                    saveGame();
-                } else {
-                    document.getElementById('shopMsg').innerHTML = `❌ Не хватает ${item.price - game.money}₽`;
-                }
-                setTimeout(() => document.getElementById('shopMsg').innerHTML = '', 2000);
-            };
-        });
-    }
-
-    // ==================== BLACK JACK ====================
-    let bjActive = false, bjCooldown = false, bjSeconds = 0, bjInterval = null;
-    let bjPlayerHand = [], bjDealerHand = [], bjCurrentBet = 0;
-
-    function getRandomCard() {
-        const cards = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-        return cards[Math.floor(Math.random() * cards.length)];
-    }
-
-    function getCardValue(card) {
-        if (card === 'A') return 11;
-        if (['K','Q','J'].includes(card)) return 10;
-        return parseInt(card);
-    }
-
-    function handScore(hand) {
-        let score = 0, aces = 0;
-        for (let card of hand) {
-            if (card === 'A') { aces++; score += 11; }
-            else { score += getCardValue(card); }
-        }
-        while (score > 21 && aces > 0) {
-            score -= 10;
-            aces--;
-        }
-        return score;
-    }
-
-    function updateBJUI() {
-        document.getElementById('playerArea').innerHTML = `🎲 Игрок: ${bjPlayerHand.join(' ')} (${handScore(bjPlayerHand)})`;
-        if (bjActive) {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand[0]} ?`;
-        } else {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand.join(' ')} (${handScore(bjDealerHand)})`;
-        }
-    }
-
-    function endBJGame(result, winAmount) {
-        bjActive = false;
-        document.getElementById('bjHitBtn').disabled = true;
-        document.getElementById('bjStandBtn').disabled = true;
-        document.getElementById('bjStartBtn').disabled = false;
-        if (result === 'win') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🎉 ПОБЕДА! +${winAmount}₽`;
-        } else if (result === 'lose') {
-            document.getElementById('bjMsg').innerHTML = `😞 ПРОИГРЫШ! -${bjCurrentBet}₽`;
-        } else if (result === 'push') {
-            game.money += bjCurrentBet;
-            document.getElementById('bjMsg').innerHTML = `🤝 НИЧЬЯ! Возврат ${bjCurrentBet}₽`;
-        } else if (result === 'blackjack') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🃏 BLACKJACK! +${winAmount}₽`;
-        }
-        updateUI();
-        updateBJUI();
-        saveGame();
-        startBJCooldown();
-        setTimeout(() => document.getElementById('bjMsg').innerHTML = '', 3000);
-    }
-
-    function dealerPlay() {
-        while (handScore(bjDealerHand) < 17) {
-            bjDealerHand.push(getRandomCard());
-        }
-        updateBJUI();
-        const dealerScore = handScore(bjDealerHand);
-        const playerScore = handScore(bjPlayerHand);
-        if (dealerScore > 21) endBJGame('win', bjCurrentBet * 2);
-        else if (dealerScore > playerScore) endBJGame('lose', 0);
-        else if (dealerScore < playerScore) endBJGame('win', bjCurrentBet * 2);
-        else endBJGame('push', bjCurrentBet);
-    }
-
-    function playerHit() {
-        if (!bjActive) return;
-        bjPlayerHand.push(getRandomCard());
-        updateBJUI();
-        if (handScore(bjPlayerHand) > 21) endBJGame('lose', 0);
-    }
-
-    function playerStand() {
-        if (!bjActive) return;
-        bjActive = false;
-        dealerPlay();
-    }
-
-    function startBJCooldown() {
-        bjCooldown = true;
-        bjSeconds = 30;
-        const timerDiv = document.getElementById('bjTimer');
-        const startBtn = document.getElementById('bjStartBtn');
-        startBtn.disabled = true;
-        if (bjInterval) clearInterval(bjInterval);
-        bjInterval = setInterval(() => {
-            bjSeconds--;
-            timerDiv.innerText = `⏳ Ждите ${bjSeconds} сек...`;
-            if (bjSeconds <= 0) {
-                clearInterval(bjInterval);
-                bjCooldown = false;
-                timerDiv.innerText = `✅ Можно играть!`;
-                startBtn.disabled = false;
-                setTimeout(() => {
-                    if (timerDiv.innerText === '✅ Можно играть!') timerDiv.innerText = '⏳ Готов';
-                }, 2000);
-            }
-        }, 1000);
-    }
-
-    function startBlackjack() {
-        if (bjCooldown) {
-            document.getElementById('bjMsg').innerHTML = `⏳ Подождите ${bjSeconds} сек!`;
+    // начать акт с мужиком (минет, ебля и тп)
+    function bringMan() {
+        if (momState === "with_man") {
+            addMomLog(`⚠️ Мама уже трахается с клиентом! Дождись окончания.`, false);
             return;
         }
-        const bet = parseInt(document.getElementById('bjBet').value);
-        if (isNaN(bet) || bet < 10) {
-            alert('Минимальная ставка 10₽');
-            return;
-        }
-        if (bet > game.money) {
-            alert('Не хватает денег!');
-            return;
-        }
-        bjCurrentBet = bet;
-        game.money -= bjCurrentBet;
-        updateUI();
-        bjPlayerHand = [getRandomCard(), getRandomCard()];
-        bjDealerHand = [getRandomCard(), getRandomCard()];
-        bjActive = true;
-        document.getElementById('bjHitBtn').disabled = false;
-        document.getElementById('bjStandBtn').disabled = false;
-        document.getElementById('bjStartBtn').disabled = true;
-        updateBJUI();
-        if (handScore(bjPlayerHand) === 21) {
-            endBJGame('blackjack', bjCurrentBet * 2.5);
-        }
-        saveGame();
-    }
-
-    // ==================== ПАССИВНЫЙ ДОХОД ====================
-    setInterval(() => {
-        let total = 0;
-        game.properties.forEach(p => total += p.income);
-        game.businesses.forEach(b => total += b.profit);
-        if (total > 0) {
-            game.money += total;
-            game.totalEarned += total;
-            updateUI();
-            saveGame();
-        }
-    }, 60000);
-
-    // ==================== ЗАПУСК ====================
-    function init() {
-        let nick = prompt("Введите ник в формате Имя_Фамилия:", "Artem_Kropotkin");
-        if (!nick || !nick.includes('_')) nick = "Artem_Kropotkin";
-        game.nick = nick;
-        document.getElementById('nickDisplay').innerText = game.nick;
-        document.getElementById('userId').innerText = Math.floor(Math.random() * 9000 + 1000);
-        loadGame();
-        renderJobs();
-        renderCars();
-        renderProperties();
-        renderBusiness();
-        renderShop();
+        // выбираем случайный тип секса
+        const randomAct = sexActions[Math.floor(Math.random() * sexActions.length)];
+        currentAct = randomAct;
+        momState = "with_man";
+        momStatusSpan.innerHTML = "🔞 С КЛИЕНТОМ (делает минет, ебётся)";
         
-        document.getElementById('bjStartBtn').onclick = startBlackjack;
-        document.getElementById('bjHitBtn').onclick = playerHit;
-        document.getElementById('bjStandBtn').onclick = playerStand;
-        document.getElementById('workFromProfileBtn').onclick = startMinigame;
+        const visitDuration = 8000 + Math.random() * 9000; // 8-17 секунд
+        addMomLog(`🚪🔞 ПРИШЁЛ МУЖИК! Мама сразу начала ${randomAct.action}. Слышны пошлые звуки.`, false);
+        addMomLog(`💢 (стонет, шлепки, неприличные фразы...)`, false);
+        
+        // показать в логах Димы первое уведомление
+        addDimaLog(`🚨 Дима услышал мужской голос и дверной звонок. Мама с кем-то зашла в комнату!`);
+        
+        if (manTimer) clearTimeout(manTimer);
+        manTimer = setTimeout(() => {
+            endManVisit();
+        }, visitDuration);
+        
+        // каждые 3 секунды во время акта автоматически пишем в комнату мамы грязные детали (опционально)
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        window.autoSexInterval = setInterval(() => {
+            if (momState === "with_man" && currentAct) {
+                const randomAuto = currentAct.sounds[Math.floor(Math.random() * currentAct.sounds.length)];
+                addMomLog(`🔞 ${randomAuto}`, false);
+            } else {
+                clearInterval(window.autoSexInterval);
+            }
+        }, 4000);
     }
 
-    // Переключение вкладок
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.getElementById(btn.getAttribute('data-tab') + 'Tab').style.display = 'block';
-        };
+    // ---- ПОДСЛУШИВАНИЕ с анимацией Димы ----
+    function listenToWall() {
+        // Анимация: Дима прикладывает ухо к стене
+        dimaAvatar.classList.add('dima-listen-effect');
+        const listenBtn = document.getElementById('listenWallBtn');
+        listenBtn.classList.add('listen-animation');
+        setTimeout(() => {
+            dimaAvatar.classList.remove('dima-listen-effect');
+            listenBtn.classList.remove('listen-animation');
+        }, 350);
+        
+        // получаем что слышит Дима в зависимости от состояния мамы
+        const hearMessage = generateHearFromMom();
+        addDimaLog(hearMessage);
+        
+        // если мама с мужиком, дополнительный бонус - иногда подслушивание приносит деньги (типа нашёл в коридоре)
+        if (momState === "with_man" && Math.random() < 0.25) {
+            const foundMoney = Math.floor(Math.random() * 150) + 20;
+            money += foundMoney;
+            updateMoney();
+            addDimaLog(`💸 Дима нашёл в коридоре купюру (вероятно, мужик обронил) +${foundMoney}₽`);
+        }
+        
+        // Дополнительная реакция: если мама делает минет, то Дима слышит очень чётко
+        if (momState === "with_man" && currentAct && currentAct.action === "минет") {
+            addDimaLog(`😨 Дима отодвинулся от стены, услышав как мама давится членом. Отвращение и стыд.`);
+        }
+        if (momState === "with_man" && currentAct && currentAct.action.includes("групповуха")) {
+            addDimaLog(`🤯 Дима в шоке: похоже у мамы сразу несколько мужиков! Слышны голоса со всех сторон.`);
+        }
+    }
+    
+    // полный сброс игры
+    function fullReset() {
+        if (manTimer) clearTimeout(manTimer);
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        money = 0;
+        momState = "home_idle";
+        currentAct = null;
+        updateMoney();
+        momStatusSpan.innerHTML = "🏠 Дома (готовит)";
+        // очистить логи
+        momSoundsDiv.innerHTML = '';
+        dimaHearDiv.innerHTML = '';
+        addMomLog(`🔄 СИСТЕМА ПЕРЕЗАПУЩЕНА. Мама снова на кухне.`, false);
+        addMomLog(`🍳 Готовит ужин, Дима в своей комнате.`);
+        addDimaLog(`🔇 Тишина. Дима сидит в углу.`);
+        addDimaLog(`👂 Может приложить ухо к стене и подслушивать...`);
+        // добавим пару стандартных
+        addMomLog(`📺 Включила телевизор, ждёт "клиентов"`);
+    }
+    
+    // инициализация кнопок и начальное состояние
+    document.getElementById('callManBtn').addEventListener('click', () => {
+        bringMan();
     });
-
-    init();
+    document.getElementById('listenWallBtn').addEventListener('click', () => {
+        listenToWall();
+    });
+    document.getElementById('resetGameBtn').addEventListener('click', () => {
+        fullReset();
+    });
+    
+    // имитация бытовых звуков когда мама одна (каждые 10-15 секунд)
+    setInterval(() => {
+        if (momState === "home_idle") {
+            const randomHomeSound = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            addMomLog(randomHomeSound, false);
+        }
+    }, 11000);
+    
+    // начальная загрузка
+    fullReset();
 </script>
 </body>
 </html>
