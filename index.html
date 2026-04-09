@@ -1,778 +1,673 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥚 СУСЛОВ: Ультра Эдишн</title>
-    <style>
-        * { box-sizing: border-box; user-select: none; }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #1a3a2e 0%, #2d5a4a 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 8px;
-        }
-        .game-container {
-            max-width: 550px;
-            width: 100%;
-            background: #efe6d5;
-            background-image: radial-gradient(circle at 20% 30%, #fff6e8, #e7d8be);
-            border-radius: 40px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
-            padding: 16px 14px 20px;
-            border: 4px solid #b49a7b;
-        }
-        h1 { font-size: 2rem; margin: 0 0 8px; color: #3d2a1b; text-shadow: 2px 2px 0 #c9aa7b; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .top-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-        .badge {
-            background: #6a4e2e;
-            color: #ffd966;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            border: 1px solid #eebb55;
-            text-align: center;
-        }
-        .suslov-area {
-            background: linear-gradient(135deg, #ccb094, #a5835e);
-            border-radius: 80px 80px 40px 40px;
-            padding: 12px;
-            border: 4px solid #5e3e28;
-            box-shadow: inset 0 -6px 0 #3f2c1c, 0 8px 0 #3f2c1c;
-            margin-bottom: 12px;
-            position: relative;
-        }
-        .suslov-emoji {
-            font-size: 100px;
-            line-height: 1;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .floating-text {
-            position: absolute;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ffd700;
-            text-shadow: 2px 2px 0 #000;
-            animation: floatUp 1s ease-out forwards;
-            pointer-events: none;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
-        }
-        .belly-bar-container {
-            background: #2c1e12;
-            padding: 4px 8px;
-            border-radius: 30px;
-            border: 2px solid #b49a7b;
-            margin-top: 8px;
-        }
-        .belly-bar-bg {
-            height: 22px;
-            background: #1e130c;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .belly-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #fcb045, #ff512f);
-            border-radius: 20px;
-            transition: width 0.2s;
-            width: 0%;
-        }
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            gap: 8px;
-        }
-        .money-block, .food-block {
-            background: #0c0907;
-            padding: 6px 16px;
-            border-radius: 25px;
-            color: #ffd966;
-            font-size: 1.3rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex: 1;
-        }
-        .shop {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin: 8px 0;
-        }
-        .food-btn {
-            background: #dccdb6;
-            border: 2px solid #6e543c;
-            border-radius: 30px;
-            padding: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 3px 0 #5a4530;
-            cursor: pointer;
-        }
-        .food-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #5a4530; }
-        .golden-food {
-            background: linear-gradient(45deg, #ffd700, #ffec8b);
-            border-color: #daa520;
-            box-shadow: 0 3px 0 #b8860b;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%,100% { box-shadow: 0 3px 0 #b8860b, 0 0 10px gold; }
-            50% { box-shadow: 0 3px 0 #b8860b, 0 0 20px orange; }
-        }
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 6px;
-            margin: 8px 0;
-        }
-        button {
-            background: #f3d37c;
-            border: none;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 30px;
-            box-shadow: 0 3px 0 #a05f2c;
-            border: 1px solid #ffeab0;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #a05f2c; }
-        .tabs {
-            display: flex;
-            gap: 4px;
-            margin: 8px 0;
-        }
-        .tab-btn {
-            background: #8b7355;
-            color: white;
-            flex: 1;
-            padding: 6px;
-            font-size: 0.8rem;
-        }
-        .tab-btn.active {
-            background: #c9a87c;
-            color: #1f140a;
-        }
-        .tab-content {
-            background: #d4c4ae;
-            border-radius: 20px;
-            padding: 8px;
-            margin: 5px 0;
-            border: 2px solid #8b7355;
-        }
-        .quest-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px;
-            background: #efe0cd;
-            margin: 3px 0;
-            border-radius: 15px;
-        }
-        .booster-active {
-            background: #ffd700;
-            color: #1a1a1a;
-            padding: 3px 8px;
-            border-radius: 15px;
-            font-size: 0.7rem;
-            display: inline-block;
-        }
-        .skin-selector {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        .skin-btn {
-            font-size: 2rem;
-            padding: 5px 10px;
-            background: #a5835e;
-            border-radius: 15px;
-            cursor: pointer;
-            opacity: 0.5;
-        }
-        .skin-btn.unlocked { opacity: 1; }
-        .skin-btn.selected { border: 3px solid gold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🥩 СИСЯ ДИМЫ ДАУНА · ПИТОМЕЦ ДАВИД · БОНУСЫ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Comic Sans MS', 'Impact', sans-serif;
+      padding: 12px;
+    }
+
+    .game-container {
+      max-width: 580px;
+      width: 100%;
+      background: #fbe9c3;
+      background-image: radial-gradient(circle at 20% 30%, #fff3d6, #f0d5a8);
+      border-radius: 60px 60px 30px 30px;
+      box-shadow: 0 20px 0 #6b3e1f, 0 30px 30px rgba(0,0,0,0.4);
+      padding: 20px 18px 30px;
+      border: 4px solid #ac6f3c;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #3d1f09;
+      text-shadow: 5px 5px 0 #e7b87b, 2px 2px 0 #a6531e;
+      word-break: break-word;
+      transform: rotate(-1deg);
+    }
+
+    .dima-zone {
+      background: #b38b60;
+      padding: 16px 10px 20px;
+      border-radius: 80px 80px 40px 40px;
+      box-shadow: inset 0 -6px 0 #5d3a22, 0 12px 0 #4d2f19, 0 8px 15px black;
+      margin-bottom: 14px;
+      border: 3px solid #eeb574;
+    }
+
+    .sisi-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sisya {
+      font-size: 6.5rem;
+      line-height: 1;
+      filter: drop-shadow(6px 10px 0 rgba(0,0,0,0.3));
+      cursor: pointer;
+      transition: 0.1s ease;
+      transform: scale(1);
+      background: #fad6b3;
+      padding: 0 10px 10px 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .sisya:active {
+      transform: scale(0.88);
+      filter: drop-shadow(2px 4px 0 #251608);
+    }
+
+    .sisi-stats {
+      background: #2c1a0b;
+      padding: 12px 8px;
+      border-radius: 50px;
+      box-shadow: inset 0 2px 6px black, 0 6px 0 #1a0f06;
+      color: #ffdead;
+      font-weight: bold;
+      font-size: 1.3rem;
+      margin: 12px 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border: 2px solid #bc8f4b;
+    }
+
+    .sisi-size {
+      background: #51321b;
+      padding: 6px 16px;
+      border-radius: 40px;
+      box-shadow: inset 0 2px 5px black;
+      color: #ffd78a;
+      text-shadow: 2px 2px 0 #1f0f03;
+    }
+
+    .crit-meter {
+      background: #241407;
+      border-radius: 30px;
+      padding: 6px 12px;
+      color: #ffb882;
+      font-size: 1.1rem;
+    }
+
+    /* Полоска возбуждения */
+    .arousal-bar-container {
+      background: #1f1107;
+      border-radius: 30px;
+      padding: 4px 10px;
+      margin: 10px 5px 0;
+      border: 2px solid #d48f4a;
+    }
+
+    .arousal-fill {
+      height: 20px;
+      background: linear-gradient(90deg, #ff6a6a, #ff3b9a);
+      border-radius: 20px;
+      width: 0%;
+      box-shadow: inset 0 2px 5px #44001a, 0 0 10px #ff8c8c;
+      transition: width 0.2s;
+    }
+
+    .arousal-text {
+      color: #ffe5b4;
+      font-weight: bold;
+      margin-top: 4px;
+      font-size: 1rem;
+    }
+
+    .pet-david {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #6e4d2e;
+      margin: 16px 0 14px;
+      padding: 10px 18px;
+      border-radius: 100px 40px 100px 40px;
+      box-shadow: inset 0 1px 6px #eebb77, 0 8px 0 #3a281a, 0 5px 10px black;
+      border: 2px solid #efc48c;
+      color: #fff3db;
+      font-weight: bold;
+    }
+
+    .pet-avatar {
+      font-size: 3.2rem;
+      background: #2d1c0b;
+      padding: 5px 16px;
+      border-radius: 60px;
+      box-shadow: inset 0 0 0 3px #b47b44;
+      line-height: 1.2;
+    }
+
+    .pet-status {
+      text-align: right;
+    }
+
+    .pet-status div {
+      font-size: 1.2rem;
+      background: #1f1309;
+      padding: 4px 12px;
+      border-radius: 30px;
+      margin: 4px 0;
+      border: 1px solid #c89a5b;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 6px 0 8px;
+    }
+
+    .btn {
+      background: #d68f3c;
+      border: none;
+      font-weight: bold;
+      font-size: 1.3rem;
+      padding: 12px 18px;
+      border-radius: 60px;
+      box-shadow: 0 7px 0 #7a451b, 0 4px 8px black;
+      color: #1f0f02;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.07s;
+      border: 2px solid #feda9b;
+      flex: 1 0 130px;
+      letter-spacing: 1.5px;
+      transform: rotate(-0.5deg);
+    }
+
+    .btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 #7a451b, 0 4px 8px black;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      filter: grayscale(0.5);
+      transform: none;
+      box-shadow: 0 5px 0 #5f371a;
+      pointer-events: none;
+    }
+
+    .achievements-panel {
+      background: #2f1f11e0;
+      border-radius: 30px;
+      padding: 12px 12px;
+      margin: 15px 0 5px;
+      border: 2px solid #dba15a;
+      backdrop-filter: blur(3px);
+    }
+
+    .ach-title {
+      color: #ffd78c;
+      font-weight: bold;
+      font-size: 1.3rem;
+      text-shadow: 2px 2px 0 #361e0c;
+      margin-bottom: 8px;
+    }
+
+    .ach-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      justify-content: center;
+    }
+
+    .ach-badge {
+      background: #543e28;
+      padding: 5px 15px;
+      border-radius: 40px;
+      color: #d4b483;
+      font-weight: bold;
+      border: 1px solid #b47d44;
+      box-shadow: inset 0 0 6px #1a0e04;
+      font-size: 1rem;
+    }
+
+    .ach-badge.unlocked {
+      background: #d6a04b;
+      color: #1d2c00;
+      box-shadow: 0 0 12px gold;
+      border-color: #ffd966;
+    }
+
+    .crit-log {
+      background: #0c0702d0;
+      backdrop-filter: blur(2px);
+      padding: 8px 12px;
+      border-radius: 40px;
+      margin-top: 14px;
+      color: #ffe3ae;
+      font-size: 1.1rem;
+      font-weight: bold;
+      min-height: 65px;
+      border: 2px dashed #f3b35e;
+      box-shadow: inset 0 0 10px #37200b;
+    }
+
+    .glow-crit {
+      text-shadow: 0 0 15px rgb(255, 200, 0), 0 0 30px rgb(255, 80, 0);
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      25%{ transform: translateX(-6px); }
+      75%{ transform: translateX(6px); }
+    }
+
+    .reset-area {
+      margin-top: 8px;
+    }
+
+    .small-btn {
+      background: #684527;
+      box-shadow: 0 4px 0 #3f2818;
+      font-size: 1rem;
+      padding: 8px 18px;
+    }
+  </style>
 </head>
 <body>
-<div class="game-container" id="gameContainer">
-    <h1>
-        <span id="currentSkinEmoji">🐹</span> СУСЛОВ
-        <button onclick="openTab('skins')" style="font-size:1rem; padding:5px; width:auto;">👤</button>
-    </h1>
-    
-    <div class="top-panel">
-        <div class="badge">⭐ Престиж <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)</div>
-        <div class="badge">💸 Потрачено <span id="totalSpent">0</span>🪙</div>
-        <div class="badge">🔥 Комбо x<span id="comboCount">0</span></div>
-        <div class="badge">📊 Рекорд <span id="recordBelly">0</span>%</div>
+<div class="game-container">
+  <h1>🥩ДИМА ДАУН🥩</h1>
+  <div class="dima-zone">
+    <div class="sisi-container">
+      <span class="sisya" id="sisiEmoji">🥩</span>
+      <span style="font-size:3rem;">🤜💥</span>
     </div>
+    <div class="sisi-stats">
+      <span class="sisi-size">🍖 <span id="sizeValue">1.0</span> см</span>
+      <span class="crit-meter">⚡КРИТ: <span id="critChanceDisplay">25</span>%</span>
+    </div>
+    <!-- Полоска возбуждения -->
+    <div class="arousal-bar-container">
+      <div class="arousal-fill" id="arousalFill"></div>
+      <div class="arousal-text">💢 ВОЗБУЖДЕНИЕ: <span id="arousalPercent">0</span>%</div>
+    </div>
+  </div>
 
-    <div class="suslov-area" id="suslovArea">
-        <div class="suslov-emoji" id="suslovEmoji">🐭</div>
-        <div class="belly-bar-container">
-            <div class="belly-bar-bg">
-                <div class="belly-fill" id="bellyFill"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; color:#ffecb3; font-size:0.8rem;">
-                <span>🍖 <span id="bellyPercent">0</span>%</span>
-                <span id="boosterIndicator"></span>
-            </div>
-        </div>
+  <!-- ПИТОМЕЦ ДАВИД -->
+  <div class="pet-david">
+    <span class="pet-avatar">🐕‍🦺 ДАВИД</span>
+    <div class="pet-status">
+      <div>❤️ <span id="petLove">50</span>%</div>
+      <div>🦴 <span id="petHunger">100</span>%</div>
     </div>
+  </div>
 
-    <div class="stats-row">
-        <div class="money-block">🪙 <span id="moneyValue">50</span></div>
-        <div class="food-block">🍱 <span id="foodCount">0</span></div>
-    </div>
-    
-    <div style="display:flex; gap:5px; font-size:0.7rem; color:#594d3c;">
-        <span>🥕<span id="carrotCount">0</span></span>
-        <span>🍔<span id="burgerCount">0</span></span>
-        <span>🎂<span id="cakeCount">0</span></span>
-        <span>👑<span id="goldenCount">0</span></span>
-    </div>
+  <div class="action-buttons">
+    <button class="btn" id="hitBtn">🤜 БИТЬ</button>
+    <button class="btn" id="feedDavidBtn">🍖 КОРМИТЬ</button>
+  </div>
+  <div class="action-buttons">
+    <button class="btn" id="specialCritBtn">💦 КРИТ-ГЛОТОК</button>
+    <button class="btn" id="playDavidBtn">🎾 ИГРАТЬ</button>
+  </div>
 
-    <!-- Вкладки -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('shop')">🛒 Магазин</button>
-        <button class="tab-btn" onclick="openTab('quests')">🎯 Задания</button>
-        <button class="tab-btn" onclick="openTab('casino')">🎰 Рулетка</button>
-        <button class="tab-btn" onclick="openTab('stats')">📊 Статы</button>
+  <!-- Достижения -->
+  <div class="achievements-panel">
+    <div class="ach-title">🏆 ДОСТИЖЕНИЯ</div>
+    <div class="ach-list" id="achList">
+      <span class="ach-badge" id="achSize">📏 10см</span>
+      <span class="ach-badge" id="achDavid">🐕 СЫТ</span>
+      <span class="ach-badge" id="achCrit5">💥 5 КРИТОВ</span>
     </div>
+  </div>
 
-    <!-- Контент вкладок -->
-    <div id="tabShop" class="tab-content">
-        <div class="shop" id="shopContainer"></div>
-        <div id="marketInfo" style="font-size:0.7rem; margin-top:5px;"></div>
-    </div>
-    
-    <div id="tabQuests" class="tab-content" style="display:none;">
-        <div id="questsList"></div>
-        <button onclick="claimDailyBonus()" style="width:100%; margin-top:8px;">🎁 Ежедневный бонус</button>
-    </div>
-    
-    <div id="tabCasino" class="tab-content" style="display:none;">
-        <h3>🎰 Рулетка удачи</h3>
-        <div id="rouletteResult" style="font-size:1.5rem; min-height:40px;">🎲</div>
-        <button onclick="spinRoulette()" id="rouletteBtn">Крутить (30🪙)</button>
-        <div id="rouletteTimer" style="font-size:0.7rem;"></div>
-    </div>
-    
-    <div id="tabStats" class="tab-content" style="display:none;">
-        <div id="statsDisplay"></div>
-    </div>
-    
-    <div id="tabSkins" class="tab-content" style="display:none;">
-        <h3>👤 Скины Суслова</h3>
-        <div class="skin-selector" id="skinSelector"></div>
-        <button onclick="openTab('shop')">← Назад</button>
-    </div>
+  <div class="crit-log" id="logBox">
+    💬 ЖМИ НА СИСЮ...
+  </div>
 
-    <div class="action-buttons">
-        <button id="feedBtn">🍽️ КОРМИТЬ</button>
-        <button id="autoFeedBtn">🤖 АВТО</button>
-    </div>
-    
-    <button id="sellFatBtn" style="width:100%; background:#c9a87c; margin-top:5px;">💰 ПРОДАТЬ ЖИР (+5%)</button>
-    
-    <div id="messageArea" style="min-height:20px; font-weight:bold; color:#ad1f1f; font-size:0.8rem;"></div>
+  <div class="reset-area">
+    <button class="btn small-btn" id="resetBtn">🔄 ЗАНОВО</button>
+  </div>
 </div>
 
 <script>
-(function(){
+  (function(){
     "use strict";
 
-    // ---------- ОСНОВНОЕ СОСТОЯНИЕ ----------
-    let money = 50;
-    let belly = 0;
-    let recordBelly = 0;
-    let foodInventory = { carrot: 0, burger: 0, cake: 0, golden: 0 };
-    let prestigeLevel = 0;
-    let prestigeBonusPercent = 0;
-    let totalSpentMoney = 0;
-    let feedCombo = 0;
-    
-    // Статистика
-    let stats = { clicks: 0, foodEaten: 0, moneyEarned: 0, spins: 0 };
-    
-    // Бустеры
-    let boosters = { moneyMulti: 1, foodMulti: 1, activeUntil: 0 };
-    
-    // Рынок
-    let marketPrices = { carrot: 5, burger: 12, cake: 22 };
-    let goldenFoodActive = false;
-    let goldenFoodPrice = 35;
-    
-    // Автокорм
-    let autoFeedActive = false;
-    let autoFeedInterval = null;
-    
-    // Рулетка
-    let rouletteCooldown = 0;
-    let lastDailyBonus = null;
-    
-    // Задания
-    let quests = [
-        { id: 1, desc: 'Купить 3 еды', target: 3, progress: 0, reward: 20, completed: false },
-        { id: 2, desc: 'Достичь 50% сытости', target: 50, progress: 0, reward: 30, completed: false },
-        { id: 3, desc: 'Сделать 10 кормёжек', target: 10, progress: 0, reward: 25, completed: false }
-    ];
-    
-    // Скины
-    let skins = [
-        { emoji: '🐭', name: 'Обычный', unlocked: true },
-        { emoji: '🐹', name: 'Хомяк', unlocked: false },
-        { emoji: '🐷', name: 'Свин', unlocked: false },
-        { emoji: '🦛', name: 'Бегемот', unlocked: false },
-        { emoji: '🐳', name: 'Кит', unlocked: false }
-    ];
-    let currentSkin = 0;
-    
-    const FOOD_DATA = {
-        carrot: { gain: 3 },
-        burger: { gain: 8 },
-        cake: { gain: 15 },
-        golden: { gain: 40 }
-    };
+    // ---------- СОСТОЯНИЕ ----------
+    let sisiSize = 1.0;
+    let critChance = 0.25;
+    let arousal = 0;            // 0-100
+    const MAX_AROUSAL = 100;
 
-    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-    function getTotalFood() {
-        return foodInventory.carrot + foodInventory.burger + foodInventory.cake + foodInventory.golden;
+    let petLove = 50;
+    let petHunger = 100;
+
+    // Достижения
+    let achSizeUnlocked = false;
+    let achDavidUnlocked = false;
+    let achCritUnlocked = false;
+    let critCounter = 0;         // для ачивки 5 критов
+
+    let canSpecialCrit = true;
+
+    // ЗВУКИ (создаём через Web Audio / простые осцилляторы, чтобы не зависеть от файлов)
+    let audioCtx = null;
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // разблокируем по первому взаимодействию
+      } catch(e) { console.warn("Web Audio не поддерживается"); }
     }
-    
-    function showFloatingText(text, color = '#ffd700') {
-        const area = document.getElementById('suslovArea');
-        const div = document.createElement('div');
-        div.className = 'floating-text';
-        div.textContent = text;
-        div.style.color = color;
-        div.style.left = Math.random() * 150 + 50 + 'px';
-        div.style.top = '50px';
-        area.appendChild(div);
-        setTimeout(() => div.remove(), 1000);
+
+    function playSlapSound() {
+      if (!audioCtx) { initAudio(); return; }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = 80 + Math.random() * 40;
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.08);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.08);
     }
-    
+
+    function playSquelchSound() {
+      if (!audioCtx) { initAudio(); return; }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 45;
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.15);
+    }
+
+    function playCritSound() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 120;
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.2);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.2);
+      // второй тон
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.value = 200;
+      gain2.gain.setValueAtTime(0.1, now+0.05);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now+0.25);
+      osc2.connect(gain2).connect(audioCtx.destination);
+      osc2.start();
+      osc2.stop(now+0.25);
+    }
+
+    // DOM элементы
+    const logBox = document.getElementById('logBox');
+    const sizeSpan = document.getElementById('sizeValue');
+    const critChanceSpan = document.getElementById('critChanceDisplay');
+    const petLoveSpan = document.getElementById('petLove');
+    const petHungerSpan = document.getElementById('petHunger');
+    const sisiEmoji = document.getElementById('sisiEmoji');
+    const arousalFill = document.getElementById('arousalFill');
+    const arousalPercent = document.getElementById('arousalPercent');
+
+    const achSizeEl = document.getElementById('achSize');
+    const achDavidEl = document.getElementById('achDavid');
+    const achCrit5El = document.getElementById('achCrit5');
+
     function updateUI() {
-        document.getElementById('moneyValue').textContent = money;
-        document.getElementById('foodCount').textContent = getTotalFood();
-        document.getElementById('carrotCount').textContent = foodInventory.carrot;
-        document.getElementById('burgerCount').textContent = foodInventory.burger;
-        document.getElementById('cakeCount').textContent = foodInventory.cake;
-        document.getElementById('goldenCount').textContent = foodInventory.golden;
-        
-        const percent = Math.min(belly, 100);
-        document.getElementById('bellyFill').style.width = percent + '%';
-        document.getElementById('bellyPercent').textContent = percent;
-        if (belly > recordBelly) recordBelly = belly;
-        document.getElementById('recordBelly').textContent = recordBelly;
-        
-        document.getElementById('prestigeLevel').textContent = prestigeLevel;
-        document.getElementById('prestigeBonus').textContent = prestigeBonusPercent;
-        document.getElementById('totalSpent').textContent = totalSpentMoney;
-        document.getElementById('comboCount').textContent = feedCombo;
-        
-        // Эмодзи
-        const emoji = document.getElementById('suslovEmoji');
-        const skinEmoji = document.getElementById('currentSkinEmoji');
-        if (belly >= 100) {
-            emoji.textContent = '💥'; skinEmoji.textContent = '💥';
-        } else if (belly >= 80) {
-            emoji.textContent = skins[currentSkin].emoji === '🐭' ? '🐡' : skins[currentSkin].emoji;
-            skinEmoji.textContent = emoji.textContent;
-        } else {
-            emoji.textContent = skins[currentSkin].emoji;
-            skinEmoji.textContent = skins[currentSkin].emoji;
-        }
-        
-        // Бустеры
-        const now = Date.now();
-        if (boosters.activeUntil > now) {
-            document.getElementById('boosterIndicator').textContent = 
-                `⚡ ${boosters.moneyMulti > 1 ? 'x2💰' : ''} ${boosters.foodMulti > 1 ? 'x2🍖' : ''}`;
-        } else {
-            document.getElementById('boosterIndicator').textContent = '';
-            boosters.moneyMulti = 1;
-            boosters.foodMulti = 1;
-        }
-        
-        // Обновление кнопки автокорма
-        document.getElementById('autoFeedBtn').textContent = autoFeedActive ? '⏹️' : '🤖';
-        
-        // Рынок
-        updateShop();
-        updateQuests();
-        updateStats();
-        checkAchievements();
-    }
-    
-    function updateShop() {
-        const container = document.getElementById('shopContainer');
-        const marketInfo = document.getElementById('marketInfo');
-        
-        // Случайное изменение цен
-        if (Math.random() < 0.3) {
-            marketPrices.carrot = Math.max(3, 5 + Math.floor(Math.random() * 6 - 3));
-            marketPrices.burger = Math.max(8, 12 + Math.floor(Math.random() * 8 - 4));
-            marketPrices.cake = Math.max(15, 22 + Math.floor(Math.random() * 12 - 6));
-        }
-        
-        // Шанс золотой еды
-        if (!goldenFoodActive && Math.random() < 0.05) {
-            goldenFoodActive = true;
-            goldenFoodPrice = 30 + Math.floor(Math.random() * 20);
-            showFloatingText('🌟 ЗОЛОТАЯ ЕДА!', '#ffd700');
-        }
-        
-        let html = `
-            <button class="food-btn" onclick="buyFood('carrot')">🥕 ${marketPrices.carrot}🪙 (+3%)</button>
-            <button class="food-btn" onclick="buyFood('burger')">🍔 ${marketPrices.burger}🪙 (+8%)</button>
-            <button class="food-btn" onclick="buyFood('cake')">🎂 ${marketPrices.cake}🪙 (+15%)</button>
-        `;
-        
-        if (goldenFoodActive) {
-            html += `<button class="food-btn golden-food" onclick="buyFood('golden')">👑 ${goldenFoodPrice}🪙 (+40%)</button>`;
-        }
-        
-        container.innerHTML = html;
-        marketInfo.innerHTML = `📈 Цены меняются! | ${goldenFoodActive ? '🌟 ЗОЛОТАЯ ЕДА!' : ''}`;
-    }
-    
-    function updateQuests() {
-        const container = document.getElementById('questsList');
-        let html = '';
-        quests.forEach(q => {
-            if (!q.completed) {
-                html += `<div class="quest-item">
-                    <span>${q.desc} (${q.progress}/${q.target})</span>
-                    <span>${q.reward}🪙</span>
-                </div>`;
-            }
-        });
-        if (html === '') html = '🎉 Все задания выполнены!';
-        container.innerHTML = html;
-    }
-    
-    function updateStats() {
-        document.getElementById('statsDisplay').innerHTML = `
-            🖱️ Кликов: ${stats.clicks}<br>
-            🍽️ Съедено: ${stats.foodEaten}<br>
-            💰 Заработано: ${stats.moneyEarned}<br>
-            🎰 Круток: ${stats.spins}<br>
-            🏆 Престижей: ${prestigeLevel}
-        `;
-    }
-    
-    function checkAchievements() {
-        // Разблокировка скинов
-        if (!skins[1].unlocked && recordBelly >= 50) {
-            skins[1].unlocked = true;
-            showFloatingText('🔓 Скин ХОМЯК!', '#ff69b4');
-        }
-        if (!skins[2].unlocked && totalSpentMoney >= 200) {
-            skins[2].unlocked = true;
-            showFloatingText('🔓 Скин СВИН!', '#ff69b4');
-        }
-        if (!skins[3].unlocked && prestigeLevel >= 3) {
-            skins[3].unlocked = true;
-            showFloatingText('🔓 Скин БЕГЕМОТ!', '#ff69b4');
-        }
-        if (!skins[4].unlocked && stats.foodEaten >= 50) {
-            skins[4].unlocked = true;
-            showFloatingText('🔓 Скин КИТ!', '#ff69b4');
-        }
+      sizeSpan.textContent = sisiSize.toFixed(2);
+      critChanceSpan.textContent = Math.round(critChance * 100);
+      
+      if (sisiSize >= 8.0) sisiEmoji.textContent = '🍖🍖';
+      else if (sisiSize >= 5.0) sisiEmoji.textContent = '🥩🥩';
+      else if (sisiSize >= 2.5) sisiEmoji.textContent = '🥩';
+      else sisiEmoji.textContent = '🥓';
+      
+      petLove = Math.min(100, Math.max(0, petLove));
+      petHunger = Math.min(100, Math.max(0, petHunger));
+      petLoveSpan.textContent = Math.floor(petLove);
+      petHungerSpan.textContent = Math.floor(petHunger);
+      
+      // arousal
+      arousal = Math.min(MAX_AROUSAL, Math.max(0, arousal));
+      const percent = (arousal / MAX_AROUSAL) * 100;
+      arousalFill.style.width = percent + '%';
+      arousalPercent.textContent = Math.floor(percent);
+      
+      // Достижения отображение
+      achSizeEl.classList.toggle('unlocked', achSizeUnlocked);
+      achDavidEl.classList.toggle('unlocked', achDavidUnlocked);
+      achCrit5El.classList.toggle('unlocked', achCritUnlocked);
     }
 
-    // ---------- ИГРОВЫЕ ФУНКЦИИ ----------
-    window.buyFood = function(type) {
-        let price = type === 'golden' ? goldenFoodPrice : marketPrices[type];
-        
-        if (money < price) {
-            showFloatingText('❌ Мало денег!', '#ff6b6b');
-            return;
-        }
-        
-        money -= price;
-        totalSpentMoney += price;
-        foodInventory[type] += 1;
-        stats.clicks++;
-        
-        // Квест: покупка еды
-        quests[0].progress++;
-        if (quests[0].progress >= quests[0].target && !quests[0].completed) {
-            completeQuest(0);
-        }
-        
-        if (type === 'golden') {
-            goldenFoodActive = false;
-            showFloatingText('🌟 +1 ЗОЛОТАЯ ЕДА!', '#ffd700');
-        } else {
-            showFloatingText(`+1 ${type === 'carrot' ? '🥕' : type === 'burger' ? '🍔' : '🎂'}`, '#90ee90');
-        }
-        
-        updateUI();
-    };
-    
-    window.feed = function() {
-        const types = ['golden', 'cake', 'burger', 'carrot'];
-        let fedType = null;
-        
-        for (let type of types) {
-            if (foodInventory[type] > 0) {
-                fedType = type;
-                break;
-            }
-        }
-        
-        if (!fedType) {
-            showFloatingText('😢 Нет еды!', '#ff6b6b');
-            return;
-        }
-        
-        foodInventory[fedType] -= 1;
-        let gain = FOOD_DATA[fedType].gain;
-        
-        // Бустеры и престиж
-        gain = Math.floor(gain * (1 + prestigeBonusPercent / 100) * boosters.foodMulti);
-        
-        // Комбо бонус
-        if (feedCombo >= 5) gain += Math.floor(feedCombo / 5);
-        
-        // Крит
-        if (Math.random() < 0.15) {
-            gain *= 2;
-            showFloatingText(`💥 КРИТ! +${gain}%`, '#ffd700');
-        } else {
-            showFloatingText(`+${gain}%`, '#ffa500');
-        }
-        
-        belly = Math.min(belly + gain, 100);
-        feedCombo++;
-        stats.foodEaten++;
-        
-        // Квест: кормёжка
-        quests[2].progress++;
-        if (quests[2].progress >= quests[2].target && !quests[2].completed) {
-            completeQuest(2);
-        }
-        
-        // Квест: сытость 50%
-        if (belly >= 50 && !quests[1].completed) {
-            completeQuest(1);
-        }
-        
-        // Комбо таймер
-        clearTimeout(window.comboTimer);
-        window.comboTimer = setTimeout(() => {
-            if (feedCombo > 0) {
-                document.getElementById('messageArea').textContent = '😢 Комбо сброшено!';
-                feedCombo = 0;
-                updateUI();
-            }
-        }, 5000);
-        
-        if (belly >= 100) {
-            document.getElementById('messageArea').innerHTML = '💥 ЖИВОТ ЛОПНУЛ! ЖМИ ПРОДАТЬ ЖИР 💥';
-        }
-        
-        updateUI();
-    };
-    
-    function completeQuest(index) {
-        quests[index].completed = true;
-        money += quests[index].reward;
-        stats.moneyEarned += quests[index].reward;
-        showFloatingText(`✅ Задание +${quests[index].reward}🪙!`, '#90ee90');
-        updateUI();
+    function checkAchievements() {
+      if (!achSizeUnlocked && sisiSize >= 10.0) {
+        achSizeUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: СИСЯ 10 СМ! ДИМА ГОРД!');
+      }
+      if (!achDavidUnlocked && petHunger >= 95 && petLove >= 80) {
+        achDavidUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: ДАВИД СЫТ И ЛЮБИМ!');
+      }
+      if (!achCritUnlocked && critCounter >= 5) {
+        achCritUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: 5 КРИТИЧЕСКИХ УДАРОВ!');
+      }
     }
-    
-    window.sellFat = function() {
-        const refund = Math.floor(totalSpentMoney * 0.05);
-        money += refund;
-        stats.moneyEarned += refund;
-        
-        if (totalSpentMoney > 0 || belly > 0) {
-            prestigeLevel++;
-            prestigeBonusPercent += 5;
-        }
-        
-        // Сброс
-        foodInventory = { carrot: 0, burger: 0, cake: 0, golden: 0 };
-        belly = 0;
-        feedCombo = 0;
-        goldenFoodActive = false;
-        
-        // Сброс квестов
-        quests = quests.map(q => ({ ...q, progress: 0, completed: false }));
-        
-        if (autoFeedActive) {
-            clearInterval(autoFeedInterval);
-            autoFeedActive = false;
-        }
-        
-        money = Math.max(money, 40 + prestigeLevel * 5);
-        showFloatingText(`💰 +${refund}🪙 кэшбек! Престиж ${prestigeLevel}!`, '#ffd700');
-        updateUI();
-    };
-    
-    window.toggleAutoFeed = function() {
-        if (autoFeedActive) {
-            clearInterval(autoFeedInterval);
-            autoFeedActive = false;
-        } else {
-            if (money < 50) {
-                showFloatingText('❌ Нужно 50🪙!', '#ff6b6b');
-                return;
-            }
-            money -= 50;
-            totalSpentMoney += 50;
-            autoFeedActive = true;
-            autoFeedInterval = setInterval(() => {
-                if (getTotalFood() > 0) {
-                    window.feed();
-                } else {
-                    clearInterval(autoFeedInterval);
-                    autoFeedActive = false;
-                    updateUI();
-                }
-            }, 2000);
-        }
-        updateUI();
-    };
-    
-    window.spinRoulette = function() {
-        if (rouletteCooldown > Date.now()) {
-            showFloatingText('⏳ Подожди!', '#ff6b6b');
-            return;
-        }
-        if (money < 30) {
-            showFloatingText('❌ Нужно 30🪙!', '#ff6b6b');
-            return;
-        }
-        
-        money -= 30;
-        totalSpentMoney += 30;
-        stats.spins++;
-        rouletteCooldown = Date.now() + 30000;
-        
-        const rewards = [
-            { text: '🎉 50🪙', action: () => { money += 50; stats.moneyEarned += 50; } },
-            { text: '🥕 3 морковки', action: () => { foodInventory.carrot += 3; } },
-            { text: '🍔 2 бургера', action: () => { foodInventory.burger += 2; } },
-            { text: '🎂 1 торт', action: () => { foodInventory.cake += 1; } },
-            { text: '⚡ x2 сытость 30с', action: () => { boosters.foodMulti = 2; boosters.activeUntil = Date.now() + 30000; } },
-            { text: '💸 x2 монеты 30с', action: () => { boosters.moneyMulti = 2; boosters.activeUntil = Date.now() + 30000; } },
-            { text: '👑 Золотая еда', action: () => { goldenFoodActive = true; } },
-            { text: '💥 Джекпот 200🪙', action: () => { money += 200; stats.moneyEarned += 200; } }
-        ];
-        
-        const reward = rewards[Math.floor(Math.random() * rewards.length)];
-        document.getElementById('rouletteResult').textContent = reward.text;
-        reward.action();
-        showFloatingText(reward.text, '#ffd700');
-        updateUI();
-    };
-    
-    window.claimDailyBonus = function() {
-        const today = new Date().toDateString();
-        if (lastDailyBonus === today) {
-            showFloatingText('⏳ Уже получено!', '#ff6b6b');
-            return;
-        }
-        lastDailyBonus = today;
-        const bonus = 50 + prestigeLevel * 10;
-        money += bonus;
-        stats.moneyEarned += bonus;
-        showFloatingText(`🎁 +${bonus}🪙!`, '#ffd700');
-        updateUI();
-    };
-    
-    window.openTab = function(tabName) {
-        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        if (tabName === 'skins') {
-            renderSkins();
-        }
-    };
-    
-    function renderSkins() {
-        const container = document.getElementById('skinSelector');
-        let html = '';
-        skins.forEach((skin, i) => {
-            html += `<div class="skin-btn ${skin.unlocked ? 'unlocked' : ''} ${i === currentSkin ? 'selected' : ''}" 
-                onclick="selectSkin(${i})">${skin.emoji}</div>`;
-        });
-        container.innerHTML = html;
+
+    function setLog(msg, isCrit=false, isSpecial=false) {
+      logBox.innerHTML = msg;
+      if (isCrit || isSpecial) {
+        logBox.classList.add('glow-crit');
+        setTimeout(() => logBox.classList.remove('glow-crit'), 400);
+      }
     }
-    
-    window.selectSkin = function(index) {
-        if (!skins[index].unlocked) {
-            showFloatingText('🔒 Скин заблокирован!', '#ff6b6b');
-            return;
-        }
-        currentSkin = index;
-        updateUI();
-        renderSkins();
-        openTab('shop');
-    };
-    
-    // Пассивный доход
-    setInterval(() => {
-        if (prestigeLevel > 0) {
-            const income = Math.floor(prestigeLevel * 0.5) + 1;
-            money += income;
-            stats.moneyEarned += income;
-            updateUI();
-        }
-    }, 5000);
-    
-    // Таймер рулетки
-    setInterval(() => {
-        if (rouletteCooldown > Date.now()) {
-            const sec = Math.ceil((rouletteCooldown - Date.now()) / 1000);
-            document.getElementById('rouletteTimer').textContent = `⏳ ${sec}с`;
-        } else {
-            document.getElementById('rouletteTimer').textContent = '✅ Готово!';
-        }
-    }, 1000);
-    
-    // Привязка событий
-    document.getElementById('feedBtn').addEventListener('click', () => window.feed());
-    document.getElementById('suslovEmoji').addEventListener('click', () => window.feed());
-    document.getElementById('autoFeedBtn').addEventListener('click', window.toggleAutoFeed);
-    document.getElementById('sellFatBtn').addEventListener('click', window.sellFat);
-    
-    updateUI();
-    updateShop();
-    
-    // Экспорт функций в глобальную область
-    window.buyFood = buyFood;
-    window.feed = feed;
-    window.sellFat = sellFat;
-    window.toggleAutoFeed = toggleAutoFeed;
-    window.spinRoulette = spinRoulette;
-    window.claimDailyBonus = claimDailyBonus;
-    window.openTab = openTab;
-    window.selectSkin = selectSkin;
-})();
+
+    function decayHunger(amount = 2) {
+      petHunger = Math.max(0, petHunger - amount);
+      if (petHunger < 15) petLove = Math.max(0, petLove - 0.5);
+      updateUI();
+    }
+
+    function hungerPenalty() {
+      if (petHunger < 20) {
+        petLove = Math.max(0, petLove - 1.2);
+        setLog('💔 ДАВИД ГОЛОДЕН!');
+      }
+    }
+
+    function addLove(amt) { petLove = Math.min(100, petLove + amt); }
+
+    // АВТОКРИТ при заполнении возбуждения
+    function checkArousalOverflow() {
+      if (arousal >= MAX_AROUSAL) {
+        arousal = 0;
+        // имитация автокрита
+        let gain = 0.8 + (Math.random() * 1.0);
+        sisiSize += gain;
+        critChance = Math.min(0.5, critChance + 0.02);
+        addLove(5);
+        playCritSound();
+        setLog(`💥💦 ВОЗБУЖДЕНИЕ ВЗОРВАЛОСЬ! АВТОКРИТ! +${gain.toFixed(2)}см, ДИМА КОНЧАЕТ НА СОСКИ!`, true);
+        critCounter++;
+        sisiEmoji.style.animation = 'shake 0.3s';
+        setTimeout(()=> sisiEmoji.style.animation = '', 300);
+        checkAchievements();
+      }
+    }
+
+    function hitSisya() {
+      initAudio();
+      playSlapSound();
+      decayHunger(3);
+      
+      let gain = 0.15 + (Math.random() * 0.2);
+      if (petLove > 70) gain *= 1.25;
+      else if (petLove < 25) gain *= 0.8;
+      
+      const effectiveCrit = critChance + (petLove > 85 ? 0.07 : 0);
+      const isCrit = Math.random() < effectiveCrit;
+      let message = '';
+      
+      if (isCrit) {
+        gain *= 2.2 + (Math.random()*0.8);
+        message = `💥💦 КРИТ! ДИМА БЬЁТ СЕБЯ ПО СИСЕ, КОНЧАЕТ НА СОСКИ! +${gain.toFixed(2)}см!`;
+        playCritSound();
+        critCounter++;
+        addLove(3);
+        arousal = Math.min(MAX_AROUSAL, arousal + 22);
+        if (Math.random()<0.4) message += ' 👅 СЛИЗЫВАЕТ!';
+      } else {
+        message = `👊 УДАР ПО СИСЕ. +${gain.toFixed(2)}см.`;
+        arousal = Math.min(MAX_AROUSAL, arousal + 8);
+        if (Math.random()<0.2) addLove(1.2);
+      }
+      
+      sisiSize += gain;
+      critChance = Math.min(0.45, 0.25 + (sisiSize * 0.005));
+      hungerPenalty();
+      updateUI();
+      checkArousalOverflow();
+      checkAchievements();
+      setLog(message, isCrit);
+      sisiEmoji.style.transform = 'scale(1.2)';
+      setTimeout(()=> sisiEmoji.style.transform = '', 120);
+    }
+
+    function performSpecialCrit() {
+      initAudio();
+      if (!canSpecialCrit) {
+        setLog('⏳ СПЕЦКРИТ НЕ ГОТОВ (покорми/поиграй)');
+        return;
+      }
+      decayHunger(8);
+      const loveBonus = petLove / 200;
+      const sizeBonus = Math.min(0.3, sisiSize * 0.02);
+      const success = Math.random() < (0.35 + loveBonus + sizeBonus);
+      
+      if (success) {
+        const hugeGain = 1.2 + (sisiSize * 0.18) + (Math.random() * 1.5);
+        sisiSize += hugeGain;
+        critChance = Math.min(0.55, critChance + 0.04);
+        addLove(8);
+        petHunger = Math.min(100, petHunger + 10);
+        arousal = Math.min(MAX_AROUSAL, arousal + 35);
+        playSquelchSound();
+        playCritSound();
+        const msg = `💦💦💦 СПЕЦ-КРИТ!!! ДИМА БЬЁТ, КОНЧАЕТ НА СОСКИ И ГЛОТАЕТ СПЕРМУ! +${hugeGain.toFixed(2)}см!`;
+        setLog(msg, true, true);
+        critCounter++;
+        sisiEmoji.style.animation = 'shake 0.4s';
+        setTimeout(()=> sisiEmoji.style.animation = '', 400);
+        canSpecialCrit = false;
+        setTimeout(()=> { canSpecialCrit = true; }, 6000);
+      } else {
+        sisiSize += 0.25;
+        setLog('😩 ПОЧТИ... НО НЕ ХВАТИЛО ВОЗБУЖДЕНИЯ');
+        petLove = Math.max(0, petLove - 2);
+        playSlapSound();
+      }
+      checkArousalOverflow();
+      checkAchievements();
+      updateUI();
+    }
+
+    function feedDavid() {
+      initAudio();
+      if (sisiSize < 0.6) { setLog('🥓 СИСЯ СЛИШКОМ МАЛА!'); return; }
+      const cost = 0.4 + Math.random()*0.3;
+      sisiSize = Math.max(0.3, sisiSize - cost);
+      petHunger = Math.min(100, petHunger + 25 + Math.floor(petLove/7));
+      addLove(6);
+      if (!canSpecialCrit && petHunger > 70) canSpecialCrit = true;
+      setLog(`🍖 ДИМА ДАЛ СИСЮ ДАВИДУ. -${cost.toFixed(2)}см`);
+      playSlapSound();
+      checkAchievements();
+      updateUI();
+    }
+
+    function playWithDavid() {
+      initAudio();
+      if (petHunger < 10) { setLog('🐕 ДАВИД ГОЛОДЕН!'); return; }
+      decayHunger(7);
+      const loveGain = 5 + Math.floor(Math.random()*8);
+      addLove(loveGain);
+      if (Math.random()<0.4) critChance = Math.min(0.5, critChance + 0.01);
+      setLog(`🎾 ИГРА С ДАВИДОМ! любовь +${loveGain}`);
+      if (!canSpecialCrit && petLove > 65) { canSpecialCrit = true; setLog('✨ СПЕЦКРИТ СНОВА ГОТОВ!'); }
+      playSlapSound();
+      checkAchievements();
+      updateUI();
+    }
+
+    function resetGame() {
+      sisiSize = 1.0; critChance = 0.25; arousal = 0;
+      petLove = 50; petHunger = 100;
+      canSpecialCrit = true;
+      achSizeUnlocked = achDavidUnlocked = achCritUnlocked = false;
+      critCounter = 0;
+      updateUI();
+      setLog('💬 НОВАЯ ИГРА! КОПИ ВОЗБУЖДЕНИЕ И КРИТЫ.');
+      sisiEmoji.style.animation = '';
+    }
+
+    function handleSisiClick() { hitSisya(); }
+
+    function init() {
+      updateUI();
+      setLog('🥩 БЕЙ, КОПИ ВОЗБУЖДЕНИЕ! ЗВУК ВКЛ.');
+      document.getElementById('hitBtn').addEventListener('click', hitSisya);
+      document.getElementById('specialCritBtn').addEventListener('click', performSpecialCrit);
+      document.getElementById('feedDavidBtn').addEventListener('click', feedDavid);
+      document.getElementById('playDavidBtn').addEventListener('click', playWithDavid);
+      document.getElementById('resetBtn').addEventListener('click', resetGame);
+      sisiEmoji.addEventListener('click', handleSisiClick);
+      
+      setInterval(() => {
+        if (petHunger > 0) { petHunger = Math.max(0, petHunger - 1.0); updateUI(); }
+        if (!canSpecialCrit && petLove>50 && petHunger>40 && Math.random()<0.15) canSpecialCrit = true;
+      }, 10000);
+      
+      // разблокировка аудио при первом касании
+      document.body.addEventListener('click', initAudio, { once: true });
+    }
+
+    init();
+  })();
 </script>
 </body>
 </html>
