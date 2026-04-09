@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>KROPOTKIN — ПОЛНАЯ ВЕРСИЯ | КД 60 СЕК</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>KROPOTKIN — Полная версия | Машины | Недвижимость | Бизнес</title>
     <style>
         * {
             margin: 0;
@@ -11,995 +11,1079 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
             background: #0a0c12;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: white;
-            padding: 16px;
-            padding-bottom: 80px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            overflow-x: hidden;
+            color: #ffffff;
+            touch-action: manipulation;
         }
-        .top-bar {
-            background: #000000aa;
-            padding: 12px 16px;
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #121724, #020408);
+            padding: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: rgba(12, 16, 28, 0.94);
+            backdrop-filter: blur(14px);
+            border-radius: 24px;
+            border: 1px solid rgba(220, 50, 50, 0.4);
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn {
+            background: linear-gradient(95deg, #b91c1c, #7f1a1a);
+            border: none;
+            padding: 16px 20px;
             border-radius: 60px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.1s;
+            margin-top: 12px;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-small {
+            background: #2c2f48;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            width: auto;
+            display: inline-block;
+            margin-right: 10px;
+            margin-top: 8px;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+        }
+        .btn-small:active { transform: scale(0.96); }
+        .btn-success { background: #2d6a4f; }
+        .btn-danger { background: #9d0208; }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            background: #1a1e30;
+            border: 1px solid #e03a3a;
+            border-radius: 60px;
+            color: white;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .server-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .server-item {
+            background: #12172a;
+            padding: 14px 20px;
+            border-radius: 60px;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            border-left: 3px solid #e03a3a;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .server-item.selected {
+            background: #a12222;
+            box-shadow: 0 0 12px #ff4f4f;
+            border-left-color: #ffcc88;
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #ff4f4f, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #000000aa;
+            padding: 12px 18px;
+            border-radius: 60px;
             font-size: 14px;
-        }
-        .tabs {
-            display: flex;
             flex-wrap: wrap;
             gap: 8px;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
         .tab-btn {
-            background: #1e1f30;
+            background: #1b1e30;
             border: none;
-            padding: 10px 12px;
-            border-radius: 40px;
-            color: #ccc;
-            font-size: 12px;
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: #ddddff;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             flex: 1;
+            min-width: 70px;
             text-align: center;
         }
-        .tab-btn.active {
+        .active-tab {
             background: #b91c1c;
             color: white;
+            box-shadow: 0 0 10px #ff6666;
         }
-        .card {
-            background: rgba(18, 22, 40, 0.95);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(220, 60, 60, 0.3);
+
+        .work-list, .shop-list, .property-list, .car-list, .business-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
         }
-        .card h3 {
-            color: #ffaa66;
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
-        button {
-            background: #b91c1c;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:active { transform: scale(0.96); }
-        button:disabled {
-            opacity: 0.5;
-            transform: none;
-        }
-        .btn-small {
-            background: #2c2f48;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .btn-success {
-            background: #2d6a4f;
-        }
-        .job-item {
+        .work-item, .shop-item, .property-item, .car-item, .business-item {
             background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 10px;
+            padding: 16px;
+            border-radius: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
-        .job-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffcc88;
-        }
-        .job-reward {
-            font-size: 11px;
-            color: #6fcf97;
-        }
+        .work-info, .shop-info, .property-info, .car-info, .business-info { flex: 1; }
+        .work-name, .shop-name, .property-name, .car-name, .business-name { font-size: 18px; font-weight: bold; color: #ffcc88; }
+        .work-desc, .shop-desc, .property-desc, .car-desc, .business-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
+        .work-stats, .shop-price, .property-price, .car-price, .business-profit { font-size: 12px; color: #6fcf97; margin-top: 4px; }
+
         .minigame-area {
             background: #0a0e1a;
             border-radius: 20px;
             padding: 20px;
+            margin: 15px 0;
             text-align: center;
-            margin-top: 10px;
         }
-        .clicker-btn {
+        .clicker-button {
             background: #e67e22;
             padding: 20px;
+            border-radius: 60px;
             font-size: 24px;
-            width: 80%;
+            font-weight: bold;
+            cursor: pointer;
             margin: 10px auto;
+            width: 80%;
         }
         .progress-bar {
+            height: 20px;
             background: #2a2e44;
-            height: 16px;
             border-radius: 10px;
-            margin: 10px 0;
+            margin: 15px 0;
             overflow: hidden;
         }
-        .progress-fill {
-            background: #6fcf97;
-            height: 100%;
-            width: 0%;
-        }
-        .memory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .memory-card {
-            background: #1a1e30;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 28px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .stat-row {
+        .progress-fill { height: 100%; background: #6fcf97; width: 0%; transition: width 0.1s; }
+        .memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .memory-card { background: #1a1e30; padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; cursor: pointer; }
+        .qrcode { font-family: monospace; font-size: 24px; letter-spacing: 4px; background: white; color: black; padding: 15px; border-radius: 12px; display: inline-block; }
+        .slider { width: 100%; margin: 15px 0; }
+
+        .bj-game { text-align: center; }
+        .bj-cards { background: #0a0e1a; border-radius: 20px; padding: 15px; margin: 15px 0; }
+        .bj-hand { margin-bottom: 20px; }
+        .bj-hand-title { color: #ffcc88; font-size: 14px; margin-bottom: 8px; }
+        .bj-cards-list { font-size: 28px; letter-spacing: 8px; background: #1a1e30; padding: 12px; border-radius: 16px; font-family: monospace; }
+        .bj-score { color: #6fcf97; font-size: 20px; font-weight: bold; margin-top: 8px; }
+        .bj-buttons { display: flex; gap: 12px; justify-content: center; margin: 15px 0; }
+        .timer-box { background: #1a1e30; padding: 12px; border-radius: 60px; text-align: center; margin: 15px 0; font-size: 16px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2a2e44; flex-wrap: wrap; gap: 10px; }
+        .stat-label { color: #ffcc88; font-weight: 500; }
+        .stat-value { color: white; }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e1f30;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2e44;
-        }
-        .stat-label { color: #ffcc88; }
-        hr { border-color: #3a2e4a; margin: 12px 0; }
-        .item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .item-card {
-            background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid #e03a3a;
+            font-size: 24px;
         }
-        .item-name { font-weight: bold; color: #ffcc88; }
-        .item-price { color: #6fcf97; font-size: 12px; }
-        .bj-cards {
-            font-size: 28px;
-            letter-spacing: 8px;
-            background: #1a1e30;
-            padding: 12px;
-            border-radius: 16px;
-            margin: 10px 0;
-        }
-        .bj-buttons {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .cooldown-timer {
-            background: #1a1e30;
-            padding: 12px;
-            border-radius: 40px;
-            text-align: center;
-            margin: 15px 0;
-            font-size: 14px;
+
+        hr { border-color: #3a2e4a; margin: 15px 0; }
+        @media (max-width: 480px) {
+            .screen { padding: 12px; }
+            .logo { font-size: 36px; }
+            .tab-btn { font-size: 12px; padding: 10px 12px; }
+            .bj-cards-list { font-size: 22px; letter-spacing: 4px; }
         }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <span>🎮 <span id="nickDisplay">KROPOTKIN</span></span>
-    <span>💰 <span id="moneyDisplay">5000</span> ₽</span>
-    <span>⭐ Ур. <span id="levelDisplay">1</span></span>
-</div>
-
-<div class="tabs">
-    <button class="tab-btn active" data-tab="profile">👤 Профиль</button>
-    <button class="tab-btn" data-tab="work">💼 Работы</button>
-    <button class="tab-btn" data-tab="minigame">🎮 Мини-игра</button>
-    <button class="tab-btn" data-tab="cars">🚗 Гараж</button>
-    <button class="tab-btn" data-tab="property">🏠 Недвижимость</button>
-    <button class="tab-btn" data-tab="business">💼 Бизнес</button>
-    <button class="tab-btn" data-tab="casino">♠️ Black Jack</button>
-    <button class="tab-btn" data-tab="shop">🏪 Магазин</button>
-    <button class="tab-btn" data-tab="stats">📊 Статистика</button>
-</div>
-
-<!-- ПРОФИЛЬ -->
-<div id="profileTab" class="tab-content" style="display: block;">
-    <div class="card">
-        <div class="stat-row"><span class="stat-label">🔰 ID:</span><span id="userId">12345</span></div>
-        <div class="stat-row"><span class="stat-label">⭐ Уровень:</span><span id="profileLevel">1</span></div>
-        <div class="stat-row"><span class="stat-label">🏆 Опыт (XP):</span><span id="profileExp">0</span> / <span id="nextExp">1000</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Работа:</span><span id="profileJob">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машина:</span><span id="profileCar">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Дом:</span><span id="profileHouse">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнес:</span><span id="profileBusiness">Нет</span></div>
-        <div id="workCooldownTimer" class="cooldown-timer" style="margin-top: 15px;">⏳ Готов к работе</div>
-        <button id="workFromProfileBtn" style="width:100%; margin-top:12px;">💼 ВЫПОЛНИТЬ РАБОТУ</button>
-    </div>
-</div>
-
-<!-- РАБОТЫ -->
-<div id="workTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Работы (открываются по уровням)</h3>
-        <div id="jobsList"></div>
-        <div id="workMessage" style="margin-top: 15px; text-align: center; color:#6fcf97;"></div>
-    </div>
-</div>
-
-<!-- МИНИ-ИГРА -->
-<div id="minigameTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3 id="minigameTitle">🎮 Мини-игра</h3>
-        <div id="minigameArea" class="minigame-area">
-            <div style="color:#aaa;">Выберите работу во вкладке "Работы"</div>
+<!-- ЭКРАН РЕГИСТРАЦИИ -->
+<div id="registerScreen" class="screen active">
+    <div class="glass-card" style="max-width: 450px; margin: 20px auto;">
+        <div class="logo">KROPOTKIN</div>
+        <div style="text-align: center; margin-bottom: 20px; color: #ffcc88;">⚡ Полная версия | Машины | Бизнес ⚡</div>
+        <input type="text" id="nicknameInput" class="input-field" placeholder="Ник (Имя_Фамилия)">
+        <div class="server-list">
+            <div class="server-item selected" data-server="KROPOTKIN#1">#1</div>
+            <div class="server-item" data-server="KROPOTKIN#2">#2</div>
+            <div class="server-item" data-server="KROPOTKIN#3">#3</div>
         </div>
-        <div id="minigameMsg" style="text-align:center; margin-top:10px;"></div>
+        <button class="btn btn-large" id="startGameBtn">▶ ВОЙТИ</button>
     </div>
 </div>
 
-<!-- ГАРАЖ -->
-<div id="carsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🚗 Мои машины</h3>
-        <div id="myCarsList" class="item-list"></div>
-        <hr>
-        <h3>🏪 Автосалон</h3>
-        <div id="carsShopList" class="item-list"></div>
-        <div id="carsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- НЕДВИЖИМОСТЬ -->
-<div id="propertyTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏠 Моя недвижимость</h3>
-        <div id="myPropsList" class="item-list"></div>
-        <hr>
-        <h3>🏢 Купить</h3>
-        <div id="propsShopList" class="item-list"></div>
-        <div id="propsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- БИЗНЕС -->
-<div id="businessTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Мой бизнес</h3>
-        <div id="myBusinessList" class="item-list"></div>
-        <div class="stat-row" style="background:#1a1e30; border-radius:16px; margin-top:12px; padding:12px;">
-            <span class="stat-label">📊 Пассивный доход:</span>
-            <span id="passiveIncome">0</span> ₽/час
+<!-- ЗАГРУЗКА -->
+<div id="loadingScreen" class="screen">
+    <div class="glass-card" style="max-width: 350px; margin: 30vh auto; text-align: center;">
+        <div style="font-size: 48px;">🚔</div>
+        <div style="margin: 15px;">Подключение к <span id="loadingServerName">KROPOTKIN</span></div>
+        <div id="loadingStep" style="color:#ffcc88;">Авторизация</div>
+        <div style="height: 6px; background: #2a2e44; border-radius: 10px;">
+            <div id="loadingBar" style="width:0%; height:6px; background:#e63946; border-radius:10px;"></div>
         </div>
-        <hr>
-        <h3>🏢 Купить бизнес</h3>
-        <div id="businessShopList" class="item-list"></div>
-        <div id="businessMsg" style="text-align:center; margin-top:10px;"></div>
     </div>
 </div>
 
-<!-- BLACK JACK -->
-<div id="casinoTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>♠️ BLACK JACK</h3>
-        <input type="number" id="bjBet" value="100" min="10" step="10" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin-bottom:10px; color:white; border:1px solid #e03a3a;">
-        <div id="bjGame">
-            <div class="bj-cards" id="dealerArea">🤵 Дилер: ???</div>
-            <div class="bj-cards" id="playerArea">🎲 Игрок: -</div>
-            <div class="bj-buttons">
-                <button id="bjHitBtn" disabled>🎴 Ещё</button>
-                <button id="bjStandBtn" disabled>✋ Хватит</button>
+<!-- ГЛАВНОЕ МЕНЮ -->
+<div id="mainMenuScreen" class="screen">
+    <div class="top-bar">
+        <div>🎮 <span id="mainNick" style="color:#ffaa66;">----</span></div>
+        <div>🟢 <span id="mainServerName">---</span></div>
+        <div>💰 <span id="moneyAmount" style="color:#6fcf97;">0</span> ₽</div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active-tab" data-tab="profile">👤 Профиль</button>
+        <button class="tab-btn" data-tab="work">💼 Работы</button>
+        <button class="tab-btn" data-tab="minigame">🎮 Мини-игра</button>
+        <button class="tab-btn" data-tab="cars">🚗 ГАРАЖ</button>
+        <button class="tab-btn" data-tab="property">🏠 НЕДВИЖИМОСТЬ</button>
+        <button class="tab-btn" data-tab="business">💼 БИЗНЕС</button>
+        <button class="tab-btn" data-tab="casino">♠️ Black Jack</button>
+        <button class="tab-btn" data-tab="shop">🏪 Магазин</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+    </div>
+
+    <!-- ПРОФИЛЬ -->
+    <div id="profileTab" class="tab-content active-tab-content">
+        <div class="glass-card">
+            <div class="stat-row"><span class="stat-label">🔰 ID:</span><span class="stat-value" id="userId">----</span></div>
+            <div class="stat-row"><span class="stat-label">⭐ Уровень:</span><span class="stat-value" id="userLvl">1</span></div>
+            <div class="stat-row"><span class="stat-label">🏆 Опыт (XP):</span><span class="stat-value" id="userXp">0</span>/<span id="nextLevelXp">1000</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Работа:</span><span class="stat-value" id="currentJob">Нет</span></div>
+            <div class="stat-row"><span class="stat-label">🚗 Машина:</span><span class="stat-value" id="currentCar">Нет</span></div>
+            <div class="stat-row"><span class="stat-label">🏠 Дом:</span><span class="stat-value" id="currentHouse">Нет</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Бизнес:</span><span class="stat-value" id="currentBusiness">Нет</span></div>
+            <div class="stat-row"><span class="stat-label">📈 До след. уровня:</span><span class="stat-value" id="xpToNext">1000</span></div>
+        </div>
+    </div>
+
+    <!-- РАБОТЫ -->
+    <div id="workTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">💼 Работы (по уровням)</h3>
+            <div id="workList" class="work-list"></div>
+        </div>
+    </div>
+
+    <!-- МИНИ-ИГРА -->
+    <div id="minigameTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;" id="minigameJobName">Выберите работу</h3>
+            <div id="minigameArea" class="minigame-area">
+                <div style="text-align: center; color: #aaa;">Сначала выберите работу во вкладке "Работы"</div>
             </div>
+            <div id="minigameResult" style="text-align: center; margin-top: 15px;"></div>
         </div>
-        <button id="bjStartBtn">🎲 НАЧАТЬ РАУНД</button>
-        <div id="bjTimer" style="background:#1a1e30; text-align:center; padding:10px; border-radius:40px; margin-top:10px;">⏳ Готов</div>
-        <div id="bjMsg" style="text-align:center; margin-top:10px;"></div>
+    </div>
+
+    <!-- ГАРАЖ (МАШИНЫ) -->
+    <div id="carsTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">🚗 МОЙ ГАРАЖ</h3>
+            <div id="myCarsList" class="work-list"></div>
+            <hr>
+            <h3 style="color:#ffcc88;">🏪 АВТОСАЛОН</h3>
+            <div id="carShopList" class="work-list"></div>
+            <div id="carMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- НЕДВИЖИМОСТЬ -->
+    <div id="propertyTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">🏠 МОЯ НЕДВИЖИМОСТЬ</h3>
+            <div id="myPropertiesList" class="work-list"></div>
+            <hr>
+            <h3 style="color:#ffcc88;">🏢 РЫНОК НЕДВИЖИМОСТИ</h3>
+            <div id="propertyMarketList" class="work-list"></div>
+            <div id="propertyMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- БИЗНЕС (ПАССИВНЫЙ ДОХОД) -->
+    <div id="businessTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">💼 МОЙ БИЗНЕС</h3>
+            <div id="myBusinessList" class="work-list"></div>
+            <div id="businessIncomeDisplay" class="stat-row" style="background:#1a1e30; border-radius:20px; margin-top:15px; padding:15px;">
+                <span class="stat-label">📊 Пассивный доход:</span>
+                <span class="stat-value" id="passiveIncome">0</span> ₽/час
+            </div>
+            <hr>
+            <h3 style="color:#ffcc88;">🏢 КУПИТЬ БИЗНЕС</h3>
+            <div id="businessMarketList" class="work-list"></div>
+            <div id="businessMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- BLACK JACK -->
+    <div id="casinoTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">♠️ BLACK JACK</h3>
+            <div style="margin: 15px 0;">
+                <label>💰 Ставка:</label>
+                <input type="number" id="betAmount" class="input-field" value="100" min="10" step="10">
+            </div>
+            <div id="bjGameArea" class="bj-game">
+                <div class="bj-cards">
+                    <div class="bj-hand"><div class="bj-hand-title">🤵 ДИЛЕР</div><div class="bj-cards-list" id="dealerCards">???</div><div class="bj-score" id="dealerScore">?</div></div>
+                    <div class="bj-hand"><div class="bj-hand-title">🎲 ИГРОК</div><div class="bj-cards-list" id="playerCards">-</div><div class="bj-score" id="playerScore">0</div></div>
+                </div>
+                <div class="bj-buttons">
+                    <button id="bjHitBtn" class="btn-small btn-success">🎴 ЕЩЁ</button>
+                    <button id="bjStandBtn" class="btn-small btn-danger">✋ ХВАТИТ</button>
+                </div>
+            </div>
+            <button id="startBlackjackBtn" class="btn">🎲 НАЧАТЬ</button>
+            <div id="bjTimer" class="timer-box">⏳ Готов</div>
+            <div id="bjMessage" style="text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- РАСШИРЕННЫЙ МАГАЗИН -->
+    <div id="shopTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">🏪 РАСШИРЕННЫЙ МАГАЗИН</h3>
+            <div id="shopList" class="work-list"></div>
+            <div id="shopMessage" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- СТАТИСТИКА -->
+    <div id="statsTab" class="tab-content" style="display: none;">
+        <div class="glass-card">
+            <h3 style="color:#ffcc88;">📊 СТАТИСТИКА</h3>
+            <div class="stat-row"><span class="stat-label">💰 Заработано:</span><span class="stat-value" id="totalEarned">0</span></div>
+            <div class="stat-row"><span class="stat-label">🎰 Выиграно в BJ:</span><span class="stat-value" id="totalWon">0</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Смен отработано:</span><span class="stat-value" id="workCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">🎮 Мини-игр пройдено:</span><span class="stat-value" id="minigameCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">🚗 Машин куплено:</span><span class="stat-value" id="carsCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">🏠 Недвижимости:</span><span class="stat-value" id="propertiesCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">💼 Бизнесов:</span><span class="stat-value" id="businessesCount">0</span></div>
+            <div class="stat-row"><span class="stat-label">📅 Дней в игре:</span><span class="stat-value" id="daysPlayed">1</span></div>
+        </div>
     </div>
 </div>
 
-<!-- МАГАЗИН -->
-<div id="shopTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏪 Магазин</h3>
-        <div id="shopList" class="item-list"></div>
-        <div id="shopMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- СТАТИСТИКА -->
-<div id="statsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>📊 СТАТИСТИКА</h3>
-        <div class="stat-row"><span class="stat-label">💰 Заработано:</span><span id="totalEarned">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎰 Выиграно в BJ:</span><span id="totalWon">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Смен отработано:</span><span id="workCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎮 Мини-игр пройдено:</span><span id="minigameCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машин куплено:</span><span id="carsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Недвижимости:</span><span id="propsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнесов:</span><span id="businessCount">0</span></div>
-    </div>
-</div>
+<!-- МУЗЫКА -->
+<div class="music-control" id="musicToggle">🔇</div>
+<audio id="bgMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-    // ==================== ИГРОВЫЕ ДАННЫЕ ====================
-    let game = {
-        nick: "KROPOTKIN",
-        money: 5000,
-        level: 1,
-        exp: 0,
-        currentJob: null,
-        totalEarned: 0,
-        totalWon: 0,
-        workCount: 0,
-        minigameCount: 0,
-        cars: [],
-        currentCar: null,
-        properties: [],
+    // ==================== ДАННЫЕ ИГРОКА ====================
+    let player = {
+        nick: "", server: "KROPOTKIN#1", money: 5000, level: 1, exp: 0,
+        currentJob: null, totalEarned: 0, totalWon: 0, workCount: 0, minigameCount: 0,
+        bjGamesCount: 0, joinDate: Date.now(),
+        cars: [], currentCar: null,
+        properties: [], currentProperty: null,
         businesses: []
     };
-
-    // ==================== КУЛДАУН 60 СЕКУНД ====================
-    let isWorkCooldown = false;
-    let workCooldownSeconds = 0;
-    let workCooldownInterval = null;
-
-    function startWorkCooldown() {
-        if (workCooldownInterval) clearInterval(workCooldownInterval);
-        isWorkCooldown = true;
-        workCooldownSeconds = 60;
-        
-        const timerDiv = document.getElementById('workCooldownTimer');
-        const workBtn = document.getElementById('workFromProfileBtn');
-        
-        workBtn.disabled = true;
-        
-        workCooldownInterval = setInterval(() => {
-            workCooldownSeconds--;
-            if (timerDiv) timerDiv.innerHTML = `⏳ КД: ${workCooldownSeconds} сек...`;
-            
-            if (workCooldownSeconds <= 0) {
-                clearInterval(workCooldownInterval);
-                isWorkCooldown = false;
-                if (timerDiv) timerDiv.innerHTML = `✅ Можно работать!`;
-                workBtn.disabled = false;
-                setTimeout(() => {
-                    if (timerDiv && timerDiv.innerHTML === '✅ Можно работать!') {
-                        timerDiv.innerHTML = `⏳ Готов к работе`;
-                    }
-                }, 2000);
-            }
-        }, 1000);
-    }
-
-    // Машины
+    
+    // ==================== МАШИНЫ ====================
     const carsForSale = [
-        { name: "ZAZ 968", price: 20000, speed: 100 },
-        { name: "ВАЗ 2101", price: 60000, speed: 120 },
-        { name: "ВАЗ 2107", price: 150000, speed: 140 },
-        { name: "Audi RS6", price: 8500000, speed: 305 },
-        { name: "Lamborghini", price: 50000000, speed: 325 }
+        { name: "🛵 ВАЗ 2101", price: 50000, speed: 120, desc: "Классика" },
+        { name: "🚗 ВАЗ 2107", price: 150000, speed: 140, desc: "Жигули" },
+        { name: "🚙 Toyota Camry", price: 350000, speed: 180, desc: "Надёжный седан" },
+        { name: "🏎️ BMW X6", price: 800000, speed: 220, desc: "Премиум" },
+        { name: "🔥 Audi RS6", price: 2000000, speed: 280, desc: "Спорткар" },
+        { name: "👑 Lamborghini", price: 5000000, speed: 330, desc: "Суперкар" }
     ];
-
-    // Недвижимость
+    
+    // ==================== НЕДВИЖИМОСТЬ ====================
     const propertiesForSale = [
-        { name: "Комната", price: 50000, income: 1000 },
-        { name: "1-комн квартира", price: 200000, income: 3000 },
-        { name: "2-комн квартира", price: 500000, income: 7000 },
-        { name: "Частный дом", price: 1500000, income: 20000 },
-        { name: "Особняк", price: 5000000, income: 60000 }
+        { name: "🏙️ Комната в общежитии", price: 50000, income: 1000, desc: "Скромно, но дёшево" },
+        { name: "🏢 1-комнатная квартира", price: 200000, income: 3000, desc: "В спальном районе" },
+        { name: "🏡 2-комнатная квартира", price: 500000, income: 7000, desc: "В центре" },
+        { name: "🏰 Частный дом", price: 1500000, income: 20000, desc: "Свой участок" },
+        { name: "🏛️ Особняк", price: 5000000, income: 60000, desc: "Премиум класс" }
     ];
-
-    // Бизнес
-    const businessForSale = [
-        { name: "Ларек", price: 100000, profit: 5000 },
-        { name: "Кафе", price: 500000, profit: 20000 },
-        { name: "Магазин", price: 1500000, profit: 50000 },
-        { name: "Автосервис", price: 3000000, profit: 100000 },
-        { name: "Гостиница", price: 10000000, profit: 300000 }
+    
+    // ==================== БИЗНЕС (пассивный доход) ====================
+    const businessesForSale = [
+        { name: "🥤 Ларек", price: 100000, profit: 5000, desc: "Торговля на районе" },
+        { name: "🍕 Кафе", price: 500000, profit: 20000, desc: "Общепит" },
+        { name: "🏪 Магазин", price: 1500000, profit: 50000, desc: "Продуктовый" },
+        { name: "🔧 Автосервис", price: 3000000, profit: 100000, desc: "Ремонт машин" },
+        { name: "🏨 Гостиница", price: 10000000, profit: 300000, desc: "Сетевой бизнес" }
     ];
-
+    
     // ==================== РАБОТЫ ====================
     const jobs = [
-        { name: "📦 КУРЬЕР", levelReq: 1, income: 3000, expReward: 1, gameType: "clicker", target: 8 },
-        { name: "🌾 ФЕРМЕР", levelReq: 1, income: 3500, expReward: 1, gameType: "clicker", target: 10 },
-        { name: "🏭 ЗАВОД", levelReq: 2, income: 4000, expReward: 2, gameType: "qrcode", target: 1 },
-        { name: "🚕 ТАКСИСТ", levelReq: 2, income: 4500, expReward: 2, gameType: "slider", target: 70 },
-        { name: "🔧 МЕХАНИК", levelReq: 3, income: 5500, expReward: 3, gameType: "memory", target: 4 },
-        { name: "🚛 ДАЛЬНОБОЙЩИК", levelReq: 5, income: 9000, expReward: 5, gameType: "slider", target: 85 }
+        { name: "📦 Курьер", levelReq: 1, income: 3000, expReward: 1, desc: "Развоз заказов", minigame: "clicker", target: 10 },
+        { name: "🌾 Фермер", levelReq: 1, income: 3500, expReward: 1, desc: "Сбор урожая", minigame: "clicker", target: 12 },
+        { name: "🏭 Завод", levelReq: 2, income: 4000, expReward: 2, desc: "Конвейер", minigame: "qrcode", target: 4 },
+        { name: "🚕 Таксист", levelReq: 2, income: 4500, expReward: 2, desc: "Перевозки", minigame: "slider", target: 80 },
+        { name: "🔧 Механик", levelReq: 3, income: 5500, expReward: 3, desc: "Ремонт", minigame: "memory", target: 4 },
+        { name: "🛍️ Продавец", levelReq: 3, income: 5000, expReward: 3, desc: "Магазин", minigame: "clicker", target: 15 },
+        { name: "⛏️ Шахтёр", levelReq: 4, income: 7000, expReward: 4, desc: "Добыча", minigame: "clicker", target: 20 },
+        { name: "🚛 Дальнобойщик", levelReq: 5, income: 9000, expReward: 5, desc: "Грузоперевозки", minigame: "slider", target: 90 }
     ];
-
-    // Магазин
+    
+    // ==================== РАСШИРЕННЫЙ МАГАЗИН (15 товаров) ====================
     const shopItems = [
-        { name: "🍔 Гамбургер", price: 150 },
-        { name: "🍕 Пицца", price: 350 },
-        { name: "💊 Аптечка", price: 500 },
-        { name: "🔫 Травмат", price: 5000 },
-        { name: "🚗 Права", price: 15000 }
+        { name: "🍔 Гамбургер", price: 150, desc: "Восстанавливает 20 HP", category: "еда" },
+        { name: "🍕 Пицца", price: 350, desc: "Восстанавливает 50 HP", category: "еда" },
+        { name: "💊 Аптечка", price: 500, desc: "Восстанавливает 100 HP", category: "лечение" },
+        { name: "💉 Лекарство", price: 1000, desc: "Лечит все болезни", category: "лечение" },
+        { name: "📱 Сим-карта", price: 1000, desc: "Для звонков", category: "услуги" },
+        { name: "🔫 Травмат", price: 5000, desc: "Для самообороны", category: "оружие" },
+        { name: "🗡️ Нож", price: 8000, desc: "Холодное оружие", category: "оружие" },
+        { name: "💣 Дымовая шашка", price: 3000, desc: "Скрывает от врагов", category: "спец" },
+        { name: "🎒 Рюкзак", price: 2000, desc: "+5 слотов инвентаря", category: "аксессуары" },
+        { name: "⌚ Часы", price: 5000, desc: "Показывает статус", category: "аксессуары" },
+        { name: "🚗 Права", price: 15000, desc: "Категория B", category: "услуги" },
+        { name: "🔫 Пистолет", price: 25000, desc: "Огнестрел", category: "оружие" },
+        { name: "🛡️ Бронежилет", price: 40000, desc: "Защита +50", category: "броня" },
+        { name: "📚 Курсы", price: 30000, desc: "+10% к доходу", category: "услуги" },
+        { name: "💎 VIP статус", price: 100000, desc: "Эксклюзивный скин", category: "премиум" }
     ];
-
-    // ==================== ОБНОВЛЕНИЕ ====================
-    function updateUI() {
-        document.getElementById('moneyDisplay').innerText = game.money.toLocaleString();
-        document.getElementById('levelDisplay').innerText = game.level;
-        document.getElementById('profileLevel').innerText = game.level;
-        document.getElementById('profileExp').innerText = game.exp;
-        document.getElementById('profileJob').innerText = game.currentJob ? game.currentJob.name : "Нет";
-        document.getElementById('profileCar').innerText = game.currentCar ? game.currentCar.name : "Нет";
-        document.getElementById('profileHouse').innerText = game.properties.length > 0 ? game.properties.length + " шт" : "Нет";
-        document.getElementById('profileBusiness').innerText = game.businesses.length > 0 ? game.businesses.length + " шт" : "Нет";
-        document.getElementById('totalEarned').innerText = game.totalEarned.toLocaleString();
-        document.getElementById('totalWon').innerText = game.totalWon.toLocaleString();
-        document.getElementById('workCount').innerText = game.workCount;
-        document.getElementById('minigameCount').innerText = game.minigameCount;
-        document.getElementById('carsCount').innerText = game.cars.length;
-        document.getElementById('propsCount').innerText = game.properties.length;
-        document.getElementById('businessCount').innerText = game.businesses.length;
-        
-        let passive = 0;
-        game.properties.forEach(p => passive += p.income);
-        game.businesses.forEach(b => passive += b.profit);
-        document.getElementById('passiveIncome').innerText = passive.toLocaleString();
-    }
-
-    function saveGame() {
-        localStorage.setItem('kropotkin_full', JSON.stringify(game));
-    }
-
-    function loadGame() {
-        const saved = localStorage.getItem('kropotkin_full');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                Object.assign(game, data);
-                if (game.currentJob) {
-                    const found = jobs.find(j => j.name === game.currentJob.name);
-                    if (found) game.currentJob = found;
-                }
-            } catch(e) {}
-        }
-        updateUI();
-    }
-
-    function addMoney(amount) {
-        game.money += amount;
-        game.totalEarned += amount;
-        updateUI();
-        saveGame();
-    }
-
+    
+    // Состояние мини-игр
+    let currentMinigame = null;
+    let minigameProgress = 0;
+    let memorySequence = [];
+    let memoryUserInput = [];
+    
+    // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
+    function getExpForNextLevel() { return 1000; }
+    
     function addExp(amount) {
-        game.exp += amount;
+        player.exp += amount;
         let leveled = false;
-        while (game.exp >= 1000) {
-            game.level++;
-            game.exp -= 1000;
+        while (player.exp >= getExpForNextLevel()) {
+            player.level++;
+            player.exp -= getExpForNextLevel();
             leveled = true;
         }
         updateUI();
-        if (leveled) {
-            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь ${game.level} уровень!`);
-            renderJobs();
+        if (leveled) { alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь ${player.level} уровень!`); renderWorkList(); }
+        saveGame();
+    }
+    
+    function addMoney(amount) {
+        player.money += amount;
+        player.totalEarned += amount;
+        updateUI();
+        saveGame();
+    }
+    
+    function updateUI() {
+        document.getElementById('moneyAmount').innerText = player.money.toLocaleString();
+        document.getElementById('userLvl').innerText = player.level;
+        document.getElementById('userXp').innerText = player.exp;
+        document.getElementById('nextLevelXp').innerText = getExpForNextLevel();
+        document.getElementById('mainNick').innerText = player.nick;
+        document.getElementById('mainServerName').innerText = player.server;
+        document.getElementById('totalEarned').innerText = player.totalEarned.toLocaleString();
+        document.getElementById('totalWon').innerText = player.totalWon.toLocaleString();
+        document.getElementById('workCount').innerText = player.workCount;
+        document.getElementById('minigameCount').innerText = player.minigameCount;
+        document.getElementById('bjGamesCount').innerText = player.bjGamesCount;
+        document.getElementById('carsCount').innerText = player.cars.length;
+        document.getElementById('propertiesCount').innerText = player.properties.length;
+        document.getElementById('businessesCount').innerText = player.businesses.length;
+        document.getElementById('xpToNext').innerText = getExpForNextLevel() - player.exp;
+        document.getElementById('currentJob').innerHTML = player.currentJob ? player.currentJob.name : "Нет";
+        document.getElementById('currentCar').innerHTML = player.currentCar ? player.currentCar.name : "Нет";
+        document.getElementById('currentHouse').innerHTML = player.currentProperty ? player.currentProperty.name : "Нет";
+        document.getElementById('currentBusiness').innerHTML = player.businesses.length > 0 ? player.businesses.length + " бизнес(ов)" : "Нет";
+        
+        let passiveIncome = 0;
+        player.properties.forEach(p => { if(p.income) passiveIncome += p.income; });
+        player.businesses.forEach(b => { if(b.profit) passiveIncome += b.profit; });
+        document.getElementById('passiveIncome').innerText = passiveIncome.toLocaleString();
+        
+        const daysPlayed = Math.floor((Date.now() - player.joinDate) / 86400000) + 1;
+        document.getElementById('daysPlayed').innerText = daysPlayed;
+    }
+    
+    // ==================== ПОКУПКА МАШИН ====================
+    function buyCar(car) {
+        if (player.money >= car.price) {
+            player.money -= car.price;
+            player.cars.push({ ...car });
+            if (!player.currentCar) player.currentCar = car;
+            updateUI();
+            renderCarLists();
+            document.getElementById('carMessage').innerHTML = `✅ Куплено: ${car.name}`;
+            setTimeout(() => { document.getElementById('carMessage').innerHTML = ''; }, 2000);
+            saveGame();
+        } else {
+            document.getElementById('carMessage').innerHTML = `❌ Не хватает ${car.price - player.money}₽`;
+        }
+    }
+    
+    function selectCar(car) {
+        player.currentCar = car;
+        updateUI();
+        document.getElementById('carMessage').innerHTML = `🚗 Теперь вы ездите на ${car.name}`;
+        setTimeout(() => { document.getElementById('carMessage').innerHTML = ''; }, 2000);
+        saveGame();
+    }
+    
+    function renderCarLists() {
+        const myCarsDiv = document.getElementById('myCarsList');
+        if (myCarsDiv) {
+            if (player.cars.length === 0) {
+                myCarsDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет машин</div>';
+            } else {
+                myCarsDiv.innerHTML = player.cars.map((car, idx) => `
+                    <div class="car-item">
+                        <div class="car-info">
+                            <div class="car-name">${car.name}</div>
+                            <div class="car-desc">${car.desc} | 🏁 ${car.speed} км/ч</div>
+                        </div>
+                        <button class="btn-small" data-select-car="${idx}">${player.currentCar === car ? '✅ ТЕКУЩАЯ' : 'Выбрать'}</button>
+                    </div>
+                `).join('');
+                document.querySelectorAll('[data-select-car]').forEach(btn => {
+                    btn.addEventListener('click', (e) => { selectCar(player.cars[parseInt(e.target.getAttribute('data-select-car'))]); });
+                });
+            }
+        }
+        const shopDiv = document.getElementById('carShopList');
+        if (shopDiv) {
+            shopDiv.innerHTML = carsForSale.map((car, idx) => `
+                <div class="car-item">
+                    <div class="car-info">
+                        <div class="car-name">${car.name}</div>
+                        <div class="car-desc">${car.desc} | 🏁 ${car.speed} км/ч</div>
+                        <div class="car-price">💰 ${car.price.toLocaleString()} ₽</div>
+                    </div>
+                    <button class="btn-small" data-buy-car="${idx}">Купить</button>
+                </div>
+            `).join('');
+            document.querySelectorAll('[data-buy-car]').forEach(btn => {
+                btn.addEventListener('click', (e) => { buyCar(carsForSale[parseInt(e.target.getAttribute('data-buy-car'))]); });
+            });
+        }
+    }
+    
+    // ==================== НЕДВИЖИМОСТЬ ====================
+    function buyProperty(prop) {
+        if (player.money >= prop.price) {
+            player.money -= prop.price;
+            player.properties.push({ ...prop });
+            if (!player.currentProperty) player.currentProperty = prop;
+            updateUI();
+            renderPropertyLists();
+            document.getElementById('propertyMessage').innerHTML = `✅ Куплено: ${prop.name}`;
+            setTimeout(() => { document.getElementById('propertyMessage').innerHTML = ''; }, 2000);
+            saveGame();
+        } else {
+            document.getElementById('propertyMessage').innerHTML = `❌ Не хватает ${prop.price - player.money}₽`;
+        }
+    }
+    
+    function renderPropertyLists() {
+        const myPropsDiv = document.getElementById('myPropertiesList');
+        if (myPropsDiv) {
+            if (player.properties.length === 0) {
+                myPropsDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет недвижимости</div>';
+            } else {
+                myPropsDiv.innerHTML = player.properties.map((prop, idx) => `
+                    <div class="property-item">
+                        <div class="property-info">
+                            <div class="property-name">${prop.name}</div>
+                            <div class="property-desc">${prop.desc}</div>
+                            <div class="property-price">💰 Доход: ${prop.income}₽/час</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        const marketDiv = document.getElementById('propertyMarketList');
+        if (marketDiv) {
+            marketDiv.innerHTML = propertiesForSale.map((prop, idx) => `
+                <div class="property-item">
+                    <div class="property-info">
+                        <div class="property-name">${prop.name}</div>
+                        <div class="property-desc">${prop.desc}</div>
+                        <div class="property-price">💰 ${prop.price.toLocaleString()} ₽ | 📈 +${prop.income}₽/час</div>
+                    </div>
+                    <button class="btn-small" data-buy-prop="${idx}">Купить</button>
+                </div>
+            `).join('');
+            document.querySelectorAll('[data-buy-prop]').forEach(btn => {
+                btn.addEventListener('click', (e) => { buyProperty(propertiesForSale[parseInt(e.target.getAttribute('data-buy-prop'))]); });
+            });
+        }
+    }
+    
+    // ==================== БИЗНЕС (пассивный доход) ====================
+    function buyBusiness(biz) {
+        if (player.money >= biz.price) {
+            player.money -= biz.price;
+            player.businesses.push({ ...biz, boughtAt: Date.now() });
+            updateUI();
+            renderBusinessLists();
+            document.getElementById('businessMessage').innerHTML = `✅ Куплен бизнес: ${biz.name}`;
+            setTimeout(() => { document.getElementById('businessMessage').innerHTML = ''; }, 2000);
+            saveGame();
+        } else {
+            document.getElementById('businessMessage').innerHTML = `❌ Не хватает ${biz.price - player.money}₽`;
+        }
+    }
+    
+    function collectBusinessIncome() {
+        let totalProfit = 0;
+        player.businesses.forEach(b => { totalProfit += b.profit; });
+        if (totalProfit > 0) {
+            addMoney(totalProfit);
+            alert(`💰 Пассивный доход: +${totalProfit}₽ от вашего бизнеса!`);
         }
         saveGame();
     }
-
-    // ==================== РАБОТЫ ====================
-    function selectJob(job) {
-        if (game.level < job.levelReq) {
+    
+    function renderBusinessLists() {
+        const myBizDiv = document.getElementById('myBusinessList');
+        if (myBizDiv) {
+            if (player.businesses.length === 0) {
+                myBizDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет бизнеса</div>';
+            } else {
+                myBizDiv.innerHTML = player.businesses.map((biz, idx) => `
+                    <div class="business-item">
+                        <div class="business-info">
+                            <div class="business-name">${biz.name}</div>
+                            <div class="business-desc">${biz.desc}</div>
+                            <div class="business-profit">💰 Доход: ${biz.profit}₽/час</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        const marketDiv = document.getElementById('businessMarketList');
+        if (marketDiv) {
+            marketDiv.innerHTML = businessesForSale.map((biz, idx) => `
+                <div class="business-item">
+                    <div class="business-info">
+                        <div class="business-name">${biz.name}</div>
+                        <div class="business-desc">${biz.desc}</div>
+                        <div class="business-profit">💰 ${biz.price.toLocaleString()} ₽ | 📈 +${biz.profit}₽/час</div>
+                    </div>
+                    <button class="btn-small" data-buy-biz="${idx}">Купить</button>
+                </div>
+            `).join('');
+            document.querySelectorAll('[data-buy-biz]').forEach(btn => {
+                btn.addEventListener('click', (e) => { buyBusiness(businessesForSale[parseInt(e.target.getAttribute('data-buy-biz'))]); });
+            });
+        }
+    }
+    
+    // ==================== РАБОТЫ И МИНИ-ИГРЫ ====================
+    function setJob(job) {
+        if (player.level < job.levelReq) {
             alert(`❌ Требуется ${job.levelReq} уровень!`);
             return;
         }
-        game.currentJob = job;
+        player.currentJob = job;
         updateUI();
-        alert(`✅ Выбрана работа: ${job.name}`);
+        document.getElementById('workMessage').innerHTML = `✅ Выбрана работа: ${job.name}`;
+        setTimeout(() => { const msg = document.getElementById('workMessage'); if(msg) msg.innerHTML = ''; }, 2000);
         saveGame();
     }
-
-    function renderJobs() {
-        const container = document.getElementById('jobsList');
-        if (!container) return;
-        container.innerHTML = '';
-        for (let job of jobs) {
-            const available = game.level >= job.levelReq;
-            const div = document.createElement('div');
-            div.className = 'job-item';
-            div.innerHTML = `
-                <div>
-                    <div class="job-name">${job.name} ${available ? '' : '🔒'}</div>
-                    <div class="job-reward">💰 +${job.income}₽ | ✨ +${job.expReward} XP</div>
-                    <div class="job-reward">${available ? '✅ Доступна' : `⭐ Требуется ${job.levelReq} уровень`}</div>
-                </div>
-                <button class="btn-small" data-job="${job.name}">Выбрать</button>
-            `;
-            container.appendChild(div);
-            const btn = div.querySelector('button');
-            if (!available) btn.disabled = true;
-            btn.onclick = () => selectJob(job);
-        }
-    }
-
-    // ==================== МИНИ-ИГРЫ ====================
-    let clickerCount = 0;
-    let memorySequence = [];
-    let memoryUserInput = [];
-
-    function startMinigame() {
-        const job = game.currentJob;
-        if (!job) {
-            alert("❌ Сначала выберите работу!");
-            return;
-        }
-        
-        if (isWorkCooldown) {
-            alert(`⏳ Подождите ${workCooldownSeconds} секунд!`);
-            return;
-        }
-        
+    
+    function startMinigame(job) {
+        currentMinigame = job.minigame;
+        minigameProgress = 0;
         const area = document.getElementById('minigameArea');
-        const title = document.getElementById('minigameTitle');
+        const title = document.getElementById('minigameJobName');
         title.innerHTML = `🎮 ${job.name} — мини-игра`;
         
-        if (job.gameType === 'clicker') {
-            clickerCount = 0;
+        if (job.minigame === 'clicker') {
             area.innerHTML = `
-                <div>👆 Нажми ${job.target} раз!</div>
-                <button id="clickBtn" class="clicker-btn">👆 НАЖМИ</button>
-                <div class="progress-bar"><div id="clickProgress" class="progress-fill"></div></div>
-                <div>Прогресс: <span id="clickCount">0</span>/${job.target}</div>
-                <button id="finishClickBtn" class="btn-small btn-success" style="margin-top:10px;">✅ ЗАВЕРШИТЬ</button>
+                <div class="minigame-title">👆 Нажми ${job.target} раз!</div>
+                <div class="clicker-button" id="clickerBtn">👆 НАЖМИ</div>
+                <div class="progress-bar"><div class="progress-fill" id="clickerProgress"></div></div>
+                <div>Прогресс: <span id="clickerCount">0</span>/${job.target}</div>
+                <button id="clickerFinishBtn" class="btn-small btn-success">✅ ЗАВЕРШИТЬ</button>
             `;
-            const clickBtn = document.getElementById('clickBtn');
-            const progressFill = document.getElementById('clickProgress');
-            const countSpan = document.getElementById('clickCount');
-            clickBtn.onclick = () => {
-                clickerCount = Math.min(clickerCount + 1, job.target);
-                progressFill.style.width = (clickerCount/job.target*100)+'%';
-                countSpan.innerText = clickerCount;
-                if (clickerCount === job.target) clickBtn.disabled = true;
+            let count = 0;
+            document.getElementById('clickerBtn').onclick = () => {
+                count = Math.min(count + 1, job.target);
+                document.getElementById('clickerCount').innerText = count;
+                document.getElementById('clickerProgress').style.width = (count/job.target*100)+'%';
             };
-            document.getElementById('finishClickBtn').onclick = () => {
-                if (clickerCount >= job.target) finishWork(true);
+            document.getElementById('clickerFinishBtn').onclick = () => {
+                if (count >= job.target) finishWork(true);
                 else finishWork(false);
             };
-        }
-        else if (job.gameType === 'qrcode') {
-            const code = Math.floor(Math.random() * 9000 + 1000);
-            area.innerHTML = `
-                <div>Введи код: ${code}</div>
-                <div style="background:white; color:black; padding:15px; border-radius:16px; margin:10px; font-size:24px;">${code}</div>
-                <input id="qrInput" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin:10px 0; color:white; border:1px solid #e03a3a;" placeholder="Введите код">
-                <button id="qrSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
+        } else if (job.minigame === 'qrcode') {
+            const code = Math.floor(Math.random()*9000+1000);
+            area.innerHTML = `<div class="minigame-title">Введи код: ${code}</div><div class="qrcode">[${code}]</div><input id="qrInput" class="input-field" placeholder="Код"><button id="qrSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>`;
             document.getElementById('qrSubmitBtn').onclick = () => {
-                const input = document.getElementById('qrInput').value;
-                if (parseInt(input) === code) finishWork(true);
+                if (parseInt(document.getElementById('qrInput').value) === code) finishWork(true);
                 else finishWork(false);
             };
-        }
-        else if (job.gameType === 'slider') {
-            const target = Math.floor(Math.random() * 41 + 30);
-            area.innerHTML = `
-                <div>Установи ползунок на ${target} (±5)</div>
-                <input type="range" id="sliderInput" min="0" max="100" value="50" style="width:100%; margin:10px 0;">
-                <div>Текущее значение: <span id="sliderValue">50</span></div>
-                <button id="sliderSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
-            const slider = document.getElementById('sliderInput');
-            const valueSpan = document.getElementById('sliderValue');
-            slider.oninput = () => { valueSpan.innerText = slider.value; };
+        } else if (job.minigame === 'slider') {
+            const target = Math.floor(Math.random()*41+30);
+            area.innerHTML = `<div class="minigame-title">Установи на ${target}</div><input type="range" id="sliderInput" class="slider" min="0" max="100"><div>Текущее: <span id="sliderValue">50</span></div><button id="sliderSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>`;
+            document.getElementById('sliderInput').oninput = () => { document.getElementById('sliderValue').innerText = document.getElementById('sliderInput').value; };
             document.getElementById('sliderSubmitBtn').onclick = () => {
-                const val = parseInt(slider.value);
-                if (Math.abs(val - target) <= 5) finishWork(true);
+                if (Math.abs(parseInt(document.getElementById('sliderInput').value) - target) <= 5) finishWork(true);
                 else finishWork(false);
             };
-        }
-        else if (job.gameType === 'memory') {
-            const icons = ['🍎','🍐','🍊','🍋','🍉','🍒'];
+        } else if (job.minigame === 'memory') {
+            const nums = ['🍎','🍐','🍊','🍋','🍉','🍒'];
             memorySequence = [];
-            for(let i=0;i<4;i++) memorySequence.push(icons[Math.floor(Math.random()*icons.length)]);
-            area.innerHTML = `<div>Запомни последовательность!</div><div style="font-size:32px; letter-spacing:10px; margin:10px;">${memorySequence.join(' ')}</div><div>Через 3 секунды исчезнет...</div>`;
+            for(let i=0;i<4;i++) memorySequence.push(nums[Math.floor(Math.random()*nums.length)]);
+            area.innerHTML = `<div class="minigame-title">Запомни: ${memorySequence.join(' ')}</div><div>Через 3 сек...</div>`;
             setTimeout(() => {
-                area.innerHTML = `<div class="memory-grid" id="memGrid"></div><button id="memCheck" class="btn-small">ПРОВЕРИТЬ</button>`;
-                const grid = document.getElementById('memGrid');
+                area.innerHTML = `<div class="memory-grid" id="memoryGrid"></div><button id="memoryCheckBtn" class="btn-small">ПРОВЕРИТЬ</button>`;
+                const grid = document.getElementById('memoryGrid');
                 memoryUserInput = [];
-                const shuffled = [...icons].sort(()=>Math.random()-0.5);
+                const shuffled = [...nums].sort(()=>Math.random()-0.5);
                 for(let i=0;i<6;i++){
                     const btn = document.createElement('div');
                     btn.className = 'memory-card';
                     btn.innerText = shuffled[i];
-                    btn.onclick = () => {
-                        if(memoryUserInput.length < 4){
-                            memoryUserInput.push(shuffled[i]);
-                            btn.style.opacity = '0.5';
-                            btn.style.pointerEvents = 'none';
-                        }
-                    };
+                    btn.onclick = () => { if(memoryUserInput.length<4){ memoryUserInput.push(shuffled[i]); btn.style.opacity='0.5'; } };
                     grid.appendChild(btn);
                 }
-                document.getElementById('memCheck').onclick = () => {
+                document.getElementById('memoryCheckBtn').onclick = () => {
                     let correct = true;
                     for(let i=0;i<4;i++) if(memoryUserInput[i] !== memorySequence[i]) correct = false;
-                    if(correct && memoryUserInput.length === 4) finishWork(true);
+                    if(correct && memoryUserInput.length===4) finishWork(true);
                     else finishWork(false);
                 };
             }, 3000);
         }
     }
-
+    
     function finishWork(success) {
-        if (success && game.currentJob) {
-            addMoney(game.currentJob.income);
-            addExp(game.currentJob.expReward);
-            game.workCount++;
-            game.minigameCount++;
+        if (success && player.currentJob) {
+            addMoney(player.currentJob.income);
+            addExp(player.currentJob.expReward);
+            player.workCount++;
+            player.minigameCount++;
             updateUI();
-            alert(`✅ Работа выполнена! +${game.currentJob.income}₽, +${game.currentJob.expReward} XP`);
-            document.getElementById('minigameMsg').innerHTML = '✅ Успех! +' + game.currentJob.income + '₽';
-            startWorkCooldown();
+            alert(`✅ Работа выполнена! +${player.currentJob.income}₽, +${player.currentJob.expReward} XP`);
+            document.getElementById('minigameResult').innerHTML = `✅ Успех! +${player.currentJob.income}₽`;
         } else {
             alert(`❌ Провал! Попробуйте ещё раз.`);
-            document.getElementById('minigameMsg').innerHTML = '❌ Провал!';
+            document.getElementById('minigameResult').innerHTML = `❌ Провал!`;
         }
-        setTimeout(() => { document.getElementById('minigameMsg').innerHTML = ''; }, 2000);
+        setTimeout(() => { document.getElementById('minigameResult').innerHTML = ''; }, 2000);
         saveGame();
     }
-
-    // ==================== ГАРАЖ ====================
-    function buyCar(car) {
-        if (game.money >= car.price) {
-            game.money -= car.price;
-            game.cars.push({ ...car });
-            if (!game.currentCar) game.currentCar = car;
-            updateUI();
-            renderCars();
-            document.getElementById('carsMsg').innerHTML = `✅ Куплено: ${car.name}`;
-            setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('carsMsg').innerHTML = `❌ Не хватает ${(car.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function selectCar(car) {
-        game.currentCar = car;
-        updateUI();
-        renderCars();
-        document.getElementById('carsMsg').innerHTML = `🚗 Теперь вы ездите на ${car.name}`;
-        setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-        saveGame();
-    }
-
-    function renderCars() {
-        const myDiv = document.getElementById('myCarsList');
-        if (myDiv) {
-            if (game.cars.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет машин</div>';
-            else {
-                myDiv.innerHTML = game.cars.map((car, idx) => `
-                    <div class="item-card">
-                        <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч</div>
-                        <button class="btn-small" data-select-car="${idx}">${game.currentCar === car ? '✅ Текущая' : 'Выбрать'}</button>
-                    </div>
-                `).join('');
-                document.querySelectorAll('[data-select-car]').forEach(btn => {
-                    btn.onclick = () => selectCar(game.cars[parseInt(btn.getAttribute('data-select-car'))]);
-                });
-            }
-        }
-        const shopDiv = document.getElementById('carsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = carsForSale.map((car, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч<br><span class="item-price">💰 ${car.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-car="${idx}">Купить</button>
+    
+    function renderWorkList() {
+        const container = document.getElementById('workList');
+        if(!container) return;
+        container.innerHTML = jobs.map((job,idx) => `
+            <div class="work-item">
+                <div class="work-info">
+                    <div class="work-name">${job.name} ${player.level>=job.levelReq ? '' : '🔒'}</div>
+                    <div class="work-desc">${job.desc}</div>
+                    <div class="work-stats">💰 +${job.income}₽ | ✨ +${job.expReward} XP</div>
+                    <div class="work-lock">${player.level>=job.levelReq ? '✅ Доступна' : `⭐ Требуется ${job.levelReq} уровень`}</div>
                 </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-car]').forEach(btn => {
-                btn.onclick = () => buyCar(carsForSale[parseInt(btn.getAttribute('data-buy-car'))]);
-            });
-        }
-    }
-
-    // ==================== НЕДВИЖИМОСТЬ ====================
-    function buyProperty(prop) {
-        if (game.money >= prop.price) {
-            game.money -= prop.price;
-            game.properties.push({ ...prop });
-            updateUI();
-            renderProperties();
-            document.getElementById('propsMsg').innerHTML = `✅ Куплено: ${prop.name}`;
-            setTimeout(() => document.getElementById('propsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('propsMsg').innerHTML = `❌ Не хватает ${(prop.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function renderProperties() {
-        const myDiv = document.getElementById('myPropsList');
-        if (myDiv) {
-            if (game.properties.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет недвижимости</div>';
-            else {
-                myDiv.innerHTML = game.properties.map(prop => `
-                    <div class="item-card">
-                        <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('propsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = propertiesForSale.map((prop, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час<br><span class="item-price">💰 ${prop.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-prop="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-prop]').forEach(btn => {
-                btn.onclick = () => buyProperty(propertiesForSale[parseInt(btn.getAttribute('data-buy-prop'))]);
-            });
-        }
-    }
-
-    // ==================== БИЗНЕС ====================
-    function buyBusiness(biz) {
-        if (game.money >= biz.price) {
-            game.money -= biz.price;
-            game.businesses.push({ ...biz });
-            updateUI();
-            renderBusiness();
-            document.getElementById('businessMsg').innerHTML = `✅ Куплен бизнес: ${biz.name}`;
-            setTimeout(() => document.getElementById('businessMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('businessMsg').innerHTML = `❌ Не хватает ${(biz.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function renderBusiness() {
-        const myDiv = document.getElementById('myBusinessList');
-        if (myDiv) {
-            if (game.businesses.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет бизнеса</div>';
-            else {
-                myDiv.innerHTML = game.businesses.map(biz => `
-                    <div class="item-card">
-                        <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('businessShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = businessForSale.map((biz, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час<br><span class="item-price">💰 ${biz.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-biz="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-biz]').forEach(btn => {
-                btn.onclick = () => buyBusiness(businessForSale[parseInt(btn.getAttribute('data-buy-biz'))]);
-            });
-        }
-    }
-
-    // ==================== МАГАЗИН ====================
-    function renderShop() {
-        const container = document.getElementById('shopList');
-        if (!container) return;
-        container.innerHTML = shopItems.map((item, idx) => `
-            <div class="item-card">
-                <div><span class="item-name">${item.name}</span><br><span class="item-price">💰 ${item.price} ₽</span></div>
-                <button class="btn-small" data-buy-item="${idx}">Купить</button>
+                <button class="btn-small" data-job-idx="${idx}" ${player.level>=job.levelReq ? '' : 'disabled style="opacity:0.5;"'}>Выбрать</button>
             </div>
         `).join('');
-        document.querySelectorAll('[data-buy-item]').forEach(btn => {
-            btn.onclick = () => {
-                const item = shopItems[parseInt(btn.getAttribute('data-buy-item'))];
-                if (game.money >= item.price) {
-                    game.money -= item.price;
-                    updateUI();
-                    document.getElementById('shopMsg').innerHTML = `✅ Куплено: ${item.name}`;
-                    saveGame();
-                } else {
-                    document.getElementById('shopMsg').innerHTML = `❌ Не хватает ${item.price - game.money}₽`;
-                }
-                setTimeout(() => document.getElementById('shopMsg').innerHTML = '', 2000);
-            };
+        document.querySelectorAll('[data-job-idx]').forEach(btn => {
+            btn.addEventListener('click', (e) => { setJob(jobs[parseInt(e.target.getAttribute('data-job-idx'))]); });
         });
     }
-
+    
+    function renderShop() {
+        const container = document.getElementById('shopList');
+        if(!container) return;
+        container.innerHTML = shopItems.map((item,idx) => `
+            <div class="shop-item">
+                <div class="shop-info">
+                    <div class="shop-name">${item.name}</div>
+                    <div class="shop-desc">${item.desc}</div>
+                    <div class="shop-price">💰 ${item.price.toLocaleString()} ₽</div>
+                </div>
+                <button class="btn-small" data-shop-idx="${idx}">Купить</button>
+            </div>
+        `).join('');
+        document.querySelectorAll('[data-shop-idx]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const item = shopItems[parseInt(e.target.getAttribute('data-shop-idx'))];
+                if(player.money >= item.price){
+                    player.money -= item.price;
+                    updateUI();
+                    document.getElementById('shopMessage').innerHTML = `✅ Куплено: ${item.name}`;
+                    saveGame();
+                    setTimeout(()=>{ document.getElementById('shopMessage').innerHTML = ''; },2000);
+                } else {
+                    document.getElementById('shopMessage').innerHTML = `❌ Не хватает ${item.price - player.money}₽`;
+                }
+            });
+        });
+    }
+    
     // ==================== BLACK JACK ====================
-    let bjActive = false, bjCooldown = false, bjSeconds = 0, bjInterval = null;
-    let bjPlayerHand = [], bjDealerHand = [], bjCurrentBet = 0;
-
-    function getRandomCard() {
-        const cards = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-        return cards[Math.floor(Math.random() * cards.length)];
-    }
-
-    function getCardValue(card) {
-        if (card === 'A') return 11;
-        if (['K','Q','J'].includes(card)) return 10;
-        return parseInt(card);
-    }
-
-    function handScore(hand) {
-        let score = 0, aces = 0;
-        for (let card of hand) {
-            if (card === 'A') { aces++; score += 11; }
-            else { score += getCardValue(card); }
-        }
-        while (score > 21 && aces > 0) {
-            score -= 10;
-            aces--;
-        }
-        return score;
-    }
-
-    function updateBJUI() {
-        document.getElementById('playerArea').innerHTML = `🎲 Игрок: ${bjPlayerHand.join(' ')} (${handScore(bjPlayerHand)})`;
-        if (bjActive) {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand[0]} ?`;
+    let bjGameActive=false, bjCooldown=false, bjCooldownSeconds=0, bjInterval=null;
+    let playerHand=[], dealerHand=[], currentBet=0;
+    function getCardValue(c){ if(c==='A') return 11; if(['K','Q','J'].includes(c)) return 10; return parseInt(c); }
+    function calcScore(h){ let s=0,a=0; for(let c of h){ if(c==='A'){ a++; s+=11; } else s+=getCardValue(c); } while(s>21 && a>0){ s-=10; a--; } return s; }
+    function getRandomCard(){ return ['2','3','4','5','6','7','8','9','10','J','Q','K','A'][Math.floor(Math.random()*13)]; }
+    function updateBJUI(){
+        document.getElementById('playerCards').innerHTML = playerHand.join(' ');
+        document.getElementById('playerScore').innerText = calcScore(playerHand);
+        if(bjGameActive){
+            document.getElementById('dealerCards').innerHTML = dealerHand[0] + ' ?';
+            document.getElementById('dealerScore').innerText = '?';
         } else {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand.join(' ')} (${handScore(bjDealerHand)})`;
+            document.getElementById('dealerCards').innerHTML = dealerHand.join(' ');
+            document.getElementById('dealerScore').innerText = calcScore(dealerHand);
         }
     }
-
-    function endBJGame(result, winAmount) {
-        bjActive = false;
-        document.getElementById('bjHitBtn').disabled = true;
-        document.getElementById('bjStandBtn').disabled = true;
-        document.getElementById('bjStartBtn').disabled = false;
-        if (result === 'win') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🎉 ПОБЕДА! +${winAmount}₽`;
-        } else if (result === 'lose') {
-            document.getElementById('bjMsg').innerHTML = `😞 ПРОИГРЫШ! -${bjCurrentBet}₽`;
-        } else if (result === 'push') {
-            game.money += bjCurrentBet;
-            document.getElementById('bjMsg').innerHTML = `🤝 НИЧЬЯ! Возврат ${bjCurrentBet}₽`;
-        } else if (result === 'blackjack') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🃏 BLACKJACK! +${winAmount}₽`;
-        }
-        updateUI();
-        updateBJUI();
-        saveGame();
+    function endBJGame(result, winAmount){
+        bjGameActive=false;
+        document.getElementById('bjHitBtn').disabled=true;
+        document.getElementById('bjStandBtn').disabled=true;
+        document.getElementById('startBlackjackBtn').disabled=false;
+        if(result==='win'){ player.money+=winAmount; player.totalWon+=winAmount; document.getElementById('bjMessage').innerHTML=`🎉 ПОБЕДА! +${winAmount}₽`; }
+        else if(result==='lose'){ document.getElementById('bjMessage').innerHTML=`😞 ПРОИГРЫШ! -${currentBet}₽`; }
+        else if(result==='push'){ player.money+=currentBet; document.getElementById('bjMessage').innerHTML=`🤝 НИЧЬЯ! Возврат ${currentBet}₽`; }
+        else if(result==='blackjack'){ player.money+=winAmount; player.totalWon+=winAmount; document.getElementById('bjMessage').innerHTML=`🃏 BLACKJACK! +${winAmount}₽`; }
+        player.bjGamesCount++;
+        updateUI(); updateBJUI(); saveGame();
         startBJCooldown();
-        setTimeout(() => document.getElementById('bjMsg').innerHTML = '', 3000);
+        setTimeout(()=>{ document.getElementById('bjMessage').innerHTML=''; },3000);
     }
-
-    function dealerPlay() {
-        while (handScore(bjDealerHand) < 17) {
-            bjDealerHand.push(getRandomCard());
-        }
+    function dealerPlay(){
+        while(calcScore(dealerHand)<17) dealerHand.push(getRandomCard());
         updateBJUI();
-        const dealerScore = handScore(bjDealerHand);
-        const playerScore = handScore(bjPlayerHand);
-        if (dealerScore > 21) endBJGame('win', bjCurrentBet * 2);
-        else if (dealerScore > playerScore) endBJGame('lose', 0);
-        else if (dealerScore < playerScore) endBJGame('win', bjCurrentBet * 2);
-        else endBJGame('push', bjCurrentBet);
+        let ds=calcScore(dealerHand), ps=calcScore(playerHand);
+        if(ds>21) endBJGame('win', currentBet*2);
+        else if(ds>ps) endBJGame('lose',0);
+        else if(ds<ps) endBJGame('win', currentBet*2);
+        else endBJGame('push', currentBet);
     }
-
-    function playerHit() {
-        if (!bjActive) return;
-        bjPlayerHand.push(getRandomCard());
-        updateBJUI();
-        if (handScore(bjPlayerHand) > 21) endBJGame('lose', 0);
-    }
-
-    function playerStand() {
-        if (!bjActive) return;
-        bjActive = false;
-        dealerPlay();
-    }
-
-    function startBJCooldown() {
-        bjCooldown = true;
-        bjSeconds = 30;
-        const timerDiv = document.getElementById('bjTimer');
-        const startBtn = document.getElementById('bjStartBtn');
-        startBtn.disabled = true;
-        if (bjInterval) clearInterval(bjInterval);
-        bjInterval = setInterval(() => {
-            bjSeconds--;
-            timerDiv.innerText = `⏳ Ждите ${bjSeconds} сек...`;
-            if (bjSeconds <= 0) {
+    function playerHit(){ if(!bjGameActive) return; playerHand.push(getRandomCard()); updateBJUI(); if(calcScore(playerHand)>21) endBJGame('lose',0); }
+    function playerStand(){ if(!bjGameActive) return; bjGameActive=false; dealerPlay(); }
+    function startBJCooldown(){
+        bjCooldown=true; bjCooldownSeconds=30;
+        const timerDiv=document.getElementById('bjTimer'), startBtn=document.getElementById('startBlackjackBtn');
+        if(startBtn) startBtn.disabled=true;
+        if(bjInterval) clearInterval(bjInterval);
+        bjInterval=setInterval(()=>{
+            bjCooldownSeconds--;
+            if(timerDiv) timerDiv.innerHTML=`⏳ Ждите ${bjCooldownSeconds} сек...`;
+            if(bjCooldownSeconds<=0){
                 clearInterval(bjInterval);
-                bjCooldown = false;
-                timerDiv.innerText = `✅ Можно играть!`;
-                startBtn.disabled = false;
-                setTimeout(() => {
-                    if (timerDiv.innerText === '✅ Можно играть!') timerDiv.innerText = '⏳ Готов';
-                }, 2000);
+                bjCooldown=false;
+                if(timerDiv) timerDiv.innerHTML=`✅ Можно играть!`;
+                if(startBtn) startBtn.disabled=false;
+                setTimeout(()=>{ if(timerDiv && timerDiv.innerHTML==='✅ Можно играть!') timerDiv.innerHTML='⏳ Готов'; },2000);
             }
-        }, 1000);
+        },1000);
     }
-
-    function startBlackjack() {
-        if (bjCooldown) {
-            document.getElementById('bjMsg').innerHTML = `⏳ Подождите ${bjSeconds} сек!`;
-            return;
-        }
-        const bet = parseInt(document.getElementById('bjBet').value);
-        if (isNaN(bet) || bet < 10) {
-            alert('Минимальная ставка 10₽');
-            return;
-        }
-        if (bet > game.money) {
-            alert('Не хватает денег!');
-            return;
-        }
-        bjCurrentBet = bet;
-        game.money -= bjCurrentBet;
-        updateUI();
-        bjPlayerHand = [getRandomCard(), getRandomCard()];
-        bjDealerHand = [getRandomCard(), getRandomCard()];
-        bjActive = true;
-        document.getElementById('bjHitBtn').disabled = false;
-        document.getElementById('bjStandBtn').disabled = false;
-        document.getElementById('bjStartBtn').disabled = true;
+    function startBlackjack(){
+        if(bjCooldown){ document.getElementById('bjMessage').innerHTML=`⏳ Подождите ${bjCooldownSeconds} сек!`; return; }
+        let bet=parseInt(document.getElementById('betAmount').value);
+        if(isNaN(bet)||bet<10){ alert('Минимум 10₽'); return; }
+        if(bet>player.money){ alert('Не хватает денег!'); return; }
+        currentBet=bet; player.money-=currentBet; updateUI();
+        playerHand=[getRandomCard(), getRandomCard()];
+        dealerHand=[getRandomCard(), getRandomCard()];
+        bjGameActive=true;
+        document.getElementById('bjHitBtn').disabled=false;
+        document.getElementById('bjStandBtn').disabled=false;
+        document.getElementById('startBlackjackBtn').disabled=true;
         updateBJUI();
-        if (handScore(bjPlayerHand) === 21) {
-            endBJGame('blackjack', bjCurrentBet * 2.5);
-        }
+        if(calcScore(playerHand)===21) endBJGame('blackjack', currentBet*2.5);
         saveGame();
     }
-
-    // ==================== ПАССИВНЫЙ ДОХОД ====================
+    
+    // ==================== МУЗЫКА ====================
+    let musicPlaying = false;
+    const audio = document.getElementById('bgMusic');
+    document.getElementById('musicToggle').onclick = () => {
+        musicPlaying = !musicPlaying;
+        document.getElementById('musicToggle').innerText = musicPlaying ? '🔊' : '🔇';
+        if(musicPlaying) audio.play().catch(e=>console.log);
+        else audio.pause();
+    };
+    
+    // ==================== ПАССИВНЫЙ ДОХОД (каждую минуту) ====================
     setInterval(() => {
         let total = 0;
-        game.properties.forEach(p => total += p.income);
-        game.businesses.forEach(b => total += b.profit);
-        if (total > 0) {
-            game.money += total;
-            game.totalEarned += total;
+        player.properties.forEach(p => total += p.income);
+        player.businesses.forEach(b => total += b.profit);
+        if(total > 0) {
+            player.money += total;
+            player.totalEarned += total;
             updateUI();
             saveGame();
+            console.log(`💸 Пассивный доход: +${total}₽`);
         }
     }, 60000);
-
-    // ==================== ЗАПУСК ====================
-    function init() {
-        document.getElementById('nickDisplay').innerText = "KROPOTKIN";
-        document.getElementById('userId').innerText = Math.floor(Math.random() * 9000 + 1000);
-        loadGame();
-        renderJobs();
-        renderCars();
-        renderProperties();
-        renderBusiness();
-        renderShop();
-        
-        document.getElementById('bjStartBtn').onclick = startBlackjack;
-        document.getElementById('bjHitBtn').onclick = playerHit;
-        document.getElementById('bjStandBtn').onclick = playerStand;
-        document.getElementById('workFromProfileBtn').onclick = startMinigame;
+    
+    // ==================== СОХРАНЕНИЕ ====================
+    function saveGame(){ localStorage.setItem('kropotkin_save', JSON.stringify({ player })); }
+    function loadGame(){
+        const saved = localStorage.getItem('kropotkin_save');
+        if(saved) try { const data = JSON.parse(saved); if(data.player) player = data.player; } catch(e){}
+        updateUI();
     }
-
-    // Переключение вкладок
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.getElementById(btn.getAttribute('data-tab') + 'Tab').style.display = 'block';
-        };
+    
+    // ==================== ЗАГРУЗКА ====================
+    function simulateLoading(callback){
+        let progress=0, stepIdx=0;
+        const steps=["Соединение...","Мир KROPOTKIN","Синхронизация","Вход"];
+        const interval = setInterval(()=>{
+            progress+=Math.random()*20+10;
+            if(progress>=100){
+                clearInterval(interval);
+                document.getElementById('loadingBar').style.width='100%';
+                setTimeout(callback,400);
+            } else {
+                document.getElementById('loadingBar').style.width=Math.min(progress,100)+'%';
+                if(stepIdx<steps.length && progress>(stepIdx+1)*22)
+                    document.getElementById('loadingStep').innerText = steps[stepIdx++];
+            }
+        },200);
+    }
+    
+    const startBtn = document.getElementById('startGameBtn');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const registerScreenDiv = document.getElementById('registerScreen');
+    const loadingScreenDiv = document.getElementById('loadingScreen');
+    const mainMenuDiv = document.getElementById('mainMenuScreen');
+    const userIdSpan = document.getElementById('userId');
+    
+    startBtn.addEventListener('click', () => {
+        let nick = nicknameInput.value.trim();
+        if(nick === ""){ alert("Введите ник (Имя_Фамилия)"); return; }
+        if(!nick.includes("_")){ alert("Ник должен содержать '_'"); return; }
+        const selectedServer = document.querySelector('.server-item.selected');
+        player.nick = nick;
+        player.server = selectedServer ? selectedServer.getAttribute('data-server') : "KROPOTKIN#1";
+        player.money = 5000;
+        player.level = 1;
+        player.exp = 0;
+        player.totalEarned = 0;
+        player.totalWon = 0;
+        player.workCount = 0;
+        player.minigameCount = 0;
+        player.bjGamesCount = 0;
+        player.joinDate = Date.now();
+        player.currentJob = null;
+        player.cars = [];
+        player.currentCar = null;
+        player.properties = [];
+        player.currentProperty = null;
+        player.businesses = [];
+        
+        registerScreenDiv.classList.remove('active');
+        loadingScreenDiv.classList.add('active');
+        document.getElementById('loadingServerName').innerText = player.server;
+        
+        simulateLoading(() => {
+            loadingScreenDiv.classList.remove('active');
+            mainMenuDiv.classList.add('active');
+            userIdSpan.innerText = Math.floor(Math.random()*9000+1000);
+            updateUI();
+            loadGame();
+            renderWorkList();
+            renderShop();
+            renderCarLists();
+            renderPropertyLists();
+            renderBusinessLists();
+            
+            document.getElementById('startBlackjackBtn').onclick = startBlackjack;
+            document.getElementById('bjHitBtn').onclick = playerHit;
+            document.getElementById('bjStandBtn').onclick = playerStand;
+            document.getElementById('bjHitBtn').disabled = true;
+            document.getElementById('bjStandBtn').disabled = true;
+            
+            // Кнопка работы из профиля
+            const profileWorkBtn = document.getElementById('workFromProfileBtn');
+            if(profileWorkBtn) profileWorkBtn.onclick = () => {
+                if(player.currentJob) startMinigame(player.currentJob);
+                else alert("Сначала выберите работу!");
+            };
+        });
     });
-
-    init();
+    
+    // Вкладки
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabsMap = {
+        profile: document.getElementById('profileTab'),
+        work: document.getElementById('workTab'),
+        minigame: document.getElementById('minigameTab'),
+        cars: document.getElementById('carsTab'),
+        property: document.getElementById('propertyTab'),
+        business: document.getElementById('businessTab'),
+        casino: document.getElementById('casinoTab'),
+        shop: document.getElementById('shopTab'),
+        stats: document.getElementById('statsTab')
+    };
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            Object.values(tabsMap).forEach(c => { if(c) c.style.display = 'none'; });
+            if(tabsMap[tabId]) tabsMap[tabId].style.display = 'block';
+            tabBtns.forEach(b => b.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+        });
+    });
+    document.querySelectorAll('.server-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.server-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+        });
+    });
 </script>
 </body>
 </html>
