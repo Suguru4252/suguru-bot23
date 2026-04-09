@@ -1,673 +1,369 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>🥩 СИСЯ ДИМЫ ДАУНА · ПИТОМЕЦ ДАВИД · БОНУСЫ</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', 'Comic Sans MS', 'Impact', sans-serif;
-      padding: 12px;
-    }
-
-    .game-container {
-      max-width: 580px;
-      width: 100%;
-      background: #fbe9c3;
-      background-image: radial-gradient(circle at 20% 30%, #fff3d6, #f0d5a8);
-      border-radius: 60px 60px 30px 30px;
-      box-shadow: 0 20px 0 #6b3e1f, 0 30px 30px rgba(0,0,0,0.4);
-      padding: 20px 18px 30px;
-      border: 4px solid #ac6f3c;
-      text-align: center;
-      transition: 0.2s;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #3d1f09;
-      text-shadow: 5px 5px 0 #e7b87b, 2px 2px 0 #a6531e;
-      word-break: break-word;
-      transform: rotate(-1deg);
-    }
-
-    .dima-zone {
-      background: #b38b60;
-      padding: 16px 10px 20px;
-      border-radius: 80px 80px 40px 40px;
-      box-shadow: inset 0 -6px 0 #5d3a22, 0 12px 0 #4d2f19, 0 8px 15px black;
-      margin-bottom: 14px;
-      border: 3px solid #eeb574;
-    }
-
-    .sisi-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .sisya {
-      font-size: 6.5rem;
-      line-height: 1;
-      filter: drop-shadow(6px 10px 0 rgba(0,0,0,0.3));
-      cursor: pointer;
-      transition: 0.1s ease;
-      transform: scale(1);
-      background: #fad6b3;
-      padding: 0 10px 10px 10px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-    .sisya:active {
-      transform: scale(0.88);
-      filter: drop-shadow(2px 4px 0 #251608);
-    }
-
-    .sisi-stats {
-      background: #2c1a0b;
-      padding: 12px 8px;
-      border-radius: 50px;
-      box-shadow: inset 0 2px 6px black, 0 6px 0 #1a0f06;
-      color: #ffdead;
-      font-weight: bold;
-      font-size: 1.3rem;
-      margin: 12px 0 5px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      border: 2px solid #bc8f4b;
-    }
-
-    .sisi-size {
-      background: #51321b;
-      padding: 6px 16px;
-      border-radius: 40px;
-      box-shadow: inset 0 2px 5px black;
-      color: #ffd78a;
-      text-shadow: 2px 2px 0 #1f0f03;
-    }
-
-    .crit-meter {
-      background: #241407;
-      border-radius: 30px;
-      padding: 6px 12px;
-      color: #ffb882;
-      font-size: 1.1rem;
-    }
-
-    /* Полоска возбуждения */
-    .arousal-bar-container {
-      background: #1f1107;
-      border-radius: 30px;
-      padding: 4px 10px;
-      margin: 10px 5px 0;
-      border: 2px solid #d48f4a;
-    }
-
-    .arousal-fill {
-      height: 20px;
-      background: linear-gradient(90deg, #ff6a6a, #ff3b9a);
-      border-radius: 20px;
-      width: 0%;
-      box-shadow: inset 0 2px 5px #44001a, 0 0 10px #ff8c8c;
-      transition: width 0.2s;
-    }
-
-    .arousal-text {
-      color: #ffe5b4;
-      font-weight: bold;
-      margin-top: 4px;
-      font-size: 1rem;
-    }
-
-    .pet-david {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #6e4d2e;
-      margin: 16px 0 14px;
-      padding: 10px 18px;
-      border-radius: 100px 40px 100px 40px;
-      box-shadow: inset 0 1px 6px #eebb77, 0 8px 0 #3a281a, 0 5px 10px black;
-      border: 2px solid #efc48c;
-      color: #fff3db;
-      font-weight: bold;
-    }
-
-    .pet-avatar {
-      font-size: 3.2rem;
-      background: #2d1c0b;
-      padding: 5px 16px;
-      border-radius: 60px;
-      box-shadow: inset 0 0 0 3px #b47b44;
-      line-height: 1.2;
-    }
-
-    .pet-status {
-      text-align: right;
-    }
-
-    .pet-status div {
-      font-size: 1.2rem;
-      background: #1f1309;
-      padding: 4px 12px;
-      border-radius: 30px;
-      margin: 4px 0;
-      border: 1px solid #c89a5b;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 6px 0 8px;
-    }
-
-    .btn {
-      background: #d68f3c;
-      border: none;
-      font-weight: bold;
-      font-size: 1.3rem;
-      padding: 12px 18px;
-      border-radius: 60px;
-      box-shadow: 0 7px 0 #7a451b, 0 4px 8px black;
-      color: #1f0f02;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: 0.07s;
-      border: 2px solid #feda9b;
-      flex: 1 0 130px;
-      letter-spacing: 1.5px;
-      transform: rotate(-0.5deg);
-    }
-
-    .btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 2px 0 #7a451b, 0 4px 8px black;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      filter: grayscale(0.5);
-      transform: none;
-      box-shadow: 0 5px 0 #5f371a;
-      pointer-events: none;
-    }
-
-    .achievements-panel {
-      background: #2f1f11e0;
-      border-radius: 30px;
-      padding: 12px 12px;
-      margin: 15px 0 5px;
-      border: 2px solid #dba15a;
-      backdrop-filter: blur(3px);
-    }
-
-    .ach-title {
-      color: #ffd78c;
-      font-weight: bold;
-      font-size: 1.3rem;
-      text-shadow: 2px 2px 0 #361e0c;
-      margin-bottom: 8px;
-    }
-
-    .ach-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 12px;
-      justify-content: center;
-    }
-
-    .ach-badge {
-      background: #543e28;
-      padding: 5px 15px;
-      border-radius: 40px;
-      color: #d4b483;
-      font-weight: bold;
-      border: 1px solid #b47d44;
-      box-shadow: inset 0 0 6px #1a0e04;
-      font-size: 1rem;
-    }
-
-    .ach-badge.unlocked {
-      background: #d6a04b;
-      color: #1d2c00;
-      box-shadow: 0 0 12px gold;
-      border-color: #ffd966;
-    }
-
-    .crit-log {
-      background: #0c0702d0;
-      backdrop-filter: blur(2px);
-      padding: 8px 12px;
-      border-radius: 40px;
-      margin-top: 14px;
-      color: #ffe3ae;
-      font-size: 1.1rem;
-      font-weight: bold;
-      min-height: 65px;
-      border: 2px dashed #f3b35e;
-      box-shadow: inset 0 0 10px #37200b;
-    }
-
-    .glow-crit {
-      text-shadow: 0 0 15px rgb(255, 200, 0), 0 0 30px rgb(255, 80, 0);
-      animation: shake 0.3s;
-    }
-
-    @keyframes shake {
-      0%,100%{ transform: translateX(0); }
-      25%{ transform: translateX(-6px); }
-      75%{ transform: translateX(6px); }
-    }
-
-    .reset-area {
-      margin-top: 8px;
-    }
-
-    .small-btn {
-      background: #684527;
-      box-shadow: 0 4px 0 #3f2818;
-      font-size: 1rem;
-      padding: 8px 18px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Realistic 3D Penis - NetErrror</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            color: #ffdd99;
+            padding: 10px;
+            font-size: 14px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+        #instruction {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            color: #ffccaa;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body>
-<div class="game-container">
-  <h1>🥩ДИМА ДАУН🥩</h1>
-  <div class="dima-zone">
-    <div class="sisi-container">
-      <span class="sisya" id="sisiEmoji">🥩</span>
-      <span style="font-size:3rem;">🤜💥</span>
-    </div>
-    <div class="sisi-stats">
-      <span class="sisi-size">🍖 <span id="sizeValue">1.0</span> см</span>
-      <span class="crit-meter">⚡КРИТ: <span id="critChanceDisplay">25</span>%</span>
-    </div>
-    <!-- Полоска возбуждения -->
-    <div class="arousal-bar-container">
-      <div class="arousal-fill" id="arousalFill"></div>
-      <div class="arousal-text">💢 ВОЗБУЖДЕНИЕ: <span id="arousalPercent">0</span>%</div>
-    </div>
-  </div>
+    <div id="info">🖱️ Мышь/палец — вращение, зум, панорамирование | Реалистичная 3D модель 🖱️</div>
+    <div id="instruction">🍆 Высокодетализированный член + мошонка | NetErrror 🍆</div>
 
-  <!-- ПИТОМЕЦ ДАВИД -->
-  <div class="pet-david">
-    <span class="pet-avatar">🐕‍🦺 ДАВИД</span>
-    <div class="pet-status">
-      <div>❤️ <span id="petLove">50</span>%</div>
-      <div>🦴 <span id="petHunger">100</span>%</div>
-    </div>
-  </div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
 
-  <div class="action-buttons">
-    <button class="btn" id="hitBtn">🤜 БИТЬ</button>
-    <button class="btn" id="feedDavidBtn">🍖 КОРМИТЬ</button>
-  </div>
-  <div class="action-buttons">
-    <button class="btn" id="specialCritBtn">💦 КРИТ-ГЛОТОК</button>
-    <button class="btn" id="playDavidBtn">🎾 ИГРАТЬ</button>
-  </div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  <!-- Достижения -->
-  <div class="achievements-panel">
-    <div class="ach-title">🏆 ДОСТИЖЕНИЯ</div>
-    <div class="ach-list" id="achList">
-      <span class="ach-badge" id="achSize">📏 10см</span>
-      <span class="ach-badge" id="achDavid">🐕 СЫТ</span>
-      <span class="ach-badge" id="achCrit5">💥 5 КРИТОВ</span>
-    </div>
-  </div>
+        // --- СЦЕНА С ТУМАНОМ И РЕАЛИСТИЧНЫМ ФОНОМ ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b1a);
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
 
-  <div class="crit-log" id="logBox">
-    💬 ЖМИ НА СИСЮ...
-  </div>
+        // --- КАМЕРА ---
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.05, 1000);
+        camera.position.set(2.0, 1.4, 2.8);
+        camera.lookAt(0, 0.5, 0);
 
-  <div class="reset-area">
-    <button class="btn small-btn" id="resetBtn">🔄 ЗАНОВО</button>
-  </div>
-</div>
+        // --- РЕНДЕРЕР С ТЕНЯМИ И АНИАЛИАСИНГОМ ---
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
 
-<script>
-  (function(){
-    "use strict";
+        // --- ОРБИТА КОНТРОЛ ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.rotateSpeed = 1.2;
+        controls.zoomSpeed = 1.0;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.target.set(0, 0.55, 0);
 
-    // ---------- СОСТОЯНИЕ ----------
-    let sisiSize = 1.0;
-    let critChance = 0.25;
-    let arousal = 0;            // 0-100
-    const MAX_AROUSAL = 100;
-
-    let petLove = 50;
-    let petHunger = 100;
-
-    // Достижения
-    let achSizeUnlocked = false;
-    let achDavidUnlocked = false;
-    let achCritUnlocked = false;
-    let critCounter = 0;         // для ачивки 5 критов
-
-    let canSpecialCrit = true;
-
-    // ЗВУКИ (создаём через Web Audio / простые осцилляторы, чтобы не зависеть от файлов)
-    let audioCtx = null;
-    function initAudio() {
-      if (audioCtx) return;
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // разблокируем по первому взаимодействию
-      } catch(e) { console.warn("Web Audio не поддерживается"); }
-    }
-
-    function playSlapSound() {
-      if (!audioCtx) { initAudio(); return; }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = 80 + Math.random() * 40;
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.08);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.08);
-    }
-
-    function playSquelchSound() {
-      if (!audioCtx) { initAudio(); return; }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.value = 45;
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.15);
-    }
-
-    function playCritSound() {
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 120;
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.2);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.2);
-      // второй тон
-      const osc2 = audioCtx.createOscillator();
-      const gain2 = audioCtx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.value = 200;
-      gain2.gain.setValueAtTime(0.1, now+0.05);
-      gain2.gain.exponentialRampToValueAtTime(0.01, now+0.25);
-      osc2.connect(gain2).connect(audioCtx.destination);
-      osc2.start();
-      osc2.stop(now+0.25);
-    }
-
-    // DOM элементы
-    const logBox = document.getElementById('logBox');
-    const sizeSpan = document.getElementById('sizeValue');
-    const critChanceSpan = document.getElementById('critChanceDisplay');
-    const petLoveSpan = document.getElementById('petLove');
-    const petHungerSpan = document.getElementById('petHunger');
-    const sisiEmoji = document.getElementById('sisiEmoji');
-    const arousalFill = document.getElementById('arousalFill');
-    const arousalPercent = document.getElementById('arousalPercent');
-
-    const achSizeEl = document.getElementById('achSize');
-    const achDavidEl = document.getElementById('achDavid');
-    const achCrit5El = document.getElementById('achCrit5');
-
-    function updateUI() {
-      sizeSpan.textContent = sisiSize.toFixed(2);
-      critChanceSpan.textContent = Math.round(critChance * 100);
-      
-      if (sisiSize >= 8.0) sisiEmoji.textContent = '🍖🍖';
-      else if (sisiSize >= 5.0) sisiEmoji.textContent = '🥩🥩';
-      else if (sisiSize >= 2.5) sisiEmoji.textContent = '🥩';
-      else sisiEmoji.textContent = '🥓';
-      
-      petLove = Math.min(100, Math.max(0, petLove));
-      petHunger = Math.min(100, Math.max(0, petHunger));
-      petLoveSpan.textContent = Math.floor(petLove);
-      petHungerSpan.textContent = Math.floor(petHunger);
-      
-      // arousal
-      arousal = Math.min(MAX_AROUSAL, Math.max(0, arousal));
-      const percent = (arousal / MAX_AROUSAL) * 100;
-      arousalFill.style.width = percent + '%';
-      arousalPercent.textContent = Math.floor(percent);
-      
-      // Достижения отображение
-      achSizeEl.classList.toggle('unlocked', achSizeUnlocked);
-      achDavidEl.classList.toggle('unlocked', achDavidUnlocked);
-      achCrit5El.classList.toggle('unlocked', achCritUnlocked);
-    }
-
-    function checkAchievements() {
-      if (!achSizeUnlocked && sisiSize >= 10.0) {
-        achSizeUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: СИСЯ 10 СМ! ДИМА ГОРД!');
-      }
-      if (!achDavidUnlocked && petHunger >= 95 && petLove >= 80) {
-        achDavidUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: ДАВИД СЫТ И ЛЮБИМ!');
-      }
-      if (!achCritUnlocked && critCounter >= 5) {
-        achCritUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: 5 КРИТИЧЕСКИХ УДАРОВ!');
-      }
-    }
-
-    function setLog(msg, isCrit=false, isSpecial=false) {
-      logBox.innerHTML = msg;
-      if (isCrit || isSpecial) {
-        logBox.classList.add('glow-crit');
-        setTimeout(() => logBox.classList.remove('glow-crit'), 400);
-      }
-    }
-
-    function decayHunger(amount = 2) {
-      petHunger = Math.max(0, petHunger - amount);
-      if (petHunger < 15) petLove = Math.max(0, petLove - 0.5);
-      updateUI();
-    }
-
-    function hungerPenalty() {
-      if (petHunger < 20) {
-        petLove = Math.max(0, petLove - 1.2);
-        setLog('💔 ДАВИД ГОЛОДЕН!');
-      }
-    }
-
-    function addLove(amt) { petLove = Math.min(100, petLove + amt); }
-
-    // АВТОКРИТ при заполнении возбуждения
-    function checkArousalOverflow() {
-      if (arousal >= MAX_AROUSAL) {
-        arousal = 0;
-        // имитация автокрита
-        let gain = 0.8 + (Math.random() * 1.0);
-        sisiSize += gain;
-        critChance = Math.min(0.5, critChance + 0.02);
-        addLove(5);
-        playCritSound();
-        setLog(`💥💦 ВОЗБУЖДЕНИЕ ВЗОРВАЛОСЬ! АВТОКРИТ! +${gain.toFixed(2)}см, ДИМА КОНЧАЕТ НА СОСКИ!`, true);
-        critCounter++;
-        sisiEmoji.style.animation = 'shake 0.3s';
-        setTimeout(()=> sisiEmoji.style.animation = '', 300);
-        checkAchievements();
-      }
-    }
-
-    function hitSisya() {
-      initAudio();
-      playSlapSound();
-      decayHunger(3);
-      
-      let gain = 0.15 + (Math.random() * 0.2);
-      if (petLove > 70) gain *= 1.25;
-      else if (petLove < 25) gain *= 0.8;
-      
-      const effectiveCrit = critChance + (petLove > 85 ? 0.07 : 0);
-      const isCrit = Math.random() < effectiveCrit;
-      let message = '';
-      
-      if (isCrit) {
-        gain *= 2.2 + (Math.random()*0.8);
-        message = `💥💦 КРИТ! ДИМА БЬЁТ СЕБЯ ПО СИСЕ, КОНЧАЕТ НА СОСКИ! +${gain.toFixed(2)}см!`;
-        playCritSound();
-        critCounter++;
-        addLove(3);
-        arousal = Math.min(MAX_AROUSAL, arousal + 22);
-        if (Math.random()<0.4) message += ' 👅 СЛИЗЫВАЕТ!';
-      } else {
-        message = `👊 УДАР ПО СИСЕ. +${gain.toFixed(2)}см.`;
-        arousal = Math.min(MAX_AROUSAL, arousal + 8);
-        if (Math.random()<0.2) addLove(1.2);
-      }
-      
-      sisiSize += gain;
-      critChance = Math.min(0.45, 0.25 + (sisiSize * 0.005));
-      hungerPenalty();
-      updateUI();
-      checkArousalOverflow();
-      checkAchievements();
-      setLog(message, isCrit);
-      sisiEmoji.style.transform = 'scale(1.2)';
-      setTimeout(()=> sisiEmoji.style.transform = '', 120);
-    }
-
-    function performSpecialCrit() {
-      initAudio();
-      if (!canSpecialCrit) {
-        setLog('⏳ СПЕЦКРИТ НЕ ГОТОВ (покорми/поиграй)');
-        return;
-      }
-      decayHunger(8);
-      const loveBonus = petLove / 200;
-      const sizeBonus = Math.min(0.3, sisiSize * 0.02);
-      const success = Math.random() < (0.35 + loveBonus + sizeBonus);
-      
-      if (success) {
-        const hugeGain = 1.2 + (sisiSize * 0.18) + (Math.random() * 1.5);
-        sisiSize += hugeGain;
-        critChance = Math.min(0.55, critChance + 0.04);
-        addLove(8);
-        petHunger = Math.min(100, petHunger + 10);
-        arousal = Math.min(MAX_AROUSAL, arousal + 35);
-        playSquelchSound();
-        playCritSound();
-        const msg = `💦💦💦 СПЕЦ-КРИТ!!! ДИМА БЬЁТ, КОНЧАЕТ НА СОСКИ И ГЛОТАЕТ СПЕРМУ! +${hugeGain.toFixed(2)}см!`;
-        setLog(msg, true, true);
-        critCounter++;
-        sisiEmoji.style.animation = 'shake 0.4s';
-        setTimeout(()=> sisiEmoji.style.animation = '', 400);
-        canSpecialCrit = false;
-        setTimeout(()=> { canSpecialCrit = true; }, 6000);
-      } else {
-        sisiSize += 0.25;
-        setLog('😩 ПОЧТИ... НО НЕ ХВАТИЛО ВОЗБУЖДЕНИЯ');
-        petLove = Math.max(0, petLove - 2);
-        playSlapSound();
-      }
-      checkArousalOverflow();
-      checkAchievements();
-      updateUI();
-    }
-
-    function feedDavid() {
-      initAudio();
-      if (sisiSize < 0.6) { setLog('🥓 СИСЯ СЛИШКОМ МАЛА!'); return; }
-      const cost = 0.4 + Math.random()*0.3;
-      sisiSize = Math.max(0.3, sisiSize - cost);
-      petHunger = Math.min(100, petHunger + 25 + Math.floor(petLove/7));
-      addLove(6);
-      if (!canSpecialCrit && petHunger > 70) canSpecialCrit = true;
-      setLog(`🍖 ДИМА ДАЛ СИСЮ ДАВИДУ. -${cost.toFixed(2)}см`);
-      playSlapSound();
-      checkAchievements();
-      updateUI();
-    }
-
-    function playWithDavid() {
-      initAudio();
-      if (petHunger < 10) { setLog('🐕 ДАВИД ГОЛОДЕН!'); return; }
-      decayHunger(7);
-      const loveGain = 5 + Math.floor(Math.random()*8);
-      addLove(loveGain);
-      if (Math.random()<0.4) critChance = Math.min(0.5, critChance + 0.01);
-      setLog(`🎾 ИГРА С ДАВИДОМ! любовь +${loveGain}`);
-      if (!canSpecialCrit && petLove > 65) { canSpecialCrit = true; setLog('✨ СПЕЦКРИТ СНОВА ГОТОВ!'); }
-      playSlapSound();
-      checkAchievements();
-      updateUI();
-    }
-
-    function resetGame() {
-      sisiSize = 1.0; critChance = 0.25; arousal = 0;
-      petLove = 50; petHunger = 100;
-      canSpecialCrit = true;
-      achSizeUnlocked = achDavidUnlocked = achCritUnlocked = false;
-      critCounter = 0;
-      updateUI();
-      setLog('💬 НОВАЯ ИГРА! КОПИ ВОЗБУЖДЕНИЕ И КРИТЫ.');
-      sisiEmoji.style.animation = '';
-    }
-
-    function handleSisiClick() { hitSisya(); }
-
-    function init() {
-      updateUI();
-      setLog('🥩 БЕЙ, КОПИ ВОЗБУЖДЕНИЕ! ЗВУК ВКЛ.');
-      document.getElementById('hitBtn').addEventListener('click', hitSisya);
-      document.getElementById('specialCritBtn').addEventListener('click', performSpecialCrit);
-      document.getElementById('feedDavidBtn').addEventListener('click', feedDavid);
-      document.getElementById('playDavidBtn').addEventListener('click', playWithDavid);
-      document.getElementById('resetBtn').addEventListener('click', resetGame);
-      sisiEmoji.addEventListener('click', handleSisiClick);
-      
-      setInterval(() => {
-        if (petHunger > 0) { petHunger = Math.max(0, petHunger - 1.0); updateUI(); }
-        if (!canSpecialCrit && petLove>50 && petHunger>40 && Math.random()<0.15) canSpecialCrit = true;
-      }, 10000);
-      
-      // разблокировка аудио при первом касании
-      document.body.addEventListener('click', initAudio, { once: true });
-    }
-
-    init();
-  })();
-</script>
+        // --- ОСВЕЩЕНИЕ (мягкое, с эффектом подкожного рассеивания) ---
+        const ambientLight = new THREE.AmbientLight(0x3c2a2a, 0.45);
+        scene.add(ambientLight);
+        
+        // Основной направленный свет
+        const mainLight = new THREE.DirectionalLight(0xffccaa, 1.2);
+        mainLight.position.set(1.8, 2.5, 1.5);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = false;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+        
+        // Заполняющий теплый свет снизу
+        const fillWarm = new THREE.PointLight(0xc8976a, 0.65);
+        fillWarm.position.set(0, -0.3, 0.2);
+        scene.add(fillWarm);
+        
+        // Холодный контровой свет
+        const backRim = new THREE.PointLight(0x88aaff, 0.55);
+        backRim.position.set(-0.8, 1.1, -1.7);
+        scene.add(backRim);
+        
+        // Моделируем SSS легким оранжевым светом
+        const sssLight = new THREE.PointLight(0xcc8866, 0.5);
+        sssLight.position.set(0.3, 0.6, 0.4);
+        scene.add(sssLight);
+        
+        // Дополнительный акцент на головку
+        const tipLight = new THREE.PointLight(0xffaa77, 0.4);
+        tipLight.position.set(0.1, 0.95, 0.5);
+        scene.add(tipLight);
+        
+        // --- ПОВЕРХНОСТЬ (пол с текстурой) ---
+        const gridHelper = new THREE.GridHelper(5, 20, 0xaa8866, 0x664422);
+        gridHelper.position.y = -0.68;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.3;
+        scene.add(gridHelper);
+        
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.7, metalness: 0.05, transparent: true, opacity: 0.2 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), groundMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.7;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
+        
+        // ========== РЕАЛИСТИЧНАЯ МОДЕЛЬ ==========
+        const penisGroup = new THREE.Group();
+        
+        // --- ТЕКСТУРЫ КОЖИ (canvas procedural) ---
+        const createSkinTexture = (baseColor, veinColor, speckColor) => {
+            const canvasTex = document.createElement('canvas');
+            canvasTex.width = 1024;
+            canvasTex.height = 1024;
+            const ctxTex = canvasTex.getContext('2d');
+            
+            // Основной цвет
+            ctxTex.fillStyle = baseColor;
+            ctxTex.fillRect(0, 0, canvasTex.width, canvasTex.height);
+            
+            // Мелкие поры и текстура
+            for (let i = 0; i < 2800; i++) {
+                ctxTex.fillStyle = `rgba(80, 50, 30, ${Math.random() * 0.25})`;
+                const x = Math.random() * canvasTex.width;
+                const y = Math.random() * canvasTex.height;
+                const r = Math.random() * 1.8;
+                ctxTex.beginPath();
+                ctxTex.arc(x, y, r, 0, Math.PI * 2);
+                ctxTex.fill();
+            }
+            
+            // Вены (извилистые линии)
+            ctxTex.strokeStyle = veinColor;
+            ctxTex.lineWidth = 6;
+            for (let v = 0; v < 35; v++) {
+                ctxTex.beginPath();
+                let startX = Math.random() * canvasTex.width;
+                let startY = Math.random() * canvasTex.height;
+                ctxTex.moveTo(startX, startY);
+                for (let seg = 0; seg < 8; seg++) {
+                    ctxTex.lineTo(startX + (Math.random() - 0.5) * 70, startY + (Math.random() - 0.5) * 50);
+                    startX += (Math.random() - 0.5) * 45;
+                    startY += (Math.random() - 0.5) * 35;
+                }
+                ctxTex.stroke();
+            }
+            
+            // Пигментные пятна
+            for (let p = 0; p < 400; p++) {
+                ctxTex.fillStyle = `rgba(100, 60, 35, ${Math.random() * 0.4})`;
+                ctxTex.beginPath();
+                ctxTex.ellipse(Math.random() * canvasTex.width, Math.random() * canvasTex.height, Math.random() * 5 + 2, Math.random() * 4 + 1.5, 0, 0, Math.PI * 2);
+                ctxTex.fill();
+            }
+            
+            const texture = new THREE.CanvasTexture(canvasTex);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1.2, 1.8);
+            return texture;
+        };
+        
+        const skinTexBody = createSkinTexture('#c89a6c', '#9c6e48', '#a5724a');
+        const skinTexTip = createSkinTexture('#e0b88a', '#b87a4a', '#c28255');
+        skinTexTip.repeat.set(0.9, 1.2);
+        
+        const shaftMat = new THREE.MeshStandardMaterial({ 
+            map: skinTexBody, 
+            color: 0xd4a074, 
+            roughness: 0.32, 
+            metalness: 0.02, 
+            emissive: 0x331a00, 
+            emissiveIntensity: 0.12 
+        });
+        
+        const tipMat = new THREE.MeshStandardMaterial({ 
+            map: skinTexTip, 
+            color: 0xe8c094, 
+            roughness: 0.23, 
+            metalness: 0.01, 
+            emissive: 0x552200, 
+            emissiveIntensity: 0.08 
+        });
+        
+        const eggMatReal = new THREE.MeshStandardMaterial({ 
+            color: 0xcc9a70, 
+            roughness: 0.45, 
+            metalness: 0.03,
+            emissive: 0x221100,
+            emissiveIntensity: 0.1
+        });
+        
+        // --- СТВОЛ С НЕРОВНОСТЯМИ (используем модифицированную геометрию) ---
+        const shaftGeo = new THREE.CylinderGeometry(0.32, 0.38, 1.35, 96, 32);
+        const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+        shaft.castShadow = true;
+        shaft.position.y = 0;
+        penisGroup.add(shaft);
+        
+        // --- ГОЛОВКА (с реалистичным переходом и уретрой)---
+        const tipGeo = new THREE.SphereGeometry(0.42, 128, 128);
+        const tip = new THREE.Mesh(tipGeo, tipMat);
+        tip.position.y = 0.78;
+        tip.castShadow = true;
+        penisGroup.add(tip);
+        
+        // Внутренний слой головки для блеска
+        const innerTipMat = new THREE.MeshStandardMaterial({ color: 0xf0ca9a, roughness: 0.18, emissive: 0x552a00, emissiveIntensity: 0.1 });
+        const innerTip = new THREE.Mesh(new THREE.SphereGeometry(0.36, 96, 96), innerTipMat);
+        innerTip.position.y = 0.79;
+        innerTip.castShadow = true;
+        penisGroup.add(innerTip);
+        
+        // Уретра (отверстие) - маленький эллипсоид
+        const urethraMat = new THREE.MeshStandardMaterial({ color: 0xaa6644, roughness: 0.12, emissive: 0x441100 });
+        const urethra = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), urethraMat);
+        urethra.position.set(0, 1.01, 0.39);
+        urethra.scale.set(0.7, 0.45, 0.35);
+        penisGroup.add(urethra);
+        
+        // Венечная борозда (глубокий желобок)
+        const coronalMat = new THREE.MeshStandardMaterial({ color: 0xb88458, roughness: 0.5 });
+        const coronalRing = new THREE.Mesh(new THREE.TorusGeometry(0.395, 0.05, 64, 128), coronalMat);
+        coronalRing.rotation.x = Math.PI / 2;
+        coronalRing.position.y = 0.52;
+        penisGroup.add(coronalRing);
+        
+        // Дополнительные кольца/складки на стволе
+        const foldMat = new THREE.MeshStandardMaterial({ color: 0xc68c62, roughness: 0.6 });
+        for (let y = -0.3; y <= 0.2; y += 0.28) {
+            const fold = new THREE.Mesh(new THREE.TorusGeometry(0.345, 0.032, 48, 96), foldMat);
+            fold.rotation.x = Math.PI / 2;
+            fold.position.y = y;
+            penisGroup.add(fold);
+        }
+        
+        // --- РЕАЛИСТИЧНЫЕ ВЕНЫ НА СТВОЛЕ (изогнутые цилиндры)---
+        const veinMatReal = new THREE.MeshStandardMaterial({ color: 0xad7a52, roughness: 0.25 });
+        const veinPositions = [
+            { pos: [0.28, -0.15, 0.22], rot: [0.2, 0.3, 0.5], scale: [0.08, 0.5, 0.08] },
+            { pos: [-0.27, 0.05, 0.28], rot: [-0.1, -0.2, 0.6], scale: [0.09, 0.55, 0.09] },
+            { pos: [0.25, 0.35, 0.24], rot: [0.15, 0.4, 0.3], scale: [0.07, 0.45, 0.07] },
+            { pos: [-0.23, -0.32, 0.26], rot: [-0.1, -0.3, 0.4], scale: [0.08, 0.6, 0.08] },
+            { pos: [0.18, -0.48, 0.32], rot: [0.05, 0.5, 0.2], scale: [0.07, 0.5, 0.07] },
+            { pos: [-0.29, 0.45, 0.18], rot: [-0.05, -0.4, 0.35], scale: [0.09, 0.52, 0.09] }
+        ];
+        veinPositions.forEach(v => {
+            const veinCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 8), veinMatReal);
+            veinCyl.position.set(v.pos[0], v.pos[1], v.pos[2]);
+            veinCyl.rotation.set(v.rot[0], v.rot[1], v.rot[2]);
+            veinCyl.scale.set(v.scale[0], v.scale[1], v.scale[2]);
+            veinCyl.castShadow = true;
+            penisGroup.add(veinCyl);
+        });
+        
+        // --- МОШОНКА (два яйца с неровной поверхностью + складки)---
+        const testicleMat = new THREE.MeshStandardMaterial({ color: 0xbc8864, roughness: 0.55, metalness: 0.02 });
+        
+        const leftTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
+        leftTest.scale.set(0.92, 0.75, 0.85);
+        leftTest.position.set(-0.64, -0.48, 0.18);
+        leftTest.castShadow = true;
+        penisGroup.add(leftTest);
+        
+        const rightTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
+        rightTest.scale.set(0.92, 0.75, 0.85);
+        rightTest.position.set(0.64, -0.48, 0.18);
+        rightTest.castShadow = true;
+        penisGroup.add(rightTest);
+        
+        // Добавляем морщинистые детали на мошонку (маленькие сферы)
+        const wrinkleMat = new THREE.MeshStandardMaterial({ color: 0xac7854, roughness: 0.7 });
+        for (let i = 0; i < 65; i++) {
+            const wrinkle = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 12), wrinkleMat);
+            const side = Math.random() > 0.5 ? -0.68 : 0.68;
+            wrinkle.position.set(side + (Math.random() - 0.5) * 0.28, -0.55 + Math.random() * 0.25, 0.1 + Math.random() * 0.35);
+            wrinkle.scale.set(0.8, 0.5, 0.7);
+            wrinkle.castShadow = true;
+            penisGroup.add(wrinkle);
+        }
+        
+        // Срединный шов мошонки (линия)
+        const seamMat = new THREE.MeshStandardMaterial({ color: 0xa07048 });
+        const seam = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.38, 0.12), seamMat);
+        seam.position.set(0, -0.52, 0.32);
+        penisGroup.add(seam);
+        
+        // Добавляем легкий блеск на головке
+        const glossMat = new THREE.MeshStandardMaterial({ color: 0xffdbb0, emissive: 0x442200, roughness: 0.12 });
+        const glossSphere = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), glossMat);
+        glossSphere.position.set(0.07, 0.95, 0.42);
+        glossSphere.scale.set(0.6, 0.4, 0.5);
+        penisGroup.add(glossSphere);
+        
+        penisGroup.position.set(0, 0.1, 0);
+        scene.add(penisGroup);
+        
+        // Динамическое пульсирование вен и легкое движение
+        let time = 0;
+        const originalVeinScale = [];
+        penisGroup.children.forEach(child => {
+            if (child.isMesh && child.material === veinMatReal) {
+                originalVeinScale.push({ mesh: child, scaleY: child.scale.y });
+            }
+        });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            
+            // Легкое покачивание и "дыхание"
+            penisGroup.rotation.y = Math.sin(time * 0.5) * 0.012;
+            penisGroup.position.y = 0.1 + Math.sin(time * 0.9) * 0.002;
+            
+            // Пульсация вен (легкая)
+            originalVeinScale.forEach((item, idx) => {
+                const scaleMul = 1 + Math.sin(time * 3.2 + idx) * 0.03;
+                item.mesh.scale.y = item.scaleY * scaleMul;
+            });
+            
+            // Мерцание подсветки SSS
+            sssLight.intensity = 0.52 + Math.sin(time * 1.7) * 0.08;
+            tipLight.intensity = 0.44 + Math.sin(time * 2.3) * 0.1;
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        console.log("NetErrror: Абсолютно реалистичная 3D модель члена и мошонки загружена.");
+    </script>
 </body>
 </html>
