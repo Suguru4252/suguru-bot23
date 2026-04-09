@@ -163,35 +163,51 @@
 
         .icon-btn:active { transform: scale(0.95); }
 
-        .restart-btn {
-            background: #e25822ee;
+        /* БОЛЬШАЯ КНОПКА ПЕРЕЗАПУСКА ПРИ GAME OVER */
+        .gameover-restart {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 30;
+            pointer-events: auto;
+        }
+
+        .big-restart-btn {
+            background: #e25822;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            padding: 10px 24px;
+            padding: 14px 32px;
             border-radius: 60px;
             color: white;
             font-family: monospace;
             cursor: pointer;
-            box-shadow: 0 5px 0 #7a2a0a;
+            box-shadow: 0 7px 0 #7a2a0a;
             transition: 0.05s linear;
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
         }
 
-        .restart-btn:active { transform: translateY(3px); box-shadow: none; }
+        .big-restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #7a2a0a;
+        }
 
         .status-text {
             position: absolute;
-            top: 40%;
+            top: 35%;
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #ffefb9;
-            background: #000000bb;
+            background: #000000cc;
             width: fit-content;
             margin: auto;
-            padding: 8px 20px;
+            padding: 10px 28px;
             border-radius: 60px;
             backdrop-filter: blur(10px);
             pointer-events: none;
@@ -223,8 +239,8 @@
             .ctrl-btn { width: 75px; height: 75px; font-size: 1.8rem; gap: 25px; }
             .score-board, .best-board, .coin-counter, .combo-counter { font-size: 0.7rem; padding: 4px 10px; }
             .icon-btn { width: 44px; height: 44px; font-size: 1.3rem; }
-            .restart-btn { font-size: 0.9rem; padding: 8px 18px; }
-            .status-text { font-size: 1rem; }
+            .big-restart-btn { font-size: 1.1rem; padding: 10px 24px; }
+            .status-text { font-size: 1rem; top: 33%; }
         }
     </style>
 </head>
@@ -245,8 +261,14 @@
     </div>
     <div class="action-buttons">
         <div class="icon-btn" id="pauseBtn">⏸️</div>
-        <div class="icon-btn" id="restartBtn">🔄</div>
+        <div class="icon-btn" id="forceRestartBtn">🔄</div>
     </div>
+    
+    <!-- Кнопка перезапуска при Game Over (появляется только при смерти) -->
+    <div id="gameoverRestartBlock" class="gameover-restart hidden">
+        <button class="big-restart-btn" id="gameoverRestartBtn">🔁 ЗАНОВО 🚀</button>
+    </div>
+    
     <div id="statusMessage" class="status-text hidden">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
     <div id="pauseMessage" class="pause-overlay hidden">⏸ ПАУЗА ⏸</div>
 </div>
@@ -284,10 +306,9 @@
         
         // Комбо система
         let combo = 1;
-        let comboCounter = 0;
-        let lastCoinFrame = 0;
+        let lastCoinTime = 0;
         
-        // Бонусы (магнит активен)
+        // Бонусы
         let magnetActive = false;
         let magnetTimer = 0;
         let shieldActive = false;
@@ -316,16 +337,13 @@
             nextWorldScore = Math.floor(score) + 450 + Math.random() * 600;
             worldChangeFlag = true;
             setTimeout(() => worldChangeFlag = false, 500);
-            // Эффект частиц смены мира
-            for(let i=0;i<30;i++) addParticle(300, 250, 5, 5, "#ffaa44", 0.8);
+            for(let i=0;i<30;i++) addParticle(300, 250, (Math.random()-0.5)*5, (Math.random()-0.5)*3, "#ffaa44", 0.7);
         }
         
-        // Частицы для сбора монет
         function addParticle(x, y, vx, vy, color, life) {
             particles.push({ x, y, vx: vx || (Math.random() - 0.5)*3, vy: vy || (Math.random() - 0.5)*3 - 2, color: color || "#FFD700", life: life || 0.6, size: 4 });
         }
         
-        // Спавн
         function spawnObstacle() {
             let laneIdx = Math.floor(Math.random() * LANE_COUNT);
             obstacles.push({
@@ -348,17 +366,15 @@
             });
         }
         
-        // Обновление
+        // Обновление игры
         function updateGame() {
             if(!gameRunning || paused) return;
             
-            // Движение объектов
             for(let o of obstacles) o.y += gameSpeed;
             for(let c of coins) c.y += gameSpeed;
             obstacles = obstacles.filter(o => o.y < 600);
             coins = coins.filter(c => c.y < 600);
             
-            // Частицы
             for(let i=0;i<particles.length;i++) {
                 particles[i].x += particles[i].vx;
                 particles[i].y += particles[i].vy;
@@ -367,7 +383,6 @@
             }
             particles = particles.filter(p => p.life > 0);
             
-            // Спавн
             let dynSpawn = Math.max(30, spawnGap - Math.floor(score / 400));
             if(frameCounter >= dynSpawn) {
                 spawnObstacle();
@@ -375,20 +390,11 @@
                 frameCounter = 0;
             } else frameCounter++;
             
-            // Скорость
             gameSpeed = Math.min(5 + Math.floor(score / 550), 13.5);
             
-            // Магнит таймер
-            if(magnetActive) {
-                magnetTimer--;
-                if(magnetTimer <= 0) magnetActive = false;
-            }
-            if(shieldActive) {
-                shieldTimer--;
-                if(shieldTimer <= 0) shieldActive = false;
-            }
+            if(magnetActive) { magnetTimer--; if(magnetTimer <= 0) magnetActive = false; }
+            if(shieldActive) { shieldTimer--; if(shieldTimer <= 0) shieldActive = false; }
             
-            // Зона игрока
             const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
             const playerRect = { x: playerX, y: playerY, w: GAZAN_SIZE, h: GAZAN_SIZE };
             
@@ -402,15 +408,17 @@
                         obstacles.splice(i,1);
                         addParticle(playerX+GAZAN_SIZE/2, playerY+GAZAN_SIZE/2, 0, -2, "#88aaff", 0.4);
                         screenShake = 5;
+                        i--;
                     } else {
                         gameRunning = false;
                         document.getElementById('statusMessage').classList.remove('hidden');
+                        document.getElementById('gameoverRestartBlock').classList.remove('hidden');
                         return;
                     }
                 }
             }
             
-            // Сбор монет + комбо
+            // Сбор монет
             let collectedAny = false;
             for(let i=0;i<coins.length;i++) {
                 const coin = coins[i];
@@ -420,7 +428,6 @@
                    playerRect.y < coinRect.y + coinRect.h && playerRect.y + playerRect.h > coinRect.y) {
                     collected = true;
                 }
-                // Магнит: притягиваем монеты в радиусе 90px
                 if(!collected && magnetActive) {
                     const centerX = playerRect.x + GAZAN_SIZE/2;
                     const centerY = playerRect.y + GAZAN_SIZE/2;
@@ -432,40 +439,32 @@
                     if(dist < 110) {
                         coin.x += dx * 0.15;
                         coin.y += dy * 0.15;
-                        if(dist < 15) collected = true;
+                        if(dist < 18) collected = true;
                     }
                 }
-                
                 if(collected) {
                     collectedAny = true;
                     coins.splice(i,1);
                     i--;
                     coinScore++;
-                    // Комбо: монеты подряд увеличивают множитель
-                    if(Date.now() - lastCoinFrame < 800) {
-                        combo = Math.min(combo + 1, 6);
-                    } else {
-                        combo = 1;
-                    }
-                    lastCoinFrame = Date.now();
+                    const now = Date.now();
+                    if(now - lastCoinTime < 800) combo = Math.min(combo + 1, 6);
+                    else combo = 1;
+                    lastCoinTime = now;
                     let addScore = 5 * combo;
                     score += addScore;
-                    // Визуал сбора
                     for(let p=0;p<6;p++) addParticle(coin.x+COIN_SIZE/2, coin.y+COIN_SIZE/2, (Math.random()-0.5)*4, -2-Math.random()*3, "#ffcc44", 0.5);
                     screenShake = 3;
                 }
             }
-            if(!collectedAny && Date.now() - lastCoinFrame > 1000) combo = Math.max(1, combo-0.5);
+            if(!collectedAny && Date.now() - lastCoinTime > 1000) combo = Math.max(1, combo-0.5);
             combo = Math.floor(combo);
             
-            // Очки за время
             score += 0.2;
-            if(score > bestScore) { bestScore = Math.floor(score); localStorage.setItem('gazanBest', bestScore); }
+            if(Math.floor(score) > bestScore) { bestScore = Math.floor(score); localStorage.setItem('gazanBest', bestScore); }
             
-            // Смена мира
             if(score >= nextWorldScore) changeWorld();
             
-            // Обновление UI
             document.getElementById('scoreValue').innerText = Math.floor(score);
             document.getElementById('coinValue').innerText = coinScore;
             document.getElementById('bestValue').innerText = bestScore;
@@ -473,11 +472,9 @@
             if(combo > 1) comboElem.innerHTML = `⚡ x${combo}`;
             else comboElem.innerHTML = `⚡ x1`;
             
-            // Тряска камеры затухает
             if(screenShake > 0) screenShake -= 0.8;
         }
         
-        // ------ ОТРИСОВКА (с учётом тряски) -----
         let shakeOffsetX = 0, shakeOffsetY = 0;
         function drawWithShake() {
             if(screenShake > 0) {
@@ -492,12 +489,10 @@
         
         function drawGame() {
             const p = getPalette();
-            // Небо
             const grad = ctx.createLinearGradient(0,0,0,GROUND_Y-40);
             grad.addColorStop(0, p.sky1); grad.addColorStop(0.8, p.sky2);
             ctx.fillStyle = grad;
             ctx.fillRect(0,0,600,GROUND_Y-20);
-            // Надпись
             ctx.font = "bold 20px monospace";
             ctx.fillStyle = p.glow;
             ctx.fillText("⚡ GAZAN 67 RUSH", 20, 55);
@@ -505,7 +500,6 @@
             ctx.fillStyle = "#ffefb0";
             ctx.fillText(p.name, 20, 85);
             
-            // Дорога
             ctx.fillStyle = p.platform;
             ctx.fillRect(0, GROUND_Y-12, 600, 20);
             for(let i=0;i<4;i++) {
@@ -515,7 +509,6 @@
             ctx.fillStyle = p.track;
             for(let i=0;i<12;i++) ctx.fillRect(i*70, GROUND_Y-5, 45, 8);
             
-            // Монеты
             for(let c of coins) {
                 ctx.shadowBlur = 6;
                 ctx.shadowColor = "#ffaa33";
@@ -532,7 +525,6 @@
                 ctx.fillText("🪙", c.x+3, c.y+COIN_SIZE-5);
             }
             
-            // Препятствия
             for(let o of obstacles) {
                 ctx.fillStyle = p.obs1;
                 ctx.shadowBlur = 3;
@@ -550,7 +542,6 @@
                 ctx.fillText("💀", o.x+OBSTACLE_W-16, o.y+24);
             }
             
-            // ГАЗАН
             const px = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
             ctx.shadowBlur = 6;
             ctx.fillStyle = "#f5a623";
@@ -589,7 +580,6 @@
                 ctx.fill();
             }
             
-            // Частицы
             for(let p of particles) {
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
@@ -597,7 +587,6 @@
                 ctx.fill();
             }
             
-            // Эффекты интерфейса
             ctx.font = "bold 16px monospace";
             ctx.fillStyle = "#fff9cf";
             ctx.fillText(`🔥 SPEED: ${Math.floor(gameSpeed*1.8)}`, 460, 40);
@@ -617,7 +606,6 @@
             ctx.shadowBlur = 0;
         }
         
-        // Управление
         function moveLeft() { if(gameRunning && !paused && lane > 0) lane--; }
         function moveRight() { if(gameRunning && !paused && lane < LANE_COUNT-1) lane++; }
         
@@ -626,6 +614,7 @@
             paused = false;
             document.getElementById('pauseMessage').classList.add('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
+            document.getElementById('gameoverRestartBlock').classList.add('hidden');
             score = 0;
             coinScore = 0;
             combo = 1;
@@ -640,6 +629,7 @@
             currentWorld = Math.floor(Math.random() * WORLDS.length);
             nextWorldScore = 500 + Math.random() * 700;
             worldChangeFlag = false;
+            lastCoinTime = 0;
             document.getElementById('scoreValue').innerText = "0";
             document.getElementById('coinValue').innerText = "0";
             document.getElementById('bestValue').innerText = bestScore;
@@ -653,11 +643,10 @@
             else msg.classList.add('hidden');
         }
         
-        // Бонусы (по желанию можно добавить спавн)
         function activateMagnet() { magnetActive = true; magnetTimer = 300; }
         function activateShield() { shieldActive = true; shieldTimer = 400; }
         
-        // Обработчики сенсоров + защита от багов
+        // Обработчики управления
         let touchStartX = 0;
         function onTouchStart(e) { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const tx = (e.touches[0].clientX - rect.left)*scale; touchStartX = tx; }
         function onTouchMove(e) { if(!gameRunning || paused) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const curX = (e.touches[0].clientX - rect.left)*scale; if(Math.abs(curX - touchStartX) > 30) { if(curX > touchStartX) moveRight(); else moveLeft(); touchStartX = curX; } }
@@ -667,11 +656,11 @@
         function onMouseMove(e) { if(!mouseDown || !gameRunning || paused) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const curX = (e.clientX - rect.left)*scale; if(Math.abs(curX - mouseStartX) > 30) { if(curX > mouseStartX) moveRight(); else moveLeft(); mouseStartX = curX; } }
         function onMouseUp() { mouseDown=false; }
         
-        // Инициализация
         window.addEventListener('load', () => {
             document.getElementById('leftBtn').onclick = (e) => { e.preventDefault(); moveLeft(); };
             document.getElementById('rightBtn').onclick = (e) => { e.preventDefault(); moveRight(); };
-            document.getElementById('restartBtn').onclick = () => { if(!gameRunning) restartGame(); else restartGame(); };
+            document.getElementById('forceRestartBtn').onclick = () => restartGame();
+            document.getElementById('gameoverRestartBtn').onclick = () => restartGame();
             document.getElementById('pauseBtn').onclick = () => togglePause();
             
             canvas.addEventListener('touchstart', onTouchStart, {passive:false});
