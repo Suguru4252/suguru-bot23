@@ -1,369 +1,523 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Realistic 3D Penis - NetErrror</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        #info {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            background: rgba(0,0,0,0.7);
-            color: #ffdd99;
-            padding: 10px;
-            font-size: 14px;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 10;
-            backdrop-filter: blur(4px);
-        }
-        #instruction {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.6);
-            color: #ffccaa;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>· МИР 5OPKA · Иерархия и тесты</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: #0b0c0e;
+      color: #e3e6eb;
+      font-family: 'Segoe UI', 'Courier New', monospace, system-ui;
+      line-height: 1.6;
+      padding: 1.5rem 1rem;
+      min-height: 100vh;
+      background-image: radial-gradient(circle at 30% 10%, #1a1f26 0%, #030405 100%);
+    }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    .glitch-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #c9d1d9;
+      text-shadow: 4px 4px 0 #1f2a36, 8px 8px 0 rgba(0,0,0,0.6);
+      border-bottom: 2px solid #3e4a5b;
+      display: inline-block;
+      padding-bottom: 10px;
+    }
+    .sub {
+      color: #8b9bb4;
+      font-size: 1.1rem;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    .creator-tag {
+      font-family: 'Courier New', monospace;
+      background: #0e1419;
+      padding: 4px 14px;
+      border-radius: 40px;
+      color: #b7c9e2;
+      border: 1px solid #2e4a66;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    /* определения */
+    .definitions-section {
+      margin-bottom: 40px;
+      scroll-margin-top: 20px;
+    }
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 24px;
+      border-left: 6px solid #5f8aae;
+      padding-left: 20px;
+      color: #d9e2ec;
+    }
+    .race-def-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .def-card {
+      background: #0f171f;
+      border-radius: 24px;
+      padding: 20px 18px;
+      border: 1px solid #2c4050;
+      box-shadow: 0 8px 0 #060a0e;
+      transition: 0.2s;
+    }
+    .def-card.player-def { border-top: 6px solid #e5b13b; }
+    .def-card.npc-def { border-top: 6px solid #4a8bb3; }
+    .def-card.mob-def { border-top: 6px solid #5f7a6b; }
+    .def-card.prit-def { border-top: 6px solid #6a4e77; }
+    .def-name {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .player-def .def-name { color: #f5c84e; }
+    .npc-def .def-name { color: #7fc3ff; }
+    .mob-def .def-name { color: #8fc0a9; }
+    .prit-def .def-name { color: #b48bc4; }
+    .def-rank {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+    }
+    .def-desc {
+      margin-top: 12px;
+      color: #b6c7db;
+    }
+    /* блок статистики (глобальный) — теперь над тестами, будет виден */
+    .global-stats-block {
+      background: #0e151d;
+      border-radius: 32px;
+      padding: 24px 24px;
+      margin: 30px 0 30px;
+      border: 1px solid #3e5f7a;
+      box-shadow: inset 0 0 30px #00000055, 0 10px 20px #0000004d;
+      scroll-margin-top: 20px;
+    }
+    .stats-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #c6d8eb;
+    }
+    .bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .race-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .race-label {
+      width: 100px;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .bar-bg {
+      flex: 1;
+      height: 30px;
+      background: #1b252f;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px black;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 40px;
+      transition: width 0.5s ease;
+    }
+    .player-fill { background: linear-gradient(90deg, #d4a11e, #f5d654); box-shadow: 0 0 10px #ffd966; }
+    .npc-fill { background: linear-gradient(90deg, #2a75b3, #7fc3ff); }
+    .mob-fill { background: linear-gradient(90deg, #3f7859, #8fc0a9); }
+    .prit-fill { background: linear-gradient(90deg, #6b4782, #b48bc4); }
+    .percent-value {
+      min-width: 60px;
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
+
+    /* ТЕСТЫ */
+    .tests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin: 20px 0 30px;
+    }
+    .test-card {
+      background: #121a22;
+      border: 1px solid #2c3e50;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 30px -8px black;
+      backdrop-filter: blur(4px);
+      transition: transform 0.2s;
+    }
+    .test-card:hover { transform: translateY(-4px); border-color: #4f7a9e; }
+    .card-header {
+      padding: 20px 20px 12px;
+      border-bottom: 2px solid;
+    }
+    .player .card-header { border-color: #e5b13b; background: linear-gradient(145deg, #1e2a36, #0e1a24); }
+    .npc .card-header { border-color: #4a8bb3; background: linear-gradient(145deg, #17222b, #0e1720); }
+    .mob .card-header { border-color: #5f7a6b; background: linear-gradient(145deg, #141e18, #0a120e); }
+    .prit .card-header { border-color: #6a4e77; background: linear-gradient(145deg, #18131e, #0f0c14); }
+    .race-name {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin: 4px 0 0;
+    }
+    .player .race-name { color: #f5c84e; }
+    .npc .race-name { color: #7fc3ff; }
+    .mob .race-name { color: #8fc0a9; }
+    .prit .race-name { color: #b48bc4; }
+    .essence {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .card-content {
+      padding: 20px 18px 24px;
+    }
+    .question-block {
+      margin-bottom: 28px;
+    }
+    .q-text {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #d3dce8;
+      border-left: 3px solid;
+      padding-left: 14px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-left: 8px;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0f171f;
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid #253544;
+      cursor: pointer;
+    }
+    .option:hover { background: #1a2733; border-color: #3f607d; }
+    .option input { accent-color: #5f8aae; width: 18px; height: 18px; }
+    .test-btn {
+      background: #1e2f3c;
+      border: 1px solid #3e6680;
+      color: #e0ecf5;
+      padding: 12px 18px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      width: 100%;
+      border-radius: 40px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 #0a1117;
+    }
+    .test-btn:hover {
+      background: #2a4052;
+      border-color: #6f9fc7;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #0a1117;
+    }
+    .result-area {
+      margin-top: 20px;
+      padding: 16px;
+      background: #0a1016;
+      border-radius: 20px;
+      border: 1px dashed #3a556b;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .footnote {
+      margin-top: 40px;
+      text-align: right;
+      color: #68788b;
+      border-top: 1px solid #26333f;
+      padding-top: 20px;
+    }
+    .reset-area {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0 0;
+    }
+    .reset-btn {
+      background: transparent;
+      border: 1px solid #4f6b7e;
+      color: #a3bedb;
+      padding: 12px 32px;
+      border-radius: 40px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .reset-btn:hover { background: #1a2938; color: #d6e6ff; }
+    .small-note { font-size: 0.8rem; opacity: 0.7; text-align: center; margin-top: 12px; }
+  </style>
 </head>
 <body>
-    <div id="info">🖱️ Мышь/палец — вращение, зум, панорамирование | Реалистичная 3D модель 🖱️</div>
-    <div id="instruction">🍆 Высокодетализированный член + мошонка | NetErrror 🍆</div>
+<div class="container">
+  <div class="glitch-header">
+    <span class="creator-tag">✦ АРХИТЕКТОР: 5OPKA ✦</span>
+    <h1>ИЕРАРХИЯ СУЩЕГО</h1>
+    <div class="sub">· познай свою расу ·</div>
+  </div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
-        }
-    </script>
+  <!-- БЛОК ОПРЕДЕЛЕНИЙ (будет виден сразу) -->
+  <div id="definitions" class="definitions-section">
+    <div class="section-title">◈ ОПРЕДЕЛЕНИЯ РАС ◈</div>
+    <div class="race-def-grid">
+      <div class="def-card player-def">
+        <div class="def-rank">высшая раса · субъект реальности</div>
+        <div class="def-name">ИГРОК</div>
+        <div class="def-desc">
+          <strong>Антисоциофоб.</strong> Прогружает чанки своим вниманием. Имеет полный контроль над миром. Одиночество — естественное состояние бога. Не нуждается в валидации, сам создаёт правила и сценарии.
+        </div>
+      </div>
+      <div class="def-card npc-def">
+        <div class="def-rank">средняя раса · патрицианская функция</div>
+        <div class="def-name">НПС</div>
+        <div class="def-desc">
+          <strong>Персонаж с квестами.</strong> Создан для взаимодействия. Имеет иллюзию судьбы и выбора, но следует скрипту. Ждёт клика Игрока, чтобы быть полезным.
+        </div>
+      </div>
+      <div class="def-card mob-def">
+        <div class="def-rank">низшая раса · массовка</div>
+        <div class="def-name">МОБ</div>
+        <div class="def-desc">
+          <strong>Одушевлённая декорация.</strong> Не имеет интеллекта, двигается по заданному маршруту матрицы. Существует для наполнения чанков. Можно контактировать, но реакции примитивны.
+        </div>
+      </div>
+      <div class="def-card prit-def">
+        <div class="def-rank">самая низшая · вектор А→Б</div>
+        <div class="def-name">ПРИТ</div>
+        <div class="def-desc">
+          <strong>Сбой навигации.</strong> Только перемещается из точки А в точку Б. Почти невидим. Чистый шум в коде матрицы, оживающий от чужого взгляда. (Аналогия — алкаши).
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  <!-- ГЛОБАЛЬНЫЙ ПРОФИЛЬ (ПРОЦЕНТЫ) — отображается под определениями -->
+  <div id="globalStats" class="global-stats-block">
+    <div class="stats-title">📊 ТВОЙ ПРОФИЛЬ В МАТРИЦЕ 5OPKA</div>
+    <div class="bars-container">
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#f5c84e;">ИГРОК</span>
+        <div class="bar-bg"><div class="bar-fill player-fill" id="player-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="player-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#7fc3ff;">НПС</span>
+        <div class="bar-bg"><div class="bar-fill npc-fill" id="npc-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="npc-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#8fc0a9;">МОБ</span>
+        <div class="bar-bg"><div class="bar-fill mob-fill" id="mob-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="mob-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#b48bc4;">ПРИТ</span>
+        <div class="bar-bg"><div class="bar-fill prit-fill" id="prit-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="prit-percent">0%</span>
+      </div>
+    </div>
+    <div class="reset-area">
+      <button class="reset-btn" id="reset-all">⟲ СБРОСИТЬ ВСЕ ТЕСТЫ</button>
+    </div>
+    <p class="small-note">пройди любой тест — проценты обновятся, и ты вернёшься к определениям</p>
+  </div>
 
-        // --- СЦЕНА С ТУМАНОМ И РЕАЛИСТИЧНЫМ ФОНОМ ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050b1a);
-        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+  <!-- ТЕСТЫ (каждый содержит по 5 вопросов) -->
+  <div style="margin-top: 20px; scroll-margin-top: 20px;" id="tests-section">
+    <div class="section-title" style="font-size:1.8rem;">▾ ТЕСТЫ НА ОПРЕДЕЛЕНИЕ РАСЫ ▾</div>
+  </div>
+  <div class="tests-grid">
+    
+    <!-- ТЕСТ ИГРОК (5 вопросов) -->
+    <div class="test-card player">
+      <div class="card-header"><div class="essence">высшая раса</div><div class="race-name">ИГРОК</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Когда вокруг много людей, ты чувствуешь:</div><div class="options" data-race="player"><label class="option"><input type="radio" name="p1" value="3"> Они массовка, я вне их правил</label><label class="option"><input type="radio" name="p1" value="1"> Пытаюсь вписаться, но устаю</label><label class="option"><input type="radio" name="p1" value="0"> Люблю быть частью толпы</label></div></div>
+        <div class="question-block"><div class="q-text">2. Как часто ты меняешь планы под влиянием других?</div><div class="options"><label class="option"><input type="radio" name="p2" value="3"> Никогда, я создаю сценарий</label><label class="option"><input type="radio" name="p2" value="1"> Иногда, если выгодно</label><label class="option"><input type="radio" name="p2" value="0"> Часто, я ориентируюсь на окружение</label></div></div>
+        <div class="question-block"><div class="q-text">3. Одиночество для тебя — это:</div><div class="options"><label class="option"><input type="radio" name="p3" value="3"> Естественное состояние, я заряжаюсь</label><label class="option"><input type="radio" name="p3" value="1"> Временная передышка</label><label class="option"><input type="radio" name="p3" value="0"> Страдание, нужны люди</label></div></div>
+        <div class="question-block"><div class="q-text">4. Как ты реагируешь, когда кто-то пытается тобой управлять?</div><div class="options"><label class="option"><input type="radio" name="p4" value="3"> Сразу пресекаю, я здесь главный</label><label class="option"><input type="radio" name="p4" value="1"> Выслушаю, но сделаю по-своему</label><label class="option"><input type="radio" name="p4" value="0"> Часто подчиняюсь авторитету</label></div></div>
+        <div class="question-block"><div class="q-text">5. Чувствуешь ли ты, что реальность «подстраивается» под тебя?</div><div class="options"><label class="option"><input type="radio" name="p5" value="3"> Да, я замечаю закономерности</label><label class="option"><input type="radio" name="p5" value="1"> Иногда кажется, что да</label><label class="option"><input type="radio" name="p5" value="0"> Нет, я плыву по течению</label></div></div>
+        <button class="test-btn" data-test="player">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="player-result" class="result-area">—</div>
+      </div>
+    </div>
 
-        // --- КАМЕРА ---
-        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.05, 1000);
-        camera.position.set(2.0, 1.4, 2.8);
-        camera.lookAt(0, 0.5, 0);
+    <!-- ТЕСТ НПС (5 вопросов) -->
+    <div class="test-card npc">
+      <div class="card-header"><div class="essence">средняя раса</div><div class="race-name">НПС</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Ты предпочитаешь следовать чёткому распорядку?</div><div class="options"><label class="option"><input type="radio" name="n1" value="3"> Да, рутина — моя броня</label><label class="option"><input type="radio" name="n1" value="1"> Иногда, но могу импровизировать</label><label class="option"><input type="radio" name="n1" value="0"> Ненавижу графики</label></div></div>
+        <div class="question-block"><div class="q-text">2. Если кто-то просит помощи, ты скорее:</div><div class="options"><label class="option"><input type="radio" name="n2" value="3"> Выполню, это моя роль</label><label class="option"><input type="radio" name="n2" value="1"> Помогу, если не в ущерб</label><label class="option"><input type="radio" name="n2" value="0"> Проигнорирую</label></div></div>
+        <div class="question-block"><div class="q-text">3. Насколько важна для тебя социальная роль?</div><div class="options"><label class="option"><input type="radio" name="n3" value="3"> Очень, я без неё никто</label><label class="option"><input type="radio" name="n3" value="1"> Важна, но не определяет</label><label class="option"><input type="radio" name="n3" value="0"> Плевать на ярлыки</label></div></div>
+        <div class="question-block"><div class="q-text">4. Часто ли ты ждёшь «разрешения» или сигнала, чтобы начать действовать?</div><div class="options"><label class="option"><input type="radio" name="n4" value="3"> Да, я жду указаний</label><label class="option"><input type="radio" name="n4" value="1"> Иногда нуждаюсь в одобрении</label><label class="option"><input type="radio" name="n4" value="0"> Нет, я сам всё решаю</label></div></div>
+        <div class="question-block"><div class="q-text">5. Как ты относишься к переменам в жизни?</div><div class="options"><label class="option"><input type="radio" name="n5" value="3"> Тревожно, лучше стабильность</label><label class="option"><input type="radio" name="n5" value="1"> Справлюсь, но не люблю</label><label class="option"><input type="radio" name="n5" value="0"> Обожаю новизну</label></div></div>
+        <button class="test-btn" data-test="npc">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="npc-result" class="result-area">—</div>
+      </div>
+    </div>
 
-        // --- РЕНДЕРЕР С ТЕНЯМИ И АНИАЛИАСИНГОМ ---
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+    <!-- ТЕСТ МОБ (5 вопросов) -->
+    <div class="test-card mob">
+      <div class="card-header"><div class="essence">низшая раса</div><div class="race-name">МОБ</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Часто ли ты действуешь «на автомате»?</div><div class="options"><label class="option"><input type="radio" name="m1" value="3"> Почти всегда, как зомби</label><label class="option"><input type="radio" name="m1" value="1"> Иногда, когда устаю</label><label class="option"><input type="radio" name="m1" value="0"> Нет, я осознаю каждое действие</label></div></div>
+        <div class="question-block"><div class="q-text">2. Насколько тебе важно мнение окружающих?</div><div class="options"><label class="option"><input type="radio" name="m2" value="3"> Я даже не задумываюсь</label><label class="option"><input type="radio" name="m2" value="1"> Немного, стараюсь не выделяться</label><label class="option"><input type="radio" name="m2" value="0"> Очень, завишу от оценки</label></div></div>
+        <div class="question-block"><div class="q-text">3. Есть ли у тебя собственная цель, или ты плывёшь по течению?</div><div class="options"><label class="option"><input type="radio" name="m3" value="3"> Течение несёт меня</label><label class="option"><input type="radio" name="m3" value="1"> Есть смутные цели</label><label class="option"><input type="radio" name="m3" value="0"> У меня чёткий план</label></div></div>
+        <div class="question-block"><div class="q-text">4. Когда ты идёшь по улице, ты замечаешь детали вокруг?</div><div class="options"><label class="option"><input type="radio" name="m4" value="3"> Нет, я просто перемещаюсь</label><label class="option"><input type="radio" name="m4" value="1"> Иногда что-то бросается в глаза</label><label class="option"><input type="radio" name="m4" value="0"> Да, я очень наблюдателен</label></div></div>
+        <div class="question-block"><div class="q-text">5. Можешь ли ты долго заниматься бессмысленной рутиной?</div><div class="options"><label class="option"><input type="radio" name="m5" value="3"> Да, я не замечаю времени</label><label class="option"><input type="radio" name="m5" value="1"> Терплю, но недолго</label><label class="option"><input type="radio" name="m5" value="0"> Ненавижу пустую трату времени</label></div></div>
+        <button class="test-btn" data-test="mob">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="mob-result" class="result-area">—</div>
+      </div>
+    </div>
 
-        // --- ОРБИТА КОНТРОЛ ---
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.07;
-        controls.rotateSpeed = 1.2;
-        controls.zoomSpeed = 1.0;
-        controls.enableZoom = true;
-        controls.enablePan = true;
-        controls.target.set(0, 0.55, 0);
+    <!-- ТЕСТ ПРИТ (5 вопросов) -->
+    <div class="test-card prit">
+      <div class="card-header"><div class="essence">самая низшая</div><div class="race-name">ПРИТ</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Твои перемещения чаще всего:</div><div class="options"><label class="option"><input type="radio" name="pr1" value="3"> Однотипны: дом-ларек-дом</label><label class="option"><input type="radio" name="pr1" value="1"> Иногда меняю, но не специально</label><label class="option"><input type="radio" name="pr1" value="0"> Всегда разные, люблю новое</label></div></div>
+        <div class="question-block"><div class="q-text">2. Как часто ты «выпадаешь» из реальности, тупишь в одну точку?</div><div class="options"><label class="option"><input type="radio" name="pr2" value="3"> Постоянно, я как в тумане</label><label class="option"><input type="radio" name="pr2" value="1"> Иногда бывает</label><label class="option"><input type="radio" name="pr2" value="0"> Никогда, я собран</label></div></div>
+        <div class="question-block"><div class="q-text">3. Ощущаешь ли ты себя «невидимкой» для окружающих?</div><div class="options"><label class="option"><input type="radio" name="pr3" value="3"> Да, меня никто не замечает</label><label class="option"><input type="radio" name="pr3" value="1"> Иногда кажется, что я фон</label><label class="option"><input type="radio" name="pr3" value="0"> Нет, я в центре внимания</label></div></div>
+        <div class="question-block"><div class="q-text">4. Есть ли у тебя ощущение, что твоя жизнь — бесконечный повтор?</div><div class="options"><label class="option"><input type="radio" name="pr4" value="3"> Да, день сурка</label><label class="option"><input type="radio" name="pr4" value="1"> Иногда замечаю циклы</label><label class="option"><input type="radio" name="pr4" value="0"> Нет, всё непредсказуемо</label></div></div>
+        <div class="question-block"><div class="q-text">5. Как часто ты передвигаешься без конкретной цели?</div><div class="options"><label class="option"><input type="radio" name="pr5" value="3"> Почти всегда, просто иду</label><label class="option"><input type="radio" name="pr5" value="1"> Время от времени</label><label class="option"><input type="radio" name="pr5" value="0"> У меня всегда есть цель</label></div></div>
+        <button class="test-btn" data-test="prit">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="prit-result" class="result-area">—</div>
+      </div>
+    </div>
+  </div>
 
-        // --- ОСВЕЩЕНИЕ (мягкое, с эффектом подкожного рассеивания) ---
-        const ambientLight = new THREE.AmbientLight(0x3c2a2a, 0.45);
-        scene.add(ambientLight);
-        
-        // Основной направленный свет
-        const mainLight = new THREE.DirectionalLight(0xffccaa, 1.2);
-        mainLight.position.set(1.8, 2.5, 1.5);
-        mainLight.castShadow = true;
-        mainLight.receiveShadow = false;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        scene.add(mainLight);
-        
-        // Заполняющий теплый свет снизу
-        const fillWarm = new THREE.PointLight(0xc8976a, 0.65);
-        fillWarm.position.set(0, -0.3, 0.2);
-        scene.add(fillWarm);
-        
-        // Холодный контровой свет
-        const backRim = new THREE.PointLight(0x88aaff, 0.55);
-        backRim.position.set(-0.8, 1.1, -1.7);
-        scene.add(backRim);
-        
-        // Моделируем SSS легким оранжевым светом
-        const sssLight = new THREE.PointLight(0xcc8866, 0.5);
-        sssLight.position.set(0.3, 0.6, 0.4);
-        scene.add(sssLight);
-        
-        // Дополнительный акцент на головку
-        const tipLight = new THREE.PointLight(0xffaa77, 0.4);
-        tipLight.position.set(0.1, 0.95, 0.5);
-        scene.add(tipLight);
-        
-        // --- ПОВЕРХНОСТЬ (пол с текстурой) ---
-        const gridHelper = new THREE.GridHelper(5, 20, 0xaa8866, 0x664422);
-        gridHelper.position.y = -0.68;
-        gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.3;
-        scene.add(gridHelper);
-        
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.7, metalness: 0.05, transparent: true, opacity: 0.2 });
-        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), groundMat);
-        groundPlane.rotation.x = -Math.PI / 2;
-        groundPlane.position.y = -0.7;
-        groundPlane.receiveShadow = true;
-        scene.add(groundPlane);
-        
-        // ========== РЕАЛИСТИЧНАЯ МОДЕЛЬ ==========
-        const penisGroup = new THREE.Group();
-        
-        // --- ТЕКСТУРЫ КОЖИ (canvas procedural) ---
-        const createSkinTexture = (baseColor, veinColor, speckColor) => {
-            const canvasTex = document.createElement('canvas');
-            canvasTex.width = 1024;
-            canvasTex.height = 1024;
-            const ctxTex = canvasTex.getContext('2d');
-            
-            // Основной цвет
-            ctxTex.fillStyle = baseColor;
-            ctxTex.fillRect(0, 0, canvasTex.width, canvasTex.height);
-            
-            // Мелкие поры и текстура
-            for (let i = 0; i < 2800; i++) {
-                ctxTex.fillStyle = `rgba(80, 50, 30, ${Math.random() * 0.25})`;
-                const x = Math.random() * canvasTex.width;
-                const y = Math.random() * canvasTex.height;
-                const r = Math.random() * 1.8;
-                ctxTex.beginPath();
-                ctxTex.arc(x, y, r, 0, Math.PI * 2);
-                ctxTex.fill();
-            }
-            
-            // Вены (извилистые линии)
-            ctxTex.strokeStyle = veinColor;
-            ctxTex.lineWidth = 6;
-            for (let v = 0; v < 35; v++) {
-                ctxTex.beginPath();
-                let startX = Math.random() * canvasTex.width;
-                let startY = Math.random() * canvasTex.height;
-                ctxTex.moveTo(startX, startY);
-                for (let seg = 0; seg < 8; seg++) {
-                    ctxTex.lineTo(startX + (Math.random() - 0.5) * 70, startY + (Math.random() - 0.5) * 50);
-                    startX += (Math.random() - 0.5) * 45;
-                    startY += (Math.random() - 0.5) * 35;
-                }
-                ctxTex.stroke();
-            }
-            
-            // Пигментные пятна
-            for (let p = 0; p < 400; p++) {
-                ctxTex.fillStyle = `rgba(100, 60, 35, ${Math.random() * 0.4})`;
-                ctxTex.beginPath();
-                ctxTex.ellipse(Math.random() * canvasTex.width, Math.random() * canvasTex.height, Math.random() * 5 + 2, Math.random() * 4 + 1.5, 0, 0, Math.PI * 2);
-                ctxTex.fill();
-            }
-            
-            const texture = new THREE.CanvasTexture(canvasTex);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1.2, 1.8);
-            return texture;
-        };
-        
-        const skinTexBody = createSkinTexture('#c89a6c', '#9c6e48', '#a5724a');
-        const skinTexTip = createSkinTexture('#e0b88a', '#b87a4a', '#c28255');
-        skinTexTip.repeat.set(0.9, 1.2);
-        
-        const shaftMat = new THREE.MeshStandardMaterial({ 
-            map: skinTexBody, 
-            color: 0xd4a074, 
-            roughness: 0.32, 
-            metalness: 0.02, 
-            emissive: 0x331a00, 
-            emissiveIntensity: 0.12 
-        });
-        
-        const tipMat = new THREE.MeshStandardMaterial({ 
-            map: skinTexTip, 
-            color: 0xe8c094, 
-            roughness: 0.23, 
-            metalness: 0.01, 
-            emissive: 0x552200, 
-            emissiveIntensity: 0.08 
-        });
-        
-        const eggMatReal = new THREE.MeshStandardMaterial({ 
-            color: 0xcc9a70, 
-            roughness: 0.45, 
-            metalness: 0.03,
-            emissive: 0x221100,
-            emissiveIntensity: 0.1
-        });
-        
-        // --- СТВОЛ С НЕРОВНОСТЯМИ (используем модифицированную геометрию) ---
-        const shaftGeo = new THREE.CylinderGeometry(0.32, 0.38, 1.35, 96, 32);
-        const shaft = new THREE.Mesh(shaftGeo, shaftMat);
-        shaft.castShadow = true;
-        shaft.position.y = 0;
-        penisGroup.add(shaft);
-        
-        // --- ГОЛОВКА (с реалистичным переходом и уретрой)---
-        const tipGeo = new THREE.SphereGeometry(0.42, 128, 128);
-        const tip = new THREE.Mesh(tipGeo, tipMat);
-        tip.position.y = 0.78;
-        tip.castShadow = true;
-        penisGroup.add(tip);
-        
-        // Внутренний слой головки для блеска
-        const innerTipMat = new THREE.MeshStandardMaterial({ color: 0xf0ca9a, roughness: 0.18, emissive: 0x552a00, emissiveIntensity: 0.1 });
-        const innerTip = new THREE.Mesh(new THREE.SphereGeometry(0.36, 96, 96), innerTipMat);
-        innerTip.position.y = 0.79;
-        innerTip.castShadow = true;
-        penisGroup.add(innerTip);
-        
-        // Уретра (отверстие) - маленький эллипсоид
-        const urethraMat = new THREE.MeshStandardMaterial({ color: 0xaa6644, roughness: 0.12, emissive: 0x441100 });
-        const urethra = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), urethraMat);
-        urethra.position.set(0, 1.01, 0.39);
-        urethra.scale.set(0.7, 0.45, 0.35);
-        penisGroup.add(urethra);
-        
-        // Венечная борозда (глубокий желобок)
-        const coronalMat = new THREE.MeshStandardMaterial({ color: 0xb88458, roughness: 0.5 });
-        const coronalRing = new THREE.Mesh(new THREE.TorusGeometry(0.395, 0.05, 64, 128), coronalMat);
-        coronalRing.rotation.x = Math.PI / 2;
-        coronalRing.position.y = 0.52;
-        penisGroup.add(coronalRing);
-        
-        // Дополнительные кольца/складки на стволе
-        const foldMat = new THREE.MeshStandardMaterial({ color: 0xc68c62, roughness: 0.6 });
-        for (let y = -0.3; y <= 0.2; y += 0.28) {
-            const fold = new THREE.Mesh(new THREE.TorusGeometry(0.345, 0.032, 48, 96), foldMat);
-            fold.rotation.x = Math.PI / 2;
-            fold.position.y = y;
-            penisGroup.add(fold);
-        }
-        
-        // --- РЕАЛИСТИЧНЫЕ ВЕНЫ НА СТВОЛЕ (изогнутые цилиндры)---
-        const veinMatReal = new THREE.MeshStandardMaterial({ color: 0xad7a52, roughness: 0.25 });
-        const veinPositions = [
-            { pos: [0.28, -0.15, 0.22], rot: [0.2, 0.3, 0.5], scale: [0.08, 0.5, 0.08] },
-            { pos: [-0.27, 0.05, 0.28], rot: [-0.1, -0.2, 0.6], scale: [0.09, 0.55, 0.09] },
-            { pos: [0.25, 0.35, 0.24], rot: [0.15, 0.4, 0.3], scale: [0.07, 0.45, 0.07] },
-            { pos: [-0.23, -0.32, 0.26], rot: [-0.1, -0.3, 0.4], scale: [0.08, 0.6, 0.08] },
-            { pos: [0.18, -0.48, 0.32], rot: [0.05, 0.5, 0.2], scale: [0.07, 0.5, 0.07] },
-            { pos: [-0.29, 0.45, 0.18], rot: [-0.05, -0.4, 0.35], scale: [0.09, 0.52, 0.09] }
-        ];
-        veinPositions.forEach(v => {
-            const veinCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 8), veinMatReal);
-            veinCyl.position.set(v.pos[0], v.pos[1], v.pos[2]);
-            veinCyl.rotation.set(v.rot[0], v.rot[1], v.rot[2]);
-            veinCyl.scale.set(v.scale[0], v.scale[1], v.scale[2]);
-            veinCyl.castShadow = true;
-            penisGroup.add(veinCyl);
-        });
-        
-        // --- МОШОНКА (два яйца с неровной поверхностью + складки)---
-        const testicleMat = new THREE.MeshStandardMaterial({ color: 0xbc8864, roughness: 0.55, metalness: 0.02 });
-        
-        const leftTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
-        leftTest.scale.set(0.92, 0.75, 0.85);
-        leftTest.position.set(-0.64, -0.48, 0.18);
-        leftTest.castShadow = true;
-        penisGroup.add(leftTest);
-        
-        const rightTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
-        rightTest.scale.set(0.92, 0.75, 0.85);
-        rightTest.position.set(0.64, -0.48, 0.18);
-        rightTest.castShadow = true;
-        penisGroup.add(rightTest);
-        
-        // Добавляем морщинистые детали на мошонку (маленькие сферы)
-        const wrinkleMat = new THREE.MeshStandardMaterial({ color: 0xac7854, roughness: 0.7 });
-        for (let i = 0; i < 65; i++) {
-            const wrinkle = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 12), wrinkleMat);
-            const side = Math.random() > 0.5 ? -0.68 : 0.68;
-            wrinkle.position.set(side + (Math.random() - 0.5) * 0.28, -0.55 + Math.random() * 0.25, 0.1 + Math.random() * 0.35);
-            wrinkle.scale.set(0.8, 0.5, 0.7);
-            wrinkle.castShadow = true;
-            penisGroup.add(wrinkle);
-        }
-        
-        // Срединный шов мошонки (линия)
-        const seamMat = new THREE.MeshStandardMaterial({ color: 0xa07048 });
-        const seam = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.38, 0.12), seamMat);
-        seam.position.set(0, -0.52, 0.32);
-        penisGroup.add(seam);
-        
-        // Добавляем легкий блеск на головке
-        const glossMat = new THREE.MeshStandardMaterial({ color: 0xffdbb0, emissive: 0x442200, roughness: 0.12 });
-        const glossSphere = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), glossMat);
-        glossSphere.position.set(0.07, 0.95, 0.42);
-        glossSphere.scale.set(0.6, 0.4, 0.5);
-        penisGroup.add(glossSphere);
-        
-        penisGroup.position.set(0, 0.1, 0);
-        scene.add(penisGroup);
-        
-        // Динамическое пульсирование вен и легкое движение
-        let time = 0;
-        const originalVeinScale = [];
-        penisGroup.children.forEach(child => {
-            if (child.isMesh && child.material === veinMatReal) {
-                originalVeinScale.push({ mesh: child, scaleY: child.scale.y });
-            }
-        });
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.016;
-            
-            // Легкое покачивание и "дыхание"
-            penisGroup.rotation.y = Math.sin(time * 0.5) * 0.012;
-            penisGroup.position.y = 0.1 + Math.sin(time * 0.9) * 0.002;
-            
-            // Пульсация вен (легкая)
-            originalVeinScale.forEach((item, idx) => {
-                const scaleMul = 1 + Math.sin(time * 3.2 + idx) * 0.03;
-                item.mesh.scale.y = item.scaleY * scaleMul;
-            });
-            
-            // Мерцание подсветки SSS
-            sssLight.intensity = 0.52 + Math.sin(time * 1.7) * 0.08;
-            tipLight.intensity = 0.44 + Math.sin(time * 2.3) * 0.1;
-            
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        
-        animate();
-        
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        
-        console.log("NetErrror: Абсолютно реалистичная 3D модель члена и мошонки загружена.");
-    </script>
+  <div class="footnote"><span>// v.5.1.pka · мир 5opka · узри свою суть //</span></div>
+</div>
+
+<script>
+  (function(){
+    // Максимум баллов за тест (5 вопросов по 3 балла = 15)
+    const MAX_SCORE = 15;
+    let scores = { player: 0, npc: 0, mob: 0, prit: 0 };
+
+    const playerResultDiv = document.getElementById('player-result');
+    const npcResultDiv = document.getElementById('npc-result');
+    const mobResultDiv = document.getElementById('mob-result');
+    const pritResultDiv = document.getElementById('prit-result');
+
+    const playerBar = document.getElementById('player-bar');
+    const npcBar = document.getElementById('npc-bar');
+    const mobBar = document.getElementById('mob-bar');
+    const pritBar = document.getElementById('prit-bar');
+    const playerPercent = document.getElementById('player-percent');
+    const npcPercent = document.getElementById('npc-percent');
+    const mobPercent = document.getElementById('mob-percent');
+    const pritPercent = document.getElementById('prit-percent');
+
+    function updateGlobalStats() {
+      const pPlayer = Math.round((scores.player / MAX_SCORE) * 100);
+      const pNpc = Math.round((scores.npc / MAX_SCORE) * 100);
+      const pMob = Math.round((scores.mob / MAX_SCORE) * 100);
+      const pPrit = Math.round((scores.prit / MAX_SCORE) * 100);
+
+      playerBar.style.width = pPlayer + '%';
+      npcBar.style.width = pNpc + '%';
+      mobBar.style.width = pMob + '%';
+      pritBar.style.width = pPrit + '%';
+
+      playerPercent.textContent = pPlayer + '%';
+      npcPercent.textContent = pNpc + '%';
+      mobPercent.textContent = pMob + '%';
+      pritPercent.textContent = pPrit + '%';
+    }
+
+    function calculateRaceScore(race) {
+      const prefix = { player: 'p', npc: 'n', mob: 'm', prit: 'pr' }[race];
+      let total = 0;
+      for (let i = 1; i <= 5; i++) {
+        const radios = document.getElementsByName(prefix + i);
+        let selected = null;
+        for (let r of radios) if (r.checked) { selected = r.value; break; }
+        if (selected !== null) total += parseInt(selected, 10);
+      }
+      return total;
+    }
+
+    function processTest(race) {
+      const score = calculateRaceScore(race);
+      scores[race] = score;
+      
+      let resultDiv, raceName;
+      if (race === 'player') { resultDiv = playerResultDiv; raceName = 'ИГРОК'; }
+      else if (race === 'npc') { resultDiv = npcResultDiv; raceName = 'НПС'; }
+      else if (race === 'mob') { resultDiv = mobResultDiv; raceName = 'МОБ'; }
+      else { resultDiv = pritResultDiv; raceName = 'ПРИТ'; }
+
+      const percent = Math.round((score / MAX_SCORE) * 100);
+      let message = percent >= 70 ? `⚡ Истинный ${raceName} (${percent}%)` :
+                    percent >= 40 ? `🌀 Есть черты ${raceName} (${percent}%)` :
+                    `◈ ${raceName} всего ${percent}%`;
+      resultDiv.innerHTML = `<span style="color:#bdd4e0;">${message}</span>`;
+      
+      updateGlobalStats();
+
+      // Прокрутка к блоку статистики (он над тестами, но рядом с определениями)
+      document.getElementById('globalStats').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.querySelectorAll('.test-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        processTest(this.dataset.test);
+      });
+    });
+
+    function resetAll() {
+      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+      scores = { player: 0, npc: 0, mob: 0, prit: 0 };
+      playerResultDiv.innerHTML = npcResultDiv.innerHTML = mobResultDiv.innerHTML = pritResultDiv.innerHTML = '—';
+      updateGlobalStats();
+    }
+    document.getElementById('reset-all').addEventListener('click', resetAll);
+    
+    // первоначальная инициализация
+    updateGlobalStats();
+  })();
+</script>
 </body>
-</html>
+    </html>
