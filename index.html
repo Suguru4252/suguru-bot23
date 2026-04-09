@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>ТИМОФЕЙ: АШ 2.0 · ПОЛНЫЙ РАНДОМ</title>
+  <title>🥩 ВЫРАСТИ СИСЮ ДИМЫ · ДИСКЛЕЙМЕР</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,253 +13,349 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(145deg, #1a2f1a 0%, #2d4a2d 100%);
+      background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
+      font-family: 'Segoe UI', 'Comic Sans MS', 'Impact', sans-serif;
       padding: 12px;
     }
 
-    .game-wrapper {
-      max-width: 1000px;
+    /* Дисклеймер — модальное окно */
+    .disclaimer-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      backdrop-filter: blur(5px);
+    }
+
+    .disclaimer-box {
+      max-width: 450px;
+      background: #f5e6d3;
+      padding: 30px 25px;
+      border-radius: 50px 20px 50px 20px;
+      box-shadow: 0 20px 0 #5a351e, 0 20px 30px black;
+      border: 4px solid #ca9a5e;
+      text-align: center;
+      color: #2d1a09;
+      margin: 20px;
+    }
+
+    .disclaimer-box h2 {
+      font-size: 2rem;
+      margin: 0 0 15px;
+      text-shadow: 3px 3px 0 #e7b87b;
+    }
+
+    .disclaimer-box p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .disclaimer-btn {
+      background: #b57a3a;
+      border: none;
+      font-weight: bold;
+      font-size: 1.8rem;
+      padding: 15px 35px;
+      border-radius: 60px;
+      box-shadow: 0 8px 0 #5f371a, 0 4px 8px black;
+      color: #1f0f02;
+      cursor: pointer;
+      border: 2px solid #feda9b;
+      transition: 0.07s;
+      text-transform: uppercase;
+    }
+
+    .disclaimer-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 #5f371a, 0 4px 8px black;
+    }
+
+    .game-container {
+      max-width: 520px;
       width: 100%;
-      background: #d4c3a3;
-      background-image: linear-gradient(145deg, #e8d8b7, #c8b48c);
-      border-radius: 40px 40px 30px 30px;
-      box-shadow: 0 18px 0 #6b4f32, 0 25px 30px rgba(0,0,0,0.4);
-      padding: 20px 20px 28px;
-      border: 5px solid #b39264;
+      background: #fbe9c3;
+      background-image: radial-gradient(circle at 20% 30%, #fff3d6, #f0d5a8);
+      border-radius: 60px 60px 30px 30px;
+      box-shadow: 0 20px 0 #6b3e1f, 0 30px 30px rgba(0,0,0,0.4);
+      padding: 24px 18px 30px;
+      border: 4px solid #ac6f3c;
+      text-align: center;
     }
 
     h1 {
-      margin: 0 0 8px;
+      margin: 0 0 15px;
       font-size: 2.5rem;
       font-weight: 900;
-      text-align: center;
-      color: #2a1f0e;
-      text-shadow: 4px 4px 0 #e0b87b;
-      letter-spacing: 3px;
-      filter: drop-shadow(0 6px 2px #5a422a);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #3d1f09;
+      text-shadow: 5px 5px 0 #e7b87b, 2px 2px 0 #a6531e;
+      word-break: break-word;
+      transform: rotate(-1deg);
     }
 
-    .school-header {
+    .dima-zone {
+      background: #b38b60;
+      padding: 20px 10px 25px;
+      border-radius: 80px 80px 40px 40px;
+      box-shadow: inset 0 -6px 0 #5d3a22, 0 12px 0 #4d2f19, 0 8px 15px black;
+      margin-bottom: 20px;
+      border: 3px solid #eeb574;
+    }
+
+    .sisi-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #5f7a5a;
-      margin: 8px 0 16px;
-      padding: 10px 20px;
-      border-radius: 50px;
-      border: 4px solid #3a552f;
-      box-shadow: inset 0 2px 6px #b1c6a4, 0 6px 0 #2f4423;
-      color: #f9f1d2;
-      font-weight: bold;
-      font-size: 1.3rem;
-    }
-
-    .notes-counter {
-      background: #2d2616;
-      padding: 8px 24px;
-      border-radius: 30px;
-      box-shadow: inset 0 2px 5px #6e5e3e, 0 3px 0 #1a150a;
-      color: #ffecb3;
-      font-size: 1.7rem;
-    }
-
-    .map-container {
-      background: #4a6741;
-      padding: 20px 16px;
-      border-radius: 30px;
-      border: 6px solid #2f4a2a;
-      box-shadow: inset 0 0 0 4px #72956a, 0 12px 0 #1f331a;
-      margin-bottom: 18px;
-    }
-
-    .school-map {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-    }
-
-    .room {
-      aspect-ratio: 1 / 1.2;
-      background: #c9af8b;
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px 4px;
-      box-shadow: inset 0 -6px 0 #7b623e, 0 7px 0 #5a4028, 0 3px 8px black;
-      border: 3px solid #a58357;
-      font-weight: bold;
-      font-size: 1rem;
-      text-align: center;
-      color: #1f1a0e;
-      transition: all 0.1s;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .sisya {
+      font-size: 8rem;
+      line-height: 1;
+      filter: drop-shadow(8px 12px 0 rgba(0,0,0,0.3));
       cursor: pointer;
-      position: relative;
+      transition: 0.1s ease;
+      background: #fad6b3;
+      padding: 10px 15px 15px 15px;
+      border-radius: 999px;
+      display: inline-block;
     }
 
-    .room.timofey {
-      background: #f5cd7a;
-      box-shadow: inset 0 -6px 0 #b38b40, 0 7px 0 #6f4f1f, 0 0 15px #ffd966;
-      border-color: #f3b33d;
-      transform: scale(1.02);
-      z-index: 2;
+    .sisya:active {
+      transform: scale(0.85);
+      filter: drop-shadow(2px 4px 0 #251608);
     }
 
-    .room.galina {
-      background: #b58a6c;
-      box-shadow: inset 0 -6px 0 #825e48, 0 7px 0 #543e2e, 0 3px 8px black;
-      border-color: #e0925b;
+    .sisi-stats {
+      background: #2c1a0b;
+      padding: 18px 15px;
+      border-radius: 60px;
+      box-shadow: inset 0 2px 6px black, 0 8px 0 #1a0f06;
+      color: #ffdead;
+      font-weight: bold;
+      font-size: 1.8rem;
+      margin: 20px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border: 2px solid #bc8f4b;
     }
 
-    .room.visited {
-      opacity: 0.95;
+    .sisi-size {
+      background: #51321b;
+      padding: 10px 25px;
+      border-radius: 50px;
+      box-shadow: inset 0 2px 5px black;
+      color: #ffd78a;
+      text-shadow: 2px 2px 0 #1f0f03;
     }
 
-    .room-emoji {
-      font-size: 2.5rem;
-      line-height: 1.2;
-      filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.2));
+    .crit-meter {
+      background: #241407;
+      border-radius: 40px;
+      padding: 10px 20px;
+      color: #ffb882;
+      font-size: 1.4rem;
     }
 
-    .room-name {
-      font-size: 0.75rem;
-      background: #352d1cc9;
-      padding: 4px 8px;
-      border-radius: 20px;
-      color: #f3eaca;
-      margin-top: 4px;
-      max-width: 90%;
+    .arousal-bar-container {
+      background: #1f1107;
+      border-radius: 40px;
+      padding: 6px 15px;
+      margin: 15px 5px 5px;
+      border: 2px solid #d48f4a;
     }
 
-    .question-mark {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      font-size: 1.5rem;
-      opacity: 0.7;
+    .arousal-fill {
+      height: 24px;
+      background: linear-gradient(90deg, #ff6a6a, #ff3b9a);
+      border-radius: 30px;
+      width: 0%;
+      box-shadow: inset 0 2px 5px #44001a, 0 0 15px #ff8c8c;
+      transition: width 0.2s;
     }
 
-    .action-panel {
+    .arousal-text {
+      color: #ffe5b4;
+      font-weight: bold;
+      margin-top: 6px;
+      font-size: 1.2rem;
+    }
+
+    .action-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin: 20px 0 12px;
+      gap: 15px;
       justify-content: center;
+      margin: 15px 0 10px;
     }
 
     .btn {
-      background: #fbeba8;
-      border: 4px solid #b67936;
-      color: #2b1d0a;
+      background: #d68f3c;
+      border: none;
       font-weight: bold;
-      font-size: 1.2rem;
-      padding: 14px 18px;
-      border-radius: 40px;
-      box-shadow: 0 7px 0 #7b4f24, 0 4px 8px black;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.05s;
-      font-family: inherit;
+      font-size: 1.6rem;
+      padding: 16px 24px;
+      border-radius: 60px;
+      box-shadow: 0 8px 0 #7a451b, 0 5px 10px black;
+      color: #1f0f02;
       text-transform: uppercase;
-      flex: 1 0 140px;
-      transform: translateY(-2px);
+      cursor: pointer;
+      transition: 0.07s;
+      border: 2px solid #feda9b;
+      flex: 1 0 160px;
+      letter-spacing: 2px;
     }
 
     .btn:active {
-      box-shadow: 0 3px 0 #7b4f24, 0 2px 6px black;
-      transform: translateY(4px);
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 #7a451b, 0 4px 8px black;
     }
 
-    .btn.special {
-      background: #f7b05e;
-      border-color: #b85f1a;
-      box-shadow: 0 7px 0 #9e4a1b, 0 4px 8px black;
-    }
-
-    .btn.danger {
-      background: #dd7a6b;
-      border-color: #992b1c;
-      box-shadow: 0 7px 0 #701f13;
-      color: #faf0d7;
-    }
-
-    .log-box {
-      background: #1e2a1acc;
-      backdrop-filter: blur(4px);
-      color: #f0eac1;
-      padding: 16px 20px;
+    .achievements-panel {
+      background: #2f1f11e0;
       border-radius: 30px;
+      padding: 15px 15px;
+      margin: 20px 0 10px;
+      border: 2px solid #dba15a;
+      backdrop-filter: blur(3px);
+    }
+
+    .ach-title {
+      color: #ffd78c;
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-shadow: 2px 2px 0 #361e0c;
+      margin-bottom: 10px;
+    }
+
+    .ach-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 15px;
+      justify-content: center;
+    }
+
+    .ach-badge {
+      background: #543e28;
+      padding: 8px 20px;
+      border-radius: 40px;
+      color: #d4b483;
+      font-weight: bold;
+      border: 1px solid #b47d44;
+      box-shadow: inset 0 0 6px #1a0e04;
       font-size: 1.2rem;
+    }
+
+    .ach-badge.unlocked {
+      background: #d6a04b;
+      color: #1d2c00;
+      box-shadow: 0 0 15px gold;
+      border-color: #ffd966;
+    }
+
+    .crit-log {
+      background: #0c0702d0;
+      backdrop-filter: blur(2px);
+      padding: 12px 16px;
+      border-radius: 40px;
+      margin-top: 15px;
+      color: #ffe3ae;
+      font-size: 1.3rem;
       font-weight: bold;
       min-height: 75px;
-      border: 3px solid #b3924b;
-      box-shadow: inset 0 0 12px #00000077, 0 6px 0 #5f4a26;
-      margin: 18px 0 8px;
+      border: 2px dashed #f3b35e;
+      box-shadow: inset 0 0 12px #37200b;
     }
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      color: #2a1f0e;
-      font-weight: bold;
+    .glow-crit {
+      text-shadow: 0 0 20px rgb(255, 200, 0), 0 0 40px rgb(255, 80, 0);
+      animation: shake 0.3s;
     }
 
-    .reset-btn {
-      background: #5d6e52;
-      border-color: #2f4028;
-      box-shadow: 0 6px 0 #2b3a22;
-      color: #f5efd7;
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      25%{ transform: translateX(-8px); }
+      75%{ transform: translateX(8px); }
     }
 
-    .hint-text {
-      font-size: 0.9rem;
-      background: #fffaec;
-      padding: 6px 14px;
-      border-radius: 20px;
-      display: inline-block;
+    .reset-area {
+      margin-top: 15px;
+    }
+
+    .small-btn {
+      background: #684527;
+      box-shadow: 0 5px 0 #3f2818;
+      font-size: 1.2rem;
+      padding: 10px 25px;
     }
   </style>
 </head>
 <body>
-<div class="game-wrapper">
-  <h1>🏫 ТИМОФЕЙ: АШ 2.0</h1>
-  <div class="school-header">
-    <span>🤪 ГЛУПЫЙ ТИМОФЕЙ</span>
-    <span class="notes-counter">📋 <span id="noteCountDisplay">0</span>/5</span>
-    <span>👩‍🏫 ГАЛИНА В.</span>
+
+<!-- ДИСКЛЕЙМЕР -->
+<div class="disclaimer-overlay" id="disclaimer">
+  <div class="disclaimer-box">
+    <h2>⚠️ ВНИМАНИЕ</h2>
+    <p>
+      Эта игра создана исключительно ради абсурдного юмора и развлечения.<br><br>
+      Я не хочу обидеть чьи-либо чувства. Если вам не понравилась игра или она кажется неуместной — вы можете просто удалить её.<br><br>
+      Простите, если случайно задел чьи-то чувства.<br>
+      ❤️ Мир и сиськи.
+    </p>
+    <button class="disclaimer-btn" id="acceptDisclaimer">ПОНЯЛ, ПОГНАЛИ 🥩</button>
+  </div>
+</div>
+
+<div class="game-container">
+  <h1>🥩 ДИМА ДАУН 🥩</h1>
+  <div class="dima-zone">
+    <div class="sisi-container">
+      <span class="sisya" id="sisiEmoji">🥩</span>
+      <span style="font-size:4rem;">🤜💥</span>
+    </div>
+    <div class="sisi-stats">
+      <span class="sisi-size">🍖 <span id="sizeValue">1.0</span> см</span>
+      <span class="crit-meter">⚡КРИТ: <span id="critChanceDisplay">25</span>%</span>
+    </div>
+    <!-- Полоска возбуждения -->
+    <div class="arousal-bar-container">
+      <div class="arousal-fill" id="arousalFill"></div>
+      <div class="arousal-text">💢 ВОЗБУЖДЕНИЕ: <span id="arousalPercent">0</span>%</div>
+    </div>
   </div>
 
-  <!-- Карта школы 5x4 = 20 кабинетов -->
-  <div class="map-container">
-    <div class="school-map" id="schoolMap"></div>
+  <div class="action-buttons">
+    <button class="btn" id="hitBtn">🤜 БИТЬ СИСЮ</button>
+    <button class="btn" id="specialCritBtn">💦 КРИТ-ГЛОТОК</button>
   </div>
 
-  <!-- Кнопки действий -->
-  <div class="action-panel">
-    <button class="btn" id="searchBtn">🔍 ИСКАТЬ ЗАПИСКУ</button>
-    <button class="btn special" id="galinaBtn">👩‍🏫 К ГАЛИНЕ В.</button>
-    <button class="btn danger" id="randomTeleportBtn">🌀 СЛУЧАЙНЫЙ КАБИНЕТ</button>
+  <!-- Достижения -->
+  <div class="achievements-panel">
+    <div class="ach-title">🏆 ДОСТИЖЕНИЯ</div>
+    <div class="ach-list" id="achList">
+      <span class="ach-badge" id="achSize">📏 15см</span>
+      <span class="ach-badge" id="achCrit5">💥 5 КРИТОВ</span>
+      <span class="ach-badge" id="achArousal">💢 ПОЛНОЕ</span>
+    </div>
   </div>
 
-  <!-- Лог событий -->
-  <div class="log-box" id="logDisplay">
-    🏫 Тимофей в школе! Ищи 5 записок (они спрятаны). Галина ждёт в одном из кабинетов...
+  <div class="crit-log" id="logBox">
+    💬 ЖМИ НА СИСЮ ИЛИ БИТЬ...
   </div>
 
-  <div class="info-row">
-    <span class="hint-text">👆 Кликай на кабинеты чтобы ходить</span>
-    <span class="hint-text">❓ Записки НЕ видны — надо искать!</span>
-  </div>
-
-  <!-- Сброс -->
-  <div style="display: flex; justify-content: center; margin-top: 16px;">
-    <button class="btn reset-btn" id="resetBtn">🔄 НОВАЯ ИГРА (ПОЛНЫЙ РАНДОМ)</button>
+  <div class="reset-area">
+    <button class="btn small-btn" id="resetBtn">🔄 ВЫРАЩИВАТЬ ЗАНОВО</button>
   </div>
 </div>
 
@@ -267,295 +363,268 @@
   (function(){
     "use strict";
 
-    // ---------- КОНФИГУРАЦИЯ ----------
-    const GRID_COLS = 5;
-    const GRID_ROWS = 4;
-    const TOTAL_ROOMS = GRID_COLS * GRID_ROWS; // 20 кабинетов
-    
-    const NOTES_REQUIRED = 5; // нужно 5 записок
-    
-    // Базы названий и эмодзи для генерации
-    const ROOM_TYPES = [
-      { name: 'Физика', emoji: '⚛️' },
-      { name: 'Химия', emoji: '🧪' },
-      { name: 'Биология', emoji: '🧬' },
-      { name: 'Математика', emoji: '📐' },
-      { name: 'Литература', emoji: '📖' },
-      { name: 'История', emoji: '🏛️' },
-      { name: 'География', emoji: '🌍' },
-      { name: 'Информатика', emoji: '💻' },
-      { name: 'Физкультура', emoji: '🏀' },
-      { name: 'Столовая', emoji: '🍕' },
-      { name: 'Библиотека', emoji: '📚' },
-      { name: 'Актовый зал', emoji: '🎭' },
-      { name: 'Медпункт', emoji: '🏥' },
-      { name: 'Учительская', emoji: '🚪' },
-      { name: 'Директор', emoji: '👔' },
-      { name: 'Рекреация', emoji: '🪑' },
-      { name: 'Туалет', emoji: '🚻' },
-      { name: 'Лаборантская', emoji: '🔬' },
-      { name: 'Музыка', emoji: '🎵' },
-      { name: 'ИЗО', emoji: '🎨' },
-      { name: 'ОБЖ', emoji: '🛡️' },
-      { name: 'Английский', emoji: '🇬🇧' },
-      { name: 'Немецкий', emoji: '🇩🇪' },
-      { name: 'Подвал', emoji: '🕳️' },
-      { name: 'Чердак', emoji: '🏚️' }
-    ];
+    // ---------- СОСТОЯНИЕ ----------
+    let sisiSize = 1.0;
+    let critChance = 0.25;
+    let arousal = 0;
+    const MAX_AROUSAL = 100;
 
-    // Состояние игры
-    let rooms = [];                     // массив объектов комнат
-    let timofeyPos = 0;                // индекс текущей комнаты (0..19)
-    let collectedNotes = 0;            
-    let notesFound = new Array(TOTAL_ROOMS).fill(false);  // true если записка уже взята
-    let notesPositions = [];            // индексы комнат где изначально записки
-    let galinaPosition = 7;            // позиция Галины (будет случайной)
-    let gameCompleted = false;
-    let visitedRooms = new Array(TOTAL_ROOMS).fill(false); // для статистики
-    
-    // DOM
-    const mapEl = document.getElementById('schoolMap');
-    const noteSpan = document.getElementById('noteCountDisplay');
-    const logEl = document.getElementById('logDisplay');
+    // Достижения
+    let achSizeUnlocked = false;
+    let achCritUnlocked = false;
+    let achArousalUnlocked = false;
+    let critCounter = 0;
 
-    // ---------- ГЕНЕРАЦИЯ СЛУЧАЙНОЙ ШКОЛЫ ----------
-    function generateRandomRooms() {
-      const shuffled = [...ROOM_TYPES].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, TOTAL_ROOMS).map((type, idx) => ({
-        id: idx,
-        name: type.name,
-        emoji: type.emoji,
-        hasNote: false, // будет установлено позже
-      }));
+    let canSpecialCrit = true;
+
+    // ЗВУКИ
+    let audioCtx = null;
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch(e) { console.warn("Web Audio не поддерживается"); }
     }
 
-    // Выбор случайных позиций для записок (5 уникальных индексов)
-    function selectRandomNotePositions() {
-      const positions = [];
-      while (positions.length < NOTES_REQUIRED) {
-        const rand = Math.floor(Math.random() * TOTAL_ROOMS);
-        if (!positions.includes(rand)) {
-          positions.push(rand);
-        }
+    function playSlapSound() {
+      if (!audioCtx) { initAudio(); return; }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = 80 + Math.random() * 50;
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.08);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.08);
+    }
+
+    function playSquelchSound() {
+      if (!audioCtx) { initAudio(); return; }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 45;
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.15);
+    }
+
+    function playCritSound() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 120;
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now+0.2);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now+0.2);
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.value = 200;
+      gain2.gain.setValueAtTime(0.1, now+0.05);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now+0.25);
+      osc2.connect(gain2).connect(audioCtx.destination);
+      osc2.start();
+      osc2.stop(now+0.25);
+    }
+
+    // DOM элементы
+    const logBox = document.getElementById('logBox');
+    const sizeSpan = document.getElementById('sizeValue');
+    const critChanceSpan = document.getElementById('critChanceDisplay');
+    const sisiEmoji = document.getElementById('sisiEmoji');
+    const arousalFill = document.getElementById('arousalFill');
+    const arousalPercent = document.getElementById('arousalPercent');
+
+    const achSizeEl = document.getElementById('achSize');
+    const achCrit5El = document.getElementById('achCrit5');
+    const achArousalEl = document.getElementById('achArousal');
+
+    function updateUI() {
+      sizeSpan.textContent = sisiSize.toFixed(2);
+      critChanceSpan.textContent = Math.round(critChance * 100);
+      
+      if (sisiSize >= 12.0) sisiEmoji.textContent = '🍖🍖🍖';
+      else if (sisiSize >= 7.0) sisiEmoji.textContent = '🍖🍖';
+      else if (sisiSize >= 4.0) sisiEmoji.textContent = '🥩🥩';
+      else if (sisiSize >= 2.0) sisiEmoji.textContent = '🥩';
+      else sisiEmoji.textContent = '🥓';
+      
+      arousal = Math.min(MAX_AROUSAL, Math.max(0, arousal));
+      const percent = (arousal / MAX_AROUSAL) * 100;
+      arousalFill.style.width = percent + '%';
+      arousalPercent.textContent = Math.floor(percent);
+      
+      achSizeEl.classList.toggle('unlocked', achSizeUnlocked);
+      achCrit5El.classList.toggle('unlocked', achCritUnlocked);
+      achArousalEl.classList.toggle('unlocked', achArousalUnlocked);
+    }
+
+    function checkAchievements() {
+      if (!achSizeUnlocked && sisiSize >= 15.0) {
+        achSizeUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: СИСЯ 15 СМ! ДИМА ГОРД!');
       }
-      return positions;
+      if (!achCritUnlocked && critCounter >= 5) {
+        achCritUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: 5 КРИТИЧЕСКИХ УДАРОВ!');
+      }
+      if (!achArousalUnlocked && arousal >= MAX_AROUSAL) {
+        achArousalUnlocked = true;
+        setLog('🏆 ДОСТИЖЕНИЕ: ПОЛНОЕ ВОЗБУЖДЕНИЕ!');
+      }
     }
 
-    // Сброс/инициализация новой игры
-    function initNewGame() {
-      // Генерируем комнаты
-      rooms = generateRandomRooms();
-      
-      // Выбираем позиции записок
-      notesPositions = selectRandomNotePositions();
-      notesFound = new Array(TOTAL_ROOMS).fill(false);
-      
-      // Устанавливаем hasNote для комнат
-      rooms.forEach((room, idx) => {
-        room.hasNote = notesPositions.includes(idx);
-      });
-      
-      // Выбираем случайную позицию Галины (не совпадающую с позицией Тимофея)
-      do {
-        galinaPosition = Math.floor(Math.random() * TOTAL_ROOMS);
-      } while (galinaPosition === 0); // Тимофей стартует в 0, Галина не там же
-      
-      timofeyPos = 0;
-      collectedNotes = 0;
-      gameCompleted = false;
-      visitedRooms = new Array(TOTAL_ROOMS).fill(false);
-      visitedRooms[0] = true;
-      
-      updateNoteCounter();
-      addLog('🔄 Новая школа! Записки спрятаны, Галина где-то ждёт. Ищи!');
-      renderMap();
+    function setLog(msg, isCrit=false, isSpecial=false) {
+      logBox.innerHTML = msg;
+      if (isCrit || isSpecial) {
+        logBox.classList.add('glow-crit');
+        setTimeout(() => logBox.classList.remove('glow-crit'), 400);
+      }
     }
 
-    // ---------- ОТРИСОВКА КАРТЫ ----------
-    function renderMap() {
-      mapEl.innerHTML = '';
+    function checkArousalOverflow() {
+      if (arousal >= MAX_AROUSAL) {
+        arousal = 0;
+        let gain = 1.0 + (Math.random() * 1.5);
+        sisiSize += gain;
+        critChance = Math.min(0.5, critChance + 0.03);
+        playCritSound();
+        setLog(`💥💦 ВОЗБУЖДЕНИЕ НА ПРЕДЕЛЕ! АВТОКРИТ! +${gain.toFixed(2)}см, ДИМА КОНЧАЕТ НА СОСКИ!`, true);
+        critCounter++;
+        sisiEmoji.style.animation = 'shake 0.3s';
+        setTimeout(()=> sisiEmoji.style.animation = '', 300);
+        checkAchievements();
+      }
+    }
+
+    function hitSisya() {
+      initAudio();
+      playSlapSound();
       
-      rooms.forEach((room, idx) => {
-        const roomDiv = document.createElement('div');
-        roomDiv.className = 'room';
-        
-        if (idx === timofeyPos) roomDiv.classList.add('timofey');
-        if (idx === galinaPosition) roomDiv.classList.add('galina');
-        if (visitedRooms[idx]) roomDiv.classList.add('visited');
-        
-        // Записка НЕ показывается! Игрок не знает где она.
-        // Показываем только если игра завершена (для наглядности)
-        let noteIndicator = '';
-        if (gameCompleted && room.hasNote && !notesFound[idx]) {
-          noteIndicator = '📋';
-        }
-        
-        // Если комната не посещена — показываем "?", но не для текущей позиции
-        const notVisitedMystery = (!visitedRooms[idx] && idx !== timofeyPos) ? '<div class="question-mark">❓</div>' : '';
-        
-        roomDiv.innerHTML = `
-          <div class="room-emoji">${room.emoji}${noteIndicator}</div>
-          <div class="room-name">${room.name}</div>
-          ${notVisitedMystery}
-        `;
-        
-        // Клик для перемещения
-        roomDiv.addEventListener('click', () => {
-          if (gameCompleted) {
-            addLog('🎉 Игра завершена! Начни новую.');
-            return;
-          }
-          
-          const targetIdx = idx;
-          if (targetIdx === timofeyPos) {
-            addLog(`🤨 Тимофей уже в ${room.name}.`);
-            return;
-          }
-          
-          // Перемещение
-          timofeyPos = targetIdx;
-          visitedRooms[targetIdx] = true;
-          
-          let moveMsg = `🚶 Тимофей зашёл в ${room.name}.`;
-          
-          // Проверка на Галину
-          if (targetIdx === galinaPosition) {
-            moveMsg += ` 👩‍🏫 Тут Галина Владимировна!`;
-            if (collectedNotes === NOTES_REQUIRED) {
-              moveMsg += ` У тебя все записки! Жми "К ГАЛИНЕ В."`;
-            } else {
-              moveMsg += ` Нужно ещё ${NOTES_REQUIRED - collectedNotes} записок.`;
-            }
-          }
-          
-          addLog(moveMsg);
-          renderMap();
-        });
-        
-        mapEl.appendChild(roomDiv);
-      });
+      let gain = 0.2 + (Math.random() * 0.25);
+      const effectiveCrit = critChance;
+      const isCrit = Math.random() < effectiveCrit;
+      let message = '';
+      
+      if (isCrit) {
+        gain *= 2.5 + (Math.random()*0.8);
+        message = `💥💦 КРИТ! ДИМА БЬЁТ СЕБЯ ПО СИСЕ, КОНЧАЕТ НА СОСКИ! +${gain.toFixed(2)}см!`;
+        playCritSound();
+        critCounter++;
+        arousal = Math.min(MAX_AROUSAL, arousal + 25);
+        if (Math.random()<0.5) message += ' 👅 СЛИЗЫВАЕТ СПЕРМУ!';
+      } else {
+        message = `👊 УДАР ПО СИСЕ. +${gain.toFixed(2)}см.`;
+        arousal = Math.min(MAX_AROUSAL, arousal + 10);
+      }
+      
+      sisiSize += gain;
+      critChance = Math.min(0.5, 0.25 + (sisiSize * 0.006));
+      
+      updateUI();
+      checkArousalOverflow();
+      checkAchievements();
+      setLog(message, isCrit);
+      
+      sisiEmoji.style.transform = 'scale(1.2)';
+      setTimeout(()=> sisiEmoji.style.transform = '', 120);
     }
 
-    // Обновление счётчика
-    function updateNoteCounter() {
-      noteSpan.textContent = `${collectedNotes}/${NOTES_REQUIRED}`;
-    }
-
-    // Лог
-    function addLog(msg) {
-      logEl.textContent = msg;
-    }
-
-    // ---------- ДЕЙСТВИЯ ----------
-    
-    // Искать записку в текущей комнате
-    function searchNote() {
-      if (gameCompleted) {
-        addLog('⛔ Игра окончена. Сбрось.');
+    function performSpecialCrit() {
+      initAudio();
+      if (!canSpecialCrit) {
+        setLog('⏳ СПЕЦ-КРИТ ПЕРЕЗАРЯЖАЕТСЯ... ПРОДОЛЖАЙ БИТЬ!');
         return;
       }
       
-      const currentRoom = rooms[timofeyPos];
+      const sizeBonus = Math.min(0.4, sisiSize * 0.025);
+      const success = Math.random() < (0.4 + sizeBonus);
       
-      if (!currentRoom.hasNote) {
-        addLog(`❌ В ${currentRoom.name} нет записки. Продолжай поиски!`);
-        return;
+      if (success) {
+        const hugeGain = 1.5 + (sisiSize * 0.2) + (Math.random() * 2.0);
+        sisiSize += hugeGain;
+        critChance = Math.min(0.6, critChance + 0.05);
+        arousal = Math.min(MAX_AROUSAL, arousal + 40);
+        playSquelchSound();
+        playCritSound();
+        const msg = `💦💦💦 СПЕЦ-КРИТ!!! ДИМА БЬЁТ, КОНЧАЕТ НА СОСКИ И 👅 ГЛОТАЕТ ВСЮ СПЕРМУ! +${hugeGain.toFixed(2)}см!`;
+        setLog(msg, true, true);
+        critCounter++;
+        sisiEmoji.style.animation = 'shake 0.4s';
+        setTimeout(()=> sisiEmoji.style.animation = '', 400);
+        canSpecialCrit = false;
+        setTimeout(()=> { canSpecialCrit = true; setLog('✨ СПЕЦ-КРИТ СНОВА ГОТОВ!'); }, 5000);
+      } else {
+        sisiSize += 0.3;
+        setLog('😩 ПОЧТИ ПОЛУЧИЛОСЬ... НО НЕ ХВАТИЛО ВОЗБУЖДЕНИЯ. +0.3см');
+        playSlapSound();
       }
       
-      if (notesFound[timofeyPos]) {
-        addLog(`📋 Записка из ${currentRoom.name} уже взята.`);
-        return;
-      }
-      
-      // Нашли записку!
-      notesFound[timofeyPos] = true;
-      collectedNotes++;
-      updateNoteCounter();
-      
-      addLog(`✅ ТИМОФЕЙ НАШЁЛ ЗАПИСКУ в ${currentRoom.name}! (${collectedNotes}/${NOTES_REQUIRED})`);
-      
-      if (collectedNotes === NOTES_REQUIRED) {
-        addLog(`🎉 ВСЕ 5 ЗАПИСОК НАЙДЕНЫ! Теперь найди Галину Владимировну и сдай их!`);
-      }
-      
-      renderMap();
-    }
-    
-    // Сдать записки Галине
-    function submitToGalina() {
-      if (gameCompleted) {
-        addLog('🏆 Тимофей уже получил АШ 2.0!');
-        return;
-      }
-      
-      // Проверка: Тимофей в одной комнате с Галиной?
-      if (timofeyPos !== galinaPosition) {
-        addLog(`🚫 Галина Владимировна не здесь! Ищи её по школе.`);
-        return;
-      }
-      
-      if (collectedNotes < NOTES_REQUIRED) {
-        addLog(`👩‍🏫 Галина: "Тимофей, у тебя только ${collectedNotes}/${NOTES_REQUIRED} записок. Приноси все 5!"`);
-        return;
-      }
-      
-      // ПОБЕДА!
-      gameCompleted = true;
-      
-      // Показываем все записки для наглядности
-      addLog(`🏆👑 ГАЛИНА ВЛАДИМИРОВНА ПРИНЯЛА 5 ЗАПИСОК! ТИМОФЕЙ ПОЛУЧАЕТ "АШ 2.0" !!! МИССИЯ ВЫПОЛНЕНА! 🎓🤡`);
-      
-      renderMap();
-      updateNoteCounter();
-    }
-    
-    // Телепорт в случайный кабинет (для веселья)
-    function randomTeleport() {
-      if (gameCompleted) {
-        addLog('Игра завершена.');
-        return;
-      }
-      
-      let newPos;
-      do {
-        newPos = Math.floor(Math.random() * TOTAL_ROOMS);
-      } while (newPos === timofeyPos);
-      
-      timofeyPos = newPos;
-      visitedRooms[newPos] = true;
-      
-      const room = rooms[newPos];
-      let msg = `🌀 Тимофей телепортировался в ${room.name}.`;
-      
-      if (newPos === galinaPosition) {
-        msg += ` 👩‍🏫 О! Тут Галина!`;
-        if (collectedNotes === NOTES_REQUIRED) msg += ` Можно сдавать!`;
-      }
-      
-      addLog(msg);
-      renderMap();
+      checkArousalOverflow();
+      checkAchievements();
+      updateUI();
     }
 
-    // Сброс
     function resetGame() {
-      initNewGame();
+      sisiSize = 1.0;
+      critChance = 0.25;
+      arousal = 0;
+      canSpecialCrit = true;
+      achSizeUnlocked = achCritUnlocked = achArousalUnlocked = false;
+      critCounter = 0;
+      updateUI();
+      setLog('💬 НОВАЯ ИГРА! ВЫРАЩИВАЙ СИСЮ ДИМЫ, КОПИ КРИТЫ.');
+      sisiEmoji.style.animation = '';
     }
 
-    // ---------- ИНИЦИАЛИЗАЦИЯ ----------
-    function bindEvents() {
-      document.getElementById('searchBtn').addEventListener('click', searchNote);
-      document.getElementById('galinaBtn').addEventListener('click', submitToGalina);
-      document.getElementById('randomTeleportBtn').addEventListener('click', randomTeleport);
+    function handleSisiClick() { hitSisya(); }
+
+    // Инициализация после принятия дисклеймера
+    function initGame() {
+      updateUI();
+      setLog('🥩 ЖМИ НА СИСЮ ИЛИ КНОПКИ! ВЫРАСТИ ГИГАНТСКУЮ СИСЮ.');
+      
+      document.getElementById('hitBtn').addEventListener('click', hitSisya);
+      document.getElementById('specialCritBtn').addEventListener('click', performSpecialCrit);
       document.getElementById('resetBtn').addEventListener('click', resetGame);
+      sisiEmoji.addEventListener('click', handleSisiClick);
+      
+      // Пассивное снижение возбуждения со временем (чтобы не копилось вечно)
+      setInterval(() => {
+        if (arousal > 0) {
+          arousal = Math.max(0, arousal - 1.5);
+          updateUI();
+        }
+        if (!canSpecialCrit && Math.random() < 0.2) canSpecialCrit = true;
+      }, 3000);
     }
 
-    // Старт
-    function startGame() {
-      initNewGame();
-      bindEvents();
-    }
+    // Дисклеймер
+    const overlay = document.getElementById('disclaimer');
+    const acceptBtn = document.getElementById('acceptDisclaimer');
+    
+    acceptBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      initGame();
+      // Активируем аудио при первом клике по игре
+      document.body.addEventListener('click', () => { initAudio(); }, { once: true });
+    });
 
-    startGame();
+    // Предварительно показываем overlay
+    overlay.style.display = 'flex';
   })();
 </script>
 </body>
