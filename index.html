@@ -3,653 +3,854 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Караоке у Артема | Ритм-игра с реальными песнями</title>
+    <title>NetErrror - Взрослый чат 18+</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f1f 100%);
+            color: #fff;
             min-height: 100vh;
-            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Poppins', 'Montserrat', system-ui, sans-serif;
             padding: 20px;
         }
 
-        .game-container {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            border-radius: 64px;
-            padding: 20px 25px 30px 25px;
-            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-
-        canvas {
-            display: block;
+        /* Контейнеры */
+        .container {
+            max-width: 600px;
             margin: 0 auto;
-            border-radius: 36px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 200, 50, 0.4);
-            cursor: pointer;
-            background-color: #0b0f1a;
-        }
-
-        .info-panel {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            background: rgba(20, 25, 40, 0.7);
-            backdrop-filter: blur(4px);
-            padding: 10px 20px;
-            border-radius: 60px;
-            border: 1px solid rgba(255, 210, 90, 0.5);
-        }
-
-        .score-box {
-            background: #000000aa;
-            padding: 6px 18px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: #FFE484;
-            text-shadow: 0 0 5px #ffb347;
-        }
-        .score-box span { font-size: 0.9rem; margin-right: 6px; }
-
-        .combo-box {
-            background: #2a1e3caa;
-            padding: 5px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: #D9A7FF;
-        }
-
-        .song-selector {
-            display: flex;
-            gap: 12px;
-            background: #00000066;
-            padding: 6px 16px;
-            border-radius: 48px;
-            align-items: center;
-        }
-        .song-selector select {
-            background: #2a2f42;
-            border: 1px solid #ffcd7e;
-            color: #FFE4B5;
-            padding: 6px 12px;
-            border-radius: 36px;
-            font-weight: bold;
-            font-family: inherit;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        button {
-            background: radial-gradient(circle at 30% 10%, #f5b042, #d97a0c);
-            border: none;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 6px 20px;
-            border-radius: 60px;
-            color: #1e1a0c;
-            font-family: inherit;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 0 #7a3e05;
-            transform: translateY(-1px);
-        }
-        button:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #7a3e05;
-        }
-        .controls-hint {
-            display: flex;
-            gap: 10px;
-            background: #00000066;
-            padding: 5px 15px;
-            border-radius: 48px;
-            font-size: 0.8rem;
-            color: #ccc;
-        }
-        .key {
-            background: #2f2f3f;
-            padding: 3px 10px;
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 20px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 0, 100, 0.3);
+            border: 1px solid rgba(255, 50, 150, 0.3);
+        }
+
+        /* Шапка */
+        .header {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ff0066;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 0, 100, 0.5);
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Навигация */
+        .nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 0, 100, 0.5);
+            transform: scale(1.02);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            box-shadow: 0 0 15px rgba(255, 0, 100, 0.5);
+        }
+
+        /* Контент */
+        .content {
+            padding: 20px;
+            min-height: 500px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Кнопки персонажей */
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .char-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .char-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 0, 100, 0.2);
+            border-color: #ff0066;
+        }
+
+        .char-card.selected {
+            background: linear-gradient(135deg, #ff0066, #ff3300);
+            box-shadow: 0 0 20px rgba(255, 0, 100, 0.5);
+        }
+
+        .char-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .char-name {
+            font-size: 18px;
             font-weight: bold;
-            color: #ffcd7e;
         }
+
+        .char-desc {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Чат */
+        .chat-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .chat-rooms {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
+        }
+
+        .room-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .room-btn.active-room {
+            background: #ff0066;
+        }
+
+        .chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            animation: fadeIn 0.2s;
+        }
+
+        .message.system {
+            background: rgba(255, 100, 0, 0.2);
+            text-align: center;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .message-header {
+            font-size: 11px;
+            color: #ff6699;
+            margin-bottom: 5px;
+        }
+
+        .message-text {
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            color: white;
+            outline: none;
+        }
+
+        .chat-send {
+            background: #ff0066;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        /* Секс-игра */
+        .sex-area {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .arousal-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .arousal-fill {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .sex-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #ff0066;
+            transform: scale(1.05);
+        }
+
+        .sex-response {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            min-height: 100px;
+            border-left: 3px solid #ff0066;
+        }
+
+        /* Другое */
+        button {
+            font-family: inherit;
+        }
+
         .status-badge {
-            background: #1e2a3a;
-            padding: 5px 16px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #ffdf8c;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
         }
-        @media (max-width: 750px) {
-            .info-panel { gap: 8px; padding: 8px 15px; }
-            .score-box { font-size: 1.2rem; padding: 4px 12px; }
-            .song-selector select { font-size: 0.7rem; }
-            button { font-size: 0.8rem; padding: 4px 14px; }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 11px;
+            opacity: 0.5;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0066;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .char-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="karaokeCanvas" width="800" height="500" style="width:100%; height:auto; max-width:800px; aspect-ratio:800/500"></canvas>
+<div class="container">
+    <div class="header">
+        <h1>🔞 NetErrror 18+</h1>
+        <p>Мир без запретов | Анонимный чат | Виртуальный секс</p>
+    </div>
 
-        <div class="info-panel">
-            <div class="score-box"><span>🎤</span> <span id="scoreValue">0</span></div>
-            <div class="combo-box">✨ x<span id="comboValue">0</span></div>
-            <div class="song-selector">
-                <span style="font-size:0.8rem;">🎵 ТРЕК:</span>
-                <select id="songSelect">
-                    <option value="classic">🎸 Классика — Мурка</option>
-                    <option value="disco">🕺 Диско — Светит месяц</option>
-                    <option value="rock">🤘 Рок — Катюша (рок-версия)</option>
-                    <option value="pop">✨ Поп — Калинка</option>
-                </select>
-                <button id="applySongBtn">▶ ЗАГРУЗИТЬ</button>
+    <div class="nav">
+        <button class="nav-btn" data-page="home">🏠 Главная</button>
+        <button class="nav-btn" data-page="sex">🎮 Вирт секс</button>
+        <button class="nav-btn" data-page="chat">💬 Онлайн чат</button>
+        <button class="nav-btn" data-page="profile">👤 Профиль</button>
+    </div>
+
+    <div class="content">
+        <!-- ГЛАВНАЯ СТРАНИЦА -->
+        <div id="home" class="page">
+            <h2>🔥 Добро пожаловать в разврат!</h2>
+            <p style="margin: 15px 0; opacity: 0.8;">Выбери персонажа и начни играть. Всё анонимно, без ограничений.</p>
+            
+            <div class="char-grid" id="charGrid">
+                <div class="char-card" data-char="girl">
+                    <div class="char-emoji">💋</div>
+                    <div class="char-name">Развратная девушка</div>
+                    <div class="char-desc">Горячая, игривая, готова на всё</div>
+                </div>
+                <div class="char-card" data-char="boy">
+                    <div class="char-emoji">🍆</div>
+                    <div class="char-name">Пошлый парень</div>
+                    <div class="char-desc">Грубый, доминантный, страстный</div>
+                </div>
+                <div class="char-card" data-char="gay">
+                    <div class="char-emoji">🏳️‍🌈</div>
+                    <div class="char-name">Гей</div>
+                    <div class="char-desc">Для парней, горячий и смелый</div>
+                </div>
+                <div class="char-card" data-char="lesbian">
+                    <div class="char-emoji">👩‍❤️‍👩</div>
+                    <div class="char-name">Лесбиянка</div>
+                    <div class="char-desc">Нежная, страстная, для девушек</div>
+                </div>
             </div>
-            <button id="resetGameBtn">🎙 НОВАЯ ИГРА</button>
-            <div class="status-badge" id="gameStatusText">⚡ ИГРА</div>
+            
+            <div id="selectedChar" class="status-badge" style="display: none; margin-top: 20px;">
+                ✅ Выбран: <span id="charName"></span>
+            </div>
         </div>
-        <div class="controls-hint">
-            <span>🎹 УДАР ПО НОТАМ:</span>
-            <span class="key">⬅️ A / ←</span>
-            <span class="key">⬆️ S / ↑</span>
-            <span class="key">⬇️ D / ↓</span>
-            <span class="key">➡️ F / →</span>
-            <span>🎤 (или мышь/тап)</span>
+
+        <!-- ВИРТУАЛЬНЫЙ СЕКС -->
+        <div id="sex" class="page">
+            <div class="sex-area">
+                <h3>🎮 Виртуальный секс</h3>
+                <p id="sexCharStatus" style="font-size: 12px; opacity: 0.7; margin: 10px 0;">Сначала выбери персонажа на главной</p>
+                
+                <div class="arousal-bar">
+                    <div class="arousal-fill" id="arousalFill"></div>
+                </div>
+                <div id="arousalText" style="text-align: center; font-size: 12px;">😈 Уровень: 0/5</div>
+                
+                <div class="sex-actions" id="sexActions">
+                    <!-- Действия будут подставлены из JS -->
+                </div>
+                
+                <div class="sex-response" id="sexResponse">
+                    👄 Напиши или нажми на действие...
+                </div>
+            </div>
         </div>
+
+        <!-- ОНЛАЙН ЧАТ -->
+        <div id="chat" class="page">
+            <div class="chat-container">
+                <div class="chat-rooms" id="chatRooms">
+                    <button class="room-btn" data-room="gay">🏳️‍🌈 Гей чат</button>
+                    <button class="room-btn" data-room="lesbian">👩‍❤️‍👩 Лесби чат</button>
+                    <button class="room-btn" data-room="mixed">💑 Смешанный</button>
+                    <button class="room-btn" data-room="everyone">🌍 Общий</button>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">💬 Выбери комнату и начни общаться...</div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." maxlength="500">
+                    <button class="chat-send" id="sendMessageBtn">📤</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        📷 Фото
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                    </label>
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        🎥 Видео
+                        <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                    </label>
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        🎙️ Голос
+                        <input type="file" id="voiceInput" accept="audio/*" style="display: none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div id="profile" class="page">
+            <h3>👤 Мой профиль</h3>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 15px;">
+                <p><strong>🎭 Персонаж:</strong> <span id="profileChar">Не выбран</span></p>
+                <p><strong>💬 Чатов:</strong> <span id="profileChats">0</span></p>
+                <p><strong>💦 Уровень разврата:</strong> <span id="profileLevel">0</span>/100</p>
+                <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.1);">
+                <button id="resetBtn" style="background: #ff0066; border: none; color: white; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer;">🔄 Сбросить всё</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        🔞 18+ ONLY | Анонимно | Без сохранения истории
     </div>
 </div>
 
 <script>
-    (function(){
-        // -------- КАНВАС ----------
-        const canvas = document.getElementById('karaokeCanvas');
-        const ctx = canvas.getContext('2d');
-        const CANVAS_W = 800, CANVAS_H = 500;
-        canvas.width = CANVAS_W; canvas.height = CANVAS_H;
-        const LANES = 4;
-        const LANE_NAMES = ['← ЛЕВО', '↑ ВВЕРХ', '↓ ВНИЗ', '→ ПРАВО'];
-        const KEY_MAP = {
-            'ArrowLeft':0,'a':0,'A':0,
-            'ArrowUp':1,'w':1,'W':1,
-            'ArrowDown':2,'s':2,'S':2,
-            'ArrowRight':3,'d':3,'D':3
-        };
-        const HIT_LINE_Y = CANVAS_H - 110;
-        const PERFECT_WINDOW = 18, GOOD_WINDOW = 38, MISS_WINDOW = 65;
-        
-        // -------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ --------
-        let notes = [];
-        let score = 0, combo = 0;
-        let gameActive = true;
-        let animationId = null;
-        let feedbackText = { text: '', alpha: 0, x: 0, y: 0, color: '#ffd966' };
-        let laneFlash = [false,false,false,false];
-        let particles = [];
-        let scrollSpeed = 3.9;      // базовая скорость нот
-        
-        // АУДИО
-        let audioCtx = null;
-        let allowAudio = false;
-        let currentAudioBuffer = null;
-        let currentSource = null;
-        let isPlayingSong = false;
-        let songStartTime = 0;
-        let scheduledNotes = [];     // массив { timeOffset, lane }
-        let animationFrameReq = null;
-        let currentSongId = "classic";
-        
-        // -------- РЕАЛЬНЫЕ ПЕСНИ + РИТМ-НОТЫ (основаны на реальных битах и мелодиях) --------
-        const SONGS_DB = {
-            classic: {
-                name: "Мурка (Классика)",
-                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // свободный инструментал
-                bpm: 108,
-                offset: 0.5,
-                rhythmPattern: [
-                    [0,1,2,3], [0,2], [1,3], [0,1], [2,3], [0], [1,2], [3,0], [2,1], [3,2], [0,1,2], [3,1], [0,3], [2,0], [1,3,2]
-                ]
-            },
-            disco: {
-                name: "Светит месяц (Диско)",
-                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-                bpm: 126,
-                offset: 0.8,
-                rhythmPattern: [
-                    [0,2], [1,3], [0,1,2], [3], [0,2,3], [1], [0,3], [2,1], [0,2], [1,3,0], [2], [3,1], [0,2,1]
-                ]
-            },
-            rock: {
-                name: "Катюша (Рок)",
-                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-                bpm: 142,
-                offset: 1.0,
-                rhythmPattern: [
-                    [0], [1], [2], [3], [0,1], [2,3], [0,2], [1,3], [0,3,1], [2,0], [3,2], [0,1,2,3], [1], [3,0]
-                ]
-            },
-            pop: {
-                name: "Калинка (Pop)",
-                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-                bpm: 98,
-                offset: 0.3,
-                rhythmPattern: [
-                    [0,2,1], [3,1], [0,3], [2,0,1], [3,2], [1,0], [2,3,1], [0], [1,2,3], [2,0,3]
-                ]
+    // ==================== ХРАНИЛИЩЕ ДАННЫХ ====================
+    let currentChar = localStorage.getItem('netErrorChar') || null;
+    let arousal = parseInt(localStorage.getItem('netErrorArousal')) || 0;
+    let level = parseInt(localStorage.getItem('netErrorLevel')) || 0;
+    
+    // Чат данные
+    let currentRoom = localStorage.getItem('netErrorRoom') || null;
+    let username = localStorage.getItem('netErrorUsername') || null;
+    
+    // Генерация случайного имени если нет
+    if (!username) {
+        const names = ['Тигр', 'Лиса', 'Волк', 'Кошка', 'Пантера', 'Дракон', 'Феникс', 'Демон', 'Ангел', 'Шалун', 'Шалунья'];
+        username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 1000);
+        localStorage.setItem('netErrorUsername', username);
+    }
+    
+    // Сообщения в чатах
+    let chatMessages = {
+        gay: JSON.parse(localStorage.getItem('chat_gay')) || [],
+        lesbian: JSON.parse(localStorage.getItem('chat_lesbian')) || [],
+        mixed: JSON.parse(localStorage.getItem('chat_mixed')) || [],
+        everyone: JSON.parse(localStorage.getItem('chat_everyone')) || []
+    };
+    
+    // ==================== ДАННЫЕ ДЛЯ СЕКСА ====================
+    const sexActions = {
+        girl: {
+            actions: ['👅 Сосать', '💋 Киска', '👉 Клитор', '✌️ Палец', '👅 Язык', '💦 Кончить'],
+            responses: {
+                'сосать': '💋 Я беру твой член в рот и делаю глубокий минет, облизывая головку язычком...',
+                'киска': '🌸 Моя киска мокрая и ждет тебя, войди в меня глубже...',
+                'клитор': '💓 Твой палец ласкает мой клитор, я дрожу от удовольствия...',
+                'палец': '👆 Два пальца внутри меня, я чувствую как ты растягиваешь меня...',
+                'язык': '👅 Твой язык вылизывает меня до самой глубины...',
+                'кончить': '💦 Я кончаю на твой член, заливая его своими соками!'
             }
-        };
-        
-        // Функция для генерации нот на основе BPM и паттерна (создаем точную ритмическую сетку)
-        function generateNoteScheduleFromSong(songKey) {
-            const song = SONGS_DB[songKey];
-            if (!song) return [];
-            const bpm = song.bpm;
-            const beatDuration = 60.0 / bpm; // длительность четверти в секундах
-            const pattern = song.rhythmPattern;
-            const totalBeats = pattern.length * 2;  // примерно 2 такта на паттерн * кол-во
-            const schedule = [];
-            let currentTime = song.offset;
-            for (let measure = 0; measure < 3; measure++) { // 3 повтора для полноты песни ~ 30-40 сек
-                for (let i = 0; i < pattern.length; i++) {
-                    const beatNotes = pattern[i];
-                    const timePoint = currentTime + (i * beatDuration * 0.8); // динамический ритм
-                    for (let lane of beatNotes) {
-                        if (lane >= 0 && lane < LANES) {
-                            schedule.push({ timeOffset: timePoint + (Math.random() * 0.02), lane: lane });
-                        }
-                    }
-                    // дополнительные ноты для насыщенности (караоке!)
-                    if (i % 2 === 0) {
-                        let extraLane = Math.floor(Math.random() * LANES);
-                        schedule.push({ timeOffset: timePoint + 0.12, lane: extraLane });
-                    }
-                }
-                currentTime += pattern.length * beatDuration * 0.9;
-                if (currentTime > 58) break;
+        },
+        boy: {
+            actions: ['🍆 Член', '🍑 Попа', '👉 Палец', '👅 Язык', '🐕 Раком', '💦 Кончить'],
+            responses: {
+                'член': '🍆 Я ввожу свой твердый член в твою мокрую киску, чувствуешь как пульсирует?...',
+                'попа': '🍑 Я раздвигаю твои ягодицы и вхожу в тугую попку, ты стонешь...',
+                'палец': '👆 Мой палец внутри тебя, массирую твою точку G...',
+                'язык': '👅 Я вылизываю твою киску до самой глубины...',
+                'раком': '🐕 Повернись раком, я вхожу сзади глубоко и жестко...',
+                'кончить': '💦 Я кончаю глубоко в тебя, сперма заливает матку!'
             }
-            // сортировка по времени
-            schedule.sort((a,b) => a.timeOffset - b.timeOffset);
-            return schedule;
+        },
+        gay: {
+            actions: ['🍆 Член', '🍑 Попка', '👅 Сосать', '💦 Кончить'],
+            responses: {
+                'член': '🏳️‍🌈 Соси мой член, глубоко, я хочу в твое горло...',
+                'попка': '🏳️‍🌈 Раздвинь мою попку, войди в меня, я хочу чувствовать тебя...',
+                'сосать': '🏳️‍🌈 Я беру твой член в рот и сосу до конца, глотая каждую каплю...',
+                'кончить': '🏳️‍🌈 Я кончаю в твою попку, заливаю тебя горячей спермой!'
+            }
+        },
+        lesbian: {
+            actions: ['💋 Киска', '💓 Клитор', '👉 Палец', '👅 Язык', '💦 Кончить'],
+            responses: {
+                'киска': '👩‍❤️‍👩 Моя киска мокрая, войди в меня пальчиками...',
+                'клитор': '👩‍❤️‍👩 Полижи мой клитор, он такой чувствительный, я кончаю...',
+                'палец': '👩‍❤️‍👩 Твои пальцы внутри меня, я сжимаюсь вокруг них...',
+                'язык': '👩‍❤️‍👩 Я вылизываю твою киску до оргазма...',
+                'кончить': '👩‍❤️‍👩 Мы кончаем вместе, обнимая друг друга!'
+            }
+        }
+    };
+    
+    // Активация действий для секса
+    function performSexAction(actionKey) {
+        if (!currentChar) {
+            document.getElementById('sexResponse').innerHTML = '❌ Сначала выбери персонажа на главной странице!';
+            return;
         }
         
-        // Загрузка реальной музыки
-        async function loadSong(songId) {
-            if (!audioCtx) {
-                try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch(e) { console.warn("Audio not supported"); return false; }
-            }
-            if (currentSource) {
-                try { currentSource.stop(); } catch(e) {}
-                currentSource = null;
-            }
-            const songData = SONGS_DB[songId];
-            if (!songData) return false;
-            try {
-                const response = await fetch(songData.url);
-                if (!response.ok) throw new Error("Network error");
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                currentAudioBuffer = audioBuffer;
-                return true;
-            } catch(err) {
-                console.warn("Не удалось загрузить удалённый трек, используем встроенный генератор битов");
-                return false;
+        const charData = sexActions[currentChar];
+        if (!charData) return;
+        
+        let response = '';
+        for (let key in charData.responses) {
+            if (actionKey.includes(key)) {
+                response = charData.responses[key];
+                break;
             }
         }
         
-        // Воспроизведение песни и синхронизация нот
-        function startRealSong(songId) {
-            if (!allowAudio || !audioCtx) return false;
-            if (currentSource) {
-                try { currentSource.stop(); } catch(e) {}
-            }
-            if (!currentAudioBuffer) {
-                // если не загружено, пробуем ещё раз синхронно
-                loadSong(songId).then(() => { if(currentAudioBuffer) startRealSong(songId); });
-                return false;
-            }
-            const source = audioCtx.createBufferSource();
-            source.buffer = currentAudioBuffer;
-            source.connect(audioCtx.destination);
-            currentSource = source;
-            songStartTime = audioCtx.currentTime;
-            source.start(0);
-            isPlayingSong = true;
-            
-            // генерируем ноты для ритма на основе выбранной песни
-            scheduledNotes = generateNoteScheduleFromSong(songId);
-            notes = []; // очищаем старые ноты
-            // Запускаем синхронизатор нот (каждый кадр проверяем время)
-            return true;
+        if (!response) {
+            response = charData.responses[Object.keys(charData.responses)[Math.floor(Math.random() * Object.keys(charData.responses).length)]];
         }
         
-        // Остановить песню
-        function stopSong() {
-            if (currentSource) {
-                try { currentSource.stop(); } catch(e) {}
-                currentSource = null;
-            }
-            isPlayingSong = false;
-            songStartTime = 0;
+        // Обновляем возбуждение
+        arousal = Math.min(arousal + Math.floor(Math.random() * 20) + 10, 100);
+        level = Math.min(level + Math.floor(Math.random() * 5) + 1, 100);
+        
+        localStorage.setItem('netErrorArousal', arousal);
+        localStorage.setItem('netErrorLevel', level);
+        
+        const fillPercent = (arousal / 100) * 100;
+        document.getElementById('arousalFill').style.width = fillPercent + '%';
+        
+        let arousalEmoji = '😈';
+        if (arousal >= 80) arousalEmoji = '💥';
+        else if (arousal >= 60) arousalEmoji = '🌊';
+        else if (arousal >= 40) arousalEmoji = '💦';
+        else if (arousal >= 20) arousalEmoji = '🔥';
+        
+        document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
+        
+        let finalResponse = response;
+        if (arousal >= 100) {
+            finalResponse = '💦💦💦 ТЫ КОНЧАЕШЬ! Сильнейший оргазм! Возбуждение сброшено... 💦💦💦\n\n' + response;
+            arousal = 0;
+            localStorage.setItem('netErrorArousal', 0);
+            document.getElementById('arousalFill').style.width = '0%';
+            document.getElementById('arousalText').innerHTML = '😈 Уровень: 0/100';
         }
         
-        // Синхронизация: добавляем ноты из расписания в игровой массив
-        let lastScheduledIndex = 0;
-        function syncNotesWithAudio() {
-            if (!gameActive || !isPlayingSong || !audioCtx || !songStartTime) return;
-            const now = audioCtx.currentTime;
-            const elapsed = now - songStartTime;
-            while (lastScheduledIndex < scheduledNotes.length && scheduledNotes[lastScheduledIndex].timeOffset <= elapsed + 0.35) {
-                const noteData = scheduledNotes[lastScheduledIndex];
-                // Добавляем ноту, которая появится сверху и будет двигаться
-                // Вычисляем позицию по времени: скорость scrollSpeed расчитываем динамически
-                // нота появится с запасом и будет идти к линии
-                const timeToHit = noteData.timeOffset - elapsed;
-                if (timeToHit > -0.2) {
-                    // Динамический старт Y: появляется сверху и за время timeToHit достигнет линии.
-                    // Определим стартовую Y, чтобы за оставшееся время долетела до HIT_LINE_Y
-                    let framesToHit = timeToHit * 60; // примерное число кадров
-                    let startY = HIT_LINE_Y - (scrollSpeed * framesToHit);
-                    if (startY < -50) startY = -50;
-                    notes.push({
-                        lane: noteData.lane,
-                        y: startY,
-                        hit: false,
-                        missMark: false,
-                        scheduledTime: noteData.timeOffset
-                    });
-                }
-                lastScheduledIndex++;
-            }
+        document.getElementById('sexResponse').innerHTML = finalResponse;
+        
+        // Обновляем профиль
+        updateProfile();
+    }
+    
+    // Обновление интерфейса
+    function updateSexActions() {
+        const container = document.getElementById('sexActions');
+        if (!currentChar) {
+            container.innerHTML = '<div style="color: #ff6699;">❌ Выбери персонажа на главной</div>';
+            return;
         }
         
-        // Обновление позиций + проверка пропусков (мимо линии)
-        function updateNotesPositions() {
-            if (!gameActive) return;
-            for (let i=0; i<notes.length; i++) {
-                const n = notes[i];
-                n.y += scrollSpeed;
-                if (!n.hit && n.y > HIT_LINE_Y + MISS_WINDOW) {
-                    n.hit = true;
-                    n.missMark = true;
-                    combo = 0;
-                    updateComboUI();
-                    if(allowAudio) playMissSound();
-                    addFeedback("МИСС!", CANVAS_W/2, HIT_LINE_Y-20, "#ff8866");
-                    addMissParticles(n.lane);
-                }
-            }
-            notes = notes.filter(n => n.y < CANVAS_H + 150);
-        }
-        
-        // Обработка попадания (адаптировано под ритм-игру)
-        function hitNote(lane) {
-            if (!gameActive) return false;
-            let closest = null;
-            let minDist = Infinity;
-            for (let i=0; i<notes.length; i++) {
-                const n = notes[i];
-                if (n.hit) continue;
-                if (n.lane === lane) {
-                    const distY = Math.abs(n.y - HIT_LINE_Y);
-                    if (distY < MISS_WINDOW && distY < minDist) {
-                        minDist = distY;
-                        closest = n;
-                    }
-                }
-            }
-            if (!closest) {
-                if (gameActive) {
-                    combo = 0;
-                    updateComboUI();
-                    addFeedback("ПРОМАХ!", laneToX(lane)+20, HIT_LINE_Y-15, "#ccaa77");
-                    if(allowAudio) playMissSound();
-                    laneFlash[lane]=true;
-                    setTimeout(()=>laneFlash[lane]=false,120);
-                }
-                return false;
-            }
-            const dist = Math.abs(closest.y - HIT_LINE_Y);
-            let isPerfect = false;
-            let points = 0;
-            if(dist <= PERFECT_WINDOW) { points = 100; isPerfect = true; addFeedback("ПЕРФЕКТ!", laneToX(lane)+20, HIT_LINE_Y-20, "#ffd966"); combo++; }
-            else if(dist <= GOOD_WINDOW) { points = 65; addFeedback("ХОРОШО!", laneToX(lane)+20, HIT_LINE_Y-18, "#b9f6ca"); combo++; }
-            else { points = 35; addFeedback("ПОПАЛ!", laneToX(lane)+20, HIT_LINE_Y-18, "#aaccff"); combo++; }
-            let comboBonus = 1 + Math.floor(combo/10)*0.05;
-            let finalPoints = Math.floor(points * comboBonus);
-            score += finalPoints;
-            updateScoreUI();
-            updateComboUI();
-            closest.hit = true;
-            laneFlash[lane]=true;
-            setTimeout(()=>laneFlash[lane]=false, 90);
-            if(allowAudio) playHitSound(isPerfect, lane);
-            addHitParticles(lane, HIT_LINE_Y, isPerfect);
-            return true;
-        }
-        
-        // ------------------ ЗВУКОВЫЕ ЭФФЕКТЫ ------------------
-        function playHitSound(perfect, lane) {
-            if(!audioCtx || !allowAudio) return;
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            let freq = 440 + lane * 45;
-            if(perfect) freq = 660 + lane * 35;
-            osc.frequency.value = freq;
-            gain.gain.value = 0.2;
-            gain.gain.exponentialRampToValueAtTime(0.0001, now+0.3);
-            osc.start();
-            osc.stop(now+0.3);
-        }
-        function playMissSound() {
-            if(!audioCtx || !allowAudio) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.value = 190;
-            gain.gain.value = 0.15;
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.25);
-            osc.start();
-            osc.stop(audioCtx.currentTime+0.25);
-        }
-        
-        // ------ визуальные эффекты ------
-        function addFeedback(msg, x, y, col) { feedbackText = { text: msg, alpha: 1.0, x: x, y: y, color: col }; }
-        function addHitParticles(lane, yPos, perfect) {
-            const xBase = laneToX(lane)+30;
-            for(let i=0;i<6+(perfect?4:0);i++) particles.push({ x: xBase+(Math.random()-0.5)*22, y: yPos+(Math.random()-0.5)*14, vx: (Math.random()-0.5)*3, vy: (Math.random()-1.5)*2.5-1, life:0.85, color: perfect?"#FFD966":"#F4C542" });
-        }
-        function addMissParticles(lane) {
-            const xBase = laneToX(lane)+30;
-            for(let i=0;i<7;i++) particles.push({ x: xBase+(Math.random()-0.5)*30, y: HIT_LINE_Y+(Math.random()-0.5)*20, vx: (Math.random()-0.5)*4, vy: (Math.random()-1)*3, life:0.6, color: "#CC8866" });
-        }
-        function updateParticles() {
-            for(let p of particles) { p.x+=p.vx; p.y+=p.vy; p.life-=0.025; p.vy+=0.12; }
-            particles = particles.filter(p=>p.life>0);
-            if(feedbackText.alpha>0) { feedbackText.alpha-=0.02; feedbackText.y-=1.1; }
-        }
-        
-        function updateScoreUI() { document.getElementById('scoreValue').innerText = Math.floor(score); }
-        function updateComboUI() { document.getElementById('comboValue').innerText = combo; }
-        function laneToX(lane) { const w = CANVAS_W/LANES; return lane*w + w/2 - 25; }
-        
-        // Рисование
-        function draw() {
-            ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
-            const grad = ctx.createLinearGradient(0,0,0,CANVAS_H);
-            grad.addColorStop(0,'#101624'); grad.addColorStop(1,'#1b1f32');
-            ctx.fillStyle=grad; ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
-            const laneW = CANVAS_W/LANES;
-            for(let i=0;i<LANES;i++){
-                ctx.beginPath();
-                ctx.strokeStyle="rgba(255,210,100,0.4)";
-                ctx.lineWidth=2;
-                ctx.strokeRect(i*laneW+5,20,laneW-10,CANVAS_H-40);
-                ctx.fillStyle="rgba(255,240,180,0.08)";
-                ctx.fillRect(i*laneW+5,20,laneW-10,CANVAS_H-40);
-                ctx.font="bold 15px 'Segoe UI'";
-                ctx.fillStyle="#FFDD99";
-                ctx.fillText(LANE_NAMES[i], i*laneW+laneW/2-30, 55);
-                if(laneFlash[i]){ ctx.fillStyle="rgba(255,200,80,0.5)"; ctx.fillRect(i*laneW+5,20,laneW-10,CANVAS_H-40); }
-            }
-            ctx.beginPath(); ctx.moveTo(0,HIT_LINE_Y); ctx.lineTo(CANVAS_W,HIT_LINE_Y); ctx.strokeStyle="#FFB347"; ctx.lineWidth=3; ctx.stroke();
-            ctx.fillStyle="#FFD966aa"; ctx.font="bold 13px monospace"; ctx.fillText("🎤 БЕЙ В РИТМ 🎤", CANVAS_W/2-90, HIT_LINE_Y-8);
-            for(let n of notes){
-                if(n.hit) continue;
-                const laneX = n.lane * laneW + laneW/2;
-                ctx.shadowBlur=8; ctx.shadowColor="#ffbb44";
-                ctx.beginPath(); ctx.arc(laneX, n.y, 18, 0, Math.PI*2); ctx.fillStyle="#FAC05E"; ctx.fill();
-                ctx.beginPath(); ctx.arc(laneX, n.y, 13, 0, Math.PI*2); ctx.fillStyle="#F57C00"; ctx.fill();
-                ctx.fillStyle="white"; ctx.font="bold 18px monospace"; ctx.fillText("♪", laneX-9, n.y+7);
-                ctx.shadowBlur=0;
-            }
-            for(let p of particles){ ctx.globalAlpha=p.life; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); }
-            ctx.globalAlpha=1;
-            if(feedbackText.alpha>0){ ctx.font="bold 30px 'Segoe UI'"; ctx.fillStyle=feedbackText.color; ctx.globalAlpha=feedbackText.alpha; ctx.fillText(feedbackText.text, feedbackText.x-30, feedbackText.y); ctx.globalAlpha=1; }
-            ctx.font="800 26px 'Montserrat'"; ctx.fillStyle="#E7C458"; ctx.fillText("🎙 КАРАОКЕ У АРТЕМА 🎙", 25, 45);
-            ctx.font="italic 11px monospace"; ctx.fillStyle="#bbaaff"; ctx.fillText("реальная музыка + ритм", CANVAS_W-150, 80);
-        }
-        
-        // -------- УПРАВЛЕНИЕ ИГРОЙ И ПЕСНЯМИ ----------
-        async function applySongAndRestart() {
-            const select = document.getElementById('songSelect');
-            const newSongId = select.value;
-            currentSongId = newSongId;
-            // Останавливаем текущую игру и звук
-            gameActive = false;
-            stopSong();
-            lastScheduledIndex = 0;
-            notes = [];
-            score = 0; combo = 0;
-            updateScoreUI(); updateComboUI();
-            // Загружаем песню
-            const loaded = await loadSong(currentSongId);
-            if(loaded && allowAudio && audioCtx) {
-                gameActive = true;
-                startRealSong(currentSongId);
-                document.getElementById('gameStatusText').innerText = "🎵 ИГРАЕТ";
-            } else {
-                // если нет сети - используем демо-режим (без музыки, но ноты идут)
-                gameActive = true;
-                scheduledNotes = generateNoteScheduleFromSong(currentSongId);
-                notes = [];
-                lastScheduledIndex = 0;
-                isPlayingSong = false;
-                document.getElementById('gameStatusText').innerText = "🎤 ДЕМО-РИТМ";
-                // в демо-режиме генерим ноты каждые полсекунды
-                if(window.demoInterval) clearInterval(window.demoInterval);
-                window.demoInterval = setInterval(()=>{
-                    if(gameActive && !isPlayingSong && scheduledNotes.length>0 && lastScheduledIndex < scheduledNotes.length){
-                        const fakeTime = (Date.now()%60000)/1000;
-                        while(lastScheduledIndex < scheduledNotes.length && scheduledNotes[lastScheduledIndex].timeOffset <= fakeTime+0.2){
-                            const nd = scheduledNotes[lastScheduledIndex];
-                            notes.push({ lane: nd.lane, y: -30, hit: false });
-                            lastScheduledIndex++;
-                        }
-                    }
-                }, 200);
-            }
-            // сброс анимации синхронизации
-            if(!isPlayingSong && window.demoInterval===undefined) {}
-        }
-        
-        function resetGameOnly() {
-            if(!gameActive) gameActive=true;
-            score=0; combo=0;
-            updateScoreUI(); updateComboUI();
-            notes = [];
-            lastScheduledIndex = 0;
-            if(isPlayingSong){
-                stopSong();
-                startRealSong(currentSongId);
-            } else {
-                if(window.demoInterval) clearInterval(window.demoInterval);
-                scheduledNotes = generateNoteScheduleFromSong(currentSongId);
-                lastScheduledIndex=0;
-                notes=[];
-                window.demoInterval = setInterval(()=>{
-                    if(gameActive && !isPlayingSong && scheduledNotes.length>0 && lastScheduledIndex < scheduledNotes.length){
-                        const fakeTime = (Date.now()%60000)/1000;
-                        while(lastScheduledIndex < scheduledNotes.length && scheduledNotes[lastScheduledIndex].timeOffset <= fakeTime+0.25){
-                            const nd = scheduledNotes[lastScheduledIndex];
-                            notes.push({ lane: nd.lane, y: -30, hit: false });
-                            lastScheduledIndex++;
-                        }
-                    }
-                }, 180);
-            }
-            document.getElementById('gameStatusText').innerText = isPlayingSong?"🎵 ИГРАЕТ":"🎤 РИТМ";
-        }
-        
-        function enableAudioAndStart() {
-            if(!allowAudio && audioCtx){
-                audioCtx.resume().then(()=>{ allowAudio=true; applySongAndRestart(); });
-            } else if(!audioCtx){
-                initAudio();
-            } else { allowAudio=true; applySongAndRestart(); }
-        }
-        function initAudio() {
-            try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-            catch(e){ console.warn("no audio"); allowAudio=true; }
-        }
-        
-        // Обработчики
-        function onKeyDown(e){
-            if(KEY_MAP.hasOwnProperty(e.key)){ e.preventDefault(); hitNote(KEY_MAP[e.key]); }
-        }
-        function onCanvasTap(e){
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width/rect.width;
-            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const canvasX = (clientX - rect.left)*scaleX;
-            if(canvasX>=0 && canvasX<=CANVAS_W){
-                const laneIdx = Math.floor(canvasX / (CANVAS_W/LANES));
-                if(laneIdx>=0 && laneIdx<LANES) hitNote(laneIdx);
-            }
-        }
-        
-        // Главный цикл
-        function gameLoop(){
-            if(gameActive){
-                if(isPlayingSong && audioCtx && songStartTime) syncNotesWithAudio();
-                updateNotesPositions();
-                updateParticles();
-            }
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Инициализация UI и событий
-        window.addEventListener('load', ()=>{
-            initAudio();
-            gameLoop();
-            window.addEventListener('keydown', onKeyDown);
-            canvas.addEventListener('click', (e)=>{ if(!allowAudio) enableAudioAndStart(); onCanvasTap(e); });
-            canvas.addEventListener('touchstart', (e)=>{ if(!allowAudio) enableAudioAndStart(); onCanvasTap(e); e.preventDefault(); });
-            document.getElementById('applySongBtn').addEventListener('click', ()=>{ if(!allowAudio) enableAudioAndStart(); else applySongAndRestart(); });
-            document.getElementById('resetGameBtn').addEventListener('click', ()=>{ if(!allowAudio) enableAudioAndStart(); else resetGameOnly(); });
-            document.body.addEventListener('click', ()=>{ if(!allowAudio) enableAudioAndStart(); }, {once:true});
+        const actions = sexActions[currentChar].actions;
+        container.innerHTML = '';
+        actions.forEach(action => {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.textContent = action;
+            const actionKey = action.replace(/[^а-яё]/gi, '').toLowerCase();
+            btn.onclick = () => performSexAction(actionKey);
+            container.appendChild(btn);
         });
-    })();
+    }
+    
+    // Обновление профиля
+    function updateProfile() {
+        const charNames = {
+            girl: '💋 Развратная девушка',
+            boy: '🍆 Пошлый парень',
+            gay: '🏳️‍🌈 Гей',
+            lesbian: '👩‍❤️‍👩 Лесбиянка'
+        };
+        
+        document.getElementById('profileChar').innerHTML = currentChar ? charNames[currentChar] : 'Не выбран';
+        document.getElementById('profileLevel').innerHTML = level;
+        
+        let chatCount = 0;
+        for (let room in chatMessages) {
+            chatCount += chatMessages[room].length;
+        }
+        document.getElementById('profileChats').innerHTML = chatCount;
+    }
+    
+    // ==================== ФУНКЦИИ ЧАТА ====================
+    function addMessage(room, username, text, type = 'text', fileData = null) {
+        const message = {
+            id: Date.now(),
+            username: username,
+            text: text,
+            type: type,
+            fileData: fileData,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+        
+        chatMessages[room].push(message);
+        if (chatMessages[room].length > 50) chatMessages[room].shift();
+        
+        localStorage.setItem(`chat_${room}`, JSON.stringify(chatMessages[room]));
+        
+        if (currentRoom === room) {
+            renderMessages();
+        }
+    }
+    
+    function renderMessages() {
+        if (!currentRoom) return;
+        
+        const container = document.getElementById('chatMessages');
+        const messages = chatMessages[currentRoom];
+        
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="message system">💬 Нет сообщений. Напиши первым!</div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        messages.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            header.innerHTML = `👤 ${msg.username} • ${msg.time}`;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            if (msg.type === 'text') {
+                textDiv.textContent = msg.text;
+            } else if (msg.type === 'photo' && msg.fileData) {
+                textDiv.innerHTML = `<img src="${msg.fileData}" style="max-width: 200px; max-height: 200px; border-radius: 10px;">`;
+            } else if (msg.type === 'video' && msg.fileData) {
+                textDiv.innerHTML = `<video src="${msg.fileData}" controls style="max-width: 200px; max-height: 200px; border-radius: 10px;"></video>`;
+            } else if (msg.type === 'voice' && msg.fileData) {
+                textDiv.innerHTML = `<audio src="${msg.fileData}" controls style="width: 200px;"></audio>`;
+            }
+            
+            msgDiv.appendChild(header);
+            msgDiv.appendChild(textDiv);
+            container.appendChild(msgDiv);
+        });
+        
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        
+        if (!text || !currentRoom || !username) return;
+        
+        addMessage(currentRoom, username, text, 'text');
+        input.value = '';
+    }
+    
+    // Файлы
+    function handleFile(file, type) {
+        if (!currentRoom || !username) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            addMessage(currentRoom, username, '', type, e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Смена комнаты
+    function changeRoom(room) {
+        currentRoom = room;
+        localStorage.setItem('netErrorRoom', room);
+        
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            if (btn.dataset.room === room) {
+                btn.classList.add('active-room');
+            } else {
+                btn.classList.remove('active-room');
+            }
+        });
+        
+        renderMessages();
+    }
+    
+    // ==================== НАВИГАЦИЯ ====================
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active-page');
+        });
+        document.getElementById(pageId).classList.add('active-page');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.dataset.page === pageId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        if (pageId === 'sex') {
+            updateSexActions();
+            const fillPercent = (arousal / 100) * 100;
+            document.getElementById('arousalFill').style.width = fillPercent + '%';
+            
+            let arousalEmoji = '😈';
+            if (arousal >= 80) arousalEmoji = '💥';
+            else if (arousal >= 60) arousalEmoji = '🌊';
+            else if (arousal >= 40) arousalEmoji = '💦';
+            else if (arousal >= 20) arousalEmoji = '🔥';
+            document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
+            
+            const charNames = {girl: 'Девушка 💋', boy: 'Парень 🍆', gay: 'Гей 🏳️‍🌈', lesbian: 'Лесбиянка 👩‍❤️‍👩'};
+            document.getElementById('sexCharStatus').innerHTML = currentChar ? `Персонаж: ${charNames[currentChar]}` : '❌ Сначала выбери персонажа на главной';
+        } else if (pageId === 'chat' && currentRoom) {
+            renderMessages();
+        } else if (pageId === 'profile') {
+            updateProfile();
+        }
+    }
+    
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
+    
+    // Выбор персонажа
+    document.querySelectorAll('.char-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            currentChar = card.dataset.char;
+            localStorage.setItem('netErrorChar', currentChar);
+            
+            const charNames = {
+                girl: '💋 Развратную девушку',
+                boy: '🍆 Пошлого парня',
+                gay: '🏳️‍🌈 Гея',
+                lesbian: '👩‍❤️‍👩 Лесбиянку'
+            };
+            
+            document.getElementById('selectedChar').style.display = 'block';
+            document.getElementById('charName').innerHTML = charNames[currentChar];
+            
+            if (currentChar === 'gay' || currentChar === 'lesbian') {
+                setTimeout(() => {
+                    if (confirm('🏳️‍🌈 Выбран ЛГБТ-персонаж. Продолжить?')) {
+                        alert('✅ Персонаж выбран! Переходи в раздел "Вирт секс"');
+                    }
+                }, 100);
+            } else {
+                alert(`✅ Ты выбрал ${charNames[currentChar]}! Переходи в раздел "Вирт секс"`);
+            }
+        });
+    });
+    
+    // Чат
+    document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    document.querySelectorAll('.room-btn').forEach(btn => {
+        btn.addEventListener('click', () => changeRoom(btn.dataset.room));
+    });
+    
+    // Файлы
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'photo');
+        e.target.value = '';
+    });
+    document.getElementById('videoInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'video');
+        e.target.value = '';
+    });
+    document.getElementById('voiceInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'voice');
+        e.target.value = '';
+    });
+    
+    // Сброс
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if (confirm('⚠️ ВСЕ ДАННЫЕ БУДУТ УДАЛЕНЫ! Ты уверен?')) {
+            localStorage.clear();
+            location.reload();
+        }
+    });
+    
+    // Загрузка начальных данных
+    if (currentChar) {
+        const charCard = document.querySelector(`.char-card[data-char="${currentChar}"]`);
+        if (charCard) charCard.classList.add('selected');
+        document.getElementById('selectedChar').style.display = 'block';
+        const charNames = {
+            girl: '💋 Развратную девушку',
+            boy: '🍆 Пошлого парня',
+            gay: '🏳️‍🌈 Гея',
+            lesbian: '👩‍❤️‍👩 Лесбиянку'
+        };
+        document.getElementById('charName').innerHTML = charNames[currentChar];
+    }
+    
+    if (currentRoom) {
+        const roomBtn = document.querySelector(`.room-btn[data-room="${currentRoom}"]`);
+        if (roomBtn) roomBtn.classList.add('active-room');
+        renderMessages();
+    }
+    
+    showPage('home');
+    updateProfile();
 </script>
 </body>
 </html>
