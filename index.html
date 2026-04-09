@@ -1,911 +1,562 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>KROPOTKIN — РАБОЧАЯ ВЕРСИЯ</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background: #0a0c12;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: white;
-            padding: 16px;
-            padding-bottom: 80px;
-        }
-        .top-bar {
-            background: #000000aa;
-            padding: 12px 16px;
-            border-radius: 60px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-        .tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .tab-btn {
-            background: #1e1f30;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 40px;
-            color: #ccc;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-        .tab-btn.active {
-            background: #b91c1c;
-            color: white;
-        }
-        .card {
-            background: rgba(18, 22, 40, 0.95);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(220, 60, 60, 0.3);
-        }
-        .card h3 {
-            color: #ffaa66;
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
-        button {
-            background: #b91c1c;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:active {
-            transform: scale(0.96);
-        }
-        .btn-small {
-            background: #2c2f48;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .btn-success {
-            background: #2d6a4f;
-        }
-        .job-item {
-            background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .job-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffcc88;
-        }
-        .job-reward {
-            font-size: 11px;
-            color: #6fcf97;
-        }
-        .minigame-area {
-            background: #0a0e1a;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .clicker-btn {
-            background: #e67e22;
-            padding: 20px;
-            font-size: 24px;
-            width: 80%;
-            margin: 10px auto;
-        }
-        .progress-bar {
-            background: #2a2e44;
-            height: 16px;
-            border-radius: 10px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: #6fcf97;
-            height: 100%;
-            width: 0%;
-        }
-        .memory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .memory-card {
-            background: #1a1e30;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 28px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2e44;
-        }
-        .stat-label { color: #ffcc88; }
-        hr { border-color: #3a2e4a; margin: 12px 0; }
-        .item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .item-card {
-            background: #0f1222;
-            border-radius: 16px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .item-name { font-weight: bold; color: #ffcc88; }
-        .item-price { color: #6fcf97; font-size: 12px; }
-        .bj-cards {
-            font-size: 28px;
-            letter-spacing: 8px;
-            background: #1a1e30;
-            padding: 12px;
-            border-radius: 16px;
-            margin: 10px 0;
-        }
-        .bj-buttons {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ТИМОФЕЙ: АШ 2.0 · ПОЛНЫЙ РАНДОМ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #1a2f1a 0%, #2d4a2d 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
+      padding: 12px;
+    }
+
+    .game-wrapper {
+      max-width: 1000px;
+      width: 100%;
+      background: #d4c3a3;
+      background-image: linear-gradient(145deg, #e8d8b7, #c8b48c);
+      border-radius: 40px 40px 30px 30px;
+      box-shadow: 0 18px 0 #6b4f32, 0 25px 30px rgba(0,0,0,0.4);
+      padding: 20px 20px 28px;
+      border: 5px solid #b39264;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-align: center;
+      color: #2a1f0e;
+      text-shadow: 4px 4px 0 #e0b87b;
+      letter-spacing: 3px;
+      filter: drop-shadow(0 6px 2px #5a422a);
+    }
+
+    .school-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #5f7a5a;
+      margin: 8px 0 16px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 4px solid #3a552f;
+      box-shadow: inset 0 2px 6px #b1c6a4, 0 6px 0 #2f4423;
+      color: #f9f1d2;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+
+    .notes-counter {
+      background: #2d2616;
+      padding: 8px 24px;
+      border-radius: 30px;
+      box-shadow: inset 0 2px 5px #6e5e3e, 0 3px 0 #1a150a;
+      color: #ffecb3;
+      font-size: 1.7rem;
+    }
+
+    .map-container {
+      background: #4a6741;
+      padding: 20px 16px;
+      border-radius: 30px;
+      border: 6px solid #2f4a2a;
+      box-shadow: inset 0 0 0 4px #72956a, 0 12px 0 #1f331a;
+      margin-bottom: 18px;
+    }
+
+    .school-map {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .room {
+      aspect-ratio: 1 / 1.2;
+      background: #c9af8b;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      box-shadow: inset 0 -6px 0 #7b623e, 0 7px 0 #5a4028, 0 3px 8px black;
+      border: 3px solid #a58357;
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+      color: #1f1a0e;
+      transition: all 0.1s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .room.timofey {
+      background: #f5cd7a;
+      box-shadow: inset 0 -6px 0 #b38b40, 0 7px 0 #6f4f1f, 0 0 15px #ffd966;
+      border-color: #f3b33d;
+      transform: scale(1.02);
+      z-index: 2;
+    }
+
+    .room.galina {
+      background: #b58a6c;
+      box-shadow: inset 0 -6px 0 #825e48, 0 7px 0 #543e2e, 0 3px 8px black;
+      border-color: #e0925b;
+    }
+
+    .room.visited {
+      opacity: 0.95;
+    }
+
+    .room-emoji {
+      font-size: 2.5rem;
+      line-height: 1.2;
+      filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.2));
+    }
+
+    .room-name {
+      font-size: 0.75rem;
+      background: #352d1cc9;
+      padding: 4px 8px;
+      border-radius: 20px;
+      color: #f3eaca;
+      margin-top: 4px;
+      max-width: 90%;
+    }
+
+    .question-mark {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+
+    .action-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      background: #fbeba8;
+      border: 4px solid #b67936;
+      color: #2b1d0a;
+      font-weight: bold;
+      font-size: 1.2rem;
+      padding: 14px 18px;
+      border-radius: 40px;
+      box-shadow: 0 7px 0 #7b4f24, 0 4px 8px black;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.05s;
+      font-family: inherit;
+      text-transform: uppercase;
+      flex: 1 0 140px;
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      box-shadow: 0 3px 0 #7b4f24, 0 2px 6px black;
+      transform: translateY(4px);
+    }
+
+    .btn.special {
+      background: #f7b05e;
+      border-color: #b85f1a;
+      box-shadow: 0 7px 0 #9e4a1b, 0 4px 8px black;
+    }
+
+    .btn.danger {
+      background: #dd7a6b;
+      border-color: #992b1c;
+      box-shadow: 0 7px 0 #701f13;
+      color: #faf0d7;
+    }
+
+    .log-box {
+      background: #1e2a1acc;
+      backdrop-filter: blur(4px);
+      color: #f0eac1;
+      padding: 16px 20px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 75px;
+      border: 3px solid #b3924b;
+      box-shadow: inset 0 0 12px #00000077, 0 6px 0 #5f4a26;
+      margin: 18px 0 8px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      color: #2a1f0e;
+      font-weight: bold;
+    }
+
+    .reset-btn {
+      background: #5d6e52;
+      border-color: #2f4028;
+      box-shadow: 0 6px 0 #2b3a22;
+      color: #f5efd7;
+    }
+
+    .hint-text {
+      font-size: 0.9rem;
+      background: #fffaec;
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
+<div class="game-wrapper">
+  <h1>🏫 ТИМОФЕЙ: АШ 2.0</h1>
+  <div class="school-header">
+    <span>🤪 ГЛУПЫЙ ТИМОФЕЙ</span>
+    <span class="notes-counter">📋 <span id="noteCountDisplay">0</span>/5</span>
+    <span>👩‍🏫 ГАЛИНА В.</span>
+  </div>
 
-<div class="top-bar">
-    <span>🎮 <span id="nickDisplay">----</span></span>
-    <span>💰 <span id="moneyDisplay">5000</span> ₽</span>
-    <span>⭐ Ур. <span id="levelDisplay">1</span></span>
-</div>
+  <!-- Карта школы 5x4 = 20 кабинетов -->
+  <div class="map-container">
+    <div class="school-map" id="schoolMap"></div>
+  </div>
 
-<div class="tabs">
-    <button class="tab-btn active" data-tab="profile">👤 Профиль</button>
-    <button class="tab-btn" data-tab="work">💼 Работы</button>
-    <button class="tab-btn" data-tab="minigame">🎮 Мини-игра</button>
-    <button class="tab-btn" data-tab="cars">🚗 Гараж</button>
-    <button class="tab-btn" data-tab="property">🏠 Недвижимость</button>
-    <button class="tab-btn" data-tab="business">💼 Бизнес</button>
-    <button class="tab-btn" data-tab="casino">♠️ Black Jack</button>
-    <button class="tab-btn" data-tab="shop">🏪 Магазин</button>
-    <button class="tab-btn" data-tab="stats">📊 Статистика</button>
-</div>
+  <!-- Кнопки действий -->
+  <div class="action-panel">
+    <button class="btn" id="searchBtn">🔍 ИСКАТЬ ЗАПИСКУ</button>
+    <button class="btn special" id="galinaBtn">👩‍🏫 К ГАЛИНЕ В.</button>
+    <button class="btn danger" id="randomTeleportBtn">🌀 СЛУЧАЙНЫЙ КАБИНЕТ</button>
+  </div>
 
-<!-- ПРОФИЛЬ -->
-<div id="profileTab" class="tab-content" style="display: block;">
-    <div class="card">
-        <div class="stat-row"><span class="stat-label">🔰 ID:</span><span id="userId">12345</span></div>
-        <div class="stat-row"><span class="stat-label">⭐ Уровень:</span><span id="profileLevel">1</span></div>
-        <div class="stat-row"><span class="stat-label">🏆 Опыт (XP):</span><span id="profileExp">0</span> / <span id="nextExp">1000</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Работа:</span><span id="profileJob">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машина:</span><span id="profileCar">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Дом:</span><span id="profileHouse">Нет</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнес:</span><span id="profileBusiness">Нет</span></div>
-        <button id="workFromProfileBtn" style="width:100%; margin-top:12px;">💼 ВЫПОЛНИТЬ РАБОТУ</button>
-    </div>
-</div>
+  <!-- Лог событий -->
+  <div class="log-box" id="logDisplay">
+    🏫 Тимофей в школе! Ищи 5 записок (они спрятаны). Галина ждёт в одном из кабинетов...
+  </div>
 
-<!-- РАБОТЫ -->
-<div id="workTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Работы</h3>
-        <div id="jobsList"></div>
-    </div>
-</div>
+  <div class="info-row">
+    <span class="hint-text">👆 Кликай на кабинеты чтобы ходить</span>
+    <span class="hint-text">❓ Записки НЕ видны — надо искать!</span>
+  </div>
 
-<!-- МИНИ-ИГРА -->
-<div id="minigameTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3 id="minigameTitle">🎮 Мини-игра</h3>
-        <div id="minigameArea" class="minigame-area">
-            <div style="color:#aaa;">Выберите работу во вкладке "Работы"</div>
-        </div>
-        <div id="minigameMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- ГАРАЖ -->
-<div id="carsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🚗 Мои машины</h3>
-        <div id="myCarsList" class="item-list"></div>
-        <hr>
-        <h3>🏪 Автосалон</h3>
-        <div id="carsShopList" class="item-list"></div>
-        <div id="carsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- НЕДВИЖИМОСТЬ -->
-<div id="propertyTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏠 Моя недвижимость</h3>
-        <div id="myPropsList" class="item-list"></div>
-        <hr>
-        <h3>🏢 Купить</h3>
-        <div id="propsShopList" class="item-list"></div>
-        <div id="propsMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- БИЗНЕС -->
-<div id="businessTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>💼 Мой бизнес</h3>
-        <div id="myBusinessList" class="item-list"></div>
-        <div class="stat-row" style="background:#1a1e30; border-radius:16px; margin-top:12px; padding:12px;">
-            <span class="stat-label">📊 Пассивный доход:</span>
-            <span id="passiveIncome">0</span> ₽/час
-        </div>
-        <hr>
-        <h3>🏢 Купить бизнес</h3>
-        <div id="businessShopList" class="item-list"></div>
-        <div id="businessMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- BLACK JACK -->
-<div id="casinoTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>♠️ BLACK JACK</h3>
-        <input type="number" id="bjBet" value="100" min="10" step="10" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin-bottom:10px; color:white; border:1px solid #e03a3a;">
-        <div id="bjGame">
-            <div class="bj-cards" id="dealerArea">🤵 Дилер: ???</div>
-            <div class="bj-cards" id="playerArea">🎲 Игрок: -</div>
-            <div class="bj-buttons">
-                <button id="bjHitBtn" disabled>🎴 Ещё</button>
-                <button id="bjStandBtn" disabled>✋ Хватит</button>
-            </div>
-        </div>
-        <button id="bjStartBtn">🎲 НАЧАТЬ РАУНД</button>
-        <div id="bjTimer" style="background:#1a1e30; text-align:center; padding:10px; border-radius:40px; margin-top:10px;">⏳ Готов</div>
-        <div id="bjMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- МАГАЗИН -->
-<div id="shopTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>🏪 Магазин</h3>
-        <div id="shopList" class="item-list"></div>
-        <div id="shopMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- СТАТИСТИКА -->
-<div id="statsTab" class="tab-content" style="display: none;">
-    <div class="card">
-        <h3>📊 Статистика</h3>
-        <div class="stat-row"><span class="stat-label">💰 Всего заработано:</span><span id="totalEarned">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎰 Выиграно в BJ:</span><span id="totalWon">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Смен отработано:</span><span id="workCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🎮 Мини-игр пройдено:</span><span id="minigameCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🚗 Машин куплено:</span><span id="carsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">🏠 Недвижимости:</span><span id="propsCount">0</span></div>
-        <div class="stat-row"><span class="stat-label">💼 Бизнесов:</span><span id="businessCount">0</span></div>
-    </div>
+  <!-- Сброс -->
+  <div style="display: flex; justify-content: center; margin-top: 16px;">
+    <button class="btn reset-btn" id="resetBtn">🔄 НОВАЯ ИГРА (ПОЛНЫЙ РАНДОМ)</button>
+  </div>
 </div>
 
 <script>
-    // ==================== ИГРОВЫЕ ДАННЫЕ ====================
-    let game = {
-        nick: "Игрок",
-        money: 5000,
-        level: 1,
-        exp: 0,
-        currentJob: null,
-        totalEarned: 0,
-        totalWon: 0,
-        workCount: 0,
-        minigameCount: 0,
-        cars: [],
-        currentCar: null,
-        properties: [],
-        businesses: []
-    };
+  (function(){
+    "use strict";
 
-    // Машины для покупки
-    const carsForSale = [
-        { name: "ZAZ 968", price: 20000, speed: 100 },
-        { name: "ВАЗ 2101", price: 60000, speed: 120 },
-        { name: "ВАЗ 2107", price: 150000, speed: 140 },
-        { name: "Audi RS6", price: 8500000, speed: 305 }
+    // ---------- КОНФИГУРАЦИЯ ----------
+    const GRID_COLS = 5;
+    const GRID_ROWS = 4;
+    const TOTAL_ROOMS = GRID_COLS * GRID_ROWS; // 20 кабинетов
+    
+    const NOTES_REQUIRED = 5; // нужно 5 записок
+    
+    // Базы названий и эмодзи для генерации
+    const ROOM_TYPES = [
+      { name: 'Физика', emoji: '⚛️' },
+      { name: 'Химия', emoji: '🧪' },
+      { name: 'Биология', emoji: '🧬' },
+      { name: 'Математика', emoji: '📐' },
+      { name: 'Литература', emoji: '📖' },
+      { name: 'История', emoji: '🏛️' },
+      { name: 'География', emoji: '🌍' },
+      { name: 'Информатика', emoji: '💻' },
+      { name: 'Физкультура', emoji: '🏀' },
+      { name: 'Столовая', emoji: '🍕' },
+      { name: 'Библиотека', emoji: '📚' },
+      { name: 'Актовый зал', emoji: '🎭' },
+      { name: 'Медпункт', emoji: '🏥' },
+      { name: 'Учительская', emoji: '🚪' },
+      { name: 'Директор', emoji: '👔' },
+      { name: 'Рекреация', emoji: '🪑' },
+      { name: 'Туалет', emoji: '🚻' },
+      { name: 'Лаборантская', emoji: '🔬' },
+      { name: 'Музыка', emoji: '🎵' },
+      { name: 'ИЗО', emoji: '🎨' },
+      { name: 'ОБЖ', emoji: '🛡️' },
+      { name: 'Английский', emoji: '🇬🇧' },
+      { name: 'Немецкий', emoji: '🇩🇪' },
+      { name: 'Подвал', emoji: '🕳️' },
+      { name: 'Чердак', emoji: '🏚️' }
     ];
 
-    // Недвижимость для покупки
-    const propertiesForSale = [
-        { name: "Комната", price: 50000, income: 1000 },
-        { name: "1-комн квартира", price: 200000, income: 3000 },
-        { name: "Частный дом", price: 1500000, income: 20000 }
-    ];
+    // Состояние игры
+    let rooms = [];                     // массив объектов комнат
+    let timofeyPos = 0;                // индекс текущей комнаты (0..19)
+    let collectedNotes = 0;            
+    let notesFound = new Array(TOTAL_ROOMS).fill(false);  // true если записка уже взята
+    let notesPositions = [];            // индексы комнат где изначально записки
+    let galinaPosition = 7;            // позиция Галины (будет случайной)
+    let gameCompleted = false;
+    let visitedRooms = new Array(TOTAL_ROOMS).fill(false); // для статистики
+    
+    // DOM
+    const mapEl = document.getElementById('schoolMap');
+    const noteSpan = document.getElementById('noteCountDisplay');
+    const logEl = document.getElementById('logDisplay');
 
-    // Бизнес для покупки
-    const businessForSale = [
-        { name: "Ларек", price: 100000, profit: 5000 },
-        { name: "Кафе", price: 500000, profit: 20000 },
-        { name: "Магазин", price: 1500000, profit: 50000 }
-    ];
+    // ---------- ГЕНЕРАЦИЯ СЛУЧАЙНОЙ ШКОЛЫ ----------
+    function generateRandomRooms() {
+      const shuffled = [...ROOM_TYPES].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, TOTAL_ROOMS).map((type, idx) => ({
+        id: idx,
+        name: type.name,
+        emoji: type.emoji,
+        hasNote: false, // будет установлено позже
+      }));
+    }
 
-    // Работы
-    const jobs = [
-        { name: "📦 Курьер", levelReq: 1, income: 3000, expReward: 1, gameType: "clicker", target: 8 },
-        { name: "🌾 Фермер", levelReq: 1, income: 3500, expReward: 1, gameType: "clicker", target: 10 },
-        { name: "🏭 Завод", levelReq: 2, income: 4000, expReward: 2, gameType: "qrcode", target: 1 },
-        { name: "🚕 Таксист", levelReq: 2, income: 4500, expReward: 2, gameType: "slider", target: 70 },
-        { name: "🚛 Дальнобойщик", levelReq: 3, income: 9000, expReward: 5, gameType: "slider", target: 85 }
-    ];
+    // Выбор случайных позиций для записок (5 уникальных индексов)
+    function selectRandomNotePositions() {
+      const positions = [];
+      while (positions.length < NOTES_REQUIRED) {
+        const rand = Math.floor(Math.random() * TOTAL_ROOMS);
+        if (!positions.includes(rand)) {
+          positions.push(rand);
+        }
+      }
+      return positions;
+    }
 
-    // Магазин
-    const shopItems = [
-        { name: "🍔 Гамбургер", price: 150 },
-        { name: "💊 Аптечка", price: 500 },
-        { name: "🔫 Травмат", price: 5000 }
-    ];
+    // Сброс/инициализация новой игры
+    function initNewGame() {
+      // Генерируем комнаты
+      rooms = generateRandomRooms();
+      
+      // Выбираем позиции записок
+      notesPositions = selectRandomNotePositions();
+      notesFound = new Array(TOTAL_ROOMS).fill(false);
+      
+      // Устанавливаем hasNote для комнат
+      rooms.forEach((room, idx) => {
+        room.hasNote = notesPositions.includes(idx);
+      });
+      
+      // Выбираем случайную позицию Галины (не совпадающую с позицией Тимофея)
+      do {
+        galinaPosition = Math.floor(Math.random() * TOTAL_ROOMS);
+      } while (galinaPosition === 0); // Тимофей стартует в 0, Галина не там же
+      
+      timofeyPos = 0;
+      collectedNotes = 0;
+      gameCompleted = false;
+      visitedRooms = new Array(TOTAL_ROOMS).fill(false);
+      visitedRooms[0] = true;
+      
+      updateNoteCounter();
+      addLog('🔄 Новая школа! Записки спрятаны, Галина где-то ждёт. Ищи!');
+      renderMap();
+    }
 
-    // ==================== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ====================
-    function updateUI() {
-        document.getElementById('moneyDisplay').innerText = game.money.toLocaleString();
-        document.getElementById('levelDisplay').innerText = game.level;
-        document.getElementById('profileLevel').innerText = game.level;
-        document.getElementById('profileExp').innerText = game.exp;
-        document.getElementById('profileJob').innerText = game.currentJob ? game.currentJob.name : "Нет";
-        document.getElementById('profileCar').innerText = game.currentCar ? game.currentCar.name : "Нет";
-        document.getElementById('profileHouse').innerText = game.properties.length > 0 ? game.properties.length + " шт" : "Нет";
-        document.getElementById('profileBusiness').innerText = game.businesses.length > 0 ? game.businesses.length + " шт" : "Нет";
-        document.getElementById('totalEarned').innerText = game.totalEarned.toLocaleString();
-        document.getElementById('totalWon').innerText = game.totalWon.toLocaleString();
-        document.getElementById('workCount').innerText = game.workCount;
-        document.getElementById('minigameCount').innerText = game.minigameCount;
-        document.getElementById('carsCount').innerText = game.cars.length;
-        document.getElementById('propsCount').innerText = game.properties.length;
-        document.getElementById('businessCount').innerText = game.businesses.length;
+    // ---------- ОТРИСОВКА КАРТЫ ----------
+    function renderMap() {
+      mapEl.innerHTML = '';
+      
+      rooms.forEach((room, idx) => {
+        const roomDiv = document.createElement('div');
+        roomDiv.className = 'room';
         
-        let passive = 0;
-        game.properties.forEach(p => passive += p.income);
-        game.businesses.forEach(b => passive += b.profit);
-        document.getElementById('passiveIncome').innerText = passive.toLocaleString();
-    }
-
-    function saveGame() {
-        localStorage.setItem('kropotkin_save', JSON.stringify(game));
-    }
-
-    function loadGame() {
-        const saved = localStorage.getItem('kropotkin_save');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                Object.assign(game, data);
-            } catch(e) {}
+        if (idx === timofeyPos) roomDiv.classList.add('timofey');
+        if (idx === galinaPosition) roomDiv.classList.add('galina');
+        if (visitedRooms[idx]) roomDiv.classList.add('visited');
+        
+        // Записка НЕ показывается! Игрок не знает где она.
+        // Показываем только если игра завершена (для наглядности)
+        let noteIndicator = '';
+        if (gameCompleted && room.hasNote && !notesFound[idx]) {
+          noteIndicator = '📋';
         }
-        updateUI();
-    }
-
-    function addMoney(amount) {
-        game.money += amount;
-        game.totalEarned += amount;
-        updateUI();
-        saveGame();
-    }
-
-    function addExp(amount) {
-        game.exp += amount;
-        if (game.exp >= 1000) {
-            game.level++;
-            game.exp -= 1000;
-            alert(`🏆 ПОВЫШЕНИЕ УРОВНЯ! Теперь ${game.level} уровень!`);
-            renderJobs();
-        }
-        updateUI();
-        saveGame();
-    }
-
-    // ==================== РАБОТЫ ====================
-    function selectJob(job) {
-        if (game.level < job.levelReq) {
-            alert(`❌ Требуется ${job.levelReq} уровень!`);
+        
+        // Если комната не посещена — показываем "?", но не для текущей позиции
+        const notVisitedMystery = (!visitedRooms[idx] && idx !== timofeyPos) ? '<div class="question-mark">❓</div>' : '';
+        
+        roomDiv.innerHTML = `
+          <div class="room-emoji">${room.emoji}${noteIndicator}</div>
+          <div class="room-name">${room.name}</div>
+          ${notVisitedMystery}
+        `;
+        
+        // Клик для перемещения
+        roomDiv.addEventListener('click', () => {
+          if (gameCompleted) {
+            addLog('🎉 Игра завершена! Начни новую.');
             return;
-        }
-        game.currentJob = job;
-        updateUI();
-        alert(`✅ Выбрана работа: ${job.name}`);
-        saveGame();
-    }
-
-    function renderJobs() {
-        const container = document.getElementById('jobsList');
-        if (!container) return;
-        container.innerHTML = '';
-        for (let job of jobs) {
-            const available = game.level >= job.levelReq;
-            const div = document.createElement('div');
-            div.className = 'job-item';
-            div.innerHTML = `
-                <div>
-                    <div class="job-name">${job.name} ${available ? '' : '🔒'}</div>
-                    <div class="job-reward">💰 +${job.income}₽ | ✨ +${job.expReward} XP</div>
-                    <div class="job-reward">${available ? '✅ Доступна' : `⭐ Требуется ${job.levelReq} уровень`}</div>
-                </div>
-                <button class="btn-small" data-job-name="${job.name}">Выбрать</button>
-            `;
-            container.appendChild(div);
-            const btn = div.querySelector('button');
-            if (!available) btn.disabled = true;
-            btn.onclick = () => selectJob(job);
-        }
-    }
-
-    // ==================== МИНИ-ИГРЫ ====================
-    let currentGame = null;
-    let clickerCount = 0;
-    let memorySequence = [];
-    let memoryUserInput = [];
-
-    function startMinigame() {
-        const job = game.currentJob;
-        if (!job) {
-            alert("❌ Сначала выберите работу во вкладке 'Работы'!");
+          }
+          
+          const targetIdx = idx;
+          if (targetIdx === timofeyPos) {
+            addLog(`🤨 Тимофей уже в ${room.name}.`);
             return;
-        }
-        
-        const area = document.getElementById('minigameArea');
-        const title = document.getElementById('minigameTitle');
-        title.innerHTML = `🎮 ${job.name} — мини-игра`;
-        
-        if (job.gameType === 'clicker') {
-            clickerCount = 0;
-            area.innerHTML = `
-                <div>👆 Нажми ${job.target} раз!</div>
-                <button id="clickBtn" class="clicker-btn">👆 НАЖМИ</button>
-                <div class="progress-bar"><div id="clickProgress" class="progress-fill"></div></div>
-                <div>Прогресс: <span id="clickCount">0</span>/${job.target}</div>
-                <button id="finishClickBtn" class="btn-small btn-success" style="margin-top:10px;">✅ ЗАВЕРШИТЬ</button>
-            `;
-            const clickBtn = document.getElementById('clickBtn');
-            const progressFill = document.getElementById('clickProgress');
-            const countSpan = document.getElementById('clickCount');
-            clickBtn.onclick = () => {
-                clickerCount = Math.min(clickerCount + 1, job.target);
-                progressFill.style.width = (clickerCount/job.target*100)+'%';
-                countSpan.innerText = clickerCount;
-                if (clickerCount === job.target) clickBtn.disabled = true;
-            };
-            document.getElementById('finishClickBtn').onclick = () => {
-                if (clickerCount >= job.target) finishWork(true);
-                else finishWork(false);
-            };
-        }
-        else if (job.gameType === 'qrcode') {
-            const code = Math.floor(Math.random() * 9000 + 1000);
-            area.innerHTML = `
-                <div>Введи код: ${code}</div>
-                <div style="background:white; color:black; padding:15px; border-radius:16px; margin:10px; font-size:24px;">${code}</div>
-                <input id="qrInput" style="background:#1a1e30; padding:10px; border-radius:40px; width:100%; margin:10px 0; color:white; border:1px solid #e03a3a;" placeholder="Введите код">
-                <button id="qrSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
-            document.getElementById('qrSubmitBtn').onclick = () => {
-                const input = document.getElementById('qrInput').value;
-                if (parseInt(input) === code) finishWork(true);
-                else finishWork(false);
-            };
-        }
-        else if (job.gameType === 'slider') {
-            const target = Math.floor(Math.random() * 41 + 30);
-            area.innerHTML = `
-                <div>Установи ползунок на ${target} (±5)</div>
-                <input type="range" id="sliderInput" min="0" max="100" value="50" style="width:100%; margin:10px 0;">
-                <div>Текущее значение: <span id="sliderValue">50</span></div>
-                <button id="sliderSubmitBtn" class="btn-small">ПРОВЕРИТЬ</button>
-            `;
-            const slider = document.getElementById('sliderInput');
-            const valueSpan = document.getElementById('sliderValue');
-            slider.oninput = () => { valueSpan.innerText = slider.value; };
-            document.getElementById('sliderSubmitBtn').onclick = () => {
-                const val = parseInt(slider.value);
-                if (Math.abs(val - target) <= 5) finishWork(true);
-                else finishWork(false);
-            };
-        }
-    }
-
-    function finishWork(success) {
-        if (success && game.currentJob) {
-            addMoney(game.currentJob.income);
-            addExp(game.currentJob.expReward);
-            game.workCount++;
-            game.minigameCount++;
-            updateUI();
-            alert(`✅ Работа выполнена! +${game.currentJob.income}₽, +${game.currentJob.expReward} XP`);
-            document.getElementById('minigameMsg').innerHTML = '✅ Успех! +' + game.currentJob.income + '₽';
-        } else {
-            alert(`❌ Провал! Попробуйте ещё раз.`);
-            document.getElementById('minigameMsg').innerHTML = '❌ Провал! Попробуйте снова.';
-        }
-        setTimeout(() => { document.getElementById('minigameMsg').innerHTML = ''; }, 2000);
-        saveGame();
-    }
-
-    // ==================== ГАРАЖ ====================
-    function buyCar(car) {
-        if (game.money >= car.price) {
-            game.money -= car.price;
-            game.cars.push({ ...car });
-            if (!game.currentCar) game.currentCar = car;
-            updateUI();
-            renderCars();
-            document.getElementById('carsMsg').innerHTML = `✅ Куплено: ${car.name}`;
-            setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('carsMsg').innerHTML = `❌ Не хватает ${(car.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function selectCar(car) {
-        game.currentCar = car;
-        updateUI();
-        renderCars();
-        document.getElementById('carsMsg').innerHTML = `🚗 Теперь вы ездите на ${car.name}`;
-        setTimeout(() => document.getElementById('carsMsg').innerHTML = '', 2000);
-        saveGame();
-    }
-
-    function renderCars() {
-        const myDiv = document.getElementById('myCarsList');
-        if (myDiv) {
-            if (game.cars.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет машин</div>';
-            else {
-                myDiv.innerHTML = game.cars.map((car, idx) => `
-                    <div class="item-card">
-                        <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч</div>
-                        <button class="btn-small" data-select-car="${idx}">${game.currentCar === car ? '✅ Текущая' : 'Выбрать'}</button>
-                    </div>
-                `).join('');
-                document.querySelectorAll('[data-select-car]').forEach(btn => {
-                    btn.onclick = () => selectCar(game.cars[parseInt(btn.getAttribute('data-select-car'))]);
-                });
+          }
+          
+          // Перемещение
+          timofeyPos = targetIdx;
+          visitedRooms[targetIdx] = true;
+          
+          let moveMsg = `🚶 Тимофей зашёл в ${room.name}.`;
+          
+          // Проверка на Галину
+          if (targetIdx === galinaPosition) {
+            moveMsg += ` 👩‍🏫 Тут Галина Владимировна!`;
+            if (collectedNotes === NOTES_REQUIRED) {
+              moveMsg += ` У тебя все записки! Жми "К ГАЛИНЕ В."`;
+            } else {
+              moveMsg += ` Нужно ещё ${NOTES_REQUIRED - collectedNotes} записок.`;
             }
-        }
-        const shopDiv = document.getElementById('carsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = carsForSale.map((car, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${car.name}</span> 🏁 ${car.speed} км/ч<br><span class="item-price">💰 ${car.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-car="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-car]').forEach(btn => {
-                btn.onclick = () => buyCar(carsForSale[parseInt(btn.getAttribute('data-buy-car'))]);
-            });
-        }
-    }
-
-    // ==================== НЕДВИЖИМОСТЬ ====================
-    function buyProperty(prop) {
-        if (game.money >= prop.price) {
-            game.money -= prop.price;
-            game.properties.push({ ...prop });
-            updateUI();
-            renderProperties();
-            document.getElementById('propsMsg').innerHTML = `✅ Куплено: ${prop.name}`;
-            setTimeout(() => document.getElementById('propsMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('propsMsg').innerHTML = `❌ Не хватает ${(prop.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function renderProperties() {
-        const myDiv = document.getElementById('myPropsList');
-        if (myDiv) {
-            if (game.properties.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет недвижимости</div>';
-            else {
-                myDiv.innerHTML = game.properties.map(prop => `
-                    <div class="item-card">
-                        <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('propsShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = propertiesForSale.map((prop, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${prop.name}</span> 📈 +${prop.income}₽/час<br><span class="item-price">💰 ${prop.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-prop="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-prop]').forEach(btn => {
-                btn.onclick = () => buyProperty(propertiesForSale[parseInt(btn.getAttribute('data-buy-prop'))]);
-            });
-        }
-    }
-
-    // ==================== БИЗНЕС ====================
-    function buyBusiness(biz) {
-        if (game.money >= biz.price) {
-            game.money -= biz.price;
-            game.businesses.push({ ...biz });
-            updateUI();
-            renderBusiness();
-            document.getElementById('businessMsg').innerHTML = `✅ Куплен бизнес: ${biz.name}`;
-            setTimeout(() => document.getElementById('businessMsg').innerHTML = '', 2000);
-            saveGame();
-        } else {
-            document.getElementById('businessMsg').innerHTML = `❌ Не хватает ${(biz.price - game.money).toLocaleString()}₽`;
-        }
-    }
-
-    function renderBusiness() {
-        const myDiv = document.getElementById('myBusinessList');
-        if (myDiv) {
-            if (game.businesses.length === 0) myDiv.innerHTML = '<div style="text-align:center; padding:20px;">У вас нет бизнеса</div>';
-            else {
-                myDiv.innerHTML = game.businesses.map(biz => `
-                    <div class="item-card">
-                        <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час</div>
-                    </div>
-                `).join('');
-            }
-        }
-        const shopDiv = document.getElementById('businessShopList');
-        if (shopDiv) {
-            shopDiv.innerHTML = businessForSale.map((biz, idx) => `
-                <div class="item-card">
-                    <div><span class="item-name">${biz.name}</span> 📈 +${biz.profit}₽/час<br><span class="item-price">💰 ${biz.price.toLocaleString()} ₽</span></div>
-                    <button class="btn-small" data-buy-biz="${idx}">Купить</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('[data-buy-biz]').forEach(btn => {
-                btn.onclick = () => buyBusiness(businessForSale[parseInt(btn.getAttribute('data-buy-biz'))]);
-            });
-        }
-    }
-
-    // ==================== МАГАЗИН ====================
-    function renderShop() {
-        const container = document.getElementById('shopList');
-        if (!container) return;
-        container.innerHTML = shopItems.map((item, idx) => `
-            <div class="item-card">
-                <div><span class="item-name">${item.name}</span><br><span class="item-price">💰 ${item.price} ₽</span></div>
-                <button class="btn-small" data-buy-item="${idx}">Купить</button>
-            </div>
-        `).join('');
-        document.querySelectorAll('[data-buy-item]').forEach(btn => {
-            btn.onclick = () => {
-                const item = shopItems[parseInt(btn.getAttribute('data-buy-item'))];
-                if (game.money >= item.price) {
-                    game.money -= item.price;
-                    updateUI();
-                    document.getElementById('shopMsg').innerHTML = `✅ Куплено: ${item.name}`;
-                    saveGame();
-                } else {
-                    document.getElementById('shopMsg').innerHTML = `❌ Не хватает ${item.price - game.money}₽`;
-                }
-                setTimeout(() => document.getElementById('shopMsg').innerHTML = '', 2000);
-            };
+          }
+          
+          addLog(moveMsg);
+          renderMap();
         });
-    }
-
-    // ==================== BLACK JACK ====================
-    let bjActive = false, bjCooldown = false, bjSeconds = 0, bjInterval = null;
-    let bjPlayerHand = [], bjDealerHand = [], bjCurrentBet = 0;
-
-    function getRandomCard() {
-        const cards = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-        return cards[Math.floor(Math.random() * cards.length)];
-    }
-
-    function getCardValue(card) {
-        if (card === 'A') return 11;
-        if (['K','Q','J'].includes(card)) return 10;
-        return parseInt(card);
-    }
-
-    function handScore(hand) {
-        let score = 0, aces = 0;
-        for (let card of hand) {
-            if (card === 'A') { aces++; score += 11; }
-            else { score += getCardValue(card); }
-        }
-        while (score > 21 && aces > 0) {
-            score -= 10;
-            aces--;
-        }
-        return score;
-    }
-
-    function updateBJUI() {
-        document.getElementById('playerArea').innerHTML = `🎲 Игрок: ${bjPlayerHand.join(' ')} (${handScore(bjPlayerHand)})`;
-        if (bjActive) {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand[0]} ?`;
-        } else {
-            document.getElementById('dealerArea').innerHTML = `🤵 Дилер: ${bjDealerHand.join(' ')} (${handScore(bjDealerHand)})`;
-        }
-    }
-
-    function endBJGame(result, winAmount) {
-        bjActive = false;
-        document.getElementById('bjHitBtn').disabled = true;
-        document.getElementById('bjStandBtn').disabled = true;
-        document.getElementById('bjStartBtn').disabled = false;
-        if (result === 'win') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🎉 ПОБЕДА! +${winAmount}₽`;
-        } else if (result === 'lose') {
-            document.getElementById('bjMsg').innerHTML = `😞 ПРОИГРЫШ! -${bjCurrentBet}₽`;
-        } else if (result === 'push') {
-            game.money += bjCurrentBet;
-            document.getElementById('bjMsg').innerHTML = `🤝 НИЧЬЯ! Возврат ${bjCurrentBet}₽`;
-        } else if (result === 'blackjack') {
-            game.money += winAmount;
-            game.totalWon += winAmount;
-            document.getElementById('bjMsg').innerHTML = `🃏 BLACKJACK! +${winAmount}₽`;
-        }
-        updateUI();
-        updateBJUI();
-        saveGame();
-        startBJCooldown();
-        setTimeout(() => document.getElementById('bjMsg').innerHTML = '', 3000);
-    }
-
-    function dealerPlay() {
-        while (handScore(bjDealerHand) < 17) {
-            bjDealerHand.push(getRandomCard());
-        }
-        updateBJUI();
-        const dealerScore = handScore(bjDealerHand);
-        const playerScore = handScore(bjPlayerHand);
-        if (dealerScore > 21) endBJGame('win', bjCurrentBet * 2);
-        else if (dealerScore > playerScore) endBJGame('lose', 0);
-        else if (dealerScore < playerScore) endBJGame('win', bjCurrentBet * 2);
-        else endBJGame('push', bjCurrentBet);
-    }
-
-    function playerHit() {
-        if (!bjActive) return;
-        bjPlayerHand.push(getRandomCard());
-        updateBJUI();
-        if (handScore(bjPlayerHand) > 21) endBJGame('lose', 0);
-    }
-
-    function playerStand() {
-        if (!bjActive) return;
-        bjActive = false;
-        dealerPlay();
-    }
-
-    function startBJCooldown() {
-        bjCooldown = true;
-        bjSeconds = 30;
-        const timerDiv = document.getElementById('bjTimer');
-        const startBtn = document.getElementById('bjStartBtn');
-        startBtn.disabled = true;
-        if (bjInterval) clearInterval(bjInterval);
-        bjInterval = setInterval(() => {
-            bjSeconds--;
-            timerDiv.innerText = `⏳ Ждите ${bjSeconds} сек...`;
-            if (bjSeconds <= 0) {
-                clearInterval(bjInterval);
-                bjCooldown = false;
-                timerDiv.innerText = `✅ Можно играть!`;
-                startBtn.disabled = false;
-                setTimeout(() => {
-                    if (timerDiv.innerText === '✅ Можно играть!') timerDiv.innerText = '⏳ Готов';
-                }, 2000);
-            }
-        }, 1000);
-    }
-
-    function startBlackjack() {
-        if (bjCooldown) {
-            document.getElementById('bjMsg').innerHTML = `⏳ Подождите ${bjSeconds} сек!`;
-            return;
-        }
-        const bet = parseInt(document.getElementById('bjBet').value);
-        if (isNaN(bet) || bet < 10) {
-            alert('Минимальная ставка 10₽');
-            return;
-        }
-        if (bet > game.money) {
-            alert('Не хватает денег!');
-            return;
-        }
-        bjCurrentBet = bet;
-        game.money -= bjCurrentBet;
-        updateUI();
-        bjPlayerHand = [getRandomCard(), getRandomCard()];
-        bjDealerHand = [getRandomCard(), getRandomCard()];
-        bjActive = true;
-        document.getElementById('bjHitBtn').disabled = false;
-        document.getElementById('bjStandBtn').disabled = false;
-        document.getElementById('bjStartBtn').disabled = true;
-        updateBJUI();
-        if (handScore(bjPlayerHand) === 21) {
-            endBJGame('blackjack', bjCurrentBet * 2.5);
-        }
-        saveGame();
-    }
-
-    // ==================== ПАССИВНЫЙ ДОХОД ====================
-    setInterval(() => {
-        let total = 0;
-        game.properties.forEach(p => total += p.income);
-        game.businesses.forEach(b => total += b.profit);
-        if (total > 0) {
-            game.money += total;
-            game.totalEarned += total;
-            updateUI();
-            saveGame();
-        }
-    }, 60000);
-
-    // ==================== ЗАПУСК ====================
-    function init() {
-        let nick = prompt("Введите ник в формате Имя_Фамилия:", "Artem_Kropotkin");
-        if (!nick || !nick.includes('_')) nick = "Artem_Kropotkin";
-        game.nick = nick;
-        document.getElementById('nickDisplay').innerText = game.nick;
-        document.getElementById('userId').innerText = Math.floor(Math.random() * 9000 + 1000);
-        loadGame();
-        renderJobs();
-        renderCars();
-        renderProperties();
-        renderBusiness();
-        renderShop();
         
-        document.getElementById('bjStartBtn').onclick = startBlackjack;
-        document.getElementById('bjHitBtn').onclick = playerHit;
-        document.getElementById('bjStandBtn').onclick = playerStand;
-        document.getElementById('workFromProfileBtn').onclick = startMinigame;
+        mapEl.appendChild(roomDiv);
+      });
     }
 
-    // Переключение вкладок
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.getElementById(btn.getAttribute('data-tab') + 'Tab').style.display = 'block';
-        };
-    });
+    // Обновление счётчика
+    function updateNoteCounter() {
+      noteSpan.textContent = `${collectedNotes}/${NOTES_REQUIRED}`;
+    }
 
-    init();
+    // Лог
+    function addLog(msg) {
+      logEl.textContent = msg;
+    }
+
+    // ---------- ДЕЙСТВИЯ ----------
+    
+    // Искать записку в текущей комнате
+    function searchNote() {
+      if (gameCompleted) {
+        addLog('⛔ Игра окончена. Сбрось.');
+        return;
+      }
+      
+      const currentRoom = rooms[timofeyPos];
+      
+      if (!currentRoom.hasNote) {
+        addLog(`❌ В ${currentRoom.name} нет записки. Продолжай поиски!`);
+        return;
+      }
+      
+      if (notesFound[timofeyPos]) {
+        addLog(`📋 Записка из ${currentRoom.name} уже взята.`);
+        return;
+      }
+      
+      // Нашли записку!
+      notesFound[timofeyPos] = true;
+      collectedNotes++;
+      updateNoteCounter();
+      
+      addLog(`✅ ТИМОФЕЙ НАШЁЛ ЗАПИСКУ в ${currentRoom.name}! (${collectedNotes}/${NOTES_REQUIRED})`);
+      
+      if (collectedNotes === NOTES_REQUIRED) {
+        addLog(`🎉 ВСЕ 5 ЗАПИСОК НАЙДЕНЫ! Теперь найди Галину Владимировну и сдай их!`);
+      }
+      
+      renderMap();
+    }
+    
+    // Сдать записки Галине
+    function submitToGalina() {
+      if (gameCompleted) {
+        addLog('🏆 Тимофей уже получил АШ 2.0!');
+        return;
+      }
+      
+      // Проверка: Тимофей в одной комнате с Галиной?
+      if (timofeyPos !== galinaPosition) {
+        addLog(`🚫 Галина Владимировна не здесь! Ищи её по школе.`);
+        return;
+      }
+      
+      if (collectedNotes < NOTES_REQUIRED) {
+        addLog(`👩‍🏫 Галина: "Тимофей, у тебя только ${collectedNotes}/${NOTES_REQUIRED} записок. Приноси все 5!"`);
+        return;
+      }
+      
+      // ПОБЕДА!
+      gameCompleted = true;
+      
+      // Показываем все записки для наглядности
+      addLog(`🏆👑 ГАЛИНА ВЛАДИМИРОВНА ПРИНЯЛА 5 ЗАПИСОК! ТИМОФЕЙ ПОЛУЧАЕТ "АШ 2.0" !!! МИССИЯ ВЫПОЛНЕНА! 🎓🤡`);
+      
+      renderMap();
+      updateNoteCounter();
+    }
+    
+    // Телепорт в случайный кабинет (для веселья)
+    function randomTeleport() {
+      if (gameCompleted) {
+        addLog('Игра завершена.');
+        return;
+      }
+      
+      let newPos;
+      do {
+        newPos = Math.floor(Math.random() * TOTAL_ROOMS);
+      } while (newPos === timofeyPos);
+      
+      timofeyPos = newPos;
+      visitedRooms[newPos] = true;
+      
+      const room = rooms[newPos];
+      let msg = `🌀 Тимофей телепортировался в ${room.name}.`;
+      
+      if (newPos === galinaPosition) {
+        msg += ` 👩‍🏫 О! Тут Галина!`;
+        if (collectedNotes === NOTES_REQUIRED) msg += ` Можно сдавать!`;
+      }
+      
+      addLog(msg);
+      renderMap();
+    }
+
+    // Сброс
+    function resetGame() {
+      initNewGame();
+    }
+
+    // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+    function bindEvents() {
+      document.getElementById('searchBtn').addEventListener('click', searchNote);
+      document.getElementById('galinaBtn').addEventListener('click', submitToGalina);
+      document.getElementById('randomTeleportBtn').addEventListener('click', randomTeleport);
+      document.getElementById('resetBtn').addEventListener('click', resetGame);
+    }
+
+    // Старт
+    function startGame() {
+      initNewGame();
+      bindEvents();
+    }
+
+    startGame();
+  })();
 </script>
 </body>
 </html>
