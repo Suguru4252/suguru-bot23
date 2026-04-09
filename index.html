@@ -1,856 +1,369 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - Взрослый чат 18+</title>
+    <title>Realistic 3D Penis - NetErrror</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
         body {
+            margin: 0;
+            overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f1f 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
         }
-
-        /* Контейнеры */
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 0, 100, 0.3);
-            border: 1px solid rgba(255, 50, 150, 0.3);
-        }
-
-        /* Шапка */
-        .header {
-            background: linear-gradient(90deg, #ff0066, #ff3300);
-            padding: 20px;
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
             text-align: center;
-            border-bottom: 2px solid #ff0066;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            text-shadow: 0 0 10px rgba(255, 0, 100, 0.5);
-        }
-
-        .header p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        /* Навигация */
-        .nav {
-            display: flex;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.7);
+            color: #ffdd99;
             padding: 10px;
-            gap: 10px;
-            flex-wrap: wrap;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
-            text-align: center;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(4px);
         }
-
-        .nav-btn:hover {
-            background: rgba(255, 0, 100, 0.5);
-            transform: scale(1.02);
-        }
-
-        .nav-btn.active {
-            background: linear-gradient(90deg, #ff0066, #ff3300);
-            box-shadow: 0 0 15px rgba(255, 0, 100, 0.5);
-        }
-
-        /* Контент */
-        .content {
-            padding: 20px;
-            min-height: 500px;
-        }
-
-        .page {
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-
-        .page.active-page {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Кнопки персонажей */
-        .char-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .char-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .char-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 0, 100, 0.2);
-            border-color: #ff0066;
-        }
-
-        .char-card.selected {
-            background: linear-gradient(135deg, #ff0066, #ff3300);
-            box-shadow: 0 0 20px rgba(255, 0, 100, 0.5);
-        }
-
-        .char-emoji {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-
-        .char-name {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .char-desc {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-
-        /* Чат */
-        .chat-container {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .chat-rooms {
-            display: flex;
-            gap: 5px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            flex-wrap: wrap;
-        }
-
-        .room-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-
-        .room-btn.active-room {
-            background: #ff0066;
-        }
-
-        .chat-messages {
-            height: 350px;
-            overflow-y: auto;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            animation: fadeIn 0.2s;
-        }
-
-        .message.system {
-            background: rgba(255, 100, 0, 0.2);
-            text-align: center;
-            font-style: italic;
-            font-size: 12px;
-        }
-
-        .message-header {
-            font-size: 11px;
-            color: #ff6699;
-            margin-bottom: 5px;
-        }
-
-        .message-text {
-            font-size: 14px;
-            word-wrap: break-word;
-        }
-
-        .chat-input-area {
-            display: flex;
-            padding: 10px;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chat-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 12px;
-            border-radius: 25px;
-            color: white;
-            outline: none;
-        }
-
-        .chat-send {
-            background: #ff0066;
-            border: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-        }
-
-        /* Секс-игра */
-        .sex-area {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            padding: 20px;
-        }
-
-        .arousal-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-
-        .arousal-fill {
-            background: linear-gradient(90deg, #ff0066, #ff3300);
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 10px;
-        }
-
-        .sex-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .action-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            background: #ff0066;
-            transform: scale(1.05);
-        }
-
-        .sex-response {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-            min-height: 100px;
-            border-left: 3px solid #ff0066;
-        }
-
-        /* Другое */
-        button {
-            font-family: inherit;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
+        #instruction {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            color: #ffccaa;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 11px;
-            background: rgba(0, 0, 0, 0.5);
-            margin-top: 10px;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 11px;
-            opacity: 0.5;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #ff0066;
-            border-radius: 5px;
-        }
-
-        @media (max-width: 500px) {
-            .char-grid {
-                grid-template-columns: 1fr;
-            }
-            .nav-btn {
-                font-size: 11px;
-                padding: 8px;
-            }
+            font-size: 12px;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>🔞 NetErrror 18+</h1>
-        <p>Мир без запретов | Анонимный чат | Виртуальный секс</p>
-    </div>
+    <div id="info">🖱️ Мышь/палец — вращение, зум, панорамирование | Реалистичная 3D модель 🖱️</div>
+    <div id="instruction">🍆 Высокодетализированный член + мошонка | NetErrror 🍆</div>
 
-    <div class="nav">
-        <button class="nav-btn" data-page="home">🏠 Главная</button>
-        <button class="nav-btn" data-page="sex">🎮 Вирт секс</button>
-        <button class="nav-btn" data-page="chat">💬 Онлайн чат</button>
-        <button class="nav-btn" data-page="profile">👤 Профиль</button>
-    </div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
 
-    <div class="content">
-        <!-- ГЛАВНАЯ СТРАНИЦА -->
-        <div id="home" class="page">
-            <h2>🔥 Добро пожаловать в разврат!</h2>
-            <p style="margin: 15px 0; opacity: 0.8;">Выбери персонажа и начни играть. Всё анонимно, без ограничений.</p>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- СЦЕНА С ТУМАНОМ И РЕАЛИСТИЧНЫМ ФОНОМ ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b1a);
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+
+        // --- КАМЕРА ---
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.05, 1000);
+        camera.position.set(2.0, 1.4, 2.8);
+        camera.lookAt(0, 0.5, 0);
+
+        // --- РЕНДЕРЕР С ТЕНЯМИ И АНИАЛИАСИНГОМ ---
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // --- ОРБИТА КОНТРОЛ ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.rotateSpeed = 1.2;
+        controls.zoomSpeed = 1.0;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.target.set(0, 0.55, 0);
+
+        // --- ОСВЕЩЕНИЕ (мягкое, с эффектом подкожного рассеивания) ---
+        const ambientLight = new THREE.AmbientLight(0x3c2a2a, 0.45);
+        scene.add(ambientLight);
+        
+        // Основной направленный свет
+        const mainLight = new THREE.DirectionalLight(0xffccaa, 1.2);
+        mainLight.position.set(1.8, 2.5, 1.5);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = false;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+        
+        // Заполняющий теплый свет снизу
+        const fillWarm = new THREE.PointLight(0xc8976a, 0.65);
+        fillWarm.position.set(0, -0.3, 0.2);
+        scene.add(fillWarm);
+        
+        // Холодный контровой свет
+        const backRim = new THREE.PointLight(0x88aaff, 0.55);
+        backRim.position.set(-0.8, 1.1, -1.7);
+        scene.add(backRim);
+        
+        // Моделируем SSS легким оранжевым светом
+        const sssLight = new THREE.PointLight(0xcc8866, 0.5);
+        sssLight.position.set(0.3, 0.6, 0.4);
+        scene.add(sssLight);
+        
+        // Дополнительный акцент на головку
+        const tipLight = new THREE.PointLight(0xffaa77, 0.4);
+        tipLight.position.set(0.1, 0.95, 0.5);
+        scene.add(tipLight);
+        
+        // --- ПОВЕРХНОСТЬ (пол с текстурой) ---
+        const gridHelper = new THREE.GridHelper(5, 20, 0xaa8866, 0x664422);
+        gridHelper.position.y = -0.68;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.3;
+        scene.add(gridHelper);
+        
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.7, metalness: 0.05, transparent: true, opacity: 0.2 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), groundMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.7;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
+        
+        // ========== РЕАЛИСТИЧНАЯ МОДЕЛЬ ==========
+        const penisGroup = new THREE.Group();
+        
+        // --- ТЕКСТУРЫ КОЖИ (canvas procedural) ---
+        const createSkinTexture = (baseColor, veinColor, speckColor) => {
+            const canvasTex = document.createElement('canvas');
+            canvasTex.width = 1024;
+            canvasTex.height = 1024;
+            const ctxTex = canvasTex.getContext('2d');
             
-            <div class="char-grid" id="charGrid">
-                <div class="char-card" data-char="girl">
-                    <div class="char-emoji">💋</div>
-                    <div class="char-name">Развратная девушка</div>
-                    <div class="char-desc">Горячая, игривая, готова на всё</div>
-                </div>
-                <div class="char-card" data-char="boy">
-                    <div class="char-emoji">🍆</div>
-                    <div class="char-name">Пошлый парень</div>
-                    <div class="char-desc">Грубый, доминантный, страстный</div>
-                </div>
-                <div class="char-card" data-char="gay">
-                    <div class="char-emoji">🏳️‍🌈</div>
-                    <div class="char-name">Гей</div>
-                    <div class="char-desc">Для парней, горячий и смелый</div>
-                </div>
-                <div class="char-card" data-char="lesbian">
-                    <div class="char-emoji">👩‍❤️‍👩</div>
-                    <div class="char-name">Лесбиянка</div>
-                    <div class="char-desc">Нежная, страстная, для девушек</div>
-                </div>
-            </div>
+            // Основной цвет
+            ctxTex.fillStyle = baseColor;
+            ctxTex.fillRect(0, 0, canvasTex.width, canvasTex.height);
             
-            <div id="selectedChar" class="status-badge" style="display: none; margin-top: 20px;">
-                ✅ Выбран: <span id="charName"></span>
-            </div>
-        </div>
-
-        <!-- ВИРТУАЛЬНЫЙ СЕКС -->
-        <div id="sex" class="page">
-            <div class="sex-area">
-                <h3>🎮 Виртуальный секс</h3>
-                <p id="sexCharStatus" style="font-size: 12px; opacity: 0.7; margin: 10px 0;">Сначала выбери персонажа на главной</p>
-                
-                <div class="arousal-bar">
-                    <div class="arousal-fill" id="arousalFill"></div>
-                </div>
-                <div id="arousalText" style="text-align: center; font-size: 12px;">😈 Уровень: 0/5</div>
-                
-                <div class="sex-actions" id="sexActions">
-                    <!-- Действия будут подставлены из JS -->
-                </div>
-                
-                <div class="sex-response" id="sexResponse">
-                    👄 Напиши или нажми на действие...
-                </div>
-            </div>
-        </div>
-
-        <!-- ОНЛАЙН ЧАТ -->
-        <div id="chat" class="page">
-            <div class="chat-container">
-                <div class="chat-rooms" id="chatRooms">
-                    <button class="room-btn" data-room="gay">🏳️‍🌈 Гей чат</button>
-                    <button class="room-btn" data-room="lesbian">👩‍❤️‍👩 Лесби чат</button>
-                    <button class="room-btn" data-room="mixed">💑 Смешанный</button>
-                    <button class="room-btn" data-room="everyone">🌍 Общий</button>
-                </div>
-                
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message system">💬 Выбери комнату и начни общаться...</div>
-                </div>
-                
-                <div class="chat-input-area">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." maxlength="500">
-                    <button class="chat-send" id="sendMessageBtn">📤</button>
-                </div>
-                
-                <div style="display: flex; gap: 10px; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
-                        📷 Фото
-                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
-                    </label>
-                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
-                        🎥 Видео
-                        <input type="file" id="videoInput" accept="video/*" style="display: none;">
-                    </label>
-                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
-                        🎙️ Голос
-                        <input type="file" id="voiceInput" accept="audio/*" style="display: none;">
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- ПРОФИЛЬ -->
-        <div id="profile" class="page">
-            <h3>👤 Мой профиль</h3>
-            <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 15px;">
-                <p><strong>🎭 Персонаж:</strong> <span id="profileChar">Не выбран</span></p>
-                <p><strong>💬 Чатов:</strong> <span id="profileChats">0</span></p>
-                <p><strong>💦 Уровень разврата:</strong> <span id="profileLevel">0</span>/100</p>
-                <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.1);">
-                <button id="resetBtn" style="background: #ff0066; border: none; color: white; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer;">🔄 Сбросить всё</button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="footer">
-        🔞 18+ ONLY | Анонимно | Без сохранения истории
-    </div>
-</div>
-
-<script>
-    // ==================== ХРАНИЛИЩЕ ДАННЫХ ====================
-    let currentChar = localStorage.getItem('netErrorChar') || null;
-    let arousal = parseInt(localStorage.getItem('netErrorArousal')) || 0;
-    let level = parseInt(localStorage.getItem('netErrorLevel')) || 0;
-    
-    // Чат данные
-    let currentRoom = localStorage.getItem('netErrorRoom') || null;
-    let username = localStorage.getItem('netErrorUsername') || null;
-    
-    // Генерация случайного имени если нет
-    if (!username) {
-        const names = ['Тигр', 'Лиса', 'Волк', 'Кошка', 'Пантера', 'Дракон', 'Феникс', 'Демон', 'Ангел', 'Шалун', 'Шалунья'];
-        username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 1000);
-        localStorage.setItem('netErrorUsername', username);
-    }
-    
-    // Сообщения в чатах
-    let chatMessages = {
-        gay: JSON.parse(localStorage.getItem('chat_gay')) || [],
-        lesbian: JSON.parse(localStorage.getItem('chat_lesbian')) || [],
-        mixed: JSON.parse(localStorage.getItem('chat_mixed')) || [],
-        everyone: JSON.parse(localStorage.getItem('chat_everyone')) || []
-    };
-    
-    // ==================== ДАННЫЕ ДЛЯ СЕКСА ====================
-    const sexActions = {
-        girl: {
-            actions: ['👅 Сосать', '💋 Киска', '👉 Клитор', '✌️ Палец', '👅 Язык', '💦 Кончить'],
-            responses: {
-                'сосать': '💋 Я беру твой член в рот и делаю глубокий минет, облизывая головку язычком...',
-                'киска': '🌸 Моя киска мокрая и ждет тебя, войди в меня глубже...',
-                'клитор': '💓 Твой палец ласкает мой клитор, я дрожу от удовольствия...',
-                'палец': '👆 Два пальца внутри меня, я чувствую как ты растягиваешь меня...',
-                'язык': '👅 Твой язык вылизывает меня до самой глубины...',
-                'кончить': '💦 Я кончаю на твой член, заливая его своими соками!'
+            // Мелкие поры и текстура
+            for (let i = 0; i < 2800; i++) {
+                ctxTex.fillStyle = `rgba(80, 50, 30, ${Math.random() * 0.25})`;
+                const x = Math.random() * canvasTex.width;
+                const y = Math.random() * canvasTex.height;
+                const r = Math.random() * 1.8;
+                ctxTex.beginPath();
+                ctxTex.arc(x, y, r, 0, Math.PI * 2);
+                ctxTex.fill();
             }
-        },
-        boy: {
-            actions: ['🍆 Член', '🍑 Попа', '👉 Палец', '👅 Язык', '🐕 Раком', '💦 Кончить'],
-            responses: {
-                'член': '🍆 Я ввожу свой твердый член в твою мокрую киску, чувствуешь как пульсирует?...',
-                'попа': '🍑 Я раздвигаю твои ягодицы и вхожу в тугую попку, ты стонешь...',
-                'палец': '👆 Мой палец внутри тебя, массирую твою точку G...',
-                'язык': '👅 Я вылизываю твою киску до самой глубины...',
-                'раком': '🐕 Повернись раком, я вхожу сзади глубоко и жестко...',
-                'кончить': '💦 Я кончаю глубоко в тебя, сперма заливает матку!'
+            
+            // Вены (извилистые линии)
+            ctxTex.strokeStyle = veinColor;
+            ctxTex.lineWidth = 6;
+            for (let v = 0; v < 35; v++) {
+                ctxTex.beginPath();
+                let startX = Math.random() * canvasTex.width;
+                let startY = Math.random() * canvasTex.height;
+                ctxTex.moveTo(startX, startY);
+                for (let seg = 0; seg < 8; seg++) {
+                    ctxTex.lineTo(startX + (Math.random() - 0.5) * 70, startY + (Math.random() - 0.5) * 50);
+                    startX += (Math.random() - 0.5) * 45;
+                    startY += (Math.random() - 0.5) * 35;
+                }
+                ctxTex.stroke();
             }
-        },
-        gay: {
-            actions: ['🍆 Член', '🍑 Попка', '👅 Сосать', '💦 Кончить'],
-            responses: {
-                'член': '🏳️‍🌈 Соси мой член, глубоко, я хочу в твое горло...',
-                'попка': '🏳️‍🌈 Раздвинь мою попку, войди в меня, я хочу чувствовать тебя...',
-                'сосать': '🏳️‍🌈 Я беру твой член в рот и сосу до конца, глотая каждую каплю...',
-                'кончить': '🏳️‍🌈 Я кончаю в твою попку, заливаю тебя горячей спермой!'
+            
+            // Пигментные пятна
+            for (let p = 0; p < 400; p++) {
+                ctxTex.fillStyle = `rgba(100, 60, 35, ${Math.random() * 0.4})`;
+                ctxTex.beginPath();
+                ctxTex.ellipse(Math.random() * canvasTex.width, Math.random() * canvasTex.height, Math.random() * 5 + 2, Math.random() * 4 + 1.5, 0, 0, Math.PI * 2);
+                ctxTex.fill();
             }
-        },
-        lesbian: {
-            actions: ['💋 Киска', '💓 Клитор', '👉 Палец', '👅 Язык', '💦 Кончить'],
-            responses: {
-                'киска': '👩‍❤️‍👩 Моя киска мокрая, войди в меня пальчиками...',
-                'клитор': '👩‍❤️‍👩 Полижи мой клитор, он такой чувствительный, я кончаю...',
-                'палец': '👩‍❤️‍👩 Твои пальцы внутри меня, я сжимаюсь вокруг них...',
-                'язык': '👩‍❤️‍👩 Я вылизываю твою киску до оргазма...',
-                'кончить': '👩‍❤️‍👩 Мы кончаем вместе, обнимая друг друга!'
-            }
-        }
-    };
-    
-    // Активация действий для секса
-    function performSexAction(actionKey) {
-        if (!currentChar) {
-            document.getElementById('sexResponse').innerHTML = '❌ Сначала выбери персонажа на главной странице!';
-            return;
-        }
-        
-        const charData = sexActions[currentChar];
-        if (!charData) return;
-        
-        let response = '';
-        for (let key in charData.responses) {
-            if (actionKey.includes(key)) {
-                response = charData.responses[key];
-                break;
-            }
-        }
-        
-        if (!response) {
-            response = charData.responses[Object.keys(charData.responses)[Math.floor(Math.random() * Object.keys(charData.responses).length)]];
-        }
-        
-        // Обновляем возбуждение
-        arousal = Math.min(arousal + Math.floor(Math.random() * 20) + 10, 100);
-        level = Math.min(level + Math.floor(Math.random() * 5) + 1, 100);
-        
-        localStorage.setItem('netErrorArousal', arousal);
-        localStorage.setItem('netErrorLevel', level);
-        
-        const fillPercent = (arousal / 100) * 100;
-        document.getElementById('arousalFill').style.width = fillPercent + '%';
-        
-        let arousalEmoji = '😈';
-        if (arousal >= 80) arousalEmoji = '💥';
-        else if (arousal >= 60) arousalEmoji = '🌊';
-        else if (arousal >= 40) arousalEmoji = '💦';
-        else if (arousal >= 20) arousalEmoji = '🔥';
-        
-        document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
-        
-        let finalResponse = response;
-        if (arousal >= 100) {
-            finalResponse = '💦💦💦 ТЫ КОНЧАЕШЬ! Сильнейший оргазм! Возбуждение сброшено... 💦💦💦\n\n' + response;
-            arousal = 0;
-            localStorage.setItem('netErrorArousal', 0);
-            document.getElementById('arousalFill').style.width = '0%';
-            document.getElementById('arousalText').innerHTML = '😈 Уровень: 0/100';
-        }
-        
-        document.getElementById('sexResponse').innerHTML = finalResponse;
-        
-        // Обновляем профиль
-        updateProfile();
-    }
-    
-    // Обновление интерфейса
-    function updateSexActions() {
-        const container = document.getElementById('sexActions');
-        if (!currentChar) {
-            container.innerHTML = '<div style="color: #ff6699;">❌ Выбери персонажа на главной</div>';
-            return;
-        }
-        
-        const actions = sexActions[currentChar].actions;
-        container.innerHTML = '';
-        actions.forEach(action => {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.textContent = action;
-            const actionKey = action.replace(/[^а-яё]/gi, '').toLowerCase();
-            btn.onclick = () => performSexAction(actionKey);
-            container.appendChild(btn);
-        });
-    }
-    
-    // Обновление профиля
-    function updateProfile() {
-        const charNames = {
-            girl: '💋 Развратная девушка',
-            boy: '🍆 Пошлый парень',
-            gay: '🏳️‍🌈 Гей',
-            lesbian: '👩‍❤️‍👩 Лесбиянка'
+            
+            const texture = new THREE.CanvasTexture(canvasTex);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1.2, 1.8);
+            return texture;
         };
         
-        document.getElementById('profileChar').innerHTML = currentChar ? charNames[currentChar] : 'Не выбран';
-        document.getElementById('profileLevel').innerHTML = level;
+        const skinTexBody = createSkinTexture('#c89a6c', '#9c6e48', '#a5724a');
+        const skinTexTip = createSkinTexture('#e0b88a', '#b87a4a', '#c28255');
+        skinTexTip.repeat.set(0.9, 1.2);
         
-        let chatCount = 0;
-        for (let room in chatMessages) {
-            chatCount += chatMessages[room].length;
-        }
-        document.getElementById('profileChats').innerHTML = chatCount;
-    }
-    
-    // ==================== ФУНКЦИИ ЧАТА ====================
-    function addMessage(room, username, text, type = 'text', fileData = null) {
-        const message = {
-            id: Date.now(),
-            username: username,
-            text: text,
-            type: type,
-            fileData: fileData,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        };
-        
-        chatMessages[room].push(message);
-        if (chatMessages[room].length > 50) chatMessages[room].shift();
-        
-        localStorage.setItem(`chat_${room}`, JSON.stringify(chatMessages[room]));
-        
-        if (currentRoom === room) {
-            renderMessages();
-        }
-    }
-    
-    function renderMessages() {
-        if (!currentRoom) return;
-        
-        const container = document.getElementById('chatMessages');
-        const messages = chatMessages[currentRoom];
-        
-        if (messages.length === 0) {
-            container.innerHTML = '<div class="message system">💬 Нет сообщений. Напиши первым!</div>';
-            return;
-        }
-        
-        container.innerHTML = '';
-        messages.forEach(msg => {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            
-            const header = document.createElement('div');
-            header.className = 'message-header';
-            header.innerHTML = `👤 ${msg.username} • ${msg.time}`;
-            
-            const textDiv = document.createElement('div');
-            textDiv.className = 'message-text';
-            
-            if (msg.type === 'text') {
-                textDiv.textContent = msg.text;
-            } else if (msg.type === 'photo' && msg.fileData) {
-                textDiv.innerHTML = `<img src="${msg.fileData}" style="max-width: 200px; max-height: 200px; border-radius: 10px;">`;
-            } else if (msg.type === 'video' && msg.fileData) {
-                textDiv.innerHTML = `<video src="${msg.fileData}" controls style="max-width: 200px; max-height: 200px; border-radius: 10px;"></video>`;
-            } else if (msg.type === 'voice' && msg.fileData) {
-                textDiv.innerHTML = `<audio src="${msg.fileData}" controls style="width: 200px;"></audio>`;
-            }
-            
-            msgDiv.appendChild(header);
-            msgDiv.appendChild(textDiv);
-            container.appendChild(msgDiv);
+        const shaftMat = new THREE.MeshStandardMaterial({ 
+            map: skinTexBody, 
+            color: 0xd4a074, 
+            roughness: 0.32, 
+            metalness: 0.02, 
+            emissive: 0x331a00, 
+            emissiveIntensity: 0.12 
         });
         
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    function sendMessage() {
-        const input = document.getElementById('chatInput');
-        const text = input.value.trim();
-        
-        if (!text || !currentRoom || !username) return;
-        
-        addMessage(currentRoom, username, text, 'text');
-        input.value = '';
-    }
-    
-    // Файлы
-    function handleFile(file, type) {
-        if (!currentRoom || !username) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            addMessage(currentRoom, username, '', type, e.target.result);
-        };
-        reader.readAsDataURL(file);
-    }
-    
-    // Смена комнаты
-    function changeRoom(room) {
-        currentRoom = room;
-        localStorage.setItem('netErrorRoom', room);
-        
-        document.querySelectorAll('.room-btn').forEach(btn => {
-            if (btn.dataset.room === room) {
-                btn.classList.add('active-room');
-            } else {
-                btn.classList.remove('active-room');
-            }
+        const tipMat = new THREE.MeshStandardMaterial({ 
+            map: skinTexTip, 
+            color: 0xe8c094, 
+            roughness: 0.23, 
+            metalness: 0.01, 
+            emissive: 0x552200, 
+            emissiveIntensity: 0.08 
         });
         
-        renderMessages();
-    }
-    
-    // ==================== НАВИГАЦИЯ ====================
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active-page');
-        });
-        document.getElementById(pageId).classList.add('active-page');
-        
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            if (btn.dataset.page === pageId) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+        const eggMatReal = new THREE.MeshStandardMaterial({ 
+            color: 0xcc9a70, 
+            roughness: 0.45, 
+            metalness: 0.03,
+            emissive: 0x221100,
+            emissiveIntensity: 0.1
         });
         
-        if (pageId === 'sex') {
-            updateSexActions();
-            const fillPercent = (arousal / 100) * 100;
-            document.getElementById('arousalFill').style.width = fillPercent + '%';
-            
-            let arousalEmoji = '😈';
-            if (arousal >= 80) arousalEmoji = '💥';
-            else if (arousal >= 60) arousalEmoji = '🌊';
-            else if (arousal >= 40) arousalEmoji = '💦';
-            else if (arousal >= 20) arousalEmoji = '🔥';
-            document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
-            
-            const charNames = {girl: 'Девушка 💋', boy: 'Парень 🍆', gay: 'Гей 🏳️‍🌈', lesbian: 'Лесбиянка 👩‍❤️‍👩'};
-            document.getElementById('sexCharStatus').innerHTML = currentChar ? `Персонаж: ${charNames[currentChar]}` : '❌ Сначала выбери персонажа на главной';
-        } else if (pageId === 'chat' && currentRoom) {
-            renderMessages();
-        } else if (pageId === 'profile') {
-            updateProfile();
+        // --- СТВОЛ С НЕРОВНОСТЯМИ (используем модифицированную геометрию) ---
+        const shaftGeo = new THREE.CylinderGeometry(0.32, 0.38, 1.35, 96, 32);
+        const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+        shaft.castShadow = true;
+        shaft.position.y = 0;
+        penisGroup.add(shaft);
+        
+        // --- ГОЛОВКА (с реалистичным переходом и уретрой)---
+        const tipGeo = new THREE.SphereGeometry(0.42, 128, 128);
+        const tip = new THREE.Mesh(tipGeo, tipMat);
+        tip.position.y = 0.78;
+        tip.castShadow = true;
+        penisGroup.add(tip);
+        
+        // Внутренний слой головки для блеска
+        const innerTipMat = new THREE.MeshStandardMaterial({ color: 0xf0ca9a, roughness: 0.18, emissive: 0x552a00, emissiveIntensity: 0.1 });
+        const innerTip = new THREE.Mesh(new THREE.SphereGeometry(0.36, 96, 96), innerTipMat);
+        innerTip.position.y = 0.79;
+        innerTip.castShadow = true;
+        penisGroup.add(innerTip);
+        
+        // Уретра (отверстие) - маленький эллипсоид
+        const urethraMat = new THREE.MeshStandardMaterial({ color: 0xaa6644, roughness: 0.12, emissive: 0x441100 });
+        const urethra = new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 32), urethraMat);
+        urethra.position.set(0, 1.01, 0.39);
+        urethra.scale.set(0.7, 0.45, 0.35);
+        penisGroup.add(urethra);
+        
+        // Венечная борозда (глубокий желобок)
+        const coronalMat = new THREE.MeshStandardMaterial({ color: 0xb88458, roughness: 0.5 });
+        const coronalRing = new THREE.Mesh(new THREE.TorusGeometry(0.395, 0.05, 64, 128), coronalMat);
+        coronalRing.rotation.x = Math.PI / 2;
+        coronalRing.position.y = 0.52;
+        penisGroup.add(coronalRing);
+        
+        // Дополнительные кольца/складки на стволе
+        const foldMat = new THREE.MeshStandardMaterial({ color: 0xc68c62, roughness: 0.6 });
+        for (let y = -0.3; y <= 0.2; y += 0.28) {
+            const fold = new THREE.Mesh(new THREE.TorusGeometry(0.345, 0.032, 48, 96), foldMat);
+            fold.rotation.x = Math.PI / 2;
+            fold.position.y = y;
+            penisGroup.add(fold);
         }
-    }
-    
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => showPage(btn.dataset.page));
-    });
-    
-    // Выбор персонажа
-    document.querySelectorAll('.char-card').forEach(card => {
-        card.addEventListener('click', () => {
-            document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            currentChar = card.dataset.char;
-            localStorage.setItem('netErrorChar', currentChar);
-            
-            const charNames = {
-                girl: '💋 Развратную девушку',
-                boy: '🍆 Пошлого парня',
-                gay: '🏳️‍🌈 Гея',
-                lesbian: '👩‍❤️‍👩 Лесбиянку'
-            };
-            
-            document.getElementById('selectedChar').style.display = 'block';
-            document.getElementById('charName').innerHTML = charNames[currentChar];
-            
-            if (currentChar === 'gay' || currentChar === 'lesbian') {
-                setTimeout(() => {
-                    if (confirm('🏳️‍🌈 Выбран ЛГБТ-персонаж. Продолжить?')) {
-                        alert('✅ Персонаж выбран! Переходи в раздел "Вирт секс"');
-                    }
-                }, 100);
-            } else {
-                alert(`✅ Ты выбрал ${charNames[currentChar]}! Переходи в раздел "Вирт секс"`);
+        
+        // --- РЕАЛИСТИЧНЫЕ ВЕНЫ НА СТВОЛЕ (изогнутые цилиндры)---
+        const veinMatReal = new THREE.MeshStandardMaterial({ color: 0xad7a52, roughness: 0.25 });
+        const veinPositions = [
+            { pos: [0.28, -0.15, 0.22], rot: [0.2, 0.3, 0.5], scale: [0.08, 0.5, 0.08] },
+            { pos: [-0.27, 0.05, 0.28], rot: [-0.1, -0.2, 0.6], scale: [0.09, 0.55, 0.09] },
+            { pos: [0.25, 0.35, 0.24], rot: [0.15, 0.4, 0.3], scale: [0.07, 0.45, 0.07] },
+            { pos: [-0.23, -0.32, 0.26], rot: [-0.1, -0.3, 0.4], scale: [0.08, 0.6, 0.08] },
+            { pos: [0.18, -0.48, 0.32], rot: [0.05, 0.5, 0.2], scale: [0.07, 0.5, 0.07] },
+            { pos: [-0.29, 0.45, 0.18], rot: [-0.05, -0.4, 0.35], scale: [0.09, 0.52, 0.09] }
+        ];
+        veinPositions.forEach(v => {
+            const veinCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 8), veinMatReal);
+            veinCyl.position.set(v.pos[0], v.pos[1], v.pos[2]);
+            veinCyl.rotation.set(v.rot[0], v.rot[1], v.rot[2]);
+            veinCyl.scale.set(v.scale[0], v.scale[1], v.scale[2]);
+            veinCyl.castShadow = true;
+            penisGroup.add(veinCyl);
+        });
+        
+        // --- МОШОНКА (два яйца с неровной поверхностью + складки)---
+        const testicleMat = new THREE.MeshStandardMaterial({ color: 0xbc8864, roughness: 0.55, metalness: 0.02 });
+        
+        const leftTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
+        leftTest.scale.set(0.92, 0.75, 0.85);
+        leftTest.position.set(-0.64, -0.48, 0.18);
+        leftTest.castShadow = true;
+        penisGroup.add(leftTest);
+        
+        const rightTest = new THREE.Mesh(new THREE.SphereGeometry(0.44, 96, 96), testicleMat);
+        rightTest.scale.set(0.92, 0.75, 0.85);
+        rightTest.position.set(0.64, -0.48, 0.18);
+        rightTest.castShadow = true;
+        penisGroup.add(rightTest);
+        
+        // Добавляем морщинистые детали на мошонку (маленькие сферы)
+        const wrinkleMat = new THREE.MeshStandardMaterial({ color: 0xac7854, roughness: 0.7 });
+        for (let i = 0; i < 65; i++) {
+            const wrinkle = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 12), wrinkleMat);
+            const side = Math.random() > 0.5 ? -0.68 : 0.68;
+            wrinkle.position.set(side + (Math.random() - 0.5) * 0.28, -0.55 + Math.random() * 0.25, 0.1 + Math.random() * 0.35);
+            wrinkle.scale.set(0.8, 0.5, 0.7);
+            wrinkle.castShadow = true;
+            penisGroup.add(wrinkle);
+        }
+        
+        // Срединный шов мошонки (линия)
+        const seamMat = new THREE.MeshStandardMaterial({ color: 0xa07048 });
+        const seam = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.38, 0.12), seamMat);
+        seam.position.set(0, -0.52, 0.32);
+        penisGroup.add(seam);
+        
+        // Добавляем легкий блеск на головке
+        const glossMat = new THREE.MeshStandardMaterial({ color: 0xffdbb0, emissive: 0x442200, roughness: 0.12 });
+        const glossSphere = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), glossMat);
+        glossSphere.position.set(0.07, 0.95, 0.42);
+        glossSphere.scale.set(0.6, 0.4, 0.5);
+        penisGroup.add(glossSphere);
+        
+        penisGroup.position.set(0, 0.1, 0);
+        scene.add(penisGroup);
+        
+        // Динамическое пульсирование вен и легкое движение
+        let time = 0;
+        const originalVeinScale = [];
+        penisGroup.children.forEach(child => {
+            if (child.isMesh && child.material === veinMatReal) {
+                originalVeinScale.push({ mesh: child, scaleY: child.scale.y });
             }
         });
-    });
-    
-    // Чат
-    document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
-    document.getElementById('chatInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
-    
-    document.querySelectorAll('.room-btn').forEach(btn => {
-        btn.addEventListener('click', () => changeRoom(btn.dataset.room));
-    });
-    
-    // Файлы
-    document.getElementById('photoInput').addEventListener('change', (e) => {
-        if (e.target.files[0]) handleFile(e.target.files[0], 'photo');
-        e.target.value = '';
-    });
-    document.getElementById('videoInput').addEventListener('change', (e) => {
-        if (e.target.files[0]) handleFile(e.target.files[0], 'video');
-        e.target.value = '';
-    });
-    document.getElementById('voiceInput').addEventListener('change', (e) => {
-        if (e.target.files[0]) handleFile(e.target.files[0], 'voice');
-        e.target.value = '';
-    });
-    
-    // Сброс
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        if (confirm('⚠️ ВСЕ ДАННЫЕ БУДУТ УДАЛЕНЫ! Ты уверен?')) {
-            localStorage.clear();
-            location.reload();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            
+            // Легкое покачивание и "дыхание"
+            penisGroup.rotation.y = Math.sin(time * 0.5) * 0.012;
+            penisGroup.position.y = 0.1 + Math.sin(time * 0.9) * 0.002;
+            
+            // Пульсация вен (легкая)
+            originalVeinScale.forEach((item, idx) => {
+                const scaleMul = 1 + Math.sin(time * 3.2 + idx) * 0.03;
+                item.mesh.scale.y = item.scaleY * scaleMul;
+            });
+            
+            // Мерцание подсветки SSS
+            sssLight.intensity = 0.52 + Math.sin(time * 1.7) * 0.08;
+            tipLight.intensity = 0.44 + Math.sin(time * 2.3) * 0.1;
+            
+            controls.update();
+            renderer.render(scene, camera);
         }
-    });
-    
-    // Загрузка начальных данных
-    if (currentChar) {
-        const charCard = document.querySelector(`.char-card[data-char="${currentChar}"]`);
-        if (charCard) charCard.classList.add('selected');
-        document.getElementById('selectedChar').style.display = 'block';
-        const charNames = {
-            girl: '💋 Развратную девушку',
-            boy: '🍆 Пошлого парня',
-            gay: '🏳️‍🌈 Гея',
-            lesbian: '👩‍❤️‍👩 Лесбиянку'
-        };
-        document.getElementById('charName').innerHTML = charNames[currentChar];
-    }
-    
-    if (currentRoom) {
-        const roomBtn = document.querySelector(`.room-btn[data-room="${currentRoom}"]`);
-        if (roomBtn) roomBtn.classList.add('active-room');
-        renderMessages();
-    }
-    
-    showPage('home');
-    updateProfile();
-</script>
+        
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        console.log("NetErrror: Абсолютно реалистичная 3D модель члена и мошонки загружена.");
+    </script>
 </body>
 </html>
