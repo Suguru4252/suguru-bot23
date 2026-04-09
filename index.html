@@ -3,157 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ГАЗАН 67 RUSH | МОБИЛЬНАЯ ЭЛИТА</title>
+    <title>ГАЗАН 67 RUSH | ПОЛНЫЙ ЭКРАН + ГИГАНТСКИЕ КНОПКИ</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             margin: 0;
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a1f1e, #041212);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', 'Press Start 2P', monospace;
-            touch-action: pan-x pan-y;
-            overflow: hidden;
-            position: fixed;
+            padding: 0;
             width: 100%;
             height: 100%;
+            background: #000000;
+            overflow: hidden;
+            position: fixed;
+            font-family: 'Courier New', 'Press Start 2P', monospace;
         }
 
-        .game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+        /* Игра на ВЕСЬ экран без отступов и рамок */
+        .game-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #041212;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #00000033;
+            overflow: hidden;
         }
 
-        .canvas-wrapper {
-            position: relative;
+        /* Канвас — адаптивный, без рамок, во всю ширину */
+        .canvas-area {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            flex: 1;
             min-height: 0;
+            background: #000000;
+            padding: 0;
             margin: 0;
-            touch-action: none;
         }
 
         canvas {
             display: block;
             width: 100%;
             height: auto;
-            max-width: 100vw;
-            max-height: 75vh;
-            border-radius: 20px;
-            box-shadow: 0 0 0 4px #ffd966, 0 0 0 8px #b97f44, 0 20px 30px rgba(0,0,0,0.5);
-            cursor: pointer;
+            max-height: 65vh;
             background: #1a1a2e;
+            border-radius: 0;
+            box-shadow: none;
             aspect-ratio: 600 / 500;
         }
 
-        @media (min-width: 700px) {
-            canvas { max-width: 85vw; max-height: 70vh; }
+        /* Контейнер для ОГРОМНЫХ кнопок внизу */
+        .giant-controls {
+            width: 100%;
+            padding: 15px 20px 25px 20px;
+            background: linear-gradient(180deg, #000000aa 0%, #041212 100%);
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            backdrop-filter: blur(4px);
+            border-top: 2px solid #ffb34766;
         }
 
-        .ui-panel {
+        /* ГИГАНТСКИЕ КНОПКИ — во всю ширину, удобные для пальцев */
+        .giant-btn {
+            flex: 1;
+            background: radial-gradient(circle at 30% 20%, #ffaa33, #cc6600);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            padding: 28px 0;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 12px 0 #7a2a0a;
+            transition: 0.03s linear;
+            letter-spacing: 4px;
+            text-shadow: 3px 3px 0 #6b2e00;
+            touch-action: manipulation;
+            backdrop-filter: blur(4px);
+        }
+
+        .giant-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 6px 0 #7a2a0a;
+        }
+
+        /* Левую кнопку сделаем чуть с акцентом */
+        .giant-btn-left {
+            background: radial-gradient(circle at 30% 20%, #ff8844, #bb4400);
+        }
+
+        .giant-btn-right {
+            background: radial-gradient(circle at 30% 20%, #ffaa44, #dd6600);
+        }
+
+        /* Панель счета поверх игры */
+        .ui-stats {
             position: absolute;
-            top: 10px;
+            top: 12px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: space-between;
-            padding: 0 12px;
+            padding: 0 15px;
             pointer-events: none;
             z-index: 20;
         }
 
-        .score-board, .best-board, .coin-counter, .combo-counter {
+        .stat-card {
             background: #000000aa;
-            backdrop-filter: blur(8px);
-            padding: 5px 12px;
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
             border-radius: 40px;
             font-weight: bold;
             font-size: 0.9rem;
-            color: #f9f3c1;
-            text-shadow: 0 0 4px #ff9900;
+            color: #ffefb0;
             font-family: monospace;
-            border: 1px solid #ffcd7e;
+            border: 1px solid #ffaa55;
             white-space: nowrap;
+            text-shadow: 0 0 3px #ff9900;
         }
 
-        .combo-counter {
+        .combo-stat {
             background: #ff6600aa;
             border-color: #ffdd88;
-            color: #ffffff;
         }
 
-        .controls-mobile {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .ctrl-btn {
-            pointer-events: auto;
-            background: #000000cc;
-            backdrop-filter: blur(16px);
-            border: 3px solid #ffb347;
-            color: #ffdd99;
-            font-size: 2.2rem;
-            font-weight: bold;
-            width: 90px;
-            height: 90px;
-            border-radius: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.05s linear;
-            box-shadow: 0 6px 0 #7a3e0e;
-            touch-action: manipulation;
-        }
-
-        .ctrl-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #7a3e0e;
-        }
-
+        /* Кнопки действий (пауза, перезапуск) в углу — маленькие, не мешают */
         .action-buttons {
             position: absolute;
-            top: 20px;
-            right: 15px;
+            top: 12px;
+            right: 12px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             z-index: 30;
             pointer-events: auto;
         }
 
-        .icon-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50px;
+        .small-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 44px;
             background: #000000bb;
             backdrop-filter: blur(8px);
-            border: 2px solid #ffaa66;
+            border: 1px solid #ffaa66;
             color: #ffdd99;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -161,12 +169,32 @@
             transition: 0.05s linear;
         }
 
-        .icon-btn:active { transform: scale(0.95); }
+        .small-icon:active { transform: scale(0.94); background: #000000dd; }
 
-        /* БОЛЬШАЯ КНОПКА ПЕРЕЗАПУСКА ПРИ GAME OVER */
+        /* Сообщения при паузе и game over */
+        .status-overlay {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffefb9;
+            background: #000000cc;
+            width: fit-content;
+            margin: 0 auto;
+            padding: 12px 28px;
+            border-radius: 60px;
+            backdrop-filter: blur(12px);
+            pointer-events: none;
+            z-index: 25;
+            white-space: nowrap;
+        }
+
         .gameover-restart {
             position: absolute;
-            bottom: 120px;
+            bottom: 160px;
             left: 0;
             right: 0;
             text-align: center;
@@ -174,7 +202,7 @@
             pointer-events: auto;
         }
 
-        .big-restart-btn {
+        .big-restart {
             background: #e25822;
             border: none;
             font-size: 1.5rem;
@@ -186,100 +214,71 @@
             cursor: pointer;
             box-shadow: 0 7px 0 #7a2a0a;
             transition: 0.05s linear;
-            letter-spacing: 2px;
-            backdrop-filter: blur(4px);
         }
 
-        .big-restart-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 3px 0 #7a2a0a;
-        }
-
-        .status-text {
-            position: absolute;
-            top: 35%;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #ffefb9;
-            background: #000000cc;
-            width: fit-content;
-            margin: auto;
-            padding: 10px 28px;
-            border-radius: 60px;
-            backdrop-filter: blur(10px);
-            pointer-events: none;
-            z-index: 25;
-        }
-
-        .pause-overlay {
-            position: absolute;
-            top: 45%;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #fff0a3;
-            background: #000000bb;
-            padding: 12px 25px;
-            width: fit-content;
-            margin: 0 auto;
-            border-radius: 60px;
-            backdrop-filter: blur(12px);
-            pointer-events: none;
-            z-index: 26;
-        }
+        .big-restart:active { transform: translateY(4px); box-shadow: 0 3px 0 #7a2a0a; }
 
         .hidden { display: none !important; }
 
-        @media (max-width: 550px) {
-            .ctrl-btn { width: 75px; height: 75px; font-size: 1.8rem; gap: 25px; }
-            .score-board, .best-board, .coin-counter, .combo-counter { font-size: 0.7rem; padding: 4px 10px; }
-            .icon-btn { width: 44px; height: 44px; font-size: 1.3rem; }
-            .big-restart-btn { font-size: 1.1rem; padding: 10px 24px; }
-            .status-text { font-size: 1rem; top: 33%; }
+        /* Для узких экранов кнопки остаются огромными */
+        @media (max-width: 700px) {
+            .giant-btn { font-size: 2.4rem; padding: 22px 0; letter-spacing: 2px; }
+            .giant-controls { padding: 12px 16px 20px 16px; gap: 18px; }
+            canvas { max-height: 60vh; }
+            .stat-card { font-size: 0.75rem; padding: 4px 10px; }
+            .status-overlay { font-size: 1.1rem; top: 35%; }
+            .big-restart { font-size: 1.1rem; padding: 10px 24px; }
+        }
+
+        @media (max-width: 480px) {
+            .giant-btn { font-size: 1.8rem; padding: 18px 0; }
+            .small-icon { width: 38px; height: 38px; font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="canvas-wrapper">
+<div class="game-fullscreen">
+    <!-- Канвас занимает всю доступную высоту, кнопки снизу -->
+    <div class="canvas-area">
         <canvas id="gameCanvas" width="600" height="500"></canvas>
     </div>
-    <div class="ui-panel">
-        <div class="score-board">🏆 <span id="scoreValue">0</span></div>
-        <div class="coin-counter">🪙 <span id="coinValue">0</span></div>
-        <div class="combo-counter" id="comboDisplay">⚡ x1</div>
-        <div class="best-board">⭐ <span id="bestValue">0</span></div>
+    
+    <!-- ОГРОМНЫЕ кнопки управления -->
+    <div class="giant-controls">
+        <div class="giant-btn giant-btn-left" id="leftBtn">◀ ЛЕВО</div>
+        <div class="giant-btn giant-btn-right" id="rightBtn">ПРАВО ▶</div>
     </div>
-    <div class="controls-mobile">
-        <div class="ctrl-btn" id="leftBtn">◀</div>
-        <div class="ctrl-btn" id="rightBtn">▶</div>
+    
+    <!-- Статистика поверх игры -->
+    <div class="ui-stats">
+        <div class="stat-card">🏆 <span id="scoreValue">0</span></div>
+        <div class="stat-card">🪙 <span id="coinValue">0</span></div>
+        <div class="stat-card combo-stat" id="comboDisplay">⚡ x1</div>
+        <div class="stat-card">⭐ <span id="bestValue">0</span></div>
     </div>
+    
+    <!-- Маленькие иконки паузы и рестарта (не мешают) -->
     <div class="action-buttons">
-        <div class="icon-btn" id="pauseBtn">⏸️</div>
-        <div class="icon-btn" id="forceRestartBtn">🔄</div>
+        <div class="small-icon" id="pauseBtn">⏸️</div>
+        <div class="small-icon" id="forceRestartBtn">🔄</div>
     </div>
     
-    <!-- Кнопка перезапуска при Game Over (появляется только при смерти) -->
+    <!-- Кнопка перезапуска при Game Over -->
     <div id="gameoverRestartBlock" class="gameover-restart hidden">
-        <button class="big-restart-btn" id="gameoverRestartBtn">🔁 ЗАНОВО 🚀</button>
+        <button class="big-restart" id="gameoverRestartBtn">🔁 ЗАНОВО 🚀</button>
     </div>
     
-    <div id="statusMessage" class="status-text hidden">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
-    <div id="pauseMessage" class="pause-overlay hidden">⏸ ПАУЗА ⏸</div>
+    <div id="statusMessage" class="status-overlay hidden">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
+    <div id="pauseMessage" class="status-overlay hidden">⏸ ПАУЗА ⏸</div>
 </div>
 
 <script>
     (function(){
-        // ----- ФИКСИРОВАННЫЕ РАЗМЕРЫ (600x500) -----
+        // ----- КАНВАС 600x500 -----
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Игровые константы
+        // Константы
         const LANE_COUNT = 3;
         const LANE_WIDTH = 600 / LANE_COUNT;
         const GROUND_Y = 430;
@@ -294,7 +293,7 @@
         const OBSTACLE_W = 52, OBSTACLE_H = 60;
         const COIN_SIZE = 22;
         
-        // Игровое состояние
+        // Состояние
         let gameRunning = true;
         let paused = false;
         let score = 0;
@@ -304,7 +303,7 @@
         let frameCounter = 0;
         let spawnGap = 50;
         
-        // Комбо система
+        // Комбо
         let combo = 1;
         let lastCoinTime = 0;
         
@@ -314,7 +313,7 @@
         let shieldActive = false;
         let shieldTimer = 0;
         
-        // Визуальные эффекты
+        // Эффекты
         let screenShake = 0;
         let worldChangeFlag = false;
         
@@ -366,15 +365,16 @@
             });
         }
         
-        // Обновление игры
         function updateGame() {
             if(!gameRunning || paused) return;
             
+            // Движение
             for(let o of obstacles) o.y += gameSpeed;
             for(let c of coins) c.y += gameSpeed;
             obstacles = obstacles.filter(o => o.y < 600);
             coins = coins.filter(c => c.y < 600);
             
+            // Частицы
             for(let i=0;i<particles.length;i++) {
                 particles[i].x += particles[i].vx;
                 particles[i].y += particles[i].vy;
@@ -383,6 +383,7 @@
             }
             particles = particles.filter(p => p.life > 0);
             
+            // Спавн
             let dynSpawn = Math.max(30, spawnGap - Math.floor(score / 400));
             if(frameCounter >= dynSpawn) {
                 spawnObstacle();
@@ -392,6 +393,7 @@
             
             gameSpeed = Math.min(5 + Math.floor(score / 550), 13.5);
             
+            // Таймеры бонусов
             if(magnetActive) { magnetTimer--; if(magnetTimer <= 0) magnetActive = false; }
             if(shieldActive) { shieldTimer--; if(shieldTimer <= 0) shieldActive = false; }
             
@@ -418,7 +420,7 @@
                 }
             }
             
-            // Сбор монет
+            // Сбор монет + комбо
             let collectedAny = false;
             for(let i=0;i<coins.length;i++) {
                 const coin = coins[i];
@@ -428,6 +430,7 @@
                    playerRect.y < coinRect.y + coinRect.h && playerRect.y + playerRect.h > coinRect.y) {
                     collected = true;
                 }
+                // Магнит
                 if(!collected && magnetActive) {
                     const centerX = playerRect.x + GAZAN_SIZE/2;
                     const centerY = playerRect.y + GAZAN_SIZE/2;
@@ -462,9 +465,9 @@
             
             score += 0.2;
             if(Math.floor(score) > bestScore) { bestScore = Math.floor(score); localStorage.setItem('gazanBest', bestScore); }
-            
             if(score >= nextWorldScore) changeWorld();
             
+            // UI
             document.getElementById('scoreValue').innerText = Math.floor(score);
             document.getElementById('coinValue').innerText = coinScore;
             document.getElementById('bestValue').innerText = bestScore;
@@ -475,6 +478,7 @@
             if(screenShake > 0) screenShake -= 0.8;
         }
         
+        // Отрисовка с тряской
         let shakeOffsetX = 0, shakeOffsetY = 0;
         function drawWithShake() {
             if(screenShake > 0) {
@@ -493,12 +497,12 @@
             grad.addColorStop(0, p.sky1); grad.addColorStop(0.8, p.sky2);
             ctx.fillStyle = grad;
             ctx.fillRect(0,0,600,GROUND_Y-20);
-            ctx.font = "bold 20px monospace";
+            ctx.font = "bold 18px monospace";
             ctx.fillStyle = p.glow;
-            ctx.fillText("⚡ GAZAN 67 RUSH", 20, 55);
-            ctx.font = "12px monospace";
+            ctx.fillText("⚡ GAZAN 67", 20, 50);
+            ctx.font = "10px monospace";
             ctx.fillStyle = "#ffefb0";
-            ctx.fillText(p.name, 20, 85);
+            ctx.fillText(p.name, 20, 75);
             
             ctx.fillStyle = p.platform;
             ctx.fillRect(0, GROUND_Y-12, 600, 20);
@@ -509,6 +513,7 @@
             ctx.fillStyle = p.track;
             for(let i=0;i<12;i++) ctx.fillRect(i*70, GROUND_Y-5, 45, 8);
             
+            // Монеты
             for(let c of coins) {
                 ctx.shadowBlur = 6;
                 ctx.shadowColor = "#ffaa33";
@@ -525,6 +530,7 @@
                 ctx.fillText("🪙", c.x+3, c.y+COIN_SIZE-5);
             }
             
+            // Препятствия
             for(let o of obstacles) {
                 ctx.fillStyle = p.obs1;
                 ctx.shadowBlur = 3;
@@ -542,6 +548,7 @@
                 ctx.fillText("💀", o.x+OBSTACLE_W-16, o.y+24);
             }
             
+            // ГАЗАН
             const px = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
             ctx.shadowBlur = 6;
             ctx.fillStyle = "#f5a623";
@@ -587,25 +594,25 @@
                 ctx.fill();
             }
             
-            ctx.font = "bold 16px monospace";
+            ctx.font = "bold 14px monospace";
             ctx.fillStyle = "#fff9cf";
-            ctx.fillText(`🔥 SPEED: ${Math.floor(gameSpeed*1.8)}`, 460, 40);
-            if(magnetActive) ctx.fillText("🧲 МАГНИТ", 460, 70);
-            if(shieldActive) ctx.fillText("🛡️ ЩИТ", 460, 95);
+            ctx.fillText(`SPEED: ${Math.floor(gameSpeed*1.8)}`, 480, 35);
+            if(magnetActive) ctx.fillText("🧲", 480, 58);
+            if(shieldActive) ctx.fillText("🛡️", 480, 75);
             if(worldChangeFlag) {
-                ctx.font = "bold 20px monospace";
+                ctx.font = "bold 16px monospace";
                 ctx.fillStyle = "#ffdd99";
-                ctx.shadowBlur = 8;
-                ctx.fillText(`✨ ${WORLDS[currentWorld].name} ✨`, 600/2-80, GROUND_Y-35);
+                ctx.fillText(`✨ ${WORLDS[currentWorld].name} ✨`, 600/2-70, GROUND_Y-35);
             }
             if(!gameRunning) {
-                ctx.font = "bold 28px monospace";
+                ctx.font = "bold 26px monospace";
                 ctx.fillStyle = "#ffbb88";
-                ctx.fillText("GAME OVER", 600/2-105, 250);
+                ctx.fillText("GAME OVER", 600/2-95, 250);
             }
             ctx.shadowBlur = 0;
         }
         
+        // Управление
         function moveLeft() { if(gameRunning && !paused && lane > 0) lane--; }
         function moveRight() { if(gameRunning && !paused && lane < LANE_COUNT-1) lane++; }
         
@@ -643,10 +650,11 @@
             else msg.classList.add('hidden');
         }
         
+        // Авто-бонусы
         function activateMagnet() { magnetActive = true; magnetTimer = 300; }
         function activateShield() { shieldActive = true; shieldTimer = 400; }
         
-        // Обработчики управления
+        // Свайпы на канвасе (доп. управление)
         let touchStartX = 0;
         function onTouchStart(e) { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const tx = (e.touches[0].clientX - rect.left)*scale; touchStartX = tx; }
         function onTouchMove(e) { if(!gameRunning || paused) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const curX = (e.touches[0].clientX - rect.left)*scale; if(Math.abs(curX - touchStartX) > 30) { if(curX > touchStartX) moveRight(); else moveLeft(); touchStartX = curX; } }
