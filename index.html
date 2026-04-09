@@ -1,16 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>· ТЕСТЫ 5OPKA · Кто ты в иерархии?</title>
+  <title>· МИР 5OPKA · Иерархия и тесты</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
+    html {
+      scroll-behavior: smooth;
+    }
     body {
       background: #0b0c0e;
       color: #e3e6eb;
@@ -20,19 +23,16 @@
       min-height: 100vh;
       background-image: radial-gradient(circle at 30% 10%, #1a1f26 0%, #030405 100%);
     }
-
     .container {
       max-width: 1300px;
       margin: 0 auto;
     }
-
     .glitch-header {
       text-align: center;
       margin-bottom: 2rem;
     }
-
     h1 {
-      font-size: clamp(2rem, 8vw, 3.8rem);
+      font-size: clamp(2rem, 8vw, 4rem);
       font-weight: 800;
       letter-spacing: 6px;
       text-transform: uppercase;
@@ -42,14 +42,12 @@
       display: inline-block;
       padding-bottom: 10px;
     }
-
     .sub {
       color: #8b9bb4;
       font-size: 1.1rem;
       margin-top: 8px;
       font-style: italic;
     }
-
     .creator-tag {
       font-family: 'Courier New', monospace;
       background: #0e1419;
@@ -60,14 +58,117 @@
       display: inline-block;
       margin-bottom: 20px;
     }
+    /* определения */
+    .definitions-section {
+      margin-bottom: 40px;
+      scroll-margin-top: 20px;
+    }
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 24px;
+      border-left: 6px solid #5f8aae;
+      padding-left: 20px;
+      color: #d9e2ec;
+    }
+    .race-def-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .def-card {
+      background: #0f171f;
+      border-radius: 24px;
+      padding: 20px 18px;
+      border: 1px solid #2c4050;
+      box-shadow: 0 8px 0 #060a0e;
+      transition: 0.2s;
+    }
+    .def-card.player-def { border-top: 6px solid #e5b13b; }
+    .def-card.npc-def { border-top: 6px solid #4a8bb3; }
+    .def-card.mob-def { border-top: 6px solid #5f7a6b; }
+    .def-card.prit-def { border-top: 6px solid #6a4e77; }
+    .def-name {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .player-def .def-name { color: #f5c84e; }
+    .npc-def .def-name { color: #7fc3ff; }
+    .mob-def .def-name { color: #8fc0a9; }
+    .prit-def .def-name { color: #b48bc4; }
+    .def-rank {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+    }
+    .def-desc {
+      margin-top: 12px;
+      color: #b6c7db;
+    }
+    /* блок статистики (глобальный) — теперь над тестами, будет виден */
+    .global-stats-block {
+      background: #0e151d;
+      border-radius: 32px;
+      padding: 24px 24px;
+      margin: 30px 0 30px;
+      border: 1px solid #3e5f7a;
+      box-shadow: inset 0 0 30px #00000055, 0 10px 20px #0000004d;
+      scroll-margin-top: 20px;
+    }
+    .stats-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #c6d8eb;
+    }
+    .bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .race-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .race-label {
+      width: 100px;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .bar-bg {
+      flex: 1;
+      height: 30px;
+      background: #1b252f;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px black;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 40px;
+      transition: width 0.5s ease;
+    }
+    .player-fill { background: linear-gradient(90deg, #d4a11e, #f5d654); box-shadow: 0 0 10px #ffd966; }
+    .npc-fill { background: linear-gradient(90deg, #2a75b3, #7fc3ff); }
+    .mob-fill { background: linear-gradient(90deg, #3f7859, #8fc0a9); }
+    .prit-fill { background: linear-gradient(90deg, #6b4782, #b48bc4); }
+    .percent-value {
+      min-width: 60px;
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
 
+    /* ТЕСТЫ */
     .tests-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
-      margin: 30px 0;
+      margin: 20px 0 30px;
     }
-
     .test-card {
       background: #121a22;
       border: 1px solid #2c3e50;
@@ -77,48 +178,36 @@
       backdrop-filter: blur(4px);
       transition: transform 0.2s;
     }
-
-    .test-card:hover {
-      transform: translateY(-4px);
-      border-color: #4f7a9e;
-    }
-
+    .test-card:hover { transform: translateY(-4px); border-color: #4f7a9e; }
     .card-header {
       padding: 20px 20px 12px;
       border-bottom: 2px solid;
     }
-
     .player .card-header { border-color: #e5b13b; background: linear-gradient(145deg, #1e2a36, #0e1a24); }
     .npc .card-header { border-color: #4a8bb3; background: linear-gradient(145deg, #17222b, #0e1720); }
     .mob .card-header { border-color: #5f7a6b; background: linear-gradient(145deg, #141e18, #0a120e); }
     .prit .card-header { border-color: #6a4e77; background: linear-gradient(145deg, #18131e, #0f0c14); }
-
     .race-name {
       font-size: 2.2rem;
       font-weight: 800;
       margin: 4px 0 0;
     }
-
     .player .race-name { color: #f5c84e; }
     .npc .race-name { color: #7fc3ff; }
     .mob .race-name { color: #8fc0a9; }
     .prit .race-name { color: #b48bc4; }
-
     .essence {
       font-size: 0.8rem;
       opacity: 0.8;
       text-transform: uppercase;
       letter-spacing: 2px;
     }
-
     .card-content {
       padding: 20px 18px 24px;
     }
-
     .question-block {
       margin-bottom: 28px;
     }
-
     .q-text {
       font-weight: 600;
       margin-bottom: 12px;
@@ -126,14 +215,12 @@
       border-left: 3px solid;
       padding-left: 14px;
     }
-
     .options {
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-left: 8px;
     }
-
     .option {
       display: flex;
       align-items: center;
@@ -143,20 +230,9 @@
       border-radius: 16px;
       border: 1px solid #253544;
       cursor: pointer;
-      transition: 0.1s;
     }
-
-    .option:hover {
-      background: #1a2733;
-      border-color: #3f607d;
-    }
-
-    .option input {
-      accent-color: #5f8aae;
-      width: 18px;
-      height: 18px;
-    }
-
+    .option:hover { background: #1a2733; border-color: #3f607d; }
+    .option input { accent-color: #5f8aae; width: 18px; height: 18px; }
     .test-btn {
       background: #1e2f3c;
       border: 1px solid #3e6680;
@@ -173,14 +249,12 @@
       transition: all 0.2s;
       box-shadow: 0 4px 0 #0a1117;
     }
-
     .test-btn:hover {
       background: #2a4052;
       border-color: #6f9fc7;
       transform: translateY(-2px);
       box-shadow: 0 6px 0 #0a1117;
     }
-
     .result-area {
       margin-top: 20px;
       padding: 16px;
@@ -189,277 +263,80 @@
       border: 1px dashed #3a556b;
       text-align: center;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
-
-    .global-result {
-      margin-top: 40px;
-      background: #0e151d;
-      border-radius: 32px;
-      padding: 28px 24px;
-      border: 1px solid #3e5f7a;
-      box-shadow: inset 0 0 30px #00000055, 0 10px 20px #0000004d;
-    }
-
-    .global-title {
-      font-size: 1.8rem;
-      text-align: center;
-      margin-bottom: 24px;
-      color: #c6d8eb;
-      letter-spacing: 4px;
-    }
-
-    .bars-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .race-bar-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .race-label {
-      width: 100px;
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    .bar-bg {
-      flex: 1;
-      height: 28px;
-      background: #1b252f;
-      border-radius: 40px;
-      overflow: hidden;
-      box-shadow: inset 0 2px 5px black;
-    }
-
-    .bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #4f8db3, #9fc5e8);
-      border-radius: 40px;
-      box-shadow: 0 0 8px #3f9eff;
-      transition: width 0.5s ease;
-    }
-
-    .percent-value {
-      min-width: 55px;
-      text-align: right;
-      font-weight: bold;
-      font-size: 1.3rem;
-    }
-
-    .player-fill { background: linear-gradient(90deg, #d4a11e, #f5d654); box-shadow: 0 0 10px #ffd966; }
-    .npc-fill { background: linear-gradient(90deg, #2a75b3, #7fc3ff); }
-    .mob-fill { background: linear-gradient(90deg, #3f7859, #8fc0a9); }
-    .prit-fill { background: linear-gradient(90deg, #6b4782, #b48bc4); }
-
     .footnote {
-      margin-top: 35px;
+      margin-top: 40px;
       text-align: right;
       color: #68788b;
       border-top: 1px solid #26333f;
       padding-top: 20px;
     }
-
-    .small-note {
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-
     .reset-area {
       display: flex;
       justify-content: center;
-      margin: 20px 0;
+      margin: 20px 0 0;
     }
-
     .reset-btn {
       background: transparent;
       border: 1px solid #4f6b7e;
       color: #a3bedb;
-      padding: 10px 28px;
+      padding: 12px 32px;
       border-radius: 40px;
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: 0.2s;
     }
-
-    .reset-btn:hover {
-      background: #1a2938;
-      color: #d6e6ff;
-    }
-
-    .highlight {
-      color: #f2cd7d;
-    }
+    .reset-btn:hover { background: #1a2938; color: #d6e6ff; }
+    .small-note { font-size: 0.8rem; opacity: 0.7; text-align: center; margin-top: 12px; }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="glitch-header">
-    <span class="creator-tag">✦ 5OPKA · ДИАГНОСТИКА СУЩНОСТИ ✦</span>
-    <h1>ТЕСТ НА РАСУ</h1>
-    <div class="sub">узнай, кем ты загружен в матрице</div>
+    <span class="creator-tag">✦ АРХИТЕКТОР: 5OPKA ✦</span>
+    <h1>ИЕРАРХИЯ СУЩЕГО</h1>
+    <div class="sub">· познай свою расу ·</div>
   </div>
 
-  <div style="margin-bottom: 16px; text-align: center; opacity:0.8;">
-    <span class="small-note">пройди любой тест или все — в конце увидишь свой профиль</span>
-  </div>
-
-  <!-- 4 ТЕСТА -->
-  <div class="tests-grid">
-    
-    <!-- ТЕСТ НА ИГРОКА -->
-    <div class="test-card player" id="test-player">
-      <div class="card-header">
-        <div class="essence">высшая раса · антисоциофоб</div>
-        <div class="race-name">ИГРОК</div>
+  <!-- БЛОК ОПРЕДЕЛЕНИЙ (будет виден сразу) -->
+  <div id="definitions" class="definitions-section">
+    <div class="section-title">◈ ОПРЕДЕЛЕНИЯ РАС ◈</div>
+    <div class="race-def-grid">
+      <div class="def-card player-def">
+        <div class="def-rank">высшая раса · субъект реальности</div>
+        <div class="def-name">ИГРОК</div>
+        <div class="def-desc">
+          <strong>Антисоциофоб.</strong> Прогружает чанки своим вниманием. Имеет полный контроль над миром. Одиночество — естественное состояние бога. Не нуждается в валидации, сам создаёт правила и сценарии.
+        </div>
       </div>
-      <div class="card-content">
-        <div class="question-block">
-          <div class="q-text">1. Когда вокруг много людей, ты чувствуешь:</div>
-          <div class="options" data-race="player">
-            <label class="option"><input type="radio" name="p1" value="3"> Они лишь массовка, я вне их правил</label>
-            <label class="option"><input type="radio" name="p1" value="1"> Стараюсь вписаться, но быстро устаю</label>
-            <label class="option"><input type="radio" name="p1" value="0"> Люблю быть частью толпы</label>
-          </div>
+      <div class="def-card npc-def">
+        <div class="def-rank">средняя раса · патрицианская функция</div>
+        <div class="def-name">НПС</div>
+        <div class="def-desc">
+          <strong>Персонаж с квестами.</strong> Создан для взаимодействия. Имеет иллюзию судьбы и выбора, но следует скрипту. Ждёт клика Игрока, чтобы быть полезным.
         </div>
-        <div class="question-block">
-          <div class="q-text">2. Как часто ты меняешь планы под влиянием других?</div>
-          <div class="options" data-race="player">
-            <label class="option"><input type="radio" name="p2" value="3"> Никогда, я сам создаю сценарий</label>
-            <label class="option"><input type="radio" name="p2" value="1"> Иногда, если это выгодно</label>
-            <label class="option"><input type="radio" name="p2" value="0"> Часто, я ориентируюсь на окружение</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">3. Одиночество для тебя — это:</div>
-          <div class="options" data-race="player">
-            <label class="option"><input type="radio" name="p3" value="3"> Естественное состояние, я в нём заряжаюсь</label>
-            <label class="option"><input type="radio" name="p3" value="1"> Временная передышка, но долго не могу</label>
-            <label class="option"><input type="radio" name="p3" value="0"> Страдание, мне нужны люди</label>
-          </div>
-        </div>
-        <button class="test-btn" data-test="player">▸ ПРОЙТИ ТЕСТ НА ИГРОКА ◂</button>
-        <div id="player-result" class="result-area">—</div>
       </div>
-    </div>
-
-    <!-- ТЕСТ НА НПС -->
-    <div class="test-card npc" id="test-npc">
-      <div class="card-header">
-        <div class="essence">средняя раса · патрицианская функция</div>
-        <div class="race-name">НПС</div>
+      <div class="def-card mob-def">
+        <div class="def-rank">низшая раса · массовка</div>
+        <div class="def-name">МОБ</div>
+        <div class="def-desc">
+          <strong>Одушевлённая декорация.</strong> Не имеет интеллекта, двигается по заданному маршруту матрицы. Существует для наполнения чанков. Можно контактировать, но реакции примитивны.
+        </div>
       </div>
-      <div class="card-content">
-        <div class="question-block">
-          <div class="q-text">1. Ты предпочитаешь следовать чёткому распорядку?</div>
-          <div class="options" data-race="npc">
-            <label class="option"><input type="radio" name="n1" value="3"> Да, рутина — моя броня</label>
-            <label class="option"><input type="radio" name="n1" value="1"> Иногда, но могу импровизировать</label>
-            <label class="option"><input type="radio" name="n1" value="0"> Ненавижу графики и планы</label>
-          </div>
+      <div class="def-card prit-def">
+        <div class="def-rank">самая низшая · вектор А→Б</div>
+        <div class="def-name">ПРИТ</div>
+        <div class="def-desc">
+          <strong>Сбой навигации.</strong> Только перемещается из точки А в точку Б. Почти невидим. Чистый шум в коде матрицы, оживающий от чужого взгляда. (Аналогия — алкаши).
         </div>
-        <div class="question-block">
-          <div class="q-text">2. Если кто-то просит помощи, ты скорее:</div>
-          <div class="options" data-race="npc">
-            <label class="option"><input type="radio" name="n2" value="3"> Выполню, это моя роль</label>
-            <label class="option"><input type="radio" name="n2" value="1"> Помогу, если это не в ущерб мне</label>
-            <label class="option"><input type="radio" name="n2" value="0"> Проигнорирую, у меня свои дела</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">3. Насколько важна для тебя социальная роль (профессия, статус)?</div>
-          <div class="options" data-race="npc">
-            <label class="option"><input type="radio" name="n3" value="3"> Очень, я без неё никто</label>
-            <label class="option"><input type="radio" name="n3" value="1"> Важна, но не определяет меня полностью</label>
-            <label class="option"><input type="radio" name="n3" value="0"> Мне плевать на ярлыки</label>
-          </div>
-        </div>
-        <button class="test-btn" data-test="npc">▸ ПРОЙТИ ТЕСТ НА НПС ◂</button>
-        <div id="npc-result" class="result-area">—</div>
-      </div>
-    </div>
-
-    <!-- ТЕСТ НА МОБА -->
-    <div class="test-card mob" id="test-mob">
-      <div class="card-header">
-        <div class="essence">низшая раса · массовка без интеллекта</div>
-        <div class="race-name">МОБ</div>
-      </div>
-      <div class="card-content">
-        <div class="question-block">
-          <div class="q-text">1. Часто ли ты действуешь «на автомате»?</div>
-          <div class="options" data-race="mob">
-            <label class="option"><input type="radio" name="m1" value="3"> Почти всегда, я как зомби</label>
-            <label class="option"><input type="radio" name="m1" value="1"> Иногда, когда устаю</label>
-            <label class="option"><input type="radio" name="m1" value="0"> Нет, я осознаю каждое действие</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">2. Насколько тебе важно мнение окружающих?</div>
-          <div class="options" data-race="mob">
-            <label class="option"><input type="radio" name="m2" value="3"> Я даже не задумываюсь об этом</label>
-            <label class="option"><input type="radio" name="m2" value="1"> Немного, но стараюсь не выделяться</label>
-            <label class="option"><input type="radio" name="m2" value="0"> Очень, я завишу от оценки других</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">3. Есть ли у тебя собственная цель, или ты плывёшь по течению?</div>
-          <div class="options" data-race="mob">
-            <label class="option"><input type="radio" name="m3" value="3"> Течение несёт меня, я не выбираю</label>
-            <label class="option"><input type="radio" name="m3" value="1"> Есть смутные цели, но я ленив</label>
-            <label class="option"><input type="radio" name="m3" value="0"> У меня чёткий план жизни</label>
-          </div>
-        </div>
-        <button class="test-btn" data-test="mob">▸ ПРОЙТИ ТЕСТ НА МОБА ◂</button>
-        <div id="mob-result" class="result-area">—</div>
-      </div>
-    </div>
-
-    <!-- ТЕСТ НА ПРИТА -->
-    <div class="test-card prit" id="test-prit">
-      <div class="card-header">
-        <div class="essence">самая низшая · вектор А→Б</div>
-        <div class="race-name">ПРИТ</div>
-      </div>
-      <div class="card-content">
-        <div class="question-block">
-          <div class="q-text">1. Твои перемещения по городу чаще всего:</div>
-          <div class="options" data-race="prit">
-            <label class="option"><input type="radio" name="pr1" value="3"> Однотипны: дом-ларек-дом, без смысла</label>
-            <label class="option"><input type="radio" name="pr1" value="1"> Иногда меняю маршруты, но не специально</label>
-            <label class="option"><input type="radio" name="pr1" value="0"> Всегда разные, я люблю новое</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">2. Как часто ты «выпадаешь» из реальности, тупишь в одну точку?</div>
-          <div class="options" data-race="prit">
-            <label class="option"><input type="radio" name="pr2" value="3"> Постоянно, я как в тумане</label>
-            <label class="option"><input type="radio" name="pr2" value="1"> Иногда бывает</label>
-            <label class="option"><input type="radio" name="pr2" value="0"> Никогда, я всегда собран</label>
-          </div>
-        </div>
-        <div class="question-block">
-          <div class="q-text">3. Ощущаешь ли ты себя «невидимкой» для окружающих?</div>
-          <div class="options" data-race="prit">
-            <label class="option"><input type="radio" name="pr3" value="3"> Да, меня никто не замечает</label>
-            <label class="option"><input type="radio" name="pr3" value="1"> Иногда кажется, что я фон</label>
-            <label class="option"><input type="radio" name="pr3" value="0"> Нет, я всегда в центре внимания</label>
-          </div>
-        </div>
-        <button class="test-btn" data-test="prit">▸ ПРОЙТИ ТЕСТ НА ПРИТА ◂</button>
-        <div id="prit-result" class="result-area">—</div>
       </div>
     </div>
   </div>
 
-  <!-- ОБЩИЙ РЕЗУЛЬТАТ (БАРЫ) -->
-  <div class="global-result" id="global-stats">
-    <div class="global-title">📊 ТВОЙ ПРОФИЛЬ В МАТРИЦЕ 5OPKA</div>
+  <!-- ГЛОБАЛЬНЫЙ ПРОФИЛЬ (ПРОЦЕНТЫ) — отображается под определениями -->
+  <div id="globalStats" class="global-stats-block">
+    <div class="stats-title">📊 ТВОЙ ПРОФИЛЬ В МАТРИЦЕ 5OPKA</div>
     <div class="bars-container">
       <div class="race-bar-item">
         <span class="race-label" style="color:#f5c84e;">ИГРОК</span>
@@ -485,28 +362,81 @@
     <div class="reset-area">
       <button class="reset-btn" id="reset-all">⟲ СБРОСИТЬ ВСЕ ТЕСТЫ</button>
     </div>
-    <p class="small-note" style="text-align:center; margin-top:12px;">проходи тесты в любом порядке — статистика обновится</p>
+    <p class="small-note">пройди любой тест — проценты обновятся, и ты вернёшься к определениям</p>
   </div>
 
-  <div class="footnote">
-    <span>// v.5.0.pka · иерархия 5opka · ты — то, что прогружает твой разум //</span>
+  <!-- ТЕСТЫ (каждый содержит по 5 вопросов) -->
+  <div style="margin-top: 20px; scroll-margin-top: 20px;" id="tests-section">
+    <div class="section-title" style="font-size:1.8rem;">▾ ТЕСТЫ НА ОПРЕДЕЛЕНИЕ РАСЫ ▾</div>
   </div>
+  <div class="tests-grid">
+    
+    <!-- ТЕСТ ИГРОК (5 вопросов) -->
+    <div class="test-card player">
+      <div class="card-header"><div class="essence">высшая раса</div><div class="race-name">ИГРОК</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Когда вокруг много людей, ты чувствуешь:</div><div class="options" data-race="player"><label class="option"><input type="radio" name="p1" value="3"> Они массовка, я вне их правил</label><label class="option"><input type="radio" name="p1" value="1"> Пытаюсь вписаться, но устаю</label><label class="option"><input type="radio" name="p1" value="0"> Люблю быть частью толпы</label></div></div>
+        <div class="question-block"><div class="q-text">2. Как часто ты меняешь планы под влиянием других?</div><div class="options"><label class="option"><input type="radio" name="p2" value="3"> Никогда, я создаю сценарий</label><label class="option"><input type="radio" name="p2" value="1"> Иногда, если выгодно</label><label class="option"><input type="radio" name="p2" value="0"> Часто, я ориентируюсь на окружение</label></div></div>
+        <div class="question-block"><div class="q-text">3. Одиночество для тебя — это:</div><div class="options"><label class="option"><input type="radio" name="p3" value="3"> Естественное состояние, я заряжаюсь</label><label class="option"><input type="radio" name="p3" value="1"> Временная передышка</label><label class="option"><input type="radio" name="p3" value="0"> Страдание, нужны люди</label></div></div>
+        <div class="question-block"><div class="q-text">4. Как ты реагируешь, когда кто-то пытается тобой управлять?</div><div class="options"><label class="option"><input type="radio" name="p4" value="3"> Сразу пресекаю, я здесь главный</label><label class="option"><input type="radio" name="p4" value="1"> Выслушаю, но сделаю по-своему</label><label class="option"><input type="radio" name="p4" value="0"> Часто подчиняюсь авторитету</label></div></div>
+        <div class="question-block"><div class="q-text">5. Чувствуешь ли ты, что реальность «подстраивается» под тебя?</div><div class="options"><label class="option"><input type="radio" name="p5" value="3"> Да, я замечаю закономерности</label><label class="option"><input type="radio" name="p5" value="1"> Иногда кажется, что да</label><label class="option"><input type="radio" name="p5" value="0"> Нет, я плыву по течению</label></div></div>
+        <button class="test-btn" data-test="player">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="player-result" class="result-area">—</div>
+      </div>
+    </div>
+
+    <!-- ТЕСТ НПС (5 вопросов) -->
+    <div class="test-card npc">
+      <div class="card-header"><div class="essence">средняя раса</div><div class="race-name">НПС</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Ты предпочитаешь следовать чёткому распорядку?</div><div class="options"><label class="option"><input type="radio" name="n1" value="3"> Да, рутина — моя броня</label><label class="option"><input type="radio" name="n1" value="1"> Иногда, но могу импровизировать</label><label class="option"><input type="radio" name="n1" value="0"> Ненавижу графики</label></div></div>
+        <div class="question-block"><div class="q-text">2. Если кто-то просит помощи, ты скорее:</div><div class="options"><label class="option"><input type="radio" name="n2" value="3"> Выполню, это моя роль</label><label class="option"><input type="radio" name="n2" value="1"> Помогу, если не в ущерб</label><label class="option"><input type="radio" name="n2" value="0"> Проигнорирую</label></div></div>
+        <div class="question-block"><div class="q-text">3. Насколько важна для тебя социальная роль?</div><div class="options"><label class="option"><input type="radio" name="n3" value="3"> Очень, я без неё никто</label><label class="option"><input type="radio" name="n3" value="1"> Важна, но не определяет</label><label class="option"><input type="radio" name="n3" value="0"> Плевать на ярлыки</label></div></div>
+        <div class="question-block"><div class="q-text">4. Часто ли ты ждёшь «разрешения» или сигнала, чтобы начать действовать?</div><div class="options"><label class="option"><input type="radio" name="n4" value="3"> Да, я жду указаний</label><label class="option"><input type="radio" name="n4" value="1"> Иногда нуждаюсь в одобрении</label><label class="option"><input type="radio" name="n4" value="0"> Нет, я сам всё решаю</label></div></div>
+        <div class="question-block"><div class="q-text">5. Как ты относишься к переменам в жизни?</div><div class="options"><label class="option"><input type="radio" name="n5" value="3"> Тревожно, лучше стабильность</label><label class="option"><input type="radio" name="n5" value="1"> Справлюсь, но не люблю</label><label class="option"><input type="radio" name="n5" value="0"> Обожаю новизну</label></div></div>
+        <button class="test-btn" data-test="npc">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="npc-result" class="result-area">—</div>
+      </div>
+    </div>
+
+    <!-- ТЕСТ МОБ (5 вопросов) -->
+    <div class="test-card mob">
+      <div class="card-header"><div class="essence">низшая раса</div><div class="race-name">МОБ</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Часто ли ты действуешь «на автомате»?</div><div class="options"><label class="option"><input type="radio" name="m1" value="3"> Почти всегда, как зомби</label><label class="option"><input type="radio" name="m1" value="1"> Иногда, когда устаю</label><label class="option"><input type="radio" name="m1" value="0"> Нет, я осознаю каждое действие</label></div></div>
+        <div class="question-block"><div class="q-text">2. Насколько тебе важно мнение окружающих?</div><div class="options"><label class="option"><input type="radio" name="m2" value="3"> Я даже не задумываюсь</label><label class="option"><input type="radio" name="m2" value="1"> Немного, стараюсь не выделяться</label><label class="option"><input type="radio" name="m2" value="0"> Очень, завишу от оценки</label></div></div>
+        <div class="question-block"><div class="q-text">3. Есть ли у тебя собственная цель, или ты плывёшь по течению?</div><div class="options"><label class="option"><input type="radio" name="m3" value="3"> Течение несёт меня</label><label class="option"><input type="radio" name="m3" value="1"> Есть смутные цели</label><label class="option"><input type="radio" name="m3" value="0"> У меня чёткий план</label></div></div>
+        <div class="question-block"><div class="q-text">4. Когда ты идёшь по улице, ты замечаешь детали вокруг?</div><div class="options"><label class="option"><input type="radio" name="m4" value="3"> Нет, я просто перемещаюсь</label><label class="option"><input type="radio" name="m4" value="1"> Иногда что-то бросается в глаза</label><label class="option"><input type="radio" name="m4" value="0"> Да, я очень наблюдателен</label></div></div>
+        <div class="question-block"><div class="q-text">5. Можешь ли ты долго заниматься бессмысленной рутиной?</div><div class="options"><label class="option"><input type="radio" name="m5" value="3"> Да, я не замечаю времени</label><label class="option"><input type="radio" name="m5" value="1"> Терплю, но недолго</label><label class="option"><input type="radio" name="m5" value="0"> Ненавижу пустую трату времени</label></div></div>
+        <button class="test-btn" data-test="mob">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="mob-result" class="result-area">—</div>
+      </div>
+    </div>
+
+    <!-- ТЕСТ ПРИТ (5 вопросов) -->
+    <div class="test-card prit">
+      <div class="card-header"><div class="essence">самая низшая</div><div class="race-name">ПРИТ</div></div>
+      <div class="card-content">
+        <div class="question-block"><div class="q-text">1. Твои перемещения чаще всего:</div><div class="options"><label class="option"><input type="radio" name="pr1" value="3"> Однотипны: дом-ларек-дом</label><label class="option"><input type="radio" name="pr1" value="1"> Иногда меняю, но не специально</label><label class="option"><input type="radio" name="pr1" value="0"> Всегда разные, люблю новое</label></div></div>
+        <div class="question-block"><div class="q-text">2. Как часто ты «выпадаешь» из реальности, тупишь в одну точку?</div><div class="options"><label class="option"><input type="radio" name="pr2" value="3"> Постоянно, я как в тумане</label><label class="option"><input type="radio" name="pr2" value="1"> Иногда бывает</label><label class="option"><input type="radio" name="pr2" value="0"> Никогда, я собран</label></div></div>
+        <div class="question-block"><div class="q-text">3. Ощущаешь ли ты себя «невидимкой» для окружающих?</div><div class="options"><label class="option"><input type="radio" name="pr3" value="3"> Да, меня никто не замечает</label><label class="option"><input type="radio" name="pr3" value="1"> Иногда кажется, что я фон</label><label class="option"><input type="radio" name="pr3" value="0"> Нет, я в центре внимания</label></div></div>
+        <div class="question-block"><div class="q-text">4. Есть ли у тебя ощущение, что твоя жизнь — бесконечный повтор?</div><div class="options"><label class="option"><input type="radio" name="pr4" value="3"> Да, день сурка</label><label class="option"><input type="radio" name="pr4" value="1"> Иногда замечаю циклы</label><label class="option"><input type="radio" name="pr4" value="0"> Нет, всё непредсказуемо</label></div></div>
+        <div class="question-block"><div class="q-text">5. Как часто ты передвигаешься без конкретной цели?</div><div class="options"><label class="option"><input type="radio" name="pr5" value="3"> Почти всегда, просто иду</label><label class="option"><input type="radio" name="pr5" value="1"> Время от времени</label><label class="option"><input type="radio" name="pr5" value="0"> У меня всегда есть цель</label></div></div>
+        <button class="test-btn" data-test="prit">▸ ПРОЙТИ ТЕСТ ◂</button>
+        <div id="prit-result" class="result-area">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote"><span>// v.5.1.pka · мир 5opka · узри свою суть //</span></div>
 </div>
 
 <script>
   (function(){
-    // объект для хранения сырых баллов по каждой расе (0-9)
-    let scores = {
-      player: 0,
-      npc: 0,
-      mob: 0,
-      prit: 0
-    };
+    // Максимум баллов за тест (5 вопросов по 3 балла = 15)
+    const MAX_SCORE = 15;
+    let scores = { player: 0, npc: 0, mob: 0, prit: 0 };
 
-    // флаги пройденных тестов (чтобы показывать % даже если не все вопросы отвечены — но мы будем считать только по тем, где выбрано)
-    const maxPerTest = 9; // 3 вопроса по 3 балла максимум
-
-    // получаем элементы
     const playerResultDiv = document.getElementById('player-result');
     const npcResultDiv = document.getElementById('npc-result');
     const mobResultDiv = document.getElementById('mob-result');
@@ -521,13 +451,11 @@
     const mobPercent = document.getElementById('mob-percent');
     const pritPercent = document.getElementById('prit-percent');
 
-    // Функция обновления глобальных баров и процентов
     function updateGlobalStats() {
-      const maxScore = 9; 
-      const pPlayer = Math.min(100, Math.round((scores.player / maxScore) * 100));
-      const pNpc = Math.min(100, Math.round((scores.npc / maxScore) * 100));
-      const pMob = Math.min(100, Math.round((scores.mob / maxScore) * 100));
-      const pPrit = Math.min(100, Math.round((scores.prit / maxScore) * 100));
+      const pPlayer = Math.round((scores.player / MAX_SCORE) * 100);
+      const pNpc = Math.round((scores.npc / MAX_SCORE) * 100);
+      const pMob = Math.round((scores.mob / MAX_SCORE) * 100);
+      const pPrit = Math.round((scores.prit / MAX_SCORE) * 100);
 
       playerBar.style.width = pPlayer + '%';
       npcBar.style.width = pNpc + '%';
@@ -540,87 +468,58 @@
       pritPercent.textContent = pPrit + '%';
     }
 
-    // Функция подсчёта баллов для конкретного теста
     function calculateRaceScore(race) {
-      const radioNamePrefix = { player: 'p', npc: 'n', mob: 'm', prit: 'pr' };
-      const prefix = radioNamePrefix[race];
+      const prefix = { player: 'p', npc: 'n', mob: 'm', prit: 'pr' }[race];
       let total = 0;
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 5; i++) {
         const radios = document.getElementsByName(prefix + i);
-        let selectedValue = null;
-        for (let r of radios) {
-          if (r.checked) {
-            selectedValue = r.value;
-            break;
-          }
-        }
-        if (selectedValue !== null) {
-          total += parseInt(selectedValue, 10);
-        }
+        let selected = null;
+        for (let r of radios) if (r.checked) { selected = r.value; break; }
+        if (selected !== null) total += parseInt(selected, 10);
       }
       return total;
     }
 
-    // Обновление конкретного результата в карточке и в scores
     function processTest(race) {
       const score = calculateRaceScore(race);
       scores[race] = score;
-
-      let resultDiv;
-      let raceName;
+      
+      let resultDiv, raceName;
       if (race === 'player') { resultDiv = playerResultDiv; raceName = 'ИГРОК'; }
       else if (race === 'npc') { resultDiv = npcResultDiv; raceName = 'НПС'; }
       else if (race === 'mob') { resultDiv = mobResultDiv; raceName = 'МОБ'; }
       else { resultDiv = pritResultDiv; raceName = 'ПРИТ'; }
 
-      const percent = Math.round((score / 9) * 100);
-      
-      let message = '';
-      if (percent >= 70) message = `⚡ Ты истинный ${raceName} (${percent}%). Твоя суть чиста.`;
-      else if (percent >= 40) message = `🌀 В тебе есть черты ${raceName} (${percent}%).`;
-      else message = `◈ ${raceName} всего на ${percent}% — почти не твоё.`;
-
+      const percent = Math.round((score / MAX_SCORE) * 100);
+      let message = percent >= 70 ? `⚡ Истинный ${raceName} (${percent}%)` :
+                    percent >= 40 ? `🌀 Есть черты ${raceName} (${percent}%)` :
+                    `◈ ${raceName} всего ${percent}%`;
       resultDiv.innerHTML = `<span style="color:#bdd4e0;">${message}</span>`;
       
-      // обновить глобальные бары
       updateGlobalStats();
+
+      // Прокрутка к блоку статистики (он над тестами, но рядом с определениями)
+      document.getElementById('globalStats').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Обработчики кнопок
     document.querySelectorAll('.test-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        const testType = this.dataset.test; // player, npc, mob, prit
-        processTest(testType);
+      btn.addEventListener('click', function() {
+        processTest(this.dataset.test);
       });
     });
 
-    // Сброс всех тестов
-    function resetAllTests() {
-      // сбросить все radio
-      const allRadios = document.querySelectorAll('input[type="radio"]');
-      allRadios.forEach(r => r.checked = false);
-      
-      // обнулить scores
+    function resetAll() {
+      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
       scores = { player: 0, npc: 0, mob: 0, prit: 0 };
-      
-      // очистить текст результатов
-      playerResultDiv.innerHTML = '—';
-      npcResultDiv.innerHTML = '—';
-      mobResultDiv.innerHTML = '—';
-      pritResultDiv.innerHTML = '—';
-      
-      // обновить бары
+      playerResultDiv.innerHTML = npcResultDiv.innerHTML = mobResultDiv.innerHTML = pritResultDiv.innerHTML = '—';
       updateGlobalStats();
     }
-
-    document.getElementById('reset-all').addEventListener('click', resetAllTests);
-
-    // Инициализация
+    document.getElementById('reset-all').addEventListener('click', resetAll);
+    
+    // первоначальная инициализация
     updateGlobalStats();
-
-    // Дополнительно: если пользователь меняет ответы после прохождения, результаты не меняются до нового клика.
-    // Это логично, чтобы не было путаницы.
   })();
 </script>
 </body>
-  </html>
+</html>
+```
