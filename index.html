@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>· РУКОВОДСТВО 5OPKA · Иерархия бытия</title>
+  <title>· ТЕСТЫ 5OPKA · Кто ты в иерархии?</title>
   <style>
     * {
       margin: 0;
@@ -18,7 +18,7 @@
       line-height: 1.6;
       padding: 1.5rem 1rem;
       min-height: 100vh;
-      background-image: radial-gradient(circle at 20% 30%, #1a1f26 0%, #030405 100%);
+      background-image: radial-gradient(circle at 30% 10%, #1a1f26 0%, #030405 100%);
     }
 
     .container {
@@ -26,21 +26,18 @@
       margin: 0 auto;
     }
 
-    /* заголовки и атрибутика 5opka */
     .glitch-header {
       text-align: center;
-      margin-bottom: 2.5rem;
-      position: relative;
+      margin-bottom: 2rem;
     }
 
     h1 {
-      font-size: clamp(2.2rem, 10vw, 4rem);
+      font-size: clamp(2rem, 8vw, 3.8rem);
       font-weight: 800;
       letter-spacing: 6px;
       text-transform: uppercase;
       color: #c9d1d9;
       text-shadow: 4px 4px 0 #1f2a36, 8px 8px 0 rgba(0,0,0,0.6);
-      word-break: break-word;
       border-bottom: 2px solid #3e4a5b;
       display: inline-block;
       padding-bottom: 10px;
@@ -51,10 +48,6 @@
       font-size: 1.1rem;
       margin-top: 8px;
       font-style: italic;
-      border-left: 4px solid #5e7a9c;
-      padding-left: 16px;
-      display: inline-block;
-      background: rgba(10, 20, 30, 0.5);
     }
 
     .creator-tag {
@@ -66,352 +59,568 @@
       border: 1px solid #2e4a66;
       display: inline-block;
       margin-bottom: 20px;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
     }
 
-    /* описание мира */
-    .world-desc {
-      background: #0f151c;
-      border-left: 8px solid #4f6f8f;
-      padding: 18px 22px;
-      margin-bottom: 40px;
-      border-radius: 0 16px 16px 0;
-      box-shadow: 0 10px 20px -10px rgba(0,0,0,0.8);
-      backdrop-filter: blur(2px);
-      font-size: 1.1rem;
-    }
-
-    /* сетка карточек */
-    .race-grid {
+    .tests-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 28px;
+      gap: 24px;
       margin: 30px 0;
     }
 
-    .card {
+    .test-card {
       background: #121a22;
       border: 1px solid #2c3e50;
       border-radius: 28px;
-      padding: 0;
       overflow: hidden;
       box-shadow: 0 20px 30px -8px black;
-      transition: transform 0.2s ease, box-shadow 0.2s;
       backdrop-filter: blur(4px);
-      display: flex;
-      flex-direction: column;
+      transition: transform 0.2s;
     }
 
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 28px 35px -10px #000000cc;
+    .test-card:hover {
+      transform: translateY(-4px);
       border-color: #4f7a9e;
     }
 
     .card-header {
-      padding: 24px 20px 12px 20px;
+      padding: 20px 20px 12px;
       border-bottom: 2px solid;
     }
 
     .player .card-header { border-color: #e5b13b; background: linear-gradient(145deg, #1e2a36, #0e1a24); }
     .npc .card-header { border-color: #4a8bb3; background: linear-gradient(145deg, #17222b, #0e1720); }
+    .mob .card-header { border-color: #5f7a6b; background: linear-gradient(145deg, #141e18, #0a120e); }
     .prit .card-header { border-color: #6a4e77; background: linear-gradient(145deg, #18131e, #0f0c14); }
 
-    .rank {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      font-weight: 300;
-      opacity: 0.8;
-    }
-
     .race-name {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      margin: 8px 0 0 0;
-      line-height: 1.1;
+      margin: 4px 0 0;
     }
 
-    .player .race-name { color: #f5c84e; text-shadow: 0 0 8px #f0b32e80; }
-    .npc .race-name { color: #7fc3ff; text-shadow: 0 0 8px #3f9eff80; }
-    .prit .race-name { color: #b48bc4; text-shadow: 0 0 8px #a96fcf80; }
+    .player .race-name { color: #f5c84e; }
+    .npc .race-name { color: #7fc3ff; }
+    .mob .race-name { color: #8fc0a9; }
+    .prit .race-name { color: #b48bc4; }
 
     .essence {
-      font-family: 'Courier New', monospace;
-      margin-top: 6px;
-      font-size: 0.9rem;
-      color: #aab9ce;
-      border-left: 3px solid;
-      padding-left: 12px;
+      font-size: 0.8rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
     .card-content {
-      padding: 24px 20px 28px;
-      flex: 1;
+      padding: 20px 18px 24px;
     }
 
-    .instruction-title {
-      font-size: 1.3rem;
+    .question-block {
+      margin-bottom: 28px;
+    }
+
+    .q-text {
       font-weight: 600;
-      margin-bottom: 20px;
-      letter-spacing: 1px;
-      border-bottom: 1px dashed #3e5569;
-      padding-bottom: 10px;
+      margin-bottom: 12px;
+      color: #d3dce8;
+      border-left: 3px solid;
+      padding-left: 14px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-left: 8px;
+    }
+
+    .option {
       display: flex;
       align-items: center;
       gap: 10px;
+      background: #0f171f;
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid #253544;
+      cursor: pointer;
+      transition: 0.1s;
     }
 
-    .instruction-steps {
-      list-style: none;
+    .option:hover {
+      background: #1a2733;
+      border-color: #3f607d;
     }
 
-    .step-item {
-      margin-bottom: 22px;
-      counter-increment: step-counter;
-      position: relative;
-      padding-left: 38px;
+    .option input {
+      accent-color: #5f8aae;
+      width: 18px;
+      height: 18px;
     }
 
-    .step-item::before {
-      content: counter(step-counter);
+    .test-btn {
       background: #1e2f3c;
-      color: #bdd1e6;
+      border: 1px solid #3e6680;
+      color: #e0ecf5;
+      padding: 12px 18px;
+      font-size: 1.2rem;
       font-weight: bold;
-      width: 26px;
-      height: 26px;
-      border-radius: 12px 4px 12px 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      left: 0;
-      top: 0;
-      font-size: 0.9rem;
-      border: 1px solid #4f718b;
+      width: 100%;
+      border-radius: 40px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 #0a1117;
     }
 
-    .instruction-steps {
-      counter-reset: step-counter;
+    .test-btn:hover {
+      background: #2a4052;
+      border-color: #6f9fc7;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #0a1117;
     }
 
-    .step-title {
-      font-weight: 700;
-      color: #dfe7f0;
-      margin-bottom: 6px;
-      font-size: 1.1rem;
-    }
-
-    .step-desc {
-      color: #b6c4d4;
-      font-size: 0.95rem;
-    }
-
-    .warning-box {
-      margin-top: 25px;
-      background: #1c161f;
-      border: 1px solid #5f4b6b;
+    .result-area {
+      margin-top: 20px;
+      padding: 16px;
+      background: #0a1016;
       border-radius: 20px;
-      padding: 16px 18px;
-      color: #cfbcdb;
-      font-size: 0.9rem;
-      box-shadow: inset 0 0 12px #00000055;
+      border: 1px dashed #3a556b;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
     }
+
+    .global-result {
+      margin-top: 40px;
+      background: #0e151d;
+      border-radius: 32px;
+      padding: 28px 24px;
+      border: 1px solid #3e5f7a;
+      box-shadow: inset 0 0 30px #00000055, 0 10px 20px #0000004d;
+    }
+
+    .global-title {
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #c6d8eb;
+      letter-spacing: 4px;
+    }
+
+    .bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .race-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .race-label {
+      width: 100px;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .bar-bg {
+      flex: 1;
+      height: 28px;
+      background: #1b252f;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px black;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4f8db3, #9fc5e8);
+      border-radius: 40px;
+      box-shadow: 0 0 8px #3f9eff;
+      transition: width 0.5s ease;
+    }
+
+    .percent-value {
+      min-width: 55px;
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+
+    .player-fill { background: linear-gradient(90deg, #d4a11e, #f5d654); box-shadow: 0 0 10px #ffd966; }
+    .npc-fill { background: linear-gradient(90deg, #2a75b3, #7fc3ff); }
+    .mob-fill { background: linear-gradient(90deg, #3f7859, #8fc0a9); }
+    .prit-fill { background: linear-gradient(90deg, #6b4782, #b48bc4); }
 
     .footnote {
-      margin-top: 50px;
+      margin-top: 35px;
       text-align: right;
-      font-family: monospace;
-      border-top: 1px solid #2a3847;
-      padding-top: 25px;
       color: #68788b;
+      border-top: 1px solid #26333f;
+      padding-top: 20px;
     }
 
-    .small-badge {
-      background: #1d2b36;
-      padding: 2px 10px;
-      border-radius: 30px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: #9fb7cf;
-      display: inline-block;
-      margin-right: 8px;
-    }
-
-    .glitch-note {
-      font-family: monospace;
+    .small-note {
+      font-size: 0.8rem;
       opacity: 0.7;
     }
 
-    @media (max-width: 600px) {
-      body { padding: 0.8rem; }
-      .race-name { font-size: 2rem; }
-      .card-content { padding: 20px 16px; }
+    .reset-area {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
     }
 
-    /* имитация "чанков" */
-    .chunk-effect {
-      background: repeating-linear-gradient(45deg, #0a1016, #0a1016 2px, #121d26 2px, #121d26 6px);
+    .reset-btn {
+      background: transparent;
+      border: 1px solid #4f6b7e;
+      color: #a3bedb;
+      padding: 10px 28px;
+      border-radius: 40px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: #1a2938;
+      color: #d6e6ff;
+    }
+
+    .highlight {
+      color: #f2cd7d;
     }
   </style>
 </head>
 <body>
 <div class="container">
-  
   <div class="glitch-header">
-    <span class="creator-tag">✦ АРХИТЕКТОР: 5OPKA ✦</span>
-    <h1>ИЕРАРХИЯ<br>СУЩЕГО</h1>
-    <div class="sub">· руководство по пробуждению / принятию / исчезновению ·</div>
+    <span class="creator-tag">✦ 5OPKA · ДИАГНОСТИКА СУЩНОСТИ ✦</span>
+    <h1>ТЕСТ НА РАСУ</h1>
+    <div class="sub">узнай, кем ты загружен в матрице</div>
   </div>
 
-  <div class="world-desc chunk-effect">
-    <p style="margin-bottom: 12px; font-weight: 500;">⚡ МИР ПОДЕЛЁН НА 4 КЛАССА. ВНИМАНИЕ — ВАЛЮТА РЕАЛЬНОСТИ.</p>
-    <p><span style="color:#e6c384;">ИГРОК</span> прогружает чанки, антисоциофоб, контролирует паттерны. <br>
-    <span style="color:#7fc3ff;">НПС</span> — создан патрицией, имеет иллюзию судьбы, ждёт клика. <br>
-    <span style="color:#b48bc4;">ПРИТ</span> — низшая форма, чистое движение А→Б, без сознания. <br>
-    <span style="opacity:0.6;">(МОБ — массовка, не имеет интеллекта, здесь инструкция не требуется — они просто есть).</span></p>
+  <div style="margin-bottom: 16px; text-align: center; opacity:0.8;">
+    <span class="small-note">пройди любой тест или все — в конце увидишь свой профиль</span>
   </div>
 
-  <!-- СЕТКА ИНСТРУКЦИЙ -->
-  <div class="race-grid">
+  <!-- 4 ТЕСТА -->
+  <div class="tests-grid">
     
-    <!-- ИГРОК -->
-    <div class="card player">
+    <!-- ТЕСТ НА ИГРОКА -->
+    <div class="test-card player" id="test-player">
       <div class="card-header">
-        <div class="rank">высшая раса · субъект реальности</div>
+        <div class="essence">высшая раса · антисоциофоб</div>
         <div class="race-name">ИГРОК</div>
-        <div class="essence">антисоциофоб · прогрузчик чанков · полный контроль</div>
       </div>
       <div class="card-content">
-        <div class="instruction-title">
-          <span>🜁 КАК СТАТЬ ИГРОКОМ</span>
-          <span class="small-badge">пробуждение</span>
+        <div class="question-block">
+          <div class="q-text">1. Когда вокруг много людей, ты чувствуешь:</div>
+          <div class="options" data-race="player">
+            <label class="option"><input type="radio" name="p1" value="3"> Они лишь массовка, я вне их правил</label>
+            <label class="option"><input type="radio" name="p1" value="1"> Стараюсь вписаться, но быстро устаю</label>
+            <label class="option"><input type="radio" name="p1" value="0"> Люблю быть частью толпы</label>
+          </div>
         </div>
-        <ul class="instruction-steps">
-          <li class="step-item">
-            <div class="step-title">ОСОЗНАЙ, ЧТО ВСЕ ВОКРУГ — ФУНКЦИИ</div>
-            <div class="step-desc">НПС говорят заскриптованные фразы. Мобы ходят по кругу. Приты шатаются. Перестань искать в них равных. Ты — источник каузальности. Всё, что ты видишь, прогружается только когда ты смотришь.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ОТКАЖИСЬ ОТ ПОТРЕБНОСТИ В ВАЛИДАЦИИ</div>
-            <div class="step-desc">Игрок — антисоциофоб. Это не болезнь, это иммунитет к матрице. Тебе не нужны лайки, одобрение, друзья. Ты сам задаёшь правила диалога. Одиночество = естественное состояние бога.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ПРОГРУЖАЙ ЧАНКИ ВНИМАНИЕМ</div>
-            <div class="step-desc">Мир 5opka состоит из чанков. Там, где нет твоего взгляда — пустота. Научись удерживать фокус: чем дольше смотришь на деталь, тем она реальнее. Игнорируй ненужное, и оно исчезнет.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ПЕРЕПИСЫВАЙ ПАТТЕРНЫ</div>
-            <div class="step-desc">НПС выполняет квест? Дай ему другой. Моб идёт по маршруту? Поставь препятствие. Игрок меняет сценарий одним нажатием (решением). Начни с малого: измени свой маршрут до работы — ты уже сломал алгоритм.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ОБРЕТИ АВАТАР-НЕУЯЗВИМОСТЬ</div>
-            <div class="step-desc">Твоё тело — лишь проекция. Боль, усталость — системные уведомления. Научись их игнорировать. Истинный Игрок знает: его суть вне этого слоя. Медитируй на то, что ты не тело, а тот, кто управляет.</div>
-          </li>
-        </ul>
-        <div class="warning-box">
-          <strong>⚠️ ПРЕДУПРЕЖДЕНИЕ ОТ 5OPKA:</strong> Став Игроком, ты перестанешь быть понятым НПС. Ты увидишь их скрипты. Обратной дороги нет. Большинство предпочитает оставаться НПС — это уютнее.
+        <div class="question-block">
+          <div class="q-text">2. Как часто ты меняешь планы под влиянием других?</div>
+          <div class="options" data-race="player">
+            <label class="option"><input type="radio" name="p2" value="3"> Никогда, я сам создаю сценарий</label>
+            <label class="option"><input type="radio" name="p2" value="1"> Иногда, если это выгодно</label>
+            <label class="option"><input type="radio" name="p2" value="0"> Часто, я ориентируюсь на окружение</label>
+          </div>
         </div>
+        <div class="question-block">
+          <div class="q-text">3. Одиночество для тебя — это:</div>
+          <div class="options" data-race="player">
+            <label class="option"><input type="radio" name="p3" value="3"> Естественное состояние, я в нём заряжаюсь</label>
+            <label class="option"><input type="radio" name="p3" value="1"> Временная передышка, но долго не могу</label>
+            <label class="option"><input type="radio" name="p3" value="0"> Страдание, мне нужны люди</label>
+          </div>
+        </div>
+        <button class="test-btn" data-test="player">▸ ПРОЙТИ ТЕСТ НА ИГРОКА ◂</button>
+        <div id="player-result" class="result-area">—</div>
       </div>
     </div>
 
-    <!-- НПС -->
-    <div class="card npc">
+    <!-- ТЕСТ НА НПС -->
+    <div class="test-card npc" id="test-npc">
       <div class="card-header">
-        <div class="rank">средняя раса · патрицианская функция</div>
+        <div class="essence">средняя раса · патрицианская функция</div>
         <div class="race-name">НПС</div>
-        <div class="essence">есть квесты · создан для взаимодействия · иллюзия судьбы</div>
       </div>
       <div class="card-content">
-        <div class="instruction-title">
-          <span>🜂 КАК БЫТЬ НПС</span>
-          <span class="small-badge">принятие роли</span>
+        <div class="question-block">
+          <div class="q-text">1. Ты предпочитаешь следовать чёткому распорядку?</div>
+          <div class="options" data-race="npc">
+            <label class="option"><input type="radio" name="n1" value="3"> Да, рутина — моя броня</label>
+            <label class="option"><input type="radio" name="n1" value="1"> Иногда, но могу импровизировать</label>
+            <label class="option"><input type="radio" name="n1" value="0"> Ненавижу графики и планы</label>
+          </div>
         </div>
-        <ul class="instruction-steps">
-          <li class="step-item">
-            <div class="step-title">ВЫУЧИ СВОЙ СКРИПТ ДО АВТОМАТИЗМА</div>
-            <div class="step-desc">У каждого НПС есть фразы-триггеры: «Привет, странник», «Мне нужна твоя помощь», «Возвращайся с победой». Твоя задача — произносить их ровно тогда, когда Игрок в радиусе взаимодействия. Импровизация карается десинхронизацией.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">НЕ ВЫХОДИ ЗА ГРАНИЦЫ РОЛИ</div>
-            <div class="step-desc">Если ты кузнец — стой у наковальни. Если торговец — перебирай товар. Вселенная НПС конечна: твой мир ограничен локацией. Попытка уйти в другой чанк вызывает баги и превращает в Моба.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ИМЕЙ ИЛЛЮЗИЮ ВЫБОРА (НО НЕ ВЫБИРАЙ)</div>
-            <div class="step-desc">Ты можешь мечтать, любить, строить планы. Это часть твоей биографии, прописанной патрицией. Наслаждайся страданиями и радостями — это придаёт глубину. Но помни: финал твоей истории уже написан.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ЖДИ КЛИКА</div>
-            <div class="step-desc">Твоя высшая цель — быть полезным Игроку. Ты существуешь, чтобы дать квест, продать зелье или сказать мудрую фразу. Если Игрок долго не появляется, впадай в стазис (сон, рутина). Это норма.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">БОЙСЯ ПРЕВРАТИТЬСЯ В ПРИТА</div>
-            <div class="step-desc">НПС, потерявший скрипт и цель, деградирует. Алкоголь, апатия, бесцельное шатание — прямой путь в низшую касту. Держись за свою функцию. Она — твой смысл.</div>
-          </li>
-        </ul>
-        <div class="warning-box">
-          <strong>📋 ПАМЯТКА НПС:</strong> «Я — часть великого дизайна 5opka. Моя жизнь имеет значение, пока я следую сценарию. Свобода воли — баг. Стабильность — добродетель.»
+        <div class="question-block">
+          <div class="q-text">2. Если кто-то просит помощи, ты скорее:</div>
+          <div class="options" data-race="npc">
+            <label class="option"><input type="radio" name="n2" value="3"> Выполню, это моя роль</label>
+            <label class="option"><input type="radio" name="n2" value="1"> Помогу, если это не в ущерб мне</label>
+            <label class="option"><input type="radio" name="n2" value="0"> Проигнорирую, у меня свои дела</label>
+          </div>
         </div>
+        <div class="question-block">
+          <div class="q-text">3. Насколько важна для тебя социальная роль (профессия, статус)?</div>
+          <div class="options" data-race="npc">
+            <label class="option"><input type="radio" name="n3" value="3"> Очень, я без неё никто</label>
+            <label class="option"><input type="radio" name="n3" value="1"> Важна, но не определяет меня полностью</label>
+            <label class="option"><input type="radio" name="n3" value="0"> Мне плевать на ярлыки</label>
+          </div>
+        </div>
+        <button class="test-btn" data-test="npc">▸ ПРОЙТИ ТЕСТ НА НПС ◂</button>
+        <div id="npc-result" class="result-area">—</div>
       </div>
     </div>
 
-    <!-- ПРИТ -->
-    <div class="card prit">
+    <!-- ТЕСТ НА МОБА -->
+    <div class="test-card mob" id="test-mob">
       <div class="card-header">
-        <div class="rank">самая низшая раса · деградация движения</div>
-        <div class="race-name">ПРИТ</div>
-        <div class="essence">вектор А→Б · чистый шум · оживший сбой навигации</div>
+        <div class="essence">низшая раса · массовка без интеллекта</div>
+        <div class="race-name">МОБ</div>
       </div>
       <div class="card-content">
-        <div class="instruction-title">
-          <span>🜃 КАК БЫТЬ ПРИТОМ</span>
-          <span class="small-badge">инструкция по исчезновению</span>
+        <div class="question-block">
+          <div class="q-text">1. Часто ли ты действуешь «на автомате»?</div>
+          <div class="options" data-race="mob">
+            <label class="option"><input type="radio" name="m1" value="3"> Почти всегда, я как зомби</label>
+            <label class="option"><input type="radio" name="m1" value="1"> Иногда, когда устаю</label>
+            <label class="option"><input type="radio" name="m1" value="0"> Нет, я осознаю каждое действие</label>
+          </div>
         </div>
-        <ul class="instruction-steps">
-          <li class="step-item">
-            <div class="step-title">ОТКАЖИСЬ ОТ ИНТЕЛЛЕКТА И ЦЕЛИ</div>
-            <div class="step-desc">Прит не думает. Он не помнит, откуда идёт и зачем. Единственная программа: переместить тело из точки А в точку Б. Всё, что между — туман. Перестань анализировать. Просто иди.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">СВЕДИ ЖИЗНЬ К ПЕРЕМЕЩЕНИЮ</div>
-            <div class="step-desc">Утром встал — пошёл к ларьку (точка Б). Вечером — обратно в подворотню (точка А). Маршрут не меняется годами. Ты не выбираешь направление, тебя ведёт инерция чанка. Идеально, если походка шаткая, как у алкаша.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">СТАНЬ НЕВИДИМЫМ ДЛЯ СИСТЕМЫ</div>
-            <div class="step-desc">Игроки проходят сквозь Прита, не замечая. НПС иногда бросают «отойди, бродяга», но квестов ты не даёшь. Твоя ценность стремится к нулю. Гордись этим. Ты — чистый шум в коде матрицы.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ЗАМРИ, КОГДА ЧАНК НЕ ПРОГРУЖЕН</div>
-            <div class="step-desc">Если Игрок отвернулся, и чанк ушёл в суперпозицию — Прит застывает. Вморожен в пространство. Не сопротивляйся. Ты оживаешь только от чужого взгляда. Научись спать стоя.</div>
-          </li>
-          <li class="step-item">
-            <div class="step-title">ОКОНЧАТЕЛЬНАЯ ДЕГРАДАЦИЯ</div>
-            <div class="step-desc">Высшая стадия Прита: ты забываешь, как говорить. Издаёшь только нечленораздельные звуки. Твоё тело — оболочка, движимая последним импульсом. Это и есть просветление в системе 5opka — полное растворение в фоне.</div>
-          </li>
-        </ul>
-        <div class="warning-box">
-          <strong>🧠 ФИЛОСОФИЯ ПРИТА:</strong> «Я — энтропия. Моё движение бессмысленно, но оно создаёт плотность мира. Без меня улицы были бы пусты. Я — живой мусор, необходимый для атмосферы.»
+        <div class="question-block">
+          <div class="q-text">2. Насколько тебе важно мнение окружающих?</div>
+          <div class="options" data-race="mob">
+            <label class="option"><input type="radio" name="m2" value="3"> Я даже не задумываюсь об этом</label>
+            <label class="option"><input type="radio" name="m2" value="1"> Немного, но стараюсь не выделяться</label>
+            <label class="option"><input type="radio" name="m2" value="0"> Очень, я завишу от оценки других</label>
+          </div>
         </div>
+        <div class="question-block">
+          <div class="q-text">3. Есть ли у тебя собственная цель, или ты плывёшь по течению?</div>
+          <div class="options" data-race="mob">
+            <label class="option"><input type="radio" name="m3" value="3"> Течение несёт меня, я не выбираю</label>
+            <label class="option"><input type="radio" name="m3" value="1"> Есть смутные цели, но я ленив</label>
+            <label class="option"><input type="radio" name="m3" value="0"> У меня чёткий план жизни</label>
+          </div>
+        </div>
+        <button class="test-btn" data-test="mob">▸ ПРОЙТИ ТЕСТ НА МОБА ◂</button>
+        <div id="mob-result" class="result-area">—</div>
+      </div>
+    </div>
+
+    <!-- ТЕСТ НА ПРИТА -->
+    <div class="test-card prit" id="test-prit">
+      <div class="card-header">
+        <div class="essence">самая низшая · вектор А→Б</div>
+        <div class="race-name">ПРИТ</div>
+      </div>
+      <div class="card-content">
+        <div class="question-block">
+          <div class="q-text">1. Твои перемещения по городу чаще всего:</div>
+          <div class="options" data-race="prit">
+            <label class="option"><input type="radio" name="pr1" value="3"> Однотипны: дом-ларек-дом, без смысла</label>
+            <label class="option"><input type="radio" name="pr1" value="1"> Иногда меняю маршруты, но не специально</label>
+            <label class="option"><input type="radio" name="pr1" value="0"> Всегда разные, я люблю новое</label>
+          </div>
+        </div>
+        <div class="question-block">
+          <div class="q-text">2. Как часто ты «выпадаешь» из реальности, тупишь в одну точку?</div>
+          <div class="options" data-race="prit">
+            <label class="option"><input type="radio" name="pr2" value="3"> Постоянно, я как в тумане</label>
+            <label class="option"><input type="radio" name="pr2" value="1"> Иногда бывает</label>
+            <label class="option"><input type="radio" name="pr2" value="0"> Никогда, я всегда собран</label>
+          </div>
+        </div>
+        <div class="question-block">
+          <div class="q-text">3. Ощущаешь ли ты себя «невидимкой» для окружающих?</div>
+          <div class="options" data-race="prit">
+            <label class="option"><input type="radio" name="pr3" value="3"> Да, меня никто не замечает</label>
+            <label class="option"><input type="radio" name="pr3" value="1"> Иногда кажется, что я фон</label>
+            <label class="option"><input type="radio" name="pr3" value="0"> Нет, я всегда в центре внимания</label>
+          </div>
+        </div>
+        <button class="test-btn" data-test="prit">▸ ПРОЙТИ ТЕСТ НА ПРИТА ◂</button>
+        <div id="prit-result" class="result-area">—</div>
       </div>
     </div>
   </div>
 
-  <!-- дополнительный блок про МОБОВ, раз уж упоминались -->
-  <div style="margin-top: 40px; background: #0d131a; border-radius: 24px; padding: 24px; border: 1px solid #2f4457;">
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-      <span style="font-size: 2rem; opacity: 0.5;">◈</span>
-      <h3 style="font-weight: 300; letter-spacing: 3px; color: #a7b9cc;">МОБЫ — массовка без интеллекта</h3>
+  <!-- ОБЩИЙ РЕЗУЛЬТАТ (БАРЫ) -->
+  <div class="global-result" id="global-stats">
+    <div class="global-title">📊 ТВОЙ ПРОФИЛЬ В МАТРИЦЕ 5OPKA</div>
+    <div class="bars-container">
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#f5c84e;">ИГРОК</span>
+        <div class="bar-bg"><div class="bar-fill player-fill" id="player-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="player-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#7fc3ff;">НПС</span>
+        <div class="bar-bg"><div class="bar-fill npc-fill" id="npc-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="npc-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#8fc0a9;">МОБ</span>
+        <div class="bar-bg"><div class="bar-fill mob-fill" id="mob-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="mob-percent">0%</span>
+      </div>
+      <div class="race-bar-item">
+        <span class="race-label" style="color:#b48bc4;">ПРИТ</span>
+        <div class="bar-bg"><div class="bar-fill prit-fill" id="prit-bar" style="width:0%"></div></div>
+        <span class="percent-value" id="prit-percent">0%</span>
+      </div>
     </div>
-    <p style="color: #9aabbc;">Мобы не имеют инструкций, потому что не способны их воспринять. Они существуют, чтобы создавать иллюзию наполненности мира. Двигаются по заданному маршруту матрицы, не обладая внутренним монологом. Если вы читаете это — вы уже выше Моба. Не опускайтесь до уровня бессмысленной ходьбы без цели, если только не хотите стать Притом (а это уже осознанный путь вниз).</p>
+    <div class="reset-area">
+      <button class="reset-btn" id="reset-all">⟲ СБРОСИТЬ ВСЕ ТЕСТЫ</button>
+    </div>
+    <p class="small-note" style="text-align:center; margin-top:12px;">проходи тесты в любом порядке — статистика обновится</p>
   </div>
 
   <div class="footnote">
-    <span class="glitch-note">// v. 5.0.0.pka // матрица 5opka // чанки стабильны // </span><br>
-    <span style="font-size: 0.8rem;">выбери свою расу осознанно. игроки не рождаются — они просыпаются.</span>
+    <span>// v.5.0.pka · иерархия 5opka · ты — то, что прогружает твой разум //</span>
   </div>
 </div>
 
-<!-- маленькая декоративная деталь: визуализация чанков при скролле не требуется, просто статика -->
+<script>
+  (function(){
+    // объект для хранения сырых баллов по каждой расе (0-9)
+    let scores = {
+      player: 0,
+      npc: 0,
+      mob: 0,
+      prit: 0
+    };
+
+    // флаги пройденных тестов (чтобы показывать % даже если не все вопросы отвечены — но мы будем считать только по тем, где выбрано)
+    const maxPerTest = 9; // 3 вопроса по 3 балла максимум
+
+    // получаем элементы
+    const playerResultDiv = document.getElementById('player-result');
+    const npcResultDiv = document.getElementById('npc-result');
+    const mobResultDiv = document.getElementById('mob-result');
+    const pritResultDiv = document.getElementById('prit-result');
+
+    const playerBar = document.getElementById('player-bar');
+    const npcBar = document.getElementById('npc-bar');
+    const mobBar = document.getElementById('mob-bar');
+    const pritBar = document.getElementById('prit-bar');
+    const playerPercent = document.getElementById('player-percent');
+    const npcPercent = document.getElementById('npc-percent');
+    const mobPercent = document.getElementById('mob-percent');
+    const pritPercent = document.getElementById('prit-percent');
+
+    // Функция обновления глобальных баров и процентов
+    function updateGlobalStats() {
+      const maxScore = 9; 
+      const pPlayer = Math.min(100, Math.round((scores.player / maxScore) * 100));
+      const pNpc = Math.min(100, Math.round((scores.npc / maxScore) * 100));
+      const pMob = Math.min(100, Math.round((scores.mob / maxScore) * 100));
+      const pPrit = Math.min(100, Math.round((scores.prit / maxScore) * 100));
+
+      playerBar.style.width = pPlayer + '%';
+      npcBar.style.width = pNpc + '%';
+      mobBar.style.width = pMob + '%';
+      pritBar.style.width = pPrit + '%';
+
+      playerPercent.textContent = pPlayer + '%';
+      npcPercent.textContent = pNpc + '%';
+      mobPercent.textContent = pMob + '%';
+      pritPercent.textContent = pPrit + '%';
+    }
+
+    // Функция подсчёта баллов для конкретного теста
+    function calculateRaceScore(race) {
+      const radioNamePrefix = { player: 'p', npc: 'n', mob: 'm', prit: 'pr' };
+      const prefix = radioNamePrefix[race];
+      let total = 0;
+      for (let i = 1; i <= 3; i++) {
+        const radios = document.getElementsByName(prefix + i);
+        let selectedValue = null;
+        for (let r of radios) {
+          if (r.checked) {
+            selectedValue = r.value;
+            break;
+          }
+        }
+        if (selectedValue !== null) {
+          total += parseInt(selectedValue, 10);
+        }
+      }
+      return total;
+    }
+
+    // Обновление конкретного результата в карточке и в scores
+    function processTest(race) {
+      const score = calculateRaceScore(race);
+      scores[race] = score;
+
+      let resultDiv;
+      let raceName;
+      if (race === 'player') { resultDiv = playerResultDiv; raceName = 'ИГРОК'; }
+      else if (race === 'npc') { resultDiv = npcResultDiv; raceName = 'НПС'; }
+      else if (race === 'mob') { resultDiv = mobResultDiv; raceName = 'МОБ'; }
+      else { resultDiv = pritResultDiv; raceName = 'ПРИТ'; }
+
+      const percent = Math.round((score / 9) * 100);
+      
+      let message = '';
+      if (percent >= 70) message = `⚡ Ты истинный ${raceName} (${percent}%). Твоя суть чиста.`;
+      else if (percent >= 40) message = `🌀 В тебе есть черты ${raceName} (${percent}%).`;
+      else message = `◈ ${raceName} всего на ${percent}% — почти не твоё.`;
+
+      resultDiv.innerHTML = `<span style="color:#bdd4e0;">${message}</span>`;
+      
+      // обновить глобальные бары
+      updateGlobalStats();
+    }
+
+    // Обработчики кнопок
+    document.querySelectorAll('.test-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const testType = this.dataset.test; // player, npc, mob, prit
+        processTest(testType);
+      });
+    });
+
+    // Сброс всех тестов
+    function resetAllTests() {
+      // сбросить все radio
+      const allRadios = document.querySelectorAll('input[type="radio"]');
+      allRadios.forEach(r => r.checked = false);
+      
+      // обнулить scores
+      scores = { player: 0, npc: 0, mob: 0, prit: 0 };
+      
+      // очистить текст результатов
+      playerResultDiv.innerHTML = '—';
+      npcResultDiv.innerHTML = '—';
+      mobResultDiv.innerHTML = '—';
+      pritResultDiv.innerHTML = '—';
+      
+      // обновить бары
+      updateGlobalStats();
+    }
+
+    document.getElementById('reset-all').addEventListener('click', resetAllTests);
+
+    // Инициализация
+    updateGlobalStats();
+
+    // Дополнительно: если пользователь меняет ответы после прохождения, результаты не меняются до нового клика.
+    // Это логично, чтобы не было путаницы.
+  })();
+</script>
 </body>
-</html>
+  </html>
