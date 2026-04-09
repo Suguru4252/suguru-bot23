@@ -1,599 +1,708 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Свадьба Ильи и Артёма | Полное издание</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ГЛУПЫЙ ТИМОФЕЙ · СИМУЛЯТОР</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
 
-        body {
-            background: linear-gradient(135deg, #140b06 0%, #3d261b 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Quicksand', 'Georgia', serif;
-            padding: 20px;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #1b2a1f 0%, #2d3e2c 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+      padding: 16px;
+    }
 
-        .game-wrapper {
-            max-width: 850px;
-            width: 100%;
-            background: #fffef5;
-            border-radius: 56px;
-            box-shadow: 0 35px 60px rgba(0,0,0,0.5), 0 0 0 3px #ffdaa5 inset;
-            overflow: hidden;
-        }
+    .game-container {
+      max-width: 700px;
+      width: 100%;
+      background: #ecd9b4;
+      background-image: radial-gradient(circle at 20% 30%, #f3e9d2, #dac29c);
+      border-radius: 64px 64px 48px 48px;
+      box-shadow: 0 20px 0 #6b4f2c, 0 30px 30px rgba(0,0,0,0.35);
+      padding: 24px 24px 30px;
+      border: 4px solid #a58357;
+      transition: box-shadow 0.2s;
+    }
 
-        .header {
-            background: linear-gradient(145deg, #c13e36, #942820);
-            padding: 18px 24px;
-            color: #fff5e0;
-            text-align: center;
-            border-bottom: 5px solid #ffd27a;
-        }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 3rem;
+      font-weight: 900;
+      text-align: center;
+      color: #302010;
+      text-shadow: 4px 4px 0 #c9a96b;
+      letter-spacing: 2px;
+      word-break: break-word;
+      filter: drop-shadow(0 6px 2px rgba(0,0,0,0.2));
+      transform: rotate(-1deg);
+    }
 
-        .header h1 {
-            font-size: 1.8rem;
-            font-family: 'Playfair Display', serif;
-            letter-spacing: 1px;
-        }
+    .subtitle {
+      text-align: center;
+      margin-top: -8px;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4a2e14;
+      background: #fbeec9;
+      display: inline-block;
+      padding: 6px 24px;
+      border-radius: 40px;
+      margin-left: auto;
+      margin-right: auto;
+      width: fit-content;
+      border: 3px dashed #a85e2c;
+      box-shadow: inset 0 1px 4px white, 0 4px 0 #6e4122;
+    }
 
-        .header h1 span {
-            background: #ffefb9;
-            color: #942820;
-            padding: 0 14px;
-            border-radius: 50px;
-            display: inline-block;
-            margin: 0 6px;
-        }
+    /* Тимофей-зона */
+    .timofey-area {
+      background: #3e5a3c;
+      background: linear-gradient(135deg, #4f7849, #2b4827);
+      border-radius: 120px 120px 60px 60px;
+      padding: 28px 20px 20px;
+      margin-bottom: 24px;
+      border: 6px solid #263f1d;
+      box-shadow: inset 0 -8px 0 #1e3018, 0 12px 0 #3b2e1f, 0 8px 12px black;
+      position: relative;
+    }
 
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 14px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+    .face-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .stat-badge {
-            background: rgba(255,235,200,0.25);
-            backdrop-filter: blur(6px);
-            border-radius: 50px;
-            padding: 6px 16px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      aspect-ratio: 1/1;
+      background: #fbe9c3;
+      border-radius: 50% 50% 40% 40%;
+      box-shadow: 0 0 0 8px #ebc47f, 0 10px 0 6px #8b5e2e, inset 0 -6px 6px rgba(0,0,0,0.1);
+      image-rendering: crisp-edges; 
+    }
 
-        .story-pane {
-            padding: 26px;
-            min-height: 520px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .status-bars {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px 32px;
+      margin: 18px 0 10px;
+      background: #ebd6b0;
+      padding: 12px 20px;
+      border-radius: 60px;
+      border: 3px solid #a76f2e;
+      box-shadow: inset 0 2px 5px #aa8b62, 0 6px 0 #6b4a24;
+    }
 
-        .scene-art {
-            text-align: center;
-            font-size: 4.8rem;
-            background: #fff3e8;
-            border-radius: 55px;
-            padding: 20px;
-            transition: 0.2s;
-        }
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #2c1c06;
+      text-shadow: 1px 1px 0 #efdba1;
+    }
 
-        .story-text {
-            background: white;
-            border-radius: 36px;
-            padding: 24px;
-            font-size: 1.05rem;
-            line-height: 1.5;
-            color: #352316;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
-            border: 1px solid #ffe2bd;
-        }
+    .bar-label {
+      min-width: 70px;
+    }
 
-        .guest-status {
-            background: #f9ede0;
-            border-radius: 50px;
-            padding: 12px 18px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            font-size: 0.8rem;
-        }
+    .bar-bg {
+      width: 130px;
+      height: 24px;
+      background: #412e18;
+      border-radius: 30px;
+      box-shadow: inset 0 3px 5px black, 0 3px 0 #5f4a2e;
+      border: 2px solid #2f210c;
+      overflow: hidden;
+    }
 
-        .guest-chip {
-            background: white;
-            border-radius: 40px;
-            padding: 4px 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
+    .bar-fill {
+      height: 100%;
+      width: 80%;
+      background: #ecbc2d;
+      background: linear-gradient(90deg, #f5d742, #ffb82e);
+      border-radius: 30px;
+      box-shadow: inset 0 2px 5px #fff9cf, 0 0 6px #ffd966;
+      transition: width 0.2s;
+    }
 
-        .inventory-box {
-            background: #e8d9cc;
-            border-radius: 40px;
-            padding: 8px 16px;
-            font-size: 0.8rem;
-            text-align: center;
-        }
+    .brain-fill {
+      background: #fa6b9b;
+      background: linear-gradient(90deg, #ff98b9, #f9578a);
+    }
 
-        .choices-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+    /* Панель действий */
+    .action-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin: 18px 0 12px;
+    }
 
-        .choice-item {
-            background: #f3e5d8;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 60px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.1s;
-            color: #4a2a1a;
-            border-left: 8px solid #e6a157;
-            font-family: inherit;
-        }
+    .btn {
+      background: #fdebb3;
+      border: 4px solid #b67936;
+      color: #332010;
+      font-weight: bold;
+      font-size: 1.2rem;
+      padding: 14px 8px;
+      border-radius: 40px;
+      box-shadow: 0 7px 0 #7b4f24, 0 4px 8px black;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.05s ease-in;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      backdrop-filter: blur(2px);
+      transform: translateY(-2px);
+    }
 
-        .choice-item:hover {
-            background: #fff0e2;
-            transform: translateX(6px);
-            border-left-color: #c2571a;
-        }
+    .btn:active {
+      box-shadow: 0 3px 0 #7b4f24, 0 2px 6px black;
+      transform: translateY(4px);
+    }
 
-        .reset-button {
-            background: #b17b58;
-            border: none;
-            padding: 12px;
-            border-radius: 44px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            margin-top: 16px;
-            font-size: 0.9rem;
-        }
+    .btn.special {
+      background: #fdcb6e;
+      border-color: #b3541c;
+      box-shadow: 0 7px 0 #9e431b, 0 4px 8px black;
+      color: #221500;
+    }
 
-        .toast-message {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2c1b12;
-            color: #ffddb0;
-            padding: 12px 28px;
-            border-radius: 60px;
-            font-weight: bold;
-            z-index: 2000;
-            animation: toastPop 0.3s ease;
-            box-shadow: 0 5px 20px black;
-            font-size: 0.9rem;
-        }
+    .danger-btn {
+      background: #dd7a6b;
+      border-color: #992b1c;
+      box-shadow: 0 7px 0 #701f13, 0 4px 8px black;
+      color: #faf0d7;
+      text-shadow: 1px 1px 0 #3f160e;
+    }
 
-        @keyframes toastPop {
-            from { opacity: 0; transform: translateX(-50%) translateY(30px);}
-            to { opacity: 1; transform: translateX(-50%) translateY(0);}
-        }
+    .log-box {
+      background: #202010d9;
+      color: #e6e3b3;
+      padding: 14px 18px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      min-height: 70px;
+      border: 3px solid #ac8c5a;
+      box-shadow: inset 0 0 10px #00000066, 0 6px 0 #584525;
+      backdrop-filter: blur(5px);
+      margin: 18px 0 8px;
+      font-family: monospace;
+      word-break: break-word;
+    }
 
-        .footer {
-            background: #f7e5d4;
-            padding: 12px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #b87a55;
-        }
+    .stats-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #c9af7e;
+      border-radius: 40px;
+      padding: 6px 18px;
+      border: 3px solid #6e4f28;
+      box-shadow: inset 0 2px 5px #fff2d4, 0 6px 0 #584021;
+      color: #202008;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 12px;
+    }
 
-        @media (max-width: 550px) {
-            .story-pane { padding: 18px; }
-            .story-text { font-size: 0.95rem; }
-        }
-    </style>
+    .reset-area {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .reset-btn {
+      background: #525b44;
+      box-shadow: 0 5px 0 #2f3a26, 0 2px 6px black;
+      border-color: #2b4120;
+      color: #f3efcd;
+      font-size: 1rem;
+      padding: 12px 28px;
+    }
+
+    .emote {
+      font-size: 2.4rem;
+      line-height: 1;
+      margin-left: 8px;
+    }
+  </style>
 </head>
 <body>
-<div class="game-wrapper" id="gameRoot">
-    <div class="header">
-        <h1>💒 <span>Илья</span> 🤵‍♂️❤️👰‍♂️ <span>Артём</span> 🏳️‍🌈</h1>
-        <div class="stats-row">
-            <div class="stat-badge">💗 Гармония: <strong id="harmonyValue">50</strong>%</div>
-            <div class="stat-badge">🎭 Глава: <strong id="chapterTitle">Пролог</strong></div>
-            <div class="stat-badge">🏅 Достижений: <strong id="achievCount">0</strong></div>
-            <div class="stat-badge">🌤️ Погода: <strong id="weatherIcon">☀️ Солнечно</strong></div>
+<div class="game-container">
+  <h1>ГЛУПЫЙ ТИМОФЕЙ</h1>
+  <div class="subtitle">🤪 СИМУЛЯТОР ВОСПИТАНИЯ 🤪</div>
+
+  <div class="timofey-area">
+    <div class="face-container">
+      <canvas id="timofeyCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <!-- Шкалы -->
+    <div class="status-bars">
+      <div class="bar-item">
+        <span class="bar-label">🍔 СЫТ</span>
+        <div class="bar-bg">
+          <div id="hungerFill" class="bar-fill" style="width: 70%"></div>
         </div>
+      </div>
+      <div class="bar-item">
+        <span class="bar-label">😴 ЭНЕРГ</span>
+        <div class="bar-bg">
+          <div id="energyFill" class="bar-fill" style="width: 60%"></div>
+        </div>
+      </div>
+      <div class="bar-item">
+        <span class="bar-label">🧠 МОЗГ</span>
+        <div class="bar-bg">
+          <div id="brainFill" class="bar-fill brain-fill" style="width: 30%"></div>
+        </div>
+      </div>
     </div>
-    <div class="story-pane" id="storyArea"></div>
-    <div class="footer">
-        🎵 Музыка любви играет фоном | Каждый выбор меняет свадьбу, гостей и судьбу молодожёнов 🎵
-    </div>
+  </div>
+
+  <!-- Кнопки управления Тимофеем -->
+  <div class="action-panel">
+    <button class="btn" id="feedBtn">🍕 КОРМИТЬ</button>
+    <button class="btn" id="sleepBtn">😴 СПАТЬ</button>
+    <button class="btn special" id="studyBtn">📚 УЧИТЬ</button>
+    <button class="btn" id="playBtn">⚽ ИГРАТЬ</button>
+    <button class="btn danger-btn" id="stupidBtn">🤡 СОВЕРШИТЬ ГЛУПОСТЬ</button>
+    <button class="btn" id="scoldBtn">😠 РУГАТЬ</button>
+  </div>
+
+  <!-- Лог событий (вся глупость тут) -->
+  <div class="log-box" id="logDisplay">
+    Тимофей появился. Он уже хочет есть и глупить...
+  </div>
+
+  <!-- Счетчик глупости и уровень тупости -->
+  <div class="stats-panel">
+    <span>📊 ГЛУПОСТЬ: <span id="stupidityCounter">0</span> / 100</span>
+    <span id="moodEmoji" class="emote">😐</span>
+  </div>
+
+  <!-- Сброс -->
+  <div class="reset-area">
+    <button class="btn reset-btn" id="resetBtn">🔄 НОВЫЙ ТИМОФЕЙ (СБРОС)</button>
+  </div>
 </div>
 
 <script>
-    // ~~~~~~~~~~~~~~ СВАДЬБА ИЛЬИ И АРТЁМА: РАСШИРЕННАЯ ВЕРСИЯ ~~~~~~~~~~~~~~
-    // --- ДОСТИЖЕНИЯ ---
-    let achievements = [];
+  (function(){
+    "use strict";
 
-    const allAchievements = {
-        trueLove: "💯 Идеальный союз (100% гармонии)",
-        flowerCatch: "💐 Король букета (выиграли мини-игру)",
-        weatherWizard: "🌈 Повелитель погоды (устранили непогоду)",
-        guestLover: "👨‍👩‍👧‍👦 Душа компании (все гости в восторге)",
-        secretEnding: "🔮 Секретный финал (нашли тайный путь)",
-        memoryKeeper: "📸 Альбом воспоминаний (открыли эпилог)"
-    };
+    // ---------- СОСТОЯНИЕ ТИМОФЕЯ ----------
+    let hunger = 70;          // 0..100 (0 - голодный, 100 - сытый)
+    let energy = 60;          // 0..100 
+    let brain = 30;           // 0..100 (чем выше - тем умнее, но Тимофей тупой)
+    let stupidity = 0;        // 0..100, при 100 - победа глупости
 
-    function addAchievement(id) {
-        if (!achievements.includes(id)) {
-            achievements.push(id);
-            showToast("🏆 ДОСТИЖЕНИЕ: " + allAchievements[id]);
-            updateAchievementUI();
-            saveGame();
-        }
+    // Флаги и таймеры
+    let gameOver = false;
+    let winStupidity = false;  // true если глупость 100
+    
+    // Лог сообщения
+    const logEl = document.getElementById('logDisplay');
+    const stupiditySpan = document.getElementById('stupidityCounter');
+    const moodEmoji = document.getElementById('moodEmoji');
+    
+    // Canvas
+    const canvas = document.getElementById('timofeyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Элементы шкал
+    const hungerFill = document.getElementById('hungerFill');
+    const energyFill = document.getElementById('energyFill');
+    const brainFill = document.getElementById('brainFill');
+
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
-    function showToast(msg) {
-        let toast = document.createElement("div");
-        toast.className = "toast-message";
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2800);
+    // Обновление UI (бары, счетчик, эмодзи)
+    function updateUI() {
+      hungerFill.style.width = clamp(hunger, 0, 100) + '%';
+      energyFill.style.width = clamp(energy, 0, 100) + '%';
+      brainFill.style.width = clamp(brain, 0, 100) + '%';
+      stupiditySpan.textContent = Math.floor(stupidity);
+      
+      // Эмодзи по состоянию
+      if (gameOver) {
+        if (winStupidity) moodEmoji.textContent = '🤡👑';
+        else if (hunger <= 0) moodEmoji.textContent = '💀🍔';
+        else if (energy <= 0) moodEmoji.textContent = '💤⚰️';
+        else moodEmoji.textContent = '😵';
+      } else {
+        if (hunger < 20) moodEmoji.textContent = '🤤';
+        else if (energy < 20) moodEmoji.textContent = '🥱';
+        else if (brain > 70) moodEmoji.textContent = '🤓❓';
+        else if (stupidity > 70) moodEmoji.textContent = '🤪🔥';
+        else if (brain < 20) moodEmoji.textContent = '🫠';
+        else moodEmoji.textContent = '😐';
+      }
+      
+      drawTimofey();
     }
 
-    function updateAchievementUI() {
-        document.getElementById("achievCount").innerText = achievements.length;
+    // Добавление записи в лог
+    function addLog(message) {
+      logEl.textContent = message;
     }
 
-    // --- Гости с динамической репутацией ---
-    let guests = {
-        "Мама Ильи": { mood: 70, emoji: "👩‍🍳", bonus: "пироги" },
-        "Папа Артёма": { mood: 68, emoji: "👨‍🦰", bonus: "тосты" },
-        "Свидетельница Алиса": { mood: 80, emoji: "💃", bonus: "конкурсы" },
-        "Свидетель Коля": { mood: 75, emoji: "🎸", bonus: "музыка" },
-        "Бабушка Зина": { mood: 85, emoji: "👵🎤", bonus: "частушки" },
-        "Кот Мурзик": { mood: 100, emoji: "🐱", bonus: "хаос" },
-        "Тётя Галя": { mood: 60, emoji: "👒", bonus: "комплименты" }
-    };
-
-    // --- Погодная система ---
-    let currentWeather = { type: "sunny", name: "☀️ Солнечно", effect: 0 };
-
-    const weathers = {
-        sunny: { name: "☀️ Солнечно", emoji: "☀️", effect: 2 },
-        rainy: { name: "🌧️ Дождливо", emoji: "🌧️", effect: -5 },
-        rainbow: { name: "🌈 Радуга", emoji: "🌈", effect: 10 },
-        windy: { name: "💨 Ветрено", emoji: "💨", effect: -2 }
-    };
-
-    function setWeather(type) {
-        if (weathers[type]) {
-            currentWeather = { type: type, name: weathers[type].name, effect: weathers[type].effect };
-            document.getElementById("weatherIcon").innerHTML = currentWeather.name;
-        }
+    // Проверка на проигрыш (голод/энергия) или победу глупости
+    function checkGameOver() {
+      if (gameOver) return true;
+      
+      if (hunger <= 0) {
+        gameOver = true;
+        addLog('💀 Тимофей УМЕР ОТ ГОЛОДА. Даже глупость не спасла...');
+        updateUI();
+        return true;
+      }
+      if (energy <= 0) {
+        gameOver = true;
+        addLog('💤 Тимофей вырубился НАВСЕГДА. Конец энергии.');
+        updateUI();
+        return true;
+      }
+      if (stupidity >= 100) {
+        gameOver = true;
+        winStupidity = true;
+        addLog('👑 ТИМОФЕЙ ДОСТИГ АБСОЛЮТНОЙ ГЛУПОСТИ! ПОБЕДА ГЛУПОСТИ! Он счастлив.');
+        updateUI();
+        return true;
+      }
+      return false;
     }
 
-    // --- Игровое состояние ---
-    let gameState = {
-        harmony: 50,
-        chapter: "prologue",
-        flags: {
-            ringSaved: false,
-            danceHit: false,
-            parentsBless: false,
-            cakeSaved: false,
-            speechEpic: false,
-            megaSurprise: false,
-            secretPath: false
-        },
-        inventory: ["💌 Приглашение", "🍾 Шампанское"],
-        flowerGamePlayed: false,
-        epilogueUnlocked: false
-    };
+    // Обработка изменения характеристик и глупости
+    function modifyStats(hungerDelta, energyDelta, brainDelta, stupidityDelta, actionMessage) {
+      if (gameOver) {
+        addLog('Игра окончена. Нажми "НОВЫЙ ТИМОФЕЙ".');
+        return;
+      }
 
-    // ~~~~~~~~~~~~~~ СЮЖЕТНЫЕ СЦЕНЫ (16+ уникальных) ~~~~~~~~~~~~~~
-    const scenes = {
-        prologue: {
-            title: "🌅 Начало легенды",
-            emoji: "🏳️‍🌈🌄",
-            text: "Илья и Артём готовятся к свадьбе уже три года. Сегодня тот самый день! Но с утра происходит череда событий: кот Мурзик украл галстуки, а тётя Галя принесла огромный пирог с сюрпризом. Что делать первым делом?",
-            choices: [
-                { text: "🐱 Догнать кота и спасти галстуки", nextScene: "catRescue", harmonyDelta: 5, flagSet: "ringSaved", flagVal: true },
-                { text: "🎁 Открыть пирог тёти Гали (может быть сюрприз)", nextScene: "pieSurprise", harmonyDelta: 3 },
-                { text: "📞 Позвонить Артёму и всё обсудить", nextScene: "callArtem", harmonyDelta: 2 }
-            ]
-        },
-        catRescue: {
-            title: "🐱 Погоня за Мурзиком",
-            emoji: "🐈💨",
-            text: "Кот устроил хаос, но галстуки спасены! В награду Мурзик принёс... старинную монету на счастье. Илья чувствует, что день начинается удачно. Артём смеётся и говорит, что это знак.",
-            choices: [
-                { text: "🍀 Положить монету в карман (удача +)", nextScene: "guestGathering", harmonyDelta: 7, flagSet: "ringSaved", flagVal: true },
-                { text: "💰 Отдать монету коту как игрушку", nextScene: "guestGathering", harmonyDelta: 2 }
-            ]
-        },
-        pieSurprise: {
-            title: "🥧 Секрет пирога",
-            emoji: "🥧✨",
-            text: "Внутри пирога — записка: «Желаю вам найти настоящую любовь. Она уже рядом». Тётя Галя растрогана. Гости начинают собираться с хорошим настроением.",
-            choices: [
-                { text: "📜 Прочитать записку вслух (трогательный момент)", nextScene: "guestGathering", harmonyDelta: 8 },
-                { text: "🤫 Сохранить как личный талисман", nextScene: "guestGathering", harmonyDelta: 4 }
-            ]
-        },
-        callArtem: {
-            title: "📱 Сердечный разговор",
-            emoji: "📞💕",
-            text: "Артём говорит: «Я так волнуюсь, но с тобой я спокоен». Внезапно на фоне слышен звук разбитой вазы. Оказывается, свидетель Коля уронил декорации. Надо выручать!",
-            choices: [
-                { text: "🎭 Помочь Коле с декорациями", nextScene: "guestGathering", harmonyDelta: 5 },
-                { text: "🎁 Послать курьера с цветами для Артёма", nextScene: "guestGathering", harmonyDelta: 6 }
-            ]
-        },
-        guestGathering: {
-            title: "👥 Гости в сборе!",
-            emoji: "🎉👪",
-            text: "Все гости прибыли. Мама Ильи печёт блины, папа Артёма репетирует тост, свидетельница Алиса предлагает конкурсы. Но погода начинает портиться... Вдруг капает дождь!",
-            choices: [
-                { text: "☂️ Организовать зонтики и продолжить веселье (творчески)", nextScene: "weatherEvent", harmonyDelta: 5 },
-                { text: "🏠 Перенести всё под шатёр", nextScene: "weatherEvent", harmonyDelta: 3 },
-                { text: "🎤 Устроить конкурс «Лучший тост» в помещении", nextScene: "weatherEvent", harmonyDelta: 4 }
-            ]
-        },
-        weatherEvent: {
-            title: "🌧️ Вызов стихии",
-            emoji: "⛈️☔",
-            text: "Начинается ливень! Гости огорчены. Но Илья и Артём не сдаются. Вдруг небо проясняется — появляется радуга! Это добрый знак. Нужно устроить что-то особенное!",
-            choices: [
-                { text: "🌈 Танцы под радугой (магический момент)", nextScene: "danceContest", harmonyDelta: 10, weatherSet: "rainbow", flagSet: "megaSurprise", flagVal: true, achievement: "weatherWizard" },
-                { text: "🎶 Позвать музыкантов сыграть весёлую песню", nextScene: "danceContest", harmonyDelta: 7, weatherSet: "rainbow" }
-            ]
-        },
-        danceContest: {
-            title: "💃 Танцевальный баттл",
-            emoji: "🕺💥💃",
-            text: "Илья и Артём показывают вальс, потом переходят на дикий тверк! Бабушка Зина выходит с частушками, свидетель Коля играет на гитаре. Гости в восторге!",
-            choices: [
-                { text: "🎸 Добавить рок-н-ролл (взрыв эмоций)", nextScene: "flowerGame", harmonyDelta: 12, flagSet: "danceHit", flagVal: true, achievement: "guestLover" },
-                { text: "💖 Закончить медленным танцем (очень романтично)", nextScene: "flowerGame", harmonyDelta: 9, flagSet: "danceHit", flagVal: true }
-            ]
-        },
-        flowerGame: {
-            title: "💐 Букет невесты — мини-игра!",
-            emoji: "💐🎲",
-            text: "Свидетельница Алиса предлагает кинуть букет! Но Илья и Артём хотят устроить челлендж: кто поймает букет — загадает желание. Выбери, как пройдёт игра!",
-            choices: [
-                { text: "🎯 Ловить букет с завязанными глазами (весело и хаотично)", nextScene: "speeches", harmonyDelta: 5, flowerSpecial: "chaos" },
-                { text: "🤹‍♂️ Устроить эстафету с букетом", nextScene: "speeches", harmonyDelta: 7, flowerSpecial: "fun" },
-                { text: "💝 Подарить букет бабушке Зине (трогательно)", nextScene: "speeches", harmonyDelta: 10, flowerSpecial: "touch", achievement: "flowerCatch" }
-            ]
-        },
-        speeches: {
-            title: "🎤 Клятвы и тосты",
-            emoji: "🍷📜",
-            text: "Папа Артёма говорит пронзительный тост, мама Ильи плачет. Теперь слово женихам! Их клятвы могут быть смешными или трогательными. Весь зал замирает.",
-            choices: [
-                { text: "❤️‍🔥 Пронзительная клятва в стихах (слёзы счастья)", nextScene: "cakeCalamity", harmonyDelta: 12, flagSet: "speechEpic", flagVal: true },
-                { text: "😂 Смешная клятва с обещанием мыть посуду", nextScene: "cakeCalamity", harmonyDelta: 7, flagSet: "speechEpic", flagVal: false },
-                { text: "🎭 Импровизация в стиле любимого фильма", nextScene: "cakeCalamity", harmonyDelta: 8 }
-            ]
-        },
-        cakeCalamity: {
-            title: "🍰 Торт в опасности!",
-            emoji: "🎂🐱",
-            text: "Вывозят огромный трёхъярусный торт! Но Мурзик уже целится в фигурки женихов. Нужно спасать десерт! Вдруг тётя Галя предлагает отвлечь кота сметаной.",
-            choices: [
-                { text: "🐟 Дать коту рыбку (успех, торт спасён!)", nextScene: "secretPathCheck", harmonyDelta: 10, flagSet: "cakeSaved", flagVal: true, achievement: "guestLover" },
-                { text: "🏃‍♂️ Быстро укатить торт на безопасное место", nextScene: "secretPathCheck", harmonyDelta: 6, flagSet: "cakeSaved", flagVal: true },
-                { text: "😱 Позвать всех на помощь (кот съел верхушку)", nextScene: "secretPathCheck", harmonyDelta: -3, flagSet: "cakeSaved", flagVal: false }
-            ]
-        },
-        secretPathCheck: {
-            title: "🔮 Тайная тропа",
-            emoji: "🗝️🌟",
-            text: "Илья вспоминает, что дедушка Артёма оставил старую карту. Если следовать ей, можно найти потайную комнату с сюрпризом. Но времени мало!",
-            choices: [
-                { text: "🗺️ Исследовать тайную комнату (секретный контент!)", nextScene: "secretEnding", harmonyDelta: 15, flagSet: "secretPath", flagVal: true, requiresFlag: null },
-                { text: "🎆 Остаться и готовить грандиозный финал", nextScene: "grandFinale", harmonyDelta: 8 }
-            ]
-        },
-        secretEnding: {
-            title: "💎 Секретная комната",
-            emoji: "✨🏆",
-            text: "В комнате они находят старые фото дедушки и его возлюбленного, письма и волшебный кристалл. Оказывается, дед тоже мечтал о большой любви. Илья и Артём клянутся хранить эту память. Гости потрясены историей!",
-            choices: [
-                { text: "💖 Поделиться историей со всеми (всеобщее умиление)", nextScene: "grandFinale", harmonyDelta: 20, flagSet: "megaSurprise", flagVal: true, achievement: "secretEnding" },
-                { text: "🤫 Сохранить тайну, но добавить кристалл в свадебный обряд", nextScene: "grandFinale", harmonyDelta: 15 }
-            ]
-        },
-        grandFinale: {
-            title: "🎆 Великий финал",
-            emoji: "🎇💒",
-            text: "", // динамический текст в рендере
-            choices: []
-        }
-    };
+      // Применяем изменения
+      hunger = clamp(hunger + hungerDelta, 0, 100);
+      energy = clamp(energy + energyDelta, 0, 100);
+      brain = clamp(brain + brainDelta, 0, 100);
+      
+      // Глупость растёт или падает (но не ниже 0)
+      stupidity = clamp(stupidity + stupidityDelta, 0, 100);
+      
+      // Дополнительные эффекты: если мозг низкий — глупость может расти сама (пассивно)
+      // Добавим немного юмора: если мозг < 20, то глупость увеличивается дополнительно
+      if (brain < 20 && !gameOver) {
+        stupidity = clamp(stupidity + 0.5, 0, 100);
+      }
+      
+      // Если энергия очень низкая — Тимофей делает глупости
+      if (energy < 15 && !gameOver) {
+        stupidity = clamp(stupidity + 0.8, 0, 100);
+      }
+      
+      // Проверка окончания
+      const over = checkGameOver();
+      
+      // Сообщение
+      let finalMsg = actionMessage;
+      if (!over) {
+        if (hunger < 25) finalMsg += ' Тимофей голоден!';
+        if (energy < 25) finalMsg += ' Он хочет спать.';
+        if (brain > 75) finalMsg += ' Кажется, он немного поумнел?';
+        if (stupidity > 85) finalMsg += ' ГЛУПОСТЬ ЗАШКАЛИВАЕТ!';
+      }
+      addLog(finalMsg);
+      updateUI();
+      
+      // Если игра не окончена, но пассивные изменения могли привести к концу
+      if (!gameOver) checkGameOver();
+      updateUI();
+    }
 
-    // Финальная логика с эпилогом
-    function getFinalContent() {
-        let harmony = Math.min(100, Math.max(0, gameState.harmony));
-        let finalText = "";
-        let finalEmoji = "🏆💖";
-
-        if (harmony >= 90 && gameState.flags.megaSurprise && gameState.flags.speechEpic) {
-            finalEmoji = "👑🌈💎";
-            finalText = "🌟✨ ЛЕГЕНДАРНАЯ СВАДЬБА ТЫСЯЧЕЛЕТИЯ ✨🌟 Илья и Артём создали праздник, который войдёт в историю! Фейерверк, радуга, тайная комната, идеальные клятвы — всё это переполняет сердца любовью. Гости рыдают от счастья, кот Мурзик получил отдельный торт. Эта история станет семейной легендой!";
-            addAchievement("trueLove");
-        } else if (harmony >= 70) {
-            finalEmoji = "🥂💕🎶";
-            finalText = "Прекрасная, душевная свадьба! Были и смех, и слёзы. Родители танцуют, друзья обнимаются. Илья с Артёмом кружатся в прощальном вальсе. День, когда любовь победила всё! ❤️‍🔥";
-        } else if (harmony >= 45) {
-            finalEmoji = "😊🍰🎉";
-            finalText = "Очень веселая и немного безумная свадьба! Кот украл галстук, торт чудом выжил, дождь превратился в радугу. Все довольны, молодожёны сияют. Главное — они вместе навсегда!";
+    // ---------- РИСОВАНИЕ ТИМОФЕЯ (выражение лица зависит от состояния) ----------
+    function drawTimofey() {
+      ctx.clearRect(0, 0, 400, 400);
+      
+      // Фон лица
+      ctx.fillStyle = '#fbe9c3';
+      ctx.beginPath();
+      ctx.ellipse(200, 200, 140, 150, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d49b6a';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      
+      // Щёки (румянец)
+      ctx.fillStyle = '#f4acb7';
+      ctx.globalAlpha = 0.5 + 0.2 * Math.sin(Date.now() / 500);
+      ctx.beginPath();
+      ctx.arc(120, 220, 24, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(280, 220, 24, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+      
+      // ГЛАЗА (меняются от состояния)
+      // Белки
+      ctx.fillStyle = '#fefee6';
+      ctx.beginPath();
+      ctx.ellipse(140, 170, 24, 28, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(260, 170, 24, 28, 0, 0, Math.PI*2);
+      ctx.fill();
+      
+      // Зрачки (зависят от глупости/мозга)
+      let pupilSize = 10;
+      let crossEye = 0;
+      if (stupidity > 70) {
+        crossEye = 12; // косоглазие
+        pupilSize = 14;
+      } else if (brain < 25) {
+        pupilSize = 14;
+        crossEye = -8;
+      }
+      
+      if (energy < 30) {
+        // сонные веки
+        ctx.fillStyle = '#d9b382';
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(140, 155, 28, 14, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(260, 155, 28, 14, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+      
+      ctx.fillStyle = '#1e2b2c';
+      ctx.beginPath();
+      ctx.arc(140 + crossEye, 175, pupilSize, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(260 - crossEye, 175, pupilSize, 0, 2*Math.PI);
+      ctx.fill();
+      
+      // Блики
+      ctx.fillStyle = '#f5f9ff';
+      ctx.beginPath();
+      ctx.arc(133 + crossEye, 168, 4, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(253 - crossEye, 168, 4, 0, 2*Math.PI);
+      ctx.fill();
+      
+      // БРОВИ (глупость/злость)
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#4a2a18';
+      ctx.beginPath();
+      let browY = 130;
+      if (gameOver && winStupidity) {
+        // счастливые брови
+        ctx.moveTo(110, 120);
+        ctx.quadraticCurveTo(140, 100, 170, 120);
+        ctx.moveTo(230, 120);
+        ctx.quadraticCurveTo(260, 100, 290, 120);
+      } else if (stupidity > 60) {
+        ctx.moveTo(110, 135);
+        ctx.lineTo(170, 115);
+        ctx.moveTo(230, 115);
+        ctx.lineTo(290, 135);
+      } else {
+        ctx.moveTo(115, browY);
+        ctx.lineTo(165, browY-8);
+        ctx.moveTo(235, browY-8);
+        ctx.lineTo(285, browY);
+      }
+      ctx.stroke();
+      
+      // РОТ
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#a52a2a';
+      ctx.fillStyle = '#992222';
+      ctx.beginPath();
+      let mouthY = 260;
+      if (hunger < 30) {
+        // открытый рот (голод)
+        ctx.beginPath();
+        ctx.ellipse(200, 275, 30, 20, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#6b1a1a';
+        ctx.fill();
+        ctx.fillStyle = '#210a0a';
+        ctx.beginPath();
+        ctx.ellipse(200, 280, 18, 12, 0, 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        if (stupidity > 50) {
+          ctx.arc(200, 265, 35, 0.1, Math.PI - 0.1);
         } else {
-            finalEmoji = "🌀😂❤️";
-            finalText = "Свадьба вышла непредсказуемой: потеряли кольца, нашлись в торте, диджей уснул, но Илья и Артём сбежали на крышу и там пообещали друг другу любовь под звёздами. Романтичный хаос — их стиль!";
+          ctx.arc(200, 260, 30, 0.1, Math.PI - 0.1);
         }
-
-        if (!gameState.epilogueUnlocked && harmony >= 60) {
-            finalText += "\n\n📸 ЭПИЛОГ: Через год Илья и Артём открывают свадебный альбом, смеются над приключениями и планируют годовщину. Кот Мурзик мирно спит на коленях. История продолжается! 📸";
-            gameState.epilogueUnlocked = true;
-            addAchievement("memoryKeeper");
-        }
-
-        finalText += `\n\n✨ Итоговая гармония: ${harmony}% | Достижений: ${achievements.length}/${Object.keys(allAchievements).length} ✨`;
-        if (gameState.flags.cakeSaved) finalText += "\n🍰 Торт уцелел!";
-        if (gameState.flags.danceHit) finalText += "\n💃 Танец покорил всех!";
-        
-        return { text: finalText, emoji: finalEmoji };
+        ctx.lineWidth = 8;
+        ctx.stroke();
+      }
+      
+      // Если глупость почти 100 - корона
+      if (stupidity > 90 && !gameOver) {
+        ctx.font = "bold 38px 'Segoe UI Emoji'";
+        ctx.fillStyle = "#f5c542";
+        ctx.fillText("👑", 155, 70);
+      }
+      
+      if (gameOver && winStupidity) {
+        ctx.font = "bold 48px sans-serif";
+        ctx.fillText("🤡", 160, 340);
+      }
     }
 
-    // --- ОСНОВНОЙ ЦИКЛ UI ---
-    function renderGame() {
-        if (gameState.chapter === "grandFinale") {
-            let finale = getFinalContent();
-            document.getElementById("harmonyValue").innerText = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
-            document.getElementById("chapterTitle").innerText = "Финал 💒";
-            let finalHtml = `
-                <div class="scene-art">${finale.emoji}</div>
-                <div class="story-text">${finale.text.replace(/\n/g, '<br>')}</div>
-                <button class="reset-button" id="resetGameBtnFinal">🌟 Начать историю заново 🌟</button>
-            `;
-            document.getElementById("storyArea").innerHTML = finalHtml;
-            document.getElementById("resetGameBtnFinal").addEventListener("click", resetGame);
-            return;
-        }
-
-        let scene = scenes[gameState.chapter];
-        if (!scene) { resetGame(); return; }
-
-        document.getElementById("harmonyValue").innerText = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
-        document.getElementById("chapterTitle").innerText = scene.title;
-
-        let choicesHtml = "";
-        for (let i = 0; i < scene.choices.length; i++) {
-            choicesHtml += `<button class="choice-item" data-choice-idx="${i}">${scene.choices[i].text}</button>`;
-        }
-
-        let guestsHtml = '<div class="guest-status">';
-        for (let [name, g] of Object.entries(guests)) {
-            let moodEmoji = g.mood > 75 ? "😄" : (g.mood > 50 ? "🙂" : "😐");
-            guestsHtml += `<span class="guest-chip">${g.emoji || "👤"} ${name} ${moodEmoji}</span>`;
-        }
-        guestsHtml += '</div>';
-
-        let invHtml = gameState.inventory.length ? `<div class="inventory-box">🎒 Инвентарь: ${gameState.inventory.join(" • ")}</div>` : "";
-
-        let fullHtml = `
-            <div class="scene-art">${scene.emoji}</div>
-            <div class="story-text"><strong>${scene.title}</strong><br><br>${scene.text}</div>
-            ${guestsHtml}
-            ${invHtml}
-            <div class="choices-list">${choicesHtml}</div>
-            <button class="reset-button" id="resetGameBtn">🔄 Переиграть свадьбу</button>
-        `;
-
-        document.getElementById("storyArea").innerHTML = fullHtml;
-
-        for (let i = 0; i < scene.choices.length; i++) {
-            let btn = document.querySelector(`.choice-item[data-choice-idx="${i}"]`);
-            if (btn) btn.addEventListener("click", () => applyChoice(scene.choices[i]));
-        }
-        let resetBtn = document.getElementById("resetGameBtn");
-        if (resetBtn) resetBtn.addEventListener("click", resetGame);
+    // ---------- ДЕЙСТВИЯ ----------
+    function feed() {
+      if (gameOver) return;
+      if (hunger >= 95) {
+        addLog('Тимофей лопнет! Не надо больше еды.');
+        return;
+      }
+      let msg = '🍕 Тимофей поел.';
+      let stupidityGain = 1;
+      if (brain < 30) stupidityGain = 3;
+      modifyStats(28, -4, 1, stupidityGain, msg);
     }
-
-    function applyChoice(choice) {
-        let newHarm = gameState.harmony + (choice.harmonyDelta || 0);
-        gameState.harmony = Math.min(100, Math.max(0, newHarm));
-        if (choice.flagSet) gameState.flags[choice.flagSet] = (choice.flagVal !== undefined) ? choice.flagVal : true;
-        if (choice.achievement) addAchievement(choice.achievement);
-        if (choice.weatherSet) setWeather(choice.weatherSet);
-        
-        // эффект мини-игры с букетом
-        if (choice.flowerSpecial === "touch") {
-            gameState.inventory.push("💐 заветный букет");
-            showToast("💐 Букет пойман! Желание сбудется!");
-        } else if (choice.flowerSpecial === "fun") {
-            gameState.inventory.push("🎉 серпантин");
-        }
-        
-        if (choice.nextScene) gameState.chapter = choice.nextScene;
-        saveGame();
-        renderGame();
+    
+    function sleep() {
+      if (gameOver) return;
+      if (energy >= 95) {
+        addLog('Тимофей не хочет спать, он слишком бодр!');
+        return;
+      }
+      let msg = '😴 Тимофей поспал.';
+      modifyStats(-10, 35, -2, -1, msg);
     }
-
-    function saveGame() {
-        let save = {
-            harmony: gameState.harmony,
-            chapter: gameState.chapter,
-            flags: gameState.flags,
-            inventory: gameState.inventory,
-            achievements: achievements,
-            epilogueUnlocked: gameState.epilogueUnlocked,
-            weather: currentWeather.type
-        };
-        localStorage.setItem("weddingDeluxeSave", JSON.stringify(save));
+    
+    function study() {
+      if (gameOver) return;
+      if (energy < 10) {
+        addLog('Тимофей слишком устал учиться!');
+        return;
+      }
+      if (brain > 90) {
+        addLog('Мозг Тимофея переполнен знаниями (почти).');
+      }
+      let msg = '📚 Тимофей УЧИЛСЯ! +мозг, но он скучал.';
+      let stupidityChange = -5;
+      if (stupidity < 10) stupidityChange = 0;
+      modifyStats(-8, -18, 12, stupidityChange, msg);
     }
-
-    function loadGame() {
-        let saved = localStorage.getItem("weddingDeluxeSave");
-        if (!saved) return false;
-        try {
-            let data = JSON.parse(saved);
-            gameState.harmony = data.harmony ?? 50;
-            gameState.chapter = data.chapter ?? "prologue";
-            gameState.flags = data.flags || {};
-            gameState.inventory = data.inventory || ["💌 Приглашение", "🍾 Шампанское"];
-            achievements = data.achievements || [];
-            gameState.epilogueUnlocked = data.epilogueUnlocked || false;
-            if (data.weather) setWeather(data.weather);
-            else setWeather("sunny");
-            updateAchievementUI();
-            return true;
-        } catch(e) { return false; }
+    
+    function play() {
+      if (gameOver) return;
+      let msg = '⚽ Тимофей играет, счастлив, но немного тупеет.';
+      modifyStats(-12, -12, -3, 7, msg);
     }
-
+    
+    function doStupid() {
+      if (gameOver) return;
+      // Специальное действие: совершить глупость
+      let stupidityBoost = 12 + Math.floor(brain / 10); 
+      let msg = '🤡 Тимофей СОВЕРШИЛ НЕВЕРОЯТНУЮ ГЛУПОСТЬ!';
+      modifyStats(-5, -12, -8, stupidityBoost, msg);
+    }
+    
+    function scold() {
+      if (gameOver) return;
+      let msg = '😠 Тимофея отругали. Глупость уменьшилась, но он расстроен.';
+      modifyStats(-4, -10, 2, -9, msg);
+    }
+    
     function resetGame() {
-        gameState = {
-            harmony: 50,
-            chapter: "prologue",
-            flags: { ringSaved: false, danceHit: false, parentsBless: false, cakeSaved: false, speechEpic: false, megaSurprise: false, secretPath: false },
-            inventory: ["💌 Приглашение", "🍾 Шампанское"],
-            flowerGamePlayed: false,
-            epilogueUnlocked: false
-        };
-        achievements = [];
-        guests = {
-            "Мама Ильи": { mood: 70, emoji: "👩‍🍳", bonus: "пироги" },
-            "Папа Артёма": { mood: 68, emoji: "👨‍🦰", bonus: "тосты" },
-            "Свидетельница Алиса": { mood: 80, emoji: "💃", bonus: "конкурсы" },
-            "Свидетель Коля": { mood: 75, emoji: "🎸", bonus: "музыка" },
-            "Бабушка Зина": { mood: 85, emoji: "👵🎤", bonus: "частушки" },
-            "Кот Мурзик": { mood: 100, emoji: "🐱", bonus: "хаос" },
-            "Тётя Галя": { mood: 60, emoji: "👒", bonus: "комплименты" }
-        };
-        setWeather("sunny");
-        updateAchievementUI();
-        saveGame();
-        renderGame();
-        showToast("🌅 История началась заново! Вперёд к приключениям!");
+      hunger = 70;
+      energy = 60;
+      brain = 30;
+      stupidity = 0;
+      gameOver = false;
+      winStupidity = false;
+      addLog('🔄 Новый Тимофей! Он такой же глупый, но полон сил.');
+      updateUI();
     }
 
-    function init() {
-        let loaded = loadGame();
-        if (!loaded) setWeather("sunny");
-        renderGame();
+    // Пассивное уменьшение характеристик со временем (каждые 2.5 сек)
+    function passiveDecay() {
+      if (gameOver) return;
+      // голод и энергия медленно падают
+      hunger = clamp(hunger - 2.2, 0, 100);
+      energy = clamp(energy - 1.8, 0, 100);
+      
+      // если мозг маленький - глупость растет
+      if (brain < 30) stupidity = clamp(stupidity + 1.2, 0, 100);
+      else if (brain > 60) stupidity = clamp(stupidity - 0.6, 0, 100);
+      
+      // небольшой шанс случайной глупости
+      if (Math.random() < 0.2 && !gameOver) {
+        stupidity = clamp(stupidity + 1.5, 0, 100);
+      }
+      
+      checkGameOver();
+      updateUI();
+      
+      // Если не конец, иногда выводим пассивное сообщение (не засоряем сильно)
+      if (!gameOver && (Math.random() < 0.3)) {
+        if (hunger < 30) addLog('🍽️ Тимофей урчит животом...');
+        else if (energy < 25) addLog('😪 Тимофей клюёт носом.');
+        else if (stupidity > 75) addLog('🤪 Тимофей тупит сам по себе.');
+      }
     }
+
+    // Инициализация событий
+    function bindEvents() {
+      document.getElementById('feedBtn').addEventListener('click', feed);
+      document.getElementById('sleepBtn').addEventListener('click', sleep);
+      document.getElementById('studyBtn').addEventListener('click', study);
+      document.getElementById('playBtn').addEventListener('click', play);
+      document.getElementById('stupidBtn').addEventListener('click', doStupid);
+      document.getElementById('scoldBtn').addEventListener('click', scold);
+      document.getElementById('resetBtn').addEventListener('click', resetGame);
+    }
+
+    // Запуск
+    function init() {
+      bindEvents();
+      updateUI();
+      drawTimofey();
+      setInterval(passiveDecay, 2800); // ~ каждые 2.8 сек
+      // Анимация моргания? Просто перерисовка
+      setInterval(() => {
+        if (!gameOver) drawTimofey();
+        else drawTimofey();
+      }, 400);
+    }
+
     init();
+  })();
 </script>
 </body>
 </html>
