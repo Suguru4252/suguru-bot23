@@ -2,710 +2,598 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ГАЗАН 67 RUSH | ПОЛНЫЙ ЭКРАН + ГИГАНТСКИЕ КНОПКИ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Свадьба Ильи и Артёма | Полное издание</title>
     <style>
         * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000000;
-            overflow: hidden;
-            position: fixed;
-            font-family: 'Courier New', 'Press Start 2P', monospace;
-        }
-
-        /* Игра на ВЕСЬ экран без отступов и рамок */
-        .game-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #041212;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Канвас — адаптивный, без рамок, во всю ширину */
-        .canvas-area {
-            flex: 1;
+            background: linear-gradient(135deg, #140b06 0%, #3d261b 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            min-height: 0;
-            background: #000000;
-            padding: 0;
-            margin: 0;
+            font-family: 'Segoe UI', 'Quicksand', 'Georgia', serif;
+            padding: 20px;
         }
 
-        canvas {
-            display: block;
+        .game-wrapper {
+            max-width: 850px;
             width: 100%;
-            height: auto;
-            max-height: 65vh;
-            background: #1a1a2e;
-            border-radius: 0;
-            box-shadow: none;
-            aspect-ratio: 600 / 500;
+            background: #fffef5;
+            border-radius: 56px;
+            box-shadow: 0 35px 60px rgba(0,0,0,0.5), 0 0 0 3px #ffdaa5 inset;
+            overflow: hidden;
         }
 
-        /* Контейнер для ОГРОМНЫХ кнопок внизу */
-        .giant-controls {
-            width: 100%;
-            padding: 15px 20px 25px 20px;
-            background: linear-gradient(180deg, #000000aa 0%, #041212 100%);
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            backdrop-filter: blur(4px);
-            border-top: 2px solid #ffb34766;
-        }
-
-        /* ГИГАНТСКИЕ КНОПКИ — во всю ширину, удобные для пальцев */
-        .giant-btn {
-            flex: 1;
-            background: radial-gradient(circle at 30% 20%, #ffaa33, #cc6600);
-            border: none;
-            border-radius: 60px;
-            color: white;
-            font-size: 3rem;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            padding: 28px 0;
+        .header {
+            background: linear-gradient(145deg, #c13e36, #942820);
+            padding: 18px 24px;
+            color: #fff5e0;
             text-align: center;
-            cursor: pointer;
-            box-shadow: 0 12px 0 #7a2a0a;
-            transition: 0.03s linear;
-            letter-spacing: 4px;
-            text-shadow: 3px 3px 0 #6b2e00;
-            touch-action: manipulation;
-            backdrop-filter: blur(4px);
+            border-bottom: 5px solid #ffd27a;
         }
 
-        .giant-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 6px 0 #7a2a0a;
+        .header h1 {
+            font-size: 1.8rem;
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 1px;
         }
 
-        /* Левую кнопку сделаем чуть с акцентом */
-        .giant-btn-left {
-            background: radial-gradient(circle at 30% 20%, #ff8844, #bb4400);
+        .header h1 span {
+            background: #ffefb9;
+            color: #942820;
+            padding: 0 14px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 0 6px;
         }
 
-        .giant-btn-right {
-            background: radial-gradient(circle at 30% 20%, #ffaa44, #dd6600);
-        }
-
-        /* Панель счета поверх игры */
-        .ui-stats {
-            position: absolute;
-            top: 12px;
-            left: 0;
-            right: 0;
+        .stats-row {
             display: flex;
             justify-content: space-between;
-            padding: 0 15px;
-            pointer-events: none;
-            z-index: 20;
+            margin-top: 14px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .stat-card {
-            background: #000000aa;
-            backdrop-filter: blur(12px);
-            padding: 6px 14px;
-            border-radius: 40px;
+        .stat-badge {
+            background: rgba(255,235,200,0.25);
+            backdrop-filter: blur(6px);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
             font-weight: bold;
-            font-size: 0.9rem;
-            color: #ffefb0;
-            font-family: monospace;
-            border: 1px solid #ffaa55;
-            white-space: nowrap;
-            text-shadow: 0 0 3px #ff9900;
         }
 
-        .combo-stat {
-            background: #ff6600aa;
-            border-color: #ffdd88;
-        }
-
-        /* Кнопки действий (пауза, перезапуск) в углу — маленькие, не мешают */
-        .action-buttons {
-            position: absolute;
-            top: 12px;
-            right: 12px;
+        .story-pane {
+            padding: 26px;
+            min-height: 520px;
             display: flex;
-            gap: 10px;
-            z-index: 30;
-            pointer-events: auto;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .small-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 44px;
-            background: #000000bb;
-            backdrop-filter: blur(8px);
-            border: 1px solid #ffaa66;
-            color: #ffdd99;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.05s linear;
-        }
-
-        .small-icon:active { transform: scale(0.94); background: #000000dd; }
-
-        /* Сообщения при паузе и game over */
-        .status-overlay {
-            position: absolute;
-            top: 40%;
-            left: 0;
-            right: 0;
+        .scene-art {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 4.8rem;
+            background: #fff3e8;
+            border-radius: 55px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+
+        .story-text {
+            background: white;
+            border-radius: 36px;
+            padding: 24px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #352316;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            border: 1px solid #ffe2bd;
+        }
+
+        .guest-status {
+            background: #f9ede0;
+            border-radius: 50px;
+            padding: 12px 18px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .guest-chip {
+            background: white;
+            border-radius: 40px;
+            padding: 4px 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .inventory-box {
+            background: #e8d9cc;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-item {
+            background: #f3e5d8;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #4a2a1a;
+            border-left: 8px solid #e6a157;
+            font-family: inherit;
+        }
+
+        .choice-item:hover {
+            background: #fff0e2;
+            transform: translateX(6px);
+            border-left-color: #c2571a;
+        }
+
+        .reset-button {
+            background: #b17b58;
+            border: none;
+            padding: 12px;
+            border-radius: 44px;
             font-weight: bold;
-            color: #ffefb9;
-            background: #000000cc;
-            width: fit-content;
-            margin: 0 auto;
+            color: white;
+            cursor: pointer;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c1b12;
+            color: #ffddb0;
             padding: 12px 28px;
             border-radius: 60px;
-            backdrop-filter: blur(12px);
-            pointer-events: none;
-            z-index: 25;
-            white-space: nowrap;
-        }
-
-        .gameover-restart {
-            position: absolute;
-            bottom: 160px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            z-index: 30;
-            pointer-events: auto;
-        }
-
-        .big-restart {
-            background: #e25822;
-            border: none;
-            font-size: 1.5rem;
             font-weight: bold;
-            padding: 14px 32px;
-            border-radius: 60px;
-            color: white;
-            font-family: monospace;
-            cursor: pointer;
-            box-shadow: 0 7px 0 #7a2a0a;
-            transition: 0.05s linear;
+            z-index: 2000;
+            animation: toastPop 0.3s ease;
+            box-shadow: 0 5px 20px black;
+            font-size: 0.9rem;
         }
 
-        .big-restart:active { transform: translateY(4px); box-shadow: 0 3px 0 #7a2a0a; }
-
-        .hidden { display: none !important; }
-
-        /* Для узких экранов кнопки остаются огромными */
-        @media (max-width: 700px) {
-            .giant-btn { font-size: 2.4rem; padding: 22px 0; letter-spacing: 2px; }
-            .giant-controls { padding: 12px 16px 20px 16px; gap: 18px; }
-            canvas { max-height: 60vh; }
-            .stat-card { font-size: 0.75rem; padding: 4px 10px; }
-            .status-overlay { font-size: 1.1rem; top: 35%; }
-            .big-restart { font-size: 1.1rem; padding: 10px 24px; }
+        @keyframes toastPop {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px);}
+            to { opacity: 1; transform: translateX(-50%) translateY(0);}
         }
 
-        @media (max-width: 480px) {
-            .giant-btn { font-size: 1.8rem; padding: 18px 0; }
-            .small-icon { width: 38px; height: 38px; font-size: 1.1rem; }
+        .footer {
+            background: #f7e5d4;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #b87a55;
+        }
+
+        @media (max-width: 550px) {
+            .story-pane { padding: 18px; }
+            .story-text { font-size: 0.95rem; }
         }
     </style>
 </head>
 <body>
-<div class="game-fullscreen">
-    <!-- Канвас занимает всю доступную высоту, кнопки снизу -->
-    <div class="canvas-area">
-        <canvas id="gameCanvas" width="600" height="500"></canvas>
+<div class="game-wrapper" id="gameRoot">
+    <div class="header">
+        <h1>💒 <span>Илья</span> 🤵‍♂️❤️👰‍♂️ <span>Артём</span> 🏳️‍🌈</h1>
+        <div class="stats-row">
+            <div class="stat-badge">💗 Гармония: <strong id="harmonyValue">50</strong>%</div>
+            <div class="stat-badge">🎭 Глава: <strong id="chapterTitle">Пролог</strong></div>
+            <div class="stat-badge">🏅 Достижений: <strong id="achievCount">0</strong></div>
+            <div class="stat-badge">🌤️ Погода: <strong id="weatherIcon">☀️ Солнечно</strong></div>
+        </div>
     </div>
-    
-    <!-- ОГРОМНЫЕ кнопки управления -->
-    <div class="giant-controls">
-        <div class="giant-btn giant-btn-left" id="leftBtn">◀ ЛЕВО</div>
-        <div class="giant-btn giant-btn-right" id="rightBtn">ПРАВО ▶</div>
+    <div class="story-pane" id="storyArea"></div>
+    <div class="footer">
+        🎵 Музыка любви играет фоном | Каждый выбор меняет свадьбу, гостей и судьбу молодожёнов 🎵
     </div>
-    
-    <!-- Статистика поверх игры -->
-    <div class="ui-stats">
-        <div class="stat-card">🏆 <span id="scoreValue">0</span></div>
-        <div class="stat-card">🪙 <span id="coinValue">0</span></div>
-        <div class="stat-card combo-stat" id="comboDisplay">⚡ x1</div>
-        <div class="stat-card">⭐ <span id="bestValue">0</span></div>
-    </div>
-    
-    <!-- Маленькие иконки паузы и рестарта (не мешают) -->
-    <div class="action-buttons">
-        <div class="small-icon" id="pauseBtn">⏸️</div>
-        <div class="small-icon" id="forceRestartBtn">🔄</div>
-    </div>
-    
-    <!-- Кнопка перезапуска при Game Over -->
-    <div id="gameoverRestartBlock" class="gameover-restart hidden">
-        <button class="big-restart" id="gameoverRestartBtn">🔁 ЗАНОВО 🚀</button>
-    </div>
-    
-    <div id="statusMessage" class="status-overlay hidden">💥 ГАЗАН РАЗБИЛСЯ 💥</div>
-    <div id="pauseMessage" class="status-overlay hidden">⏸ ПАУЗА ⏸</div>
 </div>
 
 <script>
-    (function(){
-        // ----- КАНВАС 600x500 -----
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    // ~~~~~~~~~~~~~~ СВАДЬБА ИЛЬИ И АРТЁМА: РАСШИРЕННАЯ ВЕРСИЯ ~~~~~~~~~~~~~~
+    // --- ДОСТИЖЕНИЯ ---
+    let achievements = [];
+
+    const allAchievements = {
+        trueLove: "💯 Идеальный союз (100% гармонии)",
+        flowerCatch: "💐 Король букета (выиграли мини-игру)",
+        weatherWizard: "🌈 Повелитель погоды (устранили непогоду)",
+        guestLover: "👨‍👩‍👧‍👦 Душа компании (все гости в восторге)",
+        secretEnding: "🔮 Секретный финал (нашли тайный путь)",
+        memoryKeeper: "📸 Альбом воспоминаний (открыли эпилог)"
+    };
+
+    function addAchievement(id) {
+        if (!achievements.includes(id)) {
+            achievements.push(id);
+            showToast("🏆 ДОСТИЖЕНИЕ: " + allAchievements[id]);
+            updateAchievementUI();
+            saveGame();
+        }
+    }
+
+    function showToast(msg) {
+        let toast = document.createElement("div");
+        toast.className = "toast-message";
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+    }
+
+    function updateAchievementUI() {
+        document.getElementById("achievCount").innerText = achievements.length;
+    }
+
+    // --- Гости с динамической репутацией ---
+    let guests = {
+        "Мама Ильи": { mood: 70, emoji: "👩‍🍳", bonus: "пироги" },
+        "Папа Артёма": { mood: 68, emoji: "👨‍🦰", bonus: "тосты" },
+        "Свидетельница Алиса": { mood: 80, emoji: "💃", bonus: "конкурсы" },
+        "Свидетель Коля": { mood: 75, emoji: "🎸", bonus: "музыка" },
+        "Бабушка Зина": { mood: 85, emoji: "👵🎤", bonus: "частушки" },
+        "Кот Мурзик": { mood: 100, emoji: "🐱", bonus: "хаос" },
+        "Тётя Галя": { mood: 60, emoji: "👒", bonus: "комплименты" }
+    };
+
+    // --- Погодная система ---
+    let currentWeather = { type: "sunny", name: "☀️ Солнечно", effect: 0 };
+
+    const weathers = {
+        sunny: { name: "☀️ Солнечно", emoji: "☀️", effect: 2 },
+        rainy: { name: "🌧️ Дождливо", emoji: "🌧️", effect: -5 },
+        rainbow: { name: "🌈 Радуга", emoji: "🌈", effect: 10 },
+        windy: { name: "💨 Ветрено", emoji: "💨", effect: -2 }
+    };
+
+    function setWeather(type) {
+        if (weathers[type]) {
+            currentWeather = { type: type, name: weathers[type].name, effect: weathers[type].effect };
+            document.getElementById("weatherIcon").innerHTML = currentWeather.name;
+        }
+    }
+
+    // --- Игровое состояние ---
+    let gameState = {
+        harmony: 50,
+        chapter: "prologue",
+        flags: {
+            ringSaved: false,
+            danceHit: false,
+            parentsBless: false,
+            cakeSaved: false,
+            speechEpic: false,
+            megaSurprise: false,
+            secretPath: false
+        },
+        inventory: ["💌 Приглашение", "🍾 Шампанское"],
+        flowerGamePlayed: false,
+        epilogueUnlocked: false
+    };
+
+    // ~~~~~~~~~~~~~~ СЮЖЕТНЫЕ СЦЕНЫ (16+ уникальных) ~~~~~~~~~~~~~~
+    const scenes = {
+        prologue: {
+            title: "🌅 Начало легенды",
+            emoji: "🏳️‍🌈🌄",
+            text: "Илья и Артём готовятся к свадьбе уже три года. Сегодня тот самый день! Но с утра происходит череда событий: кот Мурзик украл галстуки, а тётя Галя принесла огромный пирог с сюрпризом. Что делать первым делом?",
+            choices: [
+                { text: "🐱 Догнать кота и спасти галстуки", nextScene: "catRescue", harmonyDelta: 5, flagSet: "ringSaved", flagVal: true },
+                { text: "🎁 Открыть пирог тёти Гали (может быть сюрприз)", nextScene: "pieSurprise", harmonyDelta: 3 },
+                { text: "📞 Позвонить Артёму и всё обсудить", nextScene: "callArtem", harmonyDelta: 2 }
+            ]
+        },
+        catRescue: {
+            title: "🐱 Погоня за Мурзиком",
+            emoji: "🐈💨",
+            text: "Кот устроил хаос, но галстуки спасены! В награду Мурзик принёс... старинную монету на счастье. Илья чувствует, что день начинается удачно. Артём смеётся и говорит, что это знак.",
+            choices: [
+                { text: "🍀 Положить монету в карман (удача +)", nextScene: "guestGathering", harmonyDelta: 7, flagSet: "ringSaved", flagVal: true },
+                { text: "💰 Отдать монету коту как игрушку", nextScene: "guestGathering", harmonyDelta: 2 }
+            ]
+        },
+        pieSurprise: {
+            title: "🥧 Секрет пирога",
+            emoji: "🥧✨",
+            text: "Внутри пирога — записка: «Желаю вам найти настоящую любовь. Она уже рядом». Тётя Галя растрогана. Гости начинают собираться с хорошим настроением.",
+            choices: [
+                { text: "📜 Прочитать записку вслух (трогательный момент)", nextScene: "guestGathering", harmonyDelta: 8 },
+                { text: "🤫 Сохранить как личный талисман", nextScene: "guestGathering", harmonyDelta: 4 }
+            ]
+        },
+        callArtem: {
+            title: "📱 Сердечный разговор",
+            emoji: "📞💕",
+            text: "Артём говорит: «Я так волнуюсь, но с тобой я спокоен». Внезапно на фоне слышен звук разбитой вазы. Оказывается, свидетель Коля уронил декорации. Надо выручать!",
+            choices: [
+                { text: "🎭 Помочь Коле с декорациями", nextScene: "guestGathering", harmonyDelta: 5 },
+                { text: "🎁 Послать курьера с цветами для Артёма", nextScene: "guestGathering", harmonyDelta: 6 }
+            ]
+        },
+        guestGathering: {
+            title: "👥 Гости в сборе!",
+            emoji: "🎉👪",
+            text: "Все гости прибыли. Мама Ильи печёт блины, папа Артёма репетирует тост, свидетельница Алиса предлагает конкурсы. Но погода начинает портиться... Вдруг капает дождь!",
+            choices: [
+                { text: "☂️ Организовать зонтики и продолжить веселье (творчески)", nextScene: "weatherEvent", harmonyDelta: 5 },
+                { text: "🏠 Перенести всё под шатёр", nextScene: "weatherEvent", harmonyDelta: 3 },
+                { text: "🎤 Устроить конкурс «Лучший тост» в помещении", nextScene: "weatherEvent", harmonyDelta: 4 }
+            ]
+        },
+        weatherEvent: {
+            title: "🌧️ Вызов стихии",
+            emoji: "⛈️☔",
+            text: "Начинается ливень! Гости огорчены. Но Илья и Артём не сдаются. Вдруг небо проясняется — появляется радуга! Это добрый знак. Нужно устроить что-то особенное!",
+            choices: [
+                { text: "🌈 Танцы под радугой (магический момент)", nextScene: "danceContest", harmonyDelta: 10, weatherSet: "rainbow", flagSet: "megaSurprise", flagVal: true, achievement: "weatherWizard" },
+                { text: "🎶 Позвать музыкантов сыграть весёлую песню", nextScene: "danceContest", harmonyDelta: 7, weatherSet: "rainbow" }
+            ]
+        },
+        danceContest: {
+            title: "💃 Танцевальный баттл",
+            emoji: "🕺💥💃",
+            text: "Илья и Артём показывают вальс, потом переходят на дикий тверк! Бабушка Зина выходит с частушками, свидетель Коля играет на гитаре. Гости в восторге!",
+            choices: [
+                { text: "🎸 Добавить рок-н-ролл (взрыв эмоций)", nextScene: "flowerGame", harmonyDelta: 12, flagSet: "danceHit", flagVal: true, achievement: "guestLover" },
+                { text: "💖 Закончить медленным танцем (очень романтично)", nextScene: "flowerGame", harmonyDelta: 9, flagSet: "danceHit", flagVal: true }
+            ]
+        },
+        flowerGame: {
+            title: "💐 Букет невесты — мини-игра!",
+            emoji: "💐🎲",
+            text: "Свидетельница Алиса предлагает кинуть букет! Но Илья и Артём хотят устроить челлендж: кто поймает букет — загадает желание. Выбери, как пройдёт игра!",
+            choices: [
+                { text: "🎯 Ловить букет с завязанными глазами (весело и хаотично)", nextScene: "speeches", harmonyDelta: 5, flowerSpecial: "chaos" },
+                { text: "🤹‍♂️ Устроить эстафету с букетом", nextScene: "speeches", harmonyDelta: 7, flowerSpecial: "fun" },
+                { text: "💝 Подарить букет бабушке Зине (трогательно)", nextScene: "speeches", harmonyDelta: 10, flowerSpecial: "touch", achievement: "flowerCatch" }
+            ]
+        },
+        speeches: {
+            title: "🎤 Клятвы и тосты",
+            emoji: "🍷📜",
+            text: "Папа Артёма говорит пронзительный тост, мама Ильи плачет. Теперь слово женихам! Их клятвы могут быть смешными или трогательными. Весь зал замирает.",
+            choices: [
+                { text: "❤️‍🔥 Пронзительная клятва в стихах (слёзы счастья)", nextScene: "cakeCalamity", harmonyDelta: 12, flagSet: "speechEpic", flagVal: true },
+                { text: "😂 Смешная клятва с обещанием мыть посуду", nextScene: "cakeCalamity", harmonyDelta: 7, flagSet: "speechEpic", flagVal: false },
+                { text: "🎭 Импровизация в стиле любимого фильма", nextScene: "cakeCalamity", harmonyDelta: 8 }
+            ]
+        },
+        cakeCalamity: {
+            title: "🍰 Торт в опасности!",
+            emoji: "🎂🐱",
+            text: "Вывозят огромный трёхъярусный торт! Но Мурзик уже целится в фигурки женихов. Нужно спасать десерт! Вдруг тётя Галя предлагает отвлечь кота сметаной.",
+            choices: [
+                { text: "🐟 Дать коту рыбку (успех, торт спасён!)", nextScene: "secretPathCheck", harmonyDelta: 10, flagSet: "cakeSaved", flagVal: true, achievement: "guestLover" },
+                { text: "🏃‍♂️ Быстро укатить торт на безопасное место", nextScene: "secretPathCheck", harmonyDelta: 6, flagSet: "cakeSaved", flagVal: true },
+                { text: "😱 Позвать всех на помощь (кот съел верхушку)", nextScene: "secretPathCheck", harmonyDelta: -3, flagSet: "cakeSaved", flagVal: false }
+            ]
+        },
+        secretPathCheck: {
+            title: "🔮 Тайная тропа",
+            emoji: "🗝️🌟",
+            text: "Илья вспоминает, что дедушка Артёма оставил старую карту. Если следовать ей, можно найти потайную комнату с сюрпризом. Но времени мало!",
+            choices: [
+                { text: "🗺️ Исследовать тайную комнату (секретный контент!)", nextScene: "secretEnding", harmonyDelta: 15, flagSet: "secretPath", flagVal: true, requiresFlag: null },
+                { text: "🎆 Остаться и готовить грандиозный финал", nextScene: "grandFinale", harmonyDelta: 8 }
+            ]
+        },
+        secretEnding: {
+            title: "💎 Секретная комната",
+            emoji: "✨🏆",
+            text: "В комнате они находят старые фото дедушки и его возлюбленного, письма и волшебный кристалл. Оказывается, дед тоже мечтал о большой любви. Илья и Артём клянутся хранить эту память. Гости потрясены историей!",
+            choices: [
+                { text: "💖 Поделиться историей со всеми (всеобщее умиление)", nextScene: "grandFinale", harmonyDelta: 20, flagSet: "megaSurprise", flagVal: true, achievement: "secretEnding" },
+                { text: "🤫 Сохранить тайну, но добавить кристалл в свадебный обряд", nextScene: "grandFinale", harmonyDelta: 15 }
+            ]
+        },
+        grandFinale: {
+            title: "🎆 Великий финал",
+            emoji: "🎇💒",
+            text: "", // динамический текст в рендере
+            choices: []
+        }
+    };
+
+    // Финальная логика с эпилогом
+    function getFinalContent() {
+        let harmony = Math.min(100, Math.max(0, gameState.harmony));
+        let finalText = "";
+        let finalEmoji = "🏆💖";
+
+        if (harmony >= 90 && gameState.flags.megaSurprise && gameState.flags.speechEpic) {
+            finalEmoji = "👑🌈💎";
+            finalText = "🌟✨ ЛЕГЕНДАРНАЯ СВАДЬБА ТЫСЯЧЕЛЕТИЯ ✨🌟 Илья и Артём создали праздник, который войдёт в историю! Фейерверк, радуга, тайная комната, идеальные клятвы — всё это переполняет сердца любовью. Гости рыдают от счастья, кот Мурзик получил отдельный торт. Эта история станет семейной легендой!";
+            addAchievement("trueLove");
+        } else if (harmony >= 70) {
+            finalEmoji = "🥂💕🎶";
+            finalText = "Прекрасная, душевная свадьба! Были и смех, и слёзы. Родители танцуют, друзья обнимаются. Илья с Артёмом кружатся в прощальном вальсе. День, когда любовь победила всё! ❤️‍🔥";
+        } else if (harmony >= 45) {
+            finalEmoji = "😊🍰🎉";
+            finalText = "Очень веселая и немного безумная свадьба! Кот украл галстук, торт чудом выжил, дождь превратился в радугу. Все довольны, молодожёны сияют. Главное — они вместе навсегда!";
+        } else {
+            finalEmoji = "🌀😂❤️";
+            finalText = "Свадьба вышла непредсказуемой: потеряли кольца, нашлись в торте, диджей уснул, но Илья и Артём сбежали на крышу и там пообещали друг другу любовь под звёздами. Романтичный хаос — их стиль!";
+        }
+
+        if (!gameState.epilogueUnlocked && harmony >= 60) {
+            finalText += "\n\n📸 ЭПИЛОГ: Через год Илья и Артём открывают свадебный альбом, смеются над приключениями и планируют годовщину. Кот Мурзик мирно спит на коленях. История продолжается! 📸";
+            gameState.epilogueUnlocked = true;
+            addAchievement("memoryKeeper");
+        }
+
+        finalText += `\n\n✨ Итоговая гармония: ${harmony}% | Достижений: ${achievements.length}/${Object.keys(allAchievements).length} ✨`;
+        if (gameState.flags.cakeSaved) finalText += "\n🍰 Торт уцелел!";
+        if (gameState.flags.danceHit) finalText += "\n💃 Танец покорил всех!";
         
-        // Константы
-        const LANE_COUNT = 3;
-        const LANE_WIDTH = 600 / LANE_COUNT;
-        const GROUND_Y = 430;
-        const GAZAN_SIZE = 48;
-        let lane = 1;
-        let playerY = GROUND_Y - GAZAN_SIZE + 6;
+        return { text: finalText, emoji: finalEmoji };
+    }
+
+    // --- ОСНОВНОЙ ЦИКЛ UI ---
+    function renderGame() {
+        if (gameState.chapter === "grandFinale") {
+            let finale = getFinalContent();
+            document.getElementById("harmonyValue").innerText = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
+            document.getElementById("chapterTitle").innerText = "Финал 💒";
+            let finalHtml = `
+                <div class="scene-art">${finale.emoji}</div>
+                <div class="story-text">${finale.text.replace(/\n/g, '<br>')}</div>
+                <button class="reset-button" id="resetGameBtnFinal">🌟 Начать историю заново 🌟</button>
+            `;
+            document.getElementById("storyArea").innerHTML = finalHtml;
+            document.getElementById("resetGameBtnFinal").addEventListener("click", resetGame);
+            return;
+        }
+
+        let scene = scenes[gameState.chapter];
+        if (!scene) { resetGame(); return; }
+
+        document.getElementById("harmonyValue").innerText = Math.min(100, Math.max(0, Math.floor(gameState.harmony)));
+        document.getElementById("chapterTitle").innerText = scene.title;
+
+        let choicesHtml = "";
+        for (let i = 0; i < scene.choices.length; i++) {
+            choicesHtml += `<button class="choice-item" data-choice-idx="${i}">${scene.choices[i].text}</button>`;
+        }
+
+        let guestsHtml = '<div class="guest-status">';
+        for (let [name, g] of Object.entries(guests)) {
+            let moodEmoji = g.mood > 75 ? "😄" : (g.mood > 50 ? "🙂" : "😐");
+            guestsHtml += `<span class="guest-chip">${g.emoji || "👤"} ${name} ${moodEmoji}</span>`;
+        }
+        guestsHtml += '</div>';
+
+        let invHtml = gameState.inventory.length ? `<div class="inventory-box">🎒 Инвентарь: ${gameState.inventory.join(" • ")}</div>` : "";
+
+        let fullHtml = `
+            <div class="scene-art">${scene.emoji}</div>
+            <div class="story-text"><strong>${scene.title}</strong><br><br>${scene.text}</div>
+            ${guestsHtml}
+            ${invHtml}
+            <div class="choices-list">${choicesHtml}</div>
+            <button class="reset-button" id="resetGameBtn">🔄 Переиграть свадьбу</button>
+        `;
+
+        document.getElementById("storyArea").innerHTML = fullHtml;
+
+        for (let i = 0; i < scene.choices.length; i++) {
+            let btn = document.querySelector(`.choice-item[data-choice-idx="${i}"]`);
+            if (btn) btn.addEventListener("click", () => applyChoice(scene.choices[i]));
+        }
+        let resetBtn = document.getElementById("resetGameBtn");
+        if (resetBtn) resetBtn.addEventListener("click", resetGame);
+    }
+
+    function applyChoice(choice) {
+        let newHarm = gameState.harmony + (choice.harmonyDelta || 0);
+        gameState.harmony = Math.min(100, Math.max(0, newHarm));
+        if (choice.flagSet) gameState.flags[choice.flagSet] = (choice.flagVal !== undefined) ? choice.flagVal : true;
+        if (choice.achievement) addAchievement(choice.achievement);
+        if (choice.weatherSet) setWeather(choice.weatherSet);
         
-        // Объекты
-        let obstacles = [];
-        let coins = [];
-        let particles = [];
-        const OBSTACLE_W = 52, OBSTACLE_H = 60;
-        const COIN_SIZE = 22;
-        
-        // Состояние
-        let gameRunning = true;
-        let paused = false;
-        let score = 0;
-        let coinScore = 0;
-        let bestScore = localStorage.getItem('gazanBest') ? parseInt(localStorage.getItem('gazanBest')) : 0;
-        let gameSpeed = 5;
-        let frameCounter = 0;
-        let spawnGap = 50;
-        
-        // Комбо
-        let combo = 1;
-        let lastCoinTime = 0;
-        
-        // Бонусы
-        let magnetActive = false;
-        let magnetTimer = 0;
-        let shieldActive = false;
-        let shieldTimer = 0;
-        
-        // Эффекты
-        let screenShake = 0;
-        let worldChangeFlag = false;
-        
-        // Миры
-        let currentWorld = 0;
-        let nextWorldScore = 600;
-        const WORLDS = [
-            { name: "ДЖУНГЛИ", sky1: "#0f2027", sky2: "#2c5364", rail: "#8b5a2b", track: "#5d3a1a", obs1: "#b87333", obs2: "#e09d32", glow: "#ffbc6e", platform: "#4a3b28" },
-            { name: "КИБЕРПАНК", sky1: "#1a0033", sky2: "#4a1d6d", rail: "#ff44cc", track: "#aa22aa", obs1: "#ff2266", obs2: "#ffaa44", glow: "#ff66ff", platform: "#331155" },
-            { name: "ЗАКАТ", sky1: "#c94b1f", sky2: "#ffb347", rail: "#b87c4f", track: "#9c5e2c", obs1: "#cd7a32", obs2: "#e6a865", glow: "#ffe6b3", platform: "#bc6f3a" },
-            { name: "ЛЁД", sky1: "#b3e5fc", sky2: "#e1f5fe", rail: "#4fc3f7", track: "#0288d1", obs1: "#81d4fa", obs2: "#ffffff", glow: "#e0f7fa", platform: "#a6c9e0" }
-        ];
-        
-        function getPalette() { return WORLDS[currentWorld]; }
-        
-        function changeWorld() {
-            let newWorld = currentWorld;
-            while(newWorld === currentWorld && WORLDS.length > 1) newWorld = Math.floor(Math.random() * WORLDS.length);
-            currentWorld = newWorld;
-            nextWorldScore = Math.floor(score) + 450 + Math.random() * 600;
-            worldChangeFlag = true;
-            setTimeout(() => worldChangeFlag = false, 500);
-            for(let i=0;i<30;i++) addParticle(300, 250, (Math.random()-0.5)*5, (Math.random()-0.5)*3, "#ffaa44", 0.7);
+        // эффект мини-игры с букетом
+        if (choice.flowerSpecial === "touch") {
+            gameState.inventory.push("💐 заветный букет");
+            showToast("💐 Букет пойман! Желание сбудется!");
+        } else if (choice.flowerSpecial === "fun") {
+            gameState.inventory.push("🎉 серпантин");
         }
         
-        function addParticle(x, y, vx, vy, color, life) {
-            particles.push({ x, y, vx: vx || (Math.random() - 0.5)*3, vy: vy || (Math.random() - 0.5)*3 - 2, color: color || "#FFD700", life: life || 0.6, size: 4 });
-        }
-        
-        function spawnObstacle() {
-            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
-            obstacles.push({
-                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - OBSTACLE_W/2),
-                lane: laneIdx,
-                y: -OBSTACLE_H,
-                w: OBSTACLE_W,
-                h: OBSTACLE_H
-            });
-        }
-        
-        function spawnCoin() {
-            let laneIdx = Math.floor(Math.random() * LANE_COUNT);
-            coins.push({
-                x: laneIdx * LANE_WIDTH + (LANE_WIDTH/2 - COIN_SIZE/2),
-                lane: laneIdx,
-                y: -COIN_SIZE,
-                w: COIN_SIZE,
-                h: COIN_SIZE
-            });
-        }
-        
-        function updateGame() {
-            if(!gameRunning || paused) return;
-            
-            // Движение
-            for(let o of obstacles) o.y += gameSpeed;
-            for(let c of coins) c.y += gameSpeed;
-            obstacles = obstacles.filter(o => o.y < 600);
-            coins = coins.filter(c => c.y < 600);
-            
-            // Частицы
-            for(let i=0;i<particles.length;i++) {
-                particles[i].x += particles[i].vx;
-                particles[i].y += particles[i].vy;
-                particles[i].life -= 0.02;
-                particles[i].vy += 0.2;
-            }
-            particles = particles.filter(p => p.life > 0);
-            
-            // Спавн
-            let dynSpawn = Math.max(30, spawnGap - Math.floor(score / 400));
-            if(frameCounter >= dynSpawn) {
-                spawnObstacle();
-                if(Math.random() < 0.7) spawnCoin();
-                frameCounter = 0;
-            } else frameCounter++;
-            
-            gameSpeed = Math.min(5 + Math.floor(score / 550), 13.5);
-            
-            // Таймеры бонусов
-            if(magnetActive) { magnetTimer--; if(magnetTimer <= 0) magnetActive = false; }
-            if(shieldActive) { shieldTimer--; if(shieldTimer <= 0) shieldActive = false; }
-            
-            const playerX = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
-            const playerRect = { x: playerX, y: playerY, w: GAZAN_SIZE, h: GAZAN_SIZE };
-            
-            // Столкновения с препятствиями
-            for(let i=0;i<obstacles.length;i++) {
-                const obs = obstacles[i];
-                if(playerRect.x < obs.x + obs.w && playerRect.x + playerRect.w > obs.x &&
-                   playerRect.y < obs.y + obs.h && playerRect.y + playerRect.h > obs.y) {
-                    if(shieldActive) {
-                        shieldActive = false;
-                        obstacles.splice(i,1);
-                        addParticle(playerX+GAZAN_SIZE/2, playerY+GAZAN_SIZE/2, 0, -2, "#88aaff", 0.4);
-                        screenShake = 5;
-                        i--;
-                    } else {
-                        gameRunning = false;
-                        document.getElementById('statusMessage').classList.remove('hidden');
-                        document.getElementById('gameoverRestartBlock').classList.remove('hidden');
-                        return;
-                    }
-                }
-            }
-            
-            // Сбор монет + комбо
-            let collectedAny = false;
-            for(let i=0;i<coins.length;i++) {
-                const coin = coins[i];
-                const coinRect = { x: coin.x, y: coin.y, w: COIN_SIZE, h: COIN_SIZE };
-                let collected = false;
-                if(playerRect.x < coinRect.x + coinRect.w && playerRect.x + playerRect.w > coinRect.x &&
-                   playerRect.y < coinRect.y + coinRect.h && playerRect.y + playerRect.h > coinRect.y) {
-                    collected = true;
-                }
-                // Магнит
-                if(!collected && magnetActive) {
-                    const centerX = playerRect.x + GAZAN_SIZE/2;
-                    const centerY = playerRect.y + GAZAN_SIZE/2;
-                    const coinCenterX = coin.x + COIN_SIZE/2;
-                    const coinCenterY = coin.y + COIN_SIZE/2;
-                    const dx = centerX - coinCenterX;
-                    const dy = centerY - coinCenterY;
-                    const dist = Math.hypot(dx, dy);
-                    if(dist < 110) {
-                        coin.x += dx * 0.15;
-                        coin.y += dy * 0.15;
-                        if(dist < 18) collected = true;
-                    }
-                }
-                if(collected) {
-                    collectedAny = true;
-                    coins.splice(i,1);
-                    i--;
-                    coinScore++;
-                    const now = Date.now();
-                    if(now - lastCoinTime < 800) combo = Math.min(combo + 1, 6);
-                    else combo = 1;
-                    lastCoinTime = now;
-                    let addScore = 5 * combo;
-                    score += addScore;
-                    for(let p=0;p<6;p++) addParticle(coin.x+COIN_SIZE/2, coin.y+COIN_SIZE/2, (Math.random()-0.5)*4, -2-Math.random()*3, "#ffcc44", 0.5);
-                    screenShake = 3;
-                }
-            }
-            if(!collectedAny && Date.now() - lastCoinTime > 1000) combo = Math.max(1, combo-0.5);
-            combo = Math.floor(combo);
-            
-            score += 0.2;
-            if(Math.floor(score) > bestScore) { bestScore = Math.floor(score); localStorage.setItem('gazanBest', bestScore); }
-            if(score >= nextWorldScore) changeWorld();
-            
-            // UI
-            document.getElementById('scoreValue').innerText = Math.floor(score);
-            document.getElementById('coinValue').innerText = coinScore;
-            document.getElementById('bestValue').innerText = bestScore;
-            const comboElem = document.getElementById('comboDisplay');
-            if(combo > 1) comboElem.innerHTML = `⚡ x${combo}`;
-            else comboElem.innerHTML = `⚡ x1`;
-            
-            if(screenShake > 0) screenShake -= 0.8;
-        }
-        
-        // Отрисовка с тряской
-        let shakeOffsetX = 0, shakeOffsetY = 0;
-        function drawWithShake() {
-            if(screenShake > 0) {
-                shakeOffsetX = (Math.random() - 0.5) * screenShake;
-                shakeOffsetY = (Math.random() - 0.5) * screenShake;
-            } else { shakeOffsetX = 0; shakeOffsetY = 0; }
-            ctx.save();
-            ctx.translate(shakeOffsetX, shakeOffsetY);
-            drawGame();
-            ctx.restore();
-        }
-        
-        function drawGame() {
-            const p = getPalette();
-            const grad = ctx.createLinearGradient(0,0,0,GROUND_Y-40);
-            grad.addColorStop(0, p.sky1); grad.addColorStop(0.8, p.sky2);
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,600,GROUND_Y-20);
-            ctx.font = "bold 18px monospace";
-            ctx.fillStyle = p.glow;
-            ctx.fillText("⚡ GAZAN 67", 20, 50);
-            ctx.font = "10px monospace";
-            ctx.fillStyle = "#ffefb0";
-            ctx.fillText(p.name, 20, 75);
-            
-            ctx.fillStyle = p.platform;
-            ctx.fillRect(0, GROUND_Y-12, 600, 20);
-            for(let i=0;i<4;i++) {
-                ctx.fillStyle = p.rail;
-                ctx.fillRect(i*LANE_WIDTH-5, GROUND_Y-18, 10, 28);
-            }
-            ctx.fillStyle = p.track;
-            for(let i=0;i<12;i++) ctx.fillRect(i*70, GROUND_Y-5, 45, 8);
-            
-            // Монеты
-            for(let c of coins) {
-                ctx.shadowBlur = 6;
-                ctx.shadowColor = "#ffaa33";
-                ctx.fillStyle = "#FFD966";
-                ctx.beginPath();
-                ctx.ellipse(c.x+COIN_SIZE/2, c.y+COIN_SIZE/2, COIN_SIZE/2, COIN_SIZE/2, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#F4A261";
-                ctx.beginPath();
-                ctx.ellipse(c.x+COIN_SIZE/2, c.y+COIN_SIZE/2, COIN_SIZE/3, COIN_SIZE/3, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#FFF0A0";
-                ctx.font = `${Math.floor(COIN_SIZE*0.7)}px monospace`;
-                ctx.fillText("🪙", c.x+3, c.y+COIN_SIZE-5);
-            }
-            
-            // Препятствия
-            for(let o of obstacles) {
-                ctx.fillStyle = p.obs1;
-                ctx.shadowBlur = 3;
-                ctx.fillRect(o.x, o.y, OBSTACLE_W, OBSTACLE_H);
-                ctx.fillStyle = p.obs2;
-                ctx.fillRect(o.x+5, o.y+8, OBSTACLE_W-10, 12);
-                ctx.fillStyle = "#111";
-                ctx.fillRect(o.x+8, o.y+28, 10, 16);
-                ctx.fillRect(o.x+OBSTACLE_W-18, o.y+28, 10, 16);
-                ctx.font = "bold 20px monospace";
-                ctx.fillStyle = "#ffffaa";
-                ctx.fillText("67", o.x+12, o.y+48);
-                ctx.fillStyle = "#ffaa55";
-                ctx.font = "bold 14px monospace";
-                ctx.fillText("💀", o.x+OBSTACLE_W-16, o.y+24);
-            }
-            
-            // ГАЗАН
-            const px = lane * LANE_WIDTH + (LANE_WIDTH/2 - GAZAN_SIZE/2);
-            ctx.shadowBlur = 6;
-            ctx.fillStyle = "#f5a623";
-            ctx.beginPath();
-            ctx.roundRect(px, playerY, GAZAN_SIZE, GAZAN_SIZE, 12);
-            ctx.fill();
-            ctx.fillStyle = "#3b2a1f";
-            ctx.beginPath();
-            ctx.arc(px+GAZAN_SIZE*0.7, playerY+GAZAN_SIZE*0.35, 7, 0, Math.PI*2);
-            ctx.arc(px+GAZAN_SIZE*0.3, playerY+GAZAN_SIZE*0.35, 7, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(px+GAZAN_SIZE*0.65, playerY+GAZAN_SIZE*0.32, 2.5, 0, Math.PI*2);
-            ctx.arc(px+GAZAN_SIZE*0.25, playerY+GAZAN_SIZE*0.32, 2.5, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffd966";
-            ctx.fillRect(px+15, playerY+42, 20, 5);
-            ctx.fillStyle = "#dc143c";
-            ctx.fillRect(px+8, playerY-8, 34, 12);
-            ctx.font = "bold 11px monospace";
-            ctx.fillStyle = "#fff3b0";
-            ctx.fillText("GAZAN", px+8, playerY+GAZAN_SIZE-8);
-            if(shieldActive) {
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.arc(px+GAZAN_SIZE/2, playerY+GAZAN_SIZE/2, GAZAN_SIZE/1.6, 0, Math.PI*2);
-                ctx.fillStyle = "#88ccff";
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
-            if(magnetActive) {
-                ctx.beginPath();
-                ctx.arc(px+GAZAN_SIZE/2, playerY+GAZAN_SIZE/2, GAZAN_SIZE/1.3, 0, Math.PI*2);
-                ctx.fillStyle = "#ffaa44aa";
-                ctx.fill();
-            }
-            
-            for(let p of particles) {
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            ctx.font = "bold 14px monospace";
-            ctx.fillStyle = "#fff9cf";
-            ctx.fillText(`SPEED: ${Math.floor(gameSpeed*1.8)}`, 480, 35);
-            if(magnetActive) ctx.fillText("🧲", 480, 58);
-            if(shieldActive) ctx.fillText("🛡️", 480, 75);
-            if(worldChangeFlag) {
-                ctx.font = "bold 16px monospace";
-                ctx.fillStyle = "#ffdd99";
-                ctx.fillText(`✨ ${WORLDS[currentWorld].name} ✨`, 600/2-70, GROUND_Y-35);
-            }
-            if(!gameRunning) {
-                ctx.font = "bold 26px monospace";
-                ctx.fillStyle = "#ffbb88";
-                ctx.fillText("GAME OVER", 600/2-95, 250);
-            }
-            ctx.shadowBlur = 0;
-        }
-        
-        // Управление
-        function moveLeft() { if(gameRunning && !paused && lane > 0) lane--; }
-        function moveRight() { if(gameRunning && !paused && lane < LANE_COUNT-1) lane++; }
-        
-        function restartGame() {
-            gameRunning = true;
-            paused = false;
-            document.getElementById('pauseMessage').classList.add('hidden');
-            document.getElementById('statusMessage').classList.add('hidden');
-            document.getElementById('gameoverRestartBlock').classList.add('hidden');
-            score = 0;
-            coinScore = 0;
-            combo = 1;
-            gameSpeed = 5;
-            obstacles = [];
-            coins = [];
-            particles = [];
-            lane = 1;
-            frameCounter = 0;
-            magnetActive = false;
-            shieldActive = false;
-            currentWorld = Math.floor(Math.random() * WORLDS.length);
-            nextWorldScore = 500 + Math.random() * 700;
-            worldChangeFlag = false;
-            lastCoinTime = 0;
-            document.getElementById('scoreValue').innerText = "0";
-            document.getElementById('coinValue').innerText = "0";
-            document.getElementById('bestValue').innerText = bestScore;
-        }
-        
-        function togglePause() {
-            if(!gameRunning) return;
-            paused = !paused;
-            const msg = document.getElementById('pauseMessage');
-            if(paused) msg.classList.remove('hidden');
-            else msg.classList.add('hidden');
-        }
-        
-        // Авто-бонусы
-        function activateMagnet() { magnetActive = true; magnetTimer = 300; }
-        function activateShield() { shieldActive = true; shieldTimer = 400; }
-        
-        // Свайпы на канвасе (доп. управление)
-        let touchStartX = 0;
-        function onTouchStart(e) { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const tx = (e.touches[0].clientX - rect.left)*scale; touchStartX = tx; }
-        function onTouchMove(e) { if(!gameRunning || paused) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const curX = (e.touches[0].clientX - rect.left)*scale; if(Math.abs(curX - touchStartX) > 30) { if(curX > touchStartX) moveRight(); else moveLeft(); touchStartX = curX; } }
-        
-        let mouseDown = false, mouseStartX=0;
-        function onMouseDown(e) { e.preventDefault(); mouseDown=true; const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; mouseStartX = (e.clientX - rect.left)*scale; }
-        function onMouseMove(e) { if(!mouseDown || !gameRunning || paused) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scale = canvas.width/rect.width; const curX = (e.clientX - rect.left)*scale; if(Math.abs(curX - mouseStartX) > 30) { if(curX > mouseStartX) moveRight(); else moveLeft(); mouseStartX = curX; } }
-        function onMouseUp() { mouseDown=false; }
-        
-        window.addEventListener('load', () => {
-            document.getElementById('leftBtn').onclick = (e) => { e.preventDefault(); moveLeft(); };
-            document.getElementById('rightBtn').onclick = (e) => { e.preventDefault(); moveRight(); };
-            document.getElementById('forceRestartBtn').onclick = () => restartGame();
-            document.getElementById('gameoverRestartBtn').onclick = () => restartGame();
-            document.getElementById('pauseBtn').onclick = () => togglePause();
-            
-            canvas.addEventListener('touchstart', onTouchStart, {passive:false});
-            canvas.addEventListener('touchmove', onTouchMove, {passive:false});
-            canvas.addEventListener('touchend', (e)=>e.preventDefault());
-            canvas.addEventListener('mousedown', onMouseDown);
-            canvas.addEventListener('mousemove', onMouseMove);
-            canvas.addEventListener('mouseup', onMouseUp);
-            canvas.addEventListener('contextmenu', (e)=>e.preventDefault());
-            
-            restartGame();
-            setInterval(() => {
-                if(gameRunning && !paused && Math.random() < 0.008 && !magnetActive && !shieldActive) {
-                    if(Math.random()<0.5) activateMagnet();
-                    else activateShield();
-                }
-            }, 8000);
-            
-            function loop() {
-                updateGame();
-                drawWithShake();
-                requestAnimationFrame(loop);
-            }
-            loop();
-        });
-        
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
-                if(w<2*r) r=w/2; if(h<2*r) r=h/2;
-                this.moveTo(x+r,y); this.lineTo(x+w-r,y); this.quadraticCurveTo(x+w,y,x+w,y+r);
-                this.lineTo(x+w,y+h-r); this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-                this.lineTo(x+r,y+h); this.quadraticCurveTo(x,y+h,x,y+h-r);
-                this.lineTo(x,y+r); this.quadraticCurveTo(x,y,x+r,y);
-                return this;
-            };
-        }
-    })();
+        if (choice.nextScene) gameState.chapter = choice.nextScene;
+        saveGame();
+        renderGame();
+    }
+
+    function saveGame() {
+        let save = {
+            harmony: gameState.harmony,
+            chapter: gameState.chapter,
+            flags: gameState.flags,
+            inventory: gameState.inventory,
+            achievements: achievements,
+            epilogueUnlocked: gameState.epilogueUnlocked,
+            weather: currentWeather.type
+        };
+        localStorage.setItem("weddingDeluxeSave", JSON.stringify(save));
+    }
+
+    function loadGame() {
+        let saved = localStorage.getItem("weddingDeluxeSave");
+        if (!saved) return false;
+        try {
+            let data = JSON.parse(saved);
+            gameState.harmony = data.harmony ?? 50;
+            gameState.chapter = data.chapter ?? "prologue";
+            gameState.flags = data.flags || {};
+            gameState.inventory = data.inventory || ["💌 Приглашение", "🍾 Шампанское"];
+            achievements = data.achievements || [];
+            gameState.epilogueUnlocked = data.epilogueUnlocked || false;
+            if (data.weather) setWeather(data.weather);
+            else setWeather("sunny");
+            updateAchievementUI();
+            return true;
+        } catch(e) { return false; }
+    }
+
+    function resetGame() {
+        gameState = {
+            harmony: 50,
+            chapter: "prologue",
+            flags: { ringSaved: false, danceHit: false, parentsBless: false, cakeSaved: false, speechEpic: false, megaSurprise: false, secretPath: false },
+            inventory: ["💌 Приглашение", "🍾 Шампанское"],
+            flowerGamePlayed: false,
+            epilogueUnlocked: false
+        };
+        achievements = [];
+        guests = {
+            "Мама Ильи": { mood: 70, emoji: "👩‍🍳", bonus: "пироги" },
+            "Папа Артёма": { mood: 68, emoji: "👨‍🦰", bonus: "тосты" },
+            "Свидетельница Алиса": { mood: 80, emoji: "💃", bonus: "конкурсы" },
+            "Свидетель Коля": { mood: 75, emoji: "🎸", bonus: "музыка" },
+            "Бабушка Зина": { mood: 85, emoji: "👵🎤", bonus: "частушки" },
+            "Кот Мурзик": { mood: 100, emoji: "🐱", bonus: "хаос" },
+            "Тётя Галя": { mood: 60, emoji: "👒", bonus: "комплименты" }
+        };
+        setWeather("sunny");
+        updateAchievementUI();
+        saveGame();
+        renderGame();
+        showToast("🌅 История началась заново! Вперёд к приключениям!");
+    }
+
+    function init() {
+        let loaded = loadGame();
+        if (!loaded) setWeather("sunny");
+        renderGame();
+    }
+    init();
 </script>
 </body>
 </html>
