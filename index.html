@@ -3,622 +3,854 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥚 СУСЛОВ: Полный Фарш</title>
+    <title>NetErrror - Взрослый чат 18+</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
             user-select: none;
         }
+
         body {
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f1f 100%);
+            color: #fff;
             min-height: 100vh;
-            background: linear-gradient(145deg, #1a3a2e 0%, #2d5a4a 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
-            padding: 12px;
+            padding: 20px;
         }
-        .game-container {
-            max-width: 520px;
-            width: 100%;
-            background: #efe6d5;
-            background-image: radial-gradient(circle at 20% 30%, #fff6e8, #e7d8be);
-            border-radius: 48px 48px 40px 40px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 8px rgba(255,255,240,0.8);
-            padding: 20px 18px 28px;
-            border: 4px solid #b49a7b;
+
+        /* Контейнеры */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 0, 100, 0.3);
+            border: 1px solid rgba(255, 50, 150, 0.3);
+        }
+
+        /* Шапка */
+        .header {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ff0066;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 0, 100, 0.5);
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Навигация */
+        .nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
             text-align: center;
         }
-        h1 {
-            margin: 0 0 4px;
-            font-size: 2.4rem;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #3d2a1b;
-            text-shadow: 3px 3px 0 #c9aa7b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+
+        .nav-btn:hover {
+            background: rgba(255, 0, 100, 0.5);
+            transform: scale(1.02);
         }
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 8px 0 5px;
-            flex-wrap: wrap;
-            gap: 5px;
+
+        .nav-btn.active {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            box-shadow: 0 0 15px rgba(255, 0, 100, 0.5);
         }
-        .prestige-badge, .spent-badge, .combo-badge {
-            background: #6a4e2e;
-            color: #ffd966;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1rem;
-            border: 2px solid #eebb55;
-            box-shadow: inset 0 1px 3px #3d2e1c, 0 3px 0 #3a281a;
+
+        /* Контент */
+        .content {
+            padding: 20px;
+            min-height: 500px;
         }
-        .combo-badge {
-            background: #7a3e2e;
-            border-color: #ff9966;
-            color: #ffe0b3;
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
         }
-        .suslov-area {
-            background: #b18b62;
-            background: linear-gradient(135deg, #ccb094, #a5835e);
-            border-radius: 100px 100px 50px 50px;
-            padding: 15px 8px 10px;
-            margin: 8px 0 15px;
-            border: 5px solid #5e3e28;
-            box-shadow: inset 0 -8px 0 #3f2c1c, inset 0 5px 8px #fbe9c3, 0 10px 0 #3f2c1c;
+
+        .page.active-page {
+            display: block;
         }
-        .suslov-emoji {
-            font-size: 120px;
-            line-height: 1;
-            filter: drop-shadow(6px 12px 4px rgba(0,0,0,0.2));
-            transition: transform 0.1s ease;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Кнопки персонажей */
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .char-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
             cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .belly-bar-container {
-            background: #2c1e12;
-            padding: 6px 10px;
-            border-radius: 40px;
-            border: 3px solid #b49a7b;
-            box-shadow: inset 0 3px 5px #0f0a06, 0 5px 0 #3f2c1c;
-            margin: 8px 4px 4px;
+
+        .char-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 0, 100, 0.2);
+            border-color: #ff0066;
         }
-        .belly-label {
-            display: flex;
-            justify-content: space-between;
-            color: #ffecb3;
+
+        .char-card.selected {
+            background: linear-gradient(135deg, #ff0066, #ff3300);
+            box-shadow: 0 0 20px rgba(255, 0, 100, 0.5);
+        }
+
+        .char-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .char-name {
+            font-size: 18px;
             font-weight: bold;
-            text-shadow: 2px 2px 0 #1f140c;
-            padding: 0 6px 3px;
-            font-size: 0.95rem;
         }
-        .belly-bar-bg {
-            height: 26px;
-            background: #1e130c;
-            border-radius: 30px;
-            border: 2px solid #6b4f37;
+
+        .char-desc {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Чат */
+        .chat-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
             overflow: hidden;
         }
-        .belly-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #fcb045, #fd7e14, #ff512f);
-            box-shadow: 0 0 10px #ffb347;
-            border-radius: 30px;
-            transition: width 0.2s ease;
-        }
-        .stats-panel {
+
+        .chat-rooms {
             display: flex;
-            justify-content: space-between;
-            background: #251e16d9;
-            padding: 10px 15px;
-            border-radius: 40px;
-            margin: 12px 0 16px;
-            color: #f7e7cf;
-            border: 2px solid #ab8e6f;
-            box-shadow: inset 0 0 0 2px #51412e, 0 6px 0 #2b1e13;
-            font-weight: bold;
+            gap: 5px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
         }
-        .money-block, .food-block {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 1.5rem;
-            background: #0c0907;
-            padding: 4px 18px;
-            border-radius: 30px;
-            box-shadow: inset 0 2px 4px black, 0 3px 0 #4d3926;
-            color: #ffd966;
-        }
-        .shop {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-        .food-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #dccdb6;
-            padding: 6px 14px 6px 18px;
-            border-radius: 60px;
-            border: 3px solid #6e543c;
-            box-shadow: inset 0 1px 5px #fff3df, 0 5px 0 #5a4530;
-            font-weight: bold;
-        }
-        .food-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-        }
-        .food-desc {
-            font-size: 1rem;
-            color: #302010;
-        }
-        button {
-            background: #f3d37c;
-            border: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 10px 18px;
-            border-radius: 40px;
-            box-shadow: 0 4px 0 #a05f2c, 0 2px 8px rgba(0,0,0,0.2);
-            border: 2px solid #ffeab0;
-            color: #2c1c0c;
-            cursor: pointer;
-            transition: all 0.04s linear;
-        }
-        button:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #7b451b, 0 2px 6px black;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin: 12px 0;
-        }
-        #feedBtn {
-            background: #f5b342;
-            font-size: 1.6rem;
-            padding: 12px;
-            flex: 2;
-        }
-        #autoFeedBtn {
-            background: #6a8e7c;
-            box-shadow: 0 4px 0 #3a5a4a;
-            border-color: #a0c0b0;
-            color: #0f1f0a;
-            font-size: 1rem;
+
+        .room-btn {
             flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
         }
-        #autoFeedBtn.active {
-            background: #8bc34a;
-            box-shadow: 0 2px 0 #558b2f;
-            transform: translateY(2px);
+
+        .room-btn.active-room {
+            background: #ff0066;
         }
-        .sell-area {
-            margin-top: 15px;
+
+        .chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
         }
-        #sellFatBtn {
-            background: #c9a87c;
-            box-shadow: 0 4px 0 #7a5d3e;
-            border-color: #ebd5b0;
-            color: #1f140a;
-            font-size: 1.3rem;
-            padding: 14px 20px;
-            width: 100%;
+
+        .message {
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            animation: fadeIn 0.2s;
         }
-        .achievement-popup {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: gold;
-            color: #2c1c0c;
-            padding: 12px 24px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 8px 0 #b8860b, 0 10px 20px black;
-            z-index: 1000;
-            animation: slideDown 0.4s ease;
+
+        .message.system {
+            background: rgba(255, 100, 0, 0.2);
+            text-align: center;
+            font-style: italic;
+            font-size: 12px;
         }
-        @keyframes slideDown {
-            from { top: -60px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
+
+        .message-header {
+            font-size: 11px;
+            color: #ff6699;
+            margin-bottom: 5px;
         }
-        .crit-effect {
-            color: #ffd700 !important;
-            text-shadow: 0 0 10px #ffaa00;
+
+        .message-text {
+            font-size: 14px;
+            word-wrap: break-word;
         }
-        .footer-note {
-            color: #594d3c;
-            margin-top: 12px;
-            font-size: 0.8rem;
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            color: white;
+            outline: none;
+        }
+
+        .chat-send {
+            background: #ff0066;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        /* Секс-игра */
+        .sex-area {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .arousal-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .arousal-fill {
+            background: linear-gradient(90deg, #ff0066, #ff3300);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .sex-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #ff0066;
+            transform: scale(1.05);
+        }
+
+        .sex-response {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            min-height: 100px;
+            border-left: 3px solid #ff0066;
+        }
+
+        /* Другое */
+        button {
+            font-family: inherit;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 11px;
+            opacity: 0.5;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0066;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .char-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameContainer">
-    <h1>
-        <span>🐹</span> СУСЛОВ <span>🐹</span>
-    </h1>
+<div class="container">
+    <div class="header">
+        <h1>🔞 NetErrror 18+</h1>
+        <p>Мир без запретов | Анонимный чат | Виртуальный секс</p>
+    </div>
+
+    <div class="nav">
+        <button class="nav-btn" data-page="home">🏠 Главная</button>
+        <button class="nav-btn" data-page="sex">🎮 Вирт секс</button>
+        <button class="nav-btn" data-page="chat">💬 Онлайн чат</button>
+        <button class="nav-btn" data-page="profile">👤 Профиль</button>
+    </div>
+
+    <div class="content">
+        <!-- ГЛАВНАЯ СТРАНИЦА -->
+        <div id="home" class="page">
+            <h2>🔥 Добро пожаловать в разврат!</h2>
+            <p style="margin: 15px 0; opacity: 0.8;">Выбери персонажа и начни играть. Всё анонимно, без ограничений.</p>
+            
+            <div class="char-grid" id="charGrid">
+                <div class="char-card" data-char="girl">
+                    <div class="char-emoji">💋</div>
+                    <div class="char-name">Развратная девушка</div>
+                    <div class="char-desc">Горячая, игривая, готова на всё</div>
+                </div>
+                <div class="char-card" data-char="boy">
+                    <div class="char-emoji">🍆</div>
+                    <div class="char-name">Пошлый парень</div>
+                    <div class="char-desc">Грубый, доминантный, страстный</div>
+                </div>
+                <div class="char-card" data-char="gay">
+                    <div class="char-emoji">🏳️‍🌈</div>
+                    <div class="char-name">Гей</div>
+                    <div class="char-desc">Для парней, горячий и смелый</div>
+                </div>
+                <div class="char-card" data-char="lesbian">
+                    <div class="char-emoji">👩‍❤️‍👩</div>
+                    <div class="char-name">Лесбиянка</div>
+                    <div class="char-desc">Нежная, страстная, для девушек</div>
+                </div>
+            </div>
+            
+            <div id="selectedChar" class="status-badge" style="display: none; margin-top: 20px;">
+                ✅ Выбран: <span id="charName"></span>
+            </div>
+        </div>
+
+        <!-- ВИРТУАЛЬНЫЙ СЕКС -->
+        <div id="sex" class="page">
+            <div class="sex-area">
+                <h3>🎮 Виртуальный секс</h3>
+                <p id="sexCharStatus" style="font-size: 12px; opacity: 0.7; margin: 10px 0;">Сначала выбери персонажа на главной</p>
+                
+                <div class="arousal-bar">
+                    <div class="arousal-fill" id="arousalFill"></div>
+                </div>
+                <div id="arousalText" style="text-align: center; font-size: 12px;">😈 Уровень: 0/5</div>
+                
+                <div class="sex-actions" id="sexActions">
+                    <!-- Действия будут подставлены из JS -->
+                </div>
+                
+                <div class="sex-response" id="sexResponse">
+                    👄 Напиши или нажми на действие...
+                </div>
+            </div>
+        </div>
+
+        <!-- ОНЛАЙН ЧАТ -->
+        <div id="chat" class="page">
+            <div class="chat-container">
+                <div class="chat-rooms" id="chatRooms">
+                    <button class="room-btn" data-room="gay">🏳️‍🌈 Гей чат</button>
+                    <button class="room-btn" data-room="lesbian">👩‍❤️‍👩 Лесби чат</button>
+                    <button class="room-btn" data-room="mixed">💑 Смешанный</button>
+                    <button class="room-btn" data-room="everyone">🌍 Общий</button>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">💬 Выбери комнату и начни общаться...</div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." maxlength="500">
+                    <button class="chat-send" id="sendMessageBtn">📤</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        📷 Фото
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                    </label>
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        🎥 Видео
+                        <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                    </label>
+                    <label style="flex: 1; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;">
+                        🎙️ Голос
+                        <input type="file" id="voiceInput" accept="audio/*" style="display: none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div id="profile" class="page">
+            <h3>👤 Мой профиль</h3>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 15px;">
+                <p><strong>🎭 Персонаж:</strong> <span id="profileChar">Не выбран</span></p>
+                <p><strong>💬 Чатов:</strong> <span id="profileChats">0</span></p>
+                <p><strong>💦 Уровень разврата:</strong> <span id="profileLevel">0</span>/100</p>
+                <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.1);">
+                <button id="resetBtn" style="background: #ff0066; border: none; color: white; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer;">🔄 Сбросить всё</button>
+            </div>
+        </div>
+    </div>
     
-    <div class="stats-row">
-        <div class="prestige-badge">
-            ⭐ <span id="prestigeLevel">0</span> (+<span id="prestigeBonus">0</span>%)
-        </div>
-        <div class="spent-badge">
-            💸 <span id="totalSpent">0</span>🪙
-        </div>
-        <div class="combo-badge" id="comboDisplay" style="display:none;">
-            🔥 x<span id="comboCount">0</span>
-        </div>
+    <div class="footer">
+        🔞 18+ ONLY | Анонимно | Без сохранения истории
     </div>
-
-    <div class="suslov-area">
-        <div class="suslov-emoji" id="suslovEmoji">🐭</div>
-        <div class="belly-bar-container">
-            <div class="belly-label">
-                <span>🍖 СЫТОСТЬ</span>
-                <span id="bellyPercent">0%</span>
-            </div>
-            <div class="belly-bar-bg">
-                <div class="belly-fill" id="bellyFill" style="width:0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="stats-panel">
-        <div class="money-block">
-            <span>🪙</span> <span id="moneyValue">40</span>
-        </div>
-        <div class="food-block">
-            <span>🍱</span> <span id="foodCount">0</span>
-        </div>
-    </div>
-
-    <div class="shop">
-        <div class="food-row">
-            <div class="food-info">
-                <span>🥕</span>
-                <span class="food-desc">Морковка <small>+3%</small></span>
-            </div>
-            <button id="buyCarrot">5🪙</button>
-        </div>
-        <div class="food-row">
-            <div class="food-info">
-                <span>🍔</span>
-                <span class="food-desc">Бургер <small>+8%</small></span>
-            </div>
-            <button id="buyBurger">12🪙</button>
-        </div>
-        <div class="food-row">
-            <div class="food-info">
-                <span>🎂</span>
-                <span class="food-desc">Торт <small>+15%</small></span>
-            </div>
-            <button id="buyCake">22🪙</button>
-        </div>
-    </div>
-
-    <div class="action-buttons">
-        <button id="feedBtn">🍽️ КОРМИТЬ</button>
-        <button id="autoFeedBtn">🤖 АВТОКОРМ (50🪙)</button>
-    </div>
-
-    <div id="gameOverMessage" style="min-height: 24px; font-weight: bold; color: #ad1f1f;"></div>
-    
-    <div class="sell-area">
-        <button id="sellFatBtn">💰 ПРОДАТЬ ЖИР (+5% кэшбек + престиж)</button>
-    </div>
-    
-    <div class="footer-note">🥕+3% 🍔+8% 🎂+15% | Крит x2 | Комбо x5 | Автокорм</div>
 </div>
 
 <script>
-    (function(){
-        "use strict";
-
-        // ---------- СОСТОЯНИЕ ----------
-        let money = 40;                
-        let foodItems = 0;            
-        let belly = 0;               
+    // ==================== ХРАНИЛИЩЕ ДАННЫХ ====================
+    let currentChar = localStorage.getItem('netErrorChar') || null;
+    let arousal = parseInt(localStorage.getItem('netErrorArousal')) || 0;
+    let level = parseInt(localStorage.getItem('netErrorLevel')) || 0;
+    
+    // Чат данные
+    let currentRoom = localStorage.getItem('netErrorRoom') || null;
+    let username = localStorage.getItem('netErrorUsername') || null;
+    
+    // Генерация случайного имени если нет
+    if (!username) {
+        const names = ['Тигр', 'Лиса', 'Волк', 'Кошка', 'Пантера', 'Дракон', 'Феникс', 'Демон', 'Ангел', 'Шалун', 'Шалунья'];
+        username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 1000);
+        localStorage.setItem('netErrorUsername', username);
+    }
+    
+    // Сообщения в чатах
+    let chatMessages = {
+        gay: JSON.parse(localStorage.getItem('chat_gay')) || [],
+        lesbian: JSON.parse(localStorage.getItem('chat_lesbian')) || [],
+        mixed: JSON.parse(localStorage.getItem('chat_mixed')) || [],
+        everyone: JSON.parse(localStorage.getItem('chat_everyone')) || []
+    };
+    
+    // ==================== ДАННЫЕ ДЛЯ СЕКСА ====================
+    const sexActions = {
+        girl: {
+            actions: ['👅 Сосать', '💋 Киска', '👉 Клитор', '✌️ Палец', '👅 Язык', '💦 Кончить'],
+            responses: {
+                'сосать': '💋 Я беру твой член в рот и делаю глубокий минет, облизывая головку язычком...',
+                'киска': '🌸 Моя киска мокрая и ждет тебя, войди в меня глубже...',
+                'клитор': '💓 Твой палец ласкает мой клитор, я дрожу от удовольствия...',
+                'палец': '👆 Два пальца внутри меня, я чувствую как ты растягиваешь меня...',
+                'язык': '👅 Твой язык вылизывает меня до самой глубины...',
+                'кончить': '💦 Я кончаю на твой член, заливая его своими соками!'
+            }
+        },
+        boy: {
+            actions: ['🍆 Член', '🍑 Попа', '👉 Палец', '👅 Язык', '🐕 Раком', '💦 Кончить'],
+            responses: {
+                'член': '🍆 Я ввожу свой твердый член в твою мокрую киску, чувствуешь как пульсирует?...',
+                'попа': '🍑 Я раздвигаю твои ягодицы и вхожу в тугую попку, ты стонешь...',
+                'палец': '👆 Мой палец внутри тебя, массирую твою точку G...',
+                'язык': '👅 Я вылизываю твою киску до самой глубины...',
+                'раком': '🐕 Повернись раком, я вхожу сзади глубоко и жестко...',
+                'кончить': '💦 Я кончаю глубоко в тебя, сперма заливает матку!'
+            }
+        },
+        gay: {
+            actions: ['🍆 Член', '🍑 Попка', '👅 Сосать', '💦 Кончить'],
+            responses: {
+                'член': '🏳️‍🌈 Соси мой член, глубоко, я хочу в твое горло...',
+                'попка': '🏳️‍🌈 Раздвинь мою попку, войди в меня, я хочу чувствовать тебя...',
+                'сосать': '🏳️‍🌈 Я беру твой член в рот и сосу до конца, глотая каждую каплю...',
+                'кончить': '🏳️‍🌈 Я кончаю в твою попку, заливаю тебя горячей спермой!'
+            }
+        },
+        lesbian: {
+            actions: ['💋 Киска', '💓 Клитор', '👉 Палец', '👅 Язык', '💦 Кончить'],
+            responses: {
+                'киска': '👩‍❤️‍👩 Моя киска мокрая, войди в меня пальчиками...',
+                'клитор': '👩‍❤️‍👩 Полижи мой клитор, он такой чувствительный, я кончаю...',
+                'палец': '👩‍❤️‍👩 Твои пальцы внутри меня, я сжимаюсь вокруг них...',
+                'язык': '👩‍❤️‍👩 Я вылизываю твою киску до оргазма...',
+                'кончить': '👩‍❤️‍👩 Мы кончаем вместе, обнимая друг друга!'
+            }
+        }
+    };
+    
+    // Активация действий для секса
+    function performSexAction(actionKey) {
+        if (!currentChar) {
+            document.getElementById('sexResponse').innerHTML = '❌ Сначала выбери персонажа на главной странице!';
+            return;
+        }
         
-        let prestigeLevel = 0;               
-        let prestigeBonusPercent = 0;        
-        let totalSpentMoney = 0;
+        const charData = sexActions[currentChar];
+        if (!charData) return;
         
-        // Комбо и крит
-        let feedCombo = 0;
-        const CRIT_CHANCE = 0.15;  // 15%
-        const COMBO_BONUS = 1;      // +1% за каждые 5 комбо
+        let response = '';
+        for (let key in charData.responses) {
+            if (actionKey.includes(key)) {
+                response = charData.responses[key];
+                break;
+            }
+        }
         
-        // Автокорм
-        let autoFeedActive = false;
-        let autoFeedInterval = null;
-        const AUTO_FEED_COST = 50;
+        if (!response) {
+            response = charData.responses[Object.keys(charData.responses)[Math.floor(Math.random() * Object.keys(charData.responses).length)]];
+        }
         
-        // Достижения (простые флаги)
-        let achievements = {
-            firstLop: false,
-            richBoy: false,
-            comboKing: false
+        // Обновляем возбуждение
+        arousal = Math.min(arousal + Math.floor(Math.random() * 20) + 10, 100);
+        level = Math.min(level + Math.floor(Math.random() * 5) + 1, 100);
+        
+        localStorage.setItem('netErrorArousal', arousal);
+        localStorage.setItem('netErrorLevel', level);
+        
+        const fillPercent = (arousal / 100) * 100;
+        document.getElementById('arousalFill').style.width = fillPercent + '%';
+        
+        let arousalEmoji = '😈';
+        if (arousal >= 80) arousalEmoji = '💥';
+        else if (arousal >= 60) arousalEmoji = '🌊';
+        else if (arousal >= 40) arousalEmoji = '💦';
+        else if (arousal >= 20) arousalEmoji = '🔥';
+        
+        document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
+        
+        let finalResponse = response;
+        if (arousal >= 100) {
+            finalResponse = '💦💦💦 ТЫ КОНЧАЕШЬ! Сильнейший оргазм! Возбуждение сброшено... 💦💦💦\n\n' + response;
+            arousal = 0;
+            localStorage.setItem('netErrorArousal', 0);
+            document.getElementById('arousalFill').style.width = '0%';
+            document.getElementById('arousalText').innerHTML = '😈 Уровень: 0/100';
+        }
+        
+        document.getElementById('sexResponse').innerHTML = finalResponse;
+        
+        // Обновляем профиль
+        updateProfile();
+    }
+    
+    // Обновление интерфейса
+    function updateSexActions() {
+        const container = document.getElementById('sexActions');
+        if (!currentChar) {
+            container.innerHTML = '<div style="color: #ff6699;">❌ Выбери персонажа на главной</div>';
+            return;
+        }
+        
+        const actions = sexActions[currentChar].actions;
+        container.innerHTML = '';
+        actions.forEach(action => {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.textContent = action;
+            const actionKey = action.replace(/[^а-яё]/gi, '').toLowerCase();
+            btn.onclick = () => performSexAction(actionKey);
+            container.appendChild(btn);
+        });
+    }
+    
+    // Обновление профиля
+    function updateProfile() {
+        const charNames = {
+            girl: '💋 Развратная девушка',
+            boy: '🍆 Пошлый парень',
+            gay: '🏳️‍🌈 Гей',
+            lesbian: '👩‍❤️‍👩 Лесбиянка'
         };
         
-        // DOM элементы
-        const moneySpan = document.getElementById('moneyValue');
-        const foodSpan = document.getElementById('foodCount');
-        const bellyFill = document.getElementById('bellyFill');
-        const bellyPercent = document.getElementById('bellyPercent');
-        const suslovEmoji = document.getElementById('suslovEmoji');
-        const gameOverMsg = document.getElementById('gameOverMessage');
-        const feedBtn = document.getElementById('feedBtn');
-        const buyCarrot = document.getElementById('buyCarrot');
-        const buyBurger = document.getElementById('buyBurger');
-        const buyCake = document.getElementById('buyCake');
-        const sellFatBtn = document.getElementById('sellFatBtn');
-        const autoFeedBtn = document.getElementById('autoFeedBtn');
-        const comboDisplay = document.getElementById('comboDisplay');
-        const comboCountSpan = document.getElementById('comboCount');
+        document.getElementById('profileChar').innerHTML = currentChar ? charNames[currentChar] : 'Не выбран';
+        document.getElementById('profileLevel').innerHTML = level;
         
-        const prestigeLevelSpan = document.getElementById('prestigeLevel');
-        const prestigeBonusSpan = document.getElementById('prestigeBonus');
-        const totalSpentSpan = document.getElementById('totalSpent');
-
-        // Еда: цена, свой % сытости
-        const FOOD_DATA = {
-            carrot: { price: 5,  gain: 3 },
-            burger: { price: 12, gain: 8 },
-            cake:   { price: 22, gain: 15 }
+        let chatCount = 0;
+        for (let room in chatMessages) {
+            chatCount += chatMessages[room].length;
+        }
+        document.getElementById('profileChats').innerHTML = chatCount;
+    }
+    
+    // ==================== ФУНКЦИИ ЧАТА ====================
+    function addMessage(room, username, text, type = 'text', fileData = null) {
+        const message = {
+            id: Date.now(),
+            username: username,
+            text: text,
+            type: type,
+            fileData: fileData,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         };
         
-        let currentFoodGain = 0; // будет пересчитываться
-
-        // ---------- УВЕДОМЛЕНИЯ ----------
-        function showAchievement(text) {
-            const pop = document.createElement('div');
-            pop.className = 'achievement-popup';
-            pop.innerHTML = `🏆 ${text} 🏆`;
-            document.body.appendChild(pop);
-            setTimeout(() => pop.remove(), 2500);
-        }
-
-        // ---------- РАСЧЁТ ПРИРОСТА ----------
-        function calcFoodGain(baseGain) {
-            let bonus = 1 + (prestigeBonusPercent / 100);
-            let gain = Math.floor(baseGain * bonus);
-            
-            // Комбо бонус: +1% за каждые 5 комбо
-            if (feedCombo >= 5) {
-                gain += Math.floor(feedCombo / 5) * COMBO_BONUS;
-            }
-            
-            // Крит
-            const isCrit = Math.random() < CRIT_CHANCE;
-            if (isCrit) {
-                gain *= 2;
-                // Визуал крита
-                suslovEmoji.style.filter = 'drop-shadow(0 0 20px gold)';
-                setTimeout(() => suslovEmoji.style.filter = '', 200);
-            }
-            
-            return { gain, isCrit };
-        }
-
-        // ---------- ОБНОВЛЕНИЕ UI ----------
-        function updateUI() {
-            moneySpan.textContent = money;
-            foodSpan.textContent = foodItems;
-
-            const percent = Math.min(belly, 100);
-            bellyFill.style.width = percent + '%';
-            bellyPercent.textContent = percent + '%';
-
-            prestigeLevelSpan.textContent = prestigeLevel;
-            prestigeBonusSpan.textContent = prestigeBonusPercent;
-            totalSpentSpan.textContent = totalSpentMoney;
-            
-            // Комбо отображение
-            if (feedCombo > 0) {
-                comboDisplay.style.display = 'inline-block';
-                comboCountSpan.textContent = feedCombo;
-            } else {
-                comboDisplay.style.display = 'none';
-            }
-
-            // Эмодзи
-            if (belly >= 100) {
-                suslovEmoji.textContent = '💥🐽';
-                gameOverMsg.innerHTML = '💥 ЛОПНУЛ! ЖМИ ПРОДАТЬ ЖИР 💥';
-                if (!achievements.firstLop) {
-                    achievements.firstLop = true;
-                    showAchievement('ПЕРВЫЙ ЛОП! +10🪙');
-                    money += 10;
-                }
-            } else if (belly >= 80) {
-                suslovEmoji.textContent = '🐡';
-                gameOverMsg.innerHTML = '';
-            } else if (belly >= 50) {
-                suslovEmoji.textContent = '🐹🤰';
-                gameOverMsg.innerHTML = '';
-            } else if (belly >= 20) {
-                suslovEmoji.textContent = '🐭🍔';
-                gameOverMsg.innerHTML = '';
-            } else {
-                suslovEmoji.textContent = '🐭';
-                gameOverMsg.innerHTML = '';
-            }
-            
-            // Кнопка автокорма
-            autoFeedBtn.textContent = autoFeedActive ? '⏹️ СТОП' : `🤖 АВТОКОРМ (${AUTO_FEED_COST}🪙)`;
-            
-            // Проверка достижений
-            if (!achievements.richBoy && totalSpentMoney >= 200) {
-                achievements.richBoy = true;
-                showAchievement('ТРАНЖИРА! +25🪙');
-                money += 25;
-            }
-            if (!achievements.comboKing && feedCombo >= 20) {
-                achievements.comboKing = true;
-                showAchievement('КОМБО-КОРОЛЬ! +30🪙');
-                money += 30;
-            }
-        }
-
-        // ---------- КОРМЛЕНИЕ (одно) ----------
-        function feedOnce() {
-            if (foodItems <= 0) {
-                foodSpan.style.color = '#ffa098';
-                setTimeout(() => foodSpan.style.color = '#ffd966', 200);
-                return false;
-            }
-            
-            foodItems -= 1;
-            
-            // Прирост = зависит от типа еды? Упростим: средний прирост 8% + престиж + комбо + крит
-            // Используем базовый прирост 8% для универсальности
-            const { gain, isCrit } = calcFoodGain(8);
-            
-            belly = Math.min(belly + gain, 100);
-            feedCombo += 1;
-            
-            // Анимация
-            suslovEmoji.style.transform = 'scale(1.15)';
-            setTimeout(() => suslovEmoji.style.transform = 'scale(1)', 100);
-            
-            if (isCrit) {
-                gameOverMsg.innerHTML = '💥 КРИТИЧЕСКИЙ КОРМ! x2 💥';
-                setTimeout(() => updateUI(), 300);
-            }
-            
-            updateUI();
-            return true;
-        }
-
-        // Сброс комбо
-        function resetCombo() {
-            feedCombo = 0;
-            updateUI();
-        }
-
-        // ---------- ПОКУПКА ----------
-        function buyFood(type) {
-            const data = FOOD_DATA[type];
-            if (money < data.price) {
-                moneySpan.style.color = '#ff8989';
-                setTimeout(() => moneySpan.style.color = '#ffd966', 150);
-                return;
-            }
-            money -= data.price;
-            totalSpentMoney += data.price;
-            foodItems += 1;
-            updateUI();
-        }
-
-        // ---------- АВТОКОРМ ----------
-        function toggleAutoFeed() {
-            if (autoFeedActive) {
-                clearInterval(autoFeedInterval);
-                autoFeedActive = false;
-                autoFeedBtn.classList.remove('active');
-            } else {
-                if (money < AUTO_FEED_COST) {
-                    moneySpan.style.color = '#ff8989';
-                    setTimeout(() => moneySpan.style.color = '#ffd966', 150);
-                    return;
-                }
-                money -= AUTO_FEED_COST;
-                totalSpentMoney += AUTO_FEED_COST;
-                autoFeedActive = true;
-                autoFeedBtn.classList.add('active');
-                autoFeedInterval = setInterval(() => {
-                    if (!feedOnce()) {
-                        // если еда кончилась — автостоп
-                        clearInterval(autoFeedInterval);
-                        autoFeedActive = false;
-                        autoFeedBtn.classList.remove('active');
-                        updateUI();
-                    }
-                }, 2000);
-                updateUI();
-            }
-        }
-
-        // ---------- ПРОДАТЬ ЖИР ----------
-        function sellFat() {
-            const refund = Math.floor(totalSpentMoney * 0.05);
-            money += refund;
-            
-            if (totalSpentMoney > 0 || belly > 0) {
-                prestigeLevel += 1;
-                prestigeBonusPercent += 5;
-            }
-            
-            foodItems = 0;
-            belly = 0;
-            feedCombo = 0;
-            
-            // Остановка автокорма
-            if (autoFeedActive) {
-                clearInterval(autoFeedInterval);
-                autoFeedActive = false;
-                autoFeedBtn.classList.remove('active');
-            }
-            
-            money = Math.max(money, 35 + prestigeLevel * 4);
-            
-            updateUI();
-            suslovEmoji.textContent = '🤑🐹';
-            setTimeout(() => updateUI(), 300);
-        }
-
-        // ---------- ОБРАБОТЧИКИ ----------
-        buyCarrot.addEventListener('click', () => buyFood('carrot'));
-        buyBurger.addEventListener('click', () => buyFood('burger'));
-        buyCake.addEventListener('click', () => buyFood('cake'));
+        chatMessages[room].push(message);
+        if (chatMessages[room].length > 50) chatMessages[room].shift();
         
-        feedBtn.addEventListener('click', () => feedOnce());
-        suslovEmoji.addEventListener('click', () => feedOnce());
+        localStorage.setItem(`chat_${room}`, JSON.stringify(chatMessages[room]));
         
-        autoFeedBtn.addEventListener('click', toggleAutoFeed);
-        sellFatBtn.addEventListener('click', sellFat);
+        if (currentRoom === room) {
+            renderMessages();
+        }
+    }
+    
+    function renderMessages() {
+        if (!currentRoom) return;
         
-        // Сброс комбо если долго не кормили (5 сек)
-        let comboTimer;
-        function resetComboTimer() {
-            clearTimeout(comboTimer);
-            comboTimer = setTimeout(() => {
-                if (feedCombo > 0) {
-                    feedCombo = 0;
-                    updateUI();
-                }
-            }, 5000);
+        const container = document.getElementById('chatMessages');
+        const messages = chatMessages[currentRoom];
+        
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="message system">💬 Нет сообщений. Напиши первым!</div>';
+            return;
         }
         
-        const originalFeed = feedOnce;
-        feedOnce = function() {
-            const result = originalFeed.apply(this, arguments);
-            if (result) resetComboTimer();
-            return result;
-        };
-        
-        // Двойной клик по монетке
-        document.querySelector('.money-block').addEventListener('dblclick', () => {
-            money += 10;
-            updateUI();
+        container.innerHTML = '';
+        messages.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            header.innerHTML = `👤 ${msg.username} • ${msg.time}`;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            if (msg.type === 'text') {
+                textDiv.textContent = msg.text;
+            } else if (msg.type === 'photo' && msg.fileData) {
+                textDiv.innerHTML = `<img src="${msg.fileData}" style="max-width: 200px; max-height: 200px; border-radius: 10px;">`;
+            } else if (msg.type === 'video' && msg.fileData) {
+                textDiv.innerHTML = `<video src="${msg.fileData}" controls style="max-width: 200px; max-height: 200px; border-radius: 10px;"></video>`;
+            } else if (msg.type === 'voice' && msg.fileData) {
+                textDiv.innerHTML = `<audio src="${msg.fileData}" controls style="width: 200px;"></audio>`;
+            }
+            
+            msgDiv.appendChild(header);
+            msgDiv.appendChild(textDiv);
+            container.appendChild(msgDiv);
         });
         
-        updateUI();
-    })();
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        
+        if (!text || !currentRoom || !username) return;
+        
+        addMessage(currentRoom, username, text, 'text');
+        input.value = '';
+    }
+    
+    // Файлы
+    function handleFile(file, type) {
+        if (!currentRoom || !username) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            addMessage(currentRoom, username, '', type, e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Смена комнаты
+    function changeRoom(room) {
+        currentRoom = room;
+        localStorage.setItem('netErrorRoom', room);
+        
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            if (btn.dataset.room === room) {
+                btn.classList.add('active-room');
+            } else {
+                btn.classList.remove('active-room');
+            }
+        });
+        
+        renderMessages();
+    }
+    
+    // ==================== НАВИГАЦИЯ ====================
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active-page');
+        });
+        document.getElementById(pageId).classList.add('active-page');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.dataset.page === pageId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        if (pageId === 'sex') {
+            updateSexActions();
+            const fillPercent = (arousal / 100) * 100;
+            document.getElementById('arousalFill').style.width = fillPercent + '%';
+            
+            let arousalEmoji = '😈';
+            if (arousal >= 80) arousalEmoji = '💥';
+            else if (arousal >= 60) arousalEmoji = '🌊';
+            else if (arousal >= 40) arousalEmoji = '💦';
+            else if (arousal >= 20) arousalEmoji = '🔥';
+            document.getElementById('arousalText').innerHTML = `${arousalEmoji} Уровень: ${arousal}/100`;
+            
+            const charNames = {girl: 'Девушка 💋', boy: 'Парень 🍆', gay: 'Гей 🏳️‍🌈', lesbian: 'Лесбиянка 👩‍❤️‍👩'};
+            document.getElementById('sexCharStatus').innerHTML = currentChar ? `Персонаж: ${charNames[currentChar]}` : '❌ Сначала выбери персонажа на главной';
+        } else if (pageId === 'chat' && currentRoom) {
+            renderMessages();
+        } else if (pageId === 'profile') {
+            updateProfile();
+        }
+    }
+    
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
+    
+    // Выбор персонажа
+    document.querySelectorAll('.char-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            currentChar = card.dataset.char;
+            localStorage.setItem('netErrorChar', currentChar);
+            
+            const charNames = {
+                girl: '💋 Развратную девушку',
+                boy: '🍆 Пошлого парня',
+                gay: '🏳️‍🌈 Гея',
+                lesbian: '👩‍❤️‍👩 Лесбиянку'
+            };
+            
+            document.getElementById('selectedChar').style.display = 'block';
+            document.getElementById('charName').innerHTML = charNames[currentChar];
+            
+            if (currentChar === 'gay' || currentChar === 'lesbian') {
+                setTimeout(() => {
+                    if (confirm('🏳️‍🌈 Выбран ЛГБТ-персонаж. Продолжить?')) {
+                        alert('✅ Персонаж выбран! Переходи в раздел "Вирт секс"');
+                    }
+                }, 100);
+            } else {
+                alert(`✅ Ты выбрал ${charNames[currentChar]}! Переходи в раздел "Вирт секс"`);
+            }
+        });
+    });
+    
+    // Чат
+    document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    document.querySelectorAll('.room-btn').forEach(btn => {
+        btn.addEventListener('click', () => changeRoom(btn.dataset.room));
+    });
+    
+    // Файлы
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'photo');
+        e.target.value = '';
+    });
+    document.getElementById('videoInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'video');
+        e.target.value = '';
+    });
+    document.getElementById('voiceInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0], 'voice');
+        e.target.value = '';
+    });
+    
+    // Сброс
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if (confirm('⚠️ ВСЕ ДАННЫЕ БУДУТ УДАЛЕНЫ! Ты уверен?')) {
+            localStorage.clear();
+            location.reload();
+        }
+    });
+    
+    // Загрузка начальных данных
+    if (currentChar) {
+        const charCard = document.querySelector(`.char-card[data-char="${currentChar}"]`);
+        if (charCard) charCard.classList.add('selected');
+        document.getElementById('selectedChar').style.display = 'block';
+        const charNames = {
+            girl: '💋 Развратную девушку',
+            boy: '🍆 Пошлого парня',
+            gay: '🏳️‍🌈 Гея',
+            lesbian: '👩‍❤️‍👩 Лесбиянку'
+        };
+        document.getElementById('charName').innerHTML = charNames[currentChar];
+    }
+    
+    if (currentRoom) {
+        const roomBtn = document.querySelector(`.room-btn[data-room="${currentRoom}"]`);
+        if (roomBtn) roomBtn.classList.add('active-room');
+        renderMessages();
+    }
+    
+    showPage('home');
+    updateProfile();
 </script>
 </body>
-  </html>
+</html>
