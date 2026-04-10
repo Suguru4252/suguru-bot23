@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>💪 СИМУЛЯТОР КАЧКА · РОБЛОКС СТИЛЬ</title>
+  <title>💪 СИМУЛЯТОР КАЧКА · ЭПИЧНАЯ ВЕРСИЯ</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,163 +13,245 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+      background: linear-gradient(145deg, #0a0f1a 0%, #1a1f2e 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      padding: 16px;
     }
 
-    .game-container {
-      background: #1e2e3b;
-      border-radius: 48px;
-      padding: 24px 28px 32px;
-      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-      border-bottom: 6px solid #00b8a0;
+    .game-wrapper {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .game-panel {
+      background: linear-gradient(135deg, #1e2433 0%, #151a26 100%);
+      border-radius: 32px;
+      padding: 24px;
+      box-shadow: 0 25px 40px rgba(0, 0, 0, 0.7), inset 0 0 0 2px rgba(255, 215, 100, 0.15);
+      border-bottom: 6px solid #ffaa00;
     }
 
     canvas {
       display: block;
-      margin: 0 auto;
       width: 100%;
-      max-width: 700px;
       height: auto;
-      border-radius: 28px;
-      background: radial-gradient(circle at 20% 20%, #3d5a73, #1f3a4b);
-      box-shadow: inset 0 8px 12px rgba(0,0,0,0.5), 0 10px 18px rgba(0,0,0,0.3);
-      border: 2px solid #2d4e63;
+      border-radius: 24px;
+      background: radial-gradient(circle at 30% 20%, #2a3a4a, #0e1620);
+      box-shadow: inset 0 8px 16px rgba(0,0,0,0.7), 0 12px 24px rgba(0,0,0,0.5);
+      border: 2px solid #4a6070;
       cursor: pointer;
-      transition: transform 0.05s;
+      transition: filter 0.1s;
     }
     canvas:active {
-      transform: scale(0.99);
+      filter: brightness(1.1);
     }
 
-    .stats-panel {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      background: #15262e;
-      padding: 14px 22px;
-      border-radius: 60px;
-      box-shadow: inset 0 4px 6px #0b141a, 0 6px 8px #0e1a22;
-      border-bottom: 3px solid #2ea88f;
-    }
-
-    .strength-box {
-      display: flex;
-      align-items: center;
+    /* СТАТИСТИКА */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
+      margin: 18px 0 14px;
     }
 
-    .icon {
-      font-size: 34px;
-      filter: drop-shadow(0 4px 4px #00000066);
-    }
-
-    .strength-value {
-      background: #0b1b24;
-      padding: 8px 22px;
-      border-radius: 50px;
-      box-shadow: inset 0 2px 5px black, 0 4px 0 #0a141c;
-      color: #f5e56b;
-      font-weight: 800;
-      font-size: 28px;
-      letter-spacing: 1px;
-      text-shadow: 0 3px 0 #7f5f00;
+    .stat-card {
+      background: #10161f;
+      border-radius: 20px;
+      padding: 14px 10px;
+      box-shadow: inset 0 3px 6px #000000, 0 6px 0 #0a0e14;
       border-bottom: 2px solid #c9a227;
-      min-width: 110px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .weight-display {
+    .stat-label {
+      color: #9bb7d4;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffd966;
+      text-shadow: 0 4px 0 #7a5c00;
+      line-height: 1;
+    }
+
+    /* ПРОГРЕСС БАР */
+    .progress-section {
+      background: #0d141f;
+      border-radius: 30px;
+      padding: 12px 18px;
+      margin: 8px 0;
+    }
+
+    .level-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: #1f3440;
+      gap: 15px;
+    }
+
+    .level-badge {
+      background: #d4af37;
+      color: #0a0f1a;
+      font-weight: 900;
+      font-size: 20px;
       padding: 6px 18px;
       border-radius: 40px;
-      box-shadow: inset 0 1px 4px #0f1c24;
+      box-shadow: 0 4px 0 #7a5f1a;
     }
 
-    .dumbbell-label {
-      font-size: 22px;
+    .xp-bar-container {
+      flex: 1;
+      height: 22px;
+      background: #1b2533;
+      border-radius: 30px;
+      box-shadow: inset 0 3px 6px black;
+      overflow: hidden;
     }
 
-    .weight-number {
-      background: #1d2e38;
+    .xp-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6fcf97, #3acf7a);
+      box-shadow: 0 0 10px #3acf7a;
+      border-radius: 30px;
+      transition: width 0.15s;
+    }
+
+    .xp-text {
+      min-width: 70px;
       color: #b1e6e0;
       font-weight: bold;
-      font-size: 22px;
-      padding: 5px 18px;
-      border-radius: 30px;
-      box-shadow: inset 0 1px 3px black;
-      border-left: 2px solid #3fbcb0;
+      font-size: 18px;
+    }
+
+    /* МАГАЗИН И КНОПКИ */
+    .shop-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .powerups {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #2a3345;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 12px 20px;
+      border-radius: 40px;
+      box-shadow: 0 6px 0 #151e28, 0 2px 8px black;
+      cursor: pointer;
+      transition: 0.06s;
+      font-size: 16px;
+      border-bottom: 2px solid #b88a2e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-gold {
+      background: #c9a227;
+      color: #0f1a1f;
+      box-shadow: 0 6px 0 #7a5f1a;
+      border-bottom: 2px solid #ffdd88;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #151e28, 0 2px 8px black;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      transform: none;
+      box-shadow: 0 4px 0 #151e28;
+      pointer-events: none;
     }
 
     .reset-btn {
-      background: #3a2c1f;
-      border: none;
-      color: #ffddaa;
+      background: #4e3535;
+      box-shadow: 0 6px 0 #2e2020;
+    }
+
+    .coins-display {
+      background: #1e2a1e;
+      padding: 8px 18px;
+      border-radius: 30px;
+      color: #ffd966;
       font-weight: bold;
-      font-size: 18px;
-      padding: 10px 22px;
-      border-radius: 40px;
-      box-shadow: 0 6px 0 #1f160e, 0 2px 8px black;
-      cursor: pointer;
-      transition: 0.07s;
-      border-bottom: 2px solid #b77e2e;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .reset-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #1f160e, 0 2px 8px black;
-    }
-
-    .hint {
-      color: #aac7db;
-      font-size: 15px;
-      font-weight: 500;
-      margin-left: 5px;
+      font-size: 20px;
       display: flex;
       align-items: center;
-      gap: 5px;
-    }
-
-    .hint span {
-      background: #2e4a5b;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 16px;
+      gap: 6px;
     }
   </style>
 </head>
 <body>
-<div class="game-container">
-  <!-- Холст, где происходит вся магия -->
-  <canvas id="gameCanvas" width="700" height="500"></canvas>
+<div class="game-wrapper">
+  <div class="game-panel">
+    <!-- ХОЛСТ -->
+    <canvas id="gameCanvas" width="800" height="550"></canvas>
 
-  <div class="stats-panel">
-    <div class="strength-box">
-      <span class="icon">🏋️</span>
-      <div class="strength-value" id="strengthDisplay">0</div>
+    <!-- СТАТЫ -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">💪 СИЛА</span>
+        <span class="stat-value" id="strengthDisplay">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">🏋️ ВЕС</span>
+        <span class="stat-value" id="weightDisplay">5.0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">💰 МОНЕТЫ</span>
+        <span class="stat-value" id="coinsDisplay">0</span>
+      </div>
     </div>
 
-    <div class="weight-display">
-      <span class="dumbbell-label">🏋️‍♂️ ГАНТЕЛИ</span>
-      <span class="weight-number" id="weightDisplay">5 кг</span>
+    <!-- УРОВЕНЬ + XP -->
+    <div class="progress-section">
+      <div class="level-row">
+        <div class="level-badge" id="levelDisplay">УР. 1</div>
+        <div class="xp-bar-container">
+          <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+        </div>
+        <div class="xp-text" id="xpText">0/100 XP</div>
+      </div>
     </div>
 
-    <button class="reset-btn" id="resetButton">🔄 СБРОС</button>
-  </div>
-
-  <div class="hint">
-    <span>👇 ЖМИ НА ГАНТЕЛИ · КАЧАЙ СИЛУ · РАСТИ</span>
-    <span style="margin-left: auto;">⚡ROBLOX STYLE⚡</span>
+    <!-- МАГАЗИН И УПРАВЛЕНИЕ -->
+    <div class="shop-panel">
+      <div class="powerups">
+        <button class="btn" id="buyAutoClicker" title="Авто-кач: +1 сила/сек">🤖 АВТО-КАЧ (50💰)</button>
+        <button class="btn btn-gold" id="buyMultiplier" title="x2 силы за клик">✨ x2 КЛИК (150💰)</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <div class="coins-display">
+          <span>🪙</span> <span id="coinBalance">0</span>
+        </div>
+        <button class="btn reset-btn" id="resetButton">🔄 СБРОС</button>
+      </div>
+    </div>
+    <div style="color:#aabacb; margin-top: 12px; text-align: center; font-weight: 500;">
+      ⚡ ЖМИ НА ГАНТЕЛИ · КАЧАЙСЯ · ПОКУПАЙ УЛУЧШЕНИЯ ⚡
+    </div>
   </div>
 </div>
 
@@ -177,404 +259,370 @@
   (function(){
     "use strict";
 
-    // ----- КАНВАС И КОНТЕКСТ -----
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ----- DOM ЭЛЕМЕНТЫ -----
+    // UI элементы
     const strengthDisplay = document.getElementById('strengthDisplay');
     const weightDisplay = document.getElementById('weightDisplay');
+    const coinsDisplay = document.getElementById('coinsDisplay');
+    const coinBalance = document.getElementById('coinBalance');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const xpBarFill = document.getElementById('xpBarFill');
+    const xpText = document.getElementById('xpText');
 
-    // ----- СОСТОЯНИЕ ИГРЫ (СИЛА / УРОВЕНЬ) -----
-    let strength = 0;                // текущая сила (очки)
-    let dumbbellWeight = 5;          // вес гантели (кг), растёт с силой
+    // Кнопки
+    const resetBtn = document.getElementById('resetButton');
+    const buyAutoClicker = document.getElementById('buyAutoClicker');
+    const buyMultiplier = document.getElementById('buyMultiplier');
+
+    // ---------- СОСТОЯНИЕ ИГРЫ ----------
+    let strength = 0;               // сила
+    let coins = 0;                 // монеты
+    let level = 1;                 // уровень
+    let currentXP = 0;             // опыт
+    let xpToNextLevel = 100;       // нужно опыта
     
-    // ----- ДЛЯ АНИМАЦИИ И КЛИКОВ -----
-    let clickEffect = 0;             // 0..1 для анимации подъема
+    // Множители и улучшения
+    let clickMultiplier = 1;        // множитель клика
+    let autoClickerActive = false;
+    let autoClickerInterval = null;
+    
+    // Визуальные эффекты
+    let clickEffect = 0;
     let lastClickTime = 0;
+    let floatingTexts = [];         // всплывающий урон/сила
     
-    // Визуальное отображение размера персонажа (чем больше сила, тем больше)
-    // Базовый размер туловища будет масштабироваться
-    
-    // ----- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ -----
-    function calculateWeightFromStrength(str) {
-      // Формула: стартовый вес 5 кг, каждые 10 силы +1 кг, но также плавное увеличение
-      // Делаем чтобы вес чувствовался: вес = 5 + floor(strength / 8) + (strength % 8) * 0.125 ?
-      // Сделаем наглядно: каждые 8 силы = +1 кг. + небольшой бонус от круглых значений.
-      const base = 5;
-      const increment = Math.floor(strength / 7);  // каждые 7 силы +1 кг (динамично)
-      const extra = (strength % 7) * 0.14;         // плавное изменение
-      return Math.round((base + increment + extra) * 10) / 10;
+    // ----- ВЫЧИСЛЕНИЕ ВЕСА ГАНТЕЛИ -----
+    function calculateWeight() {
+      return 5 + Math.floor(strength / 6) + (strength * 0.2);
     }
 
-    function updateWeightDisplay() {
-      dumbbellWeight = calculateWeightFromStrength(strength);
-      weightDisplay.textContent = dumbbellWeight.toFixed(1) + ' кг';
+    function getDumbbellWeight() {
+      return Math.round((5 + Math.floor(strength / 6) + strength * 0.2) * 10) / 10;
     }
 
-    function updateStrengthUI() {
+    // ----- СИСТЕМА УРОВНЕЙ -----
+    function addXP(amount) {
+      currentXP += amount;
+      while (currentXP >= xpToNextLevel) {
+        currentXP -= xpToNextLevel;
+        level++;
+        xpToNextLevel = Math.floor(xpToNextLevel * 1.5);
+        // бонус за уровень
+        coins += 25 * level;
+        strength += 2;
+      }
+      updateLevelUI();
+    }
+
+    function updateLevelUI() {
+      levelDisplay.textContent = `УР. ${level}`;
+      const percent = (currentXP / xpToNextLevel) * 100;
+      xpBarFill.style.width = percent + '%';
+      xpText.textContent = `${currentXP}/${xpToNextLevel} XP`;
+    }
+
+    // ----- ОБНОВЛЕНИЕ UI -----
+    function refreshUI() {
       strengthDisplay.textContent = Math.floor(strength);
+      const w = getDumbbellWeight();
+      weightDisplay.textContent = w.toFixed(1);
+      coinsDisplay.textContent = coins;
+      coinBalance.textContent = coins;
+      
+      // блокировка кнопок если не хватает денег
+      buyAutoClicker.disabled = (coins < 50 || autoClickerActive);
+      buyMultiplier.disabled = (coins < 150 || clickMultiplier >= 2);
     }
 
-    // Сброс всего прогресса
-    function resetGame() {
-      strength = 0;
-      clickEffect = 0;
-      updateWeightDisplay();
-      updateStrengthUI();
-      // Перерисовываем
+    // ----- ДОБАВЛЕНИЕ СИЛЫ (ОСНОВНОЕ) -----
+    function addStrength(baseAmount) {
+      const totalGain = baseAmount * clickMultiplier;
+      strength += totalGain;
+      
+      // опыт = сила
+      addXP(totalGain);
+      
+      // монеты (1 сила = 1 монета базово + бонус)
+      coins += Math.floor(totalGain * 1.2) + 1;
+      
+      // всплывающий текст
+      floatingTexts.push({
+        x: 350 + (Math.random()-0.5)*100,
+        y: 270,
+        value: `+${totalGain.toFixed(1)}💪`,
+        life: 1.0
+      });
+      
+      refreshUI();
       drawCanvas();
     }
 
-    // Обработка клика (кач)
-    function handleLift(e) {
-      // Определим, попали ли по области гантели (для реализма, но клик везде — кач)
-      // Но добавим небольшой отклик: если клик далеко от персонажа — всё равно качаем,
-      // но всё же проверим координаты, чтобы можно было "бить" по гантелям.
-      
+    // ----- ОБРАБОТКА КЛИКА -----
+    function handleClick(e) {
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;   // обычно 1 если css совпадает
+      const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      
       const mouseX = (e.clientX - rect.left) * scaleX;
       const mouseY = (e.clientY - rect.top) * scaleY;
       
-      // ВСЕГДА добавляем силу, но для эффекта "попадания" подсветим, если попали в гантель
-      let hitDumbbell = false;
-      
-      // Вычислим примерные координаты гантелей (они рисуются относительно персонажа)
-      // Персонаж центр: (350, 270) примерно
-      const charX = 350, charY = 270;
-      const bodySize = 50 + strength * 1.1;  // размер персонажа
-      
-      // Левая гантель (x: charX - 60 - bodySize*0.2, y: charY - 15)
-      const leftDbX = charX - 60 - bodySize * 0.15;
-      const leftDbY = charY - 10;
-      // Правая гантель
-      const rightDbX = charX + 60 + bodySize * 0.15;
-      const rightDbY = charY - 10;
-      
-      // Радиус гантели зависит от веса
-      const dbRadius = 22 + dumbbellWeight * 0.8;
-      
-      // Проверка попадания
-      const distLeft = Math.hypot(mouseX - leftDbX, mouseY - leftDbY);
-      const distRight = Math.hypot(mouseX - rightDbX, mouseY - rightDbY);
-      
-      if (distLeft < dbRadius + 15 || distRight < dbRadius + 15) {
-        hitDumbbell = true;
-      }
-      
-      // Всегда качаемся, но если попали — анимация ярче
-      strength += 1;
-      
-      // Запускаем анимацию подъёма
+      // анимация
       clickEffect = 1.0;
       lastClickTime = performance.now();
       
-      // Обновляем вес и UI
-      updateWeightDisplay();
-      updateStrengthUI();
+      addStrength(1);  // база 1 * множитель
       
-      // Доп. фича: если сила кратна 10 — маленький бонус (опционально, просто визуал)
+      // вибрация при клике (если поддерживается)
+      if (navigator.vibrate) navigator.vibrate(10);
       
-      drawCanvas();
-      
-      // Для мобильных устройств отменяем стандартное поведение
       e.preventDefault();
     }
 
-    // ----- ОТРИСОВКА (САМОЕ ВКУСНОЕ) -----
+    // ----- АВТОКЛИКЕР -----
+    function startAutoClicker() {
+      if (autoClickerActive) return;
+      autoClickerActive = true;
+      autoClickerInterval = setInterval(() => {
+        addStrength(1);
+        clickEffect = 0.5;
+        lastClickTime = performance.now();
+      }, 1000);
+      refreshUI();
+    }
+
+    // ----- ПОКУПКИ -----
+    function purchaseAutoClicker() {
+      if (coins < 50 || autoClickerActive) return;
+      coins -= 50;
+      startAutoClicker();
+      refreshUI();
+    }
+
+    function purchaseMultiplier() {
+      if (coins < 150 || clickMultiplier >= 2) return;
+      coins -= 150;
+      clickMultiplier = 2;
+      refreshUI();
+    }
+
+    // ----- СБРОС -----
+    function fullReset() {
+      strength = 0;
+      coins = 0;
+      level = 1;
+      currentXP = 0;
+      xpToNextLevel = 100;
+      clickMultiplier = 1;
+      
+      if (autoClickerInterval) {
+        clearInterval(autoClickerInterval);
+        autoClickerInterval = null;
+      }
+      autoClickerActive = false;
+      
+      floatingTexts = [];
+      refreshUI();
+      updateLevelUI();
+      drawCanvas();
+    }
+
+    // ----- ОТРИСОВКА (УЛУЧШЕННАЯ ГРАФИКА) -----
     function drawCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // ----- ПАРАМЕТРЫ ПЕРСОНАЖА (растёт от силы) -----
-      const baseBodyWidth = 60;
-      const baseBodyHeight = 80;
+      // ---- ПАРАМЕТРЫ ПЕРСОНАЖА (ГИГАНТСКИЙ РОСТ) ----
+      const scale = 1 + strength * 0.04;
+      const bodyW = 70 * scale;
+      const bodyH = 95 * scale;
+      const headSize = 48 * (1 + strength * 0.018);
       
-      // Масштаб силы: чем больше сила, тем массивнее качок
-      const scaleFactor = 1 + strength * 0.035;  // до +350% при 100 силы
-      const bodyW = baseBodyWidth * scaleFactor;
-      const bodyH = baseBodyHeight * scaleFactor;
+      const centerX = 400;
+      const groundY = 460;
+      const bodyY = groundY - bodyH * 0.55;
       
-      // Голова тоже растёт, но чуть меньше
-      const headSize = 40 * (1 + strength * 0.015);
+      // ---- ФОН (ТРЕНАЖЁРНЫЙ ЗАЛ 2.0) ----
+      // Градиентное небо/стена
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#182430');
+      grad.addColorStop(1, '#0a111a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Позиционирование: персонаж по центру
-      const centerX = 350;
-      const groundY = 400;        // уровень пола
-      const bodyY = groundY - bodyH * 0.5 - 5;
-      
-      // ----- ФОН (тренажёрный зал) -----
-      // Пол
-      ctx.fillStyle = '#3d2e28';
+      // Пол с текстурой
+      ctx.fillStyle = '#3b2e24';
       ctx.beginPath();
-      ctx.rect(0, groundY - 8, canvas.width, 120);
+      ctx.rect(0, groundY-10, canvas.width, 120);
       ctx.fill();
-      // Текстура пола
-      ctx.fillStyle = '#5e4538';
-      for (let i=0;i<canvas.width;i+=30) {
-        ctx.fillRect(i, groundY-4, 15, 8);
+      for (let i=0; i<canvas.width; i+=40) {
+        ctx.fillStyle = '#5e4a38';
+        ctx.fillRect(i+5, groundY-2, 20, 10);
       }
       
-      // Зеркала на стене
-      ctx.fillStyle = '#aac7db22';
-      ctx.fillRect(40, 30, 120, 200);
-      ctx.fillStyle = '#bed9eebb';
-      ctx.fillRect(45, 35, 110, 190);
-      ctx.strokeStyle = '#cfb797';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(45, 35, 110, 190);
+      // Стойки с блинами
+      ctx.fillStyle = '#5a5f6e';
+      ctx.shadowColor = '#00000070';
+      ctx.shadowBlur = 12;
+      ctx.fillRect(60, groundY-90, 30, 90);
+      ctx.fillRect(710, groundY-90, 30, 90);
+      ctx.fillStyle = '#3d4452';
+      for (let i=0;i<5;i++) {
+        ctx.beginPath();
+        ctx.ellipse(75, groundY-70 + i*15, 20, 8, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(725, groundY-70 + i*15, 20, 8, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
       
-      ctx.fillStyle = '#aac7db22';
-      ctx.fillRect(540, 30, 120, 200);
-      ctx.fillStyle = '#bed9eebb';
-      ctx.fillRect(545, 35, 110, 190);
-      ctx.strokeRect(545, 35, 110, 190);
-      
-      // Плакат "GYM"
-      ctx.font = 'bold 24px "Segoe UI", system-ui';
-      ctx.fillStyle = '#f5d742';
-      ctx.shadowColor = '#00000080';
-      ctx.shadowBlur = 10;
-      ctx.fillText('💪 IRON GYM', 260, 80);
+      // Постеры
       ctx.shadowBlur = 0;
+      ctx.font = 'bold 28px "Segoe UI"';
+      ctx.fillStyle = '#eab308';
+      ctx.fillText('💀 IRON LEGACY', 240, 70);
       
-      // ----- АНИМАЦИЯ ПОДЪЁМА (эффект клика) -----
+      // ---- АНИМАЦИЯ ПОДЪЕМА ----
       let liftOffset = 0;
       if (clickEffect > 0) {
-        // затухание
-        const now = performance.now();
-        const elapsed = now - lastClickTime;
-        clickEffect = Math.max(0, 1 - elapsed / 250);  // 250 мс анимация
-        
-        // Поднимаем руки/гантели вверх
-        liftOffset = -12 * Math.sin(clickEffect * Math.PI); 
+        const elapsed = performance.now() - lastClickTime;
+        clickEffect = Math.max(0, 1 - elapsed / 220);
+        liftOffset = -18 * Math.sin(clickEffect * Math.PI);
       }
       
-      // ----- РИСУЕМ ПЕРСОНАЖА (КАЧКА) -----
-      // Тень под персонажем
-      ctx.fillStyle = '#1e1a16aa';
+      // ---- ПЕРСОНАЖ (МОНСТР) ----
+      // Тень
+      ctx.fillStyle = '#151010cc';
       ctx.beginPath();
-      ctx.ellipse(centerX, groundY+5, bodyW*0.7, 15, 0, 0, Math.PI*2);
+      ctx.ellipse(centerX, groundY+8, bodyW*0.8, 18, 0, 0, Math.PI*2);
       ctx.fill();
       
-      // Ноги (тоже растут)
-      ctx.fillStyle = '#2c5785';
-      ctx.shadowColor = '#00000055';
-      ctx.shadowBlur = 8;
-      // Левая нога
-      ctx.fillRect(centerX - bodyW*0.3 - 5, bodyY + bodyH*0.6, bodyW*0.25, bodyH*0.5);
-      // Правая нога
-      ctx.fillRect(centerX + bodyW*0.1, bodyY + bodyH*0.6, bodyW*0.25, bodyH*0.5);
-      
-      // Обувь
-      ctx.fillStyle = '#3a281c';
-      ctx.fillRect(centerX - bodyW*0.3 - 8, groundY-6, bodyW*0.3, 14);
-      ctx.fillRect(centerX + bodyW*0.08, groundY-6, bodyW*0.3, 14);
-      
-      // Торс (майка)
-      const gradient = ctx.createLinearGradient(centerX-bodyW/2, bodyY, centerX+bodyW/2, bodyY+bodyH);
-      gradient.addColorStop(0, '#c93f3f');
-      gradient.addColorStop(1, '#a02020');
-      ctx.fillStyle = gradient;
+      // Ноги
+      ctx.fillStyle = '#1e3a5f';
       ctx.shadowBlur = 10;
+      ctx.fillRect(centerX - bodyW*0.35, bodyY+bodyH*0.55, bodyW*0.28, bodyH*0.55);
+      ctx.fillRect(centerX + bodyW*0.1, bodyY+bodyH*0.55, bodyW*0.28, bodyH*0.55);
+      ctx.fillStyle = '#2f1e14';
+      ctx.fillRect(centerX - bodyW*0.38, groundY-8, bodyW*0.34, 16);
+      ctx.fillRect(centerX + bodyW*0.07, groundY-8, bodyW*0.34, 16);
+      
+      // Торс (градиент)
+      const torsoGrad = ctx.createRadialGradient(centerX-10, bodyY+20, 10, centerX, bodyY+40, bodyW);
+      torsoGrad.addColorStop(0, '#d64040');
+      torsoGrad.addColorStop(1, '#8b1a1a');
+      ctx.fillStyle = torsoGrad;
       ctx.beginPath();
-      ctx.ellipse(centerX, bodyY + bodyH/2, bodyW/2, bodyH/2, 0, 0, Math.PI*2);
+      ctx.ellipse(centerX, bodyY+bodyH/2.5, bodyW/1.8, bodyH/2.1, 0, 0, Math.PI*2);
       ctx.fill();
       
-      // Пресс (кубики)
-      ctx.fillStyle = '#e0b07a';
-      ctx.shadowBlur = 4;
-      for (let i=0; i<3; i++) {
-        ctx.fillRect(centerX-15, bodyY+20 + i*18, 30, 10);
+      // Мышцы
+      ctx.fillStyle = '#e0a87c';
+      ctx.shadowBlur = 8;
+      for (let i=0;i<4;i++) {
+        ctx.fillRect(centerX-22, bodyY+25 + i*16, 44, 9);
       }
       
       // Голова
-      ctx.fillStyle = '#f5dbb1';
-      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#f0cfb0';
       ctx.beginPath();
-      ctx.ellipse(centerX, bodyY - headSize*0.35, headSize/1.6, headSize/1.8, 0, 0, Math.PI*2);
+      ctx.ellipse(centerX, bodyY-headSize*0.25, headSize/1.5, headSize/1.7, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#b07040';
+      ctx.beginPath();
+      ctx.ellipse(centerX, bodyY-headSize*0.45, headSize/1.9, headSize/3.5, 0, 0, Math.PI*2);
       ctx.fill();
       
-      // Кепка / волосы
-      ctx.fillStyle = '#2b1e0e';
-      ctx.beginPath();
-      ctx.ellipse(centerX-2, bodyY - headSize*0.5, headSize/2.2, headSize/4, 0, 0, Math.PI*2);
-      ctx.fill();
-      
-      // Лицо
+      // Очки/выражение
       ctx.fillStyle = '#000';
       ctx.beginPath();
-      ctx.arc(centerX-12, bodyY - headSize*0.3, 4, 0, 2*Math.PI);
-      ctx.arc(centerX+12, bodyY - headSize*0.3, 4, 0, 2*Math.PI);
+      ctx.arc(centerX-14, bodyY-headSize*0.2, 5, 0, 2*Math.PI);
+      ctx.arc(centerX+14, bodyY-headSize*0.2, 5, 0, 2*Math.PI);
       ctx.fill();
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = '#f5f9ff';
       ctx.beginPath();
-      ctx.arc(centerX-14, bodyY - headSize*0.33, 2, 0, 2*Math.PI);
-      ctx.arc(centerX+10, bodyY - headSize*0.33, 2, 0, 2*Math.PI);
+      ctx.arc(centerX-16, bodyY-headSize*0.23, 2.5, 0, 2*Math.PI);
+      ctx.arc(centerX+12, bodyY-headSize*0.23, 2.5, 0, 2*Math.PI);
       ctx.fill();
       
-      // Улыбка уверенного качка
-      ctx.beginPath();
-      ctx.strokeStyle = '#543e2b';
-      ctx.lineWidth = 4;
-      ctx.moveTo(centerX-10, bodyY - headSize*0.1);
-      ctx.quadraticCurveTo(centerX, bodyY - headSize*0.05, centerX+10, bodyY - headSize*0.1);
-      ctx.stroke();
+      // Руки + гантели
+      const leftShoulder = {x: centerX - bodyW*0.5, y: bodyY + bodyH*0.25};
+      const rightShoulder = {x: centerX + bodyW*0.5, y: bodyY + bodyH*0.25};
+      const armLen = 45 + strength * 0.7;
+      const armAngle = 0.5 + liftOffset * 0.02;
       
-      // ----- РУКИ И ГАНТЕЛИ (САМОЕ ГЛАВНОЕ) -----
-      // Плечи
-      ctx.fillStyle = '#f5dbb1';
-      ctx.shadowBlur = 6;
-      
-      // Левая рука
-      const leftShoulderX = centerX - bodyW*0.45;
-      const leftShoulderY = bodyY + bodyH*0.25;
-      // Правая
-      const rightShoulderX = centerX + bodyW*0.45;
-      const rightShoulderY = bodyY + bodyH*0.25;
-      
-      // Длина руки зависит от силы (больше бицепс)
-      const armLength = 40 + strength * 0.8;
-      const armThick = 16 + strength * 0.25;
-      
-      // Угол подъёма для анимации (liftOffset)
-      const leftHandAngle = -0.5 + (liftOffset * 0.03);
-      const rightHandAngle = 0.5 - (liftOffset * 0.03);
-      
-      // Левая рука
+      // Левая
       ctx.save();
-      ctx.translate(leftShoulderX, leftShoulderY);
-      ctx.rotate(leftHandAngle);
-      ctx.fillStyle = '#f5dbb1';
-      ctx.fillRect(-armThick/2, -armThick/2, armLength, armThick);
-      // Кисть
-      ctx.fillStyle = '#e0b07a';
-      ctx.fillRect(armLength-8, -armThick/2-2, 16, armThick+4);
-      
-      // Гантель левая
-      const leftDbXOffset = armLength + 12;
-      const leftDbYOffset = -2;
-      // Вращаем вместе с рукой
+      ctx.translate(leftShoulder.x, leftShoulder.y);
+      ctx.rotate(-armAngle);
+      ctx.fillStyle = '#f0cfb0';
+      ctx.fillRect(-8, -8, armLen, 20);
       ctx.restore();
       
-      // Рисуем левую гантель отдельно (поверх)
-      const leftGripX = leftShoulderX + Math.cos(leftHandAngle) * (armLength+6);
-      const leftGripY = leftShoulderY + Math.sin(leftHandAngle) * (armLength+6) - 2;
-      
-      // Правая рука
       ctx.save();
-      ctx.translate(rightShoulderX, rightShoulderY);
-      ctx.rotate(rightHandAngle);
-      ctx.fillStyle = '#f5dbb1';
-      ctx.fillRect(-armThick/2, -armThick/2, armLength, armThick);
-      ctx.fillStyle = '#e0b07a';
-      ctx.fillRect(armLength-8, -armThick/2-2, 16, armThick+4);
+      ctx.translate(rightShoulder.x, rightShoulder.y);
+      ctx.rotate(armAngle);
+      ctx.fillStyle = '#f0cfb0';
+      ctx.fillRect(-8, -8, armLen, 20);
       ctx.restore();
       
-      const rightGripX = rightShoulderX + Math.cos(rightHandAngle) * (armLength+6);
-      const rightGripY = rightShoulderY + Math.sin(rightHandAngle) * (armLength+6) - 2;
+      const dbWeight = getDumbbellWeight();
+      const dbSize = 22 + dbWeight * 1.1;
       
-      // ---- ГАНТЕЛИ (вес отображается размером) ----
-      const dbSize = 18 + dumbbellWeight * 1.2;
-      ctx.shadowBlur = 12;
+      // Гантели
+      ctx.shadowBlur = 15;
+      [[leftShoulder, -armAngle], [rightShoulder, armAngle]].forEach(([sh, ang]) => {
+        const gripX = sh.x + Math.cos(ang) * (armLen+8);
+        const gripY = sh.y + Math.sin(ang) * (armLen+8);
+        ctx.fillStyle = '#3a4755';
+        ctx.beginPath();
+        ctx.ellipse(gripX, gripY, dbSize, dbSize*0.9, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#6f8a9e';
+        ctx.beginPath();
+        ctx.ellipse(gripX-2, gripY-3, dbSize*0.65, dbSize*0.6, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#ffd966';
+        ctx.font = 'bold 16px "Segoe UI"';
+        ctx.fillText(dbWeight.toFixed(1)+'kg', gripX-30, gripY-30);
+      });
       
-      // Левая гантель
-      ctx.fillStyle = '#3a4045';
-      ctx.beginPath();
-      ctx.ellipse(leftGripX, leftGripY, dbSize, dbSize*0.9, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#6b7a8a';
-      ctx.beginPath();
-      ctx.ellipse(leftGripX-2, leftGripY-2, dbSize*0.7, dbSize*0.6, 0, 0, Math.PI*2);
-      ctx.fill();
-      // Блины
-      ctx.fillStyle = '#2c353d';
-      ctx.beginPath();
-      ctx.ellipse(leftGripX-4, leftGripY-2, dbSize*0.5, dbSize*0.45, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#aabccc';
-      ctx.font = `bold ${Math.min(18, 12+Math.floor(strength/5))}px 'Segoe UI'`;
-      ctx.fillText(dumbbellWeight.toFixed(1), leftGripX-20, leftGripY-20);
-      
-      // Правая гантель
-      ctx.fillStyle = '#3a4045';
-      ctx.beginPath();
-      ctx.ellipse(rightGripX, rightGripY, dbSize, dbSize*0.9, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#6b7a8a';
-      ctx.beginPath();
-      ctx.ellipse(rightGripX-2, rightGripY-2, dbSize*0.7, dbSize*0.6, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#2c353d';
-      ctx.beginPath();
-      ctx.ellipse(rightGripX-4, rightGripY-2, dbSize*0.5, dbSize*0.45, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#aabccc';
-      ctx.fillText(dumbbellWeight.toFixed(1), rightGripX-20, rightGripY-20);
-      
-      // Подписи "ЖМИ!"
-      ctx.font = 'bold 16px "Segoe UI"';
-      ctx.fillStyle = '#f9e074';
-      ctx.shadowBlur = 14;
-      ctx.fillText('⚡ЖМИ⚡', leftGripX-35, leftGripY-45);
-      ctx.fillText('⚡ЖМИ⚡', rightGripX-35, rightGripY-45);
-      
+      // Всплывающий текст
       ctx.shadowBlur = 0;
-      ctx.shadowColor = 'transparent';
+      floatingTexts = floatingTexts.filter(t => {
+        t.life -= 0.02;
+        t.y -= 1.2;
+        ctx.font = 'bold 22px "Segoe UI"';
+        ctx.fillStyle = `rgba(255, 215, 0, ${t.life})`;
+        ctx.fillText(t.value, t.x, t.y);
+        return t.life > 0;
+      });
       
-      // Если сила большая - эффект ауры
-      if (strength > 40) {
+      // Аура при высоком уровне
+      if (strength > 70) {
         ctx.beginPath();
         ctx.arc(centerX, bodyY, bodyW*1.2, 0, Math.PI*2);
-        ctx.fillStyle = '#f5e56b20';
+        ctx.fillStyle = '#f5e56b30';
         ctx.fill();
       }
+      
+      requestAnimationFrame(() => { if (clickEffect > 0 || floatingTexts.length) drawCanvas(); });
     }
 
-    // Анимационный цикл (для плавного затухания клика)
-    function animationLoop() {
-      if (clickEffect > 0) {
-        drawCanvas();
-        requestAnimationFrame(animationLoop);
-      }
-    }
-    
-    // Переопределяем отрисовку с проверкой анимации
-    const originalDraw = drawCanvas;
-    drawCanvas = function() {
-      originalDraw();
-      if (clickEffect > 0) {
-        requestAnimationFrame(animationLoop);
-      }
-    };
-    
-    // ----- ОБРАБОТЧИКИ СОБЫТИЙ -----
-    canvas.addEventListener('click', (e) => {
-      handleLift(e);
-    });
-    
+    // ----- ПРИВЯЗКА СОБЫТИЙ -----
+    canvas.addEventListener('click', handleClick);
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      const touch = e.touches[0];
-      const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} };
-      handleLift(fakeEvent);
-    }, { passive: false });
+      handleClick(e.touches[0]);
+    }, {passive: false});
     
-    // Кнопка сброса
-    document.getElementById('resetButton').addEventListener('click', () => {
-      resetGame();
-    });
+    resetBtn.addEventListener('click', fullReset);
+    buyAutoClicker.addEventListener('click', purchaseAutoClicker);
+    buyMultiplier.addEventListener('click', purchaseMultiplier);
     
     // Инициализация
-    updateWeightDisplay();
-    updateStrengthUI();
+    refreshUI();
+    updateLevelUI();
     drawCanvas();
-    
-    // Чтобы анимация работала корректно
-    window.addEventListener('resize', () => drawCanvas());
   })();
 </script>
 </body>
-</html>
+  </html>
