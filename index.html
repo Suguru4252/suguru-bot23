@@ -2,804 +2,633 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>🥩 ВЫРАСТИ СИСЮ ДИМЫ · ПОЛНЫЙ ФАРШ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Notes · Live Preview</title>
   <style>
     * {
       box-sizing: border-box;
-      user-select: none;
-    }
-
-    body {
       margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: #f5f7fa;
       display: flex;
       justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', 'Comic Sans MS', 'Impact', sans-serif;
-      padding: 12px;
+      padding: 20px;
     }
-
-    .disclaimer-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      backdrop-filter: blur(5px);
-    }
-
-    .disclaimer-box {
-      max-width: 450px;
-      background: #f5e6d3;
-      padding: 30px 25px;
-      border-radius: 50px 20px 50px 20px;
-      box-shadow: 0 20px 0 #5a351e, 0 20px 30px black;
-      border: 4px solid #ca9a5e;
-      text-align: center;
-      color: #2d1a09;
-      margin: 20px;
-    }
-
-    .disclaimer-box h2 {
-      font-size: 2rem;
-      margin: 0 0 15px;
-      text-shadow: 3px 3px 0 #e7b87b;
-    }
-
-    .disclaimer-box p {
-      font-size: 1.2rem;
-      line-height: 1.5;
-      font-weight: bold;
-      margin-bottom: 25px;
-    }
-
-    .disclaimer-btn {
-      background: #b57a3a;
-      border: none;
-      font-weight: bold;
-      font-size: 1.8rem;
-      padding: 15px 35px;
-      border-radius: 60px;
-      box-shadow: 0 8px 0 #5f371a, 0 4px 8px black;
-      color: #1f0f02;
-      cursor: pointer;
-      border: 2px solid #feda9b;
-      transition: 0.07s;
-      text-transform: uppercase;
-    }
-
-    .game-container {
-      max-width: 550px;
+    .app {
+      max-width: 1400px;
       width: 100%;
-      background: #fbe9c3;
-      background-image: radial-gradient(circle at 20% 30%, #fff3d6, #f0d5a8);
-      border-radius: 60px 60px 30px 30px;
-      box-shadow: 0 20px 0 #6b3e1f, 0 30px 30px rgba(0,0,0,0.4);
-      padding: 20px 15px 25px;
-      border: 4px solid #ac6f3c;
-      text-align: center;
-      position: relative;
-      transition: transform 0.05s;
+      display: flex;
+      gap: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      padding: 24px;
     }
-
-    .screen-shake {
-      animation: screenShake 0.15s;
+    /* Левая панель */
+    .sidebar {
+      width: 260px;
+      border-right: 1px solid #e2e8f0;
+      padding-right: 16px;
     }
-
-    @keyframes screenShake {
-      0%,100%{ transform: translate(0,0); }
-      20%{ transform: translate(-5px,3px); }
-      40%{ transform: translate(5px,-3px); }
-      60%{ transform: translate(-3px,5px); }
-      80%{ transform: translate(3px,-5px); }
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: 2.3rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #3d1f09;
-      text-shadow: 5px 5px 0 #e7b87b, 2px 2px 0 #a6531e;
-      transform: rotate(-1deg);
-    }
-
-    .combo-display {
-      background: #ffd966;
-      color: #3d1f09;
-      font-size: 1.8rem;
-      font-weight: bold;
-      padding: 5px 20px;
-      border-radius: 40px;
-      display: inline-block;
-      margin-bottom: 10px;
-      box-shadow: 0 5px 0 #b87d2c;
-      border: 2px solid #ffeda6;
-    }
-
-    .dima-zone {
-      background: #b38b60;
-      padding: 20px 10px 25px;
-      border-radius: 80px 80px 40px 40px;
-      box-shadow: inset 0 -6px 0 #5d3a22, 0 12px 0 #4d2f19, 0 8px 15px black;
-      margin-bottom: 15px;
-      border: 3px solid #eeb574;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Капли */
-    .drop {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #fff0d0;
-      border-radius: 50%;
-      opacity: 0.9;
-      pointer-events: none;
-      filter: blur(1px);
-      box-shadow: 0 0 8px #fffaee;
-      animation: dropFall 0.6s ease-out forwards;
-    }
-
-    @keyframes dropFall {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(80px) scale(0.3); opacity: 0; }
-    }
-
-    .sisi-container {
+    .sidebar h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 2;
+      gap: 8px;
+      color: #1e293b;
     }
-
-    .sisya {
-      font-size: 8rem;
-      line-height: 1;
-      filter: drop-shadow(8px 12px 0 rgba(0,0,0,0.3));
+    .repo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px 0;
+    }
+    .repo-item {
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.1s ease;
-      background: #fad6b3;
-      padding: 10px 15px 15px 15px;
-      border-radius: 999px;
-      display: inline-block;
-      position: relative;
-      z-index: 3;
-    }
-
-    .sisya:active {
-      transform: scale(0.85);
-      filter: drop-shadow(2px 4px 0 #251608);
-    }
-
-    .dima-phrase {
-      font-size: 1.3rem;
-      color: #2d1a09;
-      font-weight: bold;
-      margin: 8px 0 5px;
-      min-height: 35px;
-      text-shadow: 1px 1px 0 #eebb77;
-    }
-
-    .sisi-stats {
-      background: #2c1a0b;
-      padding: 14px 12px;
-      border-radius: 60px;
-      box-shadow: inset 0 2px 6px black, 0 8px 0 #1a0f06;
-      color: #ffdead;
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin: 15px 0 10px;
       display: flex;
       align-items: center;
-      justify-content: space-around;
-      border: 2px solid #bc8f4b;
+      gap: 8px;
+      color: #334155;
+      transition: background 0.15s;
     }
-
-    .sisi-size {
-      background: #51321b;
-      padding: 8px 20px;
-      border-radius: 50px;
-      box-shadow: inset 0 2px 5px black;
-      color: #ffd78a;
-      text-shadow: 2px 2px 0 #1f0f03;
+    .repo-item:hover {
+      background: #f1f5f9;
     }
-
-    .crit-meter {
-      background: #241407;
-      border-radius: 40px;
-      padding: 8px 18px;
-      color: #ffb882;
-      font-size: 1.3rem;
+    .repo-item.active {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 500;
     }
-
-    .arousal-bar-container {
-      background: #1f1107;
-      border-radius: 40px;
-      padding: 6px 15px;
-      margin: 15px 5px 5px;
-      border: 2px solid #d48f4a;
+    .repo-item i {
+      opacity: 0.6;
+      font-size: 16px;
     }
-
-    .arousal-fill {
-      height: 24px;
-      background: linear-gradient(90deg, #ff6a6a, #ff3b9a);
-      border-radius: 30px;
-      width: 0%;
-      box-shadow: inset 0 2px 5px #44001a, 0 0 15px #ff8c8c;
-      transition: width 0.2s;
-    }
-
-    .arousal-text {
-      color: #ffe5b4;
-      font-weight: bold;
-      margin-top: 6px;
-      font-size: 1.1rem;
-    }
-
-    .currency-panel {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #3d2a19;
-      padding: 8px 18px;
-      border-radius: 50px;
-      margin: 10px 0;
-      color: #ffeab5;
-      font-weight: bold;
-      border: 2px solid #bc8f4b;
-    }
-
-    .cum-coins {
-      background: #f5e6d3;
-      color: #2d1a09;
-      padding: 5px 20px;
-      border-radius: 30px;
-      font-size: 1.4rem;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 12px 0 8px;
-    }
-
-    .btn {
-      background: #d68f3c;
+    .btn-new {
+      width: 100%;
+      padding: 10px;
+      background: #0f172a;
+      color: white;
       border: none;
-      font-weight: bold;
-      font-size: 1.4rem;
-      padding: 14px 18px;
-      border-radius: 60px;
-      box-shadow: 0 8px 0 #7a451b, 0 5px 10px black;
-      color: #1f0f02;
-      text-transform: uppercase;
+      border-radius: 8px;
+      font-weight: 500;
       cursor: pointer;
-      transition: 0.07s;
-      border: 2px solid #feda9b;
-      flex: 1 0 140px;
-      letter-spacing: 1.5px;
+      transition: background 0.2s;
     }
-
-    .btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 3px 0 #7a451b, 0 4px 8px black;
+    .btn-new:hover {
+      background: #1e293b;
     }
-
-    .shop-btn {
-      background: #9b6b3c;
-      box-shadow: 0 6px 0 #5a351e;
-      font-size: 1.1rem;
+    /* Правая панель */
+    .main {
+      flex: 1;
+      min-width: 0;
     }
-
-    .achievements-panel {
-      background: #2f1f11e0;
-      border-radius: 30px;
-      padding: 12px 12px;
-      margin: 15px 0 10px;
-      border: 2px solid #dba15a;
-      backdrop-filter: blur(3px);
-    }
-
-    .ach-title {
-      color: #ffd78c;
-      font-weight: bold;
-      font-size: 1.3rem;
-      text-shadow: 2px 2px 0 #361e0c;
-      margin-bottom: 8px;
-    }
-
-    .ach-list {
+    .editor-header {
       display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .repo-title-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 18px;
+      font-weight: 500;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+    .repo-title-input:focus {
+      outline: 2px solid #0ea5e9;
+      background: white;
+    }
+    /* Переключатель режимов */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .mode-tab.active {
+      background: white;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .mode-tab i {
+      margin-right: 6px;
+    }
+    /* Область контента */
+    .content-wrapper {
+      width: 100%;
+    }
+    textarea {
+      width: 100%;
+      height: 420px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fafafa;
+      resize: vertical;
+      tab-size: 4;
+    }
+    textarea:focus {
+      outline: 2px solid #0ea5e9;
+      background: white;
+    }
+    /* Превью панель */
+    .preview-panel {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .preview-header {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .preview-frame {
+      width: 100%;
+      height: 420px;
+      border: none;
+      background: white;
+    }
+    /* Разделенный вид */
+    .split-container {
+      display: flex;
+      gap: 16px;
+    }
+    .split-container .editor-section {
+      flex: 1;
+    }
+    .split-container .preview-section {
+      flex: 1;
+    }
+    .split-container textarea {
+      height: 420px;
+    }
+    .split-container .preview-panel {
+      margin-top: 0;
+      height: 420px;
+      display: flex;
+      flex-direction: column;
+    }
+    .split-container .preview-frame {
+      height: 100%;
+    }
+    /* Скрытие */
+    .hidden {
+      display: none !important;
+    }
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      justify-content: flex-end;
       flex-wrap: wrap;
-      gap: 8px 12px;
-      justify-content: center;
     }
-
-    .ach-badge {
-      background: #543e28;
-      padding: 6px 16px;
-      border-radius: 40px;
-      color: #d4b483;
-      font-weight: bold;
-      border: 1px solid #b47d44;
-      box-shadow: inset 0 0 6px #1a0e04;
-      font-size: 1rem;
+    .btn {
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      background: #e2e8f0;
+      color: #1e293b;
+      transition: all 0.15s;
     }
-
-    .ach-badge.unlocked {
-      background: #d6a04b;
-      color: #1d2c00;
-      box-shadow: 0 0 15px gold;
-      border-color: #ffd966;
+    .btn-primary {
+      background: #0f172a;
+      color: white;
     }
-
-    .crit-log {
-      background: #0c0702d0;
-      backdrop-filter: blur(2px);
-      padding: 12px 16px;
-      border-radius: 40px;
+    .btn-primary:hover {
+      background: #1e293b;
+    }
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+    .btn-copy {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .btn-copy:hover {
+      background: #bfdbfe;
+    }
+    .btn-download {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .btn-download:hover {
+      background: #bbf7d0;
+    }
+    .btn-preview {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .btn-preview:hover {
+      background: #fde68a;
+    }
+    .empty-message {
+      color: #64748b;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .footer-note {
       margin-top: 12px;
-      color: #ffe3ae;
-      font-size: 1.2rem;
-      font-weight: bold;
-      min-height: 70px;
-      border: 2px dashed #f3b35e;
-      box-shadow: inset 0 0 12px #37200b;
-    }
-
-    .glow-crit {
-      text-shadow: 0 0 20px rgb(255, 200, 0), 0 0 40px rgb(255, 80, 0);
-      animation: shake 0.3s;
-    }
-
-    @keyframes shake {
-      0%,100%{ transform: translateX(0); }
-      25%{ transform: translateX(-8px); }
-      75%{ transform: translateX(8px); }
-    }
-
-    .reset-area {
-      margin-top: 12px;
-    }
-
-    .small-btn {
-      background: #684527;
-      box-shadow: 0 5px 0 #3f2818;
-      font-size: 1rem;
-      padding: 10px 25px;
+      font-size: 12px;
+      color: #94a3b8;
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-
-<div class="disclaimer-overlay" id="disclaimer">
-  <div class="disclaimer-box">
-    <h2>⚠️ ВНИМАНИЕ</h2>
-    <p>
-      Эта игра создана исключительно ради абсурдного юмора и развлечения.<br><br>
-      Я не хочу обидеть чьи-либо чувства. Если вам не понравилась игра — просто удалите её.<br><br>
-      Простите, если случайно задел чьи-то чувства.<br>
-      ❤️ Мир и сиськи.
-    </p>
-    <button class="disclaimer-btn" id="acceptDisclaimer">ПОНЯЛ, ПОГНАЛИ 🥩</button>
-  </div>
-</div>
-
-<div class="game-container" id="gameContainer">
-  <h1>🥩 ДИМА ДАУН 🥩</h1>
-  
-  <div class="combo-display" id="comboDisplay">🔥 x1</div>
-  
-  <div class="dima-zone" id="dimaZone">
-    <div class="sisi-container">
-      <span class="sisya" id="sisiEmoji">🥩</span>
-      <span style="font-size:3.5rem;">🤜💥</span>
-    </div>
-    <div class="dima-phrase" id="dimaPhrase">😤 ЩА КАК ДАМ!</div>
-    <div class="sisi-stats">
-      <span class="sisi-size">🍖 <span id="sizeValue">1.0</span> см</span>
-      <span class="crit-meter">⚡КРИТ: <span id="critChanceDisplay">25</span>%</span>
-    </div>
-    <div class="arousal-bar-container">
-      <div class="arousal-fill" id="arousalFill"></div>
-      <div class="arousal-text">💢 ВОЗБУЖДЕНИЕ: <span id="arousalPercent">0</span>%</div>
+<div class="app">
+  <div class="sidebar">
+    <h3><i class="far fa-folder-open"></i> Мои заметки</h3>
+    <ul class="repo-list" id="repoList"></ul>
+    <button class="btn-new" id="newRepoBtn"><i class="fas fa-plus-circle"></i> Новая заметка</button>
+    <div class="footer-note">
+      <i class="far fa-save"></i> Автосохранение · Live Preview
     </div>
   </div>
 
-  <div class="currency-panel">
-    <span>💦 КАПЛИ СПЕРМЫ</span>
-    <span class="cum-coins" id="cumCoins">0</span>
-  </div>
-
-  <div class="action-buttons">
-    <button class="btn" id="hitBtn">🤜 БИТЬ</button>
-    <button class="btn" id="specialCritBtn">💦 СПЕЦ-КРИТ</button>
-  </div>
-  
-  <div class="action-buttons">
-    <button class="btn shop-btn" id="upgradeCritBtn">📈 КРИТ +5% (5💦)</button>
-    <button class="btn shop-btn" id="upgradeMultiBtn">✨ МНОЖИТЕЛЬ x2 (10💦)</button>
-  </div>
-
-  <div class="achievements-panel">
-    <div class="ach-title">🏆 ДОСТИЖЕНИЯ</div>
-    <div class="ach-list" id="achList">
-      <span class="ach-badge" id="achSize">📏 20см</span>
-      <span class="ach-badge" id="achCrit10">💥 10 КРИТОВ</span>
-      <span class="ach-badge" id="achArousal">💢 ПОЛНОЕ</span>
-      <span class="ach-badge" id="achCombo">🔥 КОМБО x10</span>
+  <div class="main" id="editorPanel">
+    <div class="empty-message">
+      <i class="far fa-hand-pointer" style="font-size: 32px; opacity: 0.5;"></i>
+      <p>Выберите заметку слева или создайте новую</p>
     </div>
-  </div>
-
-  <div class="crit-log" id="logBox">
-    💬 ЖМИ НА СИСЮ...
-  </div>
-
-  <div class="reset-area">
-    <button class="btn small-btn" id="resetBtn">🔄 ЗАНОВО</button>
   </div>
 </div>
 
 <script>
   (function(){
-    "use strict";
+    const STORAGE_KEY = 'simple_code_notes';
+    let notes = [];
 
-    // ---------- СОСТОЯНИЕ ----------
-    let sisiSize = 1.0;
-    let critChance = 0.25;
-    let arousal = 0;
-    const MAX_AROUSAL = 100;
-    
-    // Валюта и комбо
-    let cumCoins = 0;
-    let combo = 1;
-    let comboTime = 0;
-    const COMBO_TIMEOUT = 2000;
-    
-    // Множитель урона
-    let damageMultiplier = 1.0;
-
-    // Достижения
-    let achSizeUnlocked = false;
-    let achCritUnlocked = false;
-    let achArousalUnlocked = false;
-    let achComboUnlocked = false;
-    let critCounter = 0;
-
-    let canSpecialCrit = true;
-    let lastHitTime = Date.now();
-
-    // Фразы Димы
-    const dimaPhrases = [
-      "😤 ЩА КАК ДАМ!", "🥵 АЙ БЛЯТЬ!", "💦 КОНЧАЮ НА СОСКИ!", 
-      "👅 СЛИЗЫВАЮ!", "🍖 СИСЯ РАСТЁТ!", "🤤 МММ СПЕРМА!",
-      "💪 ЕЩЁ УДАР!", "🔥 ГОРИТ!", "😈 ДАВАЙ ЕЩЁ!", "💀 ЖЁСТКО!"
-    ];
-
-    // ЗВУКИ
-    let audioCtx = null;
-    function initAudio() {
-      if (audioCtx) return;
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      } catch(e) {}
-    }
-
-    function playSlapSound() {
-      if (!audioCtx) { initAudio(); return; }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = 80 + Math.random() * 50;
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.08);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.08);
-    }
-
-    function playSquelchSound() {
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.value = 45;
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.15);
-    }
-
-    function playCritSound() {
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 120;
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now+0.2);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start();
-      osc.stop(now+0.2);
-    }
-
-    // DOM элементы
-    const logBox = document.getElementById('logBox');
-    const sizeSpan = document.getElementById('sizeValue');
-    const critChanceSpan = document.getElementById('critChanceDisplay');
-    const sisiEmoji = document.getElementById('sisiEmoji');
-    const arousalFill = document.getElementById('arousalFill');
-    const arousalPercent = document.getElementById('arousalPercent');
-    const cumCoinsSpan = document.getElementById('cumCoins');
-    const comboDisplay = document.getElementById('comboDisplay');
-    const dimaPhraseEl = document.getElementById('dimaPhrase');
-    const gameContainer = document.getElementById('gameContainer');
-    const dimaZone = document.getElementById('dimaZone');
-
-    const achSizeEl = document.getElementById('achSize');
-    const achCrit10El = document.getElementById('achCrit10');
-    const achArousalEl = document.getElementById('achArousal');
-    const achComboEl = document.getElementById('achCombo');
-
-    function updateUI() {
-      sizeSpan.textContent = sisiSize.toFixed(2);
-      critChanceSpan.textContent = Math.round(critChance * 100);
-      
-      if (sisiSize >= 20.0) sisiEmoji.textContent = '🍖🍖🍖🍖';
-      else if (sisiSize >= 12.0) sisiEmoji.textContent = '🍖🍖🍖';
-      else if (sisiSize >= 7.0) sisiEmoji.textContent = '🍖🍖';
-      else if (sisiSize >= 3.0) sisiEmoji.textContent = '🥩🥩';
-      else sisiEmoji.textContent = '🥩';
-      
-      arousal = Math.min(MAX_AROUSAL, Math.max(0, arousal));
-      const percent = (arousal / MAX_AROUSAL) * 100;
-      arousalFill.style.width = percent + '%';
-      arousalPercent.textContent = Math.floor(percent);
-      
-      cumCoinsSpan.textContent = Math.floor(cumCoins);
-      comboDisplay.textContent = `🔥 x${combo.toFixed(1)}`;
-      
-      achSizeEl.classList.toggle('unlocked', achSizeUnlocked);
-      achCrit10El.classList.toggle('unlocked', achCritUnlocked);
-      achArousalEl.classList.toggle('unlocked', achArousalUnlocked);
-      achComboEl.classList.toggle('unlocked', achComboUnlocked);
-    }
-
-    function randomPhrase() {
-      return dimaPhrases[Math.floor(Math.random() * dimaPhrases.length)];
-    }
-
-    function shakeScreen() {
-      gameContainer.classList.add('screen-shake');
-      setTimeout(() => gameContainer.classList.remove('screen-shake'), 150);
-    }
-
-    function spawnDrops(count = 8) {
-      for (let i = 0; i < count; i++) {
-        const drop = document.createElement('div');
-        drop.className = 'drop';
-        drop.style.left = (20 + Math.random() * 60) + '%';
-        drop.style.top = (30 + Math.random() * 40) + '%';
-        drop.style.background = `radial-gradient(circle, #fff8e7, #ffddaa)`;
-        drop.style.width = (6 + Math.random() * 12) + 'px';
-        drop.style.height = drop.style.width;
-        dimaZone.appendChild(drop);
-        setTimeout(() => drop.remove(), 600);
+    function loadNotes() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try { notes = JSON.parse(stored); } catch(e){ notes = []; }
+      }
+      if (!notes.length) {
+        notes.push({
+          id: 'demo1',
+          title: 'debounce.js',
+          code: `function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}`
+        });
+        notes.push({
+          id: 'demo2',
+          title: 'пример страницы',
+          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { \n      font-family: system-ui; \n      padding: 20px; \n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      color: white;\n      min-height: 100vh;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n    }\n    .card {\n      background: rgba(255,255,255,0.1);\n      padding: 30px;\n      border-radius: 20px;\n      backdrop-filter: blur(10px);\n      text-align: center;\n    }\n    h1 { margin-bottom: 10px; }\n    button {\n      background: white;\n      border: none;\n      padding: 12px 24px;\n      border-radius: 40px;\n      font-weight: bold;\n      cursor: pointer;\n      margin-top: 20px;\n    }\n    button:hover { transform: scale(1.05); }\n  </style>\n</head>\n<body>\n  <div class="card">\n    <h1>🎉 Привет!</h1>\n    <p>Это живой предпросмотр HTML/CSS</p>\n    <button onclick="alert('Работает!')\">Нажми меня</button>\n  </div>\n</body>\n</html>`
+        });
       }
     }
 
-    function checkAchievements() {
-      if (!achSizeUnlocked && sisiSize >= 20.0) {
-        achSizeUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: СИСЯ 20 СМ! БОГ СИСЕК!');
-      }
-      if (!achCritUnlocked && critCounter >= 10) {
-        achCritUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: 10 КРИТОВ! КРИТ-МАШИНА!');
-      }
-      if (!achArousalUnlocked && arousal >= MAX_AROUSAL) {
-        achArousalUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: ПОЛНОЕ ВОЗБУЖДЕНИЕ!');
-      }
-      if (!achComboUnlocked && combo >= 10) {
-        achComboUnlocked = true;
-        setLog('🏆 ДОСТИЖЕНИЕ: КОМБО x10! НЕУДЕРЖИМ!');
-      }
+    function saveNotes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
     }
 
-    function setLog(msg, isCrit=false) {
-      logBox.innerHTML = msg;
-      if (isCrit) {
-        logBox.classList.add('glow-crit');
-        setTimeout(() => logBox.classList.remove('glow-crit'), 400);
-      }
+    function generateId() {
+      return Date.now() + '-' + Math.random().toString(36).substr(2, 6);
     }
 
-    function updateCombo() {
-      const now = Date.now();
-      if (now - lastHitTime < COMBO_TIMEOUT) {
-        combo = Math.min(20, combo + 0.5);
-      } else {
-        combo = 1;
-      }
-      lastHitTime = now;
-      comboDisplay.textContent = `🔥 x${combo.toFixed(1)}`;
-    }
+    const repoListEl = document.getElementById('repoList');
+    const editorPanel = document.getElementById('editorPanel');
+    const newRepoBtn = document.getElementById('newRepoBtn');
 
-    function checkArousalOverflow() {
-      if (arousal >= MAX_AROUSAL) {
-        arousal = 0;
-        let gain = 1.5 * damageMultiplier * combo;
-        sisiSize += gain;
-        critChance = Math.min(0.6, critChance + 0.03);
-        cumCoins += 5;
-        playCritSound();
-        shakeScreen();
-        spawnDrops(15);
-        dimaPhraseEl.textContent = "💦💦💦 ААААА КОНЧАЮ!!!";
-        setLog(`💥💦 АВТОКРИТ! +${gain.toFixed(2)}см! КАПЛИ ЛЕТЯТ!`, true);
-        critCounter++;
-        checkAchievements();
-        updateUI();
-      }
-    }
+    let activeNoteId = null;
+    let currentMode = 'code'; // 'code', 'split', 'preview'
+    let previewUpdateTimer = null;
 
-    function hitSisya() {
-      initAudio();
-      playSlapSound();
-      updateCombo();
-      
-      let gain = (0.2 + Math.random() * 0.3) * damageMultiplier * combo;
-      const effectiveCrit = critChance + (combo * 0.01);
-      const isCrit = Math.random() < effectiveCrit;
-      let message = '';
-      
-      dimaPhraseEl.textContent = randomPhrase();
-      
-      if (isCrit) {
-        gain *= 2.8;
-        message = `💥💦 КРИТ! +${gain.toFixed(2)}см! КОНЧАЕТ НА СОСКИ!`;
-        playCritSound();
-        shakeScreen();
-        spawnDrops(10);
-        critCounter++;
-        arousal = Math.min(MAX_AROUSAL, arousal + 25);
-        cumCoins += 3;
-        dimaPhraseEl.textContent = "💦 КОНЧАЮ НА СОСКИ! 👅 СЛИЗЫВАЮ!";
-      } else {
-        message = `👊 УДАР! +${gain.toFixed(2)}см.`;
-        arousal = Math.min(MAX_AROUSAL, arousal + 12);
-        cumCoins += 1;
-      }
-      
-      sisiSize += gain;
-      critChance = Math.min(0.6, critChance + 0.002);
-      
-      updateUI();
-      checkArousalOverflow();
-      checkAchievements();
-      setLog(message, isCrit);
-      
-      sisiEmoji.style.transform = 'scale(1.15)';
-      setTimeout(()=> sisiEmoji.style.transform = '', 100);
-    }
-
-    function performSpecialCrit() {
-      initAudio();
-      if (!canSpecialCrit) {
-        setLog('⏳ ПЕРЕЗАРЯДКА...');
+    function renderSidebar() {
+      if (!notes.length) {
+        repoListEl.innerHTML = `<li style="padding:12px; color:#64748b; list-style:none;"><i class="far fa-folder"></i> Нет заметок</li>`;
         return;
       }
+      const itemsHtml = notes.map(note => `
+        <li class="repo-item ${activeNoteId === note.id ? 'active' : ''}" data-id="${note.id}">
+          <i class="far fa-file-code"></i>
+          <span>${escapeHtml(note.title) || 'Без названия'}</span>
+        </li>
+      `).join('');
+      repoListEl.innerHTML = itemsHtml;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function getFileNameWithExtension(title) {
+      let filename = title.trim();
+      if (!filename) filename = 'code';
       
-      updateCombo();
-      const success = Math.random() < (0.45 + sisiSize * 0.01);
+      const commonExtensions = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.sh', '.bat', '.ps1', '.rb', '.php', '.swift', '.kt', '.sql'];
+      const hasExtension = commonExtensions.some(ext => filename.toLowerCase().endsWith(ext));
       
-      if (success) {
-        let gain = (2.0 + sisiSize * 0.25) * damageMultiplier * combo;
-        sisiSize += gain;
-        critChance = Math.min(0.7, critChance + 0.06);
-        arousal = Math.min(MAX_AROUSAL, arousal + 45);
-        cumCoins += 8;
-        playSquelchSound();
-        playCritSound();
-        shakeScreen();
-        spawnDrops(20);
-        dimaPhraseEl.textContent = "💦💦💦 ГЛОТАЮ ВСЮ СПЕРМУ!!!";
-        setLog(`💦💦💦 СПЕЦ-КРИТ! +${gain.toFixed(2)}см! ГЛОТАЕТ!`, true);
-        critCounter++;
-        canSpecialCrit = false;
-        setTimeout(()=> { canSpecialCrit = true; setLog('✨ СПЕЦ-КРИТ ГОТОВ!'); }, 4000);
+      if (hasExtension) return filename;
+      
+      const code = getCurrentCode();
+      const firstLine = code.trim().split('\n')[0].toLowerCase();
+      
+      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
+      if (firstLine.includes('<?php')) return filename + '.php';
+      if (firstLine.includes('import java') || firstLine.includes('public class')) return filename + '.java';
+      if (firstLine.includes('#!/usr/bin/python') || (firstLine.includes('import ') && (code.includes('def ') || code.includes('print(')))) return filename + '.py';
+      if (firstLine.includes('#!/bin/bash') || code.includes('echo ')) return filename + '.sh';
+      if (code.includes('function ') || code.includes('const ') || code.includes('let ') || code.includes('var ')) return filename + '.js';
+      if (code.includes('package ') && code.includes('import (')) return filename + '.go';
+      
+      return filename + '.txt';
+    }
+
+    function getCurrentCode() {
+      const codeEditor = document.getElementById('codeEditor');
+      return codeEditor ? codeEditor.value : '';
+    }
+
+    function updatePreview() {
+      const codeEditor = document.getElementById('codeEditor');
+      const previewFrame = document.getElementById('previewFrame');
+      if (!codeEditor || !previewFrame) return;
+      
+      const code = codeEditor.value;
+      const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+      doc.open();
+      doc.write(code);
+      doc.close();
+    }
+
+    function debouncedUpdatePreview() {
+      if (previewUpdateTimer) clearTimeout(previewUpdateTimer);
+      previewUpdateTimer = setTimeout(() => updatePreview(), 300);
+    }
+
+    function renderEditor() {
+      if (!activeNoteId) {
+        editorPanel.innerHTML = `
+          <div class="empty-message">
+            <i class="far fa-hand-pointer" style="font-size: 32px; opacity: 0.5;"></i>
+            <p>Выберите заметку слева или создайте новую</p>
+          </div>
+        `;
+        return;
+      }
+
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) {
+        activeNoteId = null;
+        renderSidebar();
+        renderEditor();
+        return;
+      }
+
+      // Базовый HTML
+      let contentHtml = `
+        <div class="editor-header">
+          <input type="text" id="noteTitleInput" class="repo-title-input" value="${escapeHtml(note.title)}" placeholder="Название заметки">
+          <div class="mode-tabs">
+            <button class="mode-tab ${currentMode === 'code' ? 'active' : ''}" data-mode="code"><i class="fas fa-code"></i> Код</button>
+            <button class="mode-tab ${currentMode === 'split' ? 'active' : ''}" data-mode="split"><i class="fas fa-columns"></i> Сплит</button>
+            <button class="mode-tab ${currentMode === 'preview' ? 'active' : ''}" data-mode="preview"><i class="fas fa-eye"></i> Preview</button>
+          </div>
+        </div>
+      `;
+
+      // Разная разметка в зависимости от режима
+      if (currentMode === 'split') {
+        contentHtml += `
+          <div class="split-container">
+            <div class="editor-section">
+              <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
+            </div>
+            <div class="preview-section">
+              <div class="preview-panel">
+                <div class="preview-header">
+                  <i class="fas fa-play-circle" style="color: #10b981;"></i> 
+                  <span>Live Preview</span>
+                  <span style="margin-left: auto; font-size: 11px;">автообновление</span>
+                </div>
+                <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentMode === 'preview') {
+        contentHtml += `
+          <div class="preview-panel" style="margin-top: 0;">
+            <div class="preview-header">
+              <i class="fas fa-play-circle" style="color: #10b981;"></i> 
+              <span>Live Preview</span>
+              <span style="margin-left: auto; font-size: 11px;">режим просмотра</span>
+            </div>
+            <iframe id="previewFrame" style="height: 500px;" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+          </div>
+          <div style="display: none;">
+            <textarea id="codeEditor">${escapeHtml(note.code)}</textarea>
+          </div>
+        `;
       } else {
-        sisiSize += 0.5;
-        setLog('😩 ПОЧТИ... +0.5см');
+        // Режим "Код"
+        contentHtml += `
+          <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
+          <div class="preview-panel hidden">
+            <div class="preview-header">
+              <i class="fas fa-play-circle" style="color: #10b981;"></i> 
+              <span>Live Preview</span>
+            </div>
+            <iframe id="previewFrame" class="preview-frame"></iframe>
+          </div>
+        `;
+      }
+
+      // Кнопки действий
+      contentHtml += `
+        <div class="action-bar">
+          <button class="btn btn-copy" id="copyCodeBtn"><i class="far fa-copy"></i> Копировать</button>
+          <button class="btn btn-download" id="downloadFileBtn"><i class="fas fa-download"></i> Скачать</button>
+          ${currentMode !== 'code' ? '<button class="btn btn-preview" id="refreshPreviewBtn"><i class="fas fa-sync-alt"></i> Обновить</button>' : ''}
+          <button class="btn btn-primary" id="saveNoteBtn"><i class="far fa-save"></i> Сохранить</button>
+          <button class="btn btn-danger" id="deleteNoteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
+        </div>
+      `;
+
+      editorPanel.innerHTML = contentHtml;
+
+      const titleInput = document.getElementById('noteTitleInput');
+      const codeEditor = document.getElementById('codeEditor');
+      const previewFrame = document.getElementById('previewFrame');
+      
+      // Инициализация превью
+      if (previewFrame) {
+        setTimeout(() => updatePreview(), 50);
       }
       
-      checkArousalOverflow();
-      checkAchievements();
-      updateUI();
+      // Переключение режимов
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          currentMode = tab.dataset.mode;
+          renderEditor();
+        });
+      });
+      
+      // Live preview при вводе
+      if (codeEditor) {
+        codeEditor.addEventListener('input', () => {
+          if (previewFrame) debouncedUpdatePreview();
+          // Автосохранение в фоне
+          const note = notes.find(n => n.id === activeNoteId);
+          if (note) {
+            note.code = codeEditor.value;
+            saveNotes();
+          }
+        });
+        
+        codeEditor.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            document.getElementById('saveNoteBtn').click();
+          }
+        });
+      }
+      
+      const refreshBtn = document.getElementById('refreshPreviewBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => updatePreview());
+      }
+      
+      document.getElementById('saveNoteBtn').addEventListener('click', () => {
+        if (!activeNoteId) return;
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.title = titleInput.value.trim() || 'Без названия';
+          if (codeEditor) note.code = codeEditor.value;
+          saveNotes();
+          renderSidebar();
+          titleInput.style.background = '#e6f7e6';
+          setTimeout(() => titleInput.style.background = '', 300);
+        }
+      });
+
+      document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+        try {
+          const textToCopy = codeEditor ? codeEditor.value : note.code;
+          await navigator.clipboard.writeText(textToCopy);
+          const btn = document.getElementById('copyCodeBtn');
+          btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
+          setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Копировать', 1500);
+        } catch (err) {
+          alert('Не удалось скопировать: ' + err);
+        }
+      });
+
+      document.getElementById('downloadFileBtn').addEventListener('click', () => {
+        const filename = getFileNameWithExtension(titleInput.value);
+        const content = codeEditor ? codeEditor.value : note.code;
+        downloadFile(filename, content);
+        const btn = document.getElementById('downloadFileBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Скачан!';
+        setTimeout(() => btn.innerHTML = originalText, 1500);
+      });
+
+      document.getElementById('deleteNoteBtn').addEventListener('click', () => {
+        if (!activeNoteId) return;
+        if (!confirm('Удалить эту заметку навсегда?')) return;
+        notes = notes.filter(n => n.id !== activeNoteId);
+        activeNoteId = null;
+        currentMode = 'code';
+        saveNotes();
+        renderSidebar();
+        renderEditor();
+      });
+      
+      // Сохранение названия при потере фокуса
+      titleInput.addEventListener('blur', () => {
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.title = titleInput.value.trim() || 'Без названия';
+          saveNotes();
+          renderSidebar();
+        }
+      });
     }
 
-    function upgradeCrit() {
-      if (cumCoins >= 5) {
-        cumCoins -= 5;
-        critChance = Math.min(0.7, critChance + 0.05);
-        setLog('📈 КРИТ +5%! ТЕПЕРЬ БОЛЬШЕ КОНЧИ!');
-        updateUI();
-      } else {
-        setLog('💦 НЕ ХВАТАЕТ КАПЕЛЬ! БЕЙ ЕЩЁ!');
+    function handleRepoClick(e) {
+      const item = e.target.closest('[data-id]');
+      if (!item) return;
+      const id = item.dataset.id;
+      if (activeNoteId !== id) {
+        activeNoteId = id;
+        currentMode = 'code';
+        renderSidebar();
+        renderEditor();
       }
     }
 
-    function upgradeMultiplier() {
-      if (cumCoins >= 10) {
-        cumCoins -= 10;
-        damageMultiplier *= 1.5;
-        setLog(`✨ МНОЖИТЕЛЬ УВЕЛИЧЕН! ТЕПЕРЬ x${damageMultiplier.toFixed(1)}!`);
-        updateUI();
-      } else {
-        setLog('💦 НЕ ХВАТАЕТ КАПЕЛЬ!');
-      }
+    function createNewNote() {
+      const newNote = {
+        id: generateId(),
+        title: 'новая_заметка',
+        code: '// ваш код'
+      };
+      notes.push(newNote);
+      activeNoteId = newNote.id;
+      currentMode = 'code';
+      saveNotes();
+      renderSidebar();
+      renderEditor();
     }
 
-    function resetGame() {
-      sisiSize = 1.0;
-      critChance = 0.25;
-      arousal = 0;
-      cumCoins = 0;
-      combo = 1;
-      damageMultiplier = 1.0;
-      canSpecialCrit = true;
-      achSizeUnlocked = achCritUnlocked = achArousalUnlocked = achComboUnlocked = false;
-      critCounter = 0;
-      updateUI();
-      setLog('💬 НОВАЯ ИГРА! ВЫРАЩИВАЙ, КОПИ КАПЛИ, ПОКУПАЙ УЛУЧШЕНИЯ!');
-      dimaPhraseEl.textContent = "😤 ЩА КАК ДАМ!";
-    }
+    loadNotes();
+    renderSidebar();
+    renderEditor();
 
-    // Инициализация
-    function initGame() {
-      updateUI();
-      setLog('🥩 ЖМИ НА СИСЮ! КОМБО, КАПЛИ, МАГАЗИН!');
-      
-      document.getElementById('hitBtn').addEventListener('click', hitSisya);
-      document.getElementById('specialCritBtn').addEventListener('click', performSpecialCrit);
-      document.getElementById('upgradeCritBtn').addEventListener('click', upgradeCrit);
-      document.getElementById('upgradeMultiBtn').addEventListener('click', upgradeMultiplier);
-      document.getElementById('resetBtn').addEventListener('click', resetGame);
-      sisiEmoji.addEventListener('click', hitSisya);
-      
-      setInterval(() => {
-        if (arousal > 0) arousal = Math.max(0, arousal - 2);
-        if (combo > 1 && Date.now() - lastHitTime > COMBO_TIMEOUT) combo = 1;
-        updateUI();
-      }, 2000);
-    }
-
-    const overlay = document.getElementById('disclaimer');
-    document.getElementById('acceptDisclaimer').addEventListener('click', () => {
-      overlay.style.display = 'none';
-      initGame();
-      document.body.addEventListener('click', () => initAudio(), { once: true });
-    });
+    repoListEl.addEventListener('click', handleRepoClick);
+    newRepoBtn.addEventListener('click', createNewNote);
   })();
 </script>
 </body>
