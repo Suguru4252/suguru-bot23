@@ -127,6 +127,7 @@
       gap: 10px;
       margin-top: 16px;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
     .btn {
       padding: 10px 18px;
@@ -159,6 +160,13 @@
     .btn-copy:hover {
       background: #bfdbfe;
     }
+    .btn-download {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .btn-download:hover {
+      background: #bbf7d0;
+    }
     .empty-message {
       color: #64748b;
       text-align: center;
@@ -170,12 +178,10 @@
       color: #94a3b8;
     }
   </style>
-  <!-- Font Awesome для иконок -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 <div class="app">
-  <!-- Левая колонка: список репозиториев -->
   <div class="sidebar">
     <h3><i class="far fa-folder-open"></i> Мои заметки</h3>
     <ul class="repo-list" id="repoList"></ul>
@@ -185,7 +191,6 @@
     </div>
   </div>
 
-  <!-- Правая колонка: редактор -->
   <div class="main" id="editorPanel">
     <div class="empty-message">
       <i class="far fa-hand-pointer" style="font-size: 32px; opacity: 0.5;"></i>
@@ -196,26 +201,23 @@
 
 <script>
   (function(){
-    // ---------- Модель данных ----------
     const STORAGE_KEY = 'simple_code_notes';
-    let notes = []; // массив { id, title, code }
+    let notes = [];
 
-    // Загрузка из localStorage
     function loadNotes() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         try { notes = JSON.parse(stored); } catch(e){ notes = []; }
       }
-      // Если пусто, добавим демо-заметку
       if (!notes.length) {
         notes.push({
           id: 'demo1',
-          title: 'Пример: debounce',
+          title: 'debounce.js',
           code: `function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}`
         });
         notes.push({
           id: 'demo2',
-          title: 'Python: чтение файла',
+          title: 'read_file.py',
           code: `with open('file.txt', 'r') as f:\n    content = f.read()\n    print(content)`
         });
       }
@@ -225,19 +227,16 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
     }
 
-    // Генерация id
     function generateId() {
       return Date.now() + '-' + Math.random().toString(36).substr(2, 6);
     }
 
-    // ---------- DOM элементы ----------
     const repoListEl = document.getElementById('repoList');
     const editorPanel = document.getElementById('editorPanel');
     const newRepoBtn = document.getElementById('newRepoBtn');
 
     let activeNoteId = null;
 
-    // ---------- Рендер списка слева ----------
     function renderSidebar() {
       if (!notes.length) {
         repoListEl.innerHTML = `<li style="padding:12px; color:#64748b; list-style:none;"><i class="far fa-folder"></i> Нет заметок</li>`;
@@ -252,14 +251,60 @@
       repoListEl.innerHTML = itemsHtml;
     }
 
-    // Простой escape
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
 
-    // ---------- Рендер правой панели (редактор) ----------
+    // Функция для скачивания файла
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Умное определение имени файла
+    function getFileNameWithExtension(title) {
+      let filename = title.trim();
+      if (!filename) filename = 'code';
+      
+      // Проверяем, есть ли уже расширение
+      const commonExtensions = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.sh', '.bat', '.ps1', '.rb', '.php', '.swift', '.kt', '.sql'];
+      const hasExtension = commonExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+      
+      if (hasExtension) {
+        return filename;
+      }
+      
+      // Пытаемся угадать расширение по содержимому (простая эвристика)
+      const code = getCurrentCode();
+      const firstLine = code.trim().split('\n')[0].toLowerCase();
+      
+      if (firstLine.includes('<?php')) return filename + '.php';
+      if (firstLine.includes('import java') || firstLine.includes('public class')) return filename + '.java';
+      if (firstLine.includes('#!/usr/bin/python') || firstLine.includes('import ') && (code.includes('def ') || code.includes('print('))) return filename + '.py';
+      if (firstLine.includes('#!/bin/bash') || code.includes('echo ')) return filename + '.sh';
+      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
+      if (code.includes('function ') || code.includes('const ') || code.includes('let ') || code.includes('var ')) return filename + '.js';
+      if (code.includes('package ') && code.includes('import (')) return filename + '.go';
+      if (firstLine.includes('use strict') || code.includes('::')) return filename + '.rs';
+      if (firstLine.includes('#include')) return filename + '.c';
+      
+      return filename + '.txt';
+    }
+
+    function getCurrentCode() {
+      const codeEditor = document.getElementById('codeEditor');
+      return codeEditor ? codeEditor.value : '';
+    }
+
     function renderEditor() {
       if (!activeNoteId) {
         editorPanel.innerHTML = `
@@ -286,16 +331,15 @@
         <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
         <div class="action-bar">
           <button class="btn btn-copy" id="copyCodeBtn"><i class="far fa-copy"></i> Копировать</button>
+          <button class="btn btn-download" id="downloadFileBtn"><i class="fas fa-download"></i> Скачать</button>
           <button class="btn btn-primary" id="saveNoteBtn"><i class="far fa-save"></i> Сохранить</button>
           <button class="btn btn-danger" id="deleteNoteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
         </div>
       `;
 
-      // Привязка событий
       const titleInput = document.getElementById('noteTitleInput');
       const codeEditor = document.getElementById('codeEditor');
       
-      // Автосохранение при изменении? По кнопке сохранить, но можно и авто при потере фокуса.
       document.getElementById('saveNoteBtn').addEventListener('click', () => {
         if (!activeNoteId) return;
         const note = notes.find(n => n.id === activeNoteId);
@@ -303,8 +347,7 @@
           note.title = titleInput.value.trim() || 'Без названия';
           note.code = codeEditor.value;
           saveNotes();
-          renderSidebar(); // обновить название в списке
-          // показать краткое уведомление (можно просто подсветить)
+          renderSidebar();
           titleInput.style.background = '#e6f7e6';
           setTimeout(() => titleInput.style.background = '', 300);
         }
@@ -313,7 +356,6 @@
       document.getElementById('copyCodeBtn').addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(codeEditor.value);
-          // Визуальная обратная связь
           const btn = document.getElementById('copyCodeBtn');
           btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
           setTimeout(() => {
@@ -322,6 +364,20 @@
         } catch (err) {
           alert('Не удалось скопировать: ' + err);
         }
+      });
+
+      document.getElementById('downloadFileBtn').addEventListener('click', () => {
+        const filename = getFileNameWithExtension(titleInput.value);
+        const content = codeEditor.value;
+        downloadFile(filename, content);
+        
+        // Визуальная обратная связь
+        const btn = document.getElementById('downloadFileBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Скачан!';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 1500);
       });
 
       document.getElementById('deleteNoteBtn').addEventListener('click', () => {
@@ -334,7 +390,6 @@
         renderEditor();
       });
 
-      // Можно также сохранять по Ctrl+S
       codeEditor.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
@@ -343,7 +398,6 @@
       });
     }
 
-    // ---------- Обработчики событий ----------
     function handleRepoClick(e) {
       const item = e.target.closest('[data-id]');
       if (!item) return;
@@ -358,7 +412,7 @@
     function createNewNote() {
       const newNote = {
         id: generateId(),
-        title: 'Новая заметка',
+        title: 'новая_заметка',
         code: '// ваш код'
       };
       notes.push(newNote);
@@ -368,16 +422,12 @@
       renderEditor();
     }
 
-    // ---------- Инициализация ----------
     loadNotes();
     renderSidebar();
     renderEditor();
 
-    // Привязка событий
     repoListEl.addEventListener('click', handleRepoClick);
     newRepoBtn.addEventListener('click', createNewNote);
-
-    // Автосохранение при уходе со страницы не нужно — всё и так в localStorage
   })();
 </script>
 </body>
