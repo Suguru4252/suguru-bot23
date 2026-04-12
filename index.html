@@ -2,329 +2,215 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Code Notes · Мобильная версия</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
+      padding: 0;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
     body {
       background: #f5f7fa;
-      padding: 0;
-      margin: 0;
+      padding: 12px;
       min-height: 100vh;
     }
     .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      max-width: 100%;
       background: white;
-      position: relative;
-    }
-    /* Верхняя панель */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .menu-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #1e293b;
-      padding: 8px;
-      margin-right: 12px;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .menu-btn:active {
-      background: #f1f5f9;
-    }
-    .current-repo-name {
-      flex: 1;
-      font-size: 18px;
-      font-weight: 600;
-      color: #1e293b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .new-repo-btn {
-      background: #0f172a;
-      color: white;
-      border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-    .new-repo-btn:active {
-      background: #1e293b;
-    }
-    /* Боковое меню (скрыто по умолчанию) */
-    .sidebar-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 20;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s;
-    }
-    .sidebar-overlay.open {
-      opacity: 1;
-      visibility: visible;
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -280px;
-      width: 280px;
-      height: 100vh;
-      background: white;
-      z-index: 21;
+      border-radius: 20px;
       padding: 16px;
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    .sidebar.open {
-      left: 0;
-    }
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .sidebar h3 {
-      font-size: 18px;
+    
+    /* Заголовок */
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
       color: #1e293b;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .close-sidebar-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #64748b;
+    
+    /* Список заметок */
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 8px;
+      background: #fafafa;
+    }
+    .note-item {
+      padding: 14px 12px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #334155;
+      font-size: 15px;
+      transition: all 0.15s;
+    }
+    .note-item:active {
+      background: #f1f5f9;
+    }
+    .note-item.active {
+      background: #0f172a;
+      color: white;
+      border-color: #0f172a;
+    }
+    .note-item i {
+      opacity: 0.7;
+      font-size: 16px;
+    }
+    
+    /* Кнопка создания */
+    .btn-new {
+      width: 100%;
+      padding: 14px;
+      background: #0f172a;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      gap: 8px;
     }
-    .close-sidebar-btn:active {
-      background: #f1f5f9;
+    .btn-new:active {
+      background: #1e293b;
     }
-    .repo-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .repo-item {
-      padding: 14px 12px;
-      margin-bottom: 4px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #334155;
-      transition: background 0.15s;
-      font-size: 16px;
-    }
-    .repo-item:active {
-      background: #f1f5f9;
-    }
-    .repo-item.active {
-      background: #e0f2fe;
-      color: #0369a1;
-      font-weight: 500;
-    }
-    .repo-item i {
-      opacity: 0.6;
-      font-size: 18px;
-    }
-    .footer-note {
-      margin-top: 20px;
-      padding: 12px;
-      font-size: 12px;
-      color: #94a3b8;
-      text-align: center;
-    }
-    /* Основной контент */
-    .main-content {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-    }
-    .editor-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    .repo-title-input {
+    
+    /* Поле названия */
+    .title-input {
       width: 100%;
       padding: 14px 16px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 500;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
-      background: #fafafa;
-      margin-bottom: 16px;
-    }
-    .repo-title-input:focus {
-      outline: 2px solid #0ea5e9;
       background: white;
+      margin-bottom: 12px;
     }
+    .title-input:focus {
+      outline: 2px solid #0ea5e9;
+    }
+    
+    /* Поле кода */
     textarea {
       width: 100%;
-      flex: 1;
-      min-height: 400px;
+      height: 350px;
       padding: 16px;
-      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-family: 'SF Mono', 'Cascadia Code', monospace;
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.5;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
       background: #fafafa;
-      resize: none;
-      tab-size: 4;
+      resize: vertical;
+      margin-bottom: 16px;
     }
     textarea:focus {
       outline: 2px solid #0ea5e9;
       background: white;
     }
+    
     /* Кнопки действий */
-    .action-bar {
+    .action-row {
       display: flex;
       gap: 8px;
-      margin-top: 16px;
-      padding-bottom: 8px;
       flex-wrap: wrap;
     }
     .btn {
       flex: 1;
-      min-width: 80px;
-      padding: 14px 12px;
+      min-width: 70px;
+      padding: 14px 10px;
       border-radius: 12px;
       border: none;
       font-weight: 500;
       font-size: 14px;
       cursor: pointer;
-      background: #e2e8f0;
-      color: #1e293b;
-      transition: all 0.15s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      background: #e2e8f0;
+      color: #1e293b;
     }
     .btn:active {
-      transform: scale(0.98);
+      opacity: 0.8;
     }
     .btn-primary {
       background: #0f172a;
       color: white;
     }
-    .btn-primary:active {
-      background: #1e293b;
-    }
     .btn-danger {
       background: #fee2e2;
       color: #b91c1c;
-    }
-    .btn-danger:active {
-      background: #fecaca;
     }
     .btn-copy {
       background: #dbeafe;
       color: #1e40af;
     }
-    .btn-copy:active {
-      background: #bfdbfe;
-    }
     .btn-download {
       background: #dcfce7;
       color: #166534;
     }
-    .btn-download:active {
-      background: #bbf7d0;
-    }
+    
     .empty-message {
-      color: #64748b;
       text-align: center;
-      padding: 60px 20px;
+      color: #64748b;
+      padding: 30px 20px;
+      background: #fafafa;
+      border-radius: 12px;
     }
-    .empty-message i {
-      font-size: 48px;
-      opacity: 0.3;
-      margin-bottom: 16px;
+    
+    .info-text {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 16px;
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 <div class="app">
-  <!-- Боковое меню -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h3><i class="far fa-folder-open"></i> Мои заметки</h3>
-      <button class="close-sidebar-btn" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <ul class="repo-list" id="repoList"></ul>
-    <div class="footer-note">
-      <i class="far fa-save"></i> Автосохранение
-    </div>
-  </div>
-
-  <!-- Верхняя панель -->
-  <div class="top-bar">
-    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-    <span class="current-repo-name" id="currentRepoName">Выберите заметку</span>
-    <button class="new-repo-btn" id="newRepoBtn"><i class="fas fa-plus"></i></button>
-  </div>
-
-  <!-- Основной контент -->
-  <div class="main-content" id="editorPanel">
-    <div class="empty-message">
-      <i class="far fa-hand-pointer"></i>
-      <p>Нажмите ☰ чтобы выбрать заметку<br>или + чтобы создать новую</p>
-    </div>
+  <h2><i class="far fa-folder-open"></i> Мои заметки</h2>
+  
+  <!-- Список заметок -->
+  <div class="notes-list" id="notesList"></div>
+  
+  <!-- Кнопка создания -->
+  <button class="btn-new" id="newNoteBtn"><i class="fas fa-plus-circle"></i> Создать новую заметку</button>
+  
+  <!-- Редактор -->
+  <div id="editorArea"></div>
+  
+  <div class="info-text">
+    <i class="far fa-save"></i> Автосохранение при вводе
   </div>
 </div>
 
 <script>
   (function(){
-    const STORAGE_KEY = 'simple_code_notes_mobile';
+    const STORAGE_KEY = 'mobile_code_notes';
     let notes = [];
 
+    // Загрузка
     function loadNotes() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -332,19 +218,19 @@
       }
       if (!notes.length) {
         notes.push({
-          id: 'demo1',
+          id: '1',
           title: 'debounce.js',
           code: `function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}`
         });
         notes.push({
-          id: 'demo2',
-          title: 'read_file.py',
+          id: '2',
+          title: 'python.py',
           code: `with open('file.txt', 'r') as f:\n    content = f.read()\n    print(content)`
         });
         notes.push({
-          id: 'demo3',
-          title: 'hello.html',
-          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: system-ui; padding: 20px; }\n    h1 { color: #0f172a; }\n  </style>\n</head>\n<body>\n  <h1>Привет, мир!</h1>\n  <p>Это моя HTML заметка</p>\n</body>\n</html>`
+          id: '3',
+          title: 'страница.html',
+          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { padding: 20px; }\n    h1 { color: #0f172a; }\n  </style>\n</head>\n<body>\n  <h1>Привет!</h1>\n</body>\n</html>`
         });
       }
     }
@@ -357,39 +243,25 @@
       return Date.now() + '-' + Math.random().toString(36).substr(2, 6);
     }
 
-    const repoListEl = document.getElementById('repoList');
-    const editorPanel = document.getElementById('editorPanel');
-    const newRepoBtn = document.getElementById('newRepoBtn');
-    const menuBtn = document.getElementById('menuBtn');
-    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const currentRepoName = document.getElementById('currentRepoName');
+    const notesListEl = document.getElementById('notesList');
+    const editorArea = document.getElementById('editorArea');
+    const newNoteBtn = document.getElementById('newNoteBtn');
 
-    let activeNoteId = null;
+    let activeNoteId = notes.length ? notes[0].id : null;
 
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('open');
-    }
-
-    function openSidebar() {
-      sidebar.classList.add('open');
-      sidebarOverlay.classList.add('open');
-    }
-
-    function renderSidebar() {
+    // Отрисовка списка
+    function renderNotesList() {
       if (!notes.length) {
-        repoListEl.innerHTML = `<li style="padding:12px; color:#64748b; list-style:none;"><i class="far fa-folder"></i> Нет заметок</li>`;
+        notesListEl.innerHTML = `<div class="empty-message" style="padding:16px;">Нет заметок. Создайте новую</div>`;
         return;
       }
-      const itemsHtml = notes.map(note => `
-        <li class="repo-item ${activeNoteId === note.id ? 'active' : ''}" data-id="${note.id}">
+      const html = notes.map(note => `
+        <div class="note-item ${activeNoteId === note.id ? 'active' : ''}" data-id="${note.id}">
           <i class="far fa-file-code"></i>
           <span>${escapeHtml(note.title) || 'Без названия'}</span>
-        </li>
+        </div>
       `).join('');
-      repoListEl.innerHTML = itemsHtml;
+      notesListEl.innerHTML = html;
     }
 
     function escapeHtml(text) {
@@ -398,6 +270,7 @@
       return div.innerHTML;
     }
 
+    // Скачивание
     function downloadFile(filename, content) {
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -410,162 +283,111 @@
       URL.revokeObjectURL(url);
     }
 
-    function getFileNameWithExtension(title) {
-      let filename = title.trim();
-      if (!filename) filename = 'code';
+    function getFileName(title, code) {
+      let name = title.trim();
+      if (!name) name = 'code';
       
-      const commonExtensions = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt', '.md', '.json', '.xml', '.sh', '.php'];
-      const hasExtension = commonExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+      const exts = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.txt'];
+      if (exts.some(ext => name.toLowerCase().endsWith(ext))) return name;
       
-      if (hasExtension) return filename;
+      if (code.includes('<!DOCTYPE') || code.includes('<html>')) return name + '.html';
+      if (code.includes('def ') || code.includes('import ')) return name + '.py';
+      if (code.includes('function ') || code.includes('const ')) return name + '.js';
       
-      const code = getCurrentCode();
-      const firstLine = code.trim().split('\n')[0].toLowerCase();
-      
-      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
-      if (firstLine.includes('import java') || firstLine.includes('public class')) return filename + '.java';
-      if (firstLine.includes('#!/usr/bin/python') || (firstLine.includes('import ') && (code.includes('def ') || code.includes('print(')))) return filename + '.py';
-      if (code.includes('function ') || code.includes('const ') || code.includes('let ')) return filename + '.js';
-      
-      return filename + '.txt';
+      return name + '.txt';
     }
 
-    function getCurrentCode() {
-      const codeEditor = document.getElementById('codeEditor');
-      return codeEditor ? codeEditor.value : '';
-    }
-
-    function updateCurrentRepoTitle() {
-      if (!activeNoteId) {
-        currentRepoName.textContent = 'Выберите заметку';
-        return;
-      }
-      const note = notes.find(n => n.id === activeNoteId);
-      if (note) {
-        currentRepoName.textContent = note.title || 'Без названия';
-      }
-    }
-
+    // Отрисовка редактора
     function renderEditor() {
       if (!activeNoteId) {
-        editorPanel.innerHTML = `
-          <div class="empty-message">
-            <i class="far fa-hand-pointer"></i>
-            <p>Нажмите ☰ чтобы выбрать заметку<br>или + чтобы создать новую</p>
-          </div>
-        `;
-        updateCurrentRepoTitle();
+        editorArea.innerHTML = `<div class="empty-message">Выберите или создайте заметку</div>`;
         return;
       }
 
       const note = notes.find(n => n.id === activeNoteId);
       if (!note) {
-        activeNoteId = null;
-        renderSidebar();
+        activeNoteId = notes.length ? notes[0].id : null;
+        renderNotesList();
         renderEditor();
         return;
       }
 
-      updateCurrentRepoTitle();
-
-      editorPanel.innerHTML = `
-        <div class="editor-container">
-          <input type="text" id="noteTitleInput" class="repo-title-input" value="${escapeHtml(note.title)}" placeholder="Название заметки">
-          <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
-          <div class="action-bar">
-            <button class="btn btn-copy" id="copyCodeBtn"><i class="far fa-copy"></i> <span>Копировать</span></button>
-            <button class="btn btn-download" id="downloadFileBtn"><i class="fas fa-download"></i> <span>Скачать</span></button>
-            <button class="btn btn-primary" id="saveNoteBtn"><i class="far fa-save"></i> <span>Сохранить</span></button>
-            <button class="btn btn-danger" id="deleteNoteBtn"><i class="far fa-trash-alt"></i> <span>Удалить</span></button>
-          </div>
+      editorArea.innerHTML = `
+        <input type="text" id="titleInput" class="title-input" value="${escapeHtml(note.title)}" placeholder="Название заметки">
+        <textarea id="codeEditor" placeholder="// Ваш код...">${escapeHtml(note.code)}</textarea>
+        <div class="action-row">
+          <button class="btn btn-copy" id="copyBtn"><i class="far fa-copy"></i> Копировать</button>
+          <button class="btn btn-download" id="downloadBtn"><i class="fas fa-download"></i> Скачать</button>
+          <button class="btn btn-primary" id="saveBtn"><i class="far fa-save"></i> Сохранить</button>
+          <button class="btn btn-danger" id="deleteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
         </div>
       `;
 
-      const titleInput = document.getElementById('noteTitleInput');
+      const titleInput = document.getElementById('titleInput');
       const codeEditor = document.getElementById('codeEditor');
-      
-      document.getElementById('saveNoteBtn').addEventListener('click', () => {
-        if (!activeNoteId) return;
-        const note = notes.find(n => n.id === activeNoteId);
-        if (note) {
-          note.title = titleInput.value.trim() || 'Без названия';
-          note.code = codeEditor.value;
-          saveNotes();
-          renderSidebar();
-          updateCurrentRepoTitle();
-          titleInput.style.background = '#e6f7e6';
-          setTimeout(() => titleInput.style.background = '', 300);
-        }
-      });
-
-      document.getElementById('copyCodeBtn').addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(codeEditor.value);
-          const btn = document.getElementById('copyCodeBtn');
-          btn.innerHTML = '<i class="fas fa-check"></i> <span>Готово</span>';
-          setTimeout(() => {
-            btn.innerHTML = '<i class="far fa-copy"></i> <span>Копировать</span>';
-          }, 1500);
-        } catch (err) {
-          alert('Не удалось скопировать');
-        }
-      });
-
-      document.getElementById('downloadFileBtn').addEventListener('click', () => {
-        const filename = getFileNameWithExtension(titleInput.value);
-        const content = codeEditor.value;
-        downloadFile(filename, content);
-        
-        const btn = document.getElementById('downloadFileBtn');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> <span>Скачан</span>';
-        setTimeout(() => {
-          btn.innerHTML = originalHtml;
-        }, 1500);
-      });
-
-      document.getElementById('deleteNoteBtn').addEventListener('click', () => {
-        if (!activeNoteId) return;
-        if (!confirm('Удалить эту заметку?')) return;
-        notes = notes.filter(n => n.id !== activeNoteId);
-        activeNoteId = null;
-        saveNotes();
-        renderSidebar();
-        renderEditor();
-      });
 
       // Автосохранение при вводе
+      titleInput.addEventListener('input', () => {
+        note.title = titleInput.value.trim() || 'Без названия';
+        saveNotes();
+        renderNotesList();
+      });
+
       codeEditor.addEventListener('input', () => {
-        const note = notes.find(n => n.id === activeNoteId);
-        if (note) {
-          note.code = codeEditor.value;
-          saveNotes();
+        note.code = codeEditor.value;
+        saveNotes();
+      });
+
+      // Кнопки
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        note.title = titleInput.value.trim() || 'Без названия';
+        note.code = codeEditor.value;
+        saveNotes();
+        renderNotesList();
+        titleInput.style.background = '#e6f7e6';
+        setTimeout(() => titleInput.style.background = '', 300);
+      });
+
+      document.getElementById('copyBtn').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(codeEditor.value);
+          const btn = document.getElementById('copyBtn');
+          btn.innerHTML = '<i class="fas fa-check"></i> Готово';
+          setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Копировать', 1500);
+        } catch (e) {
+          alert('Ошибка копирования');
         }
       });
-      
-      titleInput.addEventListener('input', () => {
-        const note = notes.find(n => n.id === activeNoteId);
-        if (note) {
-          note.title = titleInput.value.trim() || 'Без названия';
-          saveNotes();
-          updateCurrentRepoTitle();
-        }
+
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        const filename = getFileName(titleInput.value, codeEditor.value);
+        downloadFile(filename, codeEditor.value);
+        const btn = document.getElementById('downloadBtn');
+        btn.innerHTML = '<i class="fas fa-check"></i> Скачан';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-download"></i> Скачать', 1500);
+      });
+
+      document.getElementById('deleteBtn').addEventListener('click', () => {
+        if (!confirm('Удалить заметку?')) return;
+        notes = notes.filter(n => n.id !== activeNoteId);
+        activeNoteId = notes.length ? notes[0].id : null;
+        saveNotes();
+        renderNotesList();
+        renderEditor();
       });
     }
 
-    function handleRepoClick(e) {
+    // Обработчик клика по списку
+    notesListEl.addEventListener('click', (e) => {
       const item = e.target.closest('[data-id]');
       if (!item) return;
-      const id = item.dataset.id;
-      if (activeNoteId !== id) {
-        activeNoteId = id;
-        renderSidebar();
-        renderEditor();
-        closeSidebar();
-      }
-    }
+      activeNoteId = item.dataset.id;
+      renderNotesList();
+      renderEditor();
+    });
 
-    function createNewNote() {
+    // Создание новой заметки
+    newNoteBtn.addEventListener('click', () => {
       const newNote = {
         id: generateId(),
         title: 'Новая заметка',
@@ -574,33 +396,14 @@
       notes.push(newNote);
       activeNoteId = newNote.id;
       saveNotes();
-      renderSidebar();
+      renderNotesList();
       renderEditor();
-      closeSidebar();
-    }
+    });
 
+    // Старт
     loadNotes();
-    renderSidebar();
+    renderNotesList();
     renderEditor();
-
-    repoListEl.addEventListener('click', handleRepoClick);
-    newRepoBtn.addEventListener('click', createNewNote);
-    menuBtn.addEventListener('click', openSidebar);
-    closeSidebarBtn.addEventListener('click', closeSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
-    
-    // Закрытие по свайпу вправо (упрощённо)
-    let touchStartX = 0;
-    sidebar.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-    });
-    sidebar.addEventListener('touchmove', (e) => {
-      const touchX = e.touches[0].clientX;
-      const diff = touchStartX - touchX;
-      if (diff > 50) {
-        closeSidebar();
-      }
-    });
   })();
 </script>
 </body>
