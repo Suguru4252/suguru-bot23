@@ -165,10 +165,6 @@
       background: #dbeafe;
       color: #1e40af;
     }
-    .btn-download {
-      background: #dcfce7;
-      color: #166534;
-    }
     
     .empty-message {
       text-align: center;
@@ -270,33 +266,6 @@
       return div.innerHTML;
     }
 
-    // Скачивание
-    function downloadFile(filename, content) {
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function getFileName(title, code) {
-      let name = title.trim();
-      if (!name) name = 'code';
-      
-      const exts = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.txt'];
-      if (exts.some(ext => name.toLowerCase().endsWith(ext))) return name;
-      
-      if (code.includes('<!DOCTYPE') || code.includes('<html>')) return name + '.html';
-      if (code.includes('def ') || code.includes('import ')) return name + '.py';
-      if (code.includes('function ') || code.includes('const ')) return name + '.js';
-      
-      return name + '.txt';
-    }
-
     // Отрисовка редактора
     function renderEditor() {
       if (!activeNoteId) {
@@ -317,7 +286,6 @@
         <textarea id="codeEditor" placeholder="// Ваш код...">${escapeHtml(note.code)}</textarea>
         <div class="action-row">
           <button class="btn btn-copy" id="copyBtn"><i class="far fa-copy"></i> Копировать</button>
-          <button class="btn btn-download" id="downloadBtn"><i class="fas fa-download"></i> Скачать</button>
           <button class="btn btn-primary" id="saveBtn"><i class="far fa-save"></i> Сохранить</button>
           <button class="btn btn-danger" id="deleteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
         </div>
@@ -357,14 +325,6 @@
         } catch (e) {
           alert('Ошибка копирования');
         }
-      });
-
-      document.getElementById('downloadBtn').addEventListener('click', () => {
-        const filename = getFileName(titleInput.value, codeEditor.value);
-        downloadFile(filename, codeEditor.value);
-        const btn = document.getElementById('downloadBtn');
-        btn.innerHTML = '<i class="fas fa-check"></i> Скачан';
-        setTimeout(() => btn.innerHTML = '<i class="fas fa-download"></i> Скачать', 1500);
       });
 
       document.getElementById('deleteBtn').addEventListener('click', () => {
