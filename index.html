@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Notes · Простой менеджер кода</title>
+  <title>Code Notes · простые заметки с кодом</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,92 +11,80 @@
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
     body {
-      background: #0d1117;
+      background: #f5f7fa;
       display: flex;
       justify-content: center;
       padding: 20px;
-      min-height: 100vh;
     }
     .app {
-      max-width: 1400px;
+      max-width: 1100px;
       width: 100%;
       display: flex;
       gap: 20px;
-      background: #161b22;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      padding: 20px;
-      border: 1px solid #30363d;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      padding: 24px;
     }
     /* Левая панель */
     .sidebar {
-      width: 280px;
-      border-right: 1px solid #30363d;
+      width: 260px;
+      border-right: 1px solid #e2e8f0;
       padding-right: 16px;
     }
     .sidebar h3 {
-      font-size: 16px;
+      font-size: 18px;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #c9d1d9;
-      font-weight: 600;
+      color: #1e293b;
     }
     .repo-list {
       list-style: none;
       padding: 0;
       margin: 0 0 16px 0;
-      max-height: calc(100vh - 200px);
-      overflow-y: auto;
     }
     .repo-item {
       padding: 10px 12px;
       margin-bottom: 4px;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #c9d1d9;
+      color: #334155;
       transition: background 0.15s;
-      font-size: 14px;
     }
     .repo-item:hover {
-      background: #21262d;
+      background: #f1f5f9;
     }
     .repo-item.active {
-      background: #1f6feb;
-      color: white;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 500;
     }
     .repo-item i {
-      opacity: 0.7;
-      font-size: 14px;
+      opacity: 0.6;
+      font-size: 16px;
     }
     .btn-new {
       width: 100%;
-      padding: 8px 12px;
-      background: #238636;
+      padding: 10px;
+      background: #0f172a;
       color: white;
-      border: 1px solid #2ea043;
-      border-radius: 6px;
+      border: none;
+      border-radius: 8px;
       font-weight: 500;
-      font-size: 14px;
       cursor: pointer;
       transition: background 0.2s;
     }
     .btn-new:hover {
-      background: #2ea043;
-    }
-    .footer-note {
-      margin-top: 12px;
-      font-size: 11px;
-      color: #8b949e;
+      background: #1e293b;
     }
     /* Правая панель */
     .main {
       flex: 1;
-      min-width: 0;
     }
     .editor-header {
       display: flex;
@@ -106,158 +94,121 @@
     }
     .repo-title-input {
       flex: 1;
-      padding: 8px 12px;
-      font-size: 16px;
+      padding: 10px 14px;
+      font-size: 18px;
       font-weight: 500;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      background: #0d1117;
-      color: #c9d1d9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fafafa;
     }
     .repo-title-input:focus {
-      outline: 2px solid #1f6feb;
-      background: #161b22;
+      outline: 2px solid #0ea5e9;
+      background: white;
     }
-    /* Переключатель */
-    .mode-tabs {
-      display: flex;
-      gap: 4px;
-      background: #21262d;
-      padding: 3px;
-      border-radius: 6px;
-    }
-    .mode-tab {
-      padding: 6px 12px;
-      border: none;
-      background: transparent;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      color: #8b949e;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .mode-tab.active {
-      background: #30363d;
-      color: #c9d1d9;
-    }
-    /* Текстовое поле */
     textarea {
       width: 100%;
-      height: 450px;
+      height: 380px;
       padding: 16px;
-      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      background: #0d1117;
-      color: #c9d1d9;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fafafa;
       resize: vertical;
       tab-size: 4;
     }
     textarea:focus {
-      outline: 2px solid #1f6feb;
+      outline: 2px solid #0ea5e9;
+      background: white;
     }
-    /* Превью */
-    .preview-panel {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
+    /* Стили для превью */
+    .preview-container {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
       overflow: hidden;
-      margin-top: 12px;
+      background: white;
     }
     .preview-header {
       padding: 8px 12px;
-      background: #161b22;
-      border-bottom: 1px solid #30363d;
-      font-size: 12px;
-      color: #8b949e;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #64748b;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .preview-frame {
       width: 100%;
-      height: 450px;
+      height: 380px;
       border: none;
       background: white;
-    }
-    /* Сп лит */
-    .split-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .split-container textarea {
-      height: 450px;
-    }
-    .split-container .preview-panel {
-      margin-top: 0;
-      height: 450px;
-      display: flex;
-      flex-direction: column;
-    }
-    .split-container .preview-frame {
-      height: 100%;
     }
     .hidden {
       display: none !important;
     }
-    /* Кнопки действий */
     .action-bar {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-top: 16px;
       justify-content: flex-end;
       flex-wrap: wrap;
-      border-top: 1px solid #30363d;
-      padding-top: 16px;
     }
     .btn {
-      padding: 6px 14px;
-      border-radius: 6px;
-      border: 1px solid #30363d;
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: none;
       font-weight: 500;
-      font-size: 13px;
       cursor: pointer;
-      background: #21262d;
-      color: #c9d1d9;
+      background: #e2e8f0;
+      color: #1e293b;
       transition: all 0.15s;
     }
-    .btn:hover {
-      background: #30363d;
-      border-color: #8b949e;
-    }
     .btn-primary {
-      background: #238636;
+      background: #0f172a;
       color: white;
-      border-color: #2ea043;
     }
     .btn-primary:hover {
-      background: #2ea043;
+      background: #1e293b;
     }
     .btn-danger {
-      background: #da3633;
-      color: white;
-      border-color: #f85149;
+      background: #fee2e2;
+      color: #b91c1c;
     }
     .btn-danger:hover {
-      background: #b62324;
+      background: #fecaca;
     }
     .btn-copy {
-      background: #1f6feb;
-      color: white;
-      border-color: #388bfd;
+      background: #dbeafe;
+      color: #1e40af;
     }
     .btn-copy:hover {
-      background: #388bfd;
+      background: #bfdbfe;
+    }
+    .btn-download {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .btn-download:hover {
+      background: #bbf7d0;
+    }
+    .btn-pages {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .btn-pages:hover {
+      background: #fde68a;
     }
     .empty-message {
-      color: #8b949e;
+      color: #64748b;
       text-align: center;
-      padding: 60px 20px;
+      padding: 40px 20px;
+    }
+    .footer-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #94a3b8;
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -265,54 +216,53 @@
 <body>
 <div class="app">
   <div class="sidebar">
-    <h3><i class="fab fa-github"></i> Мои репозитории</h3>
+    <h3><i class="far fa-folder-open"></i> Мои заметки</h3>
     <ul class="repo-list" id="repoList"></ul>
-    <button class="btn-new" id="newRepoBtn"><i class="fas fa-plus"></i> Новый репозиторий</button>
+    <button class="btn-new" id="newRepoBtn"><i class="fas fa-plus-circle"></i> Новая заметка</button>
     <div class="footer-note">
-      <i class="far fa-hdd"></i> Локальное хранилище
+      <i class="far fa-save"></i> Автосохранение
     </div>
   </div>
 
   <div class="main" id="editorPanel">
     <div class="empty-message">
-      <i class="far fa-folder-open" style="font-size: 40px; opacity: 0.3;"></i>
-      <p style="margin-top: 16px;">Выберите репозиторий или создайте новый</p>
+      <i class="far fa-hand-pointer" style="font-size: 32px; opacity: 0.5;"></i>
+      <p>Выберите заметку слева или создайте новую</p>
     </div>
   </div>
 </div>
 
 <script>
   (function(){
-    const STORAGE_KEY = 'github_style_notes';
-    let repos = [];
+    const STORAGE_KEY = 'simple_code_notes';
+    let notes = [];
 
-    // Загрузка
-    function loadRepos() {
+    function loadNotes() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        try { repos = JSON.parse(stored); } catch(e){ repos = []; }
+        try { notes = JSON.parse(stored); } catch(e){ notes = []; }
       }
-      if (!repos.length) {
-        repos.push({
+      if (!notes.length) {
+        notes.push({
           id: 'demo1',
-          name: 'javascript-utils',
-          code: `// Полезные функции JavaScript\n\nfunction debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n\nfunction throttle(fn, limit) {\n  let inThrottle;\n  return (...args) => {\n    if (!inThrottle) {\n      fn(...args);\n      inThrottle = true;\n      setTimeout(() => inThrottle = false, limit);\n    }\n  };\n}`
+          title: 'debounce.js',
+          code: `function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}`
         });
-        repos.push({
+        notes.push({
           id: 'demo2',
-          name: 'python-snippets',
-          code: `# Примеры Python\n\ndef read_file_lines(filename):\n    """Чтение файла построчно"""\n    with open(filename, 'r', encoding='utf-8') as f:\n        return [line.strip() for line in f]\n\ndef fibonacci(n):\n    """Генератор чисел Фибоначчи"""\n    a, b = 0, 1\n    for _ in range(n):\n        yield a\n        a, b = b, a + b`
+          title: 'read_file.py',
+          code: `with open('file.txt', 'r') as f:\n    content = f.read()\n    print(content)`
         });
-        repos.push({
+        notes.push({
           id: 'demo3',
-          name: 'landing-page',
-          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { \n      font-family: system-ui; \n      padding: 40px; \n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      color: white;\n      min-height: 100vh;\n    }\n    h1 { font-size: 48px; margin-bottom: 20px; }\n    p { font-size: 20px; opacity: 0.9; }\n  </style>\n</head>\n<body>\n  <h1>🚀 Привет, мир!</h1>\n  <p>Это предпросмотр твоего кода</p>\n</body>\n</html>`
+          title: 'page.html',
+          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { \n      font-family: system-ui; \n      padding: 20px; \n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      color: white;\n    }\n    h1 { font-size: 40px; }\n    button {\n      background: white;\n      border: none;\n      padding: 12px 24px;\n      border-radius: 40px;\n      font-weight: bold;\n      cursor: pointer;\n    }\n  </style>\n</head>\n<body>\n  <h1>🎉 GitHub Pages!</h1>\n  <p>Твой код работает как сайт</p>\n  <button onclick="alert('Работает!')\">Нажми</button>\n</body>\n</html>`
         });
       }
     }
 
-    function saveRepos() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(repos));
+    function saveNotes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
     }
 
     function generateId() {
@@ -323,19 +273,18 @@
     const editorPanel = document.getElementById('editorPanel');
     const newRepoBtn = document.getElementById('newRepoBtn');
 
-    let activeRepoId = null;
-    let currentMode = 'code';
-    let previewTimer = null;
+    let activeNoteId = null;
+    let showPreview = false;
 
     function renderSidebar() {
-      if (!repos.length) {
-        repoListEl.innerHTML = `<li style="padding:12px; color:#8b949e; list-style:none;">Нет репозиториев</li>`;
+      if (!notes.length) {
+        repoListEl.innerHTML = `<li style="padding:12px; color:#64748b; list-style:none;"><i class="far fa-folder"></i> Нет заметок</li>`;
         return;
       }
-      const itemsHtml = repos.map(repo => `
-        <li class="repo-item ${activeRepoId === repo.id ? 'active' : ''}" data-id="${repo.id}">
-          <i class="far fa-folder"></i>
-          <span>${escapeHtml(repo.name)}</span>
+      const itemsHtml = notes.map(note => `
+        <li class="repo-item ${activeNoteId === note.id ? 'active' : ''}" data-id="${note.id}">
+          <i class="far fa-file-code"></i>
+          <span>${escapeHtml(note.title) || 'Без названия'}</span>
         </li>
       `).join('');
       repoListEl.innerHTML = itemsHtml;
@@ -347,6 +296,7 @@
       return div.innerHTML;
     }
 
+    // Функция для скачивания файла
     function downloadFile(filename, content) {
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -359,19 +309,32 @@
       URL.revokeObjectURL(url);
     }
 
-    function getFileName(name) {
-      let filename = name.trim();
+    // Умное определение имени файла
+    function getFileNameWithExtension(title) {
+      let filename = title.trim();
       if (!filename) filename = 'code';
       
-      const exts = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt'];
-      const hasExt = exts.some(ext => filename.toLowerCase().endsWith(ext));
+      // Проверяем, есть ли уже расширение
+      const commonExtensions = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.sh', '.bat', '.ps1', '.rb', '.php', '.swift', '.kt', '.sql'];
+      const hasExtension = commonExtensions.some(ext => filename.toLowerCase().endsWith(ext));
       
-      if (hasExt) return filename;
+      if (hasExtension) {
+        return filename;
+      }
       
+      // Пытаемся угадать расширение по содержимому (простая эвристика)
       const code = getCurrentCode();
-      if (code.includes('<!DOCTYPE') || code.includes('<html>')) return filename + '.html';
-      if (code.includes('def ') || code.includes('import ')) return filename + '.py';
-      if (code.includes('function ') || code.includes('const ')) return filename + '.js';
+      const firstLine = code.trim().split('\n')[0].toLowerCase();
+      
+      if (firstLine.includes('<?php')) return filename + '.php';
+      if (firstLine.includes('import java') || firstLine.includes('public class')) return filename + '.java';
+      if (firstLine.includes('#!/usr/bin/python') || firstLine.includes('import ') && (code.includes('def ') || code.includes('print('))) return filename + '.py';
+      if (firstLine.includes('#!/bin/bash') || code.includes('echo ')) return filename + '.sh';
+      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
+      if (code.includes('function ') || code.includes('const ') || code.includes('let ') || code.includes('var ')) return filename + '.js';
+      if (code.includes('package ') && code.includes('import (')) return filename + '.go';
+      if (firstLine.includes('use strict') || code.includes('::')) return filename + '.rs';
+      if (firstLine.includes('#include')) return filename + '.c';
       
       return filename + '.txt';
     }
@@ -392,136 +355,134 @@
       doc.close();
     }
 
-    function debouncedUpdatePreview() {
-      if (previewTimer) clearTimeout(previewTimer);
-      previewTimer = setTimeout(() => updatePreview(), 300);
-    }
-
     function renderEditor() {
-      if (!activeRepoId) {
-        editorPanel.innerHTML = `<div class="empty-message"><i class="far fa-folder-open" style="font-size: 40px; opacity: 0.3;"></i><p style="margin-top: 16px;">Выберите репозиторий или создайте новый</p></div>`;
+      if (!activeNoteId) {
+        editorPanel.innerHTML = `
+          <div class="empty-message">
+            <i class="far fa-hand-pointer" style="font-size: 32px; opacity: 0.5;"></i>
+            <p>Выберите заметку слева или создайте новую</p>
+          </div>
+        `;
         return;
       }
 
-      const repo = repos.find(r => r.id === activeRepoId);
-      if (!repo) {
-        activeRepoId = null;
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) {
+        activeNoteId = null;
         renderSidebar();
         renderEditor();
         return;
       }
 
-      let html = `
+      editorPanel.innerHTML = `
         <div class="editor-header">
-          <input type="text" id="repoNameInput" class="repo-title-input" value="${escapeHtml(repo.name)}" placeholder="Название">
-          <div class="mode-tabs">
-            <button class="mode-tab ${currentMode === 'code' ? 'active' : ''}" data-mode="code"><i class="fas fa-code"></i> Код</button>
-            <button class="mode-tab ${currentMode === 'split' ? 'active' : ''}" data-mode="split"><i class="fas fa-columns"></i> Сп лит</button>
-            <button class="mode-tab ${currentMode === 'preview' ? 'active' : ''}" data-mode="preview"><i class="fas fa-eye"></i> Превью</button>
-          </div>
+          <input type="text" id="noteTitleInput" class="repo-title-input" value="${escapeHtml(note.title)}" placeholder="Название заметки">
         </div>
-      `;
-
-      if (currentMode === 'split') {
-        html += `
-          <div class="split-container">
-            <div><textarea id="codeEditor" placeholder="// Ваш код...">${escapeHtml(repo.code)}</textarea></div>
-            <div class="preview-panel">
-              <div class="preview-header"><i class="fas fa-play"></i> Предпросмотр</div>
-              <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        <textarea id="codeEditor" placeholder="// Вставьте или напишите код..." class="${showPreview ? 'hidden' : ''}">${escapeHtml(note.code)}</textarea>
+        <div id="previewArea" class="${showPreview ? '' : 'hidden'}">
+          <div class="preview-container">
+            <div class="preview-header">
+              <i class="fas fa-globe" style="color: #10b981;"></i> 
+              <span>GitHub Pages · Live Preview</span>
             </div>
+            <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals"></iframe>
           </div>
-        `;
-      } else if (currentMode === 'preview') {
-        html += `
-          <div class="preview-panel" style="margin-top:0;">
-            <div class="preview-header"><i class="fas fa-play"></i> Предпросмотр</div>
-            <iframe id="previewFrame" style="height:500px;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-          </div>
-          <textarea id="codeEditor" class="hidden">${escapeHtml(repo.code)}</textarea>
-        `;
-      } else {
-        html += `
-          <textarea id="codeEditor" placeholder="// Ваш код...">${escapeHtml(repo.code)}</textarea>
-          <div class="preview-panel hidden"><iframe id="previewFrame"></iframe></div>
-        `;
-      }
-
-      html += `
+        </div>
         <div class="action-bar">
-          <button class="btn btn-copy" id="copyBtn"><i class="far fa-copy"></i> Копировать</button>
-          <button class="btn" id="downloadBtn"><i class="fas fa-download"></i> Скачать</button>
-          <button class="btn btn-primary" id="saveBtn"><i class="far fa-save"></i> Сохранить</button>
-          <button class="btn btn-danger" id="deleteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
+          <button class="btn btn-copy" id="copyCodeBtn"><i class="far fa-copy"></i> Копировать</button>
+          <button class="btn btn-download" id="downloadFileBtn"><i class="fas fa-download"></i> Скачать</button>
+          <button class="btn btn-pages" id="togglePagesBtn"><i class="fas fa-globe"></i> ${showPreview ? 'Код' : 'Pages'}</button>
+          <button class="btn btn-primary" id="saveNoteBtn"><i class="far fa-save"></i> Сохранить</button>
+          <button class="btn btn-danger" id="deleteNoteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
         </div>
       `;
 
-      editorPanel.innerHTML = html;
-
-      const nameInput = document.getElementById('repoNameInput');
+      const titleInput = document.getElementById('noteTitleInput');
       const codeEditor = document.getElementById('codeEditor');
       const previewFrame = document.getElementById('previewFrame');
-
-      if (previewFrame) setTimeout(() => updatePreview(), 50);
-
-      document.querySelectorAll('.mode-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          currentMode = tab.dataset.mode;
-          renderEditor();
-        });
-      });
-
-      if (codeEditor) {
-        codeEditor.addEventListener('input', () => {
-          if (previewFrame) debouncedUpdatePreview();
-          repo.code = codeEditor.value;
-          saveRepos();
-        });
+      
+      // Инициализация превью если оно есть
+      if (previewFrame) {
+        setTimeout(() => updatePreview(), 50);
       }
-
-      document.getElementById('saveBtn').addEventListener('click', () => {
-        repo.name = nameInput.value.trim() || 'без названия';
-        if (codeEditor) repo.code = codeEditor.value;
-        saveRepos();
-        renderSidebar();
-        nameInput.style.background = '#1a3a2a';
-        setTimeout(() => nameInput.style.background = '', 300);
-      });
-
-      document.getElementById('copyBtn').addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(codeEditor ? codeEditor.value : repo.code);
-          const btn = document.getElementById('copyBtn');
-          btn.innerHTML = '<i class="fas fa-check"></i> Готово';
-          setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Копировать', 1500);
-        } catch (err) {
-          alert('Ошибка копирования');
+      
+      document.getElementById('saveNoteBtn').addEventListener('click', () => {
+        if (!activeNoteId) return;
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.title = titleInput.value.trim() || 'Без названия';
+          note.code = codeEditor.value;
+          saveNotes();
+          renderSidebar();
+          titleInput.style.background = '#e6f7e6';
+          setTimeout(() => titleInput.style.background = '', 300);
         }
       });
 
-      document.getElementById('downloadBtn').addEventListener('click', () => {
-        const filename = getFileName(nameInput.value);
-        const content = codeEditor ? codeEditor.value : repo.code;
-        downloadFile(filename, content);
-        const btn = document.getElementById('downloadBtn');
-        btn.innerHTML = '<i class="fas fa-check"></i> Скачан';
-        setTimeout(() => btn.innerHTML = '<i class="fas fa-download"></i> Скачать', 1500);
+      document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(codeEditor.value);
+          const btn = document.getElementById('copyCodeBtn');
+          btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
+          setTimeout(() => {
+            btn.innerHTML = '<i class="far fa-copy"></i> Копировать';
+          }, 1500);
+        } catch (err) {
+          alert('Не удалось скопировать: ' + err);
+        }
       });
 
-      document.getElementById('deleteBtn').addEventListener('click', () => {
-        if (!confirm('Удалить репозиторий?')) return;
-        repos = repos.filter(r => r.id !== activeRepoId);
-        activeRepoId = null;
-        currentMode = 'code';
-        saveRepos();
+      document.getElementById('downloadFileBtn').addEventListener('click', () => {
+        const filename = getFileNameWithExtension(titleInput.value);
+        const content = codeEditor.value;
+        downloadFile(filename, content);
+        
+        // Визуальная обратная связь
+        const btn = document.getElementById('downloadFileBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Скачан!';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 1500);
+      });
+
+      // Кнопка переключения Pages
+      document.getElementById('togglePagesBtn').addEventListener('click', () => {
+        showPreview = !showPreview;
+        // Сохраняем код перед переключением
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.code = codeEditor.value;
+          saveNotes();
+        }
+        renderEditor();
+      });
+
+      document.getElementById('deleteNoteBtn').addEventListener('click', () => {
+        if (!activeNoteId) return;
+        if (!confirm('Удалить эту заметку навсегда?')) return;
+        notes = notes.filter(n => n.id !== activeNoteId);
+        activeNoteId = null;
+        showPreview = false;
+        saveNotes();
         renderSidebar();
         renderEditor();
       });
 
-      nameInput.addEventListener('blur', () => {
-        repo.name = nameInput.value.trim() || 'без названия';
-        saveRepos();
-        renderSidebar();
+      codeEditor.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          document.getElementById('saveNoteBtn').click();
+        }
+      });
+      
+      // Автосохранение при вводе
+      codeEditor.addEventListener('input', () => {
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.code = codeEditor.value;
+          saveNotes();
+        }
       });
     }
 
@@ -529,34 +490,34 @@
       const item = e.target.closest('[data-id]');
       if (!item) return;
       const id = item.dataset.id;
-      if (activeRepoId !== id) {
-        activeRepoId = id;
-        currentMode = 'code';
+      if (activeNoteId !== id) {
+        activeNoteId = id;
+        showPreview = false;
         renderSidebar();
         renderEditor();
       }
     }
 
-    function createNewRepo() {
-      const newRepo = {
+    function createNewNote() {
+      const newNote = {
         id: generateId(),
-        name: 'новый-репозиторий',
-        code: '// Ваш код'
+        title: 'новая_заметка',
+        code: '// ваш код'
       };
-      repos.push(newRepo);
-      activeRepoId = newRepo.id;
-      currentMode = 'code';
-      saveRepos();
+      notes.push(newNote);
+      activeNoteId = newNote.id;
+      showPreview = false;
+      saveNotes();
       renderSidebar();
       renderEditor();
     }
 
-    loadRepos();
+    loadNotes();
     renderSidebar();
     renderEditor();
 
     repoListEl.addEventListener('click', handleRepoClick);
-    newRepoBtn.addEventListener('click', createNewRepo);
+    newRepoBtn.addEventListener('click', createNewNote);
   })();
 </script>
 </body>
