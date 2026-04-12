@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Notes · простые заметки с кодом</title>
+  <title>Code Notes · Live Preview</title>
   <style>
     * {
       box-sizing: border-box;
@@ -17,7 +17,7 @@
       padding: 20px;
     }
     .app {
-      max-width: 1100px;
+      max-width: 1400px;
       width: 100%;
       display: flex;
       gap: 20px;
@@ -85,6 +85,7 @@
     /* Правая панель */
     .main {
       flex: 1;
+      min-width: 0;
     }
     .editor-header {
       display: flex;
@@ -103,6 +104,67 @@
     }
     .repo-title-input:focus {
       outline: 2px solid #0ea5e9;
+      background: white;
+    }
+    /* Переключатель режимов */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.15s;
+    }
+    .mode-tab.active {
+      background: white;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .mode-tab i {
+      margin-right: 6px;
+    }
+    /* Редактор и превью */
+    .content-area {
+      display: flex;
+      gap: 0;
+    }
+    .editor-panel {
+      flex: 1;
+      transition: all 0.2s;
+    }
+    .preview-panel {
+      flex: 1;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-header {
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-frame {
+      width: 100%;
+      height: 380px;
+      border: none;
       background: white;
     }
     textarea {
@@ -167,6 +229,13 @@
     .btn-download:hover {
       background: #bbf7d0;
     }
+    .btn-preview {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .btn-preview:hover {
+      background: #fde68a;
+    }
     .empty-message {
       color: #64748b;
       text-align: center;
@@ -176,6 +245,29 @@
       margin-top: 12px;
       font-size: 12px;
       color: #94a3b8;
+    }
+    .split-view {
+      display: flex;
+      gap: 16px;
+    }
+    .split-view .editor-panel,
+    .split-view .preview-panel {
+      flex: 1;
+    }
+    .full-view .preview-panel {
+      display: none;
+    }
+    .full-view .editor-panel {
+      width: 100%;
+    }
+    .preview-only .editor-panel {
+      display: none;
+    }
+    .preview-only .preview-panel {
+      width: 100%;
+    }
+    .preview-only .preview-frame {
+      height: 460px;
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -187,7 +279,7 @@
     <ul class="repo-list" id="repoList"></ul>
     <button class="btn-new" id="newRepoBtn"><i class="fas fa-plus-circle"></i> Новая заметка</button>
     <div class="footer-note">
-      <i class="far fa-save"></i> Автосохранение
+      <i class="far fa-save"></i> Автосохранение · Live Preview
     </div>
   </div>
 
@@ -217,8 +309,8 @@
         });
         notes.push({
           id: 'demo2',
-          title: 'read_file.py',
-          code: `with open('file.txt', 'r') as f:\n    content = f.read()\n    print(content)`
+          title: 'пример страницы',
+          code: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { \n      font-family: system-ui; \n      padding: 20px; \n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      color: white;\n      min-height: 100vh;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n    }\n    .card {\n      background: rgba(255,255,255,0.1);\n      padding: 30px;\n      border-radius: 20px;\n      backdrop-filter: blur(10px);\n      text-align: center;\n    }\n    h1 { margin-bottom: 10px; }\n    button {\n      background: white;\n      border: none;\n      padding: 12px 24px;\n      border-radius: 40px;\n      font-weight: bold;\n      cursor: pointer;\n      margin-top: 20px;\n    }\n    button:hover { transform: scale(1.05); }\n  </style>\n</head>\n<body>\n  <div class="card">\n    <h1>🎉 Привет!</h1>\n    <p>Это живой предпросмотр HTML/CSS</p>\n    <button onclick="alert('Работает!')\">Нажми меня</button>\n  </div>\n</body>\n</html>`
         });
       }
     }
@@ -236,6 +328,8 @@
     const newRepoBtn = document.getElementById('newRepoBtn');
 
     let activeNoteId = null;
+    let currentMode = 'code'; // 'code', 'split', 'preview'
+    let previewUpdateTimer = null;
 
     function renderSidebar() {
       if (!notes.length) {
@@ -257,7 +351,6 @@
       return div.innerHTML;
     }
 
-    // Функция для скачивания файла
     function downloadFile(filename, content) {
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -270,32 +363,25 @@
       URL.revokeObjectURL(url);
     }
 
-    // Умное определение имени файла
     function getFileNameWithExtension(title) {
       let filename = title.trim();
       if (!filename) filename = 'code';
       
-      // Проверяем, есть ли уже расширение
       const commonExtensions = ['.js', '.py', '.html', '.css', '.java', '.cpp', '.c', '.go', '.rs', '.ts', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.sh', '.bat', '.ps1', '.rb', '.php', '.swift', '.kt', '.sql'];
       const hasExtension = commonExtensions.some(ext => filename.toLowerCase().endsWith(ext));
       
-      if (hasExtension) {
-        return filename;
-      }
+      if (hasExtension) return filename;
       
-      // Пытаемся угадать расширение по содержимому (простая эвристика)
       const code = getCurrentCode();
       const firstLine = code.trim().split('\n')[0].toLowerCase();
       
+      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
       if (firstLine.includes('<?php')) return filename + '.php';
       if (firstLine.includes('import java') || firstLine.includes('public class')) return filename + '.java';
-      if (firstLine.includes('#!/usr/bin/python') || firstLine.includes('import ') && (code.includes('def ') || code.includes('print('))) return filename + '.py';
+      if (firstLine.includes('#!/usr/bin/python') || (firstLine.includes('import ') && (code.includes('def ') || code.includes('print(')))) return filename + '.py';
       if (firstLine.includes('#!/bin/bash') || code.includes('echo ')) return filename + '.sh';
-      if (firstLine.includes('<!doctype html') || code.includes('<html>')) return filename + '.html';
       if (code.includes('function ') || code.includes('const ') || code.includes('let ') || code.includes('var ')) return filename + '.js';
       if (code.includes('package ') && code.includes('import (')) return filename + '.go';
-      if (firstLine.includes('use strict') || code.includes('::')) return filename + '.rs';
-      if (firstLine.includes('#include')) return filename + '.c';
       
       return filename + '.txt';
     }
@@ -303,6 +389,25 @@
     function getCurrentCode() {
       const codeEditor = document.getElementById('codeEditor');
       return codeEditor ? codeEditor.value : '';
+    }
+
+    // Функция обновления превью (Live Preview)
+    function updatePreview() {
+      const codeEditor = document.getElementById('codeEditor');
+      const previewFrame = document.getElementById('previewFrame');
+      if (!codeEditor || !previewFrame) return;
+      
+      const code = codeEditor.value;
+      const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+      doc.open();
+      doc.write(code);
+      doc.close();
+    }
+
+    // Дебаунс для live preview
+    function debouncedUpdatePreview() {
+      if (previewUpdateTimer) clearTimeout(previewUpdateTimer);
+      previewUpdateTimer = setTimeout(() => updatePreview(), 300);
     }
 
     function renderEditor() {
@@ -324,14 +429,36 @@
         return;
       }
 
+      const isHtmlLike = note.code.includes('<html') || note.code.includes('<body') || note.code.includes('<!DOCTYPE');
+
       editorPanel.innerHTML = `
         <div class="editor-header">
           <input type="text" id="noteTitleInput" class="repo-title-input" value="${escapeHtml(note.title)}" placeholder="Название заметки">
+          <div class="mode-tabs">
+            <button class="mode-tab ${currentMode === 'code' ? 'active' : ''}" data-mode="code"><i class="fas fa-code"></i> Код</button>
+            <button class="mode-tab ${currentMode === 'split' ? 'active' : ''}" data-mode="split"><i class="fas fa-columns"></i> Сплит</button>
+            <button class="mode-tab ${currentMode === 'preview' ? 'active' : ''}" data-mode="preview"><i class="fas fa-eye"></i> Preview</button>
+          </div>
         </div>
-        <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
+        
+        <div class="content-area ${currentMode === 'split' ? 'split-view' : currentMode === 'preview' ? 'preview-only' : 'full-view'}">
+          <div class="editor-panel">
+            <textarea id="codeEditor" placeholder="// Вставьте или напишите код...">${escapeHtml(note.code)}</textarea>
+          </div>
+          <div class="preview-panel">
+            <div class="preview-header">
+              <i class="fas fa-play-circle" style="color: #10b981;"></i> 
+              <span>Live Preview</span>
+              <span style="margin-left: auto; font-size: 11px;">обновляется автоматически</span>
+            </div>
+            <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+          </div>
+        </div>
+        
         <div class="action-bar">
           <button class="btn btn-copy" id="copyCodeBtn"><i class="far fa-copy"></i> Копировать</button>
           <button class="btn btn-download" id="downloadFileBtn"><i class="fas fa-download"></i> Скачать</button>
+          <button class="btn btn-preview" id="refreshPreviewBtn"><i class="fas fa-sync-alt"></i> Обновить</button>
           <button class="btn btn-primary" id="saveNoteBtn"><i class="far fa-save"></i> Сохранить</button>
           <button class="btn btn-danger" id="deleteNoteBtn"><i class="far fa-trash-alt"></i> Удалить</button>
         </div>
@@ -339,6 +466,33 @@
 
       const titleInput = document.getElementById('noteTitleInput');
       const codeEditor = document.getElementById('codeEditor');
+      const previewFrame = document.getElementById('previewFrame');
+      
+      // Инициализация превью
+      setTimeout(() => updatePreview(), 50);
+      
+      // Переключение режимов
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          currentMode = tab.dataset.mode;
+          renderEditor();
+        });
+      });
+      
+      // Live preview при вводе
+      codeEditor.addEventListener('input', () => {
+        debouncedUpdatePreview();
+        // Автосохранение в фоне
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.code = codeEditor.value;
+          saveNotes();
+        }
+      });
+      
+      document.getElementById('refreshPreviewBtn').addEventListener('click', () => {
+        updatePreview();
+      });
       
       document.getElementById('saveNoteBtn').addEventListener('click', () => {
         if (!activeNoteId) return;
@@ -358,9 +512,7 @@
           await navigator.clipboard.writeText(codeEditor.value);
           const btn = document.getElementById('copyCodeBtn');
           btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
-          setTimeout(() => {
-            btn.innerHTML = '<i class="far fa-copy"></i> Копировать';
-          }, 1500);
+          setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Копировать', 1500);
         } catch (err) {
           alert('Не удалось скопировать: ' + err);
         }
@@ -368,16 +520,11 @@
 
       document.getElementById('downloadFileBtn').addEventListener('click', () => {
         const filename = getFileNameWithExtension(titleInput.value);
-        const content = codeEditor.value;
-        downloadFile(filename, content);
-        
-        // Визуальная обратная связь
+        downloadFile(filename, codeEditor.value);
         const btn = document.getElementById('downloadFileBtn');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i> Скачан!';
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-        }, 1500);
+        setTimeout(() => btn.innerHTML = originalText, 1500);
       });
 
       document.getElementById('deleteNoteBtn').addEventListener('click', () => {
@@ -385,6 +532,7 @@
         if (!confirm('Удалить эту заметку навсегда?')) return;
         notes = notes.filter(n => n.id !== activeNoteId);
         activeNoteId = null;
+        currentMode = 'code';
         saveNotes();
         renderSidebar();
         renderEditor();
@@ -396,6 +544,16 @@
           document.getElementById('saveNoteBtn').click();
         }
       });
+      
+      // Сохранение названия при потере фокуса
+      titleInput.addEventListener('blur', () => {
+        const note = notes.find(n => n.id === activeNoteId);
+        if (note) {
+          note.title = titleInput.value.trim() || 'Без названия';
+          saveNotes();
+          renderSidebar();
+        }
+      });
     }
 
     function handleRepoClick(e) {
@@ -404,6 +562,7 @@
       const id = item.dataset.id;
       if (activeNoteId !== id) {
         activeNoteId = id;
+        currentMode = 'code';
         renderSidebar();
         renderEditor();
       }
@@ -417,6 +576,7 @@
       };
       notes.push(newNote);
       activeNoteId = newNote.id;
+      currentMode = 'code';
       saveNotes();
       renderSidebar();
       renderEditor();
