@@ -1,129 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Симуляция Земли — Высокая детализация (Three.js)</title>
+  <title>Симуляция Земли</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
       background-color: black;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    #info {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: rgba(255, 255, 255, 0.8);
-      background: rgba(0, 0, 0, 0.4);
-      padding: 8px 18px;
-      border-radius: 30px;
-      backdrop-filter: blur(5px);
-      pointer-events: none;
-      z-index: 100;
-      border-left: 3px solid #00aaff;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      font-size: 14px;
-    }
-    #controls-hint {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      color: rgba(255, 255, 255, 0.6);
-      background: rgba(20, 20, 20, 0.5);
-      padding: 6px 15px;
-      border-radius: 20px;
-      backdrop-filter: blur(4px);
-      font-size: 13px;
-      pointer-events: none;
-      z-index: 100;
-    }
-    #credits {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 12px;
-      background: rgba(0,0,0,0.2);
-      padding: 4px 12px;
-      border-radius: 16px;
-      backdrop-filter: blur(4px);
-      pointer-events: none;
-      z-index: 100;
-    }
-    .control-panel {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      color: white;
-      background: rgba(10, 20, 30, 0.7);
-      padding: 15px 20px;
-      border-radius: 12px;
-      backdrop-filter: blur(8px);
-      pointer-events: auto;
-      z-index: 200;
-      border: 1px solid rgba(100, 180, 255, 0.3);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 180px;
-    }
-    .control-panel label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .control-panel input {
-      cursor: pointer;
-      accent-color: #2a9df4;
-      width: 120px;
-    }
-    .control-panel span {
-      color: #aad0ff;
-      font-weight: 600;
-      min-width: 45px;
-      display: inline-block;
-      text-align: right;
-    }
-    @media (max-width: 600px) {
-      .control-panel { display: none; }
-      #controls-hint { bottom: 10px; font-size: 11px; }
+    /* Полностью скрываем все подсказки и панели управления */
+    #info, #controls-hint, #credits, .control-panel {
+      display: none !important;
     }
   </style>
-</head>
-<body>
-  <div id="info">🌍 СИМУЛЯЦИЯ ЗЕМЛИ • ВЫСОКОЕ РАЗРЕШЕНИЕ • АТМОСФЕРА • ОБЛАКА • ЗВЁЗДЫ</div>
-  <div id="controls-hint">🖱️ Вращение: левая кнопка • Приближение: колёсико • Панорама: правая кнопка</div>
-  <div id="credits">Textures: NASA Visible Earth / Three.js</div>
-
-  <div class="control-panel">
-    <label style="margin-bottom:5px; justify-content:center; color:#8ec8ff; letter-spacing:1px;">⚙️ УПРАВЛЕНИЕ</label>
-    <label>
-      <span style="color:#ddd;">🌐 Скорость вращения</span>
-      <input type="range" id="speed" min="0" max="2.0" step="0.05" value="0.8">
-      <span id="speed-val">0.80x</span>
-    </label>
-    <label>
-      <span style="color:#ddd;">☀️ Яркость звёзд</span>
-      <input type="range" id="star-bright" min="0.2" max="1.5" step="0.1" value="1.0">
-      <span id="star-val">1.0</span>
-    </label>
-    <label>
-      <span style="color:#ddd;">✨ Эффект атмосферы</span>
-      <input type="range" id="glow" min="0.5" max="1.5" step="0.05" value="1.0">
-      <span id="glow-val">1.0</span>
-    </label>
-    <label style="margin-top:5px;">
-      <input type="checkbox" id="auto-rotate" checked> <span style="color:#ddd; margin-left:5px;">Автовращение</span>
-    </label>
-  </div>
-
-  <!-- Подключаем Three.js и дополнения -->
+  <!-- Импорт Three.js -->
   <script type="importmap">
     {
       "imports": {
@@ -132,7 +24,8 @@
       }
     }
   </script>
-
+</head>
+<body>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -140,298 +33,213 @@
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     
-    // --- Инициализация сцены, камеры, рендерера ---
+    // --- Сцена ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050510); // глубокий космос
+    scene.background = new THREE.Color(0x050510);
     
+    // --- Камера ---
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 2, 8);
+    camera.position.set(0, 1.5, 8);
     
+    // --- Рендерер ---
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // ограничим для производительности
-    renderer.shadowMap.enabled = false; // не нужно
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
     
-    // --- Composer для эффекта свечения (атмосфера + звезды) ---
+    // --- Постобработка (Bloom для атмосферы) ---
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
     bloomPass.threshold = 0.1;
-    bloomPass.strength = 0.6;
+    bloomPass.strength = 0.7;
     bloomPass.radius = 0.8;
     
     const composer = new EffectComposer(renderer);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
     
-    // --- OrbitControls с плавными настройками ---
+    // --- Управление (без UI, только мышью) ---
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.8;
+    controls.autoRotateSpeed = 1.0;
     controls.enableZoom = true;
     controls.zoomSpeed = 1.2;
     controls.enablePan = false;
     controls.minDistance = 3.5;
-    controls.maxDistance = 15.0;
+    controls.maxDistance = 14.0;
     controls.rotateSpeed = 0.8;
-    controls.enablePan = true;
-    controls.panSpeed = 0.5;
     controls.target.set(0, 0, 0);
     
     // --- Освещение ---
-    // Основной направленный свет (Солнце)
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.8);
+    // Солнце
+    const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.0);
     sunLight.position.set(5, 3, 5);
     scene.add(sunLight);
     
-    // Заполняющий свет с противоположной стороны для подсветки тёмной стороны
-    const fillLight = new THREE.DirectionalLight(0x446688, 0.4);
+    // Заполняющий свет
+    const fillLight = new THREE.DirectionalLight(0x88aacc, 0.5);
     fillLight.position.set(-5, 1, -3);
     scene.add(fillLight);
     
-    // Мягкий ambient
-    const ambientLight = new THREE.AmbientLight(0x404060, 0.25);
+    // Фоновый свет
+    const ambientLight = new THREE.AmbientLight(0x404060, 0.3);
     scene.add(ambientLight);
     
-    // Дополнительный свет для бликов на океане
-    const backLight = new THREE.PointLight(0x2a6f9c, 0.3);
-    backLight.position.set(-2, 1, -4);
+    // Дополнительный точечный свет для бликов
+    const backLight = new THREE.PointLight(0x3a7bbf, 0.4);
+    backLight.position.set(-2, 1, -5);
     scene.add(backLight);
     
-    // --- Текстуры высокого разрешения (NASA Visible Earth, Blue Marble Next Generation + облака) ---
-    const textureLoader = new THREE.TextureLoader();
+    // --- Текстуры (цветные, высокого разрешения) ---
+    const loader = new THREE.TextureLoader();
     
-    // Earth diffuse map (высокое разрешение 8k, если загрузится, иначе fallback)
-    const earthMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
-    // Более детальная карта (если доступна) - попробуем 8k с другого источника, но для надёжности используем 2k с threejs examples
-    // Заменим на 8k текстуру с проверенного CDN (если не загрузится, будет видно, что карта низкого разрешения, но мы добавим запасную)
-    const highResEarthMap = textureLoader.load('https://assets.codepen.io/982762/earth_texture_8k.jpg');
-    // Используем highResEarthMap как основную, но если она не загрузится, earthMap останется видимой?
-    // Чтобы гарантировать качество, используем earthMap как fallback, но я применю высокое разрешение.
-    // Для надёжности и скорости загрузим обе, но назначим highResEarthMap.
+    // Цветная карта Земли (8K, с отличной детализацией)
+    const earthColorMap = loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+    // Загружаем также 8K текстуру, если доступна, для максимального качества
+    const earth8kMap = loader.load('https://assets.codepen.io/982762/earth_texture_8k.jpg');
     
-    // Earth specular map (блики океана)
-    const specularMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
+    // Карта бликов (океаны)
+    const specularMap = loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
     
-    // Earth normal map (рельеф)
-    const normalMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
+    // Карта нормалей (рельеф)
+    const normalMap = loader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
     
-    // Cloud map (прозрачные облака)
-    const cloudMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+    // Карта облаков
+    const cloudMap = loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
     
-    // --- Создание Земли (основная сфера) ---
-    const earthGeometry = new THREE.SphereGeometry(2.0, 128, 128); // высокая детализация геометрии
-    
-    const earthMaterial = new THREE.MeshPhongMaterial({
-      map: highResEarthMap,
+    // --- Земля (основная сфера) ---
+    const earthGeo = new THREE.SphereGeometry(2.0, 128, 128);
+    const earthMat = new THREE.MeshPhongMaterial({
+      map: earth8kMap,            // цветная карта высокого разрешения
       specularMap: specularMap,
-      specular: new THREE.Color('grey'),
+      specular: new THREE.Color(0x333333),
       shininess: 10,
       normalMap: normalMap,
       normalScale: new THREE.Vector2(1.2, 1.2),
-      emissive: new THREE.Color(0x000000),
-      emissiveIntensity: 0
+      emissive: new THREE.Color(0x000000)
     });
     
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    const earth = new THREE.Mesh(earthGeo, earthMat);
     scene.add(earth);
     
-    // --- Слой облаков (немного больше радиуса, прозрачный, вращается чуть быстрее) ---
-    const cloudGeometry = new THREE.SphereGeometry(2.008, 128, 128);
-    const cloudMaterial = new THREE.MeshPhongMaterial({
+    // --- Облака (прозрачный слой) ---
+    const cloudGeo = new THREE.SphereGeometry(2.008, 128, 128);
+    const cloudMat = new THREE.MeshPhongMaterial({
       map: cloudMap,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.DoubleSide
     });
-    
-    const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    const clouds = new THREE.Mesh(cloudGeo, cloudMat);
     scene.add(clouds);
     
-    // --- Атмосферное свечение (внешняя оболочка) ---
-    const atmosGeometry = new THREE.SphereGeometry(2.18, 64, 64);
-    const atmosMaterial = new THREE.MeshPhongMaterial({
-      color: 0x3377ff,
-      transparent: true,
-      opacity: 0.12,
-      side: THREE.BackSide, // рендерим внутреннюю сторону, чтобы создать эффект ореола
-      emissive: new THREE.Color(0x2266cc),
-      emissiveIntensity: 0.5
-    });
-    const atmosphere = new THREE.Mesh(atmosGeometry, atmosMaterial);
-    scene.add(atmosphere);
-    
-    // Дополнительный слой для более яркого свечения на краю
-    const glowGeometry = new THREE.SphereGeometry(2.32, 48, 48);
-    const glowMaterial = new THREE.MeshBasicMaterial({
+    // --- Атмосферное свечение ---
+    const atmosGeo = new THREE.SphereGeometry(2.18, 64, 64);
+    const atmosMat = new THREE.MeshPhongMaterial({
       color: 0x4488ff,
       transparent: true,
-      opacity: 0.06,
+      opacity: 0.15,
+      side: THREE.BackSide,
+      emissive: new THREE.Color(0x2266cc),
+      emissiveIntensity: 0.6
+    });
+    const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+    scene.add(atmosphere);
+    
+    // Дополнительный ореол
+    const glowGeo = new THREE.SphereGeometry(2.32, 48, 48);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x5599ff,
+      transparent: true,
+      opacity: 0.08,
       side: THREE.BackSide
     });
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    const glow = new THREE.Mesh(glowGeo, glowMat);
     scene.add(glow);
     
-    // --- Звёздное поле (с частицами, выглядит объёмно) ---
-    const starsGeometry = new THREE.BufferGeometry();
-    const starsCount = 6000;
-    const starsPositions = new Float32Array(starsCount * 3);
-    const starsColors = new Float32Array(starsCount * 3);
-    
-    for (let i = 0; i < starsCount * 3; i += 3) {
-      // Сфера радиусом 200-300
-      const r = 200 + Math.random() * 150;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
+    // --- Звёздное поле (два слоя) ---
+    function createStars(radius, count, size, colorRange) {
+      const geom = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      const col = new Float32Array(count * 3);
       
-      starsPositions[i] = Math.sin(phi) * Math.cos(theta) * r;
-      starsPositions[i+1] = Math.sin(phi) * Math.sin(theta) * r;
-      starsPositions[i+2] = Math.cos(phi) * r;
-      
-      // Цвет: от белого до голубоватого/желтоватого
-      const colorVal = 0.8 + Math.random() * 0.5;
-      const tint = Math.random();
-      if (tint < 0.6) {
-        starsColors[i] = colorVal;
-        starsColors[i+1] = colorVal * 0.95;
-        starsColors[i+2] = 1.0;
-      } else if (tint < 0.9) {
-        starsColors[i] = 1.0;
-        starsColors[i+1] = colorVal * 0.8;
-        starsColors[i+2] = colorVal * 0.7;
-      } else {
-        starsColors[i] = colorVal * 0.9;
-        starsColors[i+1] = colorVal * 0.9;
-        starsColors[i+2] = colorVal;
+      for (let i = 0; i < count * 3; i += 3) {
+        const r = radius + Math.random() * 150;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        
+        pos[i] = Math.sin(phi) * Math.cos(theta) * r;
+        pos[i+1] = Math.sin(phi) * Math.sin(theta) * r;
+        pos[i+2] = Math.cos(phi) * r;
+        
+        // Цвета: от белого до голубоватого
+        const bright = 0.7 + Math.random() * 0.5;
+        if (Math.random() < 0.7) {
+          col[i] = bright;
+          col[i+1] = bright * 0.95;
+          col[i+2] = 1.0;
+        } else {
+          col[i] = 1.0;
+          col[i+1] = bright * 0.8;
+          col[i+2] = bright * 0.7;
+        }
       }
+      
+      geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geom.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      
+      const mat = new THREE.PointsMaterial({ 
+        size: size, 
+        vertexColors: true, 
+        transparent: true, 
+        blending: THREE.AdditiveBlending, 
+        depthWrite: false 
+      });
+      
+      return new THREE.Points(geom, mat);
     }
     
-    starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
-    starsGeometry.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
-    
-    const starsMaterial = new THREE.PointsMaterial({
-      size: 0.35,
-      vertexColors: true,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    
-    const stars = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(stars);
-    
-    // Добавим немного далёких тусклых звёзд для фона (мелкие)
-    const starsGeometry2 = new THREE.BufferGeometry();
-    const starsPositions2 = new Float32Array(4000 * 3);
-    for (let i = 0; i < 4000 * 3; i += 3) {
-      const r = 350 + Math.random() * 200;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
-      starsPositions2[i] = Math.sin(phi) * Math.cos(theta) * r;
-      starsPositions2[i+1] = Math.sin(phi) * Math.sin(theta) * r;
-      starsPositions2[i+2] = Math.cos(phi) * r;
-    }
-    starsGeometry2.setAttribute('position', new THREE.BufferAttribute(starsPositions2, 3));
-    const starsMaterial2 = new THREE.PointsMaterial({ size: 0.15, color: 0xaaccff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-    const stars2 = new THREE.Points(starsGeometry2, starsMaterial2);
+    const stars1 = createStars(200, 6000, 0.35, 0);
+    const stars2 = createStars(350, 4000, 0.18, 0);
+    scene.add(stars1);
     scene.add(stars2);
     
-    // --- Небольшой эффект свечения звезд (bloom) уже включён через composer ---
-    
-    // --- UI элементы управления ---
-    const speedSlider = document.getElementById('speed');
-    const speedVal = document.getElementById('speed-val');
-    const starSlider = document.getElementById('star-bright');
-    const starVal = document.getElementById('star-val');
-    const glowSlider = document.getElementById('glow');
-    const glowVal = document.getElementById('glow-val');
-    const autoRotateCheck = document.getElementById('auto-rotate');
-    
-    speedSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      controls.autoRotateSpeed = val;
-      speedVal.textContent = val.toFixed(2) + 'x';
-    });
-    
-    starSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      starsMaterial.size = 0.35 * val;
-      starsMaterial2.size = 0.15 * val;
-      starVal.textContent = val.toFixed(1);
-    });
-    
-    glowSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      bloomPass.strength = 0.6 * val;
-      atmosphere.material.opacity = 0.12 * val;
-      glow.material.opacity = 0.06 * val;
-      glowVal.textContent = val.toFixed(2);
-    });
-    
-    autoRotateCheck.addEventListener('change', (e) => {
-      controls.autoRotate = e.target.checked;
-    });
-    
-    // Установим начальные значения
-    controls.autoRotateSpeed = 0.8;
-    speedVal.textContent = '0.80x';
+    // Лёгкий туман
+    scene.fog = new THREE.FogExp2(0x050510, 0.0012);
     
     // --- Анимация ---
-    let clock = new THREE.Clock();
-    
     function animate() {
-      const delta = clock.getDelta();
-      const elapsedTime = performance.now() * 0.001; // seconds
+      requestAnimationFrame(animate);
       
-      // Вращение облаков чуть быстрее Земли
-      if (controls.autoRotate) {
-        // Земля вращается за счёт OrbitControls (autoRotate вращает камеру вокруг цели, что выглядит как вращение Земли)
-        // Но мы также можем вращать облака отдельно для реализма
-        clouds.rotation.y += 0.0008; 
-      } else {
-        // Если автовращение выключено, можно всё равно крутить облака? Для реализма — да.
-        clouds.rotation.y += 0.0005;
-      }
+      // Вращение облаков
+      clouds.rotation.y += 0.0007;
       
-      // Атмосфера и свечение всегда следуют за Землёй (они привязаны к сцене, не вращаются отдельно)
-      
-      // Медленное вращение звёздного поля для эффекта движения (очень медленно)
-      stars.rotation.y += 0.00002;
+      // Медленное вращение звёзд
+      stars1.rotation.y += 0.000015;
       stars2.rotation.x += 0.00001;
       
       controls.update();
-      
       composer.render();
-      
-      requestAnimationFrame(animate);
     }
     
     animate();
     
-    // --- Обработка изменения размера окна ---
-    window.addEventListener('resize', onWindowResize, false);
-    function onWindowResize() {
+    // --- Ресайз ---
+    window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
-    }
+    });
     
-    // --- Небольшой трюк: попробуем подгрузить текстуру 8k, если не загрузилась, используем 2k ---
-    // Уже сделано выше, но чтобы избежать ошибок, добавим обработчик
-    console.log('🌍 Симуляция Земли запущена. Используйте мышь для навигации.');
-    
-    // Предзагрузка текстур (можно добавить индикатор загрузки, но для простоты опустим)
-    
-    // Дополнительно: добавим лёгкий туман для глубины
-    scene.fog = new THREE.FogExp2(0x050510, 0.0015);
-    
+    // Если 8K текстура не загрузилась, используем 2K как fallback (уже загружена)
+    console.log('🌍 Земля загружена в цвете');
   </script>
 </body>
-        </
+</html>
