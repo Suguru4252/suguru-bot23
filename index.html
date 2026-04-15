@@ -2,243 +2,517 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Яркая цветная Земля</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>🚀 Мини SFS · для телефона</title>
   <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
       margin: 0;
+      padding: 0;
+      background: #000;
+      touch-action: pan-x pan-y; 
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: white;
       overflow: hidden;
-      background-color: black;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
-    /* Никаких надписей на экране */
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 30%, #0a0f1e, #020304);
+      touch-action: none;  /* предотвращаем скролл страницы */
+    }
+    #hud {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .data-panel {
+      background: rgba(10, 18, 28, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 12px 16px;
+      border-radius: 28px;
+      border: 1px solid rgba(100, 180, 255, 0.3);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      pointer-events: none;
+    }
+    .stats {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      text-shadow: 0 2px 5px black;
+    }
+    .stats span {
+      color: #aad0ff;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 20px 20px;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .control-group {
+      display: flex;
+      gap: 16px;
+      pointer-events: auto;
+    }
+    .ctrl-btn {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: rgba(20, 30, 45, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 2px solid rgba(180, 220, 255, 0.5);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.5), 0 4px 15px rgba(0,160,255,0.3);
+      transition: all 0.05s ease;
+      user-select: none;
+      touch-action: manipulation;
+      cursor: pointer;
+      text-shadow: 0 2px 5px black;
+    }
+    .ctrl-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 4px 15px #2a9df4;
+      background: rgba(60, 100, 170, 0.9);
+      border-color: #8ec8ff;
+    }
+    #thrust-btn {
+      background: rgba(180, 60, 30, 0.7);
+      border-color: #ff9966;
+      color: #fff0e0;
+    }
+    #thrust-btn:active {
+      background: rgba(220, 80, 30, 0.9);
+      box-shadow: 0 3px 0 #441100, 0 4px 20px #ff6633;
+    }
+    #reset-btn {
+      background: rgba(60, 60, 70, 0.8);
+      border-color: #aaa;
+      font-size: 24px;
+    }
+    .right-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .small-btn {
+      width: 65px;
+      height: 65px;
+      font-size: 28px;
+    }
+    #message {
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+      right: 20px;
+      text-align: center;
+      color: #ffdd99;
+      font-weight: 600;
+      text-shadow: 0 2px 8px black;
+      background: rgba(0,0,0,0.3);
+      padding: 8px;
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      pointer-events: none;
+      font-size: 15px;
+    }
+    /* адаптация под очень маленькие экраны */
+    @media (max-width: 400px) {
+      .ctrl-btn { width: 65px; height: 65px; font-size: 28px; }
+      .small-btn { width: 55px; height: 55px; font-size: 24px; }
+    }
   </style>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-      }
-    }
-  </script>
 </head>
 <body>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    
-    // --- Инициализация ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020210); // очень тёмно-синий космос
-    
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 1.2, 7.5);
-    
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = false;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4; // делаем ярче
-    document.body.appendChild(renderer.domElement);
-    
-    // --- Управление (без UI) ---
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.2;
-    controls.enableZoom = true;
-    controls.zoomSpeed = 1.0;
-    controls.enablePan = false;
-    controls.minDistance = 3.8;
-    controls.maxDistance = 12.0;
-    controls.target.set(0, 0, 0);
-    
-    // --- МОЩНОЕ ОСВЕЩЕНИЕ ДЛЯ ЯРКОСТИ ---
-    // Основной направленный свет (Солнце) — очень яркий, тёплый
-    const sunLight = new THREE.DirectionalLight(0xfff5d1, 2.5);
-    sunLight.position.set(6, 4, 6);
-    scene.add(sunLight);
-    
-    // Второй направленный свет с другой стороны, чтобы не было чёрных провалов
-    const fillLight1 = new THREE.DirectionalLight(0xccddff, 1.2);
-    fillLight1.position.set(-5, 2, -4);
-    scene.add(fillLight1);
-    
-    // Третий свет — заполняющий снизу, чтобы океаны блестели
-    const fillLight2 = new THREE.PointLight(0x88aaff, 0.8);
-    fillLight2.position.set(2, -1, -3);
-    scene.add(fillLight2);
-    
-    // Ambient — минимальный, чтобы не засвечивать, но сохранить тени
-    const ambientLight = new THREE.AmbientLight(0x404060, 0.35);
-    scene.add(ambientLight);
-    
-    // Дополнительный свет для бликов на воде
-    const rimLight = new THREE.PointLight(0xaaccff, 0.6);
-    rimLight.position.set(-3, 1.5, -5);
-    scene.add(rimLight);
-    
-    // --- ТЕКСТУРЫ: используем проверенные яркие карты (включая с suguru4252.github.io, если доступны) ---
-    const loader = new THREE.TextureLoader();
-    
-    // Основная цветная карта: используем заведомо яркую текстуру с GitHub (из вашего скриншота)
-    // Это та самая текстура, которая даёт насыщенные цвета.
-    const earthColorMap = loader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
-    
-    // Карта облаков
-    const cloudMap = loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
-    
-    // Карта нормалей для рельефа
-    const normalMap = loader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
-    
-    // Карта бликов (specular) — чтобы океаны блестели
-    const specularMap = loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
-    
-    // --- СОЗДАНИЕ ЗЕМЛИ ---
-    const earthGeo = new THREE.SphereGeometry(2.0, 128, 128);
-    const earthMat = new THREE.MeshPhongMaterial({
-      map: earthColorMap,
-      specularMap: specularMap,
-      specular: new THREE.Color(0x444444),
-      shininess: 15,
-      normalMap: normalMap,
-      normalScale: new THREE.Vector2(1.0, 1.0),
-      emissive: new THREE.Color(0x112233), // лёгкая подсветка тёмной стороны
-      emissiveIntensity: 0.15
-    });
-    
-    const earth = new THREE.Mesh(earthGeo, earthMat);
-    scene.add(earth);
-    
-    // --- ОБЛАКА (яркие, полупрозрачные) ---
-    const cloudGeo = new THREE.SphereGeometry(2.008, 128, 128);
-    const cloudMat = new THREE.MeshPhongMaterial({
-      map: cloudMap,
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      side: THREE.DoubleSide
-    });
-    const clouds = new THREE.Mesh(cloudGeo, cloudMat);
-    scene.add(clouds);
-    
-    // --- АТМОСФЕРА (голубое свечение) ---
-    const atmosGeo = new THREE.SphereGeometry(2.15, 64, 64);
-    const atmosMat = new THREE.MeshPhongMaterial({
-      color: 0x88aaff,
-      transparent: true,
-      opacity: 0.18,
-      side: THREE.BackSide,
-      emissive: new THREE.Color(0x4488ff),
-      emissiveIntensity: 0.5
-    });
-    const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
-    scene.add(atmosphere);
-    
-    // Внешний ореол
-    const glowGeo = new THREE.SphereGeometry(2.28, 48, 48);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0xaaccff,
-      transparent: true,
-      opacity: 0.08,
-      side: THREE.BackSide
-    });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    scene.add(glow);
-    
-    // --- ЗВЁЗДЫ (много, яркие) ---
-    const starsGeo = new THREE.BufferGeometry();
-    const starsCount = 8000;
-    const posArray = new Float32Array(starsCount * 3);
-    const colorArray = new Float32Array(starsCount * 3);
-    
-    for (let i = 0; i < starsCount * 3; i += 3) {
-      // Распределяем по сфере радиусом 200-400
-      const r = 200 + Math.random() * 200;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
+  <canvas id="gameCanvas"></canvas>
+  
+  <div id="hud">
+    <div class="data-panel">
+      <div class="stats">
+        <div>🌍 Альтитуда <span id="altitude">0.0</span> км</div>
+        <div>📡 Скорость <span id="velocity">0.0</span> м/с</div>
+        <div>⛽ Топливо <span id="fuel">100</span>%</div>
+      </div>
+    </div>
+    <div class="data-panel" style="padding: 8px 16px;">
+      <div style="font-size:13px; opacity:0.9;">🚀 Орбита</div>
+      <div style="font-size:18px; font-weight:700;" id="orbit-status">СУБОРБИТАЛЬНО</div>
+    </div>
+  </div>
+
+  <div id="message">👆 Вращай: ◀ ▶   |   🔥 Тяга: ⬆️</div>
+
+  <div id="controls">
+    <div class="control-group">
+      <div class="ctrl-btn" id="left-btn">◀</div>
+      <div class="ctrl-btn" id="right-btn">▶</div>
+    </div>
+    <div class="right-controls">
+      <div class="ctrl-btn" id="thrust-btn">🔥</div>
+      <div class="ctrl-btn small-btn" id="reset-btn">⟲</div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // ---------- НАСТРОЙКИ МИРА ----------
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
       
-      posArray[i] = Math.sin(phi) * Math.cos(theta) * r;
-      posArray[i+1] = Math.sin(phi) * Math.sin(theta) * r;
-      posArray[i+2] = Math.cos(phi) * r;
+      // Физические константы
+      const G = 6.67430e-11;
+      const EARTH_MASS = 5.972e24;
+      const EARTH_RADIUS = 6371000; // метров
       
-      // Яркие цвета: белые, голубоватые, желтоватые
-      const intensity = 0.7 + Math.random() * 0.8;
-      if (Math.random() < 0.6) {
-        colorArray[i] = intensity;
-        colorArray[i+1] = intensity * 0.95;
-        colorArray[i+2] = 1.0;
-      } else if (Math.random() < 0.3) {
-        colorArray[i] = 1.0;
-        colorArray[i+1] = intensity * 0.7;
-        colorArray[i+2] = intensity * 0.6;
-      } else {
-        colorArray[i] = intensity;
-        colorArray[i+1] = intensity;
-        colorArray[i+2] = intensity;
+      // Ракета
+      let rocket = {
+        x: 0,               // метров от центра Земли по горизонтали
+        y: EARTH_RADIUS + 500000, // старт с высоты 500 км (для наглядности)
+        vx: 7800,           // начальная орбитальная скорость (почти круговая)
+        vy: 0,
+        mass: 15000,        // кг
+        fuel: 8000,         // кг
+        angle: 0,           // радианы, 0 = вправо
+        thrust: 0,          // 0 или 350000 Н
+        isp: 350,           // удельный импульс
+        dryMass: 7000
+      };
+
+      // Для управления
+      let leftPressed = false;
+      let rightPressed = false;
+      let thrustPressed = false;
+      
+      const ROTATION_SPEED = 0.03; // рад/кадр
+      const THRUST_FORCE = 350000;  // Н
+      
+      // Границы экрана и камеры
+      let viewScale = 1.8e-6;        // метров в пикселе
+      let targetViewScale = viewScale;
+      let cameraX = 0, cameraY = 0;
+      
+      // Время
+      let lastTimestamp = 0;
+      let timeScale = 0.5; // замедление для удобства на телефоне
+      
+      // UI элементы
+      const altSpan = document.getElementById('altitude');
+      const velSpan = document.getElementById('velocity');
+      const fuelSpan = document.getElementById('fuel');
+      const orbitStatus = document.getElementById('orbit-status');
+
+      // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+      function getAltitude() {
+        const r = Math.sqrt(rocket.x*rocket.x + rocket.y*rocket.y);
+        return r - EARTH_RADIUS;
       }
-    }
-    
-    starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    starsGeo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-    
-    const starsMat = new THREE.PointsMaterial({
-      size: 0.3,
-      vertexColors: true,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    
-    const stars = new THREE.Points(starsGeo, starsMat);
-    scene.add(stars);
-    
-    // Второй слой мелких звёзд
-    const starsGeo2 = new THREE.BufferGeometry();
-    const posArray2 = new Float32Array(4000 * 3);
-    for (let i = 0; i < 4000 * 3; i += 3) {
-      const r = 350 + Math.random() * 250;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
-      posArray2[i] = Math.sin(phi) * Math.cos(theta) * r;
-      posArray2[i+1] = Math.sin(phi) * Math.sin(theta) * r;
-      posArray2[i+2] = Math.cos(phi) * r;
-    }
-    starsGeo2.setAttribute('position', new THREE.BufferAttribute(posArray2, 3));
-    const starsMat2 = new THREE.PointsMaterial({ size: 0.15, color: 0xccddff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-    const stars2 = new THREE.Points(starsGeo2, starsMat2);
-    scene.add(stars2);
-    
-    // Лёгкая дымка для глубины
-    scene.fog = new THREE.FogExp2(0x020210, 0.001);
-    
-    // --- АНИМАЦИЯ ---
-    function animate() {
-      requestAnimationFrame(animate);
       
-      // Облака вращаются немного быстрее Земли
-      clouds.rotation.y += 0.0006;
+      function getSpeed() {
+        return Math.sqrt(rocket.vx*rocket.vx + rocket.vy*rocket.vy);
+      }
       
-      // Медленное вращение звёзд
-      stars.rotation.y += 0.00001;
-      stars2.rotation.x += 0.000005;
+      function getFuelPercent() {
+        return Math.max(0, (rocket.fuel / 8000) * 100);
+      }
       
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    
-    animate();
-    
-    // --- РЕСАЙЗ ---
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-    
-    console.log('✅ Яркая цветная Земля загружена');
+      function getOrbitStatusText() {
+        const r = Math.sqrt(rocket.x*rocket.x + rocket.y*rocket.y);
+        const v = Math.sqrt(rocket.vx*rocket.vx + rocket.vy*rocket.vy);
+        const mu = G * EARTH_MASS;
+        const energy = (v*v)/2 - mu/r;
+        
+        if (r < EARTH_RADIUS + 1000) return "🌋 ПОВЕРХНОСТЬ";
+        if (energy < 0) {
+          const a = -mu / (2 * energy);
+          const periapsis = a * (1 - Math.sqrt(1 + (2*energy*(r*v*r*v)/(mu*mu)))); // упрощенно
+          if (periapsis > EARTH_RADIUS + 50000) return "🔄 ОРБИТА";
+          else return "📉 СУБОРБИТАЛЬНО";
+        } else {
+          return "🚀 ПОКИДАНИЕ";
+        }
+      }
+
+      // Обновление физики
+      function updatePhysics(dt) {
+        if (rocket.fuel <= 0) {
+          rocket.thrust = 0;
+        }
+        
+        const r = Math.sqrt(rocket.x*rocket.x + rocket.y*rocket.y);
+        if (r < EARTH_RADIUS + 100) {
+          // Столкновение с Землей
+          rocket.vx = 0; rocket.vy = 0;
+          rocket.thrust = 0;
+          return;
+        }
+        
+        // Гравитация
+        const gravityMagnitude = G * EARTH_MASS / (r*r);
+        const ax_grav = -rocket.x / r * gravityMagnitude;
+        const ay_grav = -rocket.y / r * gravityMagnitude;
+        
+        // Тяга
+        let ax_thrust = 0, ay_thrust = 0;
+        if (rocket.thrust > 0 && rocket.fuel > 0) {
+          const thrustX = Math.cos(rocket.angle) * rocket.thrust;
+          const thrustY = Math.sin(rocket.angle) * rocket.thrust;
+          ax_thrust = thrustX / rocket.mass;
+          ay_thrust = thrustY / rocket.mass;
+          
+          // Расход топлива
+          const fuelFlow = rocket.thrust / (rocket.isp * 9.81);
+          rocket.fuel = Math.max(0, rocket.fuel - fuelFlow * dt);
+          rocket.mass = rocket.dryMass + rocket.fuel;
+        }
+        
+        rocket.vx += (ax_grav + ax_thrust) * dt;
+        rocket.vy += (ay_grav + ay_thrust) * dt;
+        
+        rocket.x += rocket.vx * dt;
+        rocket.y += rocket.vy * dt;
+        
+        // Проверка столкновения после движения
+        const newR = Math.sqrt(rocket.x*rocket.x + rocket.y*rocket.y);
+        if (newR < EARTH_RADIUS + 100) {
+          rocket.vx = 0; rocket.vy = 0;
+          rocket.thrust = 0;
+          // ставим на поверхность
+          const anglePos = Math.atan2(rocket.y, rocket.x);
+          rocket.x = Math.cos(anglePos) * (EARTH_RADIUS + 100);
+          rocket.y = Math.sin(anglePos) * (EARTH_RADIUS + 100);
+        }
+      }
+
+      // ---------- ОТРИСОВКА ----------
+      function draw() {
+        const w = canvas.width = window.innerWidth;
+        const h = canvas.height = window.innerHeight;
+        
+        // Динамический зум
+        const alt = getAltitude();
+        if (alt > 2e6) targetViewScale = 3.5e-6;
+        else if (alt > 5e5) targetViewScale = 2.2e-6;
+        else targetViewScale = 1.4e-6;
+        
+        viewScale = viewScale * 0.9 + targetViewScale * 0.1;
+        
+        // Центрируем камеру на ракете
+        cameraX = rocket.x;
+        cameraY = rocket.y;
+        
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        ctx.translate(w/2, h/2);
+        ctx.scale(1/viewScale, -1/viewScale);
+        ctx.translate(-cameraX, -cameraY);
+        
+        // Рисуем Землю
+        const gradient = ctx.createRadialGradient(-0.2*EARTH_RADIUS, -0.1*EARTH_RADIUS, 0, 0, 0, EARTH_RADIUS);
+        gradient.addColorStop(0, '#2a9df4');
+        gradient.addColorStop(0.7, '#1a5f8a');
+        gradient.addColorStop(1, '#0a2a4a');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, EARTH_RADIUS, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#a0d0ff';
+        ctx.lineWidth = 8000;
+        ctx.beginPath();
+        ctx.arc(0, 0, EARTH_RADIUS+4000, 0, Math.PI*2);
+        ctx.stroke();
+        
+        // Атмосфера
+        ctx.strokeStyle = 'rgba(150, 200, 255, 0.25)';
+        ctx.lineWidth = 40000;
+        ctx.beginPath();
+        ctx.arc(0, 0, EARTH_RADIUS+80000, 0, Math.PI*2);
+        ctx.stroke();
+        
+        // Траектория (упрощённо)
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 200, 100, 0.5)';
+        ctx.lineWidth = 15000;
+        ctx.setLineDash([40000, 60000]);
+        let predX = rocket.x, predY = rocket.y, predVx = rocket.vx, predVy = rocket.vy;
+        for(let i=0; i<200; i++) {
+          const rr = Math.sqrt(predX*predX + predY*predY);
+          if(rr < EARTH_RADIUS+5000) break;
+          const g = G*EARTH_MASS/(rr*rr);
+          predVx -= predX/rr * g * 20;
+          predVy -= predY/rr * g * 20;
+          predX += predVx * 20;
+          predY += predVy * 20;
+          if(i===0) ctx.moveTo(predX, predY);
+          else ctx.lineTo(predX, predY);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Ракета
+        ctx.save();
+        ctx.translate(rocket.x, rocket.y);
+        ctx.rotate(rocket.angle);
+        ctx.scale(1, -1);
+        
+        // Огонь
+        if(rocket.thrust > 0 && rocket.fuel > 0) {
+          ctx.beginPath();
+          const gradientFlame = ctx.createLinearGradient(-20, 0, -80, 0);
+          gradientFlame.addColorStop(0, '#ffaa00');
+          gradientFlame.addColorStop(1, '#ff4400');
+          ctx.fillStyle = gradientFlame;
+          ctx.shadowColor = '#ff8800';
+          ctx.shadowBlur = 40000;
+          ctx.moveTo(-30000, -18000);
+          ctx.lineTo(-100000, 0);
+          ctx.lineTo(-30000, 18000);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        
+        // Корпус
+        ctx.fillStyle = '#e0e8f0';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 25000, 12000, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#b0c0d0';
+        ctx.beginPath();
+        ctx.ellipse(20000, 0, 12000, 10000, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#4090c0';
+        ctx.beginPath();
+        ctx.arc(35000, 0, 9000, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.restore();
+        ctx.restore();
+        
+        // HUD обновление текста
+        altSpan.textContent = (getAltitude()/1000).toFixed(1);
+        velSpan.textContent = getSpeed().toFixed(0);
+        fuelSpan.textContent = getFuelPercent().toFixed(0);
+        orbitStatus.textContent = getOrbitStatusText();
+      }
+
+      // ---------- УПРАВЛЕНИЕ ----------
+      function handleInput() {
+        if (leftPressed) rocket.angle += ROTATION_SPEED;
+        if (rightPressed) rocket.angle -= ROTATION_SPEED;
+        rocket.thrust = thrustPressed ? THRUST_FORCE : 0;
+      }
+      
+      function resetSimulation() {
+        rocket = {
+          x: 0, y: EARTH_RADIUS + 500000,
+          vx: 7800, vy: 0,
+          mass: 15000, fuel: 8000, angle: 0, thrust: 0,
+          isp: 350, dryMass: 7000
+        };
+        viewScale = 1.8e-6;
+      }
+
+      // ---------- ИГРОВОЙ ЦИКЛ ----------
+      function gameLoop(now) {
+        requestAnimationFrame(gameLoop);
+        const dt = Math.min(0.03, (now - lastTimestamp) / 1000 * timeScale);
+        if (lastTimestamp !== 0) {
+          handleInput();
+          updatePhysics(dt);
+        }
+        draw();
+        lastTimestamp = now;
+      }
+
+      // ---------- ПРИВЯЗКА СОБЫТИЙ (мобильные) ----------
+      function attachEvents() {
+        const left = document.getElementById('left-btn');
+        const right = document.getElementById('right-btn');
+        const thrust = document.getElementById('thrust-btn');
+        const reset = document.getElementById('reset-btn');
+        
+        const setLeft = (v) => { leftPressed = v; };
+        const setRight = (v) => { rightPressed = v; };
+        const setThrust = (v) => { thrustPressed = v; };
+        
+        // Левый
+        left.addEventListener('touchstart', (e) => { e.preventDefault(); setLeft(true); });
+        left.addEventListener('touchend', (e) => { e.preventDefault(); setLeft(false); });
+        left.addEventListener('mousedown', (e) => { e.preventDefault(); setLeft(true); });
+        left.addEventListener('mouseup', () => setLeft(false));
+        left.addEventListener('mouseleave', () => setLeft(false));
+        
+        // Правый
+        right.addEventListener('touchstart', (e) => { e.preventDefault(); setRight(true); });
+        right.addEventListener('touchend', (e) => { e.preventDefault(); setRight(false); });
+        right.addEventListener('mousedown', (e) => { e.preventDefault(); setRight(true); });
+        right.addEventListener('mouseup', () => setRight(false));
+        right.addEventListener('mouseleave', () => setRight(false));
+        
+        // Тяга
+        thrust.addEventListener('touchstart', (e) => { e.preventDefault(); setThrust(true); });
+        thrust.addEventListener('touchend', (e) => { e.preventDefault(); setThrust(false); });
+        thrust.addEventListener('mousedown', (e) => { e.preventDefault(); setThrust(true); });
+        thrust.addEventListener('mouseup', () => setThrust(false));
+        thrust.addEventListener('mouseleave', () => setThrust(false));
+        
+        // Сброс
+        reset.addEventListener('click', (e) => {
+          resetSimulation();
+        });
+        reset.addEventListener('touchstart', (e) => { e.preventDefault(); resetSimulation(); });
+        
+        // Запрет скролла на canvas
+        canvas.addEventListener('touchstart', (e) => e.preventDefault());
+        canvas.addEventListener('touchmove', (e) => e.preventDefault());
+      }
+
+      // Старт
+      attachEvents();
+      requestAnimationFrame(gameLoop);
+      
+      // Ресайз
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+      });
+      
+    })();
   </script>
 </body>
 </html>
