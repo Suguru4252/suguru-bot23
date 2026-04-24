@@ -2,671 +2,578 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🌑 ИСХОД · Мобильная версия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chugur — Оффлайн мессенджер</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
         }
 
         body {
-            background: #0a080c;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .messenger {
+            width: 400px;
+            height: 650px;
+            background: #12122a;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(100, 100, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a3e, #0d0d2b);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(100, 100, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #6a6aff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            font-size: 12px;
+            color: #6a6aff;
+            margin-top: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Courier New', monospace;
-            touch-action: none;
-        }
-
-        .game-container {
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            background: #1a1220;
-            box-shadow: 0 0 40px rgba(180, 50, 255, 0.15);
-            border-radius: 24px;
-            overflow: hidden;
-            border: 2px solid #4a2c5a;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            touch-action: none;
-        }
-
-        .hud-panel {
-            background: #0d0a12;
-            padding: 12px 16px;
-            border-top: 2px solid #3d2a4a;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #d4b5ff;
-            text-shadow: 0 0 6px #b77eff;
-            font-weight: bold;
-            font-size: 16px;
-            letter-spacing: 1px;
-        }
-
-        .timer-block {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #1e1628;
-            padding: 8px 16px;
-            border-radius: 40px;
-            border: 1px solid #7a4d9e;
-        }
-
-        .timer-icon {
-            font-size: 20px;
-        }
-
-        .progress-block {
-            display: flex;
-            align-items: center;
             gap: 6px;
         }
 
-        .rocket-icon {
-            font-size: 22px;
-            filter: drop-shadow(0 0 6px #ffaa33);
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #6a6aff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: linear-gradient(180deg, #0f0f2d, #12122a);
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #2a2a5a;
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: messageIn 0.3s ease-out;
+            word-wrap: break-word;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #6a6aff, #4f4fff);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: #1e1e3f;
+            color: #d0d0ff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message .sender {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .message .text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message .time {
+            font-size: 10px;
+            opacity: 0.6;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background: #1e1e3f;
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: none;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #6a6aff;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: #0d0d2b;
+            border-top: 1px solid rgba(100, 100, 255, 0.2);
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 25px;
+            border: 1px solid #2a2a5a;
+            background: #12122a;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-area input:focus {
+            border-color: #6a6aff;
+            box-shadow: 0 0 15px rgba(106, 106, 255, 0.2);
+        }
+
+        .input-area input::placeholder {
+            color: #4a4a7a;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #6a6aff, #a855f7);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(106, 106, 255, 0.4);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
         }
 
         .controls {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #110c16;
-            border-top: 1px solid #332244;
-        }
-
-        .joystick-area {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .joy-btn {
-            width: 64px;
-            height: 64px;
-            background: #221b2e;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
+            gap: 8px;
+            padding: 5px 15px 10px;
             justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-            color: #c9adff;
-            border: 2px solid #6b4e8a;
-            box-shadow: 0 6px 0 #0f0a14, 0 8px 12px rgba(0,0,0,0.5);
-            transition: all 0.05s ease;
-            touch-action: none;
+        }
+
+        .ctrl-btn {
+            padding: 6px 14px;
+            border-radius: 15px;
+            border: 1px solid #2a2a5a;
+            background: transparent;
+            color: #8a8aff;
+            font-size: 12px;
             cursor: pointer;
-            user-select: none;
+            transition: all 0.3s;
         }
 
-        .joy-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #0f0a14, 0 5px 10px rgba(0,0,0,0.5);
-            background: #3e2c54;
-            color: #ffeaa6;
+        .ctrl-btn:hover {
+            background: rgba(106, 106, 255, 0.1);
+            border-color: #6a6aff;
         }
 
-        .action-btn {
-            background: #6a3e8a;
-            border: 2px solid #c396ff;
-            color: #fff3d1;
-            padding: 16px 28px;
-            border-radius: 60px;
-            font-weight: bold;
-            font-size: 22px;
-            letter-spacing: 2px;
-            box-shadow: 0 8px 0 #311f42, 0 8px 16px rgba(0,0,0,0.4);
-            transition: all 0.05s ease;
-            touch-action: none;
+        .ctrl-btn.clear {
+            color: #ff6a6a;
+            border-color: #3a1a1a;
+        }
+
+        .ctrl-btn.clear:hover {
+            background: rgba(255, 106, 106, 0.1);
+            border-color: #ff6a6a;
+        }
+
+        .toggle-sender {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 15px;
+            font-size: 12px;
+            color: #8a8aff;
+        }
+
+        .toggle-sender label {
             cursor: pointer;
-            text-transform: uppercase;
-            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .action-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #311f42, 0 5px 12px rgba(0,0,0,0.4);
-            background: #8b5cb0;
-        }
-
-        .action-btn.disabled {
-            opacity: 0.4;
-            filter: grayscale(0.7);
-            pointer-events: none;
-            box-shadow: 0 4px 0 #1f1429;
-            transform: translateY(4px);
-        }
-
-        .reset-area {
-            text-align: center;
-            padding: 8px;
-        }
-
-        .reset-btn {
-            background: none;
-            border: 1px solid #5e4277;
-            color: #bda0da;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: bold;
-            backdrop-filter: blur(4px);
-            touch-action: none;
-            cursor: pointer;
-        }
-
-        .win-message {
-            color: #b1ffa8;
-            text-shadow: 0 0 10px #6eff70;
-            font-weight: bold;
-            text-align: center;
+        .toggle-sender input[type="checkbox"] {
+            accent-color: #6a6aff;
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-
-    <div class="hud-panel">
-        <div class="timer-block">
-            <span class="timer-icon">⏳</span>
-            <span id="timerDisplay">60s</span>
+    <div class="messenger">
+        <div class="header">
+            <h1>CHUGUR</h1>
+            <div class="status">
+                <span class="status-dot"></span>
+                Оффлайн режим
+            </div>
         </div>
-        <div class="progress-block">
-            <span class="rocket-icon">🚀</span>
-            <span id="partsDisplay">0/6</span>
+
+        <div class="chat-area" id="chatArea">
+            <!-- Сообщения будут появляться здесь -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="toggle-sender">
+            <label>
+                <input type="checkbox" id="senderToggle" checked>
+                Я: <strong id="senderLabel">Вы</strong>
+            </label>
+        </div>
+
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Напишите сообщение..."
+                maxlength="500"
+            >
+            <button class="send-btn" id="sendBtn">➤</button>
+        </div>
+
+        <div class="controls">
+            <button class="ctrl-btn" id="autoReplyBtn">🤖 Автоответ</button>
+            <button class="ctrl-btn clear" id="clearBtn">🗑 Очистить</button>
         </div>
     </div>
 
-    <div class="controls">
-        <div class="joystick-area">
-            <div class="joy-btn" id="btnLeft">←</div>
-            <div class="joy-btn" id="btnRight">→</div>
-            <div class="joy-btn" id="btnUp">↑</div>
-            <div class="joy-btn" id="btnDown">↓</div>
-        </div>
-        <div id="actionButton" class="action-btn">🖐️</div>
-    </div>
+    <script>
+        (function() {
+            // DOM элементы
+            const chatArea = document.getElementById('chatArea');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const autoReplyBtn = document.getElementById('autoReplyBtn');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const senderToggle = document.getElementById('senderToggle');
+            const senderLabel = document.getElementById('senderLabel');
 
-    <div class="reset-area">
-        <button class="reset-btn" id="resetButton">⟲ НОВАЯ ЗЕМЛЯ</button>
-    </div>
-    <div id="statusMessage" style="text-align: center; padding: 8px; min-height: 30px; color: #e3c9ff;"></div>
-</div>
+            // Состояние
+            let isUserASender = true; // true = "Вы", false = "Собеседник"
+            let autoReplyEnabled = true;
+            let messageCount = 0;
 
-<script>
-    (function(){
-        "use strict";
+            // Имена отправителей
+            const USER_NAME = 'Вы';
+            const OTHER_NAME = 'Chugur';
 
-        // ----- НАСТРОЙКИ -----
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        // фиксируем размеры канваса 400x400 (логические)
-        canvas.width = 400;
-        canvas.height = 400;
-
-        // ЭЛЕМЕНТЫ UI
-        const timerDisplay = document.getElementById('timerDisplay');
-        const partsDisplay = document.getElementById('partsDisplay');
-        const actionBtn = document.getElementById('actionButton');
-        const statusDiv = document.getElementById('statusMessage');
-
-        // Кнопки направлений
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
-        const btnUp = document.getElementById('btnUp');
-        const btnDown = document.getElementById('btnDown');
-
-        // ----- ИГРОВЫЕ ПЕРЕМЕННЫЕ -----
-        const TILE_SIZE = 40;        // 10x10 тайлов
-        const MAP_COLS = 10;
-        const MAP_ROWS = 10;
-
-        // Карта: 0 - пусто, 1 - стена/руины (непроходимо), 2 - деталь ракеты, 3 - ракета (место строительства)
-        let map = [];
-        
-        // Позиция игрока
-        let player = { x: 1, y: 1 };
-        
-        // Предметы (детали)
-        let partsTotal = 6;
-        let partsCollected = 0;
-        let partsRemainingOnMap = 6;  // сколько ещё лежит на карте
-        
-        // Ракета (координаты строительной площадки)
-        const rocketPos = { x: 8, y: 8 };
-        
-        // Таймер конца света
-        let timeLeft = 60; // секунд
-        let gameActive = true;
-        let gameWin = false;
-        let gameLose = false;
-        
-        // Движение (для удержания кнопок)
-        let moveDirection = { x: 0, y: 0 };
-        let moveInterval = null;
-        
-        // Последнее время кадра для таймера
-        let lastTimestamp = 0;
-        let timerAccumulator = 0;
-
-        // ----- ИНИЦИАЛИЗАЦИЯ КАРТЫ -----
-        function generateMap() {
-            // Создаём пустую карту
-            for (let row = 0; row < MAP_ROWS; row++) {
-                map[row] = Array(MAP_COLS).fill(0);
-            }
-            
-            // Стены по краям
-            for (let c = 0; c < MAP_COLS; c++) {
-                map[0][c] = 1;
-                map[MAP_ROWS-1][c] = 1;
-            }
-            for (let r = 1; r < MAP_ROWS-1; r++) {
-                map[r][0] = 1;
-                map[r][MAP_COLS-1] = 1;
-            }
-            
-            // Внутренние препятствия (руины)
-            const ruins = [
-                [2,2], [2,3], [3,2], [7,1], [6,2], [7,3], [2,7], [3,7], [5,6], [6,7],
-                [4,4], [5,4], [4,5], [7,6], [1,5], [2,5], [7,5]
+            // Заготовленные автоответы
+            const autoReplies = [
+                'Привет! Как дела?',
+                '😊 Отличная идея!',
+                'Да, я согласен!',
+                'Это интересно...',
+                'Можешь рассказать подробнее?',
+                'Секунду, подумаю...',
+                'Ха-ха, точно!',
+                'Не ожидал такого поворота 😄',
+                'Давай обсудим это позже',
+                '👍',
+                'Супер!',
+                'Я как раз об этом думал',
+                'Интересная мысль!',
+                'Продолжай...',
+                '✨ Здорово!'
             ];
-            ruins.forEach(([r,c]) => { if(r>0 && r<9 && c>0 && c<9) map[r][c] = 1; });
-            
-            // Ракета (зона строительства) – клетка 3
-            map[rocketPos.y][rocketPos.x] = 3;
-            
-            // Размещаем детали (6 штук) в доступных местах
-            let placed = 0;
-            const freeCells = [];
-            for (let r = 1; r < MAP_ROWS-1; r++) {
-                for (let c = 1; c < MAP_COLS-1; c++) {
-                    if (map[r][c] === 0 && !(r === player.y && c === player.x) && !(r === rocketPos.y && c === rocketPos.x)) {
-                        freeCells.push([r, c]);
+
+            // Загрузка истории из localStorage
+            function loadMessages() {
+                try {
+                    const stored = localStorage.getItem('chugur_messages');
+                    if (stored) {
+                        return JSON.parse(stored);
                     }
+                } catch (e) {
+                    console.warn('Не удалось загрузить историю:', e);
+                }
+                return [];
+            }
+
+            // Сохранение истории в localStorage
+            function saveMessages(messages) {
+                try {
+                    // Храним только последние 100 сообщений
+                    const toStore = messages.slice(-100);
+                    localStorage.setItem('chugur_messages', JSON.stringify(toStore));
+                } catch (e) {
+                    console.warn('Не удалось сохранить историю:', e);
                 }
             }
-            // Перемешиваем
-            for (let i = freeCells.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [freeCells[i], freeCells[j]] = [freeCells[j], freeCells[i]];
-            }
-            for (let i = 0; i < Math.min(partsTotal, freeCells.length); i++) {
-                const [r, c] = freeCells[i];
-                map[r][c] = 2; // деталь
-                placed++;
-            }
-            partsRemainingOnMap = placed;
-            // если не хватило мест, уменьшаем partsTotal
-            if (placed < partsTotal) partsTotal = placed;
-        }
 
-        // Сброс игры
-        function resetGame() {
-            gameActive = true;
-            gameWin = false;
-            gameLose = false;
-            timeLeft = 60;
-            partsCollected = 0;
-            player = { x: 1, y: 1 };
-            
-            map = [];
-            generateMap();
-            partsRemainingOnMap = partsTotal; 
-            
-            updateUI();
-            statusDiv.innerText = '🔮 Собери 6 деталей и иди к ракете';
-            actionBtn.classList.remove('disabled');
-            moveDirection = { x: 0, y: 0 };
-        }
+            let messages = loadMessages();
 
-        // Обновление текста
-        function updateUI() {
-            timerDisplay.innerText = `${Math.ceil(timeLeft)}s`;
-            partsDisplay.innerText = `${partsCollected}/${partsTotal}`;
-        }
-
-        // Проверка: можно ли встать на клетку
-        function canMoveTo(tileX, tileY) {
-            if (tileX < 0 || tileX >= MAP_COLS || tileY < 0 || tileY >= MAP_ROWS) return false;
-            const tile = map[tileY][tileX];
-            // стена (1) непроходима, ракета (3) проходима
-            return tile !== 1;
-        }
-
-        // Движение игрока
-        function tryMove(dx, dy) {
-            if (!gameActive || gameWin || gameLose) return false;
-            
-            const newX = player.x + dx;
-            const newY = player.y + dy;
-            if (!canMoveTo(newX, newY)) return false;
-            
-            // Перемещаем
-            player.x = newX;
-            player.y = newY;
-            
-            // Проверка на сбор детали (если наступили на клетку с деталью)
-            const cell = map[player.y][player.x];
-            if (cell === 2) {
-                partsCollected++;
-                partsRemainingOnMap--;
-                map[player.y][player.x] = 0; // убираем деталь
-                updateUI();
-                statusDiv.innerText = `🔧 Деталь ${partsCollected}/${partsTotal}`;
+            // Форматирование времени
+            function getTimeString() {
+                const now = new Date();
+                return now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             }
-            
-            // Проверка на активацию ракеты (если игрок на клетке ракеты и есть все детали)
-            if (player.x === rocketPos.x && player.y === rocketPos.y) {
-                if (partsCollected >= partsTotal && gameActive && !gameWin) {
-                    // ПОБЕДА!
-                    gameWin = true;
-                    gameActive = false;
-                    statusDiv.innerHTML = '<span class="win-message">🚀✨ ПОЛЕТЕЛИ! НОВАЯ ПЛАНЕТА ✨🚀</span>';
-                    actionBtn.classList.add('disabled');
-                } else if (partsCollected < partsTotal) {
-                    statusDiv.innerText = `⚠️ Нужно ещё ${partsTotal - partsCollected} деталей!`;
-                }
-            } else {
-                // если не на ракете, убираем предупреждение
-                if (!gameWin && !gameLose) {
-                    statusDiv.innerText = partsCollected === partsTotal ? '✅ Все детали! Беги к ракете!' : '🔍 Ищи детали...';
-                }
-            }
-            
-            return true;
-        }
 
-        // Обработка действия (кнопка ACTION) — подбор или взлёт
-        function handleAction() {
-            if (!gameActive || gameLose) return;
-            if (gameWin) return;
-            
-            const cell = map[player.y][player.x];
-            
-            // Если стоим на детали (на всякий случай, хотя move уже собирает)
-            if (cell === 2) {
-                partsCollected++;
-                partsRemainingOnMap--;
-                map[player.y][player.x] = 0;
-                updateUI();
-                statusDiv.innerText = `🔧 Деталь ${partsCollected}/${partsTotal}`;
-                if (partsCollected === partsTotal) {
-                    statusDiv.innerText = '✅ Все детали собраны! К ракете!';
-                }
-                return;
+            // Создание DOM-элемента сообщения
+            function createMessageElement(msg) {
+                const div = document.createElement('div');
+                div.className = `message ${msg.type}`;
+                div.innerHTML = `
+                    <div class="sender">${msg.sender}</div>
+                    <div class="text">${escapeHtml(msg.text)}</div>
+                    <div class="time">${msg.time}</div>
+                `;
+                return div;
             }
-            
-            // Если стоим на ракете и все детали собраны
-            if (player.x === rocketPos.x && player.y === rocketPos.y) {
-                if (partsCollected >= partsTotal && !gameWin) {
-                    gameWin = true;
-                    gameActive = false;
-                    statusDiv.innerHTML = '<span class="win-message">🚀🌌 ПОБЕГ! НОВЫЙ МИР 🌌🚀</span>';
-                    actionBtn.classList.add('disabled');
-                } else {
-                    statusDiv.innerText = `❌ Нужно ${partsTotal - partsCollected} деталей`;
+
+            // Экранирование HTML
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            // Отрисовка всех сообщений
+            function renderMessages() {
+                chatArea.innerHTML = '';
+                messages.forEach(msg => {
+                    chatArea.appendChild(createMessageElement(msg));
+                });
+                scrollToBottom();
+            }
+
+            // Прокрутка вниз
+            function scrollToBottom() {
+                setTimeout(() => {
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }, 50);
+            }
+
+            // Добавление сообщения
+            function addMessage(text, sender, type) {
+                const msg = {
+                    id: Date.now() + Math.random(),
+                    text: text.trim(),
+                    sender: sender,
+                    type: type,
+                    time: getTimeString()
+                };
+                messages.push(msg);
+                saveMessages(messages);
+                chatArea.appendChild(createMessageElement(msg));
+                scrollToBottom();
+                messageCount++;
+                return msg;
+            }
+
+            // Показать индикатор печати
+            function showTyping(duration = 1500) {
+                typingIndicator.classList.add('active');
+                scrollToBottom();
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        typingIndicator.classList.remove('active');
+                        resolve();
+                    }, duration);
+                });
+            }
+
+            // Автоответ
+            async function sendAutoReply() {
+                if (!autoReplyEnabled) return;
+                if (messages.length === 0) return;
+
+                const lastMsg = messages[messages.length - 1];
+                // Не отвечаем на свои же сообщения
+                if (lastMsg.sender === OTHER_NAME) return;
+
+                await showTyping(1000 + Math.random() * 1500);
+
+                const randomReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
+                addMessage(randomReply, OTHER_NAME, 'received');
+            }
+
+            // Отправка сообщения пользователя
+            async function sendUserMessage() {
+                const text = messageInput.value.trim();
+                if (!text) return;
+
+                const senderName = isUserASender ? USER_NAME : OTHER_NAME;
+                const type = isUserASender ? 'sent' : 'received';
+
+                addMessage(text, senderName, type);
+                messageInput.value = '';
+                messageInput.focus();
+
+                // Если отправитель — пользователь, запускаем автоответ
+                if (isUserASender) {
+                    await sendAutoReply();
                 }
             }
-        }
 
-        // ----- ОТРИСОВКА (пиксель-арт, красиво) -----
-        function draw() {
-            ctx.clearRect(0, 0, 400, 400);
-            
-            // Фон (ночное небо)
-            ctx.fillStyle = '#120e1a';
-            ctx.fillRect(0, 0, 400, 400);
-            
-            // Звёзды
-            ctx.fillStyle = '#f9f3e0';
-            for (let i = 0; i < 60; i++) {
-                if (i%2 === 0) continue; // ленивый рандом
-                let sx = (i*23)%400, sy = (i*17)%400;
-                ctx.fillRect(sx, sy, 1.5, 1.5);
-            }
-            
-            // Рисуем карту
-            for (let row = 0; row < MAP_ROWS; row++) {
-                for (let col = 0; col < MAP_COLS; col++) {
-                    const x = col * TILE_SIZE;
-                    const y = row * TILE_SIZE;
-                    const tile = map[row][col];
-                    
-                    // Земля
-                    if (tile === 0) {
-                        ctx.fillStyle = '#2a2336';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#382e48';
-                        ctx.fillRect(x+2, y+2, TILE_SIZE-4, TILE_SIZE-4);
-                    }
-                    // Стена / руины
-                    else if (tile === 1) {
-                        ctx.fillStyle = '#4a3a5c';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = '#6b4f7c';
-                        ctx.fillRect(x+3, y+3, TILE_SIZE-6, TILE_SIZE-6);
-                        ctx.fillStyle = '#3b2a45';
-                        ctx.fillRect(x+6, y+6, 8, 8);
-                        // трещины
-                        ctx.strokeStyle = '#1f1429';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(x+10, y+10); ctx.lineTo(x+20, y+25); ctx.stroke();
-                    }
-                    // Деталь ракеты (сияет)
-                    else if (tile === 2) {
-                        // пол
-                        ctx.fillStyle = '#2a2336';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        // свечение
-                        ctx.shadowColor = '#ffd966';
-                        ctx.shadowBlur = 14;
-                        ctx.fillStyle = '#f7c948';
-                        ctx.beginPath();
-                        ctx.arc(x+20, y+20, 12, 0, 2*Math.PI);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-                        ctx.shadowColor = 'transparent';
-                        ctx.fillStyle = '#e06b00';
-                        ctx.font = 'bold 22px "Courier New", monospace';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('⚙️', x+20, y+21);
-                    }
-                    // Ракета (стройплощадка)
-                    else if (tile === 3) {
-                        ctx.fillStyle = '#1e2a3a';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        // платформа
-                        ctx.fillStyle = '#5e6b8a';
-                        ctx.fillRect(x+4, y+28, 32, 8);
-                        // корпус ракеты (зависит от прогресса)
-                        const progress = partsCollected / partsTotal;
-                        const rocketHeight = 20 * progress;
-                        ctx.fillStyle = '#c0d0f0';
-                        ctx.fillRect(x+14, y+28-rocketHeight, 12, rocketHeight);
-                        ctx.fillStyle = '#ff884d';
-                        ctx.beginPath();
-                        ctx.moveTo(x+14, y+28-rocketHeight);
-                        ctx.lineTo(x+20, y+20-rocketHeight);
-                        ctx.lineTo(x+26, y+28-rocketHeight);
-                        ctx.fill();
-                        // иллюминатор
-                        ctx.fillStyle = '#7ec8ff';
-                        ctx.beginPath();
-                        ctx.arc(x+20, y+20-rocketHeight*0.3, 4, 0, 2*Math.PI);
-                        ctx.fill();
-                        // надпись
-                        ctx.fillStyle = '#aaccff';
-                        ctx.font = 'bold 9px monospace';
-                        ctx.fillText('SOYUZ', x+20, y+10);
-                    }
-                    
-                    // Сетка
-                    ctx.strokeStyle = '#221c2a';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+            // Очистка чата
+            function clearChat() {
+                if (messages.length === 0) return;
+                if (confirm('Удалить всю историю сообщений?')) {
+                    messages = [];
+                    saveMessages(messages);
+                    chatArea.innerHTML = '';
+                    messageCount = 0;
                 }
             }
-            
-            // Игрок (космонавт)
-            const px = player.x * TILE_SIZE;
-            const py = player.y * TILE_SIZE;
-            // тень
-            ctx.fillStyle = '#00000055';
-            ctx.beginPath();
-            ctx.ellipse(px+20, py+34, 12, 6, 0, 0, Math.PI*2);
-            ctx.fill();
-            // скафандр
-            ctx.fillStyle = '#b8d4e3';
-            ctx.beginPath();
-            ctx.arc(px+20, py+20, 14, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#e6f2ff';
-            ctx.beginPath();
-            ctx.arc(px+17, py+17, 5, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#0b1b2a';
-            ctx.beginPath();
-            ctx.arc(px+15, py+15, 2.5, 0, 2*Math.PI);
-            ctx.fill();
-            // ранец
-            ctx.fillStyle = '#8a9eb5';
-            ctx.fillRect(px+26, py+10, 8, 16);
-            
-            // если игра окончена поражением
-            if (gameLose) {
-                ctx.globalAlpha = 0.7;
-                ctx.fillStyle = '#1a0f0f';
-                ctx.fillRect(0, 160, 400, 70);
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#ff7b7b';
-                ctx.font = 'bold 24px "Courier New", monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('💀 КОНЕЦ СВЕТА 💀', 200, 210);
-            } else if (gameWin) {
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = '#d4ffc9';
-                ctx.fillRect(0, 150, 400, 80);
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#c6ffb0';
-                ctx.font = 'bold 22px monospace';
-                ctx.fillText('🚀 НОВАЯ ПЛАНЕТА 🚀', 200, 200);
-            }
-        }
 
-        // ----- ИГРОВОЙ ЦИКЛ (обновление таймера) -----
-        function gameLoop(now) {
-            if (!lastTimestamp) lastTimestamp = now;
-            const deltaSec = (now - lastTimestamp) / 1000;
-            lastTimestamp = now;
-            
-            if (gameActive && !gameWin && !gameLose) {
-                timeLeft = Math.max(0, timeLeft - deltaSec);
-                updateUI();
-                
-                if (timeLeft <= 0.0) {
-                    gameLose = true;
-                    gameActive = false;
-                    statusDiv.innerText = '💥 Время вышло... Земля погибла';
-                    actionBtn.classList.add('disabled');
+            // Переключение отправителя
+            function updateSenderLabel() {
+                isUserASender = senderToggle.checked;
+                senderLabel.textContent = isUserASender ? USER_NAME : OTHER_NAME;
+                messageInput.placeholder = isUserASender 
+                    ? 'Напишите сообщение...' 
+                    : `Пишем как ${OTHER_NAME}...`;
+            }
+
+            // Обработчики событий
+            sendBtn.addEventListener('click', sendUserMessage);
+
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendUserMessage();
+                }
+            });
+
+            clearBtn.addEventListener('click', clearChat);
+
+            senderToggle.addEventListener('change', updateSenderLabel);
+
+            autoReplyBtn.addEventListener('click', () => {
+                autoReplyEnabled = !autoReplyEnabled;
+                autoReplyBtn.textContent = autoReplyEnabled ? '🤖 Автоответ ВКЛ' : '🤖 Автоответ ВЫКЛ';
+                autoReplyBtn.style.opacity = autoReplyEnabled ? '1' : '0.5';
+            });
+
+            // Инициализация
+            function init() {
+                updateSenderLabel();
+                renderMessages();
+                messageInput.focus();
+
+                // Если чат пуст, добавим приветственное сообщение
+                if (messages.length === 0) {
+                    addMessage('Добро пожаловать в Chugur! 👋 Это оффлайн-мессенджер.', 'Chugur', 'received');
                 }
             }
-            
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
 
-        // ----- ОБРАБОТЧИКИ КНОПОК (mobile friendly)-----
-        function startMove(dx, dy) {
-            if (!gameActive || gameWin || gameLose) return;
-            tryMove(dx, dy);
-            // Если удерживаем, продолжаем движение с интервалом
-            if (moveInterval) clearInterval(moveInterval);
-            moveInterval = setInterval(() => {
-                if (gameActive && !gameWin && !gameLose) {
-                    tryMove(dx, dy);
-                } else {
-                    clearInterval(moveInterval);
-                    moveInterval = null;
-                }
-            }, 140);
-        }
-
-        function stopMove() {
-            if (moveInterval) {
-                clearInterval(moveInterval);
-                moveInterval = null;
-            }
-        }
-
-        // Привязка событий (touch + mouse для мобильных)
-        function bindDirection(btn, dx, dy) {
-            const start = (e) => { e.preventDefault(); startMove(dx, dy); };
-            const end = (e) => { e.preventDefault(); stopMove(); };
-            btn.addEventListener('mousedown', start);
-            btn.addEventListener('mouseup', end);
-            btn.addEventListener('mouseleave', end);
-            btn.addEventListener('touchstart', start, {passive: false});
-            btn.addEventListener('touchend', end);
-            btn.addEventListener('touchcancel', end);
-        }
-
-        bindDirection(btnLeft, -1, 0);
-        bindDirection(btnRight, 1, 0);
-        bindDirection(btnUp, 0, -1);
-        bindDirection(btnDown, 0, 1);
-
-        // Кнопка действия
-        actionBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleAction();
-        });
-        actionBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleAction();
-        }, {passive: false});
-
-        // Сброс
-        document.getElementById('resetButton').addEventListener('click', (e) => {
-            resetGame();
-            stopMove();
-            actionBtn.classList.remove('disabled');
-        });
-
-        // Запрет скролла на canvas
-        canvas.addEventListener('touchstart', (e) => e.preventDefault(), {passive: false});
-        canvas.addEventListener('touchmove', (e) => e.preventDefault(), {passive: false});
-        
-        // Старт
-        resetGame();
-        requestAnimationFrame(gameLoop);
-        
-        // Дополнительно: блокировка контекстного меню
-        document.querySelectorAll('button, .joy-btn').forEach(el => {
-            el.addEventListener('contextmenu', (e) => e.preventDefault());
-        });
-
-    })();
-</script>
+            init();
+        })();
+    </script>
 </body>
 </html>
