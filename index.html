@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chugur — Оффлайн мессенджер с лобби</title>
-    <script src="/socket.io/socket.io.js"></script>
+    <title>Chugur — Мессенджер с лобби</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -23,18 +23,22 @@
         }
 
         .app-container {
-            width: 900px;
-            height: 650px;
+            width: 95%;
+            max-width: 900px;
+            height: 90vh;
             display: flex;
             gap: 2px;
             background: #0a0a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         /* Панель лобби */
         .lobby-panel {
             width: 320px;
+            min-width: 280px;
             background: #12122a;
-            border-radius: 20px 0 0 20px;
             display: flex;
             flex-direction: column;
             border-right: 1px solid rgba(100, 100, 255, 0.1);
@@ -44,6 +48,7 @@
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(100, 100, 255, 0.15);
+            background: #0d0d2b;
         }
 
         .lobby-header h1 {
@@ -53,6 +58,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: 2px;
+        }
+
+        .lobby-header .subtitle {
+            font-size: 11px;
+            color: #6a6aff;
+            margin-top: 4px;
         }
 
         .lobby-list {
@@ -82,7 +93,6 @@
         .lobby-card:hover {
             border-color: #6a6aff;
             background: #1e1e42;
-            transform: translateX(2px);
         }
 
         .lobby-card .lobby-name {
@@ -100,38 +110,43 @@
         }
 
         .lobby-card .lobby-id {
-            font-size: 11px;
+            font-size: 10px;
             color: #4a4a7a;
             margin-top: 2px;
         }
 
+        .btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
         .create-btn {
             margin: 10px 15px;
-            padding: 12px;
+            width: calc(100% - 30px);
             background: linear-gradient(135deg, #6a6aff, #a855f7);
-            border: none;
             color: white;
-            border-radius: 12px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
         }
 
         .create-btn:hover {
             box-shadow: 0 5px 20px rgba(106, 106, 255, 0.3);
+            transform: translateY(-1px);
         }
 
         .refresh-btn {
             margin: 5px 15px 15px;
+            width: calc(100% - 30px);
             padding: 8px;
             background: transparent;
             border: 1px solid #2a2a5a;
             color: #8a8aff;
-            border-radius: 8px;
-            cursor: pointer;
+            font-weight: 400;
             font-size: 12px;
-            transition: all 0.2s;
         }
 
         .refresh-btn:hover {
@@ -142,23 +157,25 @@
             text-align: center;
             padding: 40px 20px;
             color: #4a4a7a;
+            font-size: 14px;
         }
 
         /* Панель чата */
         .chat-panel {
             flex: 1;
-            background: #12122a;
-            border-radius: 0 20px 20px 0;
+            background: #0f0f2d;
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
 
         .chat-header {
-            padding: 20px;
+            padding: 15px 20px;
             border-bottom: 1px solid rgba(100, 100, 255, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #0d0d2b;
         }
 
         .chat-header .room-name {
@@ -168,7 +185,7 @@
         }
 
         .chat-header .room-id {
-            font-size: 11px;
+            font-size: 10px;
             color: #4a4a7a;
         }
 
@@ -180,6 +197,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.2s;
         }
 
         .leave-btn:hover {
@@ -189,16 +207,17 @@
         .players-list {
             display: flex;
             gap: 6px;
-            padding: 8px 20px;
+            padding: 10px 20px;
             flex-wrap: wrap;
             border-bottom: 1px solid rgba(100, 100, 255, 0.1);
+            background: #0d0d2b;
         }
 
         .player-tag {
             padding: 4px 12px;
             background: #1a1a3a;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 11px;
             color: #6a6aff;
         }
 
@@ -225,10 +244,11 @@
         }
 
         .message {
-            max-width: 80%;
+            max-width: 75%;
             padding: 10px 14px;
             border-radius: 16px;
             animation: msgIn 0.2s ease-out;
+            word-wrap: break-word;
         }
 
         @keyframes msgIn {
@@ -257,6 +277,8 @@
             font-size: 12px;
             font-style: italic;
             padding: 4px 12px;
+            max-width: 90%;
+            text-align: center;
         }
 
         .message .sender-name {
@@ -280,9 +302,10 @@
 
         .chat-input-area {
             display: flex;
-            padding: 15px;
+            padding: 15px 20px;
             gap: 10px;
             border-top: 1px solid rgba(100, 100, 255, 0.15);
+            background: #0d0d2b;
         }
 
         .chat-input-area input {
@@ -290,14 +313,19 @@
             padding: 12px 16px;
             border-radius: 25px;
             border: 1px solid #2a2a5a;
-            background: #0d0d2b;
+            background: #12122a;
             color: #e0e0e0;
             font-size: 14px;
             outline: none;
+            transition: all 0.2s;
         }
 
         .chat-input-area input:focus {
             border-color: #6a6aff;
+        }
+
+        .chat-input-area input::placeholder {
+            color: #4a4a7a;
         }
 
         .send-btn {
@@ -309,6 +337,12 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
         }
 
         .no-lobby-selected {
@@ -320,13 +354,13 @@
             font-size: 16px;
         }
 
-        /* Модальные окна */
+        /* Модалки */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             justify-content: center;
             align-items: center;
             z-index: 100;
@@ -340,7 +374,8 @@
             background: #12122a;
             border-radius: 20px;
             padding: 30px;
-            width: 380px;
+            width: 90%;
+            max-width: 380px;
             border: 1px solid rgba(100, 100, 255, 0.3);
         }
 
@@ -348,12 +383,21 @@
             margin-bottom: 20px;
             color: #d0d0ff;
             text-align: center;
+            font-size: 18px;
+        }
+
+        .modal label {
+            display: block;
+            font-size: 12px;
+            color: #6a6aff;
+            margin-bottom: 4px;
+            margin-top: 10px;
         }
 
         .modal input {
             width: 100%;
             padding: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             border-radius: 10px;
             border: 1px solid #2a2a5a;
             background: #0d0d2b;
@@ -369,6 +413,7 @@
         .modal .btn-row {
             display: flex;
             gap: 10px;
+            margin-top: 15px;
         }
 
         .modal button {
@@ -379,6 +424,7 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
+            transition: all 0.2s;
         }
 
         .btn-primary {
@@ -397,6 +443,30 @@
             text-align: center;
             margin-top: 8px;
         }
+
+        .success-text {
+            color: #6aff6a;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 700px) {
+            .app-container {
+                flex-direction: column;
+                height: 100vh;
+                width: 100%;
+                border-radius: 0;
+            }
+            .lobby-panel {
+                width: 100%;
+                min-width: 0;
+                max-height: 40%;
+            }
+            .chat-panel {
+                min-height: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -405,24 +475,24 @@
         <div class="lobby-panel">
             <div class="lobby-header">
                 <h1>CHUGUR</h1>
-                <div style="font-size:11px;color:#6a6aff;margin-top:4px;">Лобби</div>
+                <div class="subtitle">Лобби для общения</div>
             </div>
-            <button class="create-btn" onclick="showCreateModal()">+ Создать лобби</button>
-            <button class="refresh-btn" onclick="requestLobbies()">🔄 Обновить список</button>
+            <button class="btn create-btn" onclick="showCreateModal()">+ Создать лобби</button>
+            <button class="btn refresh-btn" onclick="requestLobbies()">🔄 Обновить список</button>
             <div class="lobby-list" id="lobbyList">
-                <div class="empty-lobbies">Загрузка лобби...</div>
+                <div class="empty-lobbies">Загрузка...</div>
             </div>
         </div>
 
         <!-- Панель чата -->
         <div class="chat-panel" id="chatPanel">
             <div id="noLobby" class="no-lobby-selected">
-                Выберите или создайте лобби
+                👈 Выберите или создайте лобби
             </div>
-            <div id="chatInterface" style="display:none;flex-direction:column;height:100%;">
+            <div id="chatInterface" style="display:none; flex-direction:column; height:100%;">
                 <div class="chat-header">
                     <div>
-                        <div class="room-name" id="roomName"></div>
+                        <div class="room-name" id="roomName">—</div>
                         <div class="room-id" id="roomId"></div>
                     </div>
                     <button class="leave-btn" onclick="leaveLobby()">Выйти</button>
@@ -430,66 +500,98 @@
                 <div class="players-list" id="playersList"></div>
                 <div class="chat-area" id="chatArea"></div>
                 <div class="chat-input-area">
-                    <input type="text" id="messageInput" placeholder="Напишите сообщение..." maxlength="300">
+                    <input type="text" id="messageInput" placeholder="Сообщение..." maxlength="300">
                     <button class="send-btn" onclick="sendMessage()">➤</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно создания лобби -->
+    <!-- Модалка создания -->
     <div class="modal-overlay" id="createModal">
         <div class="modal">
             <h3>Создать лобби</h3>
-            <input type="text" id="createLobbyName" placeholder="Название лобби" maxlength="20">
-            <input type="number" id="createMaxPlayers" placeholder="Макс. игроков (2-20)" min="2" max="20" value="10">
-            <input type="text" id="createPassword" placeholder="Пароль (оставьте пустым для открытого)">
+            <label>Название</label>
+            <input type="text" id="createLobbyName" placeholder="Моё лобби" maxlength="20">
+            <label>Макс. игроков</label>
+            <input type="number" id="createMaxPlayers" placeholder="10" min="2" max="20" value="10">
+            <label>Пароль (необязательно)</label>
+            <input type="text" id="createPassword" placeholder="Оставьте пустым для открытого">
             <div class="btn-row">
                 <button class="btn-cancel" onclick="hideCreateModal()">Отмена</button>
                 <button class="btn-primary" onclick="createLobby()">Создать</button>
             </div>
+            <div class="error-text" id="createError"></div>
         </div>
     </div>
 
-    <!-- Модальное окно входа в лобби -->
+    <!-- Модалка входа -->
     <div class="modal-overlay" id="joinModal">
         <div class="modal">
             <h3>Войти в лобби</h3>
-            <input type="text" id="joinPlayerName" placeholder="Ваше имя" maxlength="15">
-            <input type="password" id="joinPassword" placeholder="Пароль (если есть)">
+            <label>Ваше имя</label>
+            <input type="text" id="joinPlayerName" placeholder="Игрок" maxlength="15">
+            <label id="joinPasswordLabel" style="display:none;">Пароль</label>
+            <input type="text" id="joinPassword" placeholder="Пароль" style="display:none;">
             <div class="btn-row">
                 <button class="btn-cancel" onclick="hideJoinModal()">Отмена</button>
-                <button class="btn-primary" id="joinConfirmBtn">Войти</button>
+                <button class="btn-primary" onclick="joinLobby()">Войти</button>
             </div>
             <div class="error-text" id="joinError"></div>
         </div>
     </div>
 
     <script>
-        const socket = io();
+        // Подключаемся к серверу
+        const socket = io('https://chugur-server.glitch.me/', {
+            transports: ['websocket', 'polling']
+        });
+
         let currentLobbyId = null;
         let myPlayerName = 'Игрок';
         let pendingJoinLobby = null;
 
+        // Обработка ошибок подключения
+        socket.on('connect_error', (err) => {
+            console.log('Ошибка подключения:', err.message);
+            document.getElementById('lobbyList').innerHTML = 
+                '<div class="empty-lobbies" style="color:#ff6a6a;">⚠️ Сервер недоступен<br><small>Попробуйте позже</small></div>';
+        });
+
+        socket.on('connect', () => {
+            console.log('Подключены к серверу! ID:', socket.id);
+            requestLobbies();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Отключены от сервера');
+            if (currentLobbyId) {
+                document.getElementById('chatArea').innerHTML += 
+                    '<div class="message system"><span>⚠️ Соединение потеряно</span></div>';
+            }
+        });
+
         // Запрос списка лобби
         function requestLobbies() {
-            socket.emit('request-lobbies');
+            if (socket.connected) {
+                socket.emit('request-lobbies');
+            }
         }
 
-        // Получение списка лобби
+        // Получение списка
         socket.on('lobbies-list', (lobbies) => {
             const lobbyList = document.getElementById('lobbyList');
-            if (lobbies.length === 0) {
-                lobbyList.innerHTML = '<div class="empty-lobbies">Нет доступных лобби</div>';
+            if (!lobbies || lobbies.length === 0) {
+                lobbyList.innerHTML = '<div class="empty-lobbies">Нет доступных лобби<br><small>Создайте первое!</small></div>';
                 return;
             }
 
             lobbyList.innerHTML = lobbies.map(lobby => `
                 <div class="lobby-card" onclick="clickJoinLobby('${lobby.id}', ${lobby.hasPassword})">
-                    <div class="lobby-name">${escapeHtml(lobby.name)} ${lobby.hasPassword ? '🔒' : ''}</div>
+                    <div class="lobby-name">${escapeHtml(lobby.name)} ${lobby.hasPassword ? '🔒' : '🌐'}</div>
                     <div class="lobby-info">
                         <span>👥 ${lobby.playerCount}/${lobby.maxPlayers}</span>
-                        ${lobby.hasPassword ? '<span>🔑 Пароль</span>' : '<span>🌐 Открытое</span>'}
+                        ${lobby.hasPassword ? '<span>Требуется пароль</span>' : '<span>Открытое</span>'}
                     </div>
                     <div class="lobby-id">ID: ${lobby.id}</div>
                 </div>
@@ -501,13 +603,17 @@
             document.getElementById('joinPlayerName').value = myPlayerName || '';
             document.getElementById('joinPassword').value = '';
             document.getElementById('joinError').textContent = '';
-            document.getElementById('joinPassword').style.display = hasPassword ? 'block' : 'none';
-            document.getElementById('joinModal').classList.add('active');
-            if (!hasPassword) {
-                document.getElementById('joinConfirmBtn').onclick = () => joinLobby();
+            
+            if (hasPassword) {
+                document.getElementById('joinPassword').style.display = 'block';
+                document.getElementById('joinPasswordLabel').style.display = 'block';
             } else {
-                document.getElementById('joinConfirmBtn').onclick = () => joinLobby();
+                document.getElementById('joinPassword').style.display = 'none';
+                document.getElementById('joinPasswordLabel').style.display = 'none';
             }
+            
+            document.getElementById('joinModal').classList.add('active');
+            document.getElementById('joinPlayerName').focus();
         }
 
         function joinLobby() {
@@ -536,13 +642,13 @@
             document.getElementById('chatArea').innerHTML = '';
             updatePlayersList(data.players);
             requestLobbies();
+            document.getElementById('messageInput').focus();
         });
 
         socket.on('message-history', (messages) => {
             const chatArea = document.getElementById('chatArea');
-            messages.forEach(msg => {
-                appendMessage(msg);
-            });
+            chatArea.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg));
             scrollChat();
         });
 
@@ -561,6 +667,19 @@
             document.getElementById('chatInterface').style.display = 'none';
             document.getElementById('chatArea').innerHTML = '';
             requestLobbies();
+        });
+
+        socket.on('lobby-created', (data) => {
+            currentLobbyId = data.id;
+            hideCreateModal();
+            document.getElementById('noLobby').style.display = 'none';
+            document.getElementById('chatInterface').style.display = 'flex';
+            document.getElementById('roomName').textContent = data.name;
+            document.getElementById('roomId').textContent = 'ID: ' + data.id;
+            document.getElementById('chatArea').innerHTML = '';
+            document.getElementById('playersList').innerHTML = '<span class="player-tag host">👑 Хост (Вы)</span>';
+            requestLobbies();
+            document.getElementById('messageInput').focus();
         });
 
         function appendMessage(msg) {
@@ -584,6 +703,10 @@
 
         function updatePlayersList(players) {
             const container = document.getElementById('playersList');
+            if (!players || players.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
             container.innerHTML = players.map(p => 
                 `<span class="player-tag ${p.isHost ? 'host' : ''}">${p.isHost ? '👑 ' : ''}${escapeHtml(p.name)}</span>`
             ).join('');
@@ -616,23 +739,11 @@
                 maxPlayers: Math.min(20, Math.max(2, maxPlayers)),
                 password: password
             });
-
-            hideCreateModal();
         }
-
-        socket.on('lobby-created', (data) => {
-            currentLobbyId = data.id;
-            document.getElementById('noLobby').style.display = 'none';
-            document.getElementById('chatInterface').style.display = 'flex';
-            document.getElementById('roomName').textContent = data.name;
-            document.getElementById('roomId').textContent = 'ID: ' + data.id;
-            document.getElementById('chatArea').innerHTML = '';
-            document.getElementById('playersList').innerHTML = '<span class="player-tag host">👑 Хост</span>';
-            requestLobbies();
-        });
 
         function showCreateModal() {
             document.getElementById('createModal').classList.add('active');
+            document.getElementById('createError').textContent = '';
             document.getElementById('createLobbyName').focus();
         }
 
@@ -647,7 +758,9 @@
 
         function scrollChat() {
             const area = document.getElementById('chatArea');
-            setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+            setTimeout(() => { 
+                if (area) area.scrollTop = area.scrollHeight; 
+            }, 50);
         }
 
         function escapeHtml(text) {
@@ -655,12 +768,14 @@
             return String(text).replace(/[&<>"']/g, m => map[m]);
         }
 
-        // Обработка Enter
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        // Enter для отправки
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.activeElement === document.getElementById('messageInput')) {
+                sendMessage();
+            }
         });
 
-        // Закрытие модалок по клику вне
+        // Закрытие модалок по клику на фон
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -669,13 +784,15 @@
             });
         });
 
-        // Автообновление каждые 2 секунды
+        // Автообновление списка лобби каждые 2 секунды
         setInterval(() => {
-            requestLobbies();
+            if (socket.connected) {
+                requestLobbies();
+            }
         }, 2000);
 
-        // Первый запрос
+        // Первый запрос при загрузке
         requestLobbies();
     </script>
 </body>
-  </html>
+</html>
