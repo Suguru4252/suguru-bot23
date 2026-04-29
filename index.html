@@ -1,798 +1,650 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chugur — Мессенджер с лобби</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no">
+  <title>🎰 Виртуальное Казино | Bulldrop · Winline · Спорт</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #e0e0e0;
-        }
+    body {
+      background: linear-gradient(145deg, #0a0f1e 0%, #121828 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
 
-        .app-container {
-            width: 95%;
-            max-width: 900px;
-            height: 90vh;
-            display: flex;
-            gap: 2px;
-            background: #0a0a1a;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
+    .casino-container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(18, 25, 40, 0.9);
+      backdrop-filter: blur(20px);
+      border-radius: 2.5rem;
+      padding: 2rem 2rem 2.2rem;
+      box-shadow: 0 30px 55px rgba(0,0,0,0.7), 0 0 0 1px rgba(212, 175, 55, 0.3);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
 
-        /* Панель лобби */
-        .lobby-panel {
-            width: 320px;
-            min-width: 280px;
-            background: #12122a;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(100, 100, 255, 0.1);
-        }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
 
-        .lobby-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(100, 100, 255, 0.15);
-            background: #0d0d2b;
-        }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #f5e56c, #c9a82b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px #ffb34730;
+    }
 
-        .lobby-header h1 {
-            font-size: 26px;
-            background: linear-gradient(45deg, #6a6aff, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
-        }
+    .balance-panel {
+      background: #1e2538;
+      border-radius: 3rem;
+      padding: 0.5rem 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      border: 1px solid #4a3f2b;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+    }
 
-        .lobby-header .subtitle {
-            font-size: 11px;
-            color: #6a6aff;
-            margin-top: 4px;
-        }
+    .balance {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #f7e05e;
+    }
 
-        .lobby-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
+    .balance span {
+      background: #00000033;
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      color: #ffd966;
+    }
 
-        .lobby-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .lobby-list::-webkit-scrollbar-thumb {
-            background: #2a2a5a;
-            border-radius: 2px;
-        }
+    .add-coins-btn {
+      background: #d4af37;
+      border: none;
+      color: #0a0f1e;
+      font-weight: 700;
+      padding: 0.5rem 1.5rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.25s;
+      letter-spacing: 0.5px;
+      background: linear-gradient(180deg, #f3cd5b 0%, #b38b2c 100%);
+      box-shadow: 0 6px 0 #6b4f12, 0 8px 18px rgba(212, 175, 55, 0.5);
+      border: 1px solid #ffdd88;
+    }
 
-        .lobby-card {
-            background: #1a1a3a;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
+    .add-coins-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #6b4f12, 0 5px 12px #d4af3780;
+    }
 
-        .lobby-card:hover {
-            border-color: #6a6aff;
-            background: #1e1e42;
-        }
+    .tabs {
+      display: flex;
+      gap: 0.7rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      border-bottom: 2px solid #2a3142;
+      padding-bottom: 0.8rem;
+    }
 
-        .lobby-card .lobby-name {
-            font-weight: 600;
-            font-size: 15px;
-            color: #d0d0ff;
-        }
+    .tab {
+      background: transparent;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #a0aac0;
+      border-radius: 2.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+      background: #1b2132;
+      letter-spacing: 0.6px;
+      border: 1px solid #3a4055;
+    }
 
-        .lobby-card .lobby-info {
-            font-size: 12px;
-            color: #6a6aff;
-            margin-top: 4px;
-            display: flex;
-            gap: 10px;
-        }
+    .tab.active {
+      background: #d4af37;
+      color: #0b0f1a;
+      border-color: #fad974;
+      box-shadow: 0 0 18px #e6b422;
+      font-weight: 800;
+    }
 
-        .lobby-card .lobby-id {
-            font-size: 10px;
-            color: #4a4a7a;
-            margin-top: 2px;
-        }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 0.8rem;
+    }
 
-        .btn {
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-            width: 100%;
-        }
+    .game-card {
+      background: #1b2133;
+      border-radius: 2rem;
+      padding: 1.5rem 1.2rem;
+      text-align: center;
+      border: 1px solid #3e445a;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
 
-        .create-btn {
-            margin: 10px 15px;
-            width: calc(100% - 30px);
-            background: linear-gradient(135deg, #6a6aff, #a855f7);
-            color: white;
-        }
+    .game-card:hover {
+      transform: translateY(-5px);
+      border-color: #d4af37;
+    }
 
-        .create-btn:hover {
-            box-shadow: 0 5px 20px rgba(106, 106, 255, 0.3);
-            transform: translateY(-1px);
-        }
+    .game-icon {
+      font-size: 2.8rem;
+      filter: drop-shadow(0 6px 8px black);
+    }
 
-        .refresh-btn {
-            margin: 5px 15px 15px;
-            width: calc(100% - 30px);
-            padding: 8px;
-            background: transparent;
-            border: 1px solid #2a2a5a;
-            color: #8a8aff;
-            font-weight: 400;
-            font-size: 12px;
-        }
+    .game-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f0e6c5;
+    }
 
-        .refresh-btn:hover {
-            background: rgba(106, 106, 255, 0.1);
-        }
+    .game-desc {
+      font-size: 0.85rem;
+      color: #9aa1b9;
+    }
 
-        .empty-lobbies {
-            text-align: center;
-            padding: 40px 20px;
-            color: #4a4a7a;
-            font-size: 14px;
-        }
+    .bet-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      margin: 0.3rem 0;
+    }
 
-        /* Панель чата */
-        .chat-panel {
-            flex: 1;
-            background: #0f0f2d;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
+    .bet-control input {
+      width: 80px;
+      background: #0d1220;
+      border: 1px solid #5a5f72;
+      border-radius: 2rem;
+      padding: 0.4rem 0.5rem;
+      text-align: center;
+      color: #f5e56c;
+      font-weight: bold;
+      outline: none;
+    }
 
-        .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(100, 100, 255, 0.15);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0d0d2b;
-        }
+    .play-btn {
+      background: #2c3b5a;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      background: linear-gradient(160deg, #3f4b6e, #1a223a);
+      cursor: pointer;
+      transition: 0.2s;
+      border-bottom: 3px solid #d4af37;
+      letter-spacing: 0.7px;
+    }
 
-        .chat-header .room-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #d0d0ff;
-        }
+    .play-btn:active {
+      transform: scale(0.96);
+    }
 
-        .chat-header .room-id {
-            font-size: 10px;
-            color: #4a4a7a;
-        }
+    .result-message {
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-height: 1.5rem;
+      color: #ffd966;
+    }
 
-        .leave-btn {
-            padding: 8px 16px;
-            background: transparent;
-            border: 1px solid #ff6a6a;
-            color: #ff6a6a;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
+    .winline-badge, .bulldrop-badge, .sport-badge {
+      background: #2d2538;
+      padding: 0.2rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      align-self: center;
+    }
 
-        .leave-btn:hover {
-            background: rgba(255, 106, 106, 0.1);
-        }
+    .hidden-section {
+      display: none;
+    }
 
-        .players-list {
-            display: flex;
-            gap: 6px;
-            padding: 10px 20px;
-            flex-wrap: wrap;
-            border-bottom: 1px solid rgba(100, 100, 255, 0.1);
-            background: #0d0d2b;
-        }
+    .visible-section {
+      display: block;
+    }
 
-        .player-tag {
-            padding: 4px 12px;
-            background: #1a1a3a;
-            border-radius: 12px;
-            font-size: 11px;
-            color: #6a6aff;
-        }
+    .admin-section {
+      margin-top: 2rem;
+      background: #0f1422;
+      border-radius: 2rem;
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px dashed #d4af37;
+    }
 
-        .player-tag.host {
-            border: 1px solid #a855f7;
-            color: #a855f7;
-        }
+    .admin-text {
+      color: #ccb37e;
+      font-weight: 500;
+    }
 
-        .chat-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .coin-input {
+      background: #1b2132;
+      border: 1px solid #d4af37;
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      width: 100px;
+      color: #ffd966;
+      font-weight: bold;
+      text-align: center;
+    }
 
-        .chat-area::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-area::-webkit-scrollbar-thumb {
-            background: #2a2a5a;
-            border-radius: 2px;
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 16px;
-            animation: msgIn 0.2s ease-out;
-            word-wrap: break-word;
-        }
-
-        @keyframes msgIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message.own {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #6a6aff, #4f4fff);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.other {
-            align-self: flex-start;
-            background: #1e1e3f;
-            color: #d0d0ff;
-            border-bottom-left-radius: 4px;
-        }
-
-        .message.system {
-            align-self: center;
-            background: transparent;
-            color: #4a4a7a;
-            font-size: 12px;
-            font-style: italic;
-            padding: 4px 12px;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        .message .sender-name {
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 3px;
-            opacity: 0.8;
-        }
-
-        .message .msg-text {
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .message .msg-time {
-            font-size: 10px;
-            opacity: 0.5;
-            text-align: right;
-            margin-top: 3px;
-        }
-
-        .chat-input-area {
-            display: flex;
-            padding: 15px 20px;
-            gap: 10px;
-            border-top: 1px solid rgba(100, 100, 255, 0.15);
-            background: #0d0d2b;
-        }
-
-        .chat-input-area input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 25px;
-            border: 1px solid #2a2a5a;
-            background: #12122a;
-            color: #e0e0e0;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .chat-input-area input:focus {
-            border-color: #6a6aff;
-        }
-
-        .chat-input-area input::placeholder {
-            color: #4a4a7a;
-        }
-
-        .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #6a6aff, #a855f7);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .no-lobby-selected {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #4a4a7a;
-            font-size: 16px;
-        }
-
-        /* Модалки */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: #12122a;
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 380px;
-            border: 1px solid rgba(100, 100, 255, 0.3);
-        }
-
-        .modal h3 {
-            margin-bottom: 20px;
-            color: #d0d0ff;
-            text-align: center;
-            font-size: 18px;
-        }
-
-        .modal label {
-            display: block;
-            font-size: 12px;
-            color: #6a6aff;
-            margin-bottom: 4px;
-            margin-top: 10px;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 10px;
-            border: 1px solid #2a2a5a;
-            background: #0d0d2b;
-            color: #e0e0e0;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .modal input:focus {
-            border-color: #6a6aff;
-        }
-
-        .modal .btn-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .modal button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6a6aff, #a855f7);
-            color: white;
-        }
-
-        .btn-cancel {
-            background: #1e1e3f;
-            color: #8a8aff;
-        }
-
-        .error-text {
-            color: #ff6a6a;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 8px;
-        }
-
-        .success-text {
-            color: #6aff6a;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 8px;
-        }
-
-        @media (max-width: 700px) {
-            .app-container {
-                flex-direction: column;
-                height: 100vh;
-                width: 100%;
-                border-radius: 0;
-            }
-            .lobby-panel {
-                width: 100%;
-                min-width: 0;
-                max-height: 40%;
-            }
-            .chat-panel {
-                min-height: 0;
-            }
-        }
-    </style>
+    @media (max-width: 550px) {
+      .casino-container {
+        padding: 1.5rem;
+      }
+      .tabs {
+        gap: 0.3rem;
+      }
+      .tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Панель лобби -->
-        <div class="lobby-panel">
-            <div class="lobby-header">
-                <h1>CHUGUR</h1>
-                <div class="subtitle">Лобби для общения</div>
-            </div>
-            <button class="btn create-btn" onclick="showCreateModal()">+ Создать лобби</button>
-            <button class="btn refresh-btn" onclick="requestLobbies()">🔄 Обновить список</button>
-            <div class="lobby-list" id="lobbyList">
-                <div class="empty-lobbies">Загрузка...</div>
-            </div>
-        </div>
-
-        <!-- Панель чата -->
-        <div class="chat-panel" id="chatPanel">
-            <div id="noLobby" class="no-lobby-selected">
-                👈 Выберите или создайте лобби
-            </div>
-            <div id="chatInterface" style="display:none; flex-direction:column; height:100%;">
-                <div class="chat-header">
-                    <div>
-                        <div class="room-name" id="roomName">—</div>
-                        <div class="room-id" id="roomId"></div>
-                    </div>
-                    <button class="leave-btn" onclick="leaveLobby()">Выйти</button>
-                </div>
-                <div class="players-list" id="playersList"></div>
-                <div class="chat-area" id="chatArea"></div>
-                <div class="chat-input-area">
-                    <input type="text" id="messageInput" placeholder="Сообщение..." maxlength="300">
-                    <button class="send-btn" onclick="sendMessage()">➤</button>
-                </div>
-            </div>
-        </div>
+<div class="casino-container">
+  <div class="header">
+    <h1>🥇 VIRTUAL CASINO</h1>
+    <div class="balance-panel">
+      <div class="balance">🪙 Баланс: <span id="balanceDisplay">1000</span></div>
+      <button class="add-coins-btn" id="openAdminBtn">💰 Выдать монеты</button>
     </div>
+  </div>
 
-    <!-- Модалка создания -->
-    <div class="modal-overlay" id="createModal">
-        <div class="modal">
-            <h3>Создать лобби</h3>
-            <label>Название</label>
-            <input type="text" id="createLobbyName" placeholder="Моё лобби" maxlength="20">
-            <label>Макс. игроков</label>
-            <input type="number" id="createMaxPlayers" placeholder="10" min="2" max="20" value="10">
-            <label>Пароль (необязательно)</label>
-            <input type="text" id="createPassword" placeholder="Оставьте пустым для открытого">
-            <div class="btn-row">
-                <button class="btn-cancel" onclick="hideCreateModal()">Отмена</button>
-                <button class="btn-primary" onclick="createLobby()">Создать</button>
-            </div>
-            <div class="error-text" id="createError"></div>
+  <!-- Навигация по разделам -->
+  <div class="tabs">
+    <button class="tab active" data-section="bulldrop">🐂 BULLDROP</button>
+    <button class="tab" data-section="winline">🎰 WINLINE</button>
+    <button class="tab" data-section="sport">⚽ СТАВКИ НА СПОРТ</button>
+  </div>
+
+  <!-- BULLDROP секция -->
+  <div id="bulldropSection" class="visible-section">
+    <div class="games-grid">
+      <!-- Мини-игра 1: Bull Crash -->
+      <div class="game-card">
+        <div class="game-icon">📈💥</div>
+        <div class="game-title">Bull Crash</div>
+        <div class="game-desc">Множитель растёт. Успей забрать!</div>
+        <div class="bet-control">
+          <input type="number" id="bullCrashBet" placeholder="Ставка" value="50" min="1" step="1">
         </div>
-    </div>
-
-    <!-- Модалка входа -->
-    <div class="modal-overlay" id="joinModal">
-        <div class="modal">
-            <h3>Войти в лобби</h3>
-            <label>Ваше имя</label>
-            <input type="text" id="joinPlayerName" placeholder="Игрок" maxlength="15">
-            <label id="joinPasswordLabel" style="display:none;">Пароль</label>
-            <input type="text" id="joinPassword" placeholder="Пароль" style="display:none;">
-            <div class="btn-row">
-                <button class="btn-cancel" onclick="hideJoinModal()">Отмена</button>
-                <button class="btn-primary" onclick="joinLobby()">Войти</button>
-            </div>
-            <div class="error-text" id="joinError"></div>
+        <button class="play-btn" id="playBullCrash">🚀 Играть</button>
+        <div class="result-message" id="bullCrashResult"></div>
+        <div class="bulldrop-badge">BULLDROP</div>
+      </div>
+      <!-- Мини-игра 2: Bull Dice -->
+      <div class="game-card">
+        <div class="game-icon">🎲🐂</div>
+        <div class="game-title">Bull Dice</div>
+        <div class="game-desc">Угадай число (1-6). x3.8</div>
+        <div class="bet-control">
+          <input type="number" id="bullDiceBet" placeholder="Ставка" value="30" min="1" step="1">
+          <input type="number" id="bullDiceGuess" placeholder="1-6" value="3" min="1" max="6" style="width:60px;">
         </div>
+        <button class="play-btn" id="playBullDice">🎲 Бросить</button>
+        <div class="result-message" id="bullDiceResult"></div>
+        <div class="bulldrop-badge">BULLDROP</div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Подключаемся к серверу
-        const socket = io('https://chugur-server.glitch.me/', {
-            transports: ['websocket', 'polling']
+  <!-- WINLINE секция -->
+  <div id="winlineSection" class="hidden-section">
+    <div class="games-grid">
+      <div class="game-card">
+        <div class="game-icon">🎰🍒</div>
+        <div class="game-title">Winline Slots</div>
+        <div class="game-desc">Классические слоты 3x1</div>
+        <div class="bet-control">
+          <input type="number" id="winlineSlotBet" placeholder="Ставка" value="40" min="1" step="1">
+        </div>
+        <button class="play-btn" id="playWinlineSlot">🔄 Крутить</button>
+        <div class="result-message" id="winlineSlotResult"></div>
+        <div class="winline-badge">WINLINE</div>
+      </div>
+      <div class="game-card">
+        <div class="game-icon">💎🍀</div>
+        <div class="game-title">Winline Fortune</div>
+        <div class="game-desc">Собери 3 одинаковых (x5)</div>
+        <div class="bet-control">
+          <input type="number" id="winlineFortuneBet" placeholder="Ставка" value="25" min="1" step="1">
+        </div>
+        <button class="play-btn" id="playWinlineFortune">✨ Испытать</button>
+        <div class="result-message" id="winlineFortuneResult"></div>
+        <div class="winline-badge">WINLINE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- СПОРТ секция -->
+  <div id="sportSection" class="hidden-section">
+    <div class="games-grid">
+      <div class="game-card">
+        <div class="game-icon">⚽🥅</div>
+        <div class="game-title">Футбол (матч)</div>
+        <div class="game-desc">П1 ×2.1 | Ничья ×3.2 | П2 ×2.8</div>
+        <div class="bet-control" style="flex-wrap: wrap; gap:0.3rem;">
+          <input type="number" id="footballBet" placeholder="Ставка" value="60" min="1" step="1">
+          <select id="footballOutcome" style="background:#1b2132; color:#f0e6c5; border-radius:2rem; padding:0.3rem;">
+            <option value="home">П1 (2.1)</option>
+            <option value="draw">Ничья (3.2)</option>
+            <option value="away">П2 (2.8)</option>
+          </select>
+        </div>
+        <button class="play-btn" id="playFootball">⚽ Сделать ставку</button>
+        <div class="result-message" id="footballResult"></div>
+        <div class="sport-badge">СПОРТ</div>
+      </div>
+      <div class="game-card">
+        <div class="game-icon">🏀🔥</div>
+        <div class="game-title">Баскетбол (тотал)</div>
+        <div class="game-desc">Тотал больше 210.5 (×1.95)</div>
+        <div class="bet-control">
+          <input type="number" id="basketballBet" placeholder="Ставка" value="45" min="1" step="1">
+        </div>
+        <button class="play-btn" id="playBasketball">🏀 ТБ 210.5</button>
+        <div class="result-message" id="basketballResult"></div>
+        <div class="sport-badge">СПОРТ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Админ-панель выдачи виртуальных денег -->
+  <div class="admin-section" id="adminPanel">
+    <span class="admin-text">🎁 ВЫДАТЬ ВИРТУАЛЬНЫЕ МОНЕТЫ:</span>
+    <input type="number" id="adminCoinAmount" class="coin-input" placeholder="Сумма" value="500" min="1" step="100">
+    <button class="add-coins-btn" id="applyCoinsBtn">✅ Пополнить</button>
+    <span style="color:#9aa1b9; font-size:0.8rem;">(демо-режим)</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- СОСТОЯНИЕ ВИРТУАЛЬНОГО БАЛАНСА ----------
+    let virtualBalance = 1000;
+
+    // Элементы интерфейса
+    const balanceSpan = document.getElementById('balanceDisplay');
+    const sections = {
+      bulldrop: document.getElementById('bulldropSection'),
+      winline: document.getElementById('winlineSection'),
+      sport: document.getElementById('sportSection')
+    };
+    const tabs = document.querySelectorAll('.tab');
+
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+    function updateBalanceDisplay() {
+      balanceSpan.textContent = virtualBalance;
+    }
+
+    function deductBet(amount) {
+      if (amount > virtualBalance) {
+        return false;
+      }
+      virtualBalance -= amount;
+      updateBalanceDisplay();
+      return true;
+    }
+
+    function addWinnings(amount) {
+      virtualBalance += amount;
+      updateBalanceDisplay();
+    }
+
+    // Показать результат в элементе
+    function setResult(elementId, message, isWin = null) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.textContent = message;
+        el.style.color = isWin === true ? '#b9f57b' : (isWin === false ? '#f28b82' : '#ffd966');
+      }
+    }
+
+    // ---------- ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ----------
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const sectionKey = this.dataset.section;
+        Object.keys(sections).forEach(key => {
+          sections[key].classList.add('hidden-section');
+          sections[key].classList.remove('visible-section');
         });
-
-        let currentLobbyId = null;
-        let myPlayerName = 'Игрок';
-        let pendingJoinLobby = null;
-
-        // Обработка ошибок подключения
-        socket.on('connect_error', (err) => {
-            console.log('Ошибка подключения:', err.message);
-            document.getElementById('lobbyList').innerHTML = 
-                '<div class="empty-lobbies" style="color:#ff6a6a;">⚠️ Сервер недоступен<br><small>Попробуйте позже</small></div>';
-        });
-
-        socket.on('connect', () => {
-            console.log('Подключены к серверу! ID:', socket.id);
-            requestLobbies();
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Отключены от сервера');
-            if (currentLobbyId) {
-                document.getElementById('chatArea').innerHTML += 
-                    '<div class="message system"><span>⚠️ Соединение потеряно</span></div>';
-            }
-        });
-
-        // Запрос списка лобби
-        function requestLobbies() {
-            if (socket.connected) {
-                socket.emit('request-lobbies');
-            }
+        if (sections[sectionKey]) {
+          sections[sectionKey].classList.remove('hidden-section');
+          sections[sectionKey].classList.add('visible-section');
         }
+      });
+    });
 
-        // Получение списка
-        socket.on('lobbies-list', (lobbies) => {
-            const lobbyList = document.getElementById('lobbyList');
-            if (!lobbies || lobbies.length === 0) {
-                lobbyList.innerHTML = '<div class="empty-lobbies">Нет доступных лобби<br><small>Создайте первое!</small></div>';
-                return;
-            }
+    // ---------- ВЫДАЧА ВИРТУАЛЬНЫХ ДЕНЕГ ----------
+    document.getElementById('applyCoinsBtn').addEventListener('click', function() {
+      const amountInput = document.getElementById('adminCoinAmount');
+      let amount = parseInt(amountInput.value, 10);
+      if (isNaN(amount) || amount <= 0) {
+        alert('Введите корректную сумму (больше 0)');
+        return;
+      }
+      virtualBalance += amount;
+      updateBalanceDisplay();
+      amountInput.value = 500; // сброс
+    });
 
-            lobbyList.innerHTML = lobbies.map(lobby => `
-                <div class="lobby-card" onclick="clickJoinLobby('${lobby.id}', ${lobby.hasPassword})">
-                    <div class="lobby-name">${escapeHtml(lobby.name)} ${lobby.hasPassword ? '🔒' : '🌐'}</div>
-                    <div class="lobby-info">
-                        <span>👥 ${lobby.playerCount}/${lobby.maxPlayers}</span>
-                        ${lobby.hasPassword ? '<span>Требуется пароль</span>' : '<span>Открытое</span>'}
-                    </div>
-                    <div class="lobby-id">ID: ${lobby.id}</div>
-                </div>
-            `).join('');
-        });
+    // Кнопка "Выдать монеты" просто фокус на админку
+    document.getElementById('openAdminBtn').addEventListener('click', function() {
+      document.getElementById('adminCoinAmount').focus();
+    });
 
-        function clickJoinLobby(lobbyId, hasPassword) {
-            pendingJoinLobby = lobbyId;
-            document.getElementById('joinPlayerName').value = myPlayerName || '';
-            document.getElementById('joinPassword').value = '';
-            document.getElementById('joinError').textContent = '';
-            
-            if (hasPassword) {
-                document.getElementById('joinPassword').style.display = 'block';
-                document.getElementById('joinPasswordLabel').style.display = 'block';
-            } else {
-                document.getElementById('joinPassword').style.display = 'none';
-                document.getElementById('joinPasswordLabel').style.display = 'none';
-            }
-            
-            document.getElementById('joinModal').classList.add('active');
-            document.getElementById('joinPlayerName').focus();
-        }
+    // ---------- ИГРОВЫЕ МЕХАНИКИ ----------
 
-        function joinLobby() {
-            const name = document.getElementById('joinPlayerName').value.trim() || 'Игрок';
-            const password = document.getElementById('joinPassword').value;
-            myPlayerName = name;
+    // BULLDROP: Bull Crash
+    document.getElementById('playBullCrash').addEventListener('click', function() {
+      const betInput = document.getElementById('bullCrashBet');
+      const bet = parseInt(betInput.value, 10);
+      if (isNaN(bet) || bet <= 0) {
+        setResult('bullCrashResult', 'Введите ставку', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('bullCrashResult', 'Недостаточно монет', false);
+        return;
+      }
 
-            socket.emit('join-lobby', {
-                lobbyId: pendingJoinLobby,
-                password: password,
-                name: name
-            });
-        }
+      // Симуляция краш-механики: случайный множитель от 0.0 до 5.0
+      const crashPoint = (Math.random() * 4.8 + 0.2).toFixed(2);
+      const multiplier = parseFloat(crashPoint);
+      // Игрок "забирает" на случайном множителе до крэша (упрощённо: иногда забирает раньше)
+      const cashoutMultiplier = (Math.random() * multiplier).toFixed(2);
+      const finalMultiplier = parseFloat(cashoutMultiplier);
+      const winAmount = Math.floor(bet * finalMultiplier);
+      
+      if (finalMultiplier >= 1.0) {
+        addWinnings(winAmount);
+        setResult('bullCrashResult', `Краш на ${multiplier}x. Забрал на ${finalMultiplier}x! +${winAmount}`, true);
+      } else {
+        setResult('bullCrashResult', `Краш на ${multiplier}x. Не успел (0x). Потеря ставки`, false);
+      }
+    });
 
-        socket.on('join-error', (msg) => {
-            document.getElementById('joinError').textContent = msg;
-        });
+    // BULLDROP: Bull Dice
+    document.getElementById('playBullDice').addEventListener('click', function() {
+      const betInput = document.getElementById('bullDiceBet');
+      const guessInput = document.getElementById('bullDiceGuess');
+      const bet = parseInt(betInput.value, 10);
+      const guess = parseInt(guessInput.value, 10);
+      if (isNaN(bet) || bet <= 0 || isNaN(guess) || guess < 1 || guess > 6) {
+        setResult('bullDiceResult', 'Ставка и число 1-6', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('bullDiceResult', 'Недостаточно монет', false);
+        return;
+      }
+      const diceRoll = Math.floor(Math.random() * 6) + 1;
+      if (diceRoll === guess) {
+        const win = bet * 3.8;
+        addWinnings(Math.floor(win));
+        setResult('bullDiceResult', `Выпало ${diceRoll}. Угадал! +${Math.floor(win)}`, true);
+      } else {
+        setResult('bullDiceResult', `Выпало ${diceRoll}. Не угадал.`, false);
+      }
+    });
 
-        socket.on('join-success', (data) => {
-            hideJoinModal();
-            currentLobbyId = data.id;
-            document.getElementById('noLobby').style.display = 'none';
-            document.getElementById('chatInterface').style.display = 'flex';
-            document.getElementById('roomName').textContent = data.name;
-            document.getElementById('roomId').textContent = 'ID: ' + data.id;
-            document.getElementById('chatArea').innerHTML = '';
-            updatePlayersList(data.players);
-            requestLobbies();
-            document.getElementById('messageInput').focus();
-        });
+    // WINLINE: Слоты 3x1
+    document.getElementById('playWinlineSlot').addEventListener('click', function() {
+      const betInput = document.getElementById('winlineSlotBet');
+      const bet = parseInt(betInput.value, 10);
+      if (isNaN(bet) || bet <= 0) {
+        setResult('winlineSlotResult', 'Введите ставку', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('winlineSlotResult', 'Недостаточно монет', false);
+        return;
+      }
+      const symbols = ['🍒', '🍋', '🔔', '⭐', '7️⃣'];
+      const slot = [
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)]
+      ];
+      const unique = new Set(slot);
+      let winMultiplier = 0;
+      if (unique.size === 1) winMultiplier = 8;
+      else if (unique.size === 2) winMultiplier = 2.2;
+      else winMultiplier = 0;
 
-        socket.on('message-history', (messages) => {
-            const chatArea = document.getElementById('chatArea');
-            chatArea.innerHTML = '';
-            messages.forEach(msg => appendMessage(msg));
-            scrollChat();
-        });
+      const winAmount = Math.floor(bet * winMultiplier);
+      if (winAmount > 0) {
+        addWinnings(winAmount);
+        setResult('winlineSlotResult', `${slot.join(' ')} | Выигрыш x${winMultiplier} +${winAmount}`, true);
+      } else {
+        setResult('winlineSlotResult', `${slot.join(' ')} | Нет совпадений`, false);
+      }
+    });
 
-        socket.on('new-message', (msg) => {
-            appendMessage(msg);
-            scrollChat();
-        });
+    // WINLINE Fortune
+    document.getElementById('playWinlineFortune').addEventListener('click', function() {
+      const betInput = document.getElementById('winlineFortuneBet');
+      const bet = parseInt(betInput.value, 10);
+      if (isNaN(bet) || bet <= 0) {
+        setResult('winlineFortuneResult', 'Введите ставку', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('winlineFortuneResult', 'Недостаточно монет', false);
+        return;
+      }
+      const items = ['💎', '🍀', '👑', '🌟'];
+      const r1 = items[Math.floor(Math.random()*items.length)];
+      const r2 = items[Math.floor(Math.random()*items.length)];
+      const r3 = items[Math.floor(Math.random()*items.length)];
+      const combo = [r1, r2, r3];
+      if (r1 === r2 && r2 === r3) {
+        const win = bet * 5;
+        addWinnings(win);
+        setResult('winlineFortuneResult', `${combo.join(' ')} Джекпот! +${win}`, true);
+      } else {
+        setResult('winlineFortuneResult', `${combo.join(' ')} Не вышло`, false);
+      }
+    });
 
-        socket.on('players-update', (players) => {
-            updatePlayersList(players);
-        });
+    // СПОРТ: Футбол
+    document.getElementById('playFootball').addEventListener('click', function() {
+      const betInput = document.getElementById('footballBet');
+      const outcome = document.getElementById('footballOutcome').value;
+      const bet = parseInt(betInput.value, 10);
+      if (isNaN(bet) || bet <= 0) {
+        setResult('footballResult', 'Укажите ставку', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('footballResult', 'Недостаточно монет', false);
+        return;
+      }
+      // Случайный исход матча
+      const rand = Math.random();
+      let matchResult;
+      if (rand < 0.45) matchResult = 'home';
+      else if (rand < 0.7) matchResult = 'draw';
+      else matchResult = 'away';
 
-        socket.on('left-lobby', () => {
-            currentLobbyId = null;
-            document.getElementById('noLobby').style.display = 'flex';
-            document.getElementById('chatInterface').style.display = 'none';
-            document.getElementById('chatArea').innerHTML = '';
-            requestLobbies();
-        });
+      const odds = { home: 2.1, draw: 3.2, away: 2.8 };
+      let win = 0;
+      if (outcome === matchResult) {
+        win = Math.floor(bet * odds[outcome]);
+        addWinnings(win);
+        setResult('footballResult', `Исход: ${matchResult}. Выиграл! +${win}`, true);
+      } else {
+        setResult('footballResult', `Исход: ${matchResult}. Мимо.`, false);
+      }
+    });
 
-        socket.on('lobby-created', (data) => {
-            currentLobbyId = data.id;
-            hideCreateModal();
-            document.getElementById('noLobby').style.display = 'none';
-            document.getElementById('chatInterface').style.display = 'flex';
-            document.getElementById('roomName').textContent = data.name;
-            document.getElementById('roomId').textContent = 'ID: ' + data.id;
-            document.getElementById('chatArea').innerHTML = '';
-            document.getElementById('playersList').innerHTML = '<span class="player-tag host">👑 Хост (Вы)</span>';
-            requestLobbies();
-            document.getElementById('messageInput').focus();
-        });
+    // СПОРТ: Баскетбол тотал
+    document.getElementById('playBasketball').addEventListener('click', function() {
+      const betInput = document.getElementById('basketballBet');
+      const bet = parseInt(betInput.value, 10);
+      if (isNaN(bet) || bet <= 0) {
+        setResult('basketballResult', 'Введите ставку', false);
+        return;
+      }
+      if (!deductBet(bet)) {
+        setResult('basketballResult', 'Недостаточно монет', false);
+        return;
+      }
+      const totalPoints = Math.floor(Math.random() * 80) + 160; // 160-239
+      const threshold = 210.5;
+      const winCondition = totalPoints > threshold;
+      if (winCondition) {
+        const winAmount = Math.floor(bet * 1.95);
+        addWinnings(winAmount);
+        setResult('basketballResult', `Тотал ${totalPoints} (>210.5). +${winAmount}`, true);
+      } else {
+        setResult('basketballResult', `Тотал ${totalPoints} (≤210.5). Проигрыш`, false);
+      }
+    });
 
-        function appendMessage(msg) {
-            const chatArea = document.getElementById('chatArea');
-            const div = document.createElement('div');
-            
-            if (msg.type === 'system') {
-                div.className = 'message system';
-                div.innerHTML = `<span>${escapeHtml(msg.text)}</span>`;
-            } else {
-                const isOwn = msg.sender === myPlayerName;
-                div.className = `message ${isOwn ? 'own' : 'other'}`;
-                div.innerHTML = `
-                    <div class="sender-name">${escapeHtml(msg.sender)}</div>
-                    <div class="msg-text">${escapeHtml(msg.text)}</div>
-                    <div class="msg-time">${msg.time}</div>
-                `;
-            }
-            chatArea.appendChild(div);
-        }
-
-        function updatePlayersList(players) {
-            const container = document.getElementById('playersList');
-            if (!players || players.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            container.innerHTML = players.map(p => 
-                `<span class="player-tag ${p.isHost ? 'host' : ''}">${p.isHost ? '👑 ' : ''}${escapeHtml(p.name)}</span>`
-            ).join('');
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text || !currentLobbyId) return;
-            socket.emit('send-message', text);
-            input.value = '';
-            input.focus();
-        }
-
-        function leaveLobby() {
-            if (currentLobbyId) {
-                socket.emit('leave-lobby');
-            }
-        }
-
-        function createLobby() {
-            const name = document.getElementById('createLobbyName').value.trim() || 'Лобби';
-            const maxPlayers = parseInt(document.getElementById('createMaxPlayers').value) || 10;
-            const password = document.getElementById('createPassword').value.trim() || null;
-            
-            myPlayerName = 'Хост';
-            
-            socket.emit('create-lobby', {
-                name: name,
-                maxPlayers: Math.min(20, Math.max(2, maxPlayers)),
-                password: password
-            });
-        }
-
-        function showCreateModal() {
-            document.getElementById('createModal').classList.add('active');
-            document.getElementById('createError').textContent = '';
-            document.getElementById('createLobbyName').focus();
-        }
-
-        function hideCreateModal() {
-            document.getElementById('createModal').classList.remove('active');
-        }
-
-        function hideJoinModal() {
-            document.getElementById('joinModal').classList.remove('active');
-            pendingJoinLobby = null;
-        }
-
-        function scrollChat() {
-            const area = document.getElementById('chatArea');
-            setTimeout(() => { 
-                if (area) area.scrollTop = area.scrollHeight; 
-            }, 50);
-        }
-
-        function escapeHtml(text) {
-            const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-            return String(text).replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // Enter для отправки
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && document.activeElement === document.getElementById('messageInput')) {
-                sendMessage();
-            }
-        });
-
-        // Закрытие модалок по клику на фон
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                }
-            });
-        });
-
-        // Автообновление списка лобби каждые 2 секунды
-        setInterval(() => {
-            if (socket.connected) {
-                requestLobbies();
-            }
-        }, 2000);
-
-        // Первый запрос при загрузке
-        requestLobbies();
-    </script>
+    // Инициализация
+    updateBalanceDisplay();
+  })();
+</script>
 </body>
-</html>
+        </html>
