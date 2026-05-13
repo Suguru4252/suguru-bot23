@@ -66,17 +66,17 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
-            filter: drop-shadow(0 4px 20px rgba(200,150,50,0.4));
+            filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
             animation: titleGlow 2s ease-in-out infinite;
         }
 
         @keyframes titleGlow {
             0%,
             100% {
-                filter: drop-shadow(0 4px 20px rgba(200,150,50,0.4));
+                filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
             }
             50% {
-                filter: drop-shadow(0 4px 35px rgba(240,200,80,0.7));
+                filter: drop-shadow(0 4px 35px rgba(240, 200, 80, 0.7));
             }
         }
 
@@ -772,10 +772,10 @@
                 gameHour: S.gameHour,
                 gameMinute: S.gameMinute,
                 weather: S.weather,
-                version: 5,
+                version: 6,
             };
             try {
-                localStorage.setItem('president_v5', JSON.stringify(data));
+                localStorage.setItem('president_v6', JSON.stringify(data));
                 addLog('💾 Игра сохранена!');
             } catch (e) {
                 addLog('❌ Ошибка сохранения!');
@@ -784,11 +784,8 @@
 
         function loadGame() {
             try {
-                const raw = localStorage.getItem('president_v5');
-                if (!raw) {
-                    alert('Нет сохранений!');
-                    return;
-                }
+                const raw = localStorage.getItem('president_v6');
+                if (!raw) { alert('Нет сохранений!'); return; }
                 const data = JSON.parse(raw);
                 S.countryName = data.countryName;
                 S.money = data.money;
@@ -817,7 +814,6 @@
                 S.time = 0;
                 S.incomeTimer = 0;
                 S.dragging = false;
-
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('game-screen').classList.add('active');
                 document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
@@ -826,7 +822,6 @@
                 updateUI();
                 spawnInitialPeople();
                 addLog('💾 Сохранение загружено!');
-
                 if (S.saveInterval) clearInterval(S.saveInterval);
                 S.saveInterval = setInterval(saveGame, 30000);
                 gameLoop();
@@ -895,10 +890,12 @@
             S.roads.push({ type: 'road_curve', x: -24, y: -24, w: 48, h: 48, scale: 1, rotation: 0, placedAt: 0 });
             S.rails.push({ type: 'rail', x: -200, y: -120, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
 
-            // Водоёмы
-            S.waterBodies.push({ x: -150, y: 150, w: 120, h: 90 });
-            S.waterBodies.push({ x: 100, y: -180, w: 100, h: 80 });
-            S.waterBodies.push({ x: 200, y: 50, w: 80, h: 100 });
+            // БОЛЬШИЕ ВОДОЁМЫ - ОКЕАНЫ И МОРЯ
+            S.waterBodies.push({ x: -350, y: -350, w: 300, h: 300, name: 'Северное море' });
+            S.waterBodies.push({ x: 150, y: -350, w: 250, h: 200, name: 'Восточный океан' });
+            S.waterBodies.push({ x: -350, y: 100, w: 200, h: 280, name: 'Западный залив' });
+            S.waterBodies.push({ x: 100, y: 150, w: 280, h: 220, name: 'Южное море' });
+            S.waterBodies.push({ x: -100, y: -50, w: 150, h: 120, name: 'Центральное озеро' });
 
             document.getElementById('splash').classList.add('hidden');
             document.getElementById('game-screen').classList.add('active');
@@ -909,7 +906,7 @@
             spawnInitialPeople();
             addLog('🌟 Добро пожаловать, господин Президент!');
             addLog('🛣️ Построены дороги с перекрёстком');
-            addLog('💧 На карте есть водоёмы');
+            addLog('🌊 На карте океаны и моря');
 
             if (S.saveInterval) clearInterval(S.saveInterval);
             S.saveInterval = setInterval(saveGame, 30000);
@@ -985,7 +982,7 @@
             S.money -= cost;
             S.borderSize += 200;
             S.borderExpandCost = Math.floor(S.borderExpandCost * 2);
-            addLog('📏 Граница расширена! Теперь: ' + S.borderSize + 'м (след. 💰' + S.borderExpandCost.toLocaleString() + ')');
+            addLog('📏 Граница расширена! Теперь: ' + S.borderSize + 'м');
             updateUI();
         }
 
@@ -1061,9 +1058,7 @@
             if (!info) return { w: 48, h: 48 };
             let w = Math.round(info.w * scale);
             let h = Math.round(info.h * scale);
-            if (S.buildRotation === 90 || S.buildRotation === 270) {
-                [w, h] = [h, w];
-            }
+            if (S.buildRotation === 90 || S.buildRotation === 270) { [w, h] = [h, w]; }
             return { w, h };
         }
 
@@ -1071,12 +1066,9 @@
             S.buildRotation = (S.buildRotation + 90) % 360;
             addLog(`🔄 Поворот: ${S.buildRotation}°`);
             updateUI();
-            if (document.getElementById('build-modal').classList.contains('open')) {
-                buildModalGrid();
-            }
+            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
         }
 
-        // ==================== РЕЖИМЫ ====================
         function toggleDeleteMode() {
             S.deleteMode = !S.deleteMode;
             S.selectMode = false;
@@ -1105,7 +1097,6 @@
             const scale = S.buildScale || 1;
             const cost = getBuildCost(t, scale);
             const size = getBuildSize(t, scale);
-
             if (S.money < cost) {
                 addLog('❌ Недостаточно средств! Нужно 💰' + cost.toLocaleString());
                 shakeEl('money-val');
@@ -1123,30 +1114,20 @@
                 addLog('⚠️ Нельзя строить на воде!');
                 return false;
             }
-
             const nb = {
-                type: t,
-                x: wx - size.w / 2,
-                y: wy - size.h / 2,
-                w: size.w,
-                h: size.h,
-                scale: scale,
-                rotation: S.buildRotation,
-                placedAt: S.time,
+                type: t, x: wx - size.w / 2, y: wy - size.h / 2,
+                w: size.w, h: size.h, scale: scale,
+                rotation: S.buildRotation, placedAt: S.time,
             };
-
             const allC = [...S.buildings, ...S.roads, ...S.rails];
             if (allC.some(b => rectsOverlap(nb, b, 2))) {
                 addLog('⚠️ Место занято!');
                 return false;
             }
-
             S.money -= cost;
-            if (info.isRoad || info.isRoadCurve) {
-                S.roads.push(nb);
-            } else if (info.isRail) {
-                S.rails.push(nb);
-            } else {
+            if (info.isRoad || info.isRoadCurve) S.roads.push(nb);
+            else if (info.isRail) S.rails.push(nb);
+            else {
                 S.buildings.push(nb);
                 S.population += Math.floor(info.pop * scale);
                 S.happiness = Math.max(0, Math.min(100, S.happiness + Math.floor(info.happy * scale)));
@@ -1167,17 +1148,13 @@
             const all = [...S.buildings, ...S.roads, ...S.rails];
             const found = all.find(b => wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h);
             if (!found) return false;
-
             const info = BT[found.type];
             const scale = found.scale || 1;
             const refund = Math.floor(getBuildCost(found.type, scale) * 0.5);
             S.money += refund;
-
-            if (info?.isRoad || info?.isRoadCurve) {
-                S.roads = S.roads.filter(b => b !== found);
-            } else if (info?.isRail) {
-                S.rails = S.rails.filter(b => b !== found);
-            } else {
+            if (info?.isRoad || info?.isRoadCurve) S.roads = S.roads.filter(b => b !== found);
+            else if (info?.isRail) S.rails = S.rails.filter(b => b !== found);
+            else {
                 S.buildings = S.buildings.filter(b => b !== found);
                 S.population = Math.max(0, S.population - Math.floor((info?.pop || 0) * scale));
                 S.happiness = Math.max(0, Math.min(100, S.happiness - Math.floor((info?.happy || 0) * scale)));
@@ -1185,13 +1162,13 @@
             S.cars = S.cars.filter(c => c.homeRef !== found);
             S.boats = S.boats.filter(b => b.homeRef !== found);
             updateUI();
-            addLog(`🗑️ Снесено: ${info?.emoji || '?'} (+💰${refund.toLocaleString()})`);
+            addLog(`🗑️ Снесено (+💰${refund.toLocaleString()})`);
             spawnParticles(found.x + found.w / 2, found.y + found.h / 2, '#f08888');
             return true;
         }
 
-        function rectsOverlap(a, b, margin) {
-            return !(a.x + a.w - margin < b.x || a.x > b.x + b.w - margin || a.y + a.h - margin < b.y || a.y > b.y + b.h - margin);
+        function rectsOverlap(a, b, m) {
+            return !(a.x + a.w - m < b.x || a.x > b.x + b.w - m || a.y + a.h - m < b.y || a.y > b.y + b.h - m);
         }
 
         // ==================== КООРДИНАТЫ ====================
@@ -1252,16 +1229,14 @@
             grad.addColorStop(1, `rgb(${Math.floor(r * 0.4)},${Math.floor(g * 0.4)},${Math.floor(b * 0.4)})`);
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, w, h);
-
             if (alpha > 0) {
                 ctx.fillStyle = `rgba(0,0,20,${alpha})`;
                 ctx.fillRect(0, 0, w, h);
             }
             if (alpha > 0.5) {
-                const seed = 12345;
                 for (let i = 0; i < 50; i++) {
-                    const sx = ((i * 7919 + seed) % w);
-                    const sy = ((i * 6271 + seed) % h);
+                    const sx = ((i * 7919 + 12345) % w);
+                    const sy = ((i * 6271 + 12345) % h);
                     const twinkle = Math.sin(S.time * 0.003 + i) * 0.5 + 0.5;
                     ctx.fillStyle = `rgba(255,255,255,${twinkle * (alpha - 0.5) * 1.5})`;
                     ctx.beginPath();
@@ -1277,18 +1252,32 @@
                 const ww = w.w * S.zoom;
                 const wh = w.h * S.zoom;
                 const alpha = getDayNightAlpha();
-                ctx.fillStyle = `rgba(30,100,180,${0.7 - alpha * 0.3})`;
+                // Градиент воды для реалистичности
+                const waterGrad = ctx.createLinearGradient(p.x, p.y, p.x + ww, p.y + wh);
+                waterGrad.addColorStop(0, `rgba(20,80,160,${0.8 - alpha * 0.3})`);
+                waterGrad.addColorStop(0.5, `rgba(30,100,180,${0.75 - alpha * 0.3})`);
+                waterGrad.addColorStop(1, `rgba(15,60,140,${0.8 - alpha * 0.3})`);
+                ctx.fillStyle = waterGrad;
                 ctx.fillRect(p.x, p.y, ww, wh);
-                ctx.fillStyle = `rgba(80,160,230,${0.3 - alpha * 0.1})`;
-                for (let i = 0; i < ww; i += 12 * S.zoom) {
-                    for (let j = 0; j < wh; j += 12 * S.zoom) {
-                        const wave = Math.sin((i + j) * 0.05 + S.time * 0.02) * 0.3 + 0.5;
-                        ctx.fillRect(p.x + i, p.y + j, 6 * S.zoom, 6 * S.zoom * wave);
+                // Волны
+                for (let i = 0; i < ww; i += 15 * S.zoom) {
+                    for (let j = 0; j < wh; j += 15 * S.zoom) {
+                        const wave = Math.sin((i + j) * 0.04 + S.time * 0.02) * 0.4 + 0.5;
+                        ctx.fillStyle = `rgba(100,180,240,${0.2 * wave})`;
+                        ctx.fillRect(p.x + i, p.y + j, 8 * S.zoom, 8 * S.zoom * wave);
                     }
                 }
-                ctx.strokeStyle = 'rgba(100,180,255,0.5)';
-                ctx.lineWidth = 2 * S.zoom;
+                // Береговая линия
+                ctx.strokeStyle = 'rgba(150,210,255,0.6)';
+                ctx.lineWidth = 3 * S.zoom;
                 ctx.strokeRect(p.x, p.y, ww, wh);
+                // Название водоёма
+                if (w.name && ww > 80 * S.zoom) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.font = `${Math.min(16, 12 * S.zoom)}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(w.name, p.x + ww / 2, p.y + wh / 2);
+                }
             });
         }
 
@@ -1312,7 +1301,6 @@
             ctx.closePath();
             ctx.stroke();
             ctx.setLineDash([]);
-
             const flags = ['🚩', '🚩', '🚩', '🚩'];
             for (let i = 0; i < 4; i++) {
                 const angle = i * Math.PI / 2 - Math.PI / 4;
@@ -1321,7 +1309,6 @@
                 ctx.textAlign = 'center';
                 ctx.fillText(flags[i], p.x, p.y - 10 * S.zoom);
             }
-
             const pTable = worldToScreen(bs + 30, 0);
             ctx.fillStyle = 'rgba(0,0,0,0.7)';
             ctx.fillRect(pTable.x - 40 * S.zoom, pTable.y - 20 * S.zoom, 80 * S.zoom, 35 * S.zoom);
@@ -1364,7 +1351,6 @@
             ctx.translate(cx, cy);
             if (r.rotation) ctx.rotate(r.rotation * Math.PI / 180);
             ctx.translate(-cx, -cy);
-
             if (info.isRoadCurve) {
                 ctx.fillStyle = '#444';
                 ctx.fillRect(p.x, p.y, w, h);
@@ -1431,10 +1417,8 @@
             ctx.translate(cx, cy);
             if (b.rotation) ctx.rotate(b.rotation * Math.PI / 180);
             ctx.translate(-cx, -cy);
-
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.fillRect(p.x + 2 * S.zoom, p.y + 2 * S.zoom, w, h);
-
             const t = b.type;
             if (t === 'house') {
                 ctx.fillStyle = '#e8d5b7';
@@ -1455,10 +1439,6 @@
                 ctx.strokeRect(p.x + w - 14 * S.zoom, p.y + 6 * S.zoom, 8 * S.zoom, 8 * S.zoom);
                 ctx.fillStyle = '#8B4513';
                 ctx.fillRect(p.x + w / 2 - 5 * S.zoom, p.y + h - 16 * S.zoom, 10 * S.zoom, 16 * S.zoom);
-                ctx.fillStyle = '#f0d060';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2 + 3 * S.zoom, p.y + h - 8 * S.zoom, 1.5 * S.zoom, 0, Math.PI * 2);
-                ctx.fill();
             } else if (t === 'apartment') {
                 const floors = Math.max(4, Math.floor(8 * (b.scale || 1)));
                 const fh = h / floors;
@@ -1555,14 +1535,7 @@
             } else if (t === 'park') {
                 ctx.fillStyle = '#5a8a5a';
                 ctx.fillRect(p.x, p.y, w, h);
-                const trees = [
-                    [0.2, 0.25],
-                    [0.5, 0.2],
-                    [0.8, 0.3],
-                    [0.3, 0.6],
-                    [0.7, 0.65],
-                    [0.5, 0.75]
-                ];
+                const trees = [[0.2, 0.25], [0.5, 0.2], [0.8, 0.3], [0.3, 0.6], [0.7, 0.65], [0.5, 0.75]];
                 trees.forEach(([tx, ty]) => {
                     const tx2 = p.x + tx * w;
                     const ty2 = p.y + ty * h;
@@ -1603,11 +1576,9 @@
                 ctx.fillRect(p.x + w / 2 - 2 * S.zoom, p.y + 2 * S.zoom, 4 * S.zoom, 8 * S.zoom);
                 ctx.fillRect(p.x + w / 2 - 6 * S.zoom, p.y + 5 * S.zoom, 12 * S.zoom, 3 * S.zoom);
                 ctx.fillStyle = '#87ceeb';
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < 3; j++) {
+                for (let i = 0; i < 3; i++)
+                    for (let j = 0; j < 3; j++)
                         ctx.fillRect(p.x + 5 * S.zoom + j * 16 * S.zoom, p.y + 16 * S.zoom + i * 11 * S.zoom, 9 * S.zoom, 7 * S.zoom);
-                    }
-                }
             } else if (t === 'stadium') {
                 ctx.fillStyle = '#d0d0d0';
                 ctx.fillRect(p.x, p.y, w, h);
@@ -1771,16 +1742,9 @@
                 return;
             }
             ctx.clearRect(0, 0, cv.width, cv.height);
-
-            // Время
             S.gameMinute += 0.05;
-            if (S.gameMinute >= 60) {
-                S.gameMinute = 0;
-                S.gameHour++;
-                if (S.gameHour >= 24) S.gameHour = 0;
-            }
-
-            // Погода
+            if (S.gameMinute >= 60) { S.gameMinute = 0;
+                S.gameHour++; if (S.gameHour >= 24) S.gameHour = 0; }
             S.weatherTimer++;
             if (S.weatherTimer >= S.weatherDuration) {
                 S.weatherTimer = 0;
@@ -1789,52 +1753,23 @@
                 S.weather = weathers[Math.floor(Math.random() * weathers.length)];
             }
             if (S.weather === 'rainy' || S.weather === 'stormy') {
-                if (S.raindrops.length < 60) {
-                    S.raindrops.push({
-                        x: (Math.random() - 0.5) * S.borderSize * 2,
-                        y: (Math.random() - 0.5) * S.borderSize * 2,
-                        vx: 2,
-                        vy: 8
-                    });
-                }
-                S.raindrops.forEach(d => {
-                    d.x += d.vx;
-                    d.y += d.vy;
-                    if (d.y > S.borderSize) d.y = -S.borderSize;
-                });
-            } else {
-                S.raindrops = [];
-            }
+                if (S.raindrops.length < 60) S.raindrops.push({ x: (Math.random() - 0.5) * S.borderSize * 2, y: (Math.random() - 0.5) * S.borderSize * 2, vx: 2, vy: 8 });
+                S.raindrops.forEach(d => { d.x += d.vx;
+                    d.y += d.vy; if (d.y > S.borderSize) d.y = -S.borderSize; });
+            } else S.raindrops = [];
             if (S.weather === 'snowy') {
-                if (S.snowflakes.length < 40) {
-                    S.snowflakes.push({
-                        x: (Math.random() - 0.5) * S.borderSize * 2,
-                        y: (Math.random() - 0.5) * S.borderSize * 2,
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: 1 + Math.random() * 2,
-                        size: 1 + Math.random() * 3
-                    });
-                }
-                S.snowflakes.forEach(sf => {
-                    sf.x += sf.vx;
-                    sf.y += sf.vy;
-                    if (sf.y > S.borderSize) sf.y = -S.borderSize;
-                });
-            } else {
-                S.snowflakes = [];
-            }
+                if (S.snowflakes.length < 40) S.snowflakes.push({ x: (Math.random() - 0.5) * S.borderSize * 2, y: (Math.random() - 0.5) * S.borderSize * 2, vx: (Math.random() - 0.5) * 0.5, vy: 1 + Math.random() * 2, size: 1 + Math.random() * 3 });
+                S.snowflakes.forEach(sf => { sf.x += sf.vx;
+                    sf.y += sf.vy; if (sf.y > S.borderSize) sf.y = -S.borderSize; });
+            } else S.snowflakes = [];
 
-            // Отрисовка
             drawGround(ctx);
             drawWater(ctx);
             drawGrid(ctx);
             drawBorder(ctx);
             S.roads.forEach(r => drawRoad(ctx, r, BT[r.type] || BT.road));
             S.rails.forEach(r => drawRoad(ctx, r, BT.rail));
-            S.buildings.forEach(b => {
-                const info = BT[b.type];
-                if (info) drawBuildingShape(ctx, b, info);
-            });
+            S.buildings.forEach(b => { const info = BT[b.type]; if (info) drawBuildingShape(ctx, b, info); });
             updateNPCs();
             drawPeople(ctx);
             drawCars(ctx);
@@ -1842,7 +1777,6 @@
             drawWeather(ctx);
             drawParticles(ctx);
 
-            // Призрак постройки
             if (S.selectedType && !S.dragging && !S.deleteMode && !S.selectMode) {
                 const info = BT[S.selectedType];
                 const size = getBuildSize(S.selectedType, S.buildScale || 1);
@@ -1869,40 +1803,21 @@
                 ctx.restore();
             }
 
-            // Доход
             S.incomeTimer += 16;
             if (S.incomeTimer >= 3000) {
                 S.incomeTimer = 0;
                 let total = 0;
-                S.buildings.forEach(b => {
-                    total += Math.floor((BT[b.type]?.income || 0) * (b.scale || 1));
-                });
+                S.buildings.forEach(b => { total += Math.floor((BT[b.type]?.income || 0) * (b.scale || 1)); });
                 S.roads.forEach(() => { total += 5; });
                 S.rails.forEach(() => { total += 20; });
                 S.cars.forEach(() => { total += 10; });
                 S.boats.forEach(() => { total += 30; });
                 S.money += total;
-                if (S.buildings.length > 0) {
-                    S.happiness += (Math.random() - 0.47) * 0.4;
-                    S.happiness = Math.max(0, Math.min(100, S.happiness));
-                }
+                if (S.buildings.length > 0) { S.happiness += (Math.random() - 0.47) * 0.4;
+                    S.happiness = Math.max(0, Math.min(100, S.happiness)); }
                 const totalCapacity = S.buildings.reduce((sum, b) => sum + Math.floor((BT[b.type]?.capacity || 0) * (b.scale || 1)), 0);
                 if (S.population < totalCapacity && S.happiness > 40 && S.people.length < 80) {
-                    S.people.push({
-                        x: (Math.random() - 0.5) * S.borderSize,
-                        y: (Math.random() - 0.5) * S.borderSize,
-                        vx: (Math.random() - 0.5) * 1.2,
-                        vy: (Math.random() - 0.5) * 1.2,
-                        color: `hsl(${Math.random() * 360},40%,65%)`,
-                        size: 4 + Math.random() * 3,
-                        target: null,
-                        state: 'walking',
-                        stateTimer: Math.random() * 200,
-                        hasCar: false,
-                        carRef: null,
-                        hasBoat: false,
-                        boatRef: null,
-                    });
+                    S.people.push({ x: (Math.random() - 0.5) * S.borderSize, y: (Math.random() - 0.5) * S.borderSize, vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2, color: `hsl(${Math.random() * 360},40%,65%)`, size: 4 + Math.random() * 3, target: null, state: 'walking', stateTimer: Math.random() * 200, hasCar: false, carRef: null, hasBoat: false, boatRef: null });
                     S.population++;
                 }
                 updateUI();
@@ -1913,318 +1828,104 @@
         // ==================== ОБНОВЛЕНИЕ NPC ====================
         function updateNPCs() {
             S.people.forEach(p => {
-                if (p.hasCar && p.carRef) {
-                    p.x = p.carRef.x;
-                    p.y = p.carRef.y;
-                    return;
-                }
-                if (p.hasBoat && p.boatRef) {
-                    p.x = p.boatRef.x;
-                    p.y = p.boatRef.y;
-                    return;
-                }
+                if (p.hasCar && p.carRef) { p.x = p.carRef.x;
+                    p.y = p.carRef.y; return; }
+                if (p.hasBoat && p.boatRef) { p.x = p.boatRef.x;
+                    p.y = p.boatRef.y; return; }
                 p.stateTimer--;
                 if (p.stateTimer <= 0) {
                     p.stateTimer = 80 + Math.random() * 300;
                     const targets = S.buildings.filter(b => BT[b.type] && !BT[b.type].isRoad && !BT[b.type].isRail && !BT[b.type].isRoadCurve);
-                    if (targets.length > 0 && Math.random() < 0.7) {
-                        p.target = targets[Math.floor(Math.random() * targets.length)];
-                        p.state = 'visiting';
-                    } else {
-                        p.target = null;
+                    if (targets.length > 0 && Math.random() < 0.7) { p.target = targets[Math.floor(Math.random() * targets.length)];
+                        p.state = 'visiting'; } else { p.target = null;
                         p.state = 'walking';
                         p.vx = (Math.random() - 0.5) * 1.5;
-                        p.vy = (Math.random() - 0.5) * 1.5;
-                    }
+                        p.vy = (Math.random() - 0.5) * 1.5; }
                 }
-                if (p.state === 'visiting' && p.target) {
-                    const dx = (p.target.x + p.target.w / 2) - p.x;
-                    const dy = (p.target.y + p.target.h / 2) - p.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 12) {
-                        p.state = 'inside';
-                        p.stateTimer = 100 + Math.random() * 300;
-                    } else {
-                        const sp = 1.5;
+                if (p.state === 'visiting' && p.target) { const dx = (p.target.x + p.target.w / 2) - p.x; const dy = (p.target.y + p.target.h / 2) - p.y; const dist = Math.sqrt(dx * dx + dy * dy); if (dist < 12) { p.state = 'inside';
+                        p.stateTimer = 100 + Math.random() * 300; } else { const sp = 1.5;
                         p.vx = dx / dist * sp;
-                        p.vy = dy / dist * sp;
-                    }
-                } else if (p.state === 'inside') {
-                    p.vx = 0;
-                    p.vy = 0;
-                }
+                        p.vy = dy / dist * sp; } } else if (p.state === 'inside') { p.vx = 0;
+                    p.vy = 0; }
                 p.x += p.vx;
-                p.y += p.vy;
-                if (Math.abs(p.x) > S.borderSize) p.vx *= -1;
-                if (Math.abs(p.y) > S.borderSize) p.vy *= -1;
+                p.y += p.vy; if (Math.abs(p.x) > S.borderSize) p.vx *= -1; if (Math.abs(p.y) > S.borderSize) p.vy *= -1;
             });
-
-            // Машины едут ТОЛЬКО по дорогам
-            S.cars.forEach(car => {
-                if (car.parked) return;
+            S.cars.forEach(car => { if (car.parked) return;
                 car.x += car.vx;
-                car.y += car.vy;
-                const onRoad = S.roads.some(r => car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r.h);
-                if (!onRoad) {
-                    let bestRoad = null;
-                    let bestDist = 999;
-                    S.roads.forEach(r => {
-                        const rx = r.x + r.w / 2;
-                        const ry = r.y + r.h / 2;
-                        const d = Math.hypot(car.x - rx, car.y - ry);
-                        if (d < bestDist) {
-                            bestDist = d;
-                            bestRoad = r;
-                        }
-                    });
-                    if (bestRoad) {
-                        const rx = bestRoad.x + bestRoad.w / 2;
-                        const ry = bestRoad.y + bestRoad.h / 2;
-                        const dx = rx - car.x;
-                        const dy = ry - car.y;
-                        const d = Math.sqrt(dx * dx + dy * dy);
-                        if (d > 0) {
-                            car.vx = dx / d * 2;
-                            car.vy = dy / d * 2;
-                        }
-                    }
-                }
-                if (Math.abs(car.x) > S.borderSize || Math.abs(car.y) > S.borderSize) {
-                    car.vx *= -1;
-                    car.vy = (Math.random() - 0.5) * 2;
-                }
-                // Иногда NPC выходит из машины
-                if (Math.random() < 0.005) {
-                    const person = S.people.find(p => p.carRef === car);
-                    if (person && Math.random() < 0.3) {
-                        person.hasCar = false;
+                car.y += car.vy; const onRoad = S.roads.some(r => car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r.h); if (!onRoad) { let bestRoad = null,
+                        bestDist = 999;
+                    S.roads.forEach(r => { const rx = r.x + r.w / 2,
+                            ry = r.y + r.h / 2; const d = Math.hypot(car.x - rx, car.y - ry); if (d < bestDist) { bestDist = d;
+                            bestRoad = r; } }); if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
+                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - car.x,
+                            dy = ry - car.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { car.vx = dx / d * 2;
+                            car.vy = dy / d * 2; } } } if (Math.abs(car.x) > S.borderSize || Math.abs(car.y) > S.borderSize) { car.vx *= -1;
+                    car.vy = (Math.random() - 0.5) * 2; } if (Math.random() < 0.005) { const person = S.people.find(p => p.carRef === car); if (person && Math.random() < 0.3) { person.hasCar = false;
                         person.carRef = null;
                         person.x = car.x;
                         person.y = car.y;
                         car.parked = true;
-                        setTimeout(() => {
-                            car.parked = false;
-                            if (Math.random() < 0.5) {
-                                const np = S.people.find(p => !p.hasCar && !p.hasBoat);
-                                if (np) {
-                                    np.hasCar = true;
-                                    np.carRef = car;
-                                }
-                            }
-                        }, 2000 + Math.random() * 3000);
-                    }
-                }
-            });
-
-            // Лодки ТОЛЬКО по воде
-            S.boats.forEach(boat => {
-                if (boat.parked) return;
+                        setTimeout(() => { car.parked = false; if (Math.random() < 0.5) { const np = S.people.find(p => !p.hasCar && !p.hasBoat); if (np) { np.hasCar = true;
+                                    np.carRef = car; } } }, 2000 + Math.random() * 3000); } } });
+            S.boats.forEach(boat => { if (boat.parked) return;
                 boat.x += boat.vx;
-                boat.y += boat.vy;
-                const onWater = S.waterBodies.some(w => boat.x >= w.x && boat.x <= w.x + w.w && boat.y >= w.y && boat.y <= w.y + w.h);
-                if (!onWater) {
-                    let bestW = null;
-                    let bestDist = 999;
-                    S.waterBodies.forEach(w => {
-                        const wx = w.x + w.w / 2;
-                        const wy = w.y + w.h / 2;
-                        const d = Math.hypot(boat.x - wx, boat.y - wy);
-                        if (d < bestDist) {
-                            bestDist = d;
-                            bestW = w;
-                        }
-                    });
-                    if (bestW) {
-                        const wx = bestW.x + bestW.w / 2;
-                        const wy = bestW.y + bestW.h / 2;
-                        const dx = wx - boat.x;
-                        const dy = wy - boat.y;
-                        const d = Math.sqrt(dx * dx + dy * dy);
-                        if (d > 0) {
-                            boat.vx = dx / d * 2;
-                            boat.vy = dy / d * 2;
-                        }
-                    }
-                }
-                if (Math.random() < 0.01) {
-                    boat.vx = (Math.random() - 0.5) * 2;
-                    boat.vy = (Math.random() - 0.5) * 2;
-                }
-                // Иногда NPC выходит из лодки
-                if (Math.random() < 0.003) {
-                    const person = S.people.find(p => p.boatRef === boat);
-                    if (person && Math.random() < 0.2) {
-                        person.hasBoat = false;
+                boat.y += boat.vy; const onWater = S.waterBodies.some(w => boat.x >= w.x && boat.x <= w.x + w.w && boat.y >= w.y && boat.y <= w.y + w.h); if (!onWater) { let bestW = null,
+                        bestDist = 999;
+                    S.waterBodies.forEach(w => { const wx = w.x + w.w / 2,
+                            wy = w.y + w.h / 2; const d = Math.hypot(boat.x - wx, boat.y - wy); if (d < bestDist) { bestDist = d;
+                            bestW = w; } }); if (bestW) { const wx = bestW.x + bestW.w / 2,
+                            wy = bestW.y + bestW.h / 2; const dx = wx - boat.x,
+                            dy = wy - boat.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { boat.vx = dx / d * 2;
+                            boat.vy = dy / d * 2; } } } if (Math.random() < 0.01) { boat.vx = (Math.random() - 0.5) * 2;
+                    boat.vy = (Math.random() - 0.5) * 2; } if (Math.random() < 0.003) { const person = S.people.find(p => p.boatRef === boat); if (person && Math.random() < 0.2) { person.hasBoat = false;
                         person.boatRef = null;
                         person.x = boat.x;
                         person.y = boat.y;
                         boat.parked = true;
-                        setTimeout(() => {
-                            boat.parked = false;
-                            if (Math.random() < 0.5) {
-                                const np = S.people.find(p => !p.hasCar && !p.hasBoat);
-                                if (np) {
-                                    np.hasBoat = true;
-                                    np.boatRef = boat;
-                                }
-                            }
-                        }, 3000 + Math.random() * 5000);
-                    }
-                }
-            });
-
-            // Спавн машин из автосалона
-            if (S.buildings.some(b => b.type === 'carshop') && S.roads.length > 0 && S.cars.length < 12 && Math.random() < 0.005) {
-                const shop = S.buildings.find(b => b.type === 'carshop');
-                if (shop) {
-                    const car = {
-                        x: shop.x + shop.w / 2,
-                        y: shop.y + shop.h / 2,
-                        vx: 2,
-                        vy: 0,
-                        color: `hsl(${Math.random() * 360},70%,55%)`,
-                        parked: false,
-                        homeRef: shop,
-                    };
-                    S.cars.push(car);
-                    const person = S.people.find(p => !p.hasCar && !p.hasBoat);
-                    if (person) {
-                        person.hasCar = true;
-                        person.carRef = car;
-                    }
-                }
-            }
-
-            // Спавн лодок из судостроительного завода
-            if (S.buildings.some(b => b.type === 'shipyard') && S.waterBodies.length > 0 && S.boats.length < 6 && Math.random() < 0.003) {
-                const yard = S.buildings.find(b => b.type === 'shipyard');
-                if (yard) {
-                    const water = S.waterBodies.find(w => yard.x >= w.x && yard.x <= w.x + w.w && yard.y >= w.y && yard.y <= w.y + w.h);
-                    if (water) {
-                        const boat = {
-                            x: water.x + water.w / 2,
-                            y: water.y + water.h / 2,
-                            vx: (Math.random() - 0.5) * 2,
-                            vy: (Math.random() - 0.5) * 2,
-                            color: `hsl(${Math.random() * 360},50%,50%)`,
-                            parked: false,
-                            homeRef: yard,
-                        };
-                        S.boats.push(boat);
-                        const person = S.people.find(p => !p.hasBoat && !p.hasCar);
-                        if (person) {
-                            person.hasBoat = true;
-                            person.boatRef = boat;
-                        }
-                    }
-                }
-            }
+                        setTimeout(() => { boat.parked = false; if (Math.random() < 0.5) { const np = S.people.find(p => !p.hasCar && !p.hasBoat); if (np) { np.hasBoat = true;
+                                    np.boatRef = boat; } } }, 3000 + Math.random() * 5000); } } });
+            if (S.buildings.some(b => b.type === 'carshop') && S.roads.length > 0 && S.cars.length < 12 && Math.random() < 0.005) { const shop = S.buildings.find(b => b.type === 'carshop'); if (shop) { const car = { x: shop.x + shop.w / 2,
+                        y: shop.y + shop.h / 2, vx: 2, vy: 0, color: `hsl(${Math.random() * 360},70%,55%)`, parked: false,
+                        homeRef: shop };
+                    S.cars.push(car); const person = S.people.find(p => !p.hasCar && !p.hasBoat); if (person) { person.hasCar = true;
+                        person.carRef = car; } } }
+            if (S.buildings.some(b => b.type === 'shipyard') && S.waterBodies.length > 0 && S.boats.length < 6 && Math.random() < 0.003) { const yard = S.buildings.find(b => b.type === 'shipyard'); if (yard) { const water = S.waterBodies.find(w => yard.x >= w.x && yard.x <= w.x + w.w && yard.y >= w.y && yard.y <= w.y + w.h); if (water) { const boat = { x: water.x + water.w / 2,
+                            y: water.y + water.h / 2, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, color: `hsl(${Math.random() * 360},50%,50%)`,
+                            parked: false, homeRef: yard };
+                        S.boats.push(boat); const person = S.people.find(p => !p.hasBoat && !p.hasCar); if (person) { person.hasBoat = true;
+                            person.boatRef = boat; } } } }
         }
 
-        function spawnParticles(wx, wy, colorHex) {
-            const hex = colorHex || '#f0d060';
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            for (let i = 0; i < 25; i++) {
-                S.particles.push({
-                    x: wx,
-                    y: wy,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 4,
-                    life: 1,
-                    size: Math.random() * 5 + 2,
-                    r,
-                    g,
-                    b,
-                });
-            }
-        }
+        function spawnParticles(wx, wy, colorHex) { const hex = colorHex || '#f0d060'; const r = parseInt(hex.slice(1, 3), 16); const g = parseInt(hex.slice(3, 5), 16); const b = parseInt(hex.slice(5, 7), 16); for (let i = 0; i < 25; i++) S.particles.push({ x: wx, y: wy, vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5 - 4, life: 1, size: Math.random() * 5 + 2, r, g, b }); }
 
-        // ==================== СОБЫТИЯ МЫШИ ====================
-        document.addEventListener('mousemove', e => {
-            if (!S.canvas || !S.countryName) return;
-            const c = getCanvasCoords(e);
+        document.addEventListener('mousemove', e => { if (!S.canvas || !S.countryName) return; const c = getCanvasCoords(e);
             S.mx = c.sx;
-            S.my = c.sy;
-            if (S.dragging) {
-                S.camX -= (e.clientX - S.dragSX) / S.zoom;
+            S.my = c.sy; if (S.dragging) { S.camX -= (e.clientX - S.dragSX) / S.zoom;
                 S.camY -= (e.clientY - S.dragSY) / S.zoom;
                 S.dragSX = e.clientX;
                 S.dragSY = e.clientY;
-                S.dragDist += Math.abs(e.clientX - S.dragSX) + Math.abs(e.clientY - S.dragSY);
-            }
-            const w = screenToWorld(c.sx, c.sy);
+                S.dragDist += Math.abs(e.clientX - S.dragSX) + Math.abs(e.clientY - S.dragSY); } const w = screenToWorld(c.sx, c.sy);
             S.hovered = findAt(w.x, w.y);
-            updateInfoPopup(c.sx, c.sy);
-        });
-
-        document.addEventListener('mousedown', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal')) return;
-            if (e.button === 0) {
-                const w = getWorldFromEvent(e);
+            updateInfoPopup(c.sx, c.sy); });
+        document.addEventListener('mousedown', e => { if (!S.canvas || !S.countryName) return; if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal')) return; if (e.button === 0) { const w = getWorldFromEvent(e);
                 S.mx = w.sx;
-                S.my = w.sy;
-                if (S.deleteMode) {
-                    if (deleteAt(w.wx, w.wy)) return;
-                }
-                if (S.selectedType && !S.selectMode && !S.deleteMode) {
-                    if (buildAt(w.wx, w.wy)) return;
-                }
+                S.my = w.sy; if (S.deleteMode) { if (deleteAt(w.wx, w.wy)) return; } if (S.selectedType && !S.selectMode && !S.deleteMode) { if (buildAt(w.wx, w.wy)) return; }
                 S.dragging = true;
                 S.dragSX = e.clientX;
                 S.dragSY = e.clientY;
                 S.dragDist = 0;
-                updateUI();
-            }
-        });
-
-        document.addEventListener('mouseup', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (S.dragging && S.dragDist < 3) {
-                const w = getWorldFromEvent(e);
-                if (S.deleteMode) deleteAt(w.wx, w.wy);
-                else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy);
-            }
+                updateUI(); } });
+        document.addEventListener('mouseup', e => { if (!S.canvas || !S.countryName) return; if (S.dragging && S.dragDist < 3) { const w = getWorldFromEvent(e); if (S.deleteMode) deleteAt(w.wx, w.wy); else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy); }
             S.dragging = false;
-            updateUI();
-        });
-
-        document.addEventListener('contextmenu', e => {
-            if (e.target.closest('#game-canvas')) e.preventDefault();
-        });
-
-        document.addEventListener('wheel', e => {
-            if (!S.canvas || !S.countryName || e.target.closest('#build-modal')) return;
-            e.preventDefault();
-            const rect = S.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            const w1 = screenToWorld(mx, my);
-            if (e.deltaY < 0) {
-                S.zoom = Math.min(3, S.zoom * 1.07);
-            } else {
-                S.zoom = Math.max(0.25, S.zoom / 1.07);
-            }
-            S.gridSize = Math.round(48 * S.zoom);
-            const w2 = screenToWorld(mx, my);
+            updateUI(); });
+        document.addEventListener('contextmenu', e => { if (e.target.closest('#game-canvas')) e.preventDefault(); });
+        document.addEventListener('wheel', e => { if (!S.canvas || !S.countryName || e.target.closest('#build-modal')) return;
+            e.preventDefault(); const rect = S.canvas.getBoundingClientRect(); const mx = e.clientX - rect.left; const my = e.clientY - rect.top; const w1 = screenToWorld(mx, my); if (e.deltaY < 0) S.zoom = Math.min(3, S.zoom * 1.07); else S.zoom = Math.max(0.25, S.zoom / 1.07);
+            S.gridSize = Math.round(48 * S.zoom); const w2 = screenToWorld(mx, my);
             S.camX += w1.x - w2.x;
-            S.camY += w1.y - w2.y;
-        }, { passive: false });
-
-        // ==================== ТАЧ-СОБЫТИЯ ====================
-        document.addEventListener('touchstart', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal')) return;
-            if (e.touches.length === 2) {
-                S.touchesDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                S.lastPinchZoom = S.zoom;
-                return;
-            }
-            if (e.touches.length === 1) {
-                const t = e.touches[0];
-                const rect = S.canvas.getBoundingClientRect();
+            S.camY += w1.y - w2.y; }, { passive: false });
+        document.addEventListener('touchstart', e => { if (!S.canvas || !S.countryName) return; if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal')) return; if (e.touches.length === 2) { S.touchesDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                S.lastPinchZoom = S.zoom; return; } if (e.touches.length === 1) { const t = e.touches[0]; const rect = S.canvas.getBoundingClientRect();
                 S.mx = t.clientX - rect.left;
                 S.my = t.clientY - rect.top;
                 S.dragSX = t.clientX;
@@ -2232,151 +1933,53 @@
                 S.dragDist = 0;
                 S.dragging = true;
                 S.touchStartTime = Date.now();
-                updateUI();
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchmove', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.touches.length === 2) {
-                e.preventDefault();
-                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                const scale = dist / S.touchesDist;
+                updateUI(); } }, { passive: false });
+        document.addEventListener('touchmove', e => { if (!S.canvas || !S.countryName) return; if (e.touches.length === 2) { e.preventDefault(); const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const scale = dist / S.touchesDist;
                 S.zoom = Math.max(0.25, Math.min(3, S.lastPinchZoom * scale));
-                S.gridSize = Math.round(48 * S.zoom);
-            } else if (e.touches.length === 1 && S.dragging) {
-                S.camX -= (e.touches[0].clientX - S.dragSX) / S.zoom;
+                S.gridSize = Math.round(48 * S.zoom); } else if (e.touches.length === 1 && S.dragging) { S.camX -= (e.touches[0].clientX - S.dragSX) / S.zoom;
                 S.camY -= (e.touches[0].clientY - S.dragSY) / S.zoom;
                 S.dragSX = e.touches[0].clientX;
                 S.dragSY = e.touches[0].clientY;
-                S.dragDist += Math.abs(e.touches[0].clientX - S.dragSX) + Math.abs(e.touches[0].clientY - S.dragSY);
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', e => {
-            if (!S.canvas || !S.countryName) return;
-            const wasTap = S.dragDist < 8 && Date.now() - S.touchStartTime < 300;
-            if (wasTap && e.changedTouches.length === 1) {
-                const w = getWorldFromEvent(e.changedTouches[0]);
-                if (S.deleteMode) deleteAt(w.wx, w.wy);
-                else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy);
-            }
+                S.dragDist += Math.abs(e.touches[0].clientX - S.dragSX) + Math.abs(e.touches[0].clientY - S.dragSY); } }, { passive: false });
+        document.addEventListener('touchend', e => { if (!S.canvas || !S.countryName) return; const wasTap = S.dragDist < 8 && Date.now() - S.touchStartTime < 300; if (wasTap && e.changedTouches.length === 1) { const w = getWorldFromEvent(e.changedTouches[0]); if (S.deleteMode) deleteAt(w.wx, w.wy); else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy); }
             S.dragging = false;
-            updateUI();
-        });
-
-        // ==================== КЛАВИШИ ====================
-        document.addEventListener('keydown', e => {
-            if (!S.countryName) return;
-            if (e.key === 'Escape') {
-                S.selectedType = null;
+            updateUI(); });
+        document.addEventListener('keydown', e => { if (!S.countryName) return; if (e.key === 'Escape') { S.selectedType = null;
                 S.deleteMode = false;
                 S.selectMode = false;
                 closeBuildModal();
-                updateUI();
-            }
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                e.preventDefault();
-                toggleDeleteMode();
-            }
-            if (e.key === 'b' || e.key === 'B') openBuildModal();
-            if (e.key === 'i' || e.key === 'I') toggleSelectMode();
-            if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') {
-                e.preventDefault();
-                rotateBuilding();
-            }
-        });
+                updateUI(); } if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault();
+                toggleDeleteMode(); } if (e.key === 'b' || e.key === 'B') openBuildModal(); if (e.key === 'i' || e.key === 'I') toggleSelectMode(); if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') { e.preventDefault();
+                rotateBuilding(); } });
+        document.getElementById('build-modal').addEventListener('click', function(e) { if (e.target === this) closeBuildModal(); });
+        document.getElementById('size-selector').addEventListener('click', function(e) { if (e.target.classList.contains('size-btn')) { S.buildScale = parseFloat(e.target.dataset.scale);
+                buildModalGrid(); } });
 
-        // Закрытие модального окна
-        document.getElementById('build-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeBuildModal();
-        });
+        function updateInfoPopup(sx, sy) { const popup = document.getElementById('info-popup'); if (S.hovered && !S.dragging && (S.selectMode || (!S.selectedType && !S.deleteMode))) { const b = S.hovered; const info = BT[b.type]; const scale = b.scale || 1; const cost = getBuildCost(b.type, scale); const income = Math.floor((info?.income || 0) * scale);
+            popup.style.display = 'block';
+            popup.style.left = Math.min(sx + 22, window.innerWidth - 280) + 'px';
+            popup.style.top = Math.max(10, sy - 30) + 'px';
+            popup.innerHTML = `<span class="pop-title">${info?.emoji||'?'} ${info?.name||'Объект'}</span>📏 ${b.w}x${b.h} (x${scale}) 🔄${b.rotation||0}°<br>💰 Цена: ${cost.toLocaleString()}<br><span class="pop-income">📈 Доход: 💰${income.toLocaleString()}/мес</span><br>${!info?.isRoad&&!info?.isRail&&!info?.isRoadCurve?`<span class="pop-population">👥 Вместимость: ${Math.floor((info?.capacity||0)*scale)}</span><br>`:''}<span class="pop-happy">😊 Счастье: ${(info?.happy||0)>=0?'+':''}${Math.floor((info?.happy||0)*scale)}</span>`; } else popup.style.display = 'none'; }
 
-        document.getElementById('size-selector').addEventListener('click', function(e) {
-            if (e.target.classList.contains('size-btn')) {
-                S.buildScale = parseFloat(e.target.dataset.scale);
-                buildModalGrid();
-            }
-        });
-
-        // ==================== ИНФО-ОКНО ====================
-        function updateInfoPopup(sx, sy) {
-            const popup = document.getElementById('info-popup');
-            if (S.hovered && !S.dragging && (S.selectMode || (!S.selectedType && !S.deleteMode))) {
-                const b = S.hovered;
-                const info = BT[b.type];
-                const scale = b.scale || 1;
-                const cost = getBuildCost(b.type, scale);
-                const income = Math.floor((info?.income || 0) * scale);
-                popup.style.display = 'block';
-                popup.style.left = Math.min(sx + 22, window.innerWidth - 280) + 'px';
-                popup.style.top = Math.max(10, sy - 30) + 'px';
-                popup.innerHTML = `
-                    <span class="pop-title">${info?.emoji || '?'} ${info?.name || 'Объект'}</span>
-                    📏 ${b.w}x${b.h} (x${scale}) 🔄${b.rotation || 0}°<br>
-                    💰 Цена: ${cost.toLocaleString()}<br>
-                    <span class="pop-income">📈 Доход: 💰${income.toLocaleString()}/мес</span><br>
-                    ${!info?.isRoad && !info?.isRail && !info?.isRoadCurve ? `<span class="pop-population">👥 Вместимость: ${Math.floor((info?.capacity || 0) * scale)}</span><br>` : ''}
-                    <span class="pop-happy">😊 Счастье: ${(info?.happy || 0) >= 0 ? '+' : ''}${Math.floor((info?.happy || 0) * scale)}</span>
-                `;
-            } else {
-                popup.style.display = 'none';
-            }
-        }
-
-        function addLog(msg) {
-            const log = document.getElementById('message-log');
-            const d = document.createElement('div');
+        function addLog(msg) { const log = document.getElementById('message-log'); const d = document.createElement('div');
             d.className = 'log-msg';
             d.textContent = msg;
             log.appendChild(d);
-            setTimeout(() => d.remove(), 3500);
-            if (log.children.length > 6) log.firstChild.remove();
-        }
+            setTimeout(() => d.remove(), 3500); if (log.children.length > 6) log.firstChild.remove(); }
 
-        function shakeEl(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
+        function shakeEl(id) { const el = document.getElementById(id); if (!el) return;
             el.style.animation = 'shake 0.4s ease';
-            setTimeout(() => el.style.animation = '', 400);
-        }
+            setTimeout(() => el.style.animation = '', 400); }
 
-        function showHelp() {
-            alert('🎮 PRESIDENT SIMULATOR - ПОЛНАЯ ВЕРСИЯ\n\n' +
-                '🖱️ ЛКМ — строить / перетаскивать карту\n' +
-                '🖱️ Колёсико — масштаб\n' +
-                '📱 Тап — строить, щипок — масштаб\n\n' +
-                '⌨️ КЛАВИШИ:\n' +
-                '  B — меню построек\n' +
-                '  R — поворот здания\n' +
-                '  Delete — режим сноса\n' +
-                '  I — режим информации\n' +
-                '  Esc — отмена\n\n' +
-                '🌤️ ПОГОДА: Солнце, облака, дождь, гроза, снег\n' +
-                '🕐 ВРЕМЯ: День/ночь как в реальном мире\n' +
-                '📏 ГРАНИЦА: Изогнутая, с табличкой цены расширения\n' +
-                '💧 ВОДА: Озёра и реки на карте\n' +
-                '🛣️ ДОРОГИ: Прямые и повороты (автомобили едут по дорогам)\n' +
-                '🚗 АВТОСАЛОН: Продаёт машины NPC\n' +
-                '🚢 СУДОСТРОИТЕЛЬНЫЙ: Строит лодки (только на воде)\n' +
-                '👥 NPC: Ходят в здания, живут в домах, работают\n' +
-                '🚶 NPC выходят из машин и лодок\n' +
-                '🏠 При постройке домов появляются 5-10 новых жителей\n' +
-                '💾 Автосохранение каждые 30 секунд');
-        }
+        function showHelp() { alert('🎮 PRESIDENT SIMULATOR\n\n🖱️ ЛКМ — строить/перетаскивать\n🖱️ Колёсико — масштаб\n📱 Тап — строить, щипок — масштаб\n\n⌨️ КЛАВИШИ:\n  B — меню\n  R — поворот\n  Delete — снос\n  I — инфо\n  Esc — отмена\n\n🌊 ОКЕАНЫ И МОРЯ по всей карте\n🚢 Судостроительный завод на воде\n🚗 Автосалон\n👥 NPC ходят в здания\n🌤️ Погода и время суток'); }
 
         const shakeCSS = document.createElement('style');
         shakeCSS.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
         document.head.appendChild(shakeCSS);
-
-        console.log('🏛️ President Simulator 2D - ПОЛНАЯ ВЕРСИЯ ГОТОВА!');
-        console.log('✅ Без жёлтых кругов');
-        console.log('✅ Дороги с поворотами (автомобили едут по дорогам)');
-        console.log('✅ Вода, лодки, судостроительный завод');
-        console.log('✅ NPC спавнятся при постройке домов');
-        console.log('✅ NPC выходят из машин и лодок');
-        console.log('✅ Изогнутая граница с табличкой');
-        console.log('✅ День/ночь и погода');
+        console.log('🏛️ President Simulator 2D - ГОТОВ!');
+        console.log('✅ Убраны ВСЕ цветные точки');
+        console.log('✅ Океаны и моря по всей карте');
+        console.log('✅ Реалистичная вода с градиентом и названиями');
     </script>
 </body>
 </html>
