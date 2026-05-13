@@ -181,7 +181,6 @@
             background: linear-gradient(180deg, #ffe08a, #c8943e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
         }
         .resources {
             display: flex;
@@ -228,6 +227,20 @@
         .btn-top:hover {
             background: #3a3050;
             border-color: #c8943e;
+        }
+        .time-weather {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        .time-display {
+            color: #f0d060;
+            font-weight: 700;
+        }
+        .weather-display {
+            font-size: 1.2em;
         }
 
         #game-canvas {
@@ -534,6 +547,10 @@
                 <div class="resource"><span class="res-icon">😊</span> <span class="res-happy" id="happy-val">75</span>%</div>
             </div>
             <div class="top-buttons">
+                <div class="time-weather">
+                    <span class="weather-display" id="weather-icon">☀️</span>
+                    <span class="time-display" id="time-display">12:00</span>
+                </div>
                 <button class="btn-top" onclick="expandBorder()" title="Расширить границу">📏 Граница</button>
                 <button class="btn-top" onclick="saveGame()" title="Сохранить">💾</button>
                 <button class="btn-top" onclick="showHelp()">❓</button>
@@ -617,32 +634,30 @@
             incomeTimer: 0,
             saveInterval: null,
             borderExpandCost: 50000,
+            // Время и погода
+            gameHour: 17,
+            gameMinute: 26,
+            weather: 'sunny',
+            weatherTimer: 0,
+            weatherDuration: 500 + Math.random() * 1000,
+            raindrops: [],
+            snowflakes: [],
         };
 
         const BT = {
             road: { emoji:'🛣️', name:'Дорога', cost:50, pop:0, happy:2, income:5, w:48, h:48, isRoad:true, category:'Дороги' },
             rail: { emoji:'🚂', name:'Ж/Д путь', cost:200, pop:0, happy:3, income:20, w:48, h:48, isRail:true, category:'Дороги' },
             house: { emoji:'🏠', name:'Дом', cost:500, pop:8, happy:3, income:15, w:44, h:44, category:'Жильё', capacity:8 },
-            apartment: { emoji:'🏢', name:'Жилой комплекс', cost:2000, pop:40, happy:-2, income:60, w:50, h:56, category:'Жильё',
-                capacity:40 },
-            mansion: { emoji:'🏰', name:'Особняк', cost:8000, pop:15, happy:10, income:100, w:54, h:54, category:'Жильё',
-            capacity:15 },
-            shop: { emoji:'🏪', name:'Магазин', cost:800, pop:3, happy:6, income:80, w:42, h:42, category:'Бизнес',
-            capacity:5 },
-            factory: { emoji:'🏭', name:'Завод', cost:3000, pop:20, happy:-6, income:300, w:52, h:52, category:'Бизнес',
-                capacity:20 },
-            office: { emoji:'🏬', name:'Бизнес-центр', cost:5000, pop:12, happy:4, income:500, w:48, h:60, category:'Бизнес',
-                capacity:15 },
-            park: { emoji:'🌳', name:'Парк', cost:300, pop:0, happy:15, income:0, w:46, h:46, category:'Инфраструктура',
-            capacity:0 },
-            school: { emoji:'🏫', name:'Школа', cost:4000, pop:5, happy:8, income:-30, w:50, h:48, category:'Инфраструктура',
-                capacity:30 },
-            hospital: { emoji:'🏥', name:'Больница', cost:6000, pop:8, happy:12, income:-60, w:52, h:50,
-                category:'Инфраструктура', capacity:20 },
-            stadium: { emoji:'🏟️', name:'Стадион', cost:15000, pop:25, happy:20, income:200, w:64, h:56,
-            category:'Инфраструктура', capacity:50 },
-            carshop: { emoji:'🚗', name:'Автосалон', cost:10000, pop:2, happy:5, income:150, w:48, h:48, category:'Бизнес',
-                capacity:3 },
+            apartment: { emoji:'🏢', name:'Жилой комплекс', cost:2000, pop:40, happy:-2, income:60, w:50, h:56, category:'Жильё', capacity:40 },
+            mansion: { emoji:'🏰', name:'Особняк', cost:8000, pop:15, happy:10, income:100, w:54, h:54, category:'Жильё', capacity:15 },
+            shop: { emoji:'🏪', name:'Магазин', cost:800, pop:3, happy:6, income:80, w:42, h:42, category:'Бизнес', capacity:5 },
+            factory: { emoji:'🏭', name:'Завод', cost:3000, pop:20, happy:-6, income:300, w:52, h:52, category:'Бизнес', capacity:20 },
+            office: { emoji:'🏬', name:'Бизнес-центр', cost:5000, pop:12, happy:4, income:500, w:48, h:60, category:'Бизнес', capacity:15 },
+            park: { emoji:'🌳', name:'Парк', cost:300, pop:0, happy:15, income:0, w:46, h:46, category:'Инфраструктура', capacity:0 },
+            school: { emoji:'🏫', name:'Школа', cost:4000, pop:5, happy:8, income:-30, w:50, h:48, category:'Инфраструктура', capacity:30 },
+            hospital: { emoji:'🏥', name:'Больница', cost:6000, pop:8, happy:12, income:-60, w:52, h:50, category:'Инфраструктура', capacity:20 },
+            stadium: { emoji:'🏟️', name:'Стадион', cost:15000, pop:25, happy:20, income:200, w:64, h:56, category:'Инфраструктура', capacity:50 },
+            carshop: { emoji:'🚗', name:'Автосалон', cost:10000, pop:2, happy:5, income:150, w:48, h:48, category:'Бизнес', capacity:3 },
         };
 
         // ==================== ЗВЁЗДЫ ====================
@@ -652,25 +667,12 @@
             c.height = window.innerHeight;
             const ctx = c.getContext('2d');
             const stars = Array.from({ length: 200 }, () => ({
-                x: Math.random() * c.width,
-                y: Math.random() * c.height,
-                r: Math.random() * 1.8 + 0.5,
-                twinkle: Math.random() * Math.PI * 2,
-                speed: Math.random() * 0.02 + 0.005,
+                x: Math.random() * c.width, y: Math.random() * c.height,
+                r: Math.random() * 1.8 + 0.5, twinkle: Math.random() * Math.PI * 2, speed: Math.random() * 0.02 + 0.005,
             }));
-
-            function draw() {
-                ctx.clearRect(0, 0, c.width, c.height);
-                stars.forEach(s => {
-                    s.twinkle += s.speed;
-                    const a = 0.4 + Math.sin(s.twinkle) * 0.4;
-                    ctx.fillStyle = `rgba(255,255,240,${a})`;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                requestAnimationFrame(draw);
-            }
+            function draw() { ctx.clearRect(0,0,c.width,c.height); stars.forEach(s=>{ s.twinkle+=s.speed; const a=0.4+Math.sin(s.twinkle)*0.4;
+                ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); });
+            requestAnimationFrame(draw); }
             draw();
         }
         initSplashStars();
@@ -678,697 +680,509 @@
         // ==================== СОХРАНЕНИЯ ====================
         function saveGame() {
             if (!S.countryName) return;
-            const data = {
-                countryName: S.countryName,
-                money: S.money,
-                population: S.population,
-                happiness: S.happiness,
-                borderSize: S.borderSize,
-                buildings: S.buildings,
-                roads: S.roads,
-                rails: S.rails,
-                zoom: S.zoom,
-                camX: S.camX,
-                camY: S.camY,
-                version: 3,
-            };
-            try {
-                localStorage.setItem('president_simulator_save_v3', JSON.stringify(data));
-                addLog('💾 Игра сохранена!');
-            } catch (e) {
-                addLog('❌ Ошибка сохранения!');
-            }
+            const data = { countryName:S.countryName, money:S.money, population:S.population, happiness:S.happiness,
+                borderSize:S.borderSize, buildings:S.buildings, roads:S.roads, rails:S.rails, zoom:S.zoom, camX:S.camX, camY:S.camY,
+                gameHour:S.gameHour, gameMinute:S.gameMinute, weather:S.weather, version:4 };
+            try { localStorage.setItem('president_simulator_v4', JSON.stringify(data)); addLog('💾 Игра сохранена!'); }
+            catch(e) { addLog('❌ Ошибка сохранения!'); }
         }
 
         function loadGame() {
             try {
-                const raw = localStorage.getItem('president_simulator_save_v3');
+                const raw = localStorage.getItem('president_simulator_v4');
                 if (!raw) { alert('Нет сохранений!'); return; }
                 const data = JSON.parse(raw);
-                S.countryName = data.countryName;
-                S.money = data.money;
-                S.population = data.population;
-                S.happiness = data.happiness;
-                S.borderSize = data.borderSize || 400;
-                S.buildings = data.buildings || [];
-                S.roads = data.roads || [];
-                S.rails = data.rails || [];
-                S.zoom = data.zoom || 1;
-                S.camX = data.camX || 0;
-                S.camY = data.camY || 0;
-                S.people = [];
-                S.cars = [];
-                S.particles = [];
-                S.selectedType = null;
-                S.buildScale = 1;
-                S.buildRotation = 0;
-                S.deleteMode = false;
-                S.selectMode = false;
-                S.time = 0;
-                S.incomeTimer = 0;
-                S.dragging = false;
+                S.countryName=data.countryName; S.money=data.money; S.population=data.population; S.happiness=data.happiness;
+                S.borderSize=data.borderSize||400; S.buildings=data.buildings||[]; S.roads=data.roads||[]; S.rails=data.rails||[];
+                S.zoom=data.zoom||1; S.camX=data.camX||0; S.camY=data.camY||0;
+                S.gameHour=data.gameHour||12; S.gameMinute=data.gameMinute||0; S.weather=data.weather||'sunny';
+                S.people=[]; S.cars=[]; S.particles=[]; S.selectedType=null; S.buildScale=1; S.buildRotation=0;
+                S.deleteMode=false; S.selectMode=false; S.time=0; S.incomeTimer=0; S.dragging=false;
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('game-screen').classList.add('active');
-                document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
-                initCanvas();
-                buildModalGrid();
-                updateUI();
-                spawnInitialPeople();
+                document.getElementById('display-country-name').textContent='🏛️ '+S.countryName;
+                initCanvas(); buildModalGrid(); updateUI(); spawnInitialPeople();
                 addLog('💾 Сохранение загружено!');
-                if (S.saveInterval) clearInterval(S.saveInterval);
-                S.saveInterval = setInterval(saveGame, 30000);
+                if(S.saveInterval) clearInterval(S.saveInterval);
+                S.saveInterval=setInterval(saveGame,30000);
                 gameLoop();
-            } catch (e) {
-                alert('Ошибка загрузки!');
-            }
+            } catch(e) { alert('Ошибка загрузки!'); }
         }
 
-        function initCanvas() {
-            S.canvas = document.getElementById('game-canvas');
-            S.ctx = S.canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-        }
-
-        function resizeCanvas() {
-            if (!S.canvas) return;
-            const rect = S.canvas.getBoundingClientRect();
-            S.canvas.width = rect.width;
-            S.canvas.height = rect.height;
-        }
+        function initCanvas() { S.canvas=document.getElementById('game-canvas'); S.ctx=S.canvas.getContext('2d');
+            resizeCanvas(); window.addEventListener('resize',resizeCanvas); }
+        function resizeCanvas() { if(!S.canvas) return; const rect=S.canvas.getBoundingClientRect();
+            S.canvas.width=rect.width; S.canvas.height=rect.height; }
 
         function startGame() {
-            const inp = document.getElementById('country-name');
-            const name = inp.value.trim();
-            if (!name) { inp.style.borderColor = '#f05555';
-                inp.focus();
-                setTimeout(() => inp.style.borderColor = '#3a3050', 1500); return; }
-            S.countryName = name;
-            S.buildings = [];
-            S.roads = [];
-            S.rails = [];
-            S.people = [];
-            S.cars = [];
-            S.particles = [];
-            S.money = 50000;
-            S.population = 100;
-            S.happiness = 75;
-            S.borderSize = 400;
-            S.selectedType = null;
-            S.buildScale = 1;
-            S.buildRotation = 0;
-            S.deleteMode = false;
-            S.selectMode = false;
-            S.time = 0;
-            S.incomeTimer = 0;
-            S.zoom = 1;
-            S.gridSize = 48;
-            S.dragging = false;
-            // Стартовые дороги
-            S.roads.push({ type: 'road', x: -200, y: -24, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-            S.rails.push({ type: 'rail', x: -200, y: -120, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
+            const inp=document.getElementById('country-name'); const name=inp.value.trim();
+            if(!name) { inp.style.borderColor='#f05555'; inp.focus(); setTimeout(()=>inp.style.borderColor='#3a3050',1500); return; }
+            S.countryName=name; S.buildings=[]; S.roads=[]; S.rails=[]; S.people=[]; S.cars=[]; S.particles=[];
+            S.money=50000; S.population=100; S.happiness=75; S.borderSize=400; S.selectedType=null; S.buildScale=1; S.buildRotation=0;
+            S.deleteMode=false; S.selectMode=false; S.time=0; S.incomeTimer=0; S.zoom=1; S.gridSize=48; S.dragging=false;
+            S.gameHour=17; S.gameMinute=26; S.weather='sunny'; S.weatherTimer=0; S.raindrops=[]; S.snowflakes=[];
+            S.roads.push({type:'road',x:-200,y:-24,w:400,h:48,scale:1,rotation:0,placedAt:0});
+            S.rails.push({type:'rail',x:-200,y:-120,w:400,h:48,scale:1,rotation:0,placedAt:0});
             document.getElementById('splash').classList.add('hidden');
             document.getElementById('game-screen').classList.add('active');
-            document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
-            initCanvas();
-            buildModalGrid();
-            updateUI();
-            spawnInitialPeople();
+            document.getElementById('display-country-name').textContent='🏛️ '+S.countryName;
+            initCanvas(); buildModalGrid(); updateUI(); spawnInitialPeople();
             addLog('🌟 Добро пожаловать, господин Президент!');
             addLog('🛣️ Построены стартовые дороги');
-            if (S.saveInterval) clearInterval(S.saveInterval);
-            S.saveInterval = setInterval(saveGame, 30000);
+            if(S.saveInterval) clearInterval(S.saveInterval);
+            S.saveInterval=setInterval(saveGame,30000);
             gameLoop();
         }
 
         function spawnInitialPeople() {
-            for (let i = 0; i < 40; i++) {
-                S.people.push({
-                    x: (Math.random() - 0.5) * S.borderSize,
-                    y: (Math.random() - 0.5) * S.borderSize,
-                    vx: (Math.random() - 0.5) * 1.2,
-                    vy: (Math.random() - 0.5) * 1.2,
-                    color: `hsl(${Math.random()*360},40%,65%)`,
-                    size: 4 + Math.random() * 3,
-                    target: null,
-                    state: 'walking',
-                    stateTimer: Math.random() * 200,
-                    hasCar: false,
-                    carRef: null,
-                });
-            }
+            for(let i=0;i<40;i++) S.people.push({
+                x:(Math.random()-0.5)*S.borderSize, y:(Math.random()-0.5)*S.borderSize,
+                vx:(Math.random()-0.5)*1.2, vy:(Math.random()-0.5)*1.2,
+                color:`hsl(${Math.random()*360},40%,65%)`, size:4+Math.random()*3,
+                target:null, state:'walking', stateTimer:Math.random()*200, hasCar:false, carRef:null,
+                shoppingTimer:0, workTimer:0
+            });
         }
 
         function updateUI() {
-            document.getElementById('money-val').textContent = Math.floor(S.money).toLocaleString();
-            document.getElementById('pop-val').textContent = S.population;
-            document.getElementById('happy-val').textContent = Math.round(S.happiness);
-            if (S.canvas) {
-                S.canvas.classList.toggle('building', !!S.selectedType && !S.deleteMode && !S.selectMode);
-                S.canvas.classList.toggle('grabbing', S.dragging);
-            }
-            document.getElementById('btn-build').classList.toggle('active', !!S.selectedType && !S.deleteMode && !S
-            .selectMode);
-            document.getElementById('btn-delete').classList.toggle('active', S.deleteMode);
-            document.getElementById('btn-select').classList.toggle('active', S.selectMode);
-            document.getElementById('btn-rotate').classList.toggle('active', S.buildRotation !== 0);
-            document.getElementById('rot-display').textContent = S.buildRotation + '°';
+            document.getElementById('money-val').textContent=Math.floor(S.money).toLocaleString();
+            document.getElementById('pop-val').textContent=S.population;
+            document.getElementById('happy-val').textContent=Math.round(S.happiness);
+            if(S.canvas) { S.canvas.classList.toggle('building',!!S.selectedType&&!S.deleteMode&&!S.selectMode);
+                S.canvas.classList.toggle('grabbing',S.dragging); }
+            document.getElementById('btn-build').classList.toggle('active',!!S.selectedType&&!S.deleteMode&&!S.selectMode);
+            document.getElementById('btn-delete').classList.toggle('active',S.deleteMode);
+            document.getElementById('btn-select').classList.toggle('active',S.selectMode);
+            document.getElementById('btn-rotate').classList.toggle('active',S.buildRotation!==0);
+            document.getElementById('rot-display').textContent=S.buildRotation+'°';
+            // Время и погода
+            const h=Math.floor(S.gameHour), m=Math.floor(S.gameMinute);
+            document.getElementById('time-display').textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+            const weatherIcons={sunny:'☀️', cloudy:'⛅', rainy:'🌧️', stormy:'⛈️', snowy:'❄️', night:'🌙'};
+            document.getElementById('weather-icon').textContent=weatherIcons[S.weather]||'☀️';
         }
 
         function expandBorder() {
-            const cost = S.borderExpandCost;
-            if (S.money < cost) { addLog('❌ Недостаточно средств! Нужно 💰' + cost.toLocaleString()); return; }
-            S.money -= cost;
-            S.borderSize += 200;
-            S.borderExpandCost = Math.floor(S.borderExpandCost * 2);
-            addLog('📏 Граница расширена! Теперь: ' + S.borderSize + 'м');
+            const cost=S.borderExpandCost;
+            if(S.money<cost) { addLog('❌ Недостаточно средств! Нужно 💰'+cost.toLocaleString()); return; }
+            S.money-=cost; S.borderSize+=200; S.borderExpandCost=Math.floor(S.borderExpandCost*2);
+            addLog('📏 Граница расширена! Теперь: '+S.borderSize+'м (след. расширение: 💰'+S.borderExpandCost.toLocaleString()+')');
             updateUI();
         }
 
         // ==================== МОДАЛЬНОЕ ОКНО ====================
-        let modalBuilt = false;
-
+        let modalBuilt=false;
         function buildModalGrid() {
-            const grid = document.getElementById('modal-grid');
-            if (!modalBuilt) {
-                grid.innerHTML = '';
-                Object.entries(BT).forEach(([key, info]) => {
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = `
-                        <span class="modal-item-emoji">${info.emoji}</span>
-                        <span class="modal-item-name">${info.name}</span>
-                        <span class="modal-item-cost"></span>
-                        <span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>
-                    `;
-                    div.addEventListener('click', () => selectModalItem(key));
-                    grid.appendChild(div);
-                });
-                modalBuilt = true;
-            }
-            const scale = S.buildScale || 1;
-            grid.querySelectorAll('.modal-item').forEach(div => {
-                const key = div.dataset.type;
-                const info = BT[key];
-                const cost = getBuildCost(key, scale);
-                const size = getBuildSize(key, scale);
-                div.querySelector('.modal-item-cost').textContent = `💰${cost.toLocaleString()}`;
-                div.querySelector('.modal-item-size').textContent = `${size.w}x${size.h}`;
-                div.classList.toggle('selected', S.selectedType === key);
-            });
-            document.querySelectorAll('#size-selector .size-btn').forEach(btn => {
-                btn.classList.toggle('selected', parseFloat(btn.dataset.scale) === scale);
-            });
+            const grid=document.getElementById('modal-grid');
+            if(!modalBuilt) { grid.innerHTML='';
+                Object.entries(BT).forEach(([key,info])=>{ const div=document.createElement('div'); div.className='modal-item';
+                    div.dataset.type=key; div.innerHTML=`<span class="modal-item-emoji">${info.emoji}</span><span class="modal-item-name">${info.name}</span><span class="modal-item-cost"></span><span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>`;
+                    div.addEventListener('click',()=>selectModalItem(key)); grid.appendChild(div); }); modalBuilt=true; }
+            const scale=S.buildScale||1;
+            grid.querySelectorAll('.modal-item').forEach(div=>{ const key=div.dataset.type, info=BT[key];
+                const cost=getBuildCost(key,scale), size=getBuildSize(key,scale);
+                div.querySelector('.modal-item-cost').textContent=`💰${cost.toLocaleString()}`;
+                div.querySelector('.modal-item-size').textContent=`${size.w}x${size.h}`;
+                div.classList.toggle('selected',S.selectedType===key); });
+            document.querySelectorAll('#size-selector .size-btn').forEach(btn=>{ btn.classList.toggle('selected',parseFloat(btn.dataset.scale)===scale); });
         }
 
-        function selectModalItem(key) {
-            S.selectedType = key;
-            S.deleteMode = false;
-            S.selectMode = false;
-            const scale = S.buildScale || 1;
-            const info = BT[key];
-            const sz = getBuildSize(key, scale);
-            addLog(`🔨 Выбрано: ${info.emoji} ${info.name} (${sz.w}x${sz.h}, поворот ${S.buildRotation}°)`);
-            updateUI();
-            buildModalGrid();
-            closeBuildModal();
-        }
-
-        function openBuildModal() {
-            S.deleteMode = false;
-            S.selectMode = false;
-            buildModalGrid();
-            document.getElementById('build-modal').classList.add('open');
-            updateUI();
-        }
-
-        function closeBuildModal() {
-            document.getElementById('build-modal').classList.remove('open');
-        }
-
-        function getBuildCost(type, scale) {
-            const info = BT[type];
-            if (!info) return 0;
-            return Math.floor(info.cost * scale * scale);
-        }
-
-        function getBuildSize(type, scale) {
-            const info = BT[type];
-            if (!info) return { w: 48, h: 48 };
-            let w = Math.round(info.w * scale);
-            let h = Math.round(info.h * scale);
-            if (S.buildRotation === 90 || S.buildRotation === 270) { [w, h] = [h, w]; }
-            return { w, h };
-        }
-
-        function rotateBuilding() {
-            S.buildRotation = (S.buildRotation + 90) % 360;
-            addLog(`🔄 Поворот: ${S.buildRotation}°`);
-            updateUI();
-            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
-        }
+        function selectModalItem(key) { S.selectedType=key; S.deleteMode=false; S.selectMode=false;
+            const info=BT[key], sz=getBuildSize(key,S.buildScale||1);
+            addLog(`🔨 Выбрано: ${info.emoji} ${info.name} (${sz.w}x${sz.h}, 🔄${S.buildRotation}°)`);
+            updateUI(); buildModalGrid(); closeBuildModal(); }
+        function openBuildModal() { S.deleteMode=false; S.selectMode=false; buildModalGrid();
+            document.getElementById('build-modal').classList.add('open'); updateUI(); }
+        function closeBuildModal() { document.getElementById('build-modal').classList.remove('open'); }
+        function getBuildCost(type,scale) { const info=BT[type]; if(!info) return 0; return Math.floor(info.cost*scale*scale); }
+        function getBuildSize(type,scale) { const info=BT[type]; if(!info) return {w:48,h:48};
+            let w=Math.round(info.w*scale), h=Math.round(info.h*scale);
+            if(S.buildRotation===90||S.buildRotation===270) [w,h]=[h,w]; return {w,h}; }
+        function rotateBuilding() { S.buildRotation=(S.buildRotation+90)%360; addLog(`🔄 Поворот: ${S.buildRotation}°`);
+            updateUI(); if(document.getElementById('build-modal').classList.contains('open')) buildModalGrid(); }
 
         // ==================== РЕЖИМЫ ====================
-        function toggleDeleteMode() {
-            S.deleteMode = !S.deleteMode;
-            S.selectMode = false;
-            S.selectedType = null;
-            if (S.deleteMode) addLog('🗑️ Режим сноса (возврат 50%)');
-            updateUI();
-        }
-
-        function toggleSelectMode() {
-            S.selectMode = !S.selectMode;
-            S.deleteMode = false;
-            S.selectedType = null;
-            if (S.selectMode) addLog('🔍 Режим информации');
-            updateUI();
-        }
+        function toggleDeleteMode() { S.deleteMode=!S.deleteMode; S.selectMode=false; S.selectedType=null;
+            if(S.deleteMode) addLog('🗑️ Режим сноса (возврат 50%)'); updateUI(); }
+        function toggleSelectMode() { S.selectMode=!S.selectMode; S.deleteMode=false; S.selectedType=null;
+            if(S.selectMode) addLog('🔍 Режим информации'); updateUI(); }
 
         // ==================== СТРОИТЕЛЬСТВО ====================
-        function buildAt(wx, wy) {
-            if (!S.selectedType || S.deleteMode || S.selectMode) return false;
-            const t = S.selectedType;
-            const info = BT[t];
-            const scale = S.buildScale || 1;
-            const cost = getBuildCost(t, scale);
-            const size = getBuildSize(t, scale);
-            if (S.money < cost) { addLog('❌ Недостаточно средств! 💰' + cost.toLocaleString());
-                shakeEl('money-val'); return false; }
-            // Проверка границы
-            if (Math.abs(wx) > S.borderSize || Math.abs(wy) > S.borderSize) {
-                addLog('⚠️ За границей страны! Расширьте границу.');
-                return false;
-            }
-            const nb = {
-                type: t,
-                x: wx - size.w / 2,
-                y: wy - size.h / 2,
-                w: size.w,
-                h: size.h,
-                scale: scale,
-                rotation: S.buildRotation,
-                placedAt: S.time,
-            };
-            const allC = [...S.buildings, ...S.roads, ...S.rails];
-            const overlap = allC.some(b => rectsOverlap(nb, b, 2));
-            if (overlap) { addLog('⚠️ Место занято!'); return false; }
-            S.money -= cost;
-            if (info.isRoad) S.roads.push(nb);
-            else if (info.isRail) S.rails.push(nb);
-            else {
-                S.buildings.push(nb);
-                S.population += Math.floor(info.pop * scale);
-                S.happiness = Math.max(0, Math.min(100, S.happiness + Math.floor(info.happy * scale)));
-            }
-            updateUI();
-            addLog(`✅ ${info.emoji} ${info.name} (${size.w}x${size.h}, 🔄${S.buildRotation}°)`);
-            spawnParticles(wx, wy, '#f0d060');
-            S.buildRotation = 0;
-            return true;
+        function buildAt(wx,wy) {
+            if(!S.selectedType||S.deleteMode||S.selectMode) return false;
+            const t=S.selectedType, info=BT[t], scale=S.buildScale||1, cost=getBuildCost(t,scale), size=getBuildSize(t,scale);
+            if(S.money<cost) { addLog('❌ Недостаточно средств! 💰'+cost.toLocaleString()); shakeEl('money-val'); return false; }
+            if(Math.abs(wx)>S.borderSize||Math.abs(wy)>S.borderSize) { addLog('⚠️ За границей страны! Расширьте границу.'); return false; }
+            const nb={type:t,x:wx-size.w/2,y:wy-size.h/2,w:size.w,h:size.h,scale:scale,rotation:S.buildRotation,placedAt:S.time};
+            const allC=[...S.buildings,...S.roads,...S.rails];
+            if(allC.some(b=>rectsOverlap(nb,b,2))) { addLog('⚠️ Место занято!'); return false; }
+            S.money-=cost;
+            if(info.isRoad) S.roads.push(nb); else if(info.isRail) S.rails.push(nb);
+            else { S.buildings.push(nb); S.population+=Math.floor(info.pop*scale);
+                S.happiness=Math.max(0,Math.min(100,S.happiness+Math.floor(info.happy*scale))); }
+            updateUI(); addLog(`✅ ${info.emoji} ${info.name} (${size.w}x${size.h}, 🔄${S.buildRotation}°)`);
+            spawnParticles(wx,wy,'#f0d060'); S.buildRotation=0; return true;
         }
 
-        function deleteAt(wx, wy) {
-            if (!S.deleteMode) return false;
-            const all = [...S.buildings, ...S.roads, ...S.rails];
-            const found = all.find(b => wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h);
-            if (!found) return false;
-            const info = BT[found.type];
-            const scale = found.scale || 1;
-            const refund = Math.floor(getBuildCost(found.type, scale) * 0.5);
-            S.money += refund;
-            if (info?.isRoad) S.roads = S.roads.filter(b => b !== found);
-            else if (info?.isRail) S.rails = S.rails.filter(b => b !== found);
-            else {
-                S.buildings = S.buildings.filter(b => b !== found);
-                S.population = Math.max(0, S.population - Math.floor((info?.pop || 0) * scale));
-                S.happiness = Math.max(0, Math.min(100, S.happiness - Math.floor((info?.happy || 0) * scale)));
-            }
-            // Убираем машины, привязанные к зданию
-            S.cars = S.cars.filter(c => c.homeRef !== found);
-            updateUI();
-            addLog(`🗑️ Снесено: ${info?.emoji || '?'} (+💰${refund.toLocaleString()})`);
-            spawnParticles(found.x + found.w / 2, found.y + found.h / 2, '#f08888');
-            return true;
+        function deleteAt(wx,wy) {
+            if(!S.deleteMode) return false;
+            const all=[...S.buildings,...S.roads,...S.rails];
+            const found=all.find(b=>wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h);
+            if(!found) return false;
+            const info=BT[found.type], scale=found.scale||1, refund=Math.floor(getBuildCost(found.type,scale)*0.5);
+            S.money+=refund;
+            if(info?.isRoad) S.roads=S.roads.filter(b=>b!==found);
+            else if(info?.isRail) S.rails=S.rails.filter(b=>b!==found);
+            else { S.buildings=S.buildings.filter(b=>b!==found);
+                S.population=Math.max(0,S.population-Math.floor((info?.pop||0)*scale));
+                S.happiness=Math.max(0,Math.min(100,S.happiness-Math.floor((info?.happy||0)*scale))); }
+            S.cars=S.cars.filter(c=>c.homeRef!==found);
+            updateUI(); addLog(`🗑️ Снесено: ${info?.emoji||'?'} (+💰${refund.toLocaleString()})`);
+            spawnParticles(found.x+found.w/2,found.y+found.h/2,'#f08888'); return true;
         }
 
-        function rectsOverlap(a, b, margin) {
-            return !(a.x + a.w - margin < b.x || a.x > b.x + b.w - margin || a.y + a.h - margin < b.y || a.y > b.y + b.h -
-                margin);
-        }
+        function rectsOverlap(a,b,margin) { return !(a.x+a.w-margin<b.x||a.x>b.x+b.w-margin||a.y+a.h-margin<b.y||a.y>b.y+b.h-margin); }
 
         // ==================== КООРДИНАТЫ ====================
-        function worldToScreen(wx, wy) {
-            const cx = S.camX - S.canvas.width / 2 / S.zoom;
-            const cy = S.camY - S.canvas.height / 2 / S.zoom;
-            return { x: (wx - cx) * S.zoom, y: (wy - cy) * S.zoom };
-        }
-
-        function screenToWorld(sx, sy) {
-            const cx = S.camX - S.canvas.width / 2 / S.zoom;
-            const cy = S.camY - S.canvas.height / 2 / S.zoom;
-            return { x: sx / S.zoom + cx, y: sy / S.zoom + cy };
-        }
-
-        function getCanvasCoords(e) {
-            const rect = S.canvas.getBoundingClientRect();
-            return { sx: e.clientX - rect.left, sy: e.clientY - rect.top };
-        }
-
-        function getWorldFromEvent(e) {
-            const c = getCanvasCoords(e);
-            const w = screenToWorld(c.sx, c.sy);
-            return { ...c, wx: w.x, wy: w.y };
-        }
-
-        function findAt(wx, wy) {
-            const all = [...S.buildings, ...S.roads, ...S.rails];
-            for (let i = all.length - 1; i >= 0; i--) {
-                const b = all[i];
-                if (wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h) return b;
-            }
-            return null;
-        }
+        function worldToScreen(wx,wy) { const cx=S.camX-S.canvas.width/2/S.zoom, cy=S.camY-S.canvas.height/2/S.zoom;
+            return {x:(wx-cx)*S.zoom,y:(wy-cy)*S.zoom}; }
+        function screenToWorld(sx,sy) { const cx=S.camX-S.canvas.width/2/S.zoom, cy=S.camY-S.canvas.height/2/S.zoom;
+            return {x:sx/S.zoom+cx,y:sy/S.zoom+cy}; }
+        function getCanvasCoords(e) { const rect=S.canvas.getBoundingClientRect(); return {sx:e.clientX-rect.left,sy:e.clientY-rect.top}; }
+        function getWorldFromEvent(e) { const c=getCanvasCoords(e), w=screenToWorld(c.sx,c.sy); return {...c,wx:w.x,wy:w.y}; }
+        function findAt(wx,wy) { const all=[...S.buildings,...S.roads,...S.rails];
+            for(let i=all.length-1;i>=0;i--) { const b=all[i]; if(wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h) return b; } return null; }
 
         // ==================== ОТРИСОВКА ====================
+        function getDayNightAlpha() {
+            const h=S.gameHour+S.gameMinute/60;
+            if(h>=6&&h<8) return 0.3-(h-6)*0.15;
+            if(h>=8&&h<17) return 0;
+            if(h>=17&&h<19) return (h-17)*0.2;
+            if(h>=19&&h<21) return 0.4+(h-19)*0.2;
+            if(h>=21||h<5) return 0.7;
+            if(h>=5&&h<6) return 0.7-(h-5)*0.4;
+            return 0;
+        }
+
         function drawGround(ctx) {
-            const w = S.canvas.width,
-                h = S.canvas.height;
-            const grad = ctx.createRadialGradient(w / 2, h / 2, 100, w / 2, h / 2, Math.max(w, h));
-            grad.addColorStop(0, '#3d5a2e');
-            grad.addColorStop(0.6, '#2d4a1e');
-            grad.addColorStop(1, '#1a3010');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
+            const w=S.canvas.width, h=S.canvas.height;
+            const alpha=getDayNightAlpha();
+            const grad=ctx.createRadialGradient(w/2,h/2,100,w/2,h/2,Math.max(w,h));
+            const r=Math.floor(61*(1-alpha)), g=Math.floor(90*(1-alpha)), b=Math.floor(46*(1-alpha));
+            grad.addColorStop(0,`rgb(${r},${g},${b})`);
+            grad.addColorStop(0.6,`rgb(${Math.floor(r*0.7)},${Math.floor(g*0.7)},${Math.floor(b*0.7)})`);
+            grad.addColorStop(1,`rgb(${Math.floor(r*0.4)},${Math.floor(g*0.4)},${Math.floor(b*0.4)})`);
+            ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+            // Ночное затемнение
+            if(alpha>0) { ctx.fillStyle=`rgba(0,0,20,${alpha})`; ctx.fillRect(0,0,w,h); }
+            // Звёзды ночью
+            if(alpha>0.5) {
+                const seed=12345;
+                for(let i=0;i<50;i++) {
+                    const sx=((i*7919+seed)%w), sy=((i*6271+seed)%h);
+                    const twinkle=Math.sin(S.time*0.003+i)*0.5+0.5;
+                    ctx.fillStyle=`rgba(255,255,255,${twinkle*(alpha-0.5)*1.5})`;
+                    ctx.beginPath(); ctx.arc(sx,sy,1.5,0,Math.PI*2); ctx.fill();
+                }
+            }
         }
 
         function drawBorder(ctx) {
-            const p1 = worldToScreen(-S.borderSize, -S.borderSize);
-            const p2 = worldToScreen(S.borderSize, S.borderSize);
-            const bw = p2.x - p1.x,
-                bh = p2.y - p1.y;
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = Math.max(2, 3 * S.zoom);
-            ctx.setLineDash([10 * S.zoom, 6 * S.zoom]);
-            ctx.strokeRect(p1.x, p1.y, bw, bh);
-            ctx.setLineDash([]);
-            // Флаги по углам
-            const flags = ['🚩', '🚩', '🚩', '🚩'];
-            const corners = [
-                [p1.x, p1.y],
-                [p2.x, p1.y],
-                [p1.x, p2.y],
-                [p2.x, p2.y]
-            ];
-            ctx.font = `${16*S.zoom}px serif`;
-            ctx.textAlign = 'center';
-            corners.forEach(([fx, fy], i) => ctx.fillText(flags[i], fx, fy));
+            const bs=S.borderSize;
+            // Изогнутая граница
+            ctx.strokeStyle='#ffd700'; ctx.lineWidth=Math.max(2,3*S.zoom); ctx.setLineDash([10*S.zoom,6*S.zoom]);
+            ctx.beginPath();
+            const segments=32;
+            for(let i=0;i<=segments;i++) {
+                const angle=(i/segments)*Math.PI*2;
+                const wobble=Math.sin(angle*5+S.time*0.001)*15+Math.cos(angle*3)*10;
+                const r=bs+wobble;
+                const wx=Math.cos(angle)*r, wy=Math.sin(angle)*r;
+                const p=worldToScreen(wx,wy);
+                if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+            }
+            ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+            // Флаги
+            const flags=['🚩','🚩','🚩','🚩'];
+            for(let i=0;i<4;i++) {
+                const angle=i*Math.PI/2-Math.PI/4;
+                const p=worldToScreen(Math.cos(angle)*bs,Math.sin(angle)*bs);
+                ctx.font=`${16*S.zoom}px serif`; ctx.textAlign='center';
+                ctx.fillText(flags[i],p.x,p.y-10*S.zoom);
+            }
+            // Табличка с ценой расширения
+            const pTable=worldToScreen(bs+30,0);
+            ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(pTable.x-40*S.zoom,pTable.y-20*S.zoom,80*S.zoom,35*S.zoom);
+            ctx.fillStyle='#f0d060'; ctx.font=`${12*S.zoom}px sans-serif`; ctx.textAlign='center';
+            ctx.fillText('📏 Расширить',pTable.x,pTable.y-5*S.zoom);
+            ctx.fillText(`💰${S.borderExpandCost.toLocaleString()}`,pTable.x,pTable.y+15*S.zoom);
         }
 
         function drawGrid(ctx) {
-            const w = S.canvas.width,
-                h = S.canvas.height,
-                gs = S.gridSize;
-            const cx = S.camX - w / 2 / S.zoom,
-                cy = S.camY - h / 2 / S.zoom;
-            const sx = -((cx % gs) + gs) % gs,
-                sy = -((cy % gs) + gs) % gs;
-            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let x = sx; x < w / S.zoom + gs; x += gs) { ctx.moveTo(x * S.zoom, 0);
-                ctx.lineTo(x * S.zoom, h); }
-            for (let y = sy; y < h / S.zoom + gs; y += gs) { ctx.moveTo(0, y * S.zoom);
-                ctx.lineTo(w, y * S.zoom); }
+            const w=S.canvas.width, h=S.canvas.height, gs=S.gridSize;
+            const cx=S.camX-w/2/S.zoom, cy=S.camY-h/2/S.zoom;
+            const sx=-((cx%gs)+gs)%gs, sy=-((cy%gs)+gs)%gs;
+            ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1; ctx.beginPath();
+            for(let x=sx;x<w/S.zoom+gs;x+=gs) { ctx.moveTo(x*S.zoom,0); ctx.lineTo(x*S.zoom,h); }
+            for(let y=sy;y<h/S.zoom+gs;y+=gs) { ctx.moveTo(0,y*S.zoom); ctx.lineTo(w,y*S.zoom); }
             ctx.stroke();
         }
 
-        function drawRoad(ctx, r, info) {
-            const p = worldToScreen(r.x, r.y),
-                w = r.w * S.zoom,
-                h = r.h * S.zoom;
-            ctx.save();
-            const cx = p.x + w / 2,
-                cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (r.rotation) ctx.rotate(r.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
-            if (info.isRoad) {
-                ctx.fillStyle = '#3a3a3a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#888';
-                const bw = Math.max(2, 3 * S.zoom);
-                ctx.fillRect(p.x, p.y, w, bw);
-                ctx.fillRect(p.x, p.y + h - bw, w, bw);
-                ctx.fillRect(p.x, p.y, bw, h);
-                ctx.fillRect(p.x + w - bw, p.y, bw, h);
-                ctx.strokeStyle = '#ffff66';
-                ctx.lineWidth = Math.max(1, 1.5 * S.zoom);
-                ctx.setLineDash([8 * S.zoom, 12 * S.zoom]);
-                ctx.beginPath();
-                ctx.moveTo(p.x + w / 2, p.y);
-                ctx.lineTo(p.x + w / 2, p.y + h);
-                ctx.stroke();
-                ctx.setLineDash([]);
+        function drawRoad(ctx,r,info) {
+            const p=worldToScreen(r.x,r.y), w=r.w*S.zoom, h=r.h*S.zoom;
+            ctx.save(); const cx=p.x+w/2, cy=p.y+h/2;
+            ctx.translate(cx,cy); if(r.rotation) ctx.rotate(r.rotation*Math.PI/180); ctx.translate(-cx,-cy);
+            if(info.isRoad) {
+                ctx.fillStyle='#444'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#666'; const bw=Math.max(2,3*S.zoom);
+                ctx.fillRect(p.x,p.y,w,bw); ctx.fillRect(p.x,p.y+h-bw,w,bw);
+                ctx.fillRect(p.x,p.y,bw,h); ctx.fillRect(p.x+w-bw,p.y,bw,h);
+                ctx.strokeStyle='#ffff88'; ctx.lineWidth=Math.max(1,2*S.zoom);
+                ctx.setLineDash([10*S.zoom,14*S.zoom]); ctx.beginPath();
+                ctx.moveTo(p.x+w/2,p.y); ctx.lineTo(p.x+w/2,p.y+h); ctx.stroke(); ctx.setLineDash([]);
             } else {
-                ctx.fillStyle = '#8B7355';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#5c4030';
-                const sh = Math.max(3, 4 * S.zoom),
-                    sg = Math.max(5, 8 * S.zoom);
-                for (let i = 0; i < h; i += sg) ctx.fillRect(p.x + 2 * S.zoom, p.y + i, w - 4 * S.zoom, sh);
-                ctx.strokeStyle = '#c0c0c0';
-                ctx.lineWidth = Math.max(1.5, 2 * S.zoom);
-                ctx.beginPath();
-                const rx = p.x + Math.max(6, 8 * S.zoom),
-                    rx2 = p.x + w - Math.max(6, 8 * S.zoom);
-                ctx.moveTo(rx, p.y);
-                ctx.lineTo(rx, p.y + h);
-                ctx.moveTo(rx2, p.y);
-                ctx.lineTo(rx2, p.y + h);
-                ctx.stroke();
+                ctx.fillStyle='#8B7355'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#5c4030'; const sh=Math.max(3,4*S.zoom), sg=Math.max(5,8*S.zoom);
+                for(let i=0;i<h;i+=sg) ctx.fillRect(p.x+2*S.zoom,p.y+i,w-4*S.zoom,sh);
+                ctx.strokeStyle='#ccc'; ctx.lineWidth=Math.max(1.5,2.5*S.zoom); ctx.beginPath();
+                const rx=p.x+Math.max(6,8*S.zoom), rx2=p.x+w-Math.max(6,8*S.zoom);
+                ctx.moveTo(rx,p.y); ctx.lineTo(rx,p.y+h); ctx.moveTo(rx2,p.y); ctx.lineTo(rx2,p.y+h); ctx.stroke();
             }
             ctx.restore();
         }
 
-        function drawBuildingShape(ctx, b, info) {
-            const p = worldToScreen(b.x, b.y),
-                w = b.w * S.zoom,
-                h = b.h * S.zoom;
-            ctx.save();
-            const cx = p.x + w / 2,
-                cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (b.rotation) ctx.rotate(b.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
+        function drawBuildingShape(ctx,b,info) {
+            const p=worldToScreen(b.x,b.y), w=b.w*S.zoom, h=b.h*S.zoom;
+            ctx.save(); const cx=p.x+w/2, cy=p.y+h/2;
+            ctx.translate(cx,cy); if(b.rotation) ctx.rotate(b.rotation*Math.PI/180); ctx.translate(-cx,-cy);
             // Тень
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(p.x + 3 * S.zoom, p.y + 3 * S.zoom, w, h);
-            // Базовая отрисовка
-            const t = b.type;
-            ctx.fillStyle = '#8899aa';
-            ctx.fillRect(p.x, p.y, w, h);
-            // Эмодзи
-            const fs = Math.max(16, Math.min(w, h) * 0.7);
-            ctx.font = `${fs}px serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(info.emoji, p.x + w / 2, p.y + h / 2);
-            // Крыша для домов
-            if (t === 'house' || t === 'mansion') {
-                ctx.fillStyle = t === 'house' ? '#c0392b' : '#d4af37';
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + w / 2, p.y - 14 * S.zoom);
-                ctx.lineTo(p.x + w, p.y);
-                ctx.closePath();
-                ctx.fill();
-            }
-            // Окна для квартир
-            if (t === 'apartment' || t === 'office') {
-                const floors = Math.max(3, Math.floor((b.scale || 1) * (t === 'apartment' ? 6 : 10)));
-                const fh = h / floors;
-                ctx.fillStyle = 'rgba(135,206,235,0.6)';
-                for (let i = 0; i < floors; i++) {
-                    for (let j = 0; j < Math.floor(w / (10 * S.zoom)); j++) {
-                        ctx.fillRect(p.x + 4 * S.zoom + j * 10 * S.zoom, p.y + i * fh + 3 * S.zoom, 6 * S.zoom, fh - 6 * S
-                            .zoom);
+            ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(p.x+2*S.zoom,p.y+2*S.zoom,w,h);
+            const t=b.type;
+            if(t==='house') {
+                ctx.fillStyle='#e8d5b7'; ctx.fillRect(p.x,p.y,w,h-12*S.zoom);
+                ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.moveTo(p.x-3*S.zoom,p.y);
+                ctx.lineTo(p.x+w/2,p.y-14*S.zoom); ctx.lineTo(p.x+w+3*S.zoom,p.y); ctx.closePath(); ctx.fill();
+                ctx.fillStyle='#fff'; ctx.fillRect(p.x+6*S.zoom,p.y+6*S.zoom,8*S.zoom,8*S.zoom);
+                ctx.fillRect(p.x+w-14*S.zoom,p.y+6*S.zoom,8*S.zoom,8*S.zoom);
+                ctx.strokeStyle='#8B4513'; ctx.lineWidth=1; ctx.strokeRect(p.x+6*S.zoom,p.y+6*S.zoom,8*S.zoom,8*S.zoom);
+                ctx.strokeRect(p.x+w-14*S.zoom,p.y+6*S.zoom,8*S.zoom,8*S.zoom);
+                ctx.fillStyle='#8B4513'; ctx.fillRect(p.x+w/2-5*S.zoom,p.y+h-16*S.zoom,10*S.zoom,16*S.zoom);
+                ctx.fillStyle='#f0d060'; ctx.beginPath(); ctx.arc(p.x+w/2+3*S.zoom,p.y+h-8*S.zoom,1.5*S.zoom,0,Math.PI*2); ctx.fill();
+            } else if(t==='apartment') {
+                const floors=Math.max(4,Math.floor(8*(b.scale||1))), fh=h/floors;
+                ctx.fillStyle='#c8d8e8'; ctx.fillRect(p.x,p.y,w,h);
+                for(let i=0;i<floors;i++) {
+                    ctx.fillStyle=i%2===0?'#d0dce8':'#bcc8d8'; ctx.fillRect(p.x,p.y+i*fh,w,fh);
+                    ctx.fillStyle='#87ceeb'; const ww=Math.max(3,8*S.zoom), wh=Math.max(3,fh-6*S.zoom);
+                    const cols=Math.min(3,Math.floor(w/(ww+7*S.zoom)));
+                    for(let j=0;j<cols;j++) {
+                        ctx.fillRect(p.x+5*S.zoom+j*(ww+7*S.zoom),p.y+i*fh+3*S.zoom,ww,wh);
+                        ctx.strokeStyle='#fff'; ctx.lineWidth=0.5; ctx.strokeRect(p.x+5*S.zoom+j*(ww+7*S.zoom),p.y+i*fh+3*S.zoom,ww,wh);
                     }
                 }
-            }
-            // Трубы завода
-            if (t === 'factory') {
-                ctx.fillStyle = '#555';
-                const chm = Math.min(3, Math.floor((b.scale || 1) * 2));
-                for (let i = 0; i < chm; i++) ctx.fillRect(p.x + 8 * S.zoom + i * (w / chm), p.y - 16 * S.zoom, 8 * S.zoom, 28 *
-                    S.zoom);
-                // Дым
-                const so = Math.sin(S.time * 0.05 + b.x) * 3 * S.zoom;
-                for (let i = 0; i < chm; i++) {
-                    ctx.fillStyle = 'rgba(180,180,180,0.5)';
-                    ctx.beginPath();
-                    ctx.arc(p.x + 12 * S.zoom + i * (w / chm) + so, p.y - 20 * S.zoom - i * 4 * S.zoom, (6 + i * 2) * S.zoom, 0,
-                        Math.PI * 2);
-                    ctx.fill();
+                ctx.fillStyle='#555'; ctx.fillRect(p.x+w/2-6*S.zoom,p.y+h-10*S.zoom,12*S.zoom,10*S.zoom);
+            } else if(t==='mansion') {
+                ctx.fillStyle='#f5e6d3'; ctx.fillRect(p.x,p.y+8*S.zoom,w,h-8*S.zoom);
+                ctx.fillStyle='#d4af37'; ctx.fillRect(p.x+6*S.zoom,p.y,w-12*S.zoom,20*S.zoom);
+                ctx.fillStyle='#c9972e'; ctx.beginPath(); ctx.arc(p.x+w/2,p.y,12*S.zoom,Math.PI,0); ctx.fill();
+                ctx.fillStyle='#e8dcc8'; const colW=4*S.zoom;
+                ctx.fillRect(p.x+4*S.zoom,p.y+20*S.zoom,colW,h-12*S.zoom);
+                ctx.fillRect(p.x+w-4*S.zoom-colW,p.y+20*S.zoom,colW,h-12*S.zoom);
+                ctx.fillStyle='#fff'; for(let i=0;i<3;i++) {
+                    ctx.fillRect(p.x+12*S.zoom+i*14*S.zoom,p.y+28*S.zoom,8*S.zoom,10*S.zoom);
+                    ctx.strokeStyle='#8B4513'; ctx.strokeRect(p.x+12*S.zoom+i*14*S.zoom,p.y+28*S.zoom,8*S.zoom,10*S.zoom);
                 }
+            } else if(t==='factory') {
+                ctx.fillStyle='#8899aa'; ctx.fillRect(p.x,p.y+10*S.zoom,w,h-10*S.zoom);
+                ctx.fillStyle='#667788'; ctx.fillRect(p.x,p.y+10*S.zoom,w,4*S.zoom);
+                ctx.fillStyle='#555'; const chm=Math.min(3,Math.floor((b.scale||1)*2));
+                for(let i=0;i<chm;i++) ctx.fillRect(p.x+8*S.zoom+i*(w/chm),p.y-14*S.zoom,8*S.zoom,24*S.zoom);
+                const so=Math.sin(S.time*0.05+b.x)*3*S.zoom;
+                for(let i=0;i<chm;i++) {
+                    ctx.fillStyle='rgba(180,180,180,0.4)'; ctx.beginPath();
+                    ctx.arc(p.x+12*S.zoom+i*(w/chm)+so,p.y-18*S.zoom-i*3*S.zoom,(5+i*1.5)*S.zoom,0,Math.PI*2); ctx.fill();
+                }
+                ctx.fillStyle='#ffd700'; ctx.fillRect(p.x+4*S.zoom,p.y+h-8*S.zoom,w-8*S.zoom,6*S.zoom);
+            } else if(t==='office') {
+                const floors=Math.max(6,Math.floor(12*(b.scale||1))), fh=h/floors;
+                ctx.fillStyle='#9ac8e8'; ctx.fillRect(p.x,p.y,w,h);
+                for(let i=0;i<floors;i++) {
+                    ctx.fillStyle=i%2===0?'#a8d4f0':'#8ab8d8'; ctx.fillRect(p.x,p.y+i*fh,w,fh);
+                    ctx.fillStyle='#fff'; const ww=Math.max(3,7*S.zoom), wh=Math.max(2,fh-4*S.zoom);
+                    const cols=Math.min(4,Math.floor(w/(ww+4*S.zoom)));
+                    for(let j=0;j<cols;j++) ctx.fillRect(p.x+3*S.zoom+j*(ww+4*S.zoom),p.y+i*fh+2*S.zoom,ww,wh);
+                }
+                ctx.fillStyle='#333'; ctx.fillRect(p.x+w/2-8*S.zoom,p.y+h-12*S.zoom,16*S.zoom,12*S.zoom);
+                ctx.fillStyle='#fff'; ctx.font=`${8*S.zoom}px sans-serif`; ctx.textAlign='center';
+                ctx.fillText('B',p.x+w/2,p.y+h-3*S.zoom);
+            } else if(t==='shop') {
+                ctx.fillStyle='#ffe4b5'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#ff6347'; ctx.fillRect(p.x+2*S.zoom,p.y,w-4*S.zoom,8*S.zoom);
+                ctx.fillStyle='#fff'; ctx.fillRect(p.x+3*S.zoom,p.y+12*S.zoom,w-6*S.zoom,h-24*S.zoom);
+                ctx.strokeStyle='#ddd'; ctx.lineWidth=1; ctx.strokeRect(p.x+3*S.zoom,p.y+12*S.zoom,w-6*S.zoom,h-24*S.zoom);
+                ctx.fillStyle='#8B4513'; ctx.fillRect(p.x+w/2-6*S.zoom,p.y+h-10*S.zoom,12*S.zoom,10*S.zoom);
+                ctx.fillStyle='#f0d060'; ctx.beginPath(); ctx.arc(p.x+w/2+4*S.zoom,p.y+h-5*S.zoom,1.5*S.zoom,0,Math.PI*2); ctx.fill();
+            } else if(t==='park') {
+                ctx.fillStyle='#5a8a5a'; ctx.fillRect(p.x,p.y,w,h);
+                const trees=[[0.2,0.25],[0.5,0.2],[0.8,0.3],[0.3,0.6],[0.7,0.65],[0.5,0.75]];
+                trees.forEach(([tx,ty])=>{
+                    const tx2=p.x+tx*w, ty2=p.y+ty*h;
+                    ctx.fillStyle='#3d2b1f'; ctx.fillRect(tx2-1.5*S.zoom,ty2,3*S.zoom,10*S.zoom);
+                    ctx.fillStyle='#2d6e2d'; ctx.beginPath(); ctx.arc(tx2,ty2-2*S.zoom,7*S.zoom,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle='#3d8e3d'; ctx.beginPath(); ctx.arc(tx2,ty2-5*S.zoom,6*S.zoom,0,Math.PI*2); ctx.fill();
+                });
+                ctx.fillStyle='#4a90c8'; ctx.beginPath(); ctx.ellipse(p.x+w*0.5,p.y+h*0.45,12*S.zoom,7*S.zoom,0,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(p.x+w*0.5-2*S.zoom,p.y+h*0.45-1*S.zoom,3*S.zoom,0,Math.PI*2); ctx.fill();
+            } else if(t==='school') {
+                ctx.fillStyle='#d4a574'; ctx.fillRect(p.x,p.y+4*S.zoom,w,h-4*S.zoom);
+                ctx.fillStyle='#c0392b'; ctx.fillRect(p.x-2*S.zoom,p.y,w+4*S.zoom,10*S.zoom);
+                ctx.fillStyle='#87ceeb'; for(let i=0;i<4;i++) {
+                    ctx.fillRect(p.x+5*S.zoom+i*11*S.zoom,p.y+16*S.zoom,7*S.zoom,8*S.zoom);
+                    ctx.strokeStyle='#fff'; ctx.strokeRect(p.x+5*S.zoom+i*11*S.zoom,p.y+16*S.zoom,7*S.zoom,8*S.zoom);
+                }
+                ctx.fillStyle='#8B4513'; ctx.fillRect(p.x+w/2-5*S.zoom,p.y+h-12*S.zoom,10*S.zoom,12*S.zoom);
+            } else if(t==='hospital') {
+                ctx.fillStyle='#f8f8f8'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#e74c3c'; ctx.fillRect(p.x+w/2-8*S.zoom,p.y,16*S.zoom,12*S.zoom);
+                ctx.fillStyle='#fff'; ctx.fillRect(p.x+w/2-2*S.zoom,p.y+2*S.zoom,4*S.zoom,8*S.zoom);
+                ctx.fillRect(p.x+w/2-6*S.zoom,p.y+5*S.zoom,12*S.zoom,3*S.zoom);
+                ctx.fillStyle='#87ceeb'; for(let i=0;i<3;i++) for(let j=0;j<3;j++)
+                    ctx.fillRect(p.x+5*S.zoom+j*16*S.zoom,p.y+16*S.zoom+i*11*S.zoom,9*S.zoom,7*S.zoom);
+            } else if(t==='stadium') {
+                ctx.fillStyle='#d0d0d0'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#3a8a3a'; ctx.beginPath(); ctx.ellipse(p.x+w/2,p.y+h/2,w/2-4*S.zoom,h/2-4*S.zoom,0,0,Math.PI*2); ctx.fill();
+                ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke();
+                ctx.strokeStyle='#555'; ctx.lineWidth=2*S.zoom; ctx.beginPath();
+                ctx.arc(p.x+w/2,p.y+h/2,8*S.zoom,0,Math.PI*2); ctx.stroke();
+            } else if(t==='carshop') {
+                ctx.fillStyle='#e0e0e0'; ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#ff4444'; ctx.fillRect(p.x+2*S.zoom,p.y,w-4*S.zoom,6*S.zoom);
+                ctx.fillStyle='#fff'; ctx.fillRect(p.x+4*S.zoom,p.y+10*S.zoom,w-8*S.zoom,h-22*S.zoom);
+                ctx.fillStyle='#333'; ctx.font=`${14*S.zoom}px serif`; ctx.textAlign='center';
+                ctx.fillText('🚗',p.x+w*0.3,p.y+h*0.6); ctx.fillText('🚙',p.x+w*0.7,p.y+h*0.6);
             }
-            // Подсветка
-            if (S.hovered === b) {
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 3 * S.zoom;
-                ctx.strokeRect(p.x - 2 * S.zoom, p.y - 2 * S.zoom, w + 4 * S.zoom, h + 4 * S.zoom);
-            }
+            // НЕТ жёлтых кругов подсветки - убраны полностью
             ctx.restore();
         }
 
         function drawCars(ctx) {
-            S.cars.forEach(car => {
-                const p = worldToScreen(car.x, car.y);
-                if (p.x < -30 || p.x > S.canvas.width + 30 || p.y < -30 || p.y > S.canvas.height + 30) return;
-                const sz = 8 * S.zoom;
-                ctx.fillStyle = car.color;
-                ctx.fillRect(p.x - sz, p.y - sz / 2, sz * 2, sz);
-                ctx.fillStyle = '#333';
-                ctx.fillRect(p.x - sz + 2 * S.zoom, p.y - sz / 2 - 2 * S.zoom, sz * 0.6, sz + 4 * S.zoom);
-                // Колёса
-                ctx.fillStyle = '#111';
-                [
-                    [-sz * 0.6, -sz / 2],
-                    [sz * 0.6, -sz / 2],
-                    [-sz * 0.6, sz / 2],
-                    [sz * 0.6, sz / 2]
-                ].forEach(([dx, dy]) => {
-                    ctx.beginPath();
-                    ctx.arc(p.x + dx, p.y + dy, 3 * S.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                // Фары
-                ctx.fillStyle = '#ffff88';
-                ctx.beginPath();
-                ctx.arc(p.x + sz, p.y, 2 * S.zoom, 0, Math.PI * 2);
-                ctx.fill();
+            S.cars.forEach(car=>{
+                const p=worldToScreen(car.x,car.y);
+                if(p.x<-30||p.x>S.canvas.width+30||p.y<-30||p.y>S.canvas.height+30) return;
+                const sz=7*S.zoom;
+                ctx.fillStyle=car.color; ctx.fillRect(p.x-sz,p.y-sz/2,sz*2,sz);
+                ctx.fillStyle='#333'; ctx.fillRect(p.x-sz+1.5*S.zoom,p.y-sz/2-1.5*S.zoom,sz*0.5,sz+3*S.zoom);
+                ctx.fillStyle='#111';
+                [[-sz*0.6,-sz/2],[sz*0.6,-sz/2],[-sz*0.6,sz/2],[sz*0.6,sz/2]].forEach(([dx,dy])=>{
+                    ctx.beginPath(); ctx.arc(p.x+dx,p.y+dy,2.5*S.zoom,0,Math.PI*2); ctx.fill(); });
+                ctx.fillStyle='#ffff88'; ctx.beginPath(); ctx.arc(p.x+sz,p.y,1.5*S.zoom,0,Math.PI*2); ctx.fill();
             });
         }
 
         function drawPeople(ctx) {
-            S.people.forEach(p => {
-                if (p.hasCar && p.carRef) return; // Не рисуем если в машине
-                const wp = worldToScreen(p.x, p.y);
-                if (wp.x < -30 || wp.x > S.canvas.width + 30 || wp.y < -30 || wp.y > S.canvas.height + 30) return;
-                const sz = p.size * S.zoom;
-                // Тень
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(wp.x, wp.y + sz * 0.8, sz * 0.8, sz * 0.3, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Голова
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y - sz * 0.5, sz * 0.6, 0, Math.PI * 2);
-                ctx.fill();
-                // Тело
-                ctx.fillStyle = `hsl(${(parseInt(p.color.match(/\d+/)?.[0]||0)+30)%360},50%,55%)`;
-                ctx.fillRect(wp.x - sz * 0.4, wp.y - sz * 0.2, sz * 0.8, sz * 0.9);
-                // Глаза
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#000';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.15, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.25, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.fill();
+            S.people.forEach(p=>{
+                if(p.hasCar&&p.carRef) return;
+                const wp=worldToScreen(p.x,p.y);
+                if(wp.x<-20||wp.x>S.canvas.width+20||wp.y<-20||wp.y>S.canvas.height+20) return;
+                const sz=p.size*S.zoom;
+                ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(wp.x,wp.y+sz*0.8,sz*0.8,sz*0.3,0,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(wp.x,wp.y-sz*0.5,sz*0.6,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle=`hsl(${(parseInt(p.color.match(/\d+/)?.[0]||0)+30)%360},50%,55%)`;
+                ctx.fillRect(wp.x-sz*0.4,wp.y-sz*0.2,sz*0.8,sz*0.9);
+                ctx.fillStyle='#fff'; ctx.beginPath();
+                ctx.arc(wp.x-sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2); ctx.arc(wp.x+sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle='#000'; ctx.beginPath();
+                ctx.arc(wp.x-sz*0.15,wp.y-sz*0.6,sz*0.08,0,Math.PI*2); ctx.arc(wp.x+sz*0.25,wp.y-sz*0.6,sz*0.08,0,Math.PI*2); ctx.fill();
+                // Индикатор действия
+                if(p.state==='inside'&&p.target) {
+                    const b=p.target, bwp=worldToScreen(b.x+b.w/2,b.y-5);
+                    ctx.font=`${10*S.zoom}px serif`; ctx.textAlign='center';
+                    ctx.fillText('💭',bwp.x,bwp.y-8*S.zoom);
+                }
             });
         }
 
+        function drawWeather(ctx) {
+            const alpha=getDayNightAlpha();
+            if(S.weather==='rainy'||S.weather==='stormy') {
+                S.raindrops.forEach(d=>{
+                    const p=worldToScreen(d.x,d.y);
+                    ctx.strokeStyle=`rgba(100,150,255,${0.6-alpha*0.3})`; ctx.lineWidth=1;
+                    ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x-d.vx*2,p.y+8*S.zoom); ctx.stroke();
+                });
+            }
+            if(S.weather==='snowy') {
+                S.snowflakes.forEach(sf=>{
+                    const p=worldToScreen(sf.x,sf.y);
+                    ctx.fillStyle=`rgba(255,255,255,${0.8-alpha*0.2})`; ctx.beginPath();
+                    ctx.arc(p.x,p.y,sf.size*S.zoom,0,Math.PI*2); ctx.fill();
+                });
+            }
+        }
+
         function drawParticles(ctx) {
-            S.particles = S.particles.filter(p => p.life > 0);
-            S.particles.forEach(p => {
-                const wp = worldToScreen(p.x, p.y);
-                ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.life})`;
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y, p.size * S.zoom, 0, Math.PI * 2);
-                ctx.fill();
+            S.particles=S.particles.filter(p=>p.life>0);
+            S.particles.forEach(p=>{
+                const wp=worldToScreen(p.x,p.y);
+                ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${p.life})`; ctx.beginPath();
+                ctx.arc(wp.x,wp.y,p.size*S.zoom,0,Math.PI*2); ctx.fill();
             });
         }
 
         function gameLoop(ts) {
-            S.time = ts;
-            const ctx = S.ctx,
-                cv = S.canvas;
-            if (!cv || !ctx) { requestAnimationFrame(gameLoop); return; }
-            ctx.clearRect(0, 0, cv.width, cv.height);
-            drawGround(ctx);
-            drawGrid(ctx);
-            drawBorder(ctx);
-            S.roads.forEach(r => drawRoad(ctx, r, BT.road));
-            S.rails.forEach(r => drawRoad(ctx, r, BT.rail));
-            S.buildings.forEach(b => { const info = BT[b.type]; if (info) drawBuildingShape(ctx, b, info); });
-            updateNPCs();
-            drawPeople(ctx);
-            drawCars(ctx);
-            drawParticles(ctx);
-            // Призрак
-            if (S.selectedType && !S.dragging && !S.deleteMode && !S.selectMode) {
-                const info = BT[S.selectedType];
-                const size = getBuildSize(S.selectedType, S.buildScale || 1);
-                const sw = screenToWorld(S.mx, S.my);
-                const sx2 = sw.x - size.w / 2,
-                    sy2 = sw.y - size.h / 2;
-                const pp = worldToScreen(sx2, sy2);
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.fillRect(pp.x, pp.y, size.w * S.zoom, size.h * S.zoom);
-                ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                ctx.setLineDash([5 * S.zoom, 5 * S.zoom]);
-                ctx.lineWidth = 2 * S.zoom;
-                ctx.strokeRect(pp.x, pp.y, size.w * S.zoom, size.h * S.zoom);
-                ctx.setLineDash([]);
-                ctx.save();
-                const cx2 = pp.x + size.w * S.zoom / 2,
-                    cy2 = pp.y + size.h * S.zoom / 2;
-                ctx.translate(cx2, cy2);
-                if (S.buildRotation) ctx.rotate(S.buildRotation * Math.PI / 180);
-                ctx.font = `${20*S.zoom}px serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(info.emoji, 0, 0);
-                ctx.restore();
+            S.time=ts; const ctx=S.ctx, cv=S.canvas;
+            if(!cv||!ctx) { requestAnimationFrame(gameLoop); return; }
+            ctx.clearRect(0,0,cv.width,cv.height);
+            // Обновление времени
+            S.gameMinute+=0.05;
+            if(S.gameMinute>=60) { S.gameMinute=0; S.gameHour++; if(S.gameHour>=24) S.gameHour=0; }
+            // Обновление погоды
+            S.weatherTimer++;
+            if(S.weatherTimer>=S.weatherDuration) {
+                S.weatherTimer=0; S.weatherDuration=500+Math.random()*1500;
+                const weathers=['sunny','sunny','cloudy','cloudy','rainy','rainy','stormy','snowy'];
+                S.weather=weathers[Math.floor(Math.random()*weathers.length)];
             }
-            // Доход
-            S.incomeTimer += 16;
-            if (S.incomeTimer >= 3000) {
-                S.incomeTimer = 0;
-                let total = 0;
-                S.buildings.forEach(b => { total += Math.floor((BT[b.type]?.income || 0) * (b.scale || 1)); });
-                S.roads.forEach(() => { total += 5; });
-                S.rails.forEach(() => { total += 20; });
-                // Машины приносят доход
-                S.cars.forEach(() => { total += 10; });
-                S.money += total;
-                if (S.buildings.length > 0) {
-                    S.happiness += (Math.random() - 0.47) * 0.4;
-                    S.happiness = Math.max(0, Math.min(100, S.happiness));
-                }
-                // Спавним новых жителей если есть жильё
-                const totalCapacity = S.buildings.reduce((sum, b) => sum + Math.floor((BT[b.type]?.capacity || 0) * (b.scale ||
-                    1)), 0);
-                if (S.population < totalCapacity && S.happiness > 40 && S.people.length < 80) {
-                    S.people.push({
-                        x: (Math.random() - 0.5) * S.borderSize,
-                        y: (Math.random() - 0.5) * S.borderSize,
-                        vx: (Math.random() - 0.5) * 1.2,
-                        vy: (Math.random() - 0.5) * 1.2,
-                        color: `hsl(${Math.random()*360},40%,65%)`,
-                        size: 4 + Math.random() * 3,
-                        target: null,
-                        state: 'walking',
-                        stateTimer: Math.random() * 200,
-                        hasCar: false,
-                        carRef: null,
-                    });
+            if(S.weather==='rainy'||S.weather==='stormy') {
+                if(S.raindrops.length<60) S.raindrops.push({x:(Math.random()-0.5)*S.borderSize*2,y:(Math.random()-0.5)*S.borderSize*2,vx:2,vy:8});
+                S.raindrops.forEach(d=>{ d.x+=d.vx; d.y+=d.vy; if(d.y>S.borderSize) d.y=-S.borderSize; });
+            } else S.raindrops=[];
+            if(S.weather==='snowy') {
+                if(S.snowflakes.length<40) S.snowflakes.push({x:(Math.random()-0.5)*S.borderSize*2,y:(Math.random()-0.5)*S.borderSize*2,vx:(Math.random()-0.5)*0.5,vy:1+Math.random()*2,size:1+Math.random()*3});
+                S.snowflakes.forEach(sf=>{ sf.x+=sf.vx; sf.y+=sf.vy; if(sf.y>S.borderSize) sf.y=-S.borderSize; });
+            } else S.snowflakes=[];
+
+            drawGround(ctx); drawGrid(ctx); drawBorder(ctx);
+            S.roads.forEach(r=>drawRoad(ctx,r,BT.road));
+            S.rails.forEach(r=>drawRoad(ctx,r,BT.rail));
+            S.buildings.forEach(b=>{ const info=BT[b.type]; if(info) drawBuildingShape(ctx,b,info); });
+            updateNPCs(); drawPeople(ctx); drawCars(ctx); drawWeather(ctx); drawParticles(ctx);
+
+            if(S.selectedType&&!S.dragging&&!S.deleteMode&&!S.selectMode) {
+                const info=BT[S.selectedType], size=getBuildSize(S.selectedType,S.buildScale||1);
+                const sw=screenToWorld(S.mx,S.my), sx2=sw.x-size.w/2, sy2=sw.y-size.h/2, pp=worldToScreen(sx2,sy2);
+                ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(pp.x,pp.y,size.w*S.zoom,size.h*S.zoom);
+                ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.setLineDash([5*S.zoom,5*S.zoom]); ctx.lineWidth=2*S.zoom;
+                ctx.strokeRect(pp.x,pp.y,size.w*S.zoom,size.h*S.zoom); ctx.setLineDash([]);
+                ctx.save(); const cx2=pp.x+size.w*S.zoom/2, cy2=pp.y+size.h*S.zoom/2;
+                ctx.translate(cx2,cy2); if(S.buildRotation) ctx.rotate(S.buildRotation*Math.PI/180);
+                ctx.font=`${20*S.zoom}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(info.emoji,0,0); ctx.restore();
+            }
+
+            S.incomeTimer+=16;
+            if(S.incomeTimer>=3000) {
+                S.incomeTimer=0; let total=0;
+                S.buildings.forEach(b=>{ total+=Math.floor((BT[b.type]?.income||0)*(b.scale||1)); });
+                S.roads.forEach(()=>{ total+=5; }); S.rails.forEach(()=>{ total+=20; });
+                S.cars.forEach(()=>{ total+=10; });
+                S.money+=total;
+                if(S.buildings.length>0) { S.happiness+=(Math.random()-0.47)*0.4;
+                    S.happiness=Math.max(0,Math.min(100,S.happiness)); }
+                const totalCapacity=S.buildings.reduce((sum,b)=>sum+Math.floor((BT[b.type]?.capacity||0)*(b.scale||1)),0);
+                if(S.population<totalCapacity&&S.happiness>40&&S.people.length<80) {
+                    S.people.push({x:(Math.random()-0.5)*S.borderSize,y:(Math.random()-0.5)*S.borderSize,vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2,color:`hsl(${Math.random()*360},40%,65%)`,size:4+Math.random()*3,target:null,state:'walking',stateTimer:Math.random()*200,hasCar:false,carRef:null,shoppingTimer:0,workTimer:0});
                     S.population++;
                 }
                 updateUI();
@@ -1377,300 +1191,142 @@
         }
 
         function updateNPCs() {
-            const allB = [...S.buildings, ...S.roads, ...S.rails];
-            S.people.forEach(p => {
-                if (p.hasCar && p.carRef) {
-                    // Обновляем позицию человека по машине
-                    p.x = p.carRef.x;
-                    p.y = p.carRef.y;
-                    return;
-                }
+            S.people.forEach(p=>{
+                if(p.hasCar&&p.carRef) { p.x=p.carRef.x; p.y=p.carRef.y; return; }
                 p.stateTimer--;
-                if (p.stateTimer <= 0) {
-                    p.stateTimer = 100 + Math.random() * 300;
-                    // Ищем ближайшее здание чтобы пойти туда
-                    const targets = S.buildings.filter(b => BT[b.type] && !BT[b.type].isRoad && !BT[b.type].isRail);
-                    if (targets.length > 0 && Math.random() < 0.6) {
-                        p.target = targets[Math.floor(Math.random() * targets.length)];
-                        p.state = 'visiting';
-                    } else {
-                        p.target = null;
-                        p.state = 'walking';
-                        p.vx = (Math.random() - 0.5) * 1.5;
-                        p.vy = (Math.random() - 0.5) * 1.5;
-                    }
+                if(p.stateTimer<=0) {
+                    p.stateTimer=80+Math.random()*300;
+                    const targets=S.buildings.filter(b=>BT[b.type]&&!BT[b.type].isRoad&&!BT[b.type].isRail);
+                    if(targets.length>0&&Math.random()<0.7) {
+                        p.target=targets[Math.floor(Math.random()*targets.length)];
+                        p.state='visiting';
+                    } else { p.target=null; p.state='walking'; p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5; }
                 }
-                if (p.state === 'visiting' && p.target) {
-                    const dx = (p.target.x + p.target.w / 2) - p.x;
-                    const dy = (p.target.y + p.target.h / 2) - p.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 15) {
-                        p.state = 'inside';
-                        p.stateTimer = 80 + Math.random() * 200;
-                    } else {
-                        p.vx = dx / dist * 1.5;
-                        p.vy = dy / dist * 1.5;
-                    }
-                } else if (p.state === 'inside') {
-                    p.vx = 0;
-                    p.vy = 0;
-                }
-                p.x += p.vx;
-                p.y += p.vy;
-                // Не выходим за границу
-                if (Math.abs(p.x) > S.borderSize) p.vx *= -1;
-                if (Math.abs(p.y) > S.borderSize) p.vy *= -1;
+                if(p.state==='visiting'&&p.target) {
+                    const dx=(p.target.x+p.target.w/2)-p.x, dy=(p.target.y+p.target.h/2)-p.y;
+                    const dist=Math.sqrt(dx*dx+dy*dy);
+                    if(dist<12) { p.state='inside'; p.stateTimer=100+Math.random()*300; }
+                    else { const sp=1.5; p.vx=dx/dist*sp; p.vy=dy/dist*sp; }
+                } else if(p.state==='inside') { p.vx=0; p.vy=0; }
+                p.x+=p.vx; p.y+=p.vy;
+                if(Math.abs(p.x)>S.borderSize) p.vx*=-1;
+                if(Math.abs(p.y)>S.borderSize) p.vy*=-1;
             });
-            // Обновляем машины
-            S.cars.forEach(car => {
-                if (car.parked) return;
-                car.x += car.vx;
-                car.y += car.vy;
-                if (Math.abs(car.x) > S.borderSize || Math.abs(car.y) > S.borderSize || Math.random() < 0.01) {
-                    car.vx *= -1;
-                    car.vy = (Math.random() - 0.5) * 2;
-                }
-                // Машины едут по дорогам
-                const onRoad = S.roads.some(r => car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r
-                    .h);
-                if (!onRoad && Math.random() < 0.05) {
-                    car.vx = (Math.random() - 0.5) * 3;
-                    car.vy = (Math.random() - 0.5) * 3;
-                }
+            S.cars.forEach(car=>{
+                if(car.parked) return;
+                car.x+=car.vx; car.y+=car.vy;
+                if(Math.abs(car.x)>S.borderSize||Math.abs(car.y)>S.borderSize||Math.random()<0.01) { car.vx*=-1;
+                    car.vy=(Math.random()-0.5)*2; }
+                const onRoad=S.roads.some(r=>car.x>=r.x&&car.x<=r.x+r.w&&car.y>=r.y&&car.y<=r.y+r.h);
+                if(!onRoad&&Math.random()<0.05) { car.vx=(Math.random()-0.5)*3; car.vy=(Math.random()-0.5)*3; }
             });
-            // Спавним машины если есть автосалон и дороги
-            if (S.buildings.some(b => b.type === 'carshop') && S.roads.length > 0 && S.cars.length < 10 && Math.random() <
-                0.005) {
-                const shop = S.buildings.find(b => b.type === 'carshop');
-                if (shop) {
-                    S.cars.push({
-                        x: shop.x + shop.w / 2,
-                        y: shop.y + shop.h / 2,
-                        vx: (Math.random() - 0.5) * 3,
-                        vy: (Math.random() - 0.5) * 3,
-                        color: `hsl(${Math.random()*360},70%,55%)`,
-                        parked: false,
-                        homeRef: shop,
-                    });
-                    // Назначаем машину случайному человеку
-                    const person = S.people.find(p => !p.hasCar);
-                    if (person) {
-                        person.hasCar = true;
-                        person.carRef = S.cars[S.cars.length - 1];
-                    }
+            if(S.buildings.some(b=>b.type==='carshop')&&S.roads.length>0&&S.cars.length<12&&Math.random()<0.005) {
+                const shop=S.buildings.find(b=>b.type==='carshop');
+                if(shop) {
+                    S.cars.push({x:shop.x+shop.w/2,y:shop.y+shop.h/2,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,color:`hsl(${Math.random()*360},70%,55%)`,parked:false,homeRef:shop});
+                    const person=S.people.find(p=>!p.hasCar);
+                    if(person) { person.hasCar=true; person.carRef=S.cars[S.cars.length-1]; }
                 }
             }
         }
 
-        function spawnParticles(wx, wy, colorHex) {
-            const hex = colorHex || '#f0d060';
-            const r = parseInt(hex.slice(1, 3), 16),
-                g = parseInt(hex.slice(3, 5), 16),
-                b = parseInt(hex.slice(5, 7), 16);
-            for (let i = 0; i < 25; i++) S.particles.push({ x: wx, y: wy, vx: (Math.random() - 0.5) * 5, vy: (Math.random() -
-                    0.5) * 5 - 4, life: 1, size: Math.random() * 5 + 2, r, g, b });
+        function spawnParticles(wx,wy,colorHex) {
+            const hex=colorHex||'#f0d060', r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+            for(let i=0;i<25;i++) S.particles.push({x:wx,y:wy,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5-4,life:1,size:Math.random()*5+2,r,g,b});
         }
 
         // ==================== СОБЫТИЯ ====================
-        document.addEventListener('mousemove', e => {
-            if (!S.canvas || !S.countryName) return;
-            const c = getCanvasCoords(e);
-            S.mx = c.sx;
-            S.my = c.sy;
-            if (S.dragging) {
-                S.camX -= (e.clientX - S.dragSX) / S.zoom;
-                S.camY -= (e.clientY - S.dragSY) / S.zoom;
-                S.dragSX = e.clientX;
-                S.dragSY = e.clientY;
-                S.dragDist += Math.abs(e.clientX - S.dragSX) + Math.abs(e.clientY - S.dragSY);
-            }
-            const w = screenToWorld(c.sx, c.sy);
-            S.hovered = findAt(w.x, w.y);
-            updateInfoPopup(c.sx, c.sy);
+        document.addEventListener('mousemove', e=>{
+            if(!S.canvas||!S.countryName) return;
+            const c=getCanvasCoords(e); S.mx=c.sx; S.my=c.sy;
+            if(S.dragging) { S.camX-=(e.clientX-S.dragSX)/S.zoom; S.camY-=(e.clientY-S.dragSY)/S.zoom;
+                S.dragSX=e.clientX; S.dragSY=e.clientY; S.dragDist+=Math.abs(e.clientX-S.dragSX)+Math.abs(e.clientY-S.dragSY); }
+            const w=screenToWorld(c.sx,c.sy); S.hovered=findAt(w.x,w.y);
+            updateInfoPopup(c.sx,c.sy);
         });
-
-        document.addEventListener('mousedown', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal'))
-        return;
-            if (e.button === 0) {
-                const w = getWorldFromEvent(e);
-                S.mx = w.sx;
-                S.my = w.sy;
-                if (S.deleteMode) { if (deleteAt(w.wx, w.wy)) return; }
-                if (S.selectedType && !S.selectMode && !S.deleteMode) { if (buildAt(w.wx, w.wy)) return; }
-                S.dragging = true;
-                S.dragSX = e.clientX;
-                S.dragSY = e.clientY;
-                S.dragDist = 0;
-                updateUI();
-            }
+        document.addEventListener('mousedown', e=>{
+            if(!S.canvas||!S.countryName) return;
+            if(e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
+            if(e.button===0) { const w=getWorldFromEvent(e); S.mx=w.sx; S.my=w.sy;
+                if(S.deleteMode) { if(deleteAt(w.wx,w.wy)) return; }
+                if(S.selectedType&&!S.selectMode&&!S.deleteMode) { if(buildAt(w.wx,w.wy)) return; }
+                S.dragging=true; S.dragSX=e.clientX; S.dragSY=e.clientY; S.dragDist=0; updateUI(); }
         });
-
-        document.addEventListener('mouseup', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (S.dragging && S.dragDist < 3) {
-                const w = getWorldFromEvent(e);
-                if (S.deleteMode) deleteAt(w.wx, w.wy);
-                else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy);
-            }
-            S.dragging = false;
-            updateUI();
+        document.addEventListener('mouseup', e=>{
+            if(!S.canvas||!S.countryName) return;
+            if(S.dragging&&S.dragDist<3) { const w=getWorldFromEvent(e);
+                if(S.deleteMode) deleteAt(w.wx,w.wy); else if(S.selectedType&&!S.selectMode) buildAt(w.wx,w.wy); }
+            S.dragging=false; updateUI();
         });
-
-        document.addEventListener('contextmenu', e => { if (e.target.closest('#game-canvas')) e.preventDefault(); });
-        document.addEventListener('wheel', e => {
-            if (!S.canvas || !S.countryName || e.target.closest('#build-modal')) return;
-            e.preventDefault();
-            const rect = S.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left,
-                my = e.clientY - rect.top;
-            const w1 = screenToWorld(mx, my);
-            S.zoom = Math.max(0.25, Math.min(3, S.zoom * (e.deltaY < 0 ? 1.07 : 1 / 1.07)));
-            S.gridSize = Math.round(48 * S.zoom);
-            const w2 = screenToWorld(mx, my);
-            S.camX += w1.x - w2.x;
-            S.camY += w1.y - w2.y;
-        }, { passive: false });
-
-        // Тач-события
-        document.addEventListener('touchstart', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.target.closest('#bottom-panel') || e.target.closest('#top-bar') || e.target.closest('#build-modal'))
-        return;
-            if (e.touches.length === 2) {
-                S.touchesDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[
-                    1].clientY);
-                S.lastPinchZoom = S.zoom;
-                return;
-            }
-            const t = e.touches[0],
-                rect = S.canvas.getBoundingClientRect();
-            S.mx = t.clientX - rect.left;
-            S.my = t.clientY - rect.top;
-            S.dragSX = t.clientX;
-            S.dragSY = t.clientY;
-            S.dragDist = 0;
-            S.dragging = true;
-            S.touchStartTime = Date.now();
-            updateUI();
-        }, { passive: false });
-
-        document.addEventListener('touchmove', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (e.touches.length === 2) {
-                e.preventDefault();
-                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1]
-                    .clientY);
-                S.zoom = Math.max(0.25, Math.min(3, S.lastPinchZoom * (dist / S.touchesDist)));
-                S.gridSize = Math.round(48 * S.zoom);
-            } else if (S.dragging) {
-                S.camX -= (e.touches[0].clientX - S.dragSX) / S.zoom;
-                S.camY -= (e.touches[0].clientY - S.dragSY) / S.zoom;
-                S.dragSX = e.touches[0].clientX;
-                S.dragSY = e.touches[0].clientY;
-                S.dragDist += Math.abs(e.touches[0].clientX - S.dragSX) + Math.abs(e.touches[0].clientY - S.dragSY);
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', e => {
-            if (!S.canvas || !S.countryName) return;
-            if (S.dragDist < 8 && Date.now() - S.touchStartTime < 300 && e.changedTouches.length === 1) {
-                const w = getWorldFromEvent(e.changedTouches[0]);
-                if (S.deleteMode) deleteAt(w.wx, w.wy);
-                else if (S.selectedType && !S.selectMode) buildAt(w.wx, w.wy);
-            }
-            S.dragging = false;
-            updateUI();
+        document.addEventListener('contextmenu', e=>{ if(e.target.closest('#game-canvas')) e.preventDefault(); });
+        document.addEventListener('wheel', e=>{
+            if(!S.canvas||!S.countryName||e.target.closest('#build-modal')) return;
+            e.preventDefault(); const rect=S.canvas.getBoundingClientRect(), mx=e.clientX-rect.left, my=e.clientY-rect.top;
+            const w1=screenToWorld(mx,my); S.zoom=Math.max(0.25,Math.min(3,S.zoom*(e.deltaY<0?1.07:1/1.07)));
+            S.gridSize=Math.round(48*S.zoom); const w2=screenToWorld(mx,my); S.camX+=w1.x-w2.x; S.camY+=w1.y-w2.y;
+        },{passive:false});
+        document.addEventListener('touchstart', e=>{
+            if(!S.canvas||!S.countryName) return;
+            if(e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
+            if(e.touches.length===2) { S.touchesDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+                S.lastPinchZoom=S.zoom; return; }
+            const t=e.touches[0], rect=S.canvas.getBoundingClientRect(); S.mx=t.clientX-rect.left; S.my=t.clientY-rect.top;
+            S.dragSX=t.clientX; S.dragSY=t.clientY; S.dragDist=0; S.dragging=true; S.touchStartTime=Date.now(); updateUI();
+        },{passive:false});
+        document.addEventListener('touchmove', e=>{
+            if(!S.canvas||!S.countryName) return;
+            if(e.touches.length===2) { e.preventDefault(); const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+                S.zoom=Math.max(0.25,Math.min(3,S.lastPinchZoom*(dist/S.touchesDist))); S.gridSize=Math.round(48*S.zoom); }
+            else if(S.dragging) { S.camX-=(e.touches[0].clientX-S.dragSX)/S.zoom; S.camY-=(e.touches[0].clientY-S.dragSY)/S.zoom;
+                S.dragSX=e.touches[0].clientX; S.dragSY=e.touches[0].clientY; S.dragDist+=Math.abs(e.touches[0].clientX-S.dragSX)+Math.abs(e.touches[0].clientY-S.dragSY); }
+        },{passive:false});
+        document.addEventListener('touchend', e=>{
+            if(!S.canvas||!S.countryName) return;
+            if(S.dragDist<8&&Date.now()-S.touchStartTime<300&&e.changedTouches.length===1) { const w=getWorldFromEvent(e.changedTouches[0]);
+                if(S.deleteMode) deleteAt(w.wx,w.wy); else if(S.selectedType&&!S.selectMode) buildAt(w.wx,w.wy); }
+            S.dragging=false; updateUI();
         });
-
-        document.addEventListener('keydown', e => {
-            if (!S.countryName) return;
-            if (e.key === 'Escape') { S.selectedType = null;
-                S.deleteMode = false;
-                S.selectMode = false;
-                closeBuildModal();
-                updateUI(); }
-            if (e.key === 'Delete') { e.preventDefault();
-                toggleDeleteMode(); }
-            if (e.key === 'b' || e.key === 'B') openBuildModal();
-            if (e.key === 'i' || e.key === 'I') toggleSelectMode();
-            if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') { e.preventDefault();
-                rotateBuilding(); }
+        document.addEventListener('keydown', e=>{
+            if(!S.countryName) return;
+            if(e.key==='Escape') { S.selectedType=null; S.deleteMode=false; S.selectMode=false; closeBuildModal(); updateUI(); }
+            if(e.key==='Delete') { e.preventDefault(); toggleDeleteMode(); }
+            if(e.key==='b'||e.key==='B') openBuildModal();
+            if(e.key==='i'||e.key==='I') toggleSelectMode();
+            if(e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') { e.preventDefault(); rotateBuilding(); }
         });
+        document.getElementById('build-modal').addEventListener('click',function(e){ if(e.target===this) closeBuildModal(); });
+        document.getElementById('size-selector').addEventListener('click',function(e){ if(e.target.classList.contains('size-btn')) { S.buildScale=parseFloat(e.target.dataset.scale); buildModalGrid(); } });
 
-        document.getElementById('build-modal').addEventListener('click', function(e) { if (e.target === this)
-            closeBuildModal(); });
-        document.getElementById('size-selector').addEventListener('click', function(e) {
-            if (e.target.classList.contains('size-btn')) {
-                S.buildScale = parseFloat(e.target.dataset.scale);
-                buildModalGrid();
-            }
-        });
-
-        function updateInfoPopup(sx, sy) {
-            const popup = document.getElementById('info-popup');
-            if (S.hovered && !S.dragging && (S.selectMode || (!S.selectedType && !S.deleteMode))) {
-                const b = S.hovered,
-                    info = BT[b.type],
-                    scale = b.scale || 1;
-                const cost = getBuildCost(b.type, scale),
-                    income = Math.floor((info?.income || 0) * scale);
-                popup.style.display = 'block';
-                popup.style.left = Math.min(sx + 22, window.innerWidth - 280) + 'px';
-                popup.style.top = Math.max(10, sy - 30) + 'px';
-                popup.innerHTML = `
-                    <span class="pop-title">${info?.emoji||'?'} ${info?.name||'Объект'}</span>
-                    📏 ${b.w}x${b.h} (x${scale}) 🔄${b.rotation||0}°<br>
-                    💰 Цена: ${cost.toLocaleString()}<br>
+        function updateInfoPopup(sx,sy) {
+            const popup=document.getElementById('info-popup');
+            if(S.hovered&&!S.dragging&&(S.selectMode||(!S.selectedType&&!S.deleteMode))) {
+                const b=S.hovered, info=BT[b.type], scale=b.scale||1;
+                const cost=getBuildCost(b.type,scale), income=Math.floor((info?.income||0)*scale);
+                popup.style.display='block'; popup.style.left=Math.min(sx+22,window.innerWidth-280)+'px';
+                popup.style.top=Math.max(10,sy-30)+'px';
+                popup.innerHTML=`<span class="pop-title">${info?.emoji||'?'} ${info?.name||'Объект'}</span>
+                    📏 ${b.w}x${b.h} (x${scale}) 🔄${b.rotation||0}°<br>💰 Цена: ${cost.toLocaleString()}<br>
                     <span class="pop-income">📈 Доход: 💰${income.toLocaleString()}/мес</span><br>
                     ${!info?.isRoad&&!info?.isRail?`<span class="pop-population">👥 Вместимость: ${Math.floor((info?.capacity||0)*scale)}</span><br>`:''}
-                    <span class="pop-happy">😊 Счастье: ${(info?.happy||0)>=0?'+':''}${Math.floor((info?.happy||0)*scale)}</span>
-                `;
-            } else popup.style.display = 'none';
+                    <span class="pop-happy">😊 Счастье: ${(info?.happy||0)>=0?'+':''}${Math.floor((info?.happy||0)*scale)}</span>`;
+            } else popup.style.display='none';
         }
 
-        function addLog(msg) {
-            const log = document.getElementById('message-log');
-            const d = document.createElement('div');
-            d.className = 'log-msg';
-            d.textContent = msg;
-            log.appendChild(d);
-            setTimeout(() => d.remove(), 3500);
-            if (log.children.length > 6) log.firstChild.remove();
-        }
+        function addLog(msg) { const log=document.getElementById('message-log'); const d=document.createElement('div');
+            d.className='log-msg'; d.textContent=msg; log.appendChild(d); setTimeout(()=>d.remove(),3500);
+            if(log.children.length>6) log.firstChild.remove(); }
+        function shakeEl(id) { const el=document.getElementById(id); if(!el) return;
+            el.style.animation='shake 0.4s ease'; setTimeout(()=>el.style.animation='',400); }
+        function showHelp() { alert('🎮 PRESIDENT SIMULATOR\n\n🖱️ ЛКМ — строить/перетаскивать\n🖱️ Колёсико — масштаб\n📱 Тап — строить, щипок — масштаб\n\n⌨️ КЛАВИШИ:\n  B — меню\n  R — поворот\n  Delete — снос\n  I — инфо\n  Esc — отмена\n\n🌤️ ПОГОДА меняется\n🕐 Время как в реальном мире\n📏 Граница с табличкой цены\n👥 NPC ходят в здания\n🚗 Машины и автосалон'); }
 
-        function shakeEl(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.style.animation = 'shake 0.4s ease';
-            setTimeout(() => el.style.animation = '', 400);
-        }
-
-        function showHelp() {
-            alert('🎮 PRESIDENT SIMULATOR\n\n' +
-                '🖱️ ЛКМ — строить/перетаскивать\n' +
-                '🖱️ Колёсико — масштаб\n' +
-                '📱 Тап — строить, щипок — масштаб\n\n' +
-                '⌨️ КЛАВИШИ:\n' +
-                '  B — меню построек\n' +
-                '  R — поворот здания\n' +
-                '  Delete — снос\n' +
-                '  I — информация\n' +
-                '  Esc — отмена\n\n' +
-                '📏 ГРАНИЦА: можно расширять за 💰\n' +
-                '🚗 АВТОСАЛОН: продаёт машины NPC\n' +
-                '👥 NPC: живут в домах, работают\n' +
-                '💾 Автосохранение каждые 30 сек');
-        }
-
-        console.log('🏛️ President Simulator 2D - Полная версия');
-        console.log('✅ Границы страны с расширением');
-        console.log('✅ Стартовые дороги');
-        console.log('✅ NPC с поведением (ходят в здания)');
+        console.log('🏛️ President Simulator 2D - ПОЛНАЯ ВЕРСИЯ');
+        console.log('✅ Изогнутая граница с табличкой цены');
+        console.log('✅ День/ночь с реальным временем');
+        console.log('✅ Погода: солнце, облака, дождь, гроза, снег');
+        console.log('✅ NPC с поведением (идут в здания)');
         console.log('✅ Машины и автосалон');
-        console.log('✅ Поворот зданий (R)');
-        console.log('✅ Сохранения в localStorage');
+        console.log('✅ Детальные здания БЕЗ жёлтых кругов');
+        console.log('✅ Сохранения');
     </script>
 </body>
 </html>
