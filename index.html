@@ -1,785 +1,937 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🎰 VIRTUAL CASINO | Bulldrop · Winline · Спорт</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>President Simulator - Демо</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --accent: #e2b04a;
+            --gold: #d4a574;
+            --text: #e0e0e0;
+            --green: #4caf84;
+            --red: #e05555;
+            --blue: #5b9bd5;
+            --border: #2a2a4a;
+            --hover: #2a2a5a;
+        }
 
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #0a0c14;
-      overflow-x: hidden;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse at 50% 0%, #1a1f35 0%, #0a0c18 70%);
-      position: relative;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Анимированный фон */
-    .bg-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: #0d0d1a;
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
-    .bg-circle {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.15;
-      animation: floatCircle 12s infinite ease-in-out alternate;
-    }
+        /* ЭКРАН СОЗДАНИЯ СТРАНЫ */
+        #country-creation {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a18 70%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
 
-    .bg-circle:nth-child(1) {
-      width: 600px;
-      height: 600px;
-      background: #d4af37;
-      top: -200px;
-      left: -100px;
-      animation-duration: 14s;
-    }
+        #country-creation.hidden {
+            display: none;
+        }
 
-    .bg-circle:nth-child(2) {
-      width: 500px;
-      height: 500px;
-      background: #4a3f8b;
-      bottom: -150px;
-      right: -100px;
-      animation-duration: 18s;
-      animation-delay: -3s;
-    }
+        .creation-title {
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(180deg, #f0d78c, #c8943e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            letter-spacing: 2px;
+            text-align: center;
+        }
 
-    .bg-circle:nth-child(3) {
-      width: 350px;
-      height: 350px;
-      background: #c44569;
-      top: 50%;
-      left: 50%;
-      animation-duration: 16s;
-      animation-delay: -6s;
-      opacity: 0.1;
-    }
+        .creation-subtitle {
+            color: #aaa;
+            font-size: 1.1em;
+            margin-top: -15px;
+            letter-spacing: 1px;
+        }
 
-    @keyframes floatCircle {
-      0% {
-        transform: translate(0, 0) scale(1);
-      }
-      33% {
-        transform: translate(40px, -30px) scale(1.15);
-      }
-      66% {
-        transform: translate(-25px, 20px) scale(0.9);
-      }
-      100% {
-        transform: translate(15px, -15px) scale(1.05);
-      }
-    }
+        .creation-form {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
 
-    /* Основной контейнер */
-    .casino-main {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 2rem;
-      backdrop-filter: blur(5px);
-      background: rgba(10, 12, 24, 0.7);
-      box-shadow: inset 0 0 150px rgba(212, 175, 55, 0.08);
-    }
+        .creation-form label {
+            font-weight: 600;
+            color: var(--gold);
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
 
-    /* Верхняя панель */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      margin-bottom: 2rem;
-      animation: slideDown 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        .creation-form input {
+            background: #1a1a30;
+            border: 2px solid var(--border);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1.05em;
+            transition: all 0.3s;
+            outline: none;
+        }
 
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
+        .creation-form input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(226,176,74,0.2);
+        }
 
-    .logo-icon {
-      font-size: 2.4rem;
-      filter: drop-shadow(0 0 15px #d4af37);
-      animation: pulse 2.5s infinite;
-    }
+        .btn-create {
+            background: linear-gradient(180deg, #e2b04a, #b8861e);
+            border: none;
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 1.2em;
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
 
-    @keyframes pulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.08);
-      }
-    }
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(226,176,74,0.4);
+        }
 
-    .logo-text {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      background: linear-gradient(180deg, #f5e6a3 0%, #d4af37 60%, #b4942e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
-    }
+        /* ИГРОВОЙ ИНТЕРФЕЙС */
+        #game-screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
 
-    .balance-card {
-      background: rgba(20, 24, 40, 0.8);
-      backdrop-filter: blur(20px);
-      border-radius: 3rem;
-      padding: 0.5rem 1rem 0.5rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 215, 0, 0.1) inset;
-      transition: all 0.3s ease;
-    }
+        #game-screen.active {
+            display: flex;
+        }
 
-    .balance-card:hover {
-      border-color: rgba(212, 175, 55, 0.7);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
-    }
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(22,33,62,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            height: 60px;
+        }
 
-    .coin-display {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #ffd966;
-    }
+        .resources {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
 
-    .coin-amount {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 0.4rem 1.2rem;
-      border-radius: 2rem;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.5px;
-    }
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1em;
+        }
 
-    .btn-gold {
-      background: linear-gradient(180deg, #f5d36b 0%, #c9a52b 100%);
-      border: none;
-      color: #0a0c14;
-      font-weight: 700;
-      padding: 0.7rem 1.8rem;
-      border-radius: 2.5rem;
-      cursor: pointer;
-      font-size: 0.95rem;
-      letter-spacing: 0.8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 0 #7a5d15, 0 10px 25px rgba(212, 175, 55, 0.4);
-      text-transform: uppercase;
-      position: relative;
-      overflow: hidden;
-    }
+        .resource-icon {
+            font-size: 1.5em;
+        }
+        .resource.money .value { color: #f0d78c; }
+        .resource.population .value { color: #7ec8e3; }
+        .resource.happiness .value { color: #8ce08c; }
 
-    .btn-gold:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 0 #7a5d15, 0 15px 35px rgba(212, 175, 55, 0.55);
-      background: linear-gradient(180deg, #f8e282 0%, #d4af37 100%);
-    }
+        .country-name-display {
+            font-weight: 700;
+            font-size: 1.3em;
+            background: linear-gradient(180deg, #f0d78c, #c8943e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
 
-    .btn-gold:active {
-      transform: translateY(3px);
-      box-shadow: 0 3px 0 #7a5d15, 0 8px 20px rgba(212, 175, 55, 0.5);
-    }
+        .btn-small {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        .btn-small:hover {
+            background: var(--hover);
+            border-color: var(--accent);
+        }
 
-    /* Навигация */
-    .nav-tabs {
-      display: flex;
-      gap: 0.8rem;
-      margin-bottom: 2rem;
-      animation: fadeUp 0.7s 0.15s both;
-    }
+        /* ИГРОВОЕ ПОЛЕ */
+        #game-canvas {
+            flex: 1;
+            cursor: crosshair;
+            display: block;
+            background: #1a2a1a;
+        }
 
-    .nav-tab {
-      background: rgba(20, 25, 40, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #b0b8cc;
-      padding: 0.9rem 2.4rem;
-      border-radius: 2.5rem;
-      font-weight: 600;
-      font-size: 1.05rem;
-      cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
-      letter-spacing: 0.8px;
-      position: relative;
-      overflow: hidden;
-    }
+        /* НИЖНЯЯ ПАНЕЛЬ ПОСТРОЕК */
+        #build-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            background: rgba(22,33,62,0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            gap: 8px;
+            padding: 12px 18px;
+            align-items: center;
+        }
 
-    .nav-tab:hover {
-      background: rgba(30, 36, 55, 0.8);
-      border-color: rgba(212, 175, 55, 0.5);
-      color: #e0d49c;
-      transform: translateY(-2px);
-    }
+        .build-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            background: rgba(30,30,60,0.6);
+            min-width: 75px;
+            position: relative;
+        }
 
-    .nav-tab.active {
-      background: linear-gradient(135deg, #d4af37 0%, #b38b2c 100%);
-      color: #0a0c14;
-      border-color: #fad974;
-      font-weight: 700;
-      box-shadow: 0 0 25px rgba(212, 175, 55, 0.6), 0 5px 15px rgba(0, 0, 0, 0.4);
-      transform: translateY(-2px);
-    }
+        .build-item:hover {
+            background: var(--hover);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
 
-    /* Сетка игр */
-    .games-container {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .build-item.selected {
+            border-color: #f0d78c !important;
+            background: rgba(226,176,74,0.2) !important;
+            box-shadow: 0 0 25px rgba(226,176,74,0.3);
+        }
 
-    .games-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.8rem;
-      width: 100%;
-      max-width: 1000px;
-      animation: fadeUp 0.6s 0.2s both;
-    }
+        .build-emoji {
+            font-size: 2em;
+        }
+        .build-name {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .build-cost {
+            font-size: 0.7em;
+            color: #f0d78c;
+            font-weight: 700;
+        }
 
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(25px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        /* ИНФО-ОКНО */
+        #info-popup {
+            position: absolute;
+            pointer-events: none;
+            z-index: 60;
+            background: rgba(10,10,30,0.95);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.9em;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
 
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-25px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .game-card {
-      background: rgba(20, 25, 42, 0.7);
-      backdrop-filter: blur(15px);
-      border-radius: 2rem;
-      padding: 1.8rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .game-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .game-card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(212, 175, 55, 0.5);
-      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.2);
-    }
-
-    .game-card:hover::before {
-      opacity: 1;
-    }
-
-    .game-icon {
-      font-size: 3.2rem;
-      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.6));
-      transition: transform 0.4s ease;
-      position: relative;
-      z-index: 1;
-    }
-
-    .game-card:hover .game-icon {
-      transform: scale(1.08) rotate(1deg);
-    }
-
-    .game-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #f0e4b8;
-      letter-spacing: 0.6px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .game-desc {
-      font-size: 0.9rem;
-      color: #8f9bb5;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .bet-row {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .bet-input {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 2rem;
-      padding: 0.6rem 0.9rem;
-      width: 85px;
-      text-align: center;
-      color: #ffd966;
-      font-weight: 700;
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .bet-input:focus {
-      border-color: #d4af37;
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-    }
-
-    .select-outcome {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 2rem;
-      padding: 0.6rem 1rem;
-      color: #f0e4b8;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-play {
-      background: linear-gradient(180deg, #3b4468 0%, #1f2640 100%);
-      border: none;
-      color: #fff;
-      font-weight: 700;
-      padding: 0.7rem 2rem;
-      border-radius: 2.5rem;
-      cursor: pointer;
-      font-size: 1rem;
-      letter-spacing: 0.7px;
-      transition: all 0.35s ease;
-      border-bottom: 3px solid #d4af37;
-      position: relative;
-      z-index: 1;
-      text-transform: uppercase;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .btn-play:hover {
-      background: linear-gradient(180deg, #4f5a8a 0%, #2a3355 100%);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .btn-play:active {
-      transform: translateY(2px);
-      border-bottom-width: 1px;
-    }
-
-    .result-text {
-      font-weight: 600;
-      font-size: 0.9rem;
-      min-height: 1.4rem;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      transition: color 0.3s;
-    }
-
-    .badge {
-      background: rgba(212, 175, 55, 0.15);
-      color: #d4af37;
-      padding: 0.3rem 1.2rem;
-      border-radius: 2rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Админ панель */
-    .admin-footer {
-      margin-top: 1.8rem;
-      background: rgba(20, 25, 42, 0.6);
-      backdrop-filter: blur(15px);
-      border-radius: 2rem;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      border: 1px dashed rgba(212, 175, 55, 0.5);
-      animation: fadeUp 0.7s 0.4s both;
-    }
-
-    .admin-label {
-      color: #c4b07c;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Адаптив */
-    @media (max-width: 750px) {
-      .casino-main {
-        padding: 1rem;
-      }
-      .nav-tab {
-        padding: 0.7rem 1.2rem;
-        font-size: 0.9rem;
-      }
-      .games-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+        #message-log {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 55;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: none;
+        }
+        .log-msg {
+            background: rgba(0,0,0,0.8);
+            border-left: 3px solid var(--accent);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            animation: fadeInOut 3s forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(20px); }
+            15% { opacity: 1; transform: translateX(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(20px); }
+        }
+    </style>
 </head>
 <body>
-<div class="bg-animation">
-  <div class="bg-circle"></div>
-  <div class="bg-circle"></div>
-  <div class="bg-circle"></div>
-</div>
 
-<main class="casino-main">
-  <!-- Верхняя панель -->
-  <div class="top-bar">
-    <div class="logo-section">
-      <span class="logo-icon">👑</span>
-      <span class="logo-text">VIRTUAL CASINO</span>
-    </div>
-    <div class="balance-card">
-      <div class="coin-display">
-        🪙 <span class="coin-amount" id="balanceDisplay">1000</span>
-      </div>
-      <button class="btn-gold" id="openAdminBtn">💳 Выдать</button>
-    </div>
-  </div>
-
-  <!-- Навигация -->
-  <nav class="nav-tabs">
-    <button class="nav-tab active" data-section="bulldrop">🐂 Bulldrop</button>
-    <button class="nav-tab" data-section="winline">🎰 Winline</button>
-    <button class="nav-tab" data-section="sport">⚽ Ставки на спорт</button>
-  </nav>
-
-  <!-- Контент игр -->
-  <div class="games-container">
-    <!-- Bulldrop -->
-    <div id="section-bulldrop" class="games-grid">
-      <div class="game-card">
-        <div class="game-icon">📈💥</div>
-        <div class="game-title">Bull Crash</div>
-        <div class="game-desc">Множитель растёт — успей забрать!</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="crashBet" value="50" min="1" placeholder="Ставка">
+    <!-- ЭКРАН СОЗДАНИЯ СТРАНЫ -->
+    <div id="country-creation">
+        <div class="creation-title">🏛️ PRESIDENT SIMULATOR</div>
+        <div class="creation-subtitle">Создайте свою страну</div>
+        <div class="creation-form">
+            <label for="country-name">📜 Название страны</label>
+            <input type="text" id="country-name" placeholder="Введите название..." maxlength="25" value="Великоречье">
+            <button class="btn-create" onclick="startGame()">🌟 ОСНОВАТЬ СТРАНУ</button>
         </div>
-        <button class="btn-play" id="playCrash">🚀 Забрать</button>
-        <div class="result-text" id="crashResult"></div>
-        <span class="badge">BULLDROP</span>
-      </div>
-      <div class="game-card">
-        <div class="game-icon">🎲🐂</div>
-        <div class="game-title">Bull Dice</div>
-        <div class="game-desc">Угадай грань кубика (1–6) ×3.8</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="diceBet" value="30" min="1" placeholder="Ставка">
-          <input type="number" class="bet-input" id="diceGuess" value="4" min="1" max="6" placeholder="1-6" style="width:60px;">
-        </div>
-        <button class="btn-play" id="playDice">🎲 Бросок</button>
-        <div class="result-text" id="diceResult"></div>
-        <span class="badge">BULLDROP</span>
-      </div>
     </div>
 
-    <!-- Winline -->
-    <div id="section-winline" class="games-grid hidden">
-      <div class="game-card">
-        <div class="game-icon">🎰🍒</div>
-        <div class="game-title">Winline Slots</div>
-        <div class="game-desc">Классические слоты 3×1</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="slotBet" value="40" min="1" placeholder="Ставка">
+    <!-- ИГРОВОЙ ЭКРАН -->
+    <div id="game-screen">
+        <!-- Верхняя панель -->
+        <div id="top-bar">
+            <div class="country-name-display" id="display-country-name">Великоречье</div>
+            <div class="resources">
+                <div class="resource money">
+                    <span class="resource-icon">💰</span>
+                    <span>Казна:</span>
+                    <span class="value" id="money-value">50000</span>
+                </div>
+                <div class="resource population">
+                    <span class="resource-icon">👥</span>
+                    <span>Население:</span>
+                    <span class="value" id="pop-value">100</span>
+                </div>
+                <div class="resource happiness">
+                    <span class="resource-icon">😊</span>
+                    <span>Счастье:</span>
+                    <span class="value" id="happiness-value">75</span>%
+                </div>
+            </div>
+            <button class="btn-small" onclick="showHelp()">❓ Справка</button>
         </div>
-        <button class="btn-play" id="playSlot">🔄 Крутить</button>
-        <div class="result-text" id="slotResult"></div>
-        <span class="badge">WINLINE</span>
-      </div>
-      <div class="game-card">
-        <div class="game-icon">💎🍀</div>
-        <div class="game-title">Winline Fortune</div>
-        <div class="game-desc">Собери 3 одинаковых — ×5</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="fortuneBet" value="25" min="1" placeholder="Ставка">
+
+        <!-- Канвас игры -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Инфо-окно -->
+        <div id="info-popup"></div>
+
+        <!-- Сообщения -->
+        <div id="message-log"></div>
+
+        <!-- Панель строительства -->
+        <div id="build-panel">
+            <div class="build-item" data-type="house" onclick="selectBuilding('house')">
+                <span class="build-emoji">🏠</span>
+                <span class="build-name">Жилой дом</span>
+                <span class="build-cost">💰500</span>
+            </div>
+            <div class="build-item" data-type="apartment" onclick="selectBuilding('apartment')">
+                <span class="build-emoji">🏢</span>
+                <span class="build-name">Многоквартирный</span>
+                <span class="build-cost">💰2000</span>
+            </div>
+            <div class="build-item" data-type="shop" onclick="selectBuilding('shop')">
+                <span class="build-emoji">🏪</span>
+                <span class="build-name">Магазин</span>
+                <span class="build-cost">💰800</span>
+            </div>
+            <div class="build-item" data-type="factory" onclick="selectBuilding('factory')">
+                <span class="build-emoji">🏭</span>
+                <span class="build-name">Завод</span>
+                <span class="build-cost">💰3000</span>
+            </div>
+            <div class="build-item" data-type="office" onclick="selectBuilding('office')">
+                <span class="build-emoji">🏬</span>
+                <span class="build-name">Бизнес-центр</span>
+                <span class="build-cost">💰5000</span>
+            </div>
+            <div class="build-item" data-type="park" onclick="selectBuilding('park')">
+                <span class="build-emoji">🌳</span>
+                <span class="build-name">Парк</span>
+                <span class="build-cost">💰300</span>
+            </div>
+            <button class="btn-small" style="margin-left:8px; height: 50px;" onclick="clearSelection()">✖ Отмена</button>
         </div>
-        <button class="btn-play" id="playFortune">✨ Испытать</button>
-        <div class="result-text" id="fortuneResult"></div>
-        <span class="badge">WINLINE</span>
-      </div>
     </div>
 
-    <!-- Спорт -->
-    <div id="section-sport" class="games-grid hidden">
-      <div class="game-card">
-        <div class="game-icon">⚽🥅</div>
-        <div class="game-title">Футбольный матч</div>
-        <div class="game-desc">П1 ×2.1 | Ничья ×3.2 | П2 ×2.8</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="footballBet" value="60" min="1" placeholder="Ставка">
-          <select class="select-outcome" id="footballPick">
-            <option value="home">П1 (2.1)</option>
-            <option value="draw">Ничья (3.2)</option>
-            <option value="away">П2 (2.8)</option>
-          </select>
-        </div>
-        <button class="btn-play" id="playFootball">⚽ Поставить</button>
-        <div class="result-text" id="footballResult"></div>
-        <span class="badge">СПОРТ</span>
-      </div>
-      <div class="game-card">
-        <div class="game-icon">🏀🔥</div>
-        <div class="game-title">Баскетбол · Тотал</div>
-        <div class="game-desc">ТБ 210.5 (×1.95)</div>
-        <div class="bet-row">
-          <input type="number" class="bet-input" id="basketballBet" value="45" min="1" placeholder="Ставка">
-        </div>
-        <button class="btn-play" id="playBasketball">🏀 ТБ 210.5</button>
-        <div class="result-text" id="basketballResult"></div>
-        <span class="badge">СПОРТ</span>
-      </div>
-    </div>
-  </div>
+    <script>
+        // ==================== СОСТОЯНИЕ ИГРЫ ====================
+        const state = {
+            countryName: '',
+            money: 50000,
+            population: 100,
+            happiness: 75,
+            buildings: [],
+            selectedBuildingType: null,
+            canvas: null,
+            ctx: null,
+            gridSize: 50,
+            cameraX: 0,
+            cameraY: 0,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            hoveredBuilding: null,
+            mouseX: 0,
+            mouseY: 0,
+        };
 
-  <!-- Админ-панель -->
-  <div class="admin-footer">
-    <span class="admin-label">🎁 Выдать виртуальные монеты</span>
-    <input type="number" class="bet-input" id="adminAmount" value="500" min="1" step="100" style="width:100px;">
-    <button class="btn-gold" id="applyCoins">Пополнить</button>
-    <span style="color:#8f9bb5; font-size:0.8rem;">демо-режим</span>
-  </div>
-</main>
+        // Данные о типах строений
+        const buildingTypes = {
+            house: {
+                emoji: '🏠',
+                name: 'Жилой дом',
+                cost: 500,
+                color: '#e8c897',
+                populationBonus: 5,
+                happinessBonus: 2,
+                incomeBonus: 10,
+                width: 40,
+                height: 40,
+            },
+            apartment: {
+                emoji: '🏢',
+                name: 'Многоквартирный дом',
+                cost: 2000,
+                color: '#b0c4de',
+                populationBonus: 30,
+                happinessBonus: -1,
+                incomeBonus: 40,
+                width: 48,
+                height: 48,
+            },
+            shop: {
+                emoji: '🏪',
+                name: 'Магазин',
+                cost: 800,
+                color: '#f5deb3',
+                populationBonus: 2,
+                happinessBonus: 5,
+                incomeBonus: 60,
+                width: 42,
+                height: 42,
+            },
+            factory: {
+                emoji: '🏭',
+                name: 'Завод',
+                cost: 3000,
+                color: '#8899aa',
+                populationBonus: 15,
+                happinessBonus: -5,
+                incomeBonus: 200,
+                width: 50,
+                height: 50,
+            },
+            office: {
+                emoji: '🏬',
+                name: 'Бизнес-центр',
+                cost: 5000,
+                color: '#87ceeb',
+                populationBonus: 10,
+                happinessBonus: 3,
+                incomeBonus: 350,
+                width: 46,
+                height: 46,
+            },
+            park: {
+                emoji: '🌳',
+                name: 'Парк',
+                cost: 300,
+                color: '#8fbc8f',
+                populationBonus: 0,
+                happinessBonus: 12,
+                incomeBonus: 0,
+                width: 44,
+                height: 44,
+            },
+        };
 
-<script>
-  (() => {
-    // Состояние
-    let balance = 1000;
-    const balanceEl = document.getElementById('balanceDisplay');
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function initCanvas() {
+            state.canvas = document.getElementById('game-canvas');
+            state.ctx = state.canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
 
-    // Разделы
-    const sections = {
-      bulldrop: document.getElementById('section-bulldrop'),
-      winline: document.getElementById('section-winline'),
-      sport: document.getElementById('section-sport')
-    };
-    const tabs = document.querySelectorAll('.nav-tab');
+        function resizeCanvas() {
+            state.canvas.width = window.innerWidth;
+            state.canvas.height = window.innerHeight;
+            state.cameraX = state.canvas.width / 2;
+            state.cameraY = state.canvas.height / 2;
+        }
 
-    // Обновление баланса
-    function updateUI() {
-      balanceEl.textContent = balance;
-    }
+        // ==================== СТАРТ ИГРЫ ====================
+        function startGame() {
+            const nameInput = document.getElementById('country-name');
+            const name = nameInput.value.trim();
+            if (!name) {
+                nameInput.style.borderColor = '#e05555';
+                nameInput.focus();
+                setTimeout(() => { nameInput.style.borderColor = 'var(--border)'; }, 1500);
+                return;
+            }
+            state.countryName = name;
+            state.buildings = [];
+            state.money = 50000;
+            state.population = 100;
+            state.happiness = 75;
+            state.selectedBuildingType = null;
 
-    function spend(amount) {
-      if (amount > balance) return false;
-      balance -= amount;
-      updateUI();
-      return true;
-    }
+            document.getElementById('country-creation').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('active');
+            document.getElementById('display-country-name').textContent = '🏛️ ' + state.countryName;
 
-    function add(amount) {
-      balance += amount;
-      updateUI();
-    }
+            initCanvas();
+            updateUI();
+            addLogMessage(`🇷🇺 Добро пожаловать в страну "${state.countryName}"! Начните строительство.`);
+            gameLoop();
+        }
 
-    // Вывод сообщения
-    function setMessage(id, text, win = null) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = text;
-      el.style.color = win === true ? '#b9f57b' : (win === false ? '#f28b82' : '#e0d49c');
-    }
+        function updateUI() {
+            document.getElementById('money-value').textContent = state.money.toLocaleString();
+            document.getElementById('pop-value').textContent = state.population;
+            document.getElementById('happiness-value').textContent = Math.round(state.happiness);
 
-    // Навигация
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const section = tab.dataset.section;
-        Object.values(sections).forEach(sec => sec.classList.add('hidden'));
-        if (sections[section]) sections[section].classList.remove('hidden');
-      });
-    });
+            // Обновляем выделение в панели
+            document.querySelectorAll('.build-item').forEach(el => {
+                el.classList.toggle('selected', el.dataset.type === state.selectedBuildingType);
+            });
+        }
 
-    // ===== ИГРЫ =====
-    // Bull Crash
-    document.getElementById('playCrash').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('crashBet').value, 10);
-      if (!bet || bet <= 0) return setMessage('crashResult', 'Укажи ставку', false);
-      if (!spend(bet)) return setMessage('crashResult', 'Недостаточно монет', false);
-      const crash = +(Math.random() * 5 + 0.3).toFixed(2);
-      const cashout = +(Math.random() * crash).toFixed(2);
-      const winAmount = Math.floor(bet * cashout);
-      if (cashout >= 1.0) {
-        add(winAmount);
-        setMessage('crashResult', `Краш ${crash}x | Забрал ${cashout}x → +${winAmount}`, true);
-      } else {
-        setMessage('crashResult', `Краш ${crash}x | Не успел (0x)`, false);
-      }
-    });
+        // ==================== СТРОИТЕЛЬСТВО ====================
+        function selectBuilding(type) {
+            state.selectedBuildingType = state.selectedBuildingType === type ? null : type;
+            updateUI();
+            if (state.selectedBuildingType) {
+                const info = buildingTypes[type];
+                addLogMessage(`🔨 Выбран: ${info.emoji} ${info.name} (💰${info.cost.toLocaleString()})`);
+            }
+        }
 
-    // Bull Dice
-    document.getElementById('playDice').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('diceBet').value, 10);
-      const guess = parseInt(document.getElementById('diceGuess').value, 10);
-      if (!bet || bet <= 0 || !guess || guess < 1 || guess > 6) return setMessage('diceResult', 'Ставка + число 1-6', false);
-      if (!spend(bet)) return setMessage('diceResult', 'Недостаточно монет', false);
-      const roll = Math.floor(Math.random() * 6) + 1;
-      if (roll === guess) {
-        const win = Math.floor(bet * 3.8);
-        add(win);
-        setMessage('diceResult', `🎲 ${roll} | Угадал! +${win}`, true);
-      } else {
-        setMessage('diceResult', `🎲 ${roll} | Не угадал`, false);
-      }
-    });
+        function clearSelection() {
+            state.selectedBuildingType = null;
+            updateUI();
+        }
 
-    // Winline Slots
-    document.getElementById('playSlot').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('slotBet').value, 10);
-      if (!bet || bet <= 0) return setMessage('slotResult', 'Укажи ставку', false);
-      if (!spend(bet)) return setMessage('slotResult', 'Недостаточно монет', false);
-      const sym = ['🍒', '🍋', '🔔', '⭐', '7️⃣'];
-      const s = [sym[Math.floor(Math.random()*5)], sym[Math.floor(Math.random()*5)], sym[Math.floor(Math.random()*5)]];
-      const unique = new Set(s).size;
-      let mult = 0;
-      if (unique === 1) mult = 8;
-      else if (unique === 2) mult = 2.2;
-      const win = Math.floor(bet * mult);
-      if (win > 0) {
-        add(win);
-        setMessage('slotResult', `${s.join(' ')} | ×${mult} +${win}`, true);
-      } else {
-        setMessage('slotResult', `${s.join(' ')} | Мимо`, false);
-      }
-    });
+        function buildAt(worldX, worldY) {
+            if (!state.selectedBuildingType) return;
+            const type = state.selectedBuildingType;
+            const info = buildingTypes[type];
 
-    // Winline Fortune
-    document.getElementById('playFortune').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('fortuneBet').value, 10);
-      if (!bet || bet <= 0) return setMessage('fortuneResult', 'Укажи ставку', false);
-      if (!spend(bet)) return setMessage('fortuneResult', 'Недостаточно монет', false);
-      const it = ['💎', '🍀', '👑', '🌟'];
-      const r = [it[Math.floor(Math.random()*4)], it[Math.floor(Math.random()*4)], it[Math.floor(Math.random()*4)]];
-      if (r[0] === r[1] && r[1] === r[2]) {
-        const win = bet * 5;
-        add(win);
-        setMessage('fortuneResult', `${r.join(' ')} Джекпот! +${win}`, true);
-      } else {
-        setMessage('fortuneResult', `${r.join(' ')} Нет совпадений`, false);
-      }
-    });
+            if (state.money < info.cost) {
+                addLogMessage('❌ Недостаточно средств в казне!');
+                shakeElement(document.getElementById('money-value').parentElement);
+                return;
+            }
 
-    // Футбол
-    document.getElementById('playFootball').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('footballBet').value, 10);
-      const pick = document.getElementById('footballPick').value;
-      if (!bet || bet <= 0) return setMessage('footballResult', 'Укажи ставку', false);
-      if (!spend(bet)) return setMessage('footballResult', 'Недостаточно монет', false);
-      const r = Math.random();
-      let match = r < 0.45 ? 'home' : (r < 0.7 ? 'draw' : 'away');
-      const odds = { home: 2.1, draw: 3.2, away: 2.8 };
-      if (pick === match) {
-        const win = Math.floor(bet * odds[pick]);
-        add(win);
-        setMessage('footballResult', `Исход: ${match} | Выиграл +${win}`, true);
-      } else {
-        setMessage('footballResult', `Исход: ${match} | Проигрыш`, false);
-      }
-    });
+            // Проверка наложения
+            const newBuilding = {
+                type: type,
+                x: worldX - info.width / 2,
+                y: worldY - info.height / 2,
+                width: info.width,
+                height: info.height,
+                placedAt: Date.now(),
+            };
 
-    // Баскетбол
-    document.getElementById('playBasketball').addEventListener('click', () => {
-      const bet = parseInt(document.getElementById('basketballBet').value, 10);
-      if (!bet || bet <= 0) return setMessage('basketballResult', 'Укажи ставку', false);
-      if (!spend(bet)) return setMessage('basketballResult', 'Недостаточно монет', false);
-      const total = Math.floor(Math.random() * 80) + 160;
-      if (total > 210.5) {
-        const win = Math.floor(bet * 1.95);
-        add(win);
-        setMessage('basketballResult', `Тотал ${total} (ТБ) +${win}`, true);
-      } else {
-        setMessage('basketballResult', `Тотал ${total} (ТМ) Проигрыш`, false);
-      }
-    });
+            const overlap = state.buildings.some(b => rectsOverlap(newBuilding, b));
+            if (overlap) {
+                addLogMessage('⚠️ Нельзя строить поверх другого здания!');
+                return;
+            }
 
-    // Админка
-    document.getElementById('applyCoins').addEventListener('click', () => {
-      const amt = parseInt(document.getElementById('adminAmount').value, 10);
-      if (!amt || amt <= 0) return;
-      add(amt);
-      document.getElementById('adminAmount').value = 500;
-    });
-    document.getElementById('openAdminBtn').addEventListener('click', () => {
-      document.getElementById('adminAmount').focus();
-    });
+            state.money -= info.cost;
+            state.buildings.push(newBuilding);
+            state.population += info.populationBonus;
+            state.happiness = Math.max(0, Math.min(100, state.happiness + info.happinessBonus));
 
-    updateUI();
-  })();
-</script>
+            updateUI();
+            addLogMessage(`✅ Построено: ${info.emoji} ${info.name} (-💰${info.cost.toLocaleString()})`);
+
+            // Эффект частиц при постройке
+            spawnBuildParticles(worldX, worldY);
+        }
+
+        function rectsOverlap(a, b) {
+            const margin = 4;
+            return !(
+                a.x + a.width - margin < b.x ||
+                a.x > b.x + b.width - margin ||
+                a.y + a.height - margin < b.y ||
+                a.y > b.y + b.height - margin
+            );
+        }
+
+        // ==================== ОТРИСОВКА ====================
+        function drawGrid(ctx, camX, camY, w, h) {
+            const gs = state.gridSize;
+            const startX = -((camX % gs) + gs) % gs;
+            const startY = -((camY % gs) + gs) % gs;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = startX; x < w + gs; x += gs) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+            }
+            for (let y = startY; y < h + gs; y += gs) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+            }
+            ctx.stroke();
+        }
+
+        function drawBuilding(ctx, b, camX, camY) {
+            const info = buildingTypes[b.type];
+            const screenX = b.x - camX;
+            const screenY = b.y - camY;
+            const w = b.width;
+            const h = b.height;
+
+            // Тень
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(screenX + 2, screenY + 2, w, h);
+
+            // Основание
+            ctx.fillStyle = info.color;
+            ctx.fillRect(screenX, screenY, w, h);
+
+            // Граница
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(screenX, screenY, w, h);
+
+            // Эмодзи
+            ctx.font = `${w * 0.55}px serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(info.emoji, screenX + w / 2, screenY + h / 2);
+
+            // Подсветка при наведении
+            if (state.hoveredBuilding === b) {
+                ctx.strokeStyle = '#f0d78c';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(screenX - 2, screenY - 2, w + 4, h + 4);
+                ctx.strokeStyle = 'rgba(240,215,140,0.4)';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(screenX - 5, screenY - 5, w + 10, h + 10);
+            }
+        }
+
+        function gameLoop() {
+            const ctx = state.ctx;
+            const canvas = state.canvas;
+            const w = canvas.width;
+            const h = canvas.height;
+            const camX = state.cameraX - w / 2;
+            const camY = state.cameraY - h / 2;
+
+            // Фон
+            const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w);
+            grad.addColorStop(0, '#2d3a2d');
+            grad.addColorStop(1, '#1a2a1a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Сетка
+            drawGrid(ctx, camX, camY, w, h);
+
+            // Здания
+            state.buildings.forEach(b => drawBuilding(ctx, b, camX, camY));
+
+            // Призрак размещения
+            if (state.selectedBuildingType && !state.isDragging) {
+                const info = buildingTypes[state.selectedBuildingType];
+                const mx = state.mouseX + camX;
+                const my = state.mouseY + camY;
+                const sx = mx - info.width / 2 - camX;
+                const sy = my - info.height / 2 - camY;
+
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillRect(sx, sy, info.width, info.height);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.setLineDash([6, 4]);
+                ctx.lineWidth = 2;
+                ctx.strokeRect(sx, sy, info.width, info.height);
+                ctx.setLineDash([]);
+                ctx.font = `${info.width * 0.5}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(info.emoji, sx + info.width / 2, sy + info.height / 2);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== ЧАСТИЦЫ ====================
+        function spawnBuildParticles(wx, wy) {
+            const canvas = state.canvas;
+            const ctx = state.ctx;
+            const particles = [];
+            const count = 20;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: wx - state.cameraX + canvas.width / 2,
+                    y: wy - state.cameraY + canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6 - 3,
+                    life: 1,
+                    size: Math.random() * 6 + 2,
+                    color: `hsl(${Math.random() * 60 + 30}, 80%, 60%)`,
+                });
+            }
+            function animParticles() {
+                particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15;
+                    p.life -= 0.03;
+                    if (p.life <= 0) particles.splice(i, 1);
+                });
+                if (particles.length === 0) return;
+                requestAnimationFrame(animParticles);
+            }
+            // Частицы рисуются в gameLoop временно — упростим: просто вспышка
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: fixed; pointer-events: none; z-index: 999;
+                left: ${state.mouseX}px; top: ${state.mouseY}px;
+                width: 40px; height: 40px; border-radius: 50%;
+                background: radial-gradient(circle, rgba(255,215,0,0.8), transparent);
+                transform: translate(-50%, -50%);
+                animation: flashAnim 0.6s forwards;
+            `;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 600);
+        }
+
+        // Добавляем стиль для вспышки
+        const flashStyle = document.createElement('style');
+        flashStyle.textContent = `
+            @keyframes flashAnim {
+                0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(flashStyle);
+
+        // ==================== СОБЫТИЯ МЫШИ ====================
+        function getWorldCoords(e) {
+            const rect = state.canvas.getBoundingClientRect();
+            return {
+                screenX: e.clientX - rect.left,
+                screenY: e.clientY - rect.top,
+                worldX: e.clientX - rect.left + state.cameraX - state.canvas.width / 2,
+                worldY: e.clientY - rect.top + state.cameraY - state.canvas.height / 2,
+            };
+        }
+
+        function findBuildingAt(wx, wy) {
+            return state.buildings.find(b =>
+                wx >= b.x && wx <= b.x + b.width &&
+                wy >= b.y && wy <= b.y + b.height
+            ) || null;
+        }
+
+        state.canvas = document.getElementById('game-canvas');
+
+        document.addEventListener('mousemove', (e) => {
+            if (!state.canvas) return;
+            const coords = getWorldCoords(e);
+            state.mouseX = coords.screenX;
+            state.mouseY = coords.screenY;
+
+            if (state.isDragging) {
+                state.cameraX -= e.clientX - state.dragStartX;
+                state.cameraY -= e.clientY - state.dragStartY;
+                state.dragStartX = e.clientX;
+                state.dragStartY = e.clientY;
+            }
+
+            state.hoveredBuilding = findBuildingAt(coords.worldX, coords.worldY);
+
+            // Инфо-окно
+            const popup = document.getElementById('info-popup');
+            if (state.hoveredBuilding && !state.isDragging && !state.selectedBuildingType) {
+                const b = state.hoveredBuilding;
+                const info = buildingTypes[b.type];
+                popup.style.display = 'block';
+                popup.style.left = (coords.screenX + 20) + 'px';
+                popup.style.top = (coords.screenY - 20) + 'px';
+                popup.innerHTML = `
+                    <strong>${info.emoji} ${info.name}</strong><br>
+                    <span style="color:#aaa;">Население:</span> +${info.populationBonus}<br>
+                    <span style="color:#aaa;">Доход/мес:</span> 💰${info.incomeBonus}<br>
+                    <span style="color:#aaa;">Счастье:</span> ${info.happinessBonus >= 0 ? '+' : ''}${info.happinessBonus}
+                `;
+            } else {
+                popup.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!state.canvas || e.target.closest('#build-panel') || e.target.closest('#top-bar')) return;
+            if (e.button === 1 || e.button === 0) { // Левая или средняя
+                if (state.selectedBuildingType && e.button === 0) {
+                    const coords = getWorldCoords(e);
+                    buildAt(coords.worldX, coords.worldY);
+                } else if (e.button === 1 || (e.button === 0 && !state.selectedBuildingType)) {
+                    state.isDragging = true;
+                    state.dragStartX = e.clientX;
+                    state.dragStartY = e.clientY;
+                    state.canvas.style.cursor = 'grabbing';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            state.isDragging = false;
+            if (state.canvas) state.canvas.style.cursor = state.selectedBuildingType ? 'crosshair' : 'grab';
+        });
+
+        document.addEventListener('wheel', (e) => {
+            if (!state.canvas) return;
+            e.preventDefault();
+            const zoomFactor = 1.08;
+            const rect = state.canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const worldX = mx + state.cameraX - state.canvas.width / 2;
+            const worldY = my + state.cameraY - state.canvas.height / 2;
+
+            if (e.deltaY < 0) {
+                state.gridSize = Math.min(120, state.gridSize * zoomFactor);
+            } else {
+                state.gridSize = Math.max(20, state.gridSize / zoomFactor);
+            }
+
+            state.cameraX = worldX - mx + state.canvas.width / 2;
+            state.cameraY = worldY - my + state.canvas.height / 2;
+        }, { passive: false });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('#game-canvas') || e.target.id === 'game-canvas') {
+                e.preventDefault();
+                clearSelection();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') clearSelection();
+            if (e.key === '1') selectBuilding('house');
+            if (e.key === '2') selectBuilding('apartment');
+            if (e.key === '3') selectBuilding('shop');
+            if (e.key === '4') selectBuilding('factory');
+            if (e.key === '5') selectBuilding('office');
+            if (e.key === '6') selectBuilding('park');
+        });
+
+        // ==================== ПАССИВНЫЙ ДОХОД ====================
+        setInterval(() => {
+            if (!state.countryName) return;
+            let totalIncome = 0;
+            state.buildings.forEach(b => {
+                totalIncome += buildingTypes[b.type].incomeBonus;
+            });
+            state.money += totalIncome;
+            // Небольшое изменение счастья со временем
+            if (state.buildings.length > 0) {
+                state.happiness += (Math.random() - 0.48) * 0.5;
+                state.happiness = Math.max(0, Math.min(100, state.happiness));
+            }
+            updateUI();
+        }, 3000);
+
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        function addLogMessage(msg) {
+            const log = document.getElementById('message-log');
+            const div = document.createElement('div');
+            div.className = 'log-msg';
+            div.textContent = msg;
+            log.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+            if (log.children.length > 5) log.firstChild.remove();
+        }
+
+        function shakeElement(el) {
+            el.style.animation = 'shake 0.4s ease';
+            setTimeout(() => { el.style.animation = ''; }, 400);
+        }
+
+        function showHelp() {
+            const helpText = [
+                '🎮 УПРАВЛЕНИЕ:',
+                '🖱️ ЛКМ — построить выбранное здание',
+                '🖱️ Зажать ЛКМ — перемещать карту',
+                '🖱️ Колесико — приближение',
+                '⌨️ Клавиши 1-6 — выбор здания',
+                '⌨️ Esc / ПКМ — отмена выбора',
+                '',
+                '🏠 Стройте дома, заводы, бизнесы!',
+                '💰 Каждый месяц здания приносят доход.',
+                '😊 Следите за счастьем населения!',
+            ].join('\n');
+            alert(helpText);
+        }
+
+        // Стиль для shake
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%,100% { transform: translateX(0); }
+                25% { transform: translateX(-8px); }
+                50% { transform: translateX(8px); }
+                75% { transform: translateX(-4px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // Инициализация канваса при загрузке страницы (для предпросмотра)
+        window.addEventListener('load', () => {
+            // Показываем красивый фон на канвасе до старта
+        });
+
+        console.log('🏛️ President Simulator Demo готов!');
+        console.log('Создайте страну и начните строить!');
+    </script>
 </body>
-  </html>
+</html>
