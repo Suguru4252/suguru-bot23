@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>President Simulator 2D - Градостроительный симулятор</title>
     <style>
         :root {
@@ -28,11 +28,14 @@
             background: #060610;
             overflow: hidden;
             height: 100vh;
+            height: 100dvh;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        /* Экран создания */
+        /* ЭКРАН СОЗДАНИЯ */
         #splash {
             position: fixed;
             inset: 0;
@@ -42,7 +45,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 20px;
+            padding: 20px;
         }
         #splash.hidden {
             display: none;
@@ -53,7 +57,7 @@
             pointer-events: none;
         }
         .splash-title {
-            font-size: 3.2em;
+            font-size: clamp(2em, 5vw, 3.2em);
             font-weight: 900;
             letter-spacing: 3px;
             background: linear-gradient(180deg, #ffe08a, #c8943e, #8b5e14);
@@ -74,18 +78,18 @@
         }
         .splash-subtitle {
             color: #b0a0c0;
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
             letter-spacing: 2px;
         }
         .splash-form {
             background: rgba(20,18,40,0.9);
             border: 1px solid #3a3050;
             border-radius: 20px;
-            padding: 32px 40px;
+            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            min-width: 440px;
+            gap: 12px;
+            width: min(440px, 90vw);
             backdrop-filter: blur(20px);
             box-shadow: 0 30px 80px rgba(0,0,0,0.6);
         }
@@ -129,23 +133,21 @@
             box-shadow: 0 15px 40px rgba(240,192,64,0.45);
         }
 
-        /* Игровой экран */
+        /* ИГРОВОЙ ЭКРАН */
         #game-screen {
             display: none;
             height: 100vh;
+            height: 100dvh;
             width: 100vw;
             position: relative;
         }
         #game-screen.active {
             display: flex;
+            flex-direction: column;
         }
 
-        /* Верхняя панель */
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
         #top-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
             z-index: 100;
             background: linear-gradient(180deg, rgba(18,15,35,0.97), rgba(14,12,28,0.95));
             backdrop-filter: blur(15px);
@@ -153,31 +155,36 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 20px;
-            height: 56px;
+            padding: 6px 12px;
+            min-height: 50px;
+            flex-wrap: wrap;
+            gap: 6px;
         }
         .country-name-display {
             font-weight: 800;
-            font-size: 1.25em;
+            font-size: clamp(0.9em, 2.5vw, 1.25em);
             background: linear-gradient(180deg, #ffe08a, #c8943e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
         .resources {
             display: flex;
-            gap: 22px;
+            gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .resource {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 4px;
             font-weight: 700;
-            font-size: 0.95em;
+            font-size: clamp(0.7em, 1.8vw, 0.95em);
+            white-space: nowrap;
         }
         .res-icon {
-            font-size: 1.4em;
+            font-size: 1.2em;
         }
         .res-money {
             color: #f0d060;
@@ -188,20 +195,39 @@
         .res-happy {
             color: #6ce89c;
         }
+        .top-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
         .btn-top {
             background: rgba(40,35,70,0.8);
             border: 1px solid #3a3050;
             color: #ccc;
-            padding: 7px 14px;
+            padding: 6px 10px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: 0.3s;
-            font-size: 0.85em;
+            font-size: clamp(0.7em, 1.5vw, 0.85em);
+            white-space: nowrap;
         }
-        .btn-top:hover {
+        .btn-top:hover,
+        .btn-top.active {
             background: #3a3050;
             border-color: #c8943e;
+        }
+        .btn-top.active {
+            color: #f0d060;
+            border-color: #f0d060;
+        }
+        .version-badge {
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #2a2050;
+            color: #aab;
+            font-weight: 600;
         }
 
         /* Canvas */
@@ -209,6 +235,7 @@
             flex: 1;
             cursor: grab;
             display: block;
+            touch-action: none;
         }
         #game-canvas.building {
             cursor: crosshair;
@@ -217,81 +244,157 @@
             cursor: grabbing;
         }
 
-        /* Панель строительства */
-        #build-panel {
-            position: absolute;
-            bottom: 18px;
-            left: 50%;
-            transform: translateX(-50%);
+        /* НИЖНЯЯ ПАНЕЛЬ - 3 КНОПКИ */
+        #bottom-panel {
             z-index: 100;
             background: rgba(16,14,30,0.96);
             backdrop-filter: blur(15px);
-            border: 1px solid #2e2e4e;
-            border-radius: 22px;
+            border-top: 1px solid #2e2e4e;
             display: flex;
-            gap: 4px;
-            padding: 10px 14px;
             align-items: center;
-            flex-wrap: wrap;
             justify-content: center;
-            max-width: 95vw;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+            gap: 10px;
+            padding: 8px 12px;
+            min-height: 55px;
         }
-        .build-item {
+        .bottom-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
-            padding: 8px 11px;
+            gap: 2px;
+            padding: 8px 16px;
             border-radius: 14px;
             cursor: pointer;
             transition: 0.25s;
             border: 2px solid transparent;
-            background: rgba(30,25,55,0.6);
-            min-width: 68px;
-            position: relative;
+            background: rgba(30,25,55,0.7);
+            font-weight: 700;
+            font-size: 0.75em;
+            color: #ddd;
+            min-width: 60px;
+            text-align: center;
         }
-        .build-item:hover {
-            background: rgba(50,40,80,0.8);
+        .bottom-btn:hover {
+            background: rgba(50,40,80,0.9);
             border-color: #c8943e;
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         }
-        .build-item.selected {
+        .bottom-btn.active {
             border-color: #f0d060 !important;
-            background: rgba(200,160,50,0.2) !important;
-            box-shadow: 0 0 30px rgba(240,208,96,0.3);
+            background: rgba(200,160,50,0.25) !important;
+            box-shadow: 0 0 20px rgba(240,208,96,0.3);
         }
-        .build-emoji {
-            font-size: 1.8em;
+        .bottom-btn.danger {
+            border-color: #802020;
+            color: #f08888;
+        }
+        .bottom-btn.danger:hover {
+            background: rgba(120,30,30,0.5);
+            border-color: #f04444;
+        }
+        .bottom-btn.danger.active {
+            border-color: #f04444 !important;
+            background: rgba(180,40,40,0.4) !important;
+        }
+        .bottom-btn-icon {
+            font-size: 1.6em;
             line-height: 1;
         }
-        .build-name {
+        .bottom-btn-label {
             font-size: 0.7em;
-            font-weight: 700;
-            text-align: center;
-            line-height: 1.2;
-            color: #ddd;
+            letter-spacing: 0.5px;
         }
-        .build-cost {
+
+        /* МОДАЛЬНОЕ ОКНО ВЫБОРА */
+        #build-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #build-modal.open {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1830;
+            border: 1px solid #3a3050;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 600px;
+            width: 95vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+        .modal-title {
+            font-weight: 800;
+            font-size: 1.2em;
+            color: #f0d060;
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+        }
+        .modal-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 10px 6px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+            background: rgba(30,25,55,0.6);
+            text-align: center;
+        }
+        .modal-item:hover {
+            background: rgba(50,40,80,0.8);
+            border-color: #c8943e;
+        }
+        .modal-item.selected {
+            border-color: #f0d060 !important;
+            background: rgba(200,160,50,0.25) !important;
+        }
+        .modal-item-emoji {
+            font-size: 1.8em;
+        }
+        .modal-item-name {
+            font-size: 0.7em;
+            font-weight: 600;
+            color: #ddd;
+            line-height: 1.2;
+        }
+        .modal-item-cost {
             font-size: 0.65em;
             color: #f0d060;
             font-weight: 700;
         }
-
-        /* Категории */
-        .build-category-label {
-            font-size: 0.65em;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            padding: 0 4px;
+        .modal-close {
+            display: block;
+            margin: 16px auto 0;
+            background: #3a3050;
+            border: none;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 10px;
+            cursor: pointer;
             font-weight: 700;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+        .modal-close:hover {
+            background: #5a4070;
         }
 
-        /* Инфо-окно */
+        /* ИНФО-ОКНО */
         #info-popup {
             position: absolute;
             pointer-events: none;
@@ -312,30 +415,32 @@
             font-size: 1em;
         }
 
-        /* Лог */
+        /* ЛОГ */
         #message-log {
             position: absolute;
-            top: 70px;
-            right: 20px;
+            top: 60px;
+            right: 10px;
             z-index: 110;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             pointer-events: none;
+            max-width: 250px;
         }
         .log-msg {
             background: rgba(0,0,0,0.85);
             border-left: 3px solid #f0c040;
-            padding: 7px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 0.8em;
+            font-size: 0.75em;
             animation: fadeInOut 3.5s forwards;
             font-weight: 500;
+            word-break: break-word;
         }
         @keyframes fadeInOut {
             0% {
                 opacity: 0;
-                transform: translateX(25px);
+                transform: translateX(20px);
             }
             12% {
                 opacity: 1;
@@ -346,14 +451,83 @@
             }
             100% {
                 opacity: 0;
-                transform: translateX(25px);
+                transform: translateX(20px);
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            #top-bar {
+                padding: 4px 8px;
+                min-height: 40px;
+                gap: 4px;
+            }
+            .resources {
+                gap: 6px;
+            }
+            .resource {
+                font-size: 0.65em;
+                gap: 2px;
+            }
+            .res-icon {
+                font-size: 1em;
+            }
+            .btn-top {
+                padding: 4px 7px;
+                font-size: 0.65em;
+            }
+            #bottom-panel {
+                gap: 6px;
+                padding: 6px 8px;
+                min-height: 48px;
+            }
+            .bottom-btn {
+                padding: 6px 10px;
+                min-width: 45px;
+            }
+            .bottom-btn-icon {
+                font-size: 1.3em;
+            }
+            .bottom-btn-label {
+                font-size: 0.6em;
+            }
+            .country-name-display {
+                font-size: 0.75em;
+            }
+            #message-log {
+                top: 50px;
+                right: 4px;
+                max-width: 180px;
+            }
+            .log-msg {
+                font-size: 0.65em;
+                padding: 4px 7px;
+            }
+            #info-popup {
+                font-size: 0.7em;
+                padding: 6px 10px;
+            }
+        }
+        @media (max-width: 400px) {
+            .resources {
+                gap: 3px;
+            }
+            .resource {
+                font-size: 0.55em;
+            }
+            .bottom-btn {
+                padding: 5px 7px;
+                min-width: 38px;
+            }
+            .bottom-btn-icon {
+                font-size: 1.1em;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ЭКРАН СОЗДАНИЯ СТРАНЫ -->
+    <!-- ЭКРАН СОЗДАНИЯ -->
     <div id="splash">
         <canvas class="splash-stars" id="splash-stars"></canvas>
         <div class="splash-title">🏛️ PRESIDENT<br>SIMULATOR</div>
@@ -367,48 +541,52 @@
 
     <!-- ИГРОВОЙ ЭКРАН -->
     <div id="game-screen">
+        <!-- Верхняя панель -->
         <div id="top-bar">
             <div class="country-name-display" id="display-country-name">🏛️ Великоречье</div>
             <div class="resources">
-                <div class="resource"><span class="res-icon">💰</span> Казна: <span class="res-money" id="money-val">50000</span></div>
-                <div class="resource"><span class="res-icon">👥</span> Население: <span class="res-pop" id="pop-val">100</span></div>
-                <div class="resource"><span class="res-icon">😊</span> Счастье: <span class="res-happy" id="happy-val">75</span>%</div>
+                <div class="resource"><span class="res-icon">💰</span> <span class="res-money" id="money-val">50000</span></div>
+                <div class="resource"><span class="res-icon">👥</span> <span class="res-pop" id="pop-val">100</span></div>
+                <div class="resource"><span class="res-icon">😊</span> <span class="res-happy" id="happy-val">75</span>%</div>
             </div>
-            <button class="btn-top" onclick="showHelp()">❓ Справка</button>
+            <div class="top-buttons">
+                <span class="version-badge" id="version-badge">🖥️ ПК</span>
+                <button class="btn-top" id="btn-version" onclick="toggleVersion()">📱 Моб.</button>
+                <button class="btn-top" onclick="showHelp()">❓</button>
+            </div>
         </div>
+
+        <!-- Canvas -->
         <canvas id="game-canvas"></canvas>
+
+        <!-- Инфо-окно -->
         <div id="info-popup"></div>
+        <!-- Лог -->
         <div id="message-log"></div>
-        <div id="build-panel">
-            <span class="build-category-label">ДОРОГИ</span>
-            <div class="build-item" data-type="road" onclick="selectBuild('road')">
-                <span class="build-emoji">🛣️</span><span class="build-name">Асфальт</span><span class="build-cost">💰50</span></div>
-            <div class="build-item" data-type="rail" onclick="selectBuild('rail')">
-                <span class="build-emoji">🚂</span><span class="build-name">Ж/Д путь</span><span class="build-cost">💰200</span></div>
-            <span class="build-category-label">ЖИЛЬЁ</span>
-            <div class="build-item" data-type="house" onclick="selectBuild('house')">
-                <span class="build-emoji">🏠</span><span class="build-name">Дом</span><span class="build-cost">💰500</span></div>
-            <div class="build-item" data-type="apartment" onclick="selectBuild('apartment')">
-                <span class="build-emoji">🏢</span><span class="build-name">ЖК</span><span class="build-cost">💰2000</span></div>
-            <div class="build-item" data-type="mansion" onclick="selectBuild('mansion')">
-                <span class="build-emoji">🏰</span><span class="build-name">Особняк</span><span class="build-cost">💰8000</span></div>
-            <span class="build-category-label">БИЗНЕС</span>
-            <div class="build-item" data-type="shop" onclick="selectBuild('shop')">
-                <span class="build-emoji">🏪</span><span class="build-name">Магазин</span><span class="build-cost">💰800</span></div>
-            <div class="build-item" data-type="factory" onclick="selectBuild('factory')">
-                <span class="build-emoji">🏭</span><span class="build-name">Завод</span><span class="build-cost">💰3000</span></div>
-            <div class="build-item" data-type="office" onclick="selectBuild('office')">
-                <span class="build-emoji">🏬</span><span class="build-name">Бизнес-центр</span><span class="build-cost">💰5000</span></div>
-            <span class="build-category-label">ИНФРА</span>
-            <div class="build-item" data-type="park" onclick="selectBuild('park')">
-                <span class="build-emoji">🌳</span><span class="build-name">Парк</span><span class="build-cost">💰300</span></div>
-            <div class="build-item" data-type="school" onclick="selectBuild('school')">
-                <span class="build-emoji">🏫</span><span class="build-name">Школа</span><span class="build-cost">💰4000</span></div>
-            <div class="build-item" data-type="hospital" onclick="selectBuild('hospital')">
-                <span class="build-emoji">🏥</span><span class="build-name">Больница</span><span class="build-cost">💰6000</span></div>
-            <div class="build-item" data-type="stadium" onclick="selectBuild('stadium')">
-                <span class="build-emoji">🏟️</span><span class="build-name">Стадион</span><span class="build-cost">💰15000</span></div>
-            <button class="btn-top" style="margin-left:6px;height:44px;" onclick="clearSelection()">✖</button>
+
+        <!-- НИЖНЯЯ ПАНЕЛЬ: 3 КНОПКИ -->
+        <div id="bottom-panel">
+            <button class="bottom-btn" id="btn-build" onclick="openBuildModal()">
+                <span class="bottom-btn-icon">🏗️</span>
+                <span class="bottom-btn-label">Построить</span>
+            </button>
+            <button class="bottom-btn danger" id="btn-delete" onclick="toggleDeleteMode()">
+                <span class="bottom-btn-icon">🗑️</span>
+                <span class="bottom-btn-label">Снести</span>
+            </button>
+            <button class="bottom-btn" id="btn-select" onclick="toggleSelectMode()">
+                <span class="bottom-btn-icon">🔍</span>
+                <span class="bottom-btn-label">Инфо</span>
+            </button>
+        </div>
+
+        <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА ПОСТРОЙКИ -->
+        <div id="build-modal">
+            <div class="modal-content">
+                <div class="modal-title">🏗️ Выберите что построить</div>
+                <div class="modal-grid" id="modal-grid"></div>
+                <button class="modal-close" onclick="closeBuildModal()">✖ Закрыть</button>
+            </div>
         </div>
     </div>
 
@@ -425,10 +603,14 @@
             people: [],
             particles: [],
             selectedType: null,
+            deleteMode: false,
+            selectMode: false,
+            isMobile: false,
             canvas: null,
             ctx: null,
             camX: 0,
             camY: 0,
+            zoom: 1,
             gridSize: 48,
             dragging: false,
             dragSX: 0,
@@ -438,51 +620,41 @@
             hovered: null,
             time: 0,
             incomeTimer: 0,
+            touchesDist: 0,
+            lastPinchZoom: 1,
         };
 
         // Типы строений
         const BT = {
-            road: { emoji:'🛣️', name:'Асфальтовая дорога', cost:50, color:'#555555', pop:0, happy:2, income:0, w:48, h:48, isRoad:true, roadColor:'#444444', lineColor:'#ffff88' },
-            rail: { emoji:'🚂', name:'Железная дорога', cost:200, color:'#8B7355', pop:0, happy:3, income:15, w:48, h:48, isRail:true, railColor:'#6b5040' },
-            house: { emoji:'🏠', name:'Жилой дом', cost:500, color:'#e8c897', pop:8, happy:3, income:12, w:44, h:44, roofColor:'#c0392b', wallColor:'#f5deb3' },
-            apartment: { emoji:'🏢', name:'Жилой комплекс', cost:2000, color:'#b0c4de', pop:40, happy:-2, income:50, w:50, h:56, floors:8 },
-            mansion: { emoji:'🏰', name:'Особняк', cost:8000, color:'#d4af37', pop:15, happy:10, income:80, w:54, h:54 },
-            shop: { emoji:'🏪', name:'Магазин', cost:800, color:'#f5deb3', pop:3, happy:6, income:70, w:42, h:42 },
-            factory: { emoji:'🏭', name:'Завод', cost:3000, color:'#8899aa', pop:20, happy:-6, income:250, w:52, h:52, chimneys:3 },
-            office: { emoji:'🏬', name:'Бизнес-центр', cost:5000, color:'#87ceeb', pop:12, happy:4, income:400, w:48, h:60, floors:12 },
-            park: { emoji:'🌳', name:'Парк', cost:300, color:'#6b8e6b', pop:0, happy:15, income:0, w:46, h:46 },
-            school: { emoji:'🏫', name:'Школа', cost:4000, color:'#d4a574', pop:5, happy:8, income:-20, w:50, h:48 },
-            hospital: { emoji:'🏥', name:'Больница', cost:6000, color:'#f8f8f8', pop:8, happy:12, income:-50, w:52, h:50 },
-            stadium: { emoji:'🏟️', name:'Стадион', cost:15000, color:'#c0c0c0', pop:25, happy:20, income:150, w:64, h:56 },
+            road: { emoji:'🛣️', name:'Асфальт', cost:50, pop:0, happy:2, income:0, w:48, h:48, isRoad:true, category:'Дороги' },
+            rail: { emoji:'🚂', name:'Ж/Д путь', cost:200, pop:0, happy:3, income:15, w:48, h:48, isRail:true, category:'Дороги' },
+            house: { emoji:'🏠', name:'Дом', cost:500, pop:8, happy:3, income:12, w:44, h:44, category:'Жильё' },
+            apartment: { emoji:'🏢', name:'Жилой комплекс', cost:2000, pop:40, happy:-2, income:50, w:50, h:56, category:'Жильё' },
+            mansion: { emoji:'🏰', name:'Особняк', cost:8000, pop:15, happy:10, income:80, w:54, h:54, category:'Жильё' },
+            shop: { emoji:'🏪', name:'Магазин', cost:800, pop:3, happy:6, income:70, w:42, h:42, category:'Бизнес' },
+            factory: { emoji:'🏭', name:'Завод', cost:3000, pop:20, happy:-6, income:250, w:52, h:52, category:'Бизнес' },
+            office: { emoji:'🏬', name:'Бизнес-центр', cost:5000, pop:12, happy:4, income:400, w:48, h:60, category:'Бизнес' },
+            park: { emoji:'🌳', name:'Парк', cost:300, pop:0, happy:15, income:0, w:46, h:46, category:'Инфраструктура' },
+            school: { emoji:'🏫', name:'Школа', cost:4000, pop:5, happy:8, income:-20, w:50, h:48, category:'Инфраструктура' },
+            hospital: { emoji:'🏥', name:'Больница', cost:6000, pop:8, happy:12, income:-50, w:52, h:50, category:'Инфраструктура' },
+            stadium: { emoji:'🏟️', name:'Стадион', cost:15000, pop:25, happy:20, income:150, w:64, h:56, category:'Инфраструктура' },
         };
 
-        // ==================== ЗВЁЗДЫ НА СПЛЭШЕ ====================
+        // ==================== ЗВЁЗДЫ ====================
         function initSplashStars() {
             const c = document.getElementById('splash-stars');
             c.width = window.innerWidth;
             c.height = window.innerHeight;
             const ctx = c.getContext('2d');
-            const stars = [];
-            for (let i = 0; i < 200; i++) {
-                stars.push({
-                    x: Math.random() * c.width,
-                    y: Math.random() * c.height,
-                    r: Math.random() * 1.8 + 0.5,
-                    twinkle: Math.random() * Math.PI * 2,
-                    speed: Math.random() * 0.02 + 0.005,
-                });
-            }
-
+            const stars = Array.from({length:200}, () => ({
+                x: Math.random()*c.width, y: Math.random()*c.height,
+                r: Math.random()*1.8+0.5, twinkle: Math.random()*Math.PI*2, speed: Math.random()*0.02+0.005
+            }));
             function draw() {
-                ctx.clearRect(0, 0, c.width, c.height);
-                stars.forEach(s => {
-                    s.twinkle += s.speed;
-                    const alpha = 0.4 + Math.sin(s.twinkle) * 0.4;
-                    ctx.fillStyle = `rgba(255,255,240,${alpha})`;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                    ctx.fill();
-                });
+                ctx.clearRect(0,0,c.width,c.height);
+                stars.forEach(s=>{ s.twinkle+=s.speed; const a=0.4+Math.sin(s.twinkle)*0.4;
+                    ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.beginPath();
+                    ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); });
                 requestAnimationFrame(draw);
             }
             draw();
@@ -498,18 +670,39 @@
         }
 
         function resizeCanvas() {
-            S.canvas.width = window.innerWidth;
-            S.canvas.height = window.innerHeight;
-            S.camX = S.canvas.width / 2;
-            S.camY = S.canvas.height / 2;
+            S.canvas.width = S.canvas.clientWidth;
+            S.canvas.height = S.canvas.clientHeight;
+            if (!S.countryName) { S.camX = S.canvas.width/2;
+                S.camY = S.canvas.height/2; }
+        }
+
+        // ==================== ВЕРСИЯ (ПК/МОБ) ====================
+        function toggleVersion() {
+            S.isMobile = !S.isMobile;
+            const badge = document.getElementById('version-badge');
+            const btn = document.getElementById('btn-version');
+            if (S.isMobile) {
+                badge.textContent = '📱 Моб.';
+                btn.textContent = '🖥️ ПК';
+                S.gridSize = 56;
+                S.zoom = 0.8;
+                addLog('📱 Включена мобильная версия');
+            } else {
+                badge.textContent = '🖥️ ПК';
+                btn.textContent = '📱 Моб.';
+                S.gridSize = 48;
+                S.zoom = 1;
+                addLog('🖥️ Включена версия для ПК');
+            }
+            updateUI();
         }
 
         // ==================== СТАРТ ====================
         function startGame() {
             const inp = document.getElementById('country-name');
             const name = inp.value.trim();
-            if (!name) { inp.style.borderColor = '#f05555';
-                inp.focus(); setTimeout(() => inp.style.borderColor = '#3a3050', 1500); return; }
+            if (!name) { inp.style.borderColor='#f05555';
+                inp.focus(); setTimeout(()=>inp.style.borderColor='#3a3050',1500); return; }
             S.countryName = name;
             S.buildings = [];
             S.roads = [];
@@ -520,661 +713,717 @@
             S.population = 100;
             S.happiness = 75;
             S.selectedType = null;
+            S.deleteMode = false;
+            S.selectMode = false;
             S.time = 0;
             S.incomeTimer = 0;
+            S.zoom = S.isMobile ? 0.8 : 1;
+            S.gridSize = S.isMobile ? 56 : 48;
 
             document.getElementById('splash').classList.add('hidden');
             document.getElementById('game-screen').classList.add('active');
             document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
 
             initCanvas();
+            buildModalGrid();
             updateUI();
-            addLog('🌟 Добро пожаловать, господин Президент! Стройте страну.');
+            updateBottomButtons();
+            addLog('🌟 Добро пожаловать, господин Президент!');
             spawnInitialPeople();
             gameLoop();
         }
 
         function spawnInitialPeople() {
-            for (let i = 0; i < 30; i++) {
-                S.people.push({
-                    x: (Math.random() - 0.5) * 400,
-                    y: (Math.random() - 0.5) * 400,
-                    vx: (Math.random() - 0.5) * 1.5,
-                    vy: (Math.random() - 0.5) * 1.5,
-                    color: `hsl(${Math.random()*360},40%,65%)`,
-                    size: 4 + Math.random() * 3,
-                    walkTimer: Math.random() * 100,
-                });
-            }
+            for (let i=0; i<30; i++) S.people.push({
+                x:(Math.random()-0.5)*400, y:(Math.random()-0.5)*400,
+                vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5,
+                color:`hsl(${Math.random()*360},40%,65%)`, size:4+Math.random()*3, walkTimer:Math.random()*100
+            });
         }
 
         function updateUI() {
             document.getElementById('money-val').textContent = Math.floor(S.money).toLocaleString();
             document.getElementById('pop-val').textContent = S.population;
             document.getElementById('happy-val').textContent = Math.round(S.happiness);
-            document.querySelectorAll('.build-item').forEach(el => {
-                el.classList.toggle('selected', el.dataset.type === S.selectedType);
-            });
             const cv = S.canvas;
             if (cv) {
-                cv.classList.toggle('building', !!S.selectedType);
+                cv.classList.toggle('building', !!S.selectedType && !S.deleteMode);
                 cv.classList.toggle('grabbing', S.dragging);
             }
+            updateBottomButtons();
         }
 
-        function selectBuild(type) {
-            S.selectedType = S.selectedType === type ? null : type;
+        function updateBottomButtons() {
+            document.getElementById('btn-build').classList.toggle('active', !!S.selectedType && !S.deleteMode && !S.selectMode);
+            document.getElementById('btn-delete').classList.toggle('active', S.deleteMode);
+            document.getElementById('btn-select').classList.toggle('active', S.selectMode);
+        }
+
+        // ==================== МОДАЛЬНОЕ ОКНО ====================
+        function buildModalGrid() {
+            const grid = document.getElementById('modal-grid');
+            grid.innerHTML = '';
+            Object.entries(BT).forEach(([key, info]) => {
+                const div = document.createElement('div');
+                div.className = 'modal-item';
+                div.innerHTML = `
+              <span class="modal-item-emoji">${info.emoji}</span>
+              <span class="modal-item-name">${info.name}</span>
+              <span class="modal-item-cost">💰${info.cost.toLocaleString()}</span>
+            `;
+                div.addEventListener('click', () => {
+                    S.selectedType = key;
+                    S.deleteMode = false;
+                    S.selectMode = false;
+                    document.querySelectorAll('.modal-item').forEach(el=>el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    updateUI();
+                    addLog(`🔨 Выбрано: ${info.emoji} ${info.name}`);
+                    closeBuildModal();
+                });
+                if (S.selectedType === key) div.classList.add('selected');
+                grid.appendChild(div);
+            });
+        }
+
+        function openBuildModal() {
+            S.deleteMode = false;
+            S.selectMode = false;
+            buildModalGrid();
+            document.getElementById('build-modal').classList.add('open');
             updateUI();
-            if (S.selectedType) addLog(`🔨 Выбрано: ${BT[S.selectedType].emoji} ${BT[S.selectedType].name}`);
         }
 
-        function clearSelection() { S.selectedType = null;
-            updateUI(); }
+        function closeBuildModal() {
+            document.getElementById('build-modal').classList.remove('open');
+        }
 
-        // ==================== СТРОИТЕЛЬСТВО ====================
+        // ==================== РЕЖИМЫ ====================
+        function toggleDeleteMode() {
+            S.deleteMode = !S.deleteMode;
+            S.selectMode = false;
+            S.selectedType = null;
+            if (S.deleteMode) addLog('🗑️ Режим сноса: нажмите на здание чтобы удалить');
+            updateUI();
+        }
+
+        function toggleSelectMode() {
+            S.selectMode = !S.selectMode;
+            S.deleteMode = false;
+            S.selectedType = null;
+            if (S.selectMode) addLog('🔍 Режим информации: наведите на здание');
+            updateUI();
+        }
+
+        function clearAllModes() {
+            S.selectedType = null;
+            S.deleteMode = false;
+            S.selectMode = false;
+            updateUI();
+        }
+
+        // ==================== СТРОИТЕЛЬСТВО / УДАЛЕНИЕ ====================
         function buildAt(wx, wy) {
-            if (!S.selectedType) return;
+            if (!S.selectedType || S.deleteMode) return;
             const t = S.selectedType;
             const info = BT[t];
             if (S.money < info.cost) { addLog('❌ Недостаточно средств!');
                 shakeEl('money-val'); return; }
-
             const snap = S.gridSize;
-            const sx = Math.round(wx / snap) * snap;
-            const sy = Math.round(wy / snap) * snap;
-            const nb = {
-                type: t,
-                x: sx - info.w / 2,
-                y: sy - info.h / 2,
-                w: info.w,
-                h: info.h,
-                placedAt: S.time,
-            };
-
-            // Проверка наложения
-            const allCollidables = [...S.buildings, ...S.roads, ...S.rails];
-            if (info.isRoad) {
-                const overlap = allCollidables.some(b => rectsOverlap(nb, b, 2));
-                if (overlap && !info.isRoad && !info.isRail) { addLog('⚠️ Место занято!'); return; }
-                if (info.isRoad) S.roads.push(nb);
-                else if (info.isRail) S.rails.push(nb);
-            } else {
-                const overlap = allCollidables.some(b => rectsOverlap(nb, b, 4));
-                if (overlap) { addLog('⚠️ Место занято!'); return; }
-                S.buildings.push(nb);
-            }
-
+            const sx = Math.round(wx/snap)*snap;
+            const sy = Math.round(wy/snap)*snap;
+            const nb = { type:t, x:sx-info.w/2, y:sy-info.h/2, w:info.w, h:info.h, placedAt:S.time };
+            const allC = [...S.buildings, ...S.roads, ...S.rails];
+            const overlap = allC.some(b=>rectsOverlap(nb,b, info.isRoad||info.isRail?0:4));
+            if (overlap) { addLog('⚠️ Место занято!'); return; }
             S.money -= info.cost;
-            if (!info.isRoad && !info.isRail) {
+            if (info.isRoad) S.roads.push(nb);
+            else if (info.isRail) S.rails.push(nb);
+            else { S.buildings.push(nb);
                 S.population += info.pop;
-                S.happiness = Math.max(0, Math.min(100, S.happiness + info.happy));
-            }
+                S.happiness = Math.max(0,Math.min(100,S.happiness+info.happy)); }
             updateUI();
             addLog(`✅ Построено: ${info.emoji} ${info.name} (-💰${info.cost.toLocaleString()})`);
-            spawnParticles(sx, sy, info.color || '#f0d060');
+            spawnParticles(sx, sy, '#f0d060');
         }
 
-        function rectsOverlap(a, b, margin) {
-            return !(a.x + a.w - margin < b.x || a.x > b.x + b.w - margin ||
-                a.y + a.h - margin < b.y || a.y > b.y + b.h - margin);
+        function deleteAt(wx, wy) {
+            if (!S.deleteMode) return;
+            const all = [...S.buildings, ...S.roads, ...S.rails];
+            const found = all.find(b=>wx>=b.x && wx<=b.x+b.w && wy>=b.y && wy<=b.y+b.h);
+            if (!found) return;
+            const info = BT[found.type];
+            const refund = Math.floor((info?.cost||0)*0.5);
+            S.money += refund;
+            if (info?.isRoad) S.roads = S.roads.filter(b=>b!==found);
+            else if (info?.isRail) S.rails = S.rails.filter(b=>b!==found);
+            else {
+                S.buildings = S.buildings.filter(b=>b!==found);
+                S.population = Math.max(0, S.population - (info?.pop||0));
+                S.happiness = Math.max(0,Math.min(100,S.happiness-(info?.happy||0)));
+            }
+            updateUI();
+            addLog(`🗑️ Снесено: ${info?.emoji||'?'} ${info?.name||'?'} (+💰${refund.toLocaleString()})`);
+            spawnParticles(found.x+found.w/2, found.y+found.h/2, '#f08888');
+        }
+
+        function rectsOverlap(a,b,margin) {
+            return !(a.x+a.w-margin<b.x || a.x>b.x+b.w-margin || a.y+a.h-margin<b.y || a.y>b.y+b.h-margin);
         }
 
         // ==================== ОТРИСОВКА ====================
-        function drawGround(ctx, camX, camY, w, h) {
-            // Трава с текстурой
-            const grad = ctx.createRadialGradient(w / 2, h / 2, 100, w / 2, h / 2, w);
-            grad.addColorStop(0, '#3d5a2e');
-            grad.addColorStop(0.6, '#2d4a1e');
-            grad.addColorStop(1, '#1a3010');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
+        function worldToScreen(wx, wy) {
+            const cx = S.camX - S.canvas.width/2/S.zoom;
+            const cy = S.camY - S.canvas.height/2/S.zoom;
+            return {
+                x: (wx - cx) * S.zoom,
+                y: (wy - cy) * S.zoom,
+            };
+        }
 
-            // Текстурные пятна травы
-            const gs = S.gridSize;
-            const sx = -((camX % gs) + gs) % gs;
-            const sy = -((camY % gs) + gs) % gs;
-            for (let x = sx; x < w + gs; x += gs) {
-                for (let y = sy; y < h + gs; y += gs) {
-                    const seed = (Math.floor((x + camX) / gs) * 1000 + Math.floor((y + camY) / gs)) * 0.01;
-                    const shade = Math.sin(seed) * 0.06;
-                    ctx.fillStyle = `rgba(255,255,255,${0.02 + shade})`;
-                    ctx.fillRect(x, y, gs, gs);
+        function screenToWorld(sx, sy) {
+            const cx = S.camX - S.canvas.width/2/S.zoom;
+            const cy = S.camY - S.canvas.height/2/S.zoom;
+            return {
+                x: sx/S.zoom + cx,
+                y: sy/S.zoom + cy,
+            };
+        }
+
+        function drawGround(ctx, camX, camY, w, h) {
+            const grad = ctx.createRadialGradient(w/2,h/2,100,w/2,h/2,w);
+            grad.addColorStop(0,'#3d5a2e');
+            grad.addColorStop(0.6,'#2d4a1e');
+            grad.addColorStop(1,'#1a3010');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,w,h);
+            const gs = S.gridSize * S.zoom;
+            const cx = camX - w/2/S.zoom;
+            const cy = camY - h/2/S.zoom;
+            for (let x = -((cx%S.gridSize)+S.gridSize)%S.gridSize; x < w/S.zoom + gs; x += S.gridSize) {
+                for (let y = -((cy%S.gridSize)+S.gridSize)%S.gridSize; y < h/S.zoom + gs; y += S.gridSize) {
+                    const seed = Math.sin((Math.floor((x+cx)/S.gridSize)*1000+Math.floor((y+cy)/S.gridSize))*0.01)*0.06;
+                    ctx.fillStyle = `rgba(255,255,255,${0.02+seed})`;
+                    ctx.fillRect(x*S.zoom, y*S.zoom, gs, gs);
                 }
             }
         }
 
         function drawGrid(ctx, camX, camY, w, h) {
-            const gs = S.gridSize;
-            const sx = -((camX % gs) + gs) % gs;
-            const sy = -((camY % gs) + gs) % gs;
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            const gs = S.gridSize * S.zoom;
+            const cx = camX - w/2/S.zoom;
+            const cy = camY - h/2/S.zoom;
+            const sx = -((cx%S.gridSize)+S.gridSize)%S.gridSize;
+            const sy = -((cy%S.gridSize)+S.gridSize)%S.gridSize;
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            for (let x = sx; x < w + gs; x += gs) { ctx.moveTo(x, 0);
-                ctx.lineTo(x, h); }
-            for (let y = sy; y < h + gs; y += gs) { ctx.moveTo(0, y);
-                ctx.lineTo(w, y); }
+            for (let x=sx; x<w/S.zoom+gs; x+=S.gridSize) { ctx.moveTo(x*S.zoom,0);
+                ctx.lineTo(x*S.zoom,h); }
+            for (let y=sy; y<h/S.zoom+gs; y+=S.gridSize) { ctx.moveTo(0,y*S.zoom);
+                ctx.lineTo(w,y*S.zoom); }
             ctx.stroke();
         }
 
         function drawRoad(ctx, r, camX, camY, info) {
-            const sx = r.x - camX;
-            const sy = r.y - camY;
-            const w = r.w;
-            const h = r.h;
+            const p = worldToScreen(r.x, r.y);
+            const w = r.w * S.zoom;
+            const h = r.h * S.zoom;
             if (info.isRoad) {
-                // Асфальт
                 ctx.fillStyle = '#3a3a3a';
-                ctx.fillRect(sx, sy, w, h);
-                // Бордюры
+                ctx.fillRect(p.x,p.y,w,h);
                 ctx.fillStyle = '#888888';
-                ctx.fillRect(sx, sy, w, 3);
-                ctx.fillRect(sx, sy + h - 3, w, 3);
-                ctx.fillRect(sx, sy, 3, h);
-                ctx.fillRect(sx + w - 3, sy, 3, h);
-                // Разметка
+                ctx.fillRect(p.x,p.y,w,3*S.zoom);
+                ctx.fillRect(p.x,p.y+h-3*S.zoom,w,3*S.zoom);
+                ctx.fillRect(p.x,p.y,3*S.zoom,h);
+                ctx.fillRect(p.x+w-3*S.zoom,p.y,3*S.zoom,h);
                 ctx.strokeStyle = '#ffff66';
-                ctx.lineWidth = 1.5;
-                ctx.setLineDash([8, 12]);
+                ctx.lineWidth = 1.5*S.zoom;
+                ctx.setLineDash([8*S.zoom,12*S.zoom]);
                 ctx.beginPath();
-                ctx.moveTo(sx + w / 2, sy);
-                ctx.lineTo(sx + w / 2, sy + h);
+                ctx.moveTo(p.x+w/2,p.y);
+                ctx.lineTo(p.x+w/2,p.y+h);
                 ctx.stroke();
                 ctx.setLineDash([]);
             } else if (info.isRail) {
-                // Ж/Д полотно
                 ctx.fillStyle = '#8B7355';
-                ctx.fillRect(sx, sy, w, h);
-                // Шпалы
+                ctx.fillRect(p.x,p.y,w,h);
                 ctx.fillStyle = '#5c4030';
-                for (let i = 0; i < h; i += 8) {
-                    ctx.fillRect(sx + 2, sy + i, w - 4, 4);
-                }
-                // Рельсы
+                for (let i=0; i<h; i+=8*S.zoom) ctx.fillRect(p.x+2*S.zoom,p.y+i,w-4*S.zoom,4*S.zoom);
                 ctx.strokeStyle = '#c0c0c0';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2*S.zoom;
                 ctx.beginPath();
-                ctx.moveTo(sx + 8, sy);
-                ctx.lineTo(sx + 8, sy + h);
-                ctx.moveTo(sx + w - 8, sy);
-                ctx.lineTo(sx + w - 8, sy + h);
+                ctx.moveTo(p.x+8*S.zoom,p.y);
+                ctx.lineTo(p.x+8*S.zoom,p.y+h);
+                ctx.moveTo(p.x+w-8*S.zoom,p.y);
+                ctx.lineTo(p.x+w-8*S.zoom,p.y+h);
                 ctx.stroke();
             }
         }
 
         function drawBuilding(ctx, b, camX, camY, info) {
-            const sx = b.x - camX;
-            const sy = b.y - camY;
-            const w = b.w;
-            const h = b.h;
+            const p = worldToScreen(b.x, b.y);
+            const w = b.w * S.zoom;
+            const h = b.h * S.zoom;
             const t = b.type;
-
             ctx.save();
-            // Тень
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillRect(sx + 3, sy + 3, w, h);
+            ctx.fillRect(p.x+3*S.zoom,p.y+3*S.zoom,w,h);
 
-            if (t === 'house') {
-                // Стены
-                ctx.fillStyle = '#f5deb3';
-                ctx.fillRect(sx, sy, w, h - 12);
-                // Крыша
-                ctx.fillStyle = '#c0392b';
+            if (t==='house') {
+                ctx.fillStyle='#f5deb3';
+                ctx.fillRect(p.x,p.y,w,h-12*S.zoom);
+                ctx.fillStyle='#c0392b';
                 ctx.beginPath();
-                ctx.moveTo(sx - 4, sy);
-                ctx.lineTo(sx + w / 2, sy - 16);
-                ctx.lineTo(sx + w + 4, sy);
+                ctx.moveTo(p.x-4*S.zoom,p.y);
+                ctx.lineTo(p.x+w/2,p.y-16*S.zoom);
+                ctx.lineTo(p.x+w+4*S.zoom,p.y);
                 ctx.closePath();
                 ctx.fill();
-                // Окна
-                ctx.fillStyle = '#87ceeb';
-                ctx.fillRect(sx + 7, sy + 8, 10, 10);
-                ctx.fillRect(sx + w - 17, sy + 8, 10, 10);
-                // Дверь
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(sx + w / 2 - 6, sy + h - 18, 12, 18);
-            } else if (t === 'apartment') {
-                const floors = 8;
-                const fh = h / floors;
-                ctx.fillStyle = '#c8d8e8';
-                ctx.fillRect(sx, sy, w, h);
-                for (let i = 0; i < floors; i++) {
-                    ctx.fillStyle = i % 2 === 0 ? '#d0dce8' : '#bcc8d8';
-                    ctx.fillRect(sx, sy + i * fh, w, fh);
-                    // Окна
-                    ctx.fillStyle = '#87ceeb';
-                    for (let j = 0; j < 3; j++) {
-                        ctx.fillRect(sx + 5 + j * 15, sy + i * fh + 3, 8, fh - 6);
-                    }
+                ctx.fillStyle='#87ceeb';
+                ctx.fillRect(p.x+7*S.zoom,p.y+8*S.zoom,10*S.zoom,10*S.zoom);
+                ctx.fillRect(p.x+w-17*S.zoom,p.y+8*S.zoom,10*S.zoom,10*S.zoom);
+                ctx.fillStyle='#8B4513';
+                ctx.fillRect(p.x+w/2-6*S.zoom,p.y+h-18*S.zoom,12*S.zoom,18*S.zoom);
+            } else if (t==='apartment') {
+                const floors=8, fh=h/floors;
+                ctx.fillStyle='#c8d8e8';
+                ctx.fillRect(p.x,p.y,w,h);
+                for (let i=0;i<floors;i++) {
+                    ctx.fillStyle=i%2===0?'#d0dce8':'#bcc8d8';
+                    ctx.fillRect(p.x,p.y+i*fh,w,fh);
+                    ctx.fillStyle='#87ceeb';
+                    for (let j=0;j<3;j++) ctx.fillRect(p.x+5*S.zoom+j*15*S.zoom,p.y+i*fh+3*S.zoom,8*S.zoom,fh-6*S.zoom);
                 }
-            } else if (t === 'mansion') {
-                ctx.fillStyle = '#f0e6d3';
-                ctx.fillRect(sx, sy + 10, w, h - 10);
-                ctx.fillStyle = '#d4af37';
-                ctx.fillRect(sx + 8, sy, w - 16, 24);
-                // Купол
-                ctx.fillStyle = '#c9972e';
+            } else if (t==='mansion') {
+                ctx.fillStyle='#f0e6d3';
+                ctx.fillRect(p.x,p.y+10*S.zoom,w,h-10*S.zoom);
+                ctx.fillStyle='#d4af37';
+                ctx.fillRect(p.x+8*S.zoom,p.y,w-16*S.zoom,24*S.zoom);
+                ctx.fillStyle='#c9972e';
                 ctx.beginPath();
-                ctx.arc(sx + w / 2, sy, 14, Math.PI, 0);
+                ctx.arc(p.x+w/2,p.y,14*S.zoom,Math.PI,0);
                 ctx.fill();
-                // Колонны
-                ctx.fillStyle = '#e8dcc8';
-                ctx.fillRect(sx + 4, sy + 24, 6, h - 14);
-                ctx.fillRect(sx + w - 10, sy + 24, 6, h - 14);
-            } else if (t === 'factory') {
-                ctx.fillStyle = '#778899';
-                ctx.fillRect(sx, sy + 12, w, h - 12);
-                // Трубы
-                ctx.fillStyle = '#555';
-                for (let i = 0; i < 3; i++) {
-                    ctx.fillRect(sx + 8 + i * 16, sy - 16, 8, 28);
-                }
-                // Дым (анимированный)
-                const smokeOff = Math.sin(S.time * 0.05 + b.x) * 3;
-                for (let i = 0; i < 3; i++) {
-                    ctx.fillStyle = 'rgba(180,180,180,0.5)';
+                ctx.fillStyle='#e8dcc8';
+                ctx.fillRect(p.x+4*S.zoom,p.y+24*S.zoom,6*S.zoom,h-14*S.zoom);
+                ctx.fillRect(p.x+w-10*S.zoom,p.y+24*S.zoom,6*S.zoom,h-14*S.zoom);
+            } else if (t==='factory') {
+                ctx.fillStyle='#778899';
+                ctx.fillRect(p.x,p.y+12*S.zoom,w,h-12*S.zoom);
+                ctx.fillStyle='#555';
+                for (let i=0;i<3;i++) ctx.fillRect(p.x+8*S.zoom+i*16*S.zoom,p.y-16*S.zoom,8*S.zoom,28*S.zoom);
+                const so=Math.sin(S.time*0.05+b.x)*3*S.zoom;
+                for (let i=0;i<3;i++) {
+                    ctx.fillStyle='rgba(180,180,180,0.5)';
                     ctx.beginPath();
-                    ctx.arc(sx + 12 + i * 16 + smokeOff, sy - 20 - i * 4, 6 + i * 2, 0, Math.PI * 2);
+                    ctx.arc(p.x+12*S.zoom+i*16*S.zoom+so,p.y-20*S.zoom-i*4*S.zoom,(6+i*2)*S.zoom,0,Math.PI*2);
                     ctx.fill();
                 }
-            } else if (t === 'office') {
-                const floors = 12;
-                const fh = h / floors;
-                ctx.fillStyle = '#9ac8e8';
-                ctx.fillRect(sx, sy, w, h);
-                for (let i = 0; i < floors; i++) {
-                    ctx.fillStyle = i % 2 === 0 ? '#a8d4f0' : '#8ab8d8';
-                    ctx.fillRect(sx, sy + i * fh, w, fh);
-                    ctx.fillStyle = '#ffffff';
-                    for (let j = 0; j < 4; j++) {
-                        ctx.fillRect(sx + 3 + j * 11, sy + i * fh + 2, 7, fh - 4);
-                    }
+            } else if (t==='office') {
+                const floors=12, fh=h/floors;
+                ctx.fillStyle='#9ac8e8';
+                ctx.fillRect(p.x,p.y,w,h);
+                for (let i=0;i<floors;i++) {
+                    ctx.fillStyle=i%2===0?'#a8d4f0':'#8ab8d8';
+                    ctx.fillRect(p.x,p.y+i*fh,w,fh);
+                    ctx.fillStyle='#ffffff';
+                    for (let j=0;j<4;j++) ctx.fillRect(p.x+3*S.zoom+j*11*S.zoom,p.y+i*fh+2*S.zoom,7*S.zoom,fh-4*S.zoom);
                 }
-            } else if (t === 'shop') {
-                ctx.fillStyle = '#ffe4b5';
-                ctx.fillRect(sx, sy, w, h);
-                ctx.fillStyle = '#ff6347';
-                ctx.fillRect(sx + 2, sy, w - 4, 10);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(sx + 4, sy + 14, w - 8, h - 28);
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(sx + w / 2 - 7, sy + h - 12, 14, 10);
-            } else if (t === 'park') {
-                ctx.fillStyle = '#5a8a5a';
-                ctx.fillRect(sx, sy, w, h);
-                // Деревья
-                const treePositions = [
-                    [0.2, 0.25],
-                    [0.5, 0.2],
-                    [0.8, 0.3],
-                    [0.3, 0.6],
-                    [0.7, 0.65],
-                    [0.5, 0.75]
-                ];
-                treePositions.forEach(([tx, ty]) => {
-                    const tx2 = sx + tx * w;
-                    const ty2 = sy + ty * h;
-                    ctx.fillStyle = '#3d2b1f';
-                    ctx.fillRect(tx2 - 2, ty2, 4, 12);
-                    ctx.fillStyle = '#2d6e2d';
+            } else if (t==='shop') {
+                ctx.fillStyle='#ffe4b5';
+                ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#ff6347';
+                ctx.fillRect(p.x+2*S.zoom,p.y,w-4*S.zoom,10*S.zoom);
+                ctx.fillStyle='#ffffff';
+                ctx.fillRect(p.x+4*S.zoom,p.y+14*S.zoom,w-8*S.zoom,h-28*S.zoom);
+                ctx.fillStyle='#8B4513';
+                ctx.fillRect(p.x+w/2-7*S.zoom,p.y+h-12*S.zoom,14*S.zoom,10*S.zoom);
+            } else if (t==='park') {
+                ctx.fillStyle='#5a8a5a';
+                ctx.fillRect(p.x,p.y,w,h);
+                [
+                    [0.2,0.25],
+                    [0.5,0.2],
+                    [0.8,0.3],
+                    [0.3,0.6],
+                    [0.7,0.65],
+                    [0.5,0.75]
+                ].forEach(([tx,ty])=>{
+                    const tx2=p.x+tx*w, ty2=p.y+ty*h;
+                    ctx.fillStyle='#3d2b1f';
+                    ctx.fillRect(tx2-2*S.zoom,ty2,4*S.zoom,12*S.zoom);
+                    ctx.fillStyle='#2d6e2d';
                     ctx.beginPath();
-                    ctx.arc(tx2, ty2 - 2, 8, 0, Math.PI * 2);
+                    ctx.arc(tx2,ty2-2*S.zoom,8*S.zoom,0,Math.PI*2);
                     ctx.fill();
-                    ctx.fillStyle = '#3d8e3d';
+                    ctx.fillStyle='#3d8e3d';
                     ctx.beginPath();
-                    ctx.arc(tx2, ty2 - 6, 7, 0, Math.PI * 2);
+                    ctx.arc(tx2,ty2-6*S.zoom,7*S.zoom,0,Math.PI*2);
                     ctx.fill();
                 });
-                // Пруд
-                ctx.fillStyle = '#4a90c8';
+                ctx.fillStyle='#4a90c8';
                 ctx.beginPath();
-                ctx.ellipse(sx + w * 0.5, sy + h * 0.45, 14, 8, 0, 0, Math.PI * 2);
+                ctx.ellipse(p.x+w*0.5,p.y+h*0.45,14*S.zoom,8*S.zoom,0,0,Math.PI*2);
                 ctx.fill();
-            } else if (t === 'school') {
-                ctx.fillStyle = '#d4a574';
-                ctx.fillRect(sx, sy + 6, w, h - 6);
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(sx - 2, sy, w + 4, 12);
-                ctx.fillStyle = '#87ceeb';
-                for (let i = 0; i < 4; i++) {
-                    ctx.fillRect(sx + 5 + i * 11, sy + 18, 7, 8);
-                }
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(sx + w / 2 - 5, sy + h - 14, 10, 14);
-            } else if (t === 'hospital') {
-                ctx.fillStyle = '#f8f8f8';
-                ctx.fillRect(sx, sy, w, h);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(sx + w / 2 - 10, sy, 20, 14);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(sx + w / 2 - 3, sy + 2, 6, 10);
-                ctx.fillRect(sx + w / 2 - 8, sy + 6, 16, 3);
-                ctx.fillStyle = '#87ceeb';
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        ctx.fillRect(sx + 5 + j * 16, sy + 18 + i * 12, 10, 8);
-                    }
-                }
-            } else if (t === 'stadium') {
-                ctx.fillStyle = '#d0d0d0';
-                ctx.fillRect(sx, sy, w, h);
-                ctx.fillStyle = '#3a8a3a';
+            } else if (t==='school') {
+                ctx.fillStyle='#d4a574';
+                ctx.fillRect(p.x,p.y+6*S.zoom,w,h-6*S.zoom);
+                ctx.fillStyle='#c0392b';
+                ctx.fillRect(p.x-2*S.zoom,p.y,w+4*S.zoom,12*S.zoom);
+                ctx.fillStyle='#87ceeb';
+                for (let i=0;i<4;i++) ctx.fillRect(p.x+5*S.zoom+i*11*S.zoom,p.y+18*S.zoom,7*S.zoom,8*S.zoom);
+                ctx.fillStyle='#8B4513';
+                ctx.fillRect(p.x+w/2-5*S.zoom,p.y+h-14*S.zoom,10*S.zoom,14*S.zoom);
+            } else if (t==='hospital') {
+                ctx.fillStyle='#f8f8f8';
+                ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#e74c3c';
+                ctx.fillRect(p.x+w/2-10*S.zoom,p.y,20*S.zoom,14*S.zoom);
+                ctx.fillStyle='#ffffff';
+                ctx.fillRect(p.x+w/2-3*S.zoom,p.y+2*S.zoom,6*S.zoom,10*S.zoom);
+                ctx.fillRect(p.x+w/2-8*S.zoom,p.y+6*S.zoom,16*S.zoom,3*S.zoom);
+                ctx.fillStyle='#87ceeb';
+                for (let i=0;i<3;i++) for (let j=0;j<3;j++) ctx.fillRect(p.x+5*S.zoom+j*16*S.zoom,p.y+18*S.zoom+i*12*S.zoom,10*S.zoom,8*S.zoom);
+            } else if (t==='stadium') {
+                ctx.fillStyle='#d0d0d0';
+                ctx.fillRect(p.x,p.y,w,h);
+                ctx.fillStyle='#3a8a3a';
                 ctx.beginPath();
-                ctx.ellipse(sx + w / 2, sy + h / 2, w / 2 - 4, h / 2 - 4, 0, 0, Math.PI * 2);
+                ctx.ellipse(p.x+w/2,p.y+h/2,w/2-4*S.zoom,h/2-4*S.zoom,0,0,Math.PI*2);
                 ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle='#ffffff';
+                ctx.lineWidth=1;
                 ctx.stroke();
-                ctx.strokeStyle = '#555';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle='#555';
+                ctx.lineWidth=2*S.zoom;
                 ctx.beginPath();
-                ctx.arc(sx + w / 2, sy + h / 2, 10, 0, Math.PI * 2);
+                ctx.arc(p.x+w/2,p.y+h/2,10*S.zoom,0,Math.PI*2);
                 ctx.stroke();
             }
 
-            // Подсветка при наведении
-            if (S.hovered === b) {
-                ctx.strokeStyle = '#f0d060';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(sx - 2, sy - 2, w + 4, h + 4);
-                ctx.strokeStyle = 'rgba(240,208,96,0.35)';
-                ctx.lineWidth = 7;
-                ctx.strokeRect(sx - 5, sy - 5, w + 10, h + 10);
+            if (S.hovered===b) {
+                ctx.strokeStyle='#f0d060';
+                ctx.lineWidth=3*S.zoom;
+                ctx.strokeRect(p.x-2*S.zoom,p.y-2*S.zoom,w+4*S.zoom,h+4*S.zoom);
+                ctx.strokeStyle='rgba(240,208,96,0.35)';
+                ctx.lineWidth=7*S.zoom;
+                ctx.strokeRect(p.x-5*S.zoom,p.y-5*S.zoom,w+10*S.zoom,h+10*S.zoom);
             }
-
             ctx.restore();
         }
 
         function drawPeople(ctx, camX, camY) {
-            S.people.forEach(p => {
-                const sx = p.x - camX;
-                const sy = p.y - camY;
-                if (sx < -30 || sx > S.canvas.width + 30 || sy < -30 || sy > S.canvas.height + 30) return;
-                // Тень
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            S.people.forEach(p=>{
+                const wp = worldToScreen(p.x, p.y);
+                if (wp.x<-30||wp.x>S.canvas.width+30||wp.y<-30||wp.y>S.canvas.height+30) return;
+                const sz=p.size*S.zoom;
+                ctx.fillStyle='rgba(0,0,0,0.3)';
                 ctx.beginPath();
-                ctx.ellipse(sx, sy + p.size * 0.8, p.size * 0.8, p.size * 0.3, 0, 0, Math.PI * 2);
+                ctx.ellipse(wp.x,wp.y+sz*0.8,sz*0.8,sz*0.3,0,0,Math.PI*2);
                 ctx.fill();
-                // Тело
-                ctx.fillStyle = p.color;
+                ctx.fillStyle=p.color;
                 ctx.beginPath();
-                ctx.arc(sx, sy - p.size * 0.5, p.size * 0.6, 0, Math.PI * 2);
+                ctx.arc(wp.x,wp.y-sz*0.5,sz*0.6,0,Math.PI*2);
                 ctx.fill();
-                // Одежда
-                ctx.fillStyle = `hsl(${parseInt(p.color.match(/\d+/)?.[0]||0)+30},50%,55%)`;
-                ctx.fillRect(sx - p.size * 0.4, sy - p.size * 0.2, p.size * 0.8, p.size * 0.9);
-                // Глаза
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle=`hsl(${(parseInt(p.color.match(/\d+/)?.[0]||0)+30)%360},50%,55%)`;
+                ctx.fillRect(wp.x-sz*0.4,wp.y-sz*0.2,sz*0.8,sz*0.9);
+                ctx.fillStyle='#fff';
                 ctx.beginPath();
-                ctx.arc(sx - p.size * 0.2, sy - p.size * 0.6, p.size * 0.18, 0, Math.PI * 2);
-                ctx.arc(sx + p.size * 0.2, sy - p.size * 0.6, p.size * 0.18, 0, Math.PI * 2);
+                ctx.arc(wp.x-sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2);
+                ctx.arc(wp.x+sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle = '#000';
+                ctx.fillStyle='#000';
                 ctx.beginPath();
-                ctx.arc(sx - p.size * 0.15, sy - p.size * 0.6, p.size * 0.08, 0, Math.PI * 2);
-                ctx.arc(sx + p.size * 0.25, sy - p.size * 0.6, p.size * 0.08, 0, Math.PI * 2);
+                ctx.arc(wp.x-sz*0.15,wp.y-sz*0.6,sz*0.08,0,Math.PI*2);
+                ctx.arc(wp.x+sz*0.25,wp.y-sz*0.6,sz*0.08,0,Math.PI*2);
                 ctx.fill();
             });
         }
 
         function drawParticles(ctx, camX, camY) {
-            S.particles = S.particles.filter(p => p.life > 0);
-            S.particles.forEach(p => {
-                const sx = p.x - camX;
-                const sy = p.y - camY;
-                ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.life})`;
+            S.particles=S.particles.filter(p=>p.life>0);
+            S.particles.forEach(p=>{
+                const wp=worldToScreen(p.x,p.y);
+                ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${p.life})`;
                 ctx.beginPath();
-                ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+                ctx.arc(wp.x,wp.y,p.size*S.zoom,0,Math.PI*2);
                 ctx.fill();
             });
         }
 
         function gameLoop(ts) {
-            S.time = ts;
-            const ctx = S.ctx;
-            const cv = S.canvas;
-            if (!cv || !ctx) { requestAnimationFrame(gameLoop); return; }
-            const w = cv.width;
-            const h = cv.height;
-            const camX = S.camX - w / 2;
-            const camY = S.camY - h / 2;
+            S.time=ts;
+            const ctx=S.ctx, cv=S.canvas;
+            if (!cv||!ctx) { requestAnimationFrame(gameLoop); return; }
+            const w=cv.width, h=cv.height;
+            ctx.clearRect(0,0,w,h);
 
-            // Фон
-            drawGround(ctx, camX, camY, w, h);
-            drawGrid(ctx, camX, camY, w, h);
+            drawGround(ctx, S.camX, S.camY, w, h);
+            drawGrid(ctx, S.camX, S.camY, w, h);
 
-            // Дороги
-            S.roads.forEach(r => drawRoad(ctx, r, camX, camY, BT.road));
-            S.rails.forEach(r => drawRoad(ctx, r, camX, camY, BT.rail));
+            S.roads.forEach(r=>drawRoad(ctx,r,S.camX,S.camY,BT.road));
+            S.rails.forEach(r=>drawRoad(ctx,r,S.camX,S.camY,BT.rail));
+            S.buildings.forEach(b=>{ const info=BT[b.type]; if(info) drawBuilding(ctx,b,S.camX,S.camY,info); });
 
-            // Здания
-            S.buildings.forEach(b => {
-                const info = BT[b.type];
-                if (info) drawBuilding(ctx, b, camX, camY, info);
-            });
-
-            // Люди
             updatePeople();
-            drawPeople(ctx, camX, camY);
-
-            // Частицы
+            drawPeople(ctx, S.camX, S.camY);
             updateParticles();
-            drawParticles(ctx, camX, camY);
+            drawParticles(ctx, S.camX, S.camY);
 
-            // Призрак строительства
-            if (S.selectedType && !S.dragging) {
-                const info = BT[S.selectedType];
-                const snap = S.gridSize;
-                const wx = S.mx + camX;
-                const wy = S.my + camY;
-                const sx2 = Math.round(wx / snap) * snap - info.w / 2;
-                const sy2 = Math.round(wy / snap) * snap - info.h / 2;
-                const sx = sx2 - camX;
-                const sy = sy2 - camY;
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillRect(sx, sy, info.w, info.h);
-                ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                ctx.setLineDash([5, 5]);
-                ctx.lineWidth = 2;
-                ctx.strokeRect(sx, sy, info.w, info.h);
+            // Призрак
+            if (S.selectedType && !S.dragging && !S.deleteMode) {
+                const info=BT[S.selectedType];
+                const snap=S.gridSize;
+                const sw=screenToWorld(S.mx,S.my);
+                const sx2=Math.round(sw.x/snap)*snap-info.w/2;
+                const sy2=Math.round(sw.y/snap)*snap-info.h/2;
+                const p=worldToScreen(sx2,sy2);
+                ctx.fillStyle='rgba(255,255,255,0.2)';
+                ctx.fillRect(p.x,p.y,info.w*S.zoom,info.h*S.zoom);
+                ctx.strokeStyle='rgba(255,255,255,0.7)';
+                ctx.setLineDash([5*S.zoom,5*S.zoom]);
+                ctx.lineWidth=2*S.zoom;
+                ctx.strokeRect(p.x,p.y,info.w*S.zoom,info.h*S.zoom);
                 ctx.setLineDash([]);
-                ctx.font = '20px serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(info.emoji, sx + info.w / 2, sy + info.h / 2);
+                ctx.font=`${20*S.zoom}px serif`;
+                ctx.textAlign='center';
+                ctx.textBaseline='middle';
+                ctx.fillText(info.emoji,p.x+info.w*S.zoom/2,p.y+info.h*S.zoom/2);
             }
 
             // Доход
-            S.incomeTimer += 16;
-            if (S.incomeTimer >= 3000) {
-                S.incomeTimer = 0;
-                let totalInc = 0;
-                S.buildings.forEach(b => { totalInc += (BT[b.type]?.income || 0); });
-                S.rails.forEach(() => { totalInc += 15; });
-                S.money += totalInc;
-                S.happiness += (Math.random() - 0.47) * 0.4;
-                S.happiness = Math.max(0, Math.min(100, S.happiness));
+            S.incomeTimer+=16;
+            if (S.incomeTimer>=3000) {
+                S.incomeTimer=0;
+                let total=0;
+                S.buildings.forEach(b=>{ total+=(BT[b.type]?.income||0); });
+                S.rails.forEach(()=>{ total+=15; });
+                S.money+=total;
+                S.happiness+=(Math.random()-0.47)*0.4;
+                S.happiness=Math.max(0,Math.min(100,S.happiness));
                 updateUI();
             }
-
             requestAnimationFrame(gameLoop);
         }
 
-        // ==================== ОБНОВЛЕНИЕ ЛЮДЕЙ ====================
         function updatePeople() {
-            S.people.forEach(p => {
-                p.walkTimer += 0.05;
-                if (Math.random() < 0.02) {
-                    p.vx += (Math.random() - 0.5) * 0.6;
-                    p.vy += (Math.random() - 0.5) * 0.6;
-                    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-                    if (speed > 2) { p.vx *= 1.5 / speed;
-                        p.vy *= 1.5 / speed; }
-                }
-                p.x += p.vx;
-                p.y += p.vy;
-                // Гравитация к центру
-                const dist = Math.sqrt(p.x * p.x + p.y * p.y);
-                if (dist > 500) {
-                    p.vx -= p.x / dist * 0.03;
-                    p.vy -= p.y / dist * 0.03;
-                }
+            S.people.forEach(p=>{
+                p.walkTimer+=0.05;
+                if (Math.random()<0.02) { p.vx+=(Math.random()-0.5)*0.6;
+                    p.vy+=(Math.random()-0.5)*0.6; const sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy); if (sp>2) { p.vx*=1.5/sp;
+                    p.vy*=1.5/sp; } }
+                p.x+=p.vx;
+                p.y+=p.vy;
+                const d=Math.sqrt(p.x*p.x+p.y*p.y); if (d>500) { p.vx-=p.x/d*0.03;
+                    p.vy-=p.y/d*0.03; }
             });
         }
 
         function updateParticles() {
-            S.particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.1;
-                p.life -= 0.025;
-                p.size *= 0.995;
-            });
+            S.particles.forEach(p=>{ p.x+=p.vx;
+                p.y+=p.vy;
+                p.vy+=0.1;
+                p.life-=0.025;
+                p.size*=0.995; });
         }
 
-        function spawnParticles(wx, wy, colorHex) {
-            const hex = colorHex || '#f0d060';
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            for (let i = 0; i < 25; i++) {
-                S.particles.push({
-                    x: wx,
-                    y: wy,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 4,
-                    life: 1,
-                    size: Math.random() * 5 + 2,
-                    r,
-                    g,
-                    b,
-                });
-            }
+        function spawnParticles(wx,wy,colorHex) {
+            const hex=colorHex||'#f0d060';
+            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+            for (let i=0;i<25;i++) S.particles.push({ x:wx,y:wy, vx:(Math.random()-0.5)*5, vy:(Math.random()-0.5)*5-4, life:1,
+                size:Math.random()*5+2, r,g,b });
         }
 
         // ==================== СОБЫТИЯ ====================
-        function getWorldCoords(e) {
-            const rect = S.canvas.getBoundingClientRect();
-            return {
-                sx: e.clientX - rect.left,
-                sy: e.clientY - rect.top,
-                wx: e.clientX - rect.left + S.camX - S.canvas.width / 2,
-                wy: e.clientY - rect.top + S.camY - S.canvas.height / 2,
-            };
+        function getCanvasCoords(e) {
+            const rect=S.canvas.getBoundingClientRect();
+            return { sx:e.clientX-rect.left, sy:e.clientY-rect.top };
         }
 
-        function findAt(wx, wy) {
-            const all = [...S.buildings, ...S.roads, ...S.rails];
-            return all.find(b => wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h) || null;
+        function getWorldFromEvent(e) {
+            const c=getCanvasCoords(e);
+            return { ...c, ...screenToWorld(c.sx,c.sy) };
         }
 
-        document.addEventListener('mousemove', e => {
+        function findAt(wx,wy) {
+            const all=[...S.buildings,...S.roads,...S.rails];
+            return all.find(b=>wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h)||null;
+        }
+
+        // Мышь
+        document.addEventListener('mousemove', e=>{
             if (!S.canvas) return;
-            const c = getWorldCoords(e);
-            S.mx = c.sx;
-            S.my = c.sy;
+            const c=getCanvasCoords(e);
+            S.mx=c.sx;
+            S.my=c.sy;
             if (S.dragging) {
-                S.camX -= e.clientX - S.dragSX;
-                S.camY -= e.clientY - S.dragSY;
-                S.dragSX = e.clientX;
-                S.dragSY = e.clientY;
+                S.camX-=(e.clientX-S.dragSX)/S.zoom;
+                S.camY-=(e.clientY-S.dragSY)/S.zoom;
+                S.dragSX=e.clientX;
+                S.dragSY=e.clientY;
             }
-            S.hovered = findAt(c.wx, c.wy);
-            const popup = document.getElementById('info-popup');
-            if (S.hovered && !S.dragging && !S.selectedType) {
-                const b = S.hovered;
-                const info = BT[b.type];
-                popup.style.display = 'block';
-                popup.style.left = (c.sx + 22) + 'px';
-                popup.style.top = (c.sy - 15) + 'px';
-                popup.innerHTML = `<span class="pop-title">${info?.emoji||''} ${info?.name||''}</span><br>
+            const w=getWorldFromEvent(e);
+            S.hovered=findAt(w.wx,w.wy);
+            const popup=document.getElementById('info-popup');
+            if (S.hovered && !S.dragging && (S.selectMode || (!S.selectedType && !S.deleteMode))) {
+                const b=S.hovered;
+                const info=BT[b.type];
+                popup.style.display='block';
+                popup.style.left=(c.sx+22)+'px';
+                popup.style.top=(c.sy-15)+'px';
+                popup.innerHTML=`<span class="pop-title">${info?.emoji||''} ${info?.name||''}</span><br>
               <span style="color:#aaa;">Размер:</span> ${b.w}x${b.h}<br>
               ${info&&!info.isRoad&&!info.isRail?`<span style="color:#aaa;">Население:</span> +${info.pop}<br>`:''}
               <span style="color:#aaa;">Доход/мес:</span> 💰${info?.income||0}<br>
               <span style="color:#aaa;">Счастье:</span> ${(info?.happy||0)>=0?'+':''}${info?.happy||0}`;
-            } else { popup.style.display = 'none'; }
+            } else { popup.style.display='none'; }
         });
 
-        document.addEventListener('mousedown', e => {
-            if (!S.canvas || e.target.closest('#build-panel') || e.target.closest('#top-bar')) return;
-            if (e.button === 0 && S.selectedType) {
-                const c = getWorldCoords(e);
-                buildAt(c.wx, c.wy);
-            } else if (e.button === 0 && !S.selectedType) {
-                S.dragging = true;
-                S.dragSX = e.clientX;
-                S.dragSY = e.clientY;
+        document.addEventListener('mousedown', e=>{
+            if (!S.canvas||e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
+            if (e.button===0) {
+                const w=getWorldFromEvent(e);
+                if (S.deleteMode) { deleteAt(w.wx,w.wy); return; }
+                if (S.selectedType && !S.selectMode) { buildAt(w.wx,w.wy); return; }
+                S.dragging=true;
+                S.dragSX=e.clientX;
+                S.dragSY=e.clientY;
                 updateUI();
             }
-            if (e.button === 2) { e.preventDefault();
-                clearSelection(); }
+            if (e.button===2) { e.preventDefault();
+                clearAllModes(); }
         });
 
-        document.addEventListener('mouseup', () => { S.dragging = false;
+        document.addEventListener('mouseup', ()=>{ S.dragging=false;
             updateUI(); });
-        document.addEventListener('contextmenu', e => { if (e.target.closest('#game-canvas')) e.preventDefault(); });
-        document.addEventListener('wheel', e => {
-            if (!S.canvas) return;
-            e.preventDefault();
-            const rect = S.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            const wx = mx + S.camX - S.canvas.width / 2;
-            const wy = my + S.camY - S.canvas.height / 2;
-            const zf = 1.07;
-            if (e.deltaY < 0) S.gridSize = Math.min(100, S.gridSize * zf);
-            else S.gridSize = Math.max(18, S.gridSize / zf);
-            S.camX = wx - mx + S.canvas.width / 2;
-            S.camY = wy - my + S.canvas.height / 2;
-        }, { passive: false });
+        document.addEventListener('contextmenu', e=>{ if (e.target.closest('#game-canvas')) e.preventDefault(); });
 
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') clearSelection();
-            const keys = { '1': 'road', '2': 'rail', '3': 'house', '4': 'apartment', '5': 'mansion', '6': 'shop', '7': 'factory',
-                '8': 'office', '9': 'park', '0': 'school', '-': 'hospital', '=': 'stadium' };
-            if (keys[e.key]) selectBuild(keys[e.key]);
+        document.addEventListener('wheel', e=>{
+            if (!S.canvas||e.target.closest('#build-modal')) return;
+            e.preventDefault();
+            const rect=S.canvas.getBoundingClientRect();
+            const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+            const w=screenToWorld(mx,my);
+            const zf=1.07;
+            if (e.deltaY<0) S.zoom=Math.min(3,S.zoom*zf);
+            else S.zoom=Math.max(0.25,S.zoom/zf);
+            S.gridSize=Math.round(48*S.zoom);
+            const w2=screenToWorld(mx,my);
+            S.camX+=w.x-w2.x;
+            S.camY+=w.y-w2.y;
+        }, { passive:false });
+
+        // Тач-события для мобильных
+        document.addEventListener('touchstart', e=>{
+            if (!S.canvas||e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
+            if (e.touches.length===2) {
+                S.dragging=false;
+                S.touchesDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1]
+                    .clientY);
+                S.lastPinchZoom=S.zoom;
+                return;
+            }
+            if (e.touches.length===1) {
+                const t=e.touches[0];
+                const rect=S.canvas.getBoundingClientRect();
+                const sx=t.clientX-rect.left, sy=t.clientY-rect.top;
+                S.mx=sx;
+                S.my=sy;
+                S.dragSX=t.clientX;
+                S.dragSY=t.clientY;
+                S.dragging=true;
+                updateUI();
+            }
+        }, { passive:false });
+
+        document.addEventListener('touchmove', e=>{
+            if (!S.canvas) return;
+            if (e.touches.length===2) {
+                e.preventDefault();
+                const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+                const scale=dist/S.touchesDist;
+                S.zoom=Math.max(0.25,Math.min(3,S.lastPinchZoom*scale));
+                S.gridSize=Math.round(48*S.zoom);
+            } else if (e.touches.length===1 && S.dragging) {
+                S.camX-=(e.touches[0].clientX-S.dragSX)/S.zoom;
+                S.camY-=(e.touches[0].clientY-S.dragSY)/S.zoom;
+                S.dragSX=e.touches[0].clientX;
+                S.dragSY=e.touches[0].clientY;
+                const rect=S.canvas.getBoundingClientRect();
+                S.mx=e.touches[0].clientX-rect.left;
+                S.my=e.touches[0].clientY-rect.top;
+            }
+        }, { passive:false });
+
+        document.addEventListener('touchend', e=>{
+            if (!S.canvas) return;
+            if (e.touches.length===0) {
+                // Проверяем был ли это тап (не драг)
+                const wasDrag=S.dragging && Math.abs(e.changedTouches[0].clientX-S.dragSX)<5 && Math.abs(e.changedTouches[0]
+                    .clientY-S.dragSY)<5;
+                if (!S.dragging||wasDrag) {
+                    const w=getWorldFromEvent(e.changedTouches[0]);
+                    if (S.deleteMode) deleteAt(w.wx,w.wy);
+                    else if (S.selectedType && !S.selectMode) buildAt(w.wx,w.wy);
+                }
+                S.dragging=false;
+                updateUI();
+            }
+        });
+
+        document.addEventListener('keydown', e=>{
+            if (e.key==='Escape') { clearAllModes();
+                closeBuildModal(); }
+            if (e.key==='Delete'||e.key==='Backspace') toggleDeleteMode();
+            if (e.key==='b'||e.key==='B') openBuildModal();
+            if (e.key==='i'||e.key==='I') toggleSelectMode();
+        });
+
+        // Закрытие модального окна по клику вне
+        document.getElementById('build-modal').addEventListener('click', function(e) {
+            if (e.target===this) closeBuildModal();
         });
 
         // ==================== УТИЛИТЫ ====================
         function addLog(msg) {
-            const log = document.getElementById('message-log');
-            const d = document.createElement('div');
-            d.className = 'log-msg';
-            d.textContent = msg;
+            const log=document.getElementById('message-log');
+            const d=document.createElement('div');
+            d.className='log-msg';
+            d.textContent=msg;
             log.appendChild(d);
-            setTimeout(() => d.remove(), 3500);
-            if (log.children.length > 6) log.firstChild.remove();
+            setTimeout(()=>d.remove(),3500);
+            if (log.children.length>6) log.firstChild.remove();
         }
 
         function shakeEl(id) {
-            const el = document.getElementById(id);
+            const el=document.getElementById(id);
             if (!el) return;
-            el.style.animation = 'shake 0.4s ease';
-            setTimeout(() => el.style.animation = '', 400);
+            el.style.animation='shake 0.4s ease';
+            setTimeout(()=>el.style.animation='',400);
         }
 
         function showHelp() {
-            alert('🎮 УПРАВЛЕНИЕ:\n\n' +
-                '🖱️ ЛКМ — строить / перетаскивать карту\n' +
-                '🖱️ Колёсико — масштаб\n' +
-                '⌨️ Клавиши 1-9,0,-,= — выбор инструментов\n' +
-                '⌨️ Esc / ПКМ — отмена\n\n' +
-                '🏗️ СТРОИТЕЛЬСТВО:\n' +
-                '🛣️ Дороги и ж/д пути\n' +
-                '🏠 Жилые дома, ЖК, особняки\n' +
-                '🏪 Магазины, заводы, бизнес-центры\n' +
-                '🌳 Парки, школы, больницы, стадионы\n\n' +
-                '💰 Здания приносят ежемесячный доход!\n' +
-                '👥 Следите за населением и счастьем.');
+            alert('🎮 УПРАВЛЕНИЕ:\n\n'+
+                '🖱️ ПК: ЛКМ — строить/перетаскивать\n'+
+                '🖱️ Колёсико — масштаб\n'+
+                '📱 Моб.: касание — строить/перетаскивать\n'+
+                '📱 Щипок — масштаб\n\n'+
+                '⌨️ Клавиши:\n'+
+                '  B — открыть меню построек\n'+
+                '  Delete — режим сноса\n'+
+                '  I — режим информации\n'+
+                '  Esc — отмена всего\n\n'+
+                '🏗️ Нижняя панель: Построить | Снести | Инфо\n'+
+                '🔄 Переключатель ПК/Моб в верхней панели');
         }
 
-        const shakeCSS = document.createElement('style');
-        shakeCSS.textContent =
-            '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
+        const shakeCSS=document.createElement('style');
+        shakeCSS.textContent='@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
         document.head.appendChild(shakeCSS);
 
         console.log('🏛️ President Simulator 2D готов!');
-        console.log('Стройте дороги, дома, заводы, парки и управляйте страной!');
+        console.log('Нижняя панель: Построить | Снести | Инфо');
+        console.log('Верхняя панель: переключатель ПК/Мобильная версия');
     </script>
 </body>
 </html>
