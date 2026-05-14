@@ -2,1592 +2,601 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>President Simulator 2D - Градостроительный симулятор</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Глобальная эпидемия · Создай свой вирус и зарази мир</title>
     <style>
-        :root {
-            --bg: #0a0a14;
-            --panel: #1a1a2e;
-            --accent: #f0c040;
-            --gold: #e8c547;
-            --text: #e8e8e8;
-            --border: #2e2e4e;
-            --hover: #2a2a50;
-        }
-
         * {
-            margin: 0;
-            padding: 0;
+            user-select: none;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #060610;
-            overflow: hidden;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            position: fixed;
+            background: linear-gradient(145deg, #021017 0%, #020c12 100%);
+            font-family: 'Segoe UI', 'Poppins', 'Orbitron', 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
 
-        #splash {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #060610 70%);
+        /* главный контейнер игры */
+        .game-container {
+            background: rgba(0, 10, 20, 0.65);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 16px 20px 20px 20px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        /* карта мира + панель управления */
+        .world-panel {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
-            padding: 20px;
-        }
-        #splash.hidden {
-            display: none;
-        }
-        .splash-stars {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-        .splash-title {
-            font-size: clamp(2em, 5vw, 3.2em);
-            font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(180deg, #ffe08a, #c8943e, #8b5e14);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            filter: drop-shadow(0 4px 20px rgba(200,150,50,0.4));
-            animation: titleGlow 2s ease-in-out infinite;
-        }
-        @keyframes titleGlow {
-            0%,
-            100% {
-                filter: drop-shadow(0 4px 20px rgba(200,150,50,0.4));
-            }
-            50% {
-                filter: drop-shadow(0 4px 35px rgba(240,200,80,0.7));
-            }
-        }
-        .splash-subtitle {
-            color: #b0a0c0;
-            font-size: clamp(0.9em, 2vw, 1.1em);
-            letter-spacing: 2px;
-        }
-        .splash-form {
-            background: rgba(20,18,40,0.9);
-            border: 1px solid #3a3050;
-            border-radius: 20px;
-            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: min(440px, 90vw);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-        }
-        .splash-form label {
-            font-weight: 700;
-            color: #d4b060;
-            font-size: 0.95em;
-            letter-spacing: 1px;
-        }
-        .splash-form input {
-            background: #121025;
-            border: 2px solid #3a3050;
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            transition: 0.3s;
-            outline: none;
-        }
-        .splash-form input:focus {
-            border-color: #e8c547;
-            box-shadow: 0 0 25px rgba(232,197,71,0.25);
-        }
-        .btn-create {
-            background: linear-gradient(180deg, #f0c040, #b8781a);
-            border: none;
-            color: #1a1020;
-            font-weight: 800;
-            font-size: 1.2em;
-            padding: 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            letter-spacing: 1.5px;
-            transition: 0.3s;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
-        .btn-create:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(240,192,64,0.45);
-        }
-        .splash-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn-load {
-            background: rgba(40,35,70,0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: 0.9em;
-        }
-        .btn-load:hover {
-            background: #3a3050;
-            border-color: #c8943e;
+            align-items: flex-start;
         }
 
-        #game-screen {
-            display: none;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            position: relative;
-            flex-direction: column;
-        }
-        #game-screen.active {
-            display: flex;
+        /* SVG карта мира (стилизованная) */
+        .map-holder {
+            background: radial-gradient(circle at 30% 20%, #0a2a36, #021016);
+            border-radius: 32px;
+            padding: 12px;
+            box-shadow: 0 12px 28px black;
+            border: 1px solid #1f6e7e;
         }
 
-        #top-bar {
-            z-index: 100;
-            background: linear-gradient(180deg, rgba(18,15,35,0.97), rgba(14,12,28,0.95));
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            min-height: 50px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .country-name-display {
-            font-weight: 800;
-            font-size: clamp(0.9em, 2.5vw, 1.25em);
-            background: linear-gradient(180deg, #ffe08a, #c8943e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            white-space: nowrap;
-        }
-        .resources {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .resource {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 700;
-            font-size: clamp(0.7em, 1.8vw, 0.95em);
-            white-space: nowrap;
-        }
-        .res-icon {
-            font-size: 1.2em;
-        }
-        .res-money {
-            color: #f0d060;
-        }
-        .res-pop {
-            color: #6dc8e8;
-        }
-        .res-happy {
-            color: #6ce89c;
-        }
-        .top-buttons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .btn-top {
-            background: rgba(40,35,70,0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: clamp(0.7em, 1.5vw, 0.85em);
-            white-space: nowrap;
-        }
-        .btn-top:hover {
-            background: #3a3050;
-            border-color: #c8943e;
-        }
-        .version-badge {
-            font-size: 0.7em;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: #2a2050;
-            color: #aab;
-            font-weight: 600;
-        }
-
-        #game-canvas {
-            flex: 1;
-            cursor: grab;
+        svg {
             display: block;
-            touch-action: none;
-            min-height: 0;
-        }
-        #game-canvas.building {
-            cursor: crosshair;
-        }
-        #game-canvas.grabbing {
-            cursor: grabbing;
-        }
-
-        #bottom-panel {
-            z-index: 100;
-            background: rgba(16,14,30,0.96);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px 10px;
-            min-height: 55px;
-            flex-wrap: wrap;
-        }
-        .bottom-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 8px 14px;
-            border-radius: 14px;
+            width: 760px;
+            height: auto;
+            background: #00141e;
+            border-radius: 24px;
             cursor: pointer;
-            transition: 0.25s;
-            border: 2px solid transparent;
-            background: rgba(30,25,55,0.7);
-            font-weight: 700;
-            font-size: 0.75em;
-            color: #ddd;
-            min-width: 55px;
-            text-align: center;
-        }
-        .bottom-btn:active {
-            transform: scale(0.95);
-        }
-        .bottom-btn.active {
-            border-color: #f0d060 !important;
-            background: rgba(200,160,50,0.25) !important;
-            box-shadow: 0 0 20px rgba(240,208,96,0.3);
-        }
-        .bottom-btn.danger {
-            border-color: #802020;
-            color: #f08888;
-        }
-        .bottom-btn.danger.active {
-            border-color: #f04444 !important;
-            background: rgba(180,40,40,0.4) !important;
-        }
-        .bottom-btn-icon {
-            font-size: 1.6em;
-            line-height: 1;
-        }
-        .bottom-btn-label {
-            font-size: 0.7em;
-            letter-spacing: 0.5px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
 
-        #build-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        /* стили регионов — динамика через js */
+        .country {
+            transition: filter 0.2s ease;
+            cursor: pointer;
         }
-        #build-modal.open {
-            display: flex;
+        .country:hover {
+            filter: brightness(1.2) drop-shadow(0 0 4px cyan);
         }
-        .modal-content {
-            background: #1a1830;
-            border: 1px solid #3a3050;
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 650px;
-            width: 95vw;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+
+        /* правая панель */
+        .virus-lab {
+            background: rgba(0, 20, 30, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 18px 20px;
+            width: 300px;
+            border: 1px solid #2fa0b0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: #b9f3ff;
         }
-        .modal-title {
-            font-weight: 800;
-            font-size: 1.2em;
-            color: #f0d060;
+
+        .virus-name-area {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .virus-name-area input {
+            background: #021e28;
+            border: 1px solid #2cc0d0;
+            border-radius: 40px;
+            padding: 10px 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            color: #d4fcff;
+            width: 100%;
+            font-family: monospace;
             letter-spacing: 1px;
         }
-        .modal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 8px;
-        }
-        .modal-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 10px 6px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.15s;
-            border: 2px solid transparent;
-            background: rgba(30,25,55,0.6);
-            text-align: center;
-            will-change: transform;
-        }
-        .modal-item:active {
-            transform: scale(0.95);
-        }
-        .modal-item.selected {
-            border-color: #f0d060 !important;
-            background: rgba(200,160,50,0.25) !important;
-            box-shadow: 0 0 20px rgba(240,208,96,0.3);
-        }
-        .modal-item-emoji {
-            font-size: 2em;
-        }
-        .modal-item-name {
-            font-size: 0.75em;
-            font-weight: 600;
-            color: #ddd;
-            line-height: 1.2;
-        }
-        .modal-item-cost {
-            font-size: 0.7em;
-            color: #f0d060;
-            font-weight: 700;
-        }
-        .modal-close {
-            display: block;
-            margin: 16px auto 0;
-            background: #3a3050;
-            border: none;
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.9em;
-            transition: 0.3s;
-        }
-        .modal-close:hover {
-            background: #5a4070;
-        }
 
-        .size-selector {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
+        .stat-bar {
             margin: 12px 0;
-            flex-wrap: wrap;
-        }
-        .size-btn {
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 2px solid #3a3050;
-            background: rgba(30,25,55,0.6);
-            color: #ccc;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.78em;
-            transition: 0.15s;
-            white-space: nowrap;
-            will-change: transform;
-        }
-        .size-btn:active {
-            transform: scale(0.95);
-        }
-        .size-btn.selected {
-            border-color: #f0d060 !important;
-            background: rgba(200,160,50,0.3) !important;
-            color: #f0d060;
-        }
-        .size-label {
-            text-align: center;
-            color: #aaa;
-            font-size: 0.85em;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-        .rotate-info {
-            text-align: center;
-            color: #8af;
-            font-size: 0.75em;
-            margin-top: 4px;
-            font-weight: 600;
         }
 
-        #info-popup {
-            position: absolute;
-            pointer-events: none;
-            z-index: 150;
-            background: rgba(15,12,35,0.97);
-            border: 2px solid #5a5080;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 0.9em;
-            display: none;
-            white-space: nowrap;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.8);
-            line-height: 1.7;
-            color: #f0f0f0;
-        }
-        #info-popup .pop-title {
-            font-weight: 800;
-            color: #ffd700;
-            font-size: 1.1em;
-            display: block;
-            margin-bottom: 4px;
-        }
-        #info-popup .pop-stat {
-            color: #d0d0d0;
-        }
-        #info-popup .pop-income {
-            color: #f0d060;
-            font-weight: 700;
-        }
-        #info-popup .pop-happy {
-            color: #6ce89c;
-            font-weight: 700;
-        }
-        #info-popup .pop-population {
-            color: #6dc8e8;
-            font-weight: 700;
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        #message-log {
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            z-index: 110;
+        .bar-bg {
+            background: #0f2e36;
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff3c6f, #ff1e4d);
+            border-radius: 20px;
+            transition: width 0.25s;
+        }
+
+        .infectivity .bar-fill { background: linear-gradient(90deg, #f0a23b, #ff5e00); }
+        .lethality .bar-fill { background: linear-gradient(90deg, #c038ff, #7c0aff); }
+        .resist .bar-fill { background: linear-gradient(90deg, #3dc2ff, #0088cc); }
+
+        .upgrade-buttons {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            pointer-events: none;
-            max-width: 280px;
-        }
-        .log-msg {
-            background: rgba(0,0,0,0.9);
-            border-left: 3px solid #f0c040;
-            padding: 7px 12px;
-            border-radius: 6px;
-            font-size: 0.8em;
-            animation: fadeInOut 3.5s forwards;
-            font-weight: 500;
-            word-break: break-word;
-            color: #e0e0e0;
-        }
-        @keyframes fadeInOut {
-            0% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            12% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            75% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
+            gap: 12px;
+            margin: 20px 0;
         }
 
-        @media (max-width: 768px) {
-            #top-bar {
-                padding: 4px 6px;
-                min-height: 40px;
-                gap: 3px;
-            }
-            .resources {
-                gap: 5px;
-            }
-            .resource {
-                font-size: 0.6em;
-                gap: 2px;
-            }
-            .btn-top {
-                padding: 4px 6px;
-                font-size: 0.6em;
-            }
-            #bottom-panel {
-                gap: 4px;
-                padding: 5px 6px;
-                min-height: 48px;
-            }
-            .bottom-btn {
-                padding: 5px 8px;
-                min-width: 42px;
-                font-size: 0.65em;
-            }
-            #message-log {
-                top: 45px;
-                right: 4px;
-                max-width: 180px;
-            }
-            #info-popup {
-                font-size: 0.7em;
-                padding: 8px 10px;
-            }
+        button {
+            background: #0e2f3a;
+            border: none;
+            border-radius: 60px;
+            padding: 10px 12px;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #c7f0ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.1s linear;
+            border: 1px solid #2f9eb0;
+        }
+        button:active { transform: scale(0.97); }
+        button:hover {
+            background: #1e5568;
+            box-shadow: 0 0 8px cyan;
+            border-color: cyan;
+        }
+        .cost {
+            background: #02121a;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .danger-btn {
+            background: #4a151f;
+            border-color: #ff5a6e;
+        }
+        .danger-btn:hover {
+            background: #a02030;
+        }
+        .reset-btn {
+            background: #1a2b2f;
+            margin-top: 10px;
+        }
+
+        .global-info {
+            background: #02131b;
+            border-radius: 24px;
+            padding: 14px;
+            text-align: center;
+            margin-top: 15px;
+            border: 1px solid #2aa0b0;
+        }
+        .infection-rate {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffd966;
+        }
+        .small-text {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+        .win-marker {
+            font-size: 1rem;
+            background: #451e2c;
+            border-radius: 40px;
+            padding: 6px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 12px;
+            opacity: 0.7;
+        }
+        @media (max-width: 1100px) {
+            svg { width: 560px; }
+            .virus-lab { width: 260px; }
+        }
+        @media (max-width: 860px) {
+            .world-panel { flex-direction: column; align-items: center; }
+            svg { width: 90vw; }
         }
     </style>
 </head>
 <body>
+<div class="game-container">
+    <div class="world-panel">
+        <div class="map-holder">
+            <!-- стилизованная SVG-карта мира с "клетками"-странами -->
+            <svg viewBox="0 0 1000 550" xmlns="http://www.w3.org/2000/svg">
+                <!-- Глобус / Океан -->
+                <rect width="1000" height="550" fill="#001f2b" rx="20" ry="20"/>
+                <defs>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <!-- Материки в виде геометрических групп (регионы) -->
+                <!-- Северная Америка -->
+                <path id="NA" class="country" data-name="Северная Америка" d="M120,100 L200,80 L280,110 L290,160 L250,210 L200,230 L150,220 L110,180 L90,140 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Южная Америка -->
+                <path id="SA" class="country" data-name="Южная Америка" d="M250,260 L290,250 L330,280 L340,340 L300,400 L260,410 L230,370 L220,310 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Европа -->
+                <path id="EU" class="country" data-name="Европа" d="M460,100 L520,85 L570,110 L580,150 L540,180 L490,180 L450,160 L440,125 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Африка -->
+                <path id="AF" class="country" data-name="Африка" d="M500,200 L560,190 L610,220 L620,290 L580,340 L520,350 L490,310 L480,250 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Азия -->
+                <path id="AS" class="country" data-name="Азия" d="M600,80 L720,70 L810,90 L840,130 L820,180 L760,200 L700,180 L650,170 L600,150 L590,110 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Австралия (Океания) -->
+                <path id="OC" class="country" data-name="Океания" d="M780,370 L840,360 L880,390 L860,430 L810,440 L780,410 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Антарктида (символ) -->
+                <path id="AN" class="country" data-name="Антарктида" d="M200,500 L400,490 L600,500 L700,510 L550,530 L300,525 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5" opacity="0.7"/>
+                <!-- дополнительные точки: Гренландия -->
+                <path id="GL" class="country" data-name="Гренландия" d="M350,50 L390,45 L410,70 L380,90 L340,80 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
+                <!-- Индия / Ближний Восток - улучшаем детали -->
+                <path id="IN" class="country" data-name="Индия" d="M560,150 L600,140 L630,170 L610,200 L570,190 Z" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1.5"/>
 
-    <div id="splash">
-        <canvas class="splash-stars" id="splash-stars"></canvas>
-        <div class="splash-title">🏛️ PRESIDENT<br>SIMULATOR</div>
-        <div class="splash-subtitle">Постройте страну своей мечты</div>
-        <div class="splash-form">
-            <label for="country-name">📜 Название государства</label>
-            <input type="text" id="country-name" placeholder="Введите название..." maxlength="28" value="Великоречье">
-            <button class="btn-create" onclick="startGame()">🌟 ОСНОВАТЬ ГОСУДАРСТВО</button>
-            <div class="splash-buttons">
-                <button class="btn-load" onclick="loadGame()">💾 Загрузить сохранение</button>
+                <!-- маленькие острова для атмосферы -->
+                <circle cx="880" cy="230" r="12" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1" class="country" data-name="Япония"/>
+                <circle cx="800" cy="280" r="9" fill="#2c5a6b" stroke="#3bd0e0" stroke-width="1" class="country" data-name="Индонезия"/>
+            </svg>
+        </div>
+
+        <div class="virus-lab">
+            <div class="virus-name-area">
+                <input type="text" id="virusNameInput" placeholder="НАЗВАНИЕ ВИРУСА" maxlength="24" value="NECRO-X">
+                <div class="small-text" style="margin-top: 4px;">★ Твой штамм ★</div>
             </div>
+
+            <div class="stat-bar infectivity">
+                <div class="stat-label"><span>🧬 ЗАРАЗНОСТЬ</span><span id="infectVal">20</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="infectFill" style="width:20%"></div></div>
+            </div>
+            <div class="stat-bar lethality">
+                <div class="stat-label"><span>💀 ЛЕТАЛЬНОСТЬ</span><span id="lethalVal">10</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="lethalFill" style="width:10%"></div></div>
+            </div>
+            <div class="stat-bar resist">
+                <div class="stat-label"><span>🛡️ УСТОЙЧИВОСТЬ</span><span id="resistVal">5</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="resistFill" style="width:5%"></div></div>
+            </div>
+
+            <div class="upgrade-buttons">
+                <button id="upgInfect">📈 Усилить заразность <span class="cost">⚡10</span></button>
+                <button id="upgLethal">☠️ Летальность + <span class="cost">⚡15</span></button>
+                <button id="upgResist">🧫 Устойчивость + <span class="cost">⚡20</span></button>
+                <button id="globalAction" class="danger-btn">🌍 ГЛОБАЛЬНАЯ МУТАЦИЯ <span class="cost">⚡50</span></button>
+            </div>
+
+            <div class="global-info">
+                <div>🧪 ОЧКИ ЭВОЛЮЦИИ <span style="font-size: 1.8rem; font-weight: bold;" id="points">100</span> ⚡</div>
+                <div style="margin-top: 10px;">🌡️ ЗАРАЖЕНИЕ МИРА</div>
+                <div class="infection-rate"><span id="globalInfPct">0</span>%</div>
+                <div class="small-text">стран под контролем вируса</div>
+                <div id="winMessage" class="win-marker">💀 Активируй заразу 💀</div>
+            </div>
+            <button id="resetGame" class="reset-btn">🔄 СБРОСИТЬ ПАНДЕМИЮ</button>
+            <footer>⚡ кликай на страны, чтобы заражать! улучшай вирус, поглоти планету</footer>
         </div>
     </div>
+</div>
 
-    <div id="game-screen">
-        <div id="top-bar">
-            <div class="country-name-display" id="display-country-name">🏛️ Великоречье</div>
-            <div class="resources">
-                <div class="resource"><span class="res-icon">💰</span> <span class="res-money" id="money-val">50000</span></div>
-                <div class="resource"><span class="res-icon">👥</span> <span class="res-pop" id="pop-val">100</span></div>
-                <div class="resource"><span class="res-icon">😊</span> <span class="res-happy" id="happy-val">75</span>%</div>
-            </div>
-            <div class="top-buttons">
-                <span class="version-badge" id="version-badge">🖥️ ПК</span>
-                <button class="btn-top" id="btn-version" onclick="toggleVersion()">📱</button>
-                <button class="btn-top" onclick="saveGame()" title="Сохранить">💾</button>
-                <button class="btn-top" onclick="showHelp()">❓</button>
-            </div>
-        </div>
+<script>
+    // ------ ИГРОВАЯ МЕХАНИКА: ЗАРАЖЕНИЕ СТРАН И РАЗВИТИЕ ВИРУСА ------
+    // Список стран (ID и названия, соответствующие svg элементам)
+    const COUNTRIES = [
+        { id: "NA", name: "Северная Америка", infected: false },
+        { id: "SA", name: "Южная Америка", infected: false },
+        { id: "EU", name: "Европа", infected: false },
+        { id: "AF", name: "Африка", infected: false },
+        { id: "AS", name: "Азия", infected: false },
+        { id: "OC", name: "Океания", infected: false },
+        { id: "AN", name: "Антарктида", infected: false },
+        { id: "GL", name: "Гренландия", infected: false },
+        { id: "IN", name: "Индия", infected: false },
+        { id: "JP", name: "Япония", infected: false },
+        { id: "ID", name: "Индонезия", infected: false }
+    ];
 
-        <canvas id="game-canvas"></canvas>
-
-        <div id="info-popup"></div>
-        <div id="message-log"></div>
-
-        <div id="bottom-panel">
-            <button class="bottom-btn" id="btn-build" onclick="openBuildModal()">
-                <span class="bottom-btn-icon">🏗️</span>
-                <span class="bottom-btn-label">Построить</span>
-            </button>
-            <button class="bottom-btn" id="btn-rotate" onclick="rotateBuilding()">
-                <span class="bottom-btn-icon">🔄</span>
-                <span class="bottom-btn-label">Поворот</span>
-            </button>
-            <button class="bottom-btn danger" id="btn-delete" onclick="toggleDeleteMode()">
-                <span class="bottom-btn-icon">🗑️</span>
-                <span class="bottom-btn-label">Снести</span>
-            </button>
-            <button class="bottom-btn" id="btn-select" onclick="toggleSelectMode()">
-                <span class="bottom-btn-icon">🔍</span>
-                <span class="bottom-btn-label">Инфо</span>
-            </button>
-        </div>
-
-        <div id="build-modal">
-            <div class="modal-content">
-                <div class="modal-title">🏗️ Выберите что построить</div>
-                <div class="modal-grid" id="modal-grid"></div>
-                <div class="size-label">📏 Размер постройки:</div>
-                <div class="size-selector" id="size-selector">
-                    <button class="size-btn selected" data-scale="1">🔹 1x</button>
-                    <button class="size-btn" data-scale="1.5">🔸 1.5x</button>
-                    <button class="size-btn" data-scale="2">🔶 2x</button>
-                    <button class="size-btn" data-scale="3">💎 3x</button>
-                </div>
-                <div class="rotate-info">🔄 Клавиша R или кнопка Поворот — вращать перед постройкой</div>
-                <button class="modal-close" onclick="closeBuildModal()">✖ Закрыть</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const S = {
-            countryName: '',
-            money: 50000,
-            population: 100,
-            happiness: 75,
-            buildings: [],
-            roads: [],
-            rails: [],
-            people: [],
-            particles: [],
-            selectedType: null,
-            buildScale: 1,
-            buildRotation: 0,
-            deleteMode: false,
-            selectMode: false,
-            isMobile: false,
-            canvas: null,
-            ctx: null,
-            camX: 0,
-            camY: 0,
-            zoom: 1,
-            gridSize: 48,
-            dragging: false,
-            dragSX: 0,
-            dragSY: 0,
-            dragDist: 0,
-            mx: 0,
-            my: 0,
-            hovered: null,
-            time: 0,
-            incomeTimer: 0,
-            touchesDist: 0,
-            lastPinchZoom: 1,
-            touchStartTime: 0,
-            saveInterval: null,
-        };
-
-        const BT = {
-            road: { emoji:'🛣️', name:'Дорога', cost:50, pop:0, happy:2, income:0, w:48, h:48, isRoad:true, category:'Дороги' },
-            rail: { emoji:'🚂', name:'Ж/Д путь', cost:200, pop:0, happy:3, income:15, w:48, h:48, isRail:true, category:'Дороги' },
-            house: { emoji:'🏠', name:'Дом', cost:500, pop:8, happy:3, income:12, w:44, h:44, category:'Жильё' },
-            apartment: { emoji:'🏢', name:'Жилой комплекс', cost:2000, pop:40, happy:-2, income:50, w:50, h:56, category:'Жильё' },
-            mansion: { emoji:'🏰', name:'Особняк', cost:8000, pop:15, happy:10, income:80, w:54, h:54, category:'Жильё' },
-            shop: { emoji:'🏪', name:'Магазин', cost:800, pop:3, happy:6, income:70, w:42, h:42, category:'Бизнес' },
-            factory: { emoji:'🏭', name:'Завод', cost:3000, pop:20, happy:-6, income:250, w:52, h:52, category:'Бизнес' },
-            office: { emoji:'🏬', name:'Бизнес-центр', cost:5000, pop:12, happy:4, income:400, w:48, h:60, category:'Бизнес' },
-            park: { emoji:'🌳', name:'Парк', cost:300, pop:0, happy:15, income:0, w:46, h:46, category:'Инфраструктура' },
-            school: { emoji:'🏫', name:'Школа', cost:4000, pop:5, happy:8, income:-20, w:50, h:48, category:'Инфраструктура' },
-            hospital: { emoji:'🏥', name:'Больница', cost:6000, pop:8, happy:12, income:-50, w:52, h:50, category:'Инфраструктура' },
-            stadium: { emoji:'🏟️', name:'Стадион', cost:15000, pop:25, happy:20, income:150, w:64, h:56, category:'Инфраструктура' },
-        };
-
-        function initSplashStars() {
-            const c = document.getElementById('splash-stars');
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-            const ctx = c.getContext('2d');
-            const stars = Array.from({length:200}, () => ({
-                x: Math.random()*c.width, y: Math.random()*c.height,
-                r: Math.random()*1.8+0.5, twinkle: Math.random()*Math.PI*2, speed: Math.random()*0.02+0.005,
-            }));
-            function draw() {
-                ctx.clearRect(0,0,c.width,c.height);
-                stars.forEach(s=>{ s.twinkle+=s.speed; const a=0.4+Math.sin(s.twinkle)*0.4;
-                    ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); });
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-        initSplashStars();
-
-        function saveGame() {
-            if (!S.countryName) return;
-            const data = {
-                countryName: S.countryName,
-                money: S.money,
-                population: S.population,
-                happiness: S.happiness,
-                buildings: S.buildings,
-                roads: S.roads,
-                rails: S.rails,
-                zoom: S.zoom,
-                gridSize: S.gridSize,
-                camX: S.camX,
-                camY: S.camY,
-                isMobile: S.isMobile,
-                version: 2,
-            };
-            try {
-                localStorage.setItem('president_simulator_save', JSON.stringify(data));
-                addLog('💾 Игра сохранена!');
-            } catch(e) {
-                addLog('❌ Ошибка сохранения!');
+    // Игровые параметры
+    let evolutionPoints = 100;    // очки улучшений
+    let infectivity = 20;         // заразность (влияет на шанс заражения при клике)
+    let lethality = 10;           // летальность (штраф к очкам? но для механики: влияние на сложность? сделаем эстетику + потеря очков при мутациях)
+    let resistance = 5;           // устойчивость (снижает стоимость улучшений? но упростим: влияет на скорость эпидемии? но для драйва: чем выше, тем больше шанс авто-распространения)
+    // Интересная механика: каждые несколько секунд — попытка автоматического заражения соседних стран?
+    // Но для простоты и понятности: игрок кликает по странам для заражения, но успех зависит от заразности.
+    // Также пассивное распространение от заражённых стран к незаражённым с шансом (по таймеру)
+    
+    let infectedCountries = []; // массив id зараженных
+    let virusName = "NECRO-X";
+    
+    // Функции обновления UI карты
+    function updateMapColors() {
+        for (let c of COUNTRIES) {
+            const element = document.getElementById(c.id);
+            if (element) {
+                if (c.infected) {
+                    element.setAttribute("fill", "#bb2f5e");
+                    element.setAttribute("stroke", "#ff6699");
+                    element.setAttribute("filter", "url(#glow)");
+                } else {
+                    element.setAttribute("fill", "#2c5a6b");
+                    element.setAttribute("stroke", "#3bd0e0");
+                    element.setAttribute("filter", "");
+                }
             }
         }
-
-        function loadGame() {
-            try {
-                const raw = localStorage.getItem('president_simulator_save');
-                if (!raw) { alert('Нет сохранений!'); return; }
-                const data = JSON.parse(raw);
-                if (data.version !== 2) { alert('Старая версия сохранения!'); return; }
-                S.countryName = data.countryName;
-                S.money = data.money;
-                S.population = data.population;
-                S.happiness = data.happiness;
-                S.buildings = data.buildings || [];
-                S.roads = data.roads || [];
-                S.rails = data.rails || [];
-                S.zoom = data.zoom || 1;
-                S.gridSize = data.gridSize || 48;
-                S.camX = data.camX || 0;
-                S.camY = data.camY || 0;
-                S.isMobile = data.isMobile || false;
-                S.people = [];
-                S.particles = [];
-                S.selectedType = null;
-                S.buildScale = 1;
-                S.buildRotation = 0;
-                S.deleteMode = false;
-                S.selectMode = false;
-                S.time = 0;
-                S.incomeTimer = 0;
-                S.dragging = false;
-                S.dragDist = 0;
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('game-screen').classList.add('active');
-                document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
-                document.getElementById('version-badge').textContent = S.isMobile ? '📱 Моб.' : '🖥️ ПК';
-                document.getElementById('btn-version').textContent = S.isMobile ? '🖥️' : '📱';
-                initCanvas();
-                buildModalGrid();
-                updateUI();
-                updateBottomButtons();
-                spawnInitialPeople();
-                addLog('💾 Сохранение загружено! Добро пожаловать обратно!');
-                if (S.saveInterval) clearInterval(S.saveInterval);
-                S.saveInterval = setInterval(saveGame, 30000);
-                gameLoop();
-            } catch(e) {
-                alert('Ошибка загрузки сохранения!');
-            }
-        }
-
-        function initCanvas() {
-            S.canvas = document.getElementById('game-canvas');
-            S.ctx = S.canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-        }
-
-        function resizeCanvas() {
-            if (!S.canvas) return;
-            const rect = S.canvas.getBoundingClientRect();
-            S.canvas.width = rect.width;
-            S.canvas.height = rect.height;
-            if (!S.camX && !S.camY) {
-                S.camX = S.canvas.width / 2 / S.zoom;
-                S.camY = S.canvas.height / 2 / S.zoom;
-            }
-        }
-
-        function toggleVersion() {
-            S.isMobile = !S.isMobile;
-            document.getElementById('version-badge').textContent = S.isMobile ? '📱 Моб.' : '🖥️ ПК';
-            document.getElementById('btn-version').textContent = S.isMobile ? '🖥️' : '📱';
-            if (S.isMobile) { S.zoom = 0.8;
-                S.gridSize = Math.round(48*S.zoom); }
-            else { S.zoom = 1;
-                S.gridSize = 48; }
-            addLog(S.isMobile ? '📱 Мобильная версия' : '🖥️ Версия для ПК');
-            updateUI();
-            resizeCanvas();
-        }
-
-        function startGame() {
-            const inp = document.getElementById('country-name');
-            const name = inp.value.trim();
-            if (!name) { inp.style.borderColor='#f05555';
-                inp.focus(); setTimeout(()=>inp.style.borderColor='#3a3050',1500); return; }
-            S.countryName = name;
-            S.buildings = [];
-            S.roads = [];
-            S.rails = [];
-            S.people = [];
-            S.particles = [];
-            S.money = 50000;
-            S.population = 100;
-            S.happiness = 75;
-            S.selectedType = null;
-            S.buildScale = 1;
-            S.buildRotation = 0;
-            S.deleteMode = false;
-            S.selectMode = false;
-            S.time = 0;
-            S.incomeTimer = 0;
-            S.zoom = S.isMobile ? 0.8 : 1;
-            S.gridSize = Math.round(48*S.zoom);
-            S.dragging = false;
-            S.dragDist = 0;
-            document.getElementById('splash').classList.add('hidden');
-            document.getElementById('game-screen').classList.add('active');
-            document.getElementById('display-country-name').textContent = '🏛️ ' + S.countryName;
-            initCanvas();
-            buildModalGrid();
-            updateUI();
-            updateBottomButtons();
-            spawnInitialPeople();
-            addLog('🌟 Добро пожаловать, господин Президент!');
-            if (S.saveInterval) clearInterval(S.saveInterval);
-            S.saveInterval = setInterval(saveGame, 30000);
-            gameLoop();
-        }
-
-        function spawnInitialPeople() {
-            for (let i=0; i<30; i++) S.people.push({
-                x:(Math.random()-0.5)*400, y:(Math.random()-0.5)*400,
-                vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5,
-                color:`hsl(${Math.random()*360},40%,65%)`, size:4+Math.random()*3, walkTimer:Math.random()*100
-            });
-        }
-
-        function updateUI() {
-            document.getElementById('money-val').textContent = Math.floor(S.money).toLocaleString();
-            document.getElementById('pop-val').textContent = S.population;
-            document.getElementById('happy-val').textContent = Math.round(S.happiness);
-            if (S.canvas) {
-                S.canvas.classList.toggle('building', !!S.selectedType && !S.deleteMode && !S.selectMode);
-                S.canvas.classList.toggle('grabbing', S.dragging);
-            }
-            updateBottomButtons();
-        }
-
-        function updateBottomButtons() {
-            document.getElementById('btn-build').classList.toggle('active', !!S.selectedType && !S.deleteMode && !S.selectMode);
-            document.getElementById('btn-delete').classList.toggle('active', S.deleteMode);
-            document.getElementById('btn-select').classList.toggle('active', S.selectMode);
-            document.getElementById('btn-rotate').classList.toggle('active', S.buildRotation !== 0);
-        }
-
-        let modalBuilt = false;
-        function buildModalGrid() {
-            const grid = document.getElementById('modal-grid');
-            if (!modalBuilt) {
-                grid.innerHTML = '';
-                Object.entries(BT).forEach(([key, info]) => {
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = `
-                        <span class="modal-item-emoji">${info.emoji}</span>
-                        <span class="modal-item-name">${info.name}</span>
-                        <span class="modal-item-cost"></span>
-                        <span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>
-                    `;
-                    div.addEventListener('click', () => selectModalItem(key));
-                    grid.appendChild(div);
-                });
-                modalBuilt = true;
-            }
-            const scale = S.buildScale || 1;
-            grid.querySelectorAll('.modal-item').forEach(div => {
-                const key = div.dataset.type;
-                const info = BT[key];
-                const cost = getBuildCost(key, scale);
-                const size = getBuildSize(key, scale);
-                div.querySelector('.modal-item-cost').textContent = `💰${cost.toLocaleString()}`;
-                div.querySelector('.modal-item-size').textContent = `${size.w}x${size.h}`;
-                div.classList.toggle('selected', S.selectedType === key);
-            });
-            document.querySelectorAll('#size-selector .size-btn').forEach(btn => {
-                btn.classList.toggle('selected', parseFloat(btn.dataset.scale) === scale);
-            });
-        }
-
-        function selectModalItem(key) {
-            S.selectedType = key;
-            S.deleteMode = false;
-            S.selectMode = false;
-            const scale = S.buildScale || 1;
-            const info = BT[key];
-            const sz = getBuildSize(key, scale);
-            addLog(`🔨 Выбрано: ${info.emoji} ${info.name} (${sz.w}x${sz.h})`);
-            updateUI();
-            buildModalGrid();
-            closeBuildModal();
-        }
-
-        function openBuildModal() {
-            S.deleteMode = false;
-            S.selectMode = false;
-            buildModalGrid();
-            document.getElementById('build-modal').classList.add('open');
-            updateUI();
-        }
-
-        function closeBuildModal() {
-            document.getElementById('build-modal').classList.remove('open');
-        }
-
-        function getBuildCost(type, scale) {
-            const info = BT[type];
-            if (!info) return 0;
-            return Math.floor(info.cost * scale * scale);
-        }
-
-        function getBuildSize(type, scale) {
-            const info = BT[type];
-            if (!info) return {w:48, h:48};
-            let w = Math.round(info.w * scale);
-            let h = Math.round(info.h * scale);
-            if (S.buildRotation === 90 || S.buildRotation === 270) {
-                [w, h] = [h, w];
-            }
-            return {w, h};
-        }
-
-        function rotateBuilding() {
-            S.buildRotation = (S.buildRotation + 90) % 360;
-            const rotNames = {0:'0°', 90:'90°', 180:'180°', 270:'270°'};
-            addLog(`🔄 Поворот: ${rotNames[S.buildRotation]}`);
-            updateUI();
-            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
-        }
-
-        function toggleDeleteMode() {
-            S.deleteMode = !S.deleteMode;
-            S.selectMode = false;
-            S.selectedType = null;
-            if (S.deleteMode) addLog('🗑️ Режим сноса: нажмите на здание (возврат 50%)');
-            updateUI();
-        }
-
-        function toggleSelectMode() {
-            S.selectMode = !S.selectMode;
-            S.deleteMode = false;
-            S.selectedType = null;
-            if (S.selectMode) addLog('🔍 Режим информации: наведите на здание');
-            updateUI();
-        }
-
-        function clearAllModes() {
-            S.selectedType = null;
-            S.deleteMode = false;
-            S.selectMode = false;
-            updateUI();
-        }
-
-        function buildAt(wx, wy) {
-            if (!S.selectedType || S.deleteMode || S.selectMode) return false;
-            const t = S.selectedType;
-            const info = BT[t];
-            const scale = S.buildScale || 1;
-            const cost = getBuildCost(t, scale);
-            const size = getBuildSize(t, scale);
-            if (S.money < cost) { addLog('❌ Недостаточно средств! Нужно: 💰'+cost.toLocaleString());
-                shakeEl('money-val'); return false; }
-            const nb = {
-                type: t, x: wx-size.w/2, y: wy-size.h/2, w: size.w, h: size.h,
-                scale: scale, rotation: S.buildRotation, placedAt: S.time,
-            };
-            const allC = [...S.buildings, ...S.roads, ...S.rails];
-            const overlap = allC.some(b => rectsOverlap(nb, b, 2));
-            if (overlap) { addLog('⚠️ Нельзя строить на другом здании!'); return false; }
-            S.money -= cost;
-            if (info.isRoad) S.roads.push(nb);
-            else if (info.isRail) S.rails.push(nb);
-            else { S.buildings.push(nb);
-                S.population += Math.floor(info.pop*scale);
-                S.happiness = Math.max(0,Math.min(100,S.happiness+Math.floor(info.happy*scale))); }
-            updateUI();
-            addLog(`✅ Построено: ${info.emoji} ${info.name} (${size.w}x${size.h}, поворот ${S.buildRotation}°)`);
-            spawnParticles(wx, wy, '#f0d060');
-            S.buildRotation = 0;
+    }
+    
+    function updateInfectionPercent() {
+        const infectedCount = COUNTRIES.filter(c => c.infected).length;
+        const percent = Math.floor((infectedCount / COUNTRIES.length) * 100);
+        document.getElementById("globalInfPct").innerText = percent;
+        return percent;
+    }
+    
+    function checkWin() {
+        const allInfected = COUNTRIES.every(c => c.infected);
+        const winDiv = document.getElementById("winMessage");
+        if (allInfected) {
+            winDiv.innerHTML = "🏆 МИР ПОГЛОЩЁН! ВИРУС ДОМИНИРУЕТ 🏆";
+            winDiv.style.background = "#8b1e3f";
+            winDiv.style.boxShadow = "0 0 12px crimson";
             return true;
+        } else {
+            winDiv.innerHTML = "🧬 ЗАРАЗА РАСПРОСТРАНЯЕТСЯ... УЛУЧШАЙ ВИРУС! 🧬";
+            winDiv.style.background = "#451e2c";
+            return false;
         }
-
-        function deleteAt(wx, wy) {
-            if (!S.deleteMode) return false;
-            const all = [...S.buildings, ...S.roads, ...S.rails];
-            const found = all.find(b => wx>=b.x && wx<=b.x+b.w && wy>=b.y && wy<=b.y+b.h);
-            if (!found) return false;
-            const info = BT[found.type];
-            const scale = found.scale||1;
-            const refund = Math.floor(getBuildCost(found.type, scale)*0.5);
-            S.money += refund;
-            if (info?.isRoad) S.roads = S.roads.filter(b=>b!==found);
-            else if (info?.isRail) S.rails = S.rails.filter(b=>b!==found);
-            else { S.buildings = S.buildings.filter(b=>b!==found);
-                S.population = Math.max(0,S.population-Math.floor((info?.pop||0)*scale));
-                S.happiness = Math.max(0,Math.min(100,S.happiness-Math.floor((info?.happy||0)*scale))); }
-            updateUI();
-            addLog(`🗑️ Снесено: ${info?.emoji||'?'} (возврат +💰${refund.toLocaleString()})`);
-            spawnParticles(found.x+found.w/2, found.y+found.h/2, '#f08888');
+    }
+    
+    // Обновить статистику в панели
+    function refreshStatsUI() {
+        document.getElementById("infectVal").innerText = infectivity;
+        document.getElementById("lethalVal").innerText = lethality;
+        document.getElementById("resistVal").innerText = resistance;
+        document.getElementById("infectFill").style.width = Math.min(100, infectivity) + "%";
+        document.getElementById("lethalFill").style.width = Math.min(100, lethality) + "%";
+        document.getElementById("resistFill").style.width = Math.min(100, resistance) + "%";
+        document.getElementById("points").innerText = Math.floor(evolutionPoints);
+        updateInfectionPercent();
+        checkWin();
+    }
+    
+    // Попытка заразить конкретную страну через клик (или механику)
+    function tryInfectCountry(countryObj) {
+        if (countryObj.infected) return false; // уже заражена
+        
+        // шанс на заражение: база 20% + заразность * 0.8 (макс 90%)
+        let chance = 20 + (infectivity * 0.7);
+        if (chance > 90) chance = 90;
+        const roll = Math.random() * 100;
+        if (roll <= chance) {
+            // успех!
+            countryObj.infected = true;
+            // награда за новое заражение: очки эволюции (стимул)
+            let reward = 8 + Math.floor(resistance / 5);
+            evolutionPoints += reward;
+            updateMapColors();
+            refreshStatsUI();
+            // дополнительный эффект: если летальность высокая, за каждое заражение возможна потеря 1-2 очков? но лучше - позитив
+            if (lethality > 60 && Math.random() < 0.2) {
+                evolutionPoints = Math.max(0, evolutionPoints - 2);
+                refreshStatsUI();
+            }
             return true;
-        }
-
-        function rectsOverlap(a, b, margin) {
-            return !(a.x+a.w-margin < b.x || a.x > b.x+b.w-margin || a.y+a.h-margin < b.y || a.y > b.y+b.h-margin);
-        }
-
-        function worldToScreen(wx, wy) {
-            const cx = S.camX - S.canvas.width/2/S.zoom;
-            const cy = S.camY - S.canvas.height/2/S.zoom;
-            return { x: (wx-cx)*S.zoom, y: (wy-cy)*S.zoom };
-        }
-
-        function screenToWorld(sx, sy) {
-            const cx = S.camX - S.canvas.width/2/S.zoom;
-            const cy = S.camY - S.canvas.height/2/S.zoom;
-            return { x: sx/S.zoom+cx, y: sy/S.zoom+cy };
-        }
-
-        function getCanvasCoords(e) {
-            const rect = S.canvas.getBoundingClientRect();
-            return { sx: e.clientX-rect.left, sy: e.clientY-rect.top };
-        }
-
-        function getWorldFromEvent(e) {
-            const c = getCanvasCoords(e);
-            const w = screenToWorld(c.sx, c.sy);
-            return { ...c, wx: w.x, wy: w.y };
-        }
-
-        function findAt(wx, wy) {
-            const all = [...S.buildings, ...S.roads, ...S.rails];
-            for (let i=all.length-1; i>=0; i--) {
-                const b = all[i];
-                if (wx>=b.x && wx<=b.x+b.w && wy>=b.y && wy<=b.y+b.h) return b;
+        } else {
+            // неудача, но кое-что за попытку: если устойчивость высокая, то даём небольшие очки за исследования?
+            if (resistance > 30) {
+                evolutionPoints = Math.max(0, evolutionPoints + 1);
+                refreshStatsUI();
             }
-            return null;
+            return false;
         }
-
-        function drawGround(ctx) {
-            const w=S.canvas.width, h=S.canvas.height;
-            const grad=ctx.createRadialGradient(w/2,h/2,100,w/2,h/2,Math.max(w,h));
-            grad.addColorStop(0,'#3d5a2e');
-            grad.addColorStop(0.6,'#2d4a1e');
-            grad.addColorStop(1,'#1a3010');
-            ctx.fillStyle=grad;
-            ctx.fillRect(0,0,w,h);
-            const gs=S.gridSize, cx=S.camX-w/2/S.zoom, cy=S.camY-h/2/S.zoom;
-            const sx=-((cx%gs)+gs)%gs, sy=-((cy%gs)+gs)%gs;
-            for (let x=sx; x<w/S.zoom+gs; x+=gs)
-                for (let y=sy; y<h/S.zoom+gs; y+=gs) {
-                    const seed=Math.sin((Math.floor((x+cx)/gs)*1000+Math.floor((y+cy)/gs))*0.01)*0.06;
-                    ctx.fillStyle=`rgba(255,255,255,${0.02+seed})`;
-                    ctx.fillRect(x*S.zoom,y*S.zoom,gs*S.zoom,gs*S.zoom);
+    }
+    
+    // Пассивное распространение (каждые 3 секунды от заражённых стран)
+    let autoSpreadInterval;
+    function startAutoSpread() {
+        if (autoSpreadInterval) clearInterval(autoSpreadInterval);
+        autoSpreadInterval = setInterval(() => {
+            // проверяем есть ли заражённые и незаражённые
+            const infectedList = COUNTRIES.filter(c => c.infected);
+            const healthyList = COUNTRIES.filter(c => !c.infected);
+            if (infectedList.length === 0 || healthyList.length === 0) return;
+            
+            // шанс распространения за тик: зависит от заразности и количества заражённых
+            let spreadChanceBase = 5 + (infectivity * 0.4);
+            if (spreadChanceBase > 45) spreadChanceBase = 45;
+            if (Math.random() * 100 < spreadChanceBase) {
+                // выбираем случайную здоровую страну
+                const target = healthyList[Math.floor(Math.random() * healthyList.length)];
+                if (!target.infected) {
+                    const successRoll = Math.random() * 100;
+                    const autoInfectChance = 35 + (infectivity * 0.5);
+                    if (successRoll < autoInfectChance) {
+                        target.infected = true;
+                        evolutionPoints += 5;
+                        refreshStatsUI();
+                        updateMapColors();
+                    }
                 }
-        }
-
-        function drawGrid(ctx) {
-            const w=S.canvas.width, h=S.canvas.height, gs=S.gridSize;
-            const cx=S.camX-w/2/S.zoom, cy=S.camY-h/2/S.zoom;
-            const sx=-((cx%gs)+gs)%gs, sy=-((cy%gs)+gs)%gs;
-            ctx.strokeStyle='rgba(255,255,255,0.06)';
-            ctx.lineWidth=1;
-            ctx.beginPath();
-            for (let x=sx; x<w/S.zoom+gs; x+=gs) { ctx.moveTo(x*S.zoom,0);
-                ctx.lineTo(x*S.zoom,h); }
-            for (let y=sy; y<h/S.zoom+gs; y+=gs) { ctx.moveTo(0,y*S.zoom);
-                ctx.lineTo(w,y*S.zoom); }
-            ctx.stroke();
-        }
-
-        function drawRoad(ctx, r, info) {
-            const p=worldToScreen(r.x, r.y), w=r.w*S.zoom, h=r.h*S.zoom;
-            if (info.isRoad) {
-                ctx.fillStyle='#3a3a3a';
-                ctx.fillRect(p.x,p.y,w,h);
-                ctx.fillStyle='#888888';
-                const bw=Math.max(2,3*S.zoom);
-                ctx.fillRect(p.x,p.y,w,bw);
-                ctx.fillRect(p.x,p.y+h-bw,w,bw);
-                ctx.fillRect(p.x,p.y,bw,h);
-                ctx.fillRect(p.x+w-bw,p.y,bw,h);
-                ctx.strokeStyle='#ffff66';
-                ctx.lineWidth=Math.max(1,1.5*S.zoom);
-                ctx.setLineDash([Math.max(4,8*S.zoom),Math.max(6,12*S.zoom)]);
-                ctx.beginPath();
-                ctx.moveTo(p.x+w/2,p.y);
-                ctx.lineTo(p.x+w/2,p.y+h);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            } else {
-                ctx.fillStyle='#8B7355';
-                ctx.fillRect(p.x,p.y,w,h);
-                ctx.fillStyle='#5c4030';
-                const sh=Math.max(3,4*S.zoom), sg=Math.max(5,8*S.zoom);
-                for (let i=0; i<h; i+=sg) ctx.fillRect(p.x+2*S.zoom,p.y+i,w-4*S.zoom,sh);
-                ctx.strokeStyle='#c0c0c0';
-                ctx.lineWidth=Math.max(1.5,2*S.zoom);
-                ctx.beginPath();
-                const rx=p.x+Math.max(6,8*S.zoom), rx2=p.x+w-Math.max(6,8*S.zoom);
-                ctx.moveTo(rx,p.y);
-                ctx.lineTo(rx,p.y+h);
-                ctx.moveTo(rx2,p.y);
-                ctx.lineTo(rx2,p.y+h);
-                ctx.stroke();
             }
-        }
-
-        function drawBuildingShape(ctx, b, info) {
-            const p=worldToScreen(b.x, b.y), w=b.w*S.zoom, h=b.h*S.zoom, t=b.type;
-            ctx.save();
-            const cx=p.x+w/2, cy=p.y+h/2;
-            ctx.translate(cx, cy);
-            if (b.rotation) ctx.rotate(b.rotation*Math.PI/180);
-            ctx.translate(-cx, -cy);
-            ctx.fillStyle='rgba(0,0,0,0.4)';
-            ctx.fillRect(p.x+3*S.zoom,p.y+3*S.zoom,w,h);
-            if (t==='house') {
-                ctx.fillStyle='#f5deb3';
-                ctx.fillRect(p.x,p.y,w,h-12*S.zoom);
-                ctx.fillStyle='#c0392b';
-                ctx.beginPath();
-                ctx.moveTo(p.x-4*S.zoom,p.y);
-                ctx.lineTo(p.x+w/2,p.y-16*S.zoom);
-                ctx.lineTo(p.x+w+4*S.zoom,p.y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle='#87ceeb';
-                ctx.fillRect(p.x+7*S.zoom,p.y+8*S.zoom,10*S.zoom,10*S.zoom);
-                ctx.fillRect(p.x+w-17*S.zoom,p.y+8*S.zoom,10*S.zoom,10*S.zoom);
-                ctx.fillStyle='#8B4513';
-                ctx.fillRect(p.x+w/2-6*S.zoom,p.y+h-18*S.zoom,12*S.zoom,18*S.zoom);
-            } else if (t==='apartment') {
-                const floors=Math.max(4,Math.floor(8*(b.scale||1))), fh=h/floors;
-                for (let i=0; i<floors; i++) {
-                    ctx.fillStyle=i%2===0?'#d0dce8':'#bcc8d8';
-                    ctx.fillRect(p.x,p.y+i*fh,w,fh);
-                    ctx.fillStyle='#87ceeb';
-                    const ww=Math.max(3,8*S.zoom), wh=Math.max(3,fh-6*S.zoom);
-                    const cols=Math.min(3,Math.floor(w/(ww+7*S.zoom)));
-                    for (let j=0; j<cols; j++) ctx.fillRect(p.x+5*S.zoom+j*(ww+7*S.zoom),p.y+i*fh+3*S.zoom,ww,wh);
+            
+            // также учитываем устойчивость: чем выше, тем сложнее? но сделаем обратную связь: устойчивость замедляет распространение? нет,
+            // устойчивость вируса - это способность выживать, пусть помогает авто-распространению слабо, но добавим прирост очков пассивно
+            if (resistance > 25 && infectedList.length > 2) {
+                if (Math.random() < 0.1) {
+                    evolutionPoints += 1;
+                    refreshStatsUI();
                 }
-            } else if (t==='mansion') {
-                ctx.fillStyle='#f0e6d3';
-                ctx.fillRect(p.x,p.y+10*S.zoom,w,h-10*S.zoom);
-                ctx.fillStyle='#d4af37';
-                ctx.fillRect(p.x+8*S.zoom,p.y,w-16*S.zoom,24*S.zoom);
-                ctx.fillStyle='#c9972e';
-                ctx.beginPath();
-                ctx.arc(p.x+w/2,p.y,14*S.zoom,Math.PI,0);
-                ctx.fill();
-                ctx.fillStyle='#e8dcc8';
-                ctx.fillRect(p.x+4*S.zoom,p.y+24*S.zoom,6*S.zoom,h-14*S.zoom);
-                ctx.fillRect(p.x+w-10*S.zoom,p.y+24*S.zoom,6*S.zoom,h-14*S.zoom);
-            } else if (t==='factory') {
-                ctx.fillStyle='#778899';
-                ctx.fillRect(p.x,p.y+12*S.zoom,w,h-12*S.zoom);
-                ctx.fillStyle='#555';
-                const chm=Math.min(3,Math.floor((b.scale||1)*2));
-                for (let i=0; i<chm; i++) ctx.fillRect(p.x+8*S.zoom+i*(w/chm),p.y-16*S.zoom,8*S.zoom,28*S.zoom);
-                const so=Math.sin(S.time*0.05+b.x)*3*S.zoom;
-                for (let i=0; i<chm; i++) {
-                    ctx.fillStyle='rgba(180,180,180,0.5)';
-                    ctx.beginPath();
-                    ctx.arc(p.x+12*S.zoom+i*(w/chm)+so,p.y-20*S.zoom-i*4*S.zoom,(6+i*2)*S.zoom,0,Math.PI*2);
-                    ctx.fill();
-                }
-            } else if (t==='office') {
-                const floors=Math.max(6,Math.floor(12*(b.scale||1))), fh=h/floors;
-                for (let i=0; i<floors; i++) {
-                    ctx.fillStyle=i%2===0?'#a8d4f0':'#8ab8d8';
-                    ctx.fillRect(p.x,p.y+i*fh,w,fh);
-                    ctx.fillStyle='#ffffff';
-                    const ww=Math.max(3,7*S.zoom), wh=Math.max(2,fh-4*S.zoom);
-                    const cols=Math.min(4,Math.floor(w/(ww+4*S.zoom)));
-                    for (let j=0; j<cols; j++) ctx.fillRect(p.x+3*S.zoom+j*(ww+4*S.zoom),p.y+i*fh+2*S.zoom,ww,wh);
-                }
-            } else if (t==='shop') {
-                ctx.fillStyle='#ffe4b5';
-                ctx.fillRect(p.x,p.y,w,h);
-                ctx.fillStyle='#ff6347';
-                ctx.fillRect(p.x+2*S.zoom,p.y,w-4*S.zoom,10*S.zoom);
-                ctx.fillStyle='#ffffff';
-                ctx.fillRect(p.x+4*S.zoom,p.y+14*S.zoom,w-8*S.zoom,h-28*S.zoom);
-                ctx.fillStyle='#8B4513';
-                ctx.fillRect(p.x+w/2-7*S.zoom,p.y+h-12*S.zoom,14*S.zoom,10*S.zoom);
-            } else if (t==='park') {
-                ctx.fillStyle='#5a8a5a';
-                ctx.fillRect(p.x,p.y,w,h);
-                [
-                    [0.2,0.25],
-                    [0.5,0.2],
-                    [0.8,0.3],
-                    [0.3,0.6],
-                    [0.7,0.65],
-                    [0.5,0.75]
-                ].forEach(([tx,ty])=>{
-                    const tx2=p.x+tx*w, ty2=p.y+ty*h;
-                    ctx.fillStyle='#3d2b1f';
-                    ctx.fillRect(tx2-2*S.zoom,ty2,4*S.zoom,12*S.zoom);
-                    ctx.fillStyle='#2d6e2d';
-                    ctx.beginPath();
-                    ctx.arc(tx2,ty2-2*S.zoom,8*S.zoom,0,Math.PI*2);
-                    ctx.fill();
-                    ctx.fillStyle='#3d8e3d';
-                    ctx.beginPath();
-                    ctx.arc(tx2,ty2-6*S.zoom,7*S.zoom,0,Math.PI*2);
-                    ctx.fill();
-                });
-                ctx.fillStyle='#4a90c8';
-                ctx.beginPath();
-                ctx.ellipse(p.x+w*0.5,p.y+h*0.45,14*S.zoom,8*S.zoom,0,0,Math.PI*2);
-                ctx.fill();
-            } else if (t==='school') {
-                ctx.fillStyle='#d4a574';
-                ctx.fillRect(p.x,p.y+6*S.zoom,w,h-6*S.zoom);
-                ctx.fillStyle='#c0392b';
-                ctx.fillRect(p.x-2*S.zoom,p.y,w+4*S.zoom,12*S.zoom);
-                ctx.fillStyle='#87ceeb';
-                for (let i=0; i<4; i++) ctx.fillRect(p.x+5*S.zoom+i*11*S.zoom,p.y+18*S.zoom,7*S.zoom,8*S.zoom);
-                ctx.fillStyle='#8B4513';
-                ctx.fillRect(p.x+w/2-5*S.zoom,p.y+h-14*S.zoom,10*S.zoom,14*S.zoom);
-            } else if (t==='hospital') {
-                ctx.fillStyle='#f8f8f8';
-                ctx.fillRect(p.x,p.y,w,h);
-                ctx.fillStyle='#e74c3c';
-                ctx.fillRect(p.x+w/2-10*S.zoom,p.y,20*S.zoom,14*S.zoom);
-                ctx.fillStyle='#ffffff';
-                ctx.fillRect(p.x+w/2-3*S.zoom,p.y+2*S.zoom,6*S.zoom,10*S.zoom);
-                ctx.fillRect(p.x+w/2-8*S.zoom,p.y+6*S.zoom,16*S.zoom,3*S.zoom);
-                ctx.fillStyle='#87ceeb';
-                for (let i=0; i<3; i++) for (let j=0; j<3; j++) ctx.fillRect(p.x+5*S.zoom+j*16*S.zoom,p.y+18*S.zoom+i*12*S.zoom,10*S.zoom,8*S.zoom);
-            } else if (t==='stadium') {
-                ctx.fillStyle='#d0d0d0';
-                ctx.fillRect(p.x,p.y,w,h);
-                ctx.fillStyle='#3a8a3a';
-                ctx.beginPath();
-                ctx.ellipse(p.x+w/2,p.y+h/2,w/2-4*S.zoom,h/2-4*S.zoom,0,0,Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle='#ffffff';
-                ctx.lineWidth=1;
-                ctx.stroke();
-                ctx.strokeStyle='#555';
-                ctx.lineWidth=2*S.zoom;
-                ctx.beginPath();
-                ctx.arc(p.x+w/2,p.y+h/2,10*S.zoom,0,Math.PI*2);
-                ctx.stroke();
             }
-            if (S.hovered===b) {
-                ctx.strokeStyle='#ffd700';
-                ctx.lineWidth=3*S.zoom;
-                ctx.strokeRect(p.x-2*S.zoom,p.y-2*S.zoom,w+4*S.zoom,h+4*S.zoom);
-                ctx.strokeStyle='rgba(255,215,0,0.3)';
-                ctx.lineWidth=7*S.zoom;
-                ctx.strokeRect(p.x-5*S.zoom,p.y-5*S.zoom,w+10*S.zoom,h+10*S.zoom);
-            }
-            ctx.restore();
-        }
-
-        function drawPeople(ctx) {
-            S.people.forEach(p=>{
-                const wp=worldToScreen(p.x,p.y);
-                if (wp.x<-30||wp.x>S.canvas.width+30||wp.y<-30||wp.y>S.canvas.height+30) return;
-                const sz=p.size*S.zoom;
-                ctx.fillStyle='rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(wp.x,wp.y+sz*0.8,sz*0.8,sz*0.3,0,0,Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle=p.color;
-                ctx.beginPath();
-                ctx.arc(wp.x,wp.y-sz*0.5,sz*0.6,0,Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle=`hsl(${(parseInt(p.color.match(/\d+/)?.[0]||0)+30)%360},50%,55%)`;
-                ctx.fillRect(wp.x-sz*0.4,wp.y-sz*0.2,sz*0.8,sz*0.9);
-                ctx.fillStyle='#fff';
-                ctx.beginPath();
-                ctx.arc(wp.x-sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2);
-                ctx.arc(wp.x+sz*0.2,wp.y-sz*0.6,sz*0.18,0,Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle='#000';
-                ctx.beginPath();
-                ctx.arc(wp.x-sz*0.15,wp.y-sz*0.6,sz*0.08,0,Math.PI*2);
-                ctx.arc(wp.x+sz*0.25,wp.y-sz*0.6,sz*0.08,0,Math.PI*2);
-                ctx.fill();
+            refreshStatsUI();
+        }, 2800);
+    }
+    
+    // Обработка кликов по странам (делегирование SVG)
+    function initMapClick() {
+        const countriesElements = document.querySelectorAll(".country");
+        countriesElements.forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const countryId = el.id;
+                const countryData = COUNTRIES.find(c => c.id === countryId);
+                if (countryData) {
+                    if (!countryData.infected) {
+                        tryInfectCountry(countryData);
+                        refreshStatsUI();
+                        updateMapColors();
+                    } else {
+                        // уже заражена, можно мутировать, получить немного очков
+                        evolutionPoints += 2;
+                        refreshStatsUI();
+                        // визуальный фидбек
+                        const msg = document.getElementById("winMessage");
+                        msg.style.opacity = "0.7";
+                        setTimeout(()=> msg.style.opacity = "1", 200);
+                    }
+                } else {
+                    // fallback
+                }
             });
-        }
-
-        function drawParticles(ctx) {
-            S.particles=S.particles.filter(p=>p.life>0);
-            S.particles.forEach(p=>{
-                const wp=worldToScreen(p.x,p.y);
-                ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${p.life})`;
-                ctx.beginPath();
-                ctx.arc(wp.x,wp.y,p.size*S.zoom,0,Math.PI*2);
-                ctx.fill();
-            });
-        }
-
-        function gameLoop(ts) {
-            S.time=ts;
-            const ctx=S.ctx, cv=S.canvas;
-            if (!cv||!ctx) { requestAnimationFrame(gameLoop); return; }
-            ctx.clearRect(0,0,cv.width,cv.height);
-            drawGround(ctx);
-            drawGrid(ctx);
-            S.roads.forEach(r=>drawRoad(ctx,r,BT.road));
-            S.rails.forEach(r=>drawRoad(ctx,r,BT.rail));
-            S.buildings.forEach(b=>{ const info=BT[b.type]; if (info) drawBuildingShape(ctx,b,info); });
-            updatePeople();
-            drawPeople(ctx);
-            updateParticles();
-            drawParticles(ctx);
-            if (S.selectedType && !S.dragging && !S.deleteMode && !S.selectMode) {
-                const info=BT[S.selectedType];
-                const size=getBuildSize(S.selectedType, S.buildScale||1);
-                const sw=screenToWorld(S.mx,S.my);
-                const sx2=sw.x-size.w/2, sy2=sw.y-size.h/2;
-                const pp=worldToScreen(sx2,sy2);
-                ctx.fillStyle='rgba(255,255,255,0.25)';
-                ctx.fillRect(pp.x,pp.y,size.w*S.zoom,size.h*S.zoom);
-                ctx.strokeStyle='rgba(255,255,255,0.8)';
-                ctx.setLineDash([5*S.zoom,5*S.zoom]);
-                ctx.lineWidth=2*S.zoom;
-                ctx.strokeRect(pp.x,pp.y,size.w*S.zoom,size.h*S.zoom);
-                ctx.setLineDash([]);
-                const fs=Math.max(14,20*S.zoom);
-                ctx.font=`${fs}px serif`;
-                ctx.textAlign='center';
-                ctx.textBaseline='middle';
-                ctx.save();
-                const cx2=pp.x+size.w*S.zoom/2, cy2=pp.y+size.h*S.zoom/2;
-                ctx.translate(cx2,cy2);
-                if (S.buildRotation) ctx.rotate(S.buildRotation*Math.PI/180);
-                ctx.fillText(info.emoji,0,0);
-                ctx.restore();
-            }
-            S.incomeTimer+=16;
-            if (S.incomeTimer>=3000) {
-                S.incomeTimer=0;
-                let total=0;
-                S.buildings.forEach(b=>{ total+=Math.floor((BT[b.type]?.income||0)*(b.scale||1)); });
-                S.rails.forEach(()=>{ total+=15; });
-                S.money+=total;
-                if (S.buildings.length>0||S.roads.length>0) { S.happiness+=(Math.random()-0.47)*0.4;
-                    S.happiness=Math.max(0,Math.min(100,S.happiness)); }
-                updateUI();
-            }
-            requestAnimationFrame(gameLoop);
-        }
-
-        function updatePeople() {
-            S.people.forEach(p=>{
-                p.walkTimer+=0.05;
-                if (Math.random()<0.02) { p.vx+=(Math.random()-0.5)*0.6;
-                    p.vy+=(Math.random()-0.5)*0.6; const sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy); if (sp>2) { p.vx*=1.5/sp;
-                    p.vy*=1.5/sp; } }
-                p.x+=p.vx;
-                p.y+=p.vy;
-                const d=Math.sqrt(p.x*p.x+p.y*p.y); if (d>500) { p.vx-=p.x/d*0.03;
-                    p.vy-=p.y/d*0.03; }
-            });
-        }
-
-        function updateParticles() {
-            S.particles.forEach(p=>{ p.x+=p.vx;
-                p.y+=p.vy;
-                p.vy+=0.1;
-                p.life-=0.025;
-                p.size*=0.995; });
-            S.particles=S.particles.filter(p=>p.life>0);
-        }
-
-        function spawnParticles(wx,wy,colorHex) {
-            const hex=colorHex||'#f0d060';
-            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-            for (let i=0; i<25; i++) S.particles.push({ x:wx,y:wy, vx:(Math.random()-0.5)*5, vy:(Math.random()-0.5)*5-4, life:1,
-                size:Math.random()*5+2, r,g,b });
-        }
-
-        document.addEventListener('mousemove', e=>{
-            if (!S.canvas||!S.countryName) return;
-            const c=getCanvasCoords(e);
-            S.mx=c.sx;
-            S.my=c.sy;
-            if (S.dragging) { S.camX-=(e.clientX-S.dragSX)/S.zoom;
-                S.camY-=(e.clientY-S.dragSY)/S.zoom;
-                S.dragSX=e.clientX;
-                S.dragSY=e.clientY;
-                S.dragDist+=Math.abs(e.clientX-S.dragSX)+Math.abs(e.clientY-S.dragSY); }
-            const w=screenToWorld(c.sx,c.sy);
-            S.hovered=findAt(w.x,w.y);
-            updateInfoPopup(c.sx,c.sy);
         });
-
-        document.addEventListener('mousedown', e=>{
-            if (!S.canvas||!S.countryName) return;
-            if (e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
-            if (e.button===0) {
-                const w=getWorldFromEvent(e);
-                S.mx=w.sx;
-                S.my=w.sy;
-                if (S.deleteMode) { if (deleteAt(w.wx,w.wy)) return; }
-                if (S.selectedType && !S.selectMode && !S.deleteMode) { if (buildAt(w.wx,w.wy)) return; }
-                S.dragging=true;
-                S.dragSX=e.clientX;
-                S.dragSY=e.clientY;
-                S.dragDist=0;
-                updateUI();
+    }
+    
+    // Улучшения
+    function upgrade(stat, cost, amount) {
+        if (evolutionPoints >= cost) {
+            evolutionPoints -= cost;
+            if (stat === 'infectivity') {
+                infectivity = Math.min(95, infectivity + amount);
+            } else if (stat === 'lethality') {
+                lethality = Math.min(85, lethality + amount);
+            } else if (stat === 'resistance') {
+                resistance = Math.min(90, resistance + amount);
             }
-            if (e.button===2) { e.preventDefault();
-                clearAllModes(); }
-        });
-
-        document.addEventListener('mouseup', e=>{
-            if (!S.canvas||!S.countryName) return;
-            if (S.dragging && S.dragDist<3) {
-                const w=getWorldFromEvent(e);
-                if (S.deleteMode) deleteAt(w.wx,w.wy);
-                else if (S.selectedType && !S.selectMode) buildAt(w.wx,w.wy);
+            refreshStatsUI();
+            return true;
+        } else {
+            // показать недостаток очков
+            const msgDiv = document.getElementById("winMessage");
+            const original = msgDiv.innerText;
+            msgDiv.innerText = "❌ НЕ ХВАТАЕТ ОЧКОВ ЭВОЛЮЦИИ ❌";
+            setTimeout(() => {
+                if (!COUNTRIES.every(c=>c.infected)) msgDiv.innerText = "🧬 ЗАРАЗА РАСПРОСТРАНЯЕТСЯ... УЛУЧШАЙ ВИРУС! 🧬";
+                else msgDiv.innerText = "🏆 МИР ПОГЛОЩЁН! 🏆";
+            }, 1000);
+            return false;
+        }
+    }
+    
+    // Глобальная мутация - дорогое улучшение, даёт бонус ко всем статам и небольшое авто-заражение
+    function globalMutation() {
+        if (evolutionPoints >= 50) {
+            evolutionPoints -= 50;
+            infectivity = Math.min(95, infectivity + 12);
+            lethality = Math.min(85, lethality + 8);
+            resistance = Math.min(90, resistance + 10);
+            // дополнительно: мгновенно заражаем одну случайную здоровую страну
+            const healthy = COUNTRIES.filter(c => !c.infected);
+            if (healthy.length > 0) {
+                const randomTarget = healthy[Math.floor(Math.random() * healthy.length)];
+                randomTarget.infected = true;
+                evolutionPoints += 10;
             }
-            S.dragging=false;
-            S.dragDist=0;
-            updateUI();
+            refreshStatsUI();
+            updateMapColors();
+        } else {
+            const msgDiv = document.getElementById("winMessage");
+            msgDiv.innerText = "💀 МУТАЦИЯ ТРЕБУЕТ 50 ОЧКОВ 💀";
+            setTimeout(()=> { if(!COUNTRIES.every(c=>c.infected)) msgDiv.innerText = "🧬 ЗАРАЗА РАСПРОСТРАНЯЕТСЯ... УЛУЧШАЙ ВИРУС! 🧬"; else msgDiv.innerText = "🏆 МИР ПОГЛОЩЁН! 🏆";}, 1000);
+        }
+    }
+    
+    // Сброс игры
+    function resetGame() {
+        for (let c of COUNTRIES) {
+            c.infected = false;
+        }
+        evolutionPoints = 100;
+        infectivity = 20;
+        lethality = 10;
+        resistance = 5;
+        // имя вируса (из поля)
+        const nameInput = document.getElementById("virusNameInput");
+        virusName = nameInput.value.trim() || "NECRO-X";
+        refreshStatsUI();
+        updateMapColors();
+        const winDiv = document.getElementById("winMessage");
+        winDiv.innerHTML = "🧬 ВСЁ НАЧАЛОСЬ ЗАНОВО. СОЗДАЙ СВОЙ ВИРУС! 🧬";
+        winDiv.style.background = "#451e2c";
+    }
+    
+    // обработчики кнопок
+    function bindButtons() {
+        document.getElementById("upgInfect").onclick = () => upgrade('infectivity', 10, 8);
+        document.getElementById("upgLethal").onclick = () => upgrade('lethality', 15, 6);
+        document.getElementById("upgResist").onclick = () => upgrade('resistance', 20, 7);
+        document.getElementById("globalAction").onclick = () => globalMutation();
+        document.getElementById("resetGame").onclick = () => resetGame();
+        document.getElementById("virusNameInput").addEventListener("change", (e) => {
+            virusName = e.target.value.trim() || "МУТАНТ";
         });
-
-        document.addEventListener('contextmenu', e=>{ if (e.target.closest('#game-canvas')) e.preventDefault(); });
-        document.addEventListener('wheel', e=>{
-            if (!S.canvas||!S.countryName||e.target.closest('#build-modal')) return;
-            e.preventDefault();
-            const rect=S.canvas.getBoundingClientRect();
-            const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-            const w1=screenToWorld(mx,my);
-            const zf=1.07;
-            if (e.deltaY<0) S.zoom=Math.min(3,S.zoom*zf);
-            else S.zoom=Math.max(0.25,S.zoom/zf);
-            S.gridSize=Math.round(48*S.zoom);
-            const w2=screenToWorld(mx,my);
-            S.camX+=w1.x-w2.x;
-            S.camY+=w1.y-w2.y;
-        }, { passive:false });
-
-        document.addEventListener('touchstart', e=>{
-            if (!S.canvas||!S.countryName) return;
-            if (e.target.closest('#bottom-panel')||e.target.closest('#top-bar')||e.target.closest('#build-modal')) return;
-            if (e.touches.length===2) { S.dragging=false;
-                S.touchesDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-                S.lastPinchZoom=S.zoom; return; }
-            if (e.touches.length===1) {
-                const t=e.touches[0], rect=S.canvas.getBoundingClientRect();
-                S.mx=t.clientX-rect.left;
-                S.my=t.clientY-rect.top;
-                S.dragSX=t.clientX;
-                S.dragSY=t.clientY;
-                S.dragDist=0;
-                S.dragging=true;
-                S.touchStartTime=Date.now();
-                updateUI();
+    }
+    
+    // дополнительный эффект: при заражении всех стран - поздравительное сообщение и остановка авто-распространения не требуется
+    function monitorWin() {
+        let winFlag = false;
+        setInterval(() => {
+            const allInf = COUNTRIES.every(c=>c.infected);
+            if (allInf && !winFlag) {
+                winFlag = true;
+                const winDiv = document.getElementById("winMessage");
+                winDiv.innerHTML = "🔥 ВИРУС ПОГЛОТИЛ ВСЁ ЖИВОЕ. ПОЗДРАВЛЯЮ! МИР ТВОЙ 🔥";
+                winDiv.style.background = "#7a1f3a";
+            } else if (!allInf) {
+                winFlag = false;
             }
-        }, { passive:false });
-
-        document.addEventListener('touchmove', e=>{
-            if (!S.canvas||!S.countryName) return;
-            if (e.touches.length===2) { e.preventDefault(); const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-                S.zoom=Math.max(0.25,Math.min(3,S.lastPinchZoom*(dist/S.touchesDist)));
-                S.gridSize=Math.round(48*S.zoom); }
-            else if (e.touches.length===1&&S.dragging) { S.camX-=(e.touches[0].clientX-S.dragSX)/S.zoom;
-                S.camY-=(e.touches[0].clientY-S.dragSY)/S.zoom;
-                S.dragSX=e.touches[0].clientX;
-                S.dragSY=e.touches[0].clientY;
-                S.dragDist+=Math.abs(e.touches[0].clientX-S.dragSX)+Math.abs(e.touches[0].clientY-S.dragSY); const rect=S.canvas.getBoundingClientRect();
-                S.mx=e.touches[0].clientX-rect.left;
-                S.my=e.touches[0].clientY-rect.top; }
-        }, { passive:false });
-
-        document.addEventListener('touchend', e=>{
-            if (!S.canvas||!S.countryName) return;
-            const wasTap=S.dragDist<8&&Date.now()-S.touchStartTime<300;
-            if (wasTap&&e.changedTouches.length===1) { const w=getWorldFromEvent(e.changedTouches[0]); if (S.deleteMode) deleteAt(w.wx,w.wy); else if (S.selectedType&&!S.selectMode) buildAt(w.wx,w.wy); }
-            S.dragging=false;
-            S.dragDist=0;
-            updateUI();
-        });
-
-        document.addEventListener('keydown', e=>{
-            if (!S.countryName) return;
-            if (e.key==='Escape') { clearAllModes();
-                closeBuildModal(); }
-            if (e.key==='Delete'||e.key==='Backspace') { e.preventDefault();
-                toggleDeleteMode(); }
-            if (e.key==='b'||e.key==='B') openBuildModal();
-            if (e.key==='i'||e.key==='I') toggleSelectMode();
-            if (e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') { e.preventDefault();
-                rotateBuilding(); }
-        });
-
-        document.getElementById('build-modal').addEventListener('click', function(e){ if (e.target===this) closeBuildModal(); });
-
-        function updateInfoPopup(sx,sy) {
-            const popup=document.getElementById('info-popup');
-            if (S.hovered&&!S.dragging&&(S.selectMode||(!S.selectedType&&!S.deleteMode))) {
-                const b=S.hovered, info=BT[b.type], scale=b.scale||1;
-                const cost=getBuildCost(b.type,scale), income=Math.floor((info?.income||0)*scale);
-                const popBonus=Math.floor((info?.pop||0)*scale), happyBonus=Math.floor((info?.happy||0)*scale);
-                popup.style.display='block';
-                popup.style.left=Math.min(sx+22,window.innerWidth-280)+'px';
-                popup.style.top=Math.max(10,sy-30)+'px';
-                popup.innerHTML=`
-                    <span class="pop-title">${info?.emoji||'?'} ${info?.name||'Объект'}</span>
-                    <span class="pop-stat">📏 Размер: ${b.w}x${b.h} (x${scale}) 🔄 ${b.rotation||0}°</span><br>
-                    <span class="pop-stat">💰 Стоимость: ${cost.toLocaleString()}</span><br>
-                    <span class="pop-income">📈 Доход/мес: 💰${income.toLocaleString()}</span><br>
-                    ${!info?.isRoad&&!info?.isRail?`<span class="pop-population">👥 Население: +${popBonus}</span><br>`:''}
-                    <span class="pop-happy">😊 Счастье: ${happyBonus>=0?'+':''}${happyBonus}</span>
-                `;
-            } else popup.style.display='none';
-        }
-
-        function addLog(msg) {
-            const log=document.getElementById('message-log');
-            const d=document.createElement('div');
-            d.className='log-msg';
-            d.textContent=msg;
-            log.appendChild(d);
-            setTimeout(()=>d.remove(),3500);
-            if (log.children.length>6) log.firstChild.remove();
-        }
-
-        function shakeEl(id) {
-            const el=document.getElementById(id);
-            if (!el) return;
-            el.style.animation='shake 0.4s ease';
-            setTimeout(()=>el.style.animation='',400);
-        }
-
-        function showHelp() {
-            alert('🎮 УПРАВЛЕНИЕ:\n\n'+
-                '🖱️ ЛКМ — строить/перетаскивать\n'+
-                '🖱️ Колёсико — масштаб\n'+
-                '📱 Тап — строить, щипок — масштаб\n\n'+
-                '⌨️ КЛАВИШИ:\n'+
-                '  B — меню построек\n'+
-                '  R — поворот (0°/90°/180°/270°)\n'+
-                '  Delete — снос (возврат 50%)\n'+
-                '  I — информация\n'+
-                '  Esc — отмена\n\n'+
-                '📏 РАЗМЕР: цена ×scale²\n'+
-                '💾 Автосохранение каждые 30 сек\n'+
-                '🔄 Кнопка Поворот на нижней панели');
-        }
-
-        const shakeCSS=document.createElement('style');
-        shakeCSS.textContent='@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
-        document.head.appendChild(shakeCSS);
-
-        console.log('🏛️ President Simulator 2D готов!');
-        console.log('✅ Сохранения в localStorage');
-        console.log('🔄 Поворот зданий (R или кнопка)');
-        console.log('📏 Свободное размещение без сетки');
-        console.log('⚡ Оптимизировано — без лагов');
-    </script>
+        }, 500);
+    }
+    
+    // инициализация
+    function initGame() {
+        startAutoSpread();
+        bindButtons();
+        initMapClick();
+        refreshStatsUI();
+        updateMapColors();
+        monitorWin();
+        // добавить стартовый бонус: если хотим подсказку
+        console.log("Игра запущена. Создай вирус, кликай на страны!");
+    }
+    
+    initGame();
+</script>
 </body>
 </html>
