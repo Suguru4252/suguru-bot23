@@ -1,485 +1,580 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Земля | Реалистичная 3D модель</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-        }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 12px 25px;
-            border-radius: 50px;
-            pointer-events: none;
-            backdrop-filter: blur(10px);
-            font-weight: 500;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.2);
-            z-index: 10;
-        }
-        .instruction {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
-            background: rgba(0,0,0,0.55);
-            padding: 8px 25px;
-            border-radius: 25px;
-            backdrop-filter: blur(8px);
-            white-space: nowrap;
-            pointer-events: none;
-            letter-spacing: 0.5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, touch-action: manipulation">
+  <title>🌍 Планетарный разрушитель | Интерактивная Земля</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: #000;
+    }
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.75);
+      padding: 12px 25px;
+      border-radius: 40px;
+      backdrop-filter: blur(12px);
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.25);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+    #ui span {
+      color: #ffaa00;
+      margin-right: 5px;
+    }
+    .weapon-panel {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      background: rgba(20, 20, 30, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 15px 25px;
+      border-radius: 60px;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      z-index: 30;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .weapon-btn {
+      background: rgba(60, 60, 80, 0.6);
+      border: none;
+      color: #ddd;
+      padding: 12px 22px;
+      border-radius: 40px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.8px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.2);
+      white-space: nowrap;
+    }
+    .weapon-btn:hover {
+      background: rgba(100, 100, 140, 0.8);
+      color: white;
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,160,255,0.5);
+    }
+    .weapon-btn.active {
+      background: #ff5500;
+      color: white;
+      border-color: #ffaa00;
+      box-shadow: 0 0 25px #ff5500;
+      transform: scale(1.05);
+    }
+    .instruction {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .destruction-level {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      padding: 12px 25px;
+      border-radius: 30px;
+      color: #ff8888;
+      font-weight: bold;
+      font-size: 20px;
+      border: 1px solid rgba(255,100,100,0.4);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 1px;
+    }
+    #health-bar {
+      width: 120px;
+      height: 10px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      display: inline-block;
+    }
+    #health-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff4444, #ffaa00);
+      transition: width 0.2s ease;
+    }
+    @media (max-width: 700px) {
+      .weapon-panel {
+        gap: 8px;
+        padding: 12px 15px;
+        bottom: 20px;
+      }
+      .weapon-btn {
+        padding: 10px 15px;
+        font-size: 15px;
+      }
+      .instruction {
+        bottom: 100px;
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="info">🌍 ЗЕМЛЯ</div>
-    <div class="instruction">🖱️ Вращение | 📜 Зум | 👆 Удерживайте для перемещения</div>
+  <div id="ui"><span>🌍</span> ПЛАНЕТАРНЫЙ РАЗРУШИТЕЛЬ</div>
+  <div class="destruction-level">
+    <span>💥 РАЗРУШЕНИЕ</span>
+    <div id="health-bar"><div id="health-fill" style="width: 100%;"></div></div>
+    <span id="health-text">100%</span>
+  </div>
+  <div class="instruction">🖱️ Вращение | 📜 Зум | 🎯 Клик по планете для атаки | Выбери оружие ниже</div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
+  <div class="weapon-panel">
+    <button id="btn-laser" class="weapon-btn active">🔴 ЛАЗЕР</button>
+    <button id="btn-missile" class="weapon-btn">🚀 РАКЕТА</button>
+    <button id="btn-drill" class="weapon-btn">⚙️ БУР</button>
+    <button id="btn-nuke" class="weapon-btn">☢️ ЯДЕРНЫЙ УДАР</button>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // ---------- СЦЕНА ----------
+    const scene = new THREE.Scene();
+    
+    // Звёзды
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 3500;
+    const starsPositions = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount * 3; i += 3) {
+      starsPositions[i] = (Math.random() - 0.5) * 900;
+      starsPositions[i+1] = (Math.random() - 0.5) * 600;
+      starsPositions[i+2] = (Math.random() - 0.5) * 700;
+    }
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+    const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(stars);
+    
+    const starsGeo2 = new THREE.BufferGeometry();
+    const starsPositions2 = new Float32Array(2000 * 3);
+    for (let i = 0; i < 2000 * 3; i += 3) {
+      starsPositions2[i] = (Math.random() - 0.5) * 1100;
+      starsPositions2[i+1] = (Math.random() - 0.5) * 700;
+      starsPositions2[i+2] = (Math.random() - 0.5) * 900;
+    }
+    starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPositions2, 3));
+    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(stars2);
+
+    // Камера
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0.8, 5.2);
+    camera.lookAt(0, 0, 0);
+
+    // Рендеры
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    document.body.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    // Управление
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.rotateSpeed = 0.7;
+    controls.zoomSpeed = 1.3;
+    controls.minDistance = 1.9;
+    controls.maxDistance = 18;
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    // Освещение
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
+    sunLight.position.set(5, 3, 5);
+    scene.add(sunLight);
+    const ambientLight = new THREE.AmbientLight(0x112244, 0.45);
+    scene.add(ambientLight);
+    const rimLight = new THREE.DirectionalLight(0x4488cc, 0.55);
+    rimLight.position.set(-3, 0, -3);
+    scene.add(rimLight);
+
+    // ---------- ТЕКСТУРЫ ЗЕМЛИ ----------
+    function createEarthTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      const oceanGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      oceanGrad.addColorStop(0, '#1a3a5c');
+      oceanGrad.addColorStop(0.3, '#1e5a8a');
+      oceanGrad.addColorStop(0.5, '#225588');
+      oceanGrad.addColorStop(0.7, '#1e5a8a');
+      oceanGrad.addColorStop(1, '#1a3a5c');
+      ctx.fillStyle = oceanGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const continents = [
+        { x: 150, y: 60, w: 180, h: 150 },
+        { x: 200, y: 200, w: 90, h: 180 },
+        { x: 480, y: 70, w: 140, h: 100 },
+        { x: 470, y: 150, w: 150, h: 250 },
+        { x: 600, y: 50, w: 300, h: 180 },
+        { x: 750, y: 290, w: 100, h: 80 },
+        { x: 0, y: 430, w: 1024, h: 82 }
+      ];
+      continents.forEach(c => {
+        ctx.save();
+        ctx.fillStyle = '#3a6b35';
+        ctx.strokeStyle = '#2d5a28';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const points = 14;
+        for (let i = 0; i < points; i++) {
+          const angle = (i / points) * Math.PI * 2;
+          const rx = c.w/2 + (Math.random() - 0.5) * c.w * 0.35;
+          const ry = c.h/2 + (Math.random() - 0.5) * c.h * 0.35;
+          ctx.lineTo(c.x + c.w/2 + Math.cos(angle) * rx, c.y + c.h/2 + Math.sin(angle) * ry);
         }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // ==================== СЦЕНА ====================
-        const scene = new THREE.Scene();
-        
-        // Звёздное небо
-        const starsGeo = new THREE.BufferGeometry();
-        const starsCount = 3000;
-        const starsPositions = new Float32Array(starsCount * 3);
-        for (let i = 0; i < starsCount * 3; i += 3) {
-            starsPositions[i] = (Math.random() - 0.5) * 800;
-            starsPositions[i+1] = (Math.random() - 0.5) * 500;
-            starsPositions[i+2] = (Math.random() - 0.5) * 600;
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#4a8a3f';
+        for (let i=0; i<25; i++) {
+          ctx.beginPath();
+          ctx.arc(c.x+Math.random()*c.w, c.y+Math.random()*c.h, Math.random()*14+4, 0, Math.PI*2);
+          ctx.fill();
         }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
-        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ 
-            color: 0xffffff, 
-            size: 0.3, 
-            blending: THREE.AdditiveBlending, 
-            depthWrite: false 
-        }));
-        scene.add(stars);
-        
-        // Ещё слой звёзд
-        const starsGeo2 = new THREE.BufferGeometry();
-        const starsPositions2 = new Float32Array(2000 * 3);
-        for (let i = 0; i < 2000 * 3; i += 3) {
-            starsPositions2[i] = (Math.random() - 0.5) * 1000;
-            starsPositions2[i+1] = (Math.random() - 0.5) * 600;
-            starsPositions2[i+2] = (Math.random() - 0.5) * 800;
+        ctx.fillStyle = '#c4a855';
+        for (let i=0; i<8; i++) {
+          ctx.beginPath();
+          ctx.arc(c.x+Math.random()*c.w, c.y+Math.random()*c.h, Math.random()*11+3, 0, Math.PI*2);
+          ctx.fill();
         }
-        starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPositions2, 3));
-        const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({ 
-            color: 0xaaccff, 
-            size: 0.25, 
-            blending: THREE.AdditiveBlending, 
-            depthWrite: false 
-        }));
-        scene.add(stars2);
+        ctx.restore();
+      });
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fillRect(0,0,canvas.width,30);
+      ctx.fillRect(0,canvas.height-50,canvas.width,50);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      for (let i=0; i<180; i++) {
+        ctx.beginPath();
+        ctx.ellipse(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*35+8, Math.random()*12+4, Math.random()*Math.PI, 0, Math.PI*2);
+        ctx.fill();
+      }
+      return new THREE.CanvasTexture(canvas);
+    }
+    
+    function createCloudTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for (let i=0; i<450; i++) {
+        const alpha = 0.1 + Math.random()*0.45;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.ellipse(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*55+12, Math.random()*18+4, Math.random()*Math.PI, 0, Math.PI*2);
+        ctx.fill();
+      }
+      return new THREE.CanvasTexture(canvas);
+    }
 
-        // ==================== КАМЕРА ====================
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0.5, 4.5);
-        camera.lookAt(0, 0, 0);
+    // ---------- ГРУППА ЗЕМЛИ ----------
+    const earthGroup = new THREE.Group();
+    const earthGeo = new THREE.SphereGeometry(1.5, 96, 96);
+    const earthTex = createEarthTexture();
+    const earthMat = new THREE.MeshPhongMaterial({ map: earthTex, specular: new THREE.Color('grey'), shininess: 8 });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    earth.castShadow = true;
+    earth.receiveShadow = true;
+    earthGroup.add(earth);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.1;
-        document.body.appendChild(renderer.domElement);
+    const cloudsGeo = new THREE.SphereGeometry(1.53, 96, 96);
+    const cloudsTex = createCloudTexture();
+    const cloudsMat = new THREE.MeshPhongMaterial({ map: cloudsTex, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false });
+    const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
+    clouds.renderOrder = 1;
+    earthGroup.add(clouds);
 
-        // ==================== УПРАВЛЕНИЕ ====================
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.08;
-        controls.rotateSpeed = 0.6;
-        controls.zoomSpeed = 1.2;
-        controls.minDistance = 1.8;
-        controls.maxDistance = 15;
-        controls.target.set(0, 0, 0);
-        controls.update();
+    const atmosphereGeo = new THREE.SphereGeometry(1.65, 96, 96);
+    const atmosphereMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: new THREE.Color('#4488ff') } },
+      vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main() { vec4 wp = modelMatrix * vec4(position,1.0); vNormal = normalize(mat3(modelMatrix)*normal); vPosition = wp.xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+      fragmentShader: `varying vec3 vNormal; varying vec3 vPosition; uniform vec3 uColor; void main() { vec3 viewDir = normalize(cameraPosition - vPosition); float f = 1.0 - abs(dot(viewDir, vNormal)); f = pow(f, 3.8); gl_FragColor = vec4(uColor, f*0.55); }`,
+      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+    atmosphere.renderOrder = 2;
+    earthGroup.add(atmosphere);
+    scene.add(earthGroup);
 
-        // ==================== ОСВЕЩЕНИЕ ====================
-        // Солнечный свет
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        sunLight.position.set(5, 3, 5);
-        scene.add(sunLight);
-        
-        // Подсветка тёмной стороны
-        const ambientLight = new THREE.AmbientLight(0x111144, 0.4);
-        scene.add(ambientLight);
-        
-        // Рассеянный свет атмосферы
-        const rimLight = new THREE.DirectionalLight(0x4488cc, 0.5);
-        rimLight.position.set(-3, 0, -3);
-        scene.add(rimLight);
+    // ---------- СИСТЕМА РАЗРУШЕНИЯ ----------
+    const destructionFragments = [];
+    let planetHealth = 100;
+    const maxHealth = 100;
+    
+    function updateHealthUI() {
+      document.getElementById('health-fill').style.width = `${planetHealth}%`;
+      document.getElementById('health-text').textContent = `${Math.floor(planetHealth)}%`;
+      if (planetHealth < 30) {
+        document.getElementById('health-fill').style.background = "linear-gradient(90deg, #ff0000, #ff4444)";
+      } else if (planetHealth < 60) {
+        document.getElementById('health-fill').style.background = "linear-gradient(90deg, #ff5500, #ffaa00)";
+      }
+    }
 
-        // ==================== СОЗДАНИЕ ТЕКСТУР ЗЕМЛИ ====================
-        function createEarthTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            // Океан (глубокий синий)
-            const oceanGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            oceanGradient.addColorStop(0, '#1a3a5c');
-            oceanGradient.addColorStop(0.3, '#1e5a8a');
-            oceanGradient.addColorStop(0.5, '#225588');
-            oceanGradient.addColorStop(0.7, '#1e5a8a');
-            oceanGradient.addColorStop(1, '#1a3a5c');
-            ctx.fillStyle = oceanGradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Континенты
-            const continents = [
-                { name: 'Северная Америка', x: 150, y: 60, w: 180, h: 150 },
-                { name: 'Южная Америка', x: 200, y: 200, w: 90, h: 180 },
-                { name: 'Европа', x: 480, y: 70, w: 140, h: 100 },
-                { name: 'Африка', x: 470, y: 150, w: 150, h: 250 },
-                { name: 'Азия', x: 600, y: 50, w: 300, h: 180 },
-                { name: 'Австралия', x: 750, y: 290, w: 100, h: 80 },
-                { name: 'Антарктида', x: 0, y: 430, w: 1024, h: 82 }
-            ];
-            
-            continents.forEach(continent => {
-                ctx.save();
-                ctx.fillStyle = '#3a6b35';
-                ctx.strokeStyle = '#2d5a28';
-                ctx.lineWidth = 2;
-                
-                ctx.beginPath();
-                const { x, y, w, h } = continent;
-                
-                // Создаём неровный контур
-                const points = 12;
-                ctx.moveTo(x + Math.random() * 20, y + Math.random() * 10);
-                for (let i = 0; i < points; i++) {
-                    const angle = (i / points) * Math.PI * 2;
-                    const rx = w/2 + (Math.random() - 0.5) * w * 0.3;
-                    const ry = h/2 + (Math.random() - 0.5) * h * 0.3;
-                    ctx.lineTo(
-                        x + w/2 + Math.cos(angle) * rx,
-                        y + h/2 + Math.sin(angle) * ry
-                    );
-                }
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                
-                // Добавляем рельеф
-                ctx.fillStyle = '#4a8a3f';
-                for (let i = 0; i < 30; i++) {
-                    const rx = x + Math.random() * w;
-                    const ry = y + Math.random() * h;
-                    ctx.beginPath();
-                    ctx.arc(rx, ry, Math.random() * 15 + 5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                // Горы
-                ctx.fillStyle = '#5a7a4a';
-                for (let i = 0; i < 10; i++) {
-                    const mx = x + Math.random() * w;
-                    const my = y + Math.random() * h;
-                    ctx.beginPath();
-                    ctx.arc(mx, my, Math.random() * 8 + 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                // Пустыни
-                ctx.fillStyle = '#c4a855';
-                for (let i = 0; i < 8; i++) {
-                    const dx = x + Math.random() * w;
-                    const dy = y + Math.random() * h;
-                    ctx.beginPath();
-                    ctx.arc(dx, dy, Math.random() * 12 + 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                ctx.restore();
-            });
-            
-            // Лёд на полюсах
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-            ctx.fillRect(0, 0, canvas.width, 30);
-            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-            
-            // Облака поверх
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for (let i = 0; i < 200; i++) {
-                const cx = Math.random() * canvas.width;
-                const cy = Math.random() * canvas.height;
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, Math.random() * 40 + 10, Math.random() * 15 + 5, Math.random() * Math.PI, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            // Острова
-            ctx.fillStyle = '#4a8a3f';
-            for (let i = 0; i < 50; i++) {
-                const ix = Math.random() * canvas.width;
-                const iy = Math.random() * canvas.height;
-                ctx.beginPath();
-                ctx.arc(ix, iy, Math.random() * 6 + 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            return new THREE.CanvasTexture(canvas);
+    function createExplosionEffect(position, color = 0xff5500, size = 0.25) {
+      const particlesGeo = new THREE.BufferGeometry();
+      const count = 18;
+      const posArray = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i += 3) {
+        posArray[i] = (Math.random() - 0.5) * size;
+        posArray[i+1] = (Math.random() - 0.5) * size;
+        posArray[i+2] = (Math.random() - 0.5) * size;
+      }
+      particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const mat = new THREE.PointsMaterial({ color: color, size: 0.08, blending: THREE.AdditiveBlending, depthWrite: false });
+      const particles = new THREE.Points(particlesGeo, mat);
+      particles.position.copy(position);
+      scene.add(particles);
+      
+      let timer = 0;
+      const animateParticles = () => {
+        timer++;
+        particles.material.opacity = 1 - timer/25;
+        particles.scale.multiplyScalar(1.06);
+        if (timer > 25 || planetHealth <= 0) {
+          scene.remove(particles);
+        } else {
+          requestAnimationFrame(animateParticles);
         }
-        
-        function createCloudTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Облачные образования
-            for (let i = 0; i < 500; i++) {
-                const alpha = 0.1 + Math.random() * 0.4;
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                const cx = Math.random() * canvas.width;
-                const cy = Math.random() * canvas.height;
-                const rx = Math.random() * 60 + 15;
-                const ry = Math.random() * 20 + 5;
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, rx, ry, Math.random() * Math.PI, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Мелкие облачка рядом
-                for (let j = 0; j < 3; j++) {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
-                    ctx.beginPath();
-                    ctx.ellipse(
-                        cx + (Math.random() - 0.5) * 40,
-                        cy + (Math.random() - 0.5) * 15,
-                        rx * 0.6,
-                        ry * 0.6,
-                        Math.random() * Math.PI,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                }
-            }
-            
-            // Полосы облаков
-            for (let y = 0; y < canvas.height; y += 30) {
-                const alpha = 0.05 + Math.random() * 0.15;
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fillRect(0, y, canvas.width, 20 + Math.random() * 10);
-            }
-            
-            return new THREE.CanvasTexture(canvas);
+      };
+      animateParticles();
+    }
+
+    function damagePlanet(amount, position) {
+      if (planetHealth <= 0) return;
+      planetHealth = Math.max(0, planetHealth - amount);
+      updateHealthUI();
+      
+      createExplosionEffect(position, 0xff6600, 0.35);
+      
+      // Создаём фрагменты коры
+      for (let i = 0; i < 7; i++) {
+        const fragGeo = new THREE.SphereGeometry(0.08 + Math.random()*0.15, 3, 3);
+        const fragMat = new THREE.MeshPhongMaterial({ color: new THREE.Color(`hsl(${30 + Math.random()*20}, 70%, 40%)`), emissive: new THREE.Color(0x331100) });
+        const fragment = new THREE.Mesh(fragGeo, fragMat);
+        fragment.position.copy(position);
+        const dir = position.clone().normalize();
+        fragment.userData = { 
+          velocity: dir.clone().multiplyScalar(0.08 + Math.random()*0.15),
+          life: 1.0,
+          decay: 0.008 + Math.random()*0.02
+        };
+        scene.add(fragment);
+        destructionFragments.push(fragment);
+      }
+      
+      if (planetHealth <= 0) {
+        triggerTotalDestruction();
+      }
+    }
+
+    function triggerTotalDestruction() {
+      for (let i = 0; i < 80; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 1.5 + Math.random() * 0.3;
+        const pos = new THREE.Vector3(Math.cos(angle) * radius, (Math.random() - 0.5) * 2.5, Math.sin(angle) * radius);
+        const fragGeo = new THREE.SphereGeometry(0.1 + Math.random()*0.25, 4, 4);
+        const fragMat = new THREE.MeshPhongMaterial({ color: new THREE.Color(`hsl(${Math.random()*60}, 70%, 45%)`), emissive: new THREE.Color(0x441100) });
+        const fragment = new THREE.Mesh(fragGeo, fragMat);
+        fragment.position.copy(pos);
+        fragment.userData = { velocity: pos.clone().normalize().multiplyScalar(0.18 + Math.random()*0.35), life: 1.0, decay: 0.004 };
+        scene.add(fragment);
+        destructionFragments.push(fragment);
+      }
+      earth.visible = false;
+      clouds.visible = false;
+      atmosphere.visible = false;
+    }
+
+    // ---------- ОРУЖИЕ И АТАКИ ----------
+    let currentWeapon = 'laser';
+    
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onCanvasClick(event) {
+      if (planetHealth <= 0) return;
+      
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(earth);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        applyWeaponEffect(point);
+      }
+    }
+
+    function applyWeaponEffect(worldPoint) {
+      const localPoint = earth.worldToLocal(worldPoint.clone());
+      
+      switch(currentWeapon) {
+        case 'laser':
+          damagePlanet(4, worldPoint);
+          createLaserBeam(worldPoint);
+          break;
+        case 'missile':
+          damagePlanet(8, worldPoint);
+          createExplosionEffect(worldPoint, 0xff4400, 0.5);
+          break;
+        case 'drill':
+          damagePlanet(12, worldPoint);
+          for (let i=0; i<3; i++) createExplosionEffect(worldPoint.clone().add(new THREE.Vector3((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2)), 0xaa5500, 0.3);
+          break;
+        case 'nuke':
+          damagePlanet(22, worldPoint);
+          for (let i=0; i<8; i++) {
+            const offset = new THREE.Vector3((Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5);
+            createExplosionEffect(worldPoint.clone().add(offset), 0xff2200, 0.7);
+          }
+          break;
+      }
+    }
+
+    function createLaserBeam(targetPoint) {
+      const startPoint = camera.position.clone();
+      const direction = targetPoint.clone().sub(startPoint).normalize();
+      const length = startPoint.distanceTo(targetPoint);
+      const midPoint = startPoint.clone().add(direction.clone().multiplyScalar(length/2));
+      
+      const beamGeo = new THREE.CylinderGeometry(0.03, 0.03, length, 6);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0xff3300, emissive: new THREE.Color(0xff0000), blending: THREE.AdditiveBlending, depthWrite: false });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.copy(midPoint);
+      beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction);
+      scene.add(beam);
+      
+      setTimeout(() => scene.remove(beam), 150);
+    }
+
+    // Обработчики кнопок
+    document.getElementById('btn-laser').addEventListener('click', () => setWeapon('laser', 'btn-laser'));
+    document.getElementById('btn-missile').addEventListener('click', () => setWeapon('missile', 'btn-missile'));
+    document.getElementById('btn-drill').addEventListener('click', () => setWeapon('drill', 'btn-drill'));
+    document.getElementById('btn-nuke').addEventListener('click', () => setWeapon('nuke', 'btn-nuke'));
+    
+    function setWeapon(type, btnId) {
+      currentWeapon = type;
+      document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(btnId).classList.add('active');
+    }
+
+    window.addEventListener('click', onCanvasClick);
+    
+    // Для мобильных устройств
+    window.addEventListener('touchstart', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
+        onCanvasClick(fakeEvent);
+      }
+    });
+
+    // Анимация
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      
+      earth.rotation.y += 0.0007;
+      clouds.rotation.y += 0.00095;
+      stars.rotation.y += 0.00008;
+      stars2.rotation.y -= 0.00004;
+      
+      // Движение фрагментов
+      for (let i = destructionFragments.length - 1; i >= 0; i--) {
+        const frag = destructionFragments[i];
+        frag.position.add(frag.userData.velocity);
+        frag.userData.life -= frag.userData.decay;
+        frag.material.opacity = frag.userData.life;
+        frag.scale.multiplyScalar(0.998);
+        if (frag.userData.life <= 0.1 || frag.position.length() > 6) {
+          scene.remove(frag);
+          destructionFragments.splice(i,1);
         }
-        
-        function createSpecularMap() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            
-            // Океан блестит (светлый), суша матовая (тёмная)
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#111111';
-            const continents = [
-                { x: 75, y: 30, w: 90, h: 75 },
-                { x: 100, y: 100, w: 45, h: 90 },
-                { x: 240, y: 35, w: 70, h: 50 },
-                { x: 235, y: 75, w: 75, h: 125 },
-                { x: 300, y: 25, w: 150, h: 90 },
-                { x: 375, y: 145, w: 50, h: 40 },
-                { x: 0, y: 215, w: 512, h: 41 }
-            ];
-            
-            continents.forEach(c => {
-                ctx.beginPath();
-                ctx.ellipse(c.x + c.w/2, c.y + c.h/2, c.w/2, c.h/2, 0, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            return new THREE.CanvasTexture(canvas);
-        }
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    
+    animate();
 
-        // ==================== СОЗДАНИЕ ЗЕМЛИ ====================
-        const earthGroup = new THREE.Group();
-        
-        // Основная сфера Земли
-        const earthGeo = new THREE.SphereGeometry(1.5, 96, 96);
-        const earthTex = createEarthTexture();
-        const specularTex = createSpecularMap();
-        
-        const earthMat = new THREE.MeshPhongMaterial({
-            map: earthTex,
-            specularMap: specularTex,
-            specular: new THREE.Color('grey'),
-            shininess: 10,
-            bumpScale: 0.05
-        });
-        
-        const earth = new THREE.Mesh(earthGeo, earthMat);
-        earth.castShadow = true;
-        earth.receiveShadow = true;
-        earthGroup.add(earth);
-        
-        // Слой облаков
-        const cloudsGeo = new THREE.SphereGeometry(1.53, 96, 96);
-        const cloudsTex = createCloudTexture();
-        const cloudsMat = new THREE.MeshPhongMaterial({
-            map: cloudsTex,
-            transparent: true,
-            opacity: 0.4,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.FrontSide
-        });
-        const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
-        clouds.renderOrder = 1;
-        earthGroup.add(clouds);
-        
-        // Атмосфера
-        const atmosphereGeo = new THREE.SphereGeometry(1.65, 96, 96);
-        const atmosphereMat = new THREE.ShaderMaterial({
-            uniforms: {
-                uColor: { value: new THREE.Color('#4488ff') }
-            },
-            vertexShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                void main() {
-                    vec4 worldPos = modelMatrix * vec4(position, 1.0);
-                    vNormal = normalize(mat3(modelMatrix) * normal);
-                    vPosition = worldPos.xyz;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                uniform vec3 uColor;
-                void main() {
-                    vec3 viewDir = normalize(cameraPosition - vPosition);
-                    float fresnel = 1.0 - abs(dot(viewDir, vNormal));
-                    fresnel = pow(fresnel, 3.5);
-                    float alpha = fresnel * 0.5;
-                    gl_FragColor = vec4(uColor, alpha);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.FrontSide
-        });
-        const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
-        atmosphere.renderOrder = 2;
-        earthGroup.add(atmosphere);
-        
-        // Внешнее свечение атмосферы
-        const outerAtmoGeo = new THREE.SphereGeometry(1.78, 64, 64);
-        const outerAtmoMat = new THREE.ShaderMaterial({
-            uniforms: {
-                uColor: { value: new THREE.Color('#88bbff') }
-            },
-            vertexShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                void main() {
-                    vec4 worldPos = modelMatrix * vec4(position, 1.0);
-                    vNormal = normalize(mat3(modelMatrix) * normal);
-                    vPosition = worldPos.xyz;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                uniform vec3 uColor;
-                void main() {
-                    vec3 viewDir = normalize(cameraPosition - vPosition);
-                    float fresnel = 1.0 - abs(dot(viewDir, vNormal));
-                    fresnel = pow(fresnel, 6.0);
-                    float alpha = fresnel * 0.25;
-                    gl_FragColor = vec4(uColor, alpha);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.FrontSide
-        });
-        const outerAtmo = new THREE.Mesh(outerAtmoGeo, outerAtmoMat);
-        outerAtmo.renderOrder = 3;
-        earthGroup.add(outerAtmo);
-        
-        scene.add(earthGroup);
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-        // ==================== АНИМАЦИЯ ====================
-        const clock = new THREE.Clock();
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const delta = clock.getDelta();
-            
-            // Вращение Земли
-            earth.rotation.y += 0.0008;
-            // Облака вращаются чуть быстрее
-            clouds.rotation.y += 0.001;
-            
-            // Вращение звёзд
-            stars.rotation.y += 0.0001;
-            stars2.rotation.y -= 0.00005;
-            
-            controls.update();
-            
-            renderer.render(scene, camera);
-        }
-        
-        animate();
-
-        // ==================== РЕСАЙЗ ====================
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        console.log('🌍 Реалистичная Земля готова!');
-        console.log('   🖱️ Вращайте мышью');
-        console.log('   📜 Приближайте колёсиком');
-        console.log('   👆 Зажмите правую кнопку для перемещения');
-        console.log('   ☁️ Облака вращаются');
-        console.log('   🌫️ Атмосфера с эффектом Френеля');
-    </script>
+    console.log('🌍 Планетарный разрушитель активирован! Выбирай оружие и кликай по Земле.');
+  </script>
 </body>
 </html>
