@@ -2,848 +2,616 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Фронт: Тактическая оборона</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=yes, viewport-fit=cover">
+  <title>Haunted Dorm · Комната 404</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
     }
     body {
-      background: #1a1a1a;
+      background: #0b0b0f;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 10px;
     }
-
-    /* Стили для спойлера */
-    .spoiler-container {
-      width: 800px;
-      max-width: 95vw;
-      margin-bottom: 10px;
-    }
-    .spoiler-btn {
-      background: #3d3d3d;
-      color: #ccc;
-      border: 1px solid #555;
-      padding: 10px 15px;
-      width: 100%;
-      text-align: left;
-      font-size: 14px;
-      font-family: 'Courier New', monospace;
-      cursor: pointer;
-      transition: background 0.3s;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .spoiler-btn:hover {
-      background: #4a4a4a;
-    }
-    .spoiler-btn .arrow {
-      transition: transform 0.3s;
-      font-size: 12px;
-    }
-    .spoiler-btn.open .arrow {
-      transform: rotate(90deg);
-    }
-    .spoiler-content {
-      background: #262626;
-      border: 1px solid #555;
-      border-top: none;
-      padding: 0 15px;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease, padding 0.4s ease;
-      color: #aaa;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .spoiler-content.open {
-      max-height: 200px;
-      padding: 15px;
-    }
-    .spoiler-content p {
-      margin: 5px 0;
-    }
-    .spoiler-content strong {
-      color: #ffaa00;
-    }
-
-    /* Основной контейнер игры */
     .game-container {
-      background: #2d2d2d;
-      border: 2px solid #555;
-      border-radius: 8px;
-      padding: 20px;
-      width: 800px;
-      max-width: 95vw;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: #3a4a3a;
-      border: 2px solid #666;
-      border-radius: 4px;
+      background: linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%);
+      border-radius: 32px;
+      padding: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 0, 100, 0.3);
+      max-width: 500px;
       width: 100%;
-      height: auto;
-      cursor: crosshair;
+      border: 1px solid #ff2a6d;
     }
-    .hud {
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 15px;
-      color: #ccc;
-      font-size: 14px;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .hud > div {
-      background: #1f1f1f;
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #444;
-    }
-    .resources span {
-      color: #ffcc00;
+      color: #ffb3c6;
       font-weight: bold;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 10px 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid #ff4d7a;
     }
-    .unit-btn {
-      background: #4a4a4a;
-      color: #ddd;
-      border: 1px solid #666;
-      padding: 8px 14px;
+    .energy-display {
+      font-size: 1.4rem;
+      background: #000;
+      padding: 5px 14px;
+      border-radius: 20px;
+      color: #ffdf00;
+      text-shadow: 0 0 8px #ffaa00;
+      box-shadow: inset 0 0 6px black;
+    }
+    .door-hp {
+      font-size: 1.2rem;
+      background: #3a0a1a;
+      padding: 5px 16px;
+      border-radius: 20px;
+      color: #ff6b6b;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      background: #12121c;
+      padding: 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 2px solid #3d2b3f;
+      box-shadow: inset 0 0 15px black;
+    }
+    .cell {
+      aspect-ratio: 1 / 1;
+      background: #25253a;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: white;
+      background: radial-gradient(circle at 30% 30%, #3c3c5c, #1b1b2a);
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.6), 0 4px 6px black;
+      transition: 0.1s;
+      position: relative;
       cursor: pointer;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      border-radius: 4px;
-      transition: all 0.2s;
-      white-space: nowrap;
     }
-    .unit-btn:hover {
-      background: #5a5a5a;
+    .cell.occupied {
+      background: radial-gradient(circle at 30% 30%, #5a3a6a, #2a1a3a);
+      color: #f0e68c;
+      font-weight: bold;
+      box-shadow: 0 0 12px #b983ff;
     }
-    .unit-btn:active {
-      background: #3a3a3a;
+    .cell.door {
+      background: radial-gradient(circle at 30% 30%, #8b0000, #4a0000);
+      font-size: 2rem;
+      box-shadow: 0 0 15px #ff4444;
+    }
+    .cell.selected {
+      outline: 3px solid #ffe484;
+      outline-offset: -2px;
+      filter: brightness(1.3);
       transform: scale(0.96);
     }
-    .unit-btn.selected {
-      background: #556b2f;
-      border-color: #8fbc8f;
-      box-shadow: 0 0 8px #8fbc8f;
+    .action-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+      background: #1e1e30;
+      border-radius: 24px;
+      padding: 12px;
+      justify-content: center;
     }
-    .special-btn {
-      background: #4a3a2a;
-      border-color: #8b6914;
+    button {
+      background: #2c2c44;
+      border: none;
+      color: #ddd;
+      font-weight: bold;
+      padding: 10px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 0 #0b0b15, 0 6px 10px black;
+      transition: all 0.07s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      min-width: 60px;
+      background: #383854;
+      color: white;
     }
-    .special-btn:hover {
-      background: #5a4a3a;
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #0b0b15, 0 4px 6px black;
+      filter: brightness(1.3);
     }
-    .special-btn.selected {
-      background: #6b4a1a;
-      border-color: #ffaa00;
-      box-shadow: 0 0 8px #ffaa00;
+    button:disabled {
+      opacity: 0.5;
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #0b0b15;
+      pointer-events: none;
     }
-    .restart-btn {
-      background: #5c3a3a;
-      border-color: #8b3a3a;
+    .turret-btn { background: #5e3a6c; color: #ffddf4; }
+    .gen-btn { background: #2f5a4a; color: #c5ffc5; }
+    .door-btn { background: #8b3a3a; color: #ffc0c0; }
+    .boss-area {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 1.1rem;
+      color: #ffaaaa;
+      background: #1a0e0e;
+      border-radius: 30px;
+      padding: 8px;
+      border: 1px solid #ff4d4d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: 20px;
+      padding-right: 20px;
     }
-    .restart-btn:hover {
-      background: #6b4444;
+    .boss-hp-bar {
+      width: 120px;
+      height: 12px;
+      background: #3a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
     }
-    .message {
-      color: #ff6666;
+    .boss-hp-fill {
+      width: 100%;
+      height: 100%;
+      background: #ff3a3a;
+      box-shadow: 0 0 15px red;
+    }
+    .log {
+      color: #aaa;
+      font-size: 0.75rem;
       margin-top: 8px;
-      font-size: 13px;
       text-align: center;
       min-height: 20px;
     }
-    @media (max-width: 600px) {
-      .hud {
-        flex-direction: column;
-        align-items: stretch;
+    @media (max-width: 400px) {
+      button {
+        font-size: 0.7rem;
+        padding: 8px 6px;
       }
     }
   </style>
 </head>
 <body>
+<div class="game-container">
+  <div class="header">
+    <span>⚡ <span id="energyValue">120</span></span>
+    <span class="door-hp">🚪 <span id="doorHP">100</span>%</span>
+    <span>👻BOSS <span id="waveText">1</span></span>
+  </div>
 
-  <!-- СПОЙЛЕР -->
-  <div class="spoiler-container">
-    <button class="spoiler-btn" id="spoilerBtn">
-      ⚠️ ПРЕДУПРЕЖДЕНИЕ <span class="arrow">▶</span>
+  <div class="grid" id="gridContainer"></div>
+
+  <div class="action-panel">
+    <button class="gen-btn" id="btnGenerator">
+      <span>🔋</span> Генератор<br><small>35⚡</small>
     </button>
-    <div class="spoiler-content" id="spoilerContent">
-      <p><strong>Внимание:</strong> данная игра представляет собой абстрактный тактический симулятор обороны.</p>
-      <p>Все события, юниты и локации являются вымышленными и не привязаны к реальным конфликтам.</p>
-      <p>Игра создана исключительно в развлекательных целях.</p>
-    </div>
+    <button class="turret-btn" id="btnTurret">
+      <span>🔫</span> Пушка<br><small>60⚡</small>
+    </button>
+    <button class="door-btn" id="btnRepair">
+      <span>🛡️</span> Чинить<br><small>30⚡</small>
+    </button>
+    <button id="btnSell" style="background:#4a4a5a;">
+      <span>💰</span> Продать<br><small>+50%</small>
+    </button>
   </div>
 
-  <!-- ИГРА -->
-  <div class="game-container">
-    <canvas id="gameCanvas" width="700" height="400"></canvas>
-    <div class="hud">
-      <div class="resources">🔧 Ресурсы: <span id="resDisplay">100</span></div>
-      <button class="unit-btn" id="btnTurret">🛡️ Башня (30)</button>
-      <button class="unit-btn" id="btnSoldier">👤 Пехотинец (15)</button>
-      <button class="unit-btn" id="btnMine">💣 Мина (10)</button>
-      <button class="unit-btn special-btn" id="btnArtillery">💥 Артудар (50)</button>
-      <button class="unit-btn restart-btn" id="btnRestart">🔄 Сброс</button>
+  <div class="boss-area">
+    <span>👾 Босс</span>
+    <div class="boss-hp-bar">
+      <div id="bossHpFill" class="boss-hp-fill" style="width: 100%;"></div>
     </div>
-    <div class="message" id="messageText"></div>
+    <span id="bossHpText">200/200</span>
   </div>
+  <div class="log" id="logMessage">Выбери клетку для постройки</div>
+</div>
 
-  <script>
-    (function() {
-      // --- СПОЙЛЕР ---
-      const spoilerBtn = document.getElementById('spoilerBtn');
-      const spoilerContent = document.getElementById('spoilerContent');
-      spoilerBtn.addEventListener('click', () => {
-        spoilerBtn.classList.toggle('open');
-        spoilerContent.classList.toggle('open');
-      });
+<script>
+  (function() {
+    // ---------- НАСТРОЙКИ КОМНАТЫ ----------
+    const ROWS = 5;
+    const COLS = 5;
+    // Дверь находится в фиксированной клетке (индекс 2,2) - центр
+    const DOOR_ROW = 2;
+    const DOOR_COL = 2;
 
-      // --- ИГРОВАЯ ЛОГИКА ---
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
+    // ---------- СОСТОЯНИЕ ИГРЫ ----------
+    let energy = 180;
+    let doorHP = 100;
+    let bossHP = 200;
+    let wave = 1;
+    let bossMaxHP = 200;
 
-      // Элементы HUD
-      const resDisplay = document.getElementById('resDisplay');
-      const messageText = document.getElementById('messageText');
-      const btnTurret = document.getElementById('btnTurret');
-      const btnSoldier = document.getElementById('btnSoldier');
-      const btnMine = document.getElementById('btnMine');
-      const btnArtillery = document.getElementById('btnArtillery');
-      const btnRestart = document.getElementById('btnRestart');
+    // Ячейки: храним что построено: null, 'generator', 'turret'
+    let gridState = Array(ROWS).fill().map(() => Array(COLS).fill(null));
 
-      // Размеры игрового поля
-      const W = canvas.width;
-      const H = canvas.height;
+    // Таймеры
+    let generatorInterval = null;
+    let bossAttackInterval = null;
+    let turretAttackInterval = null;
 
-      // Линия обороны (база) — левый край
-      const BASE_X = 50;
+    // Выбранная ячейка (для продажи/подсветки)
+    let selectedRow = -1;
+    let selectedCol = -1;
 
-      // Состояние игры
-      let resources = 100;
-      let selectedUnit = null; // 'turret', 'soldier', 'mine', 'artillery'
-      let units = [];
-      let enemies = [];
-      let bullets = [];
-      let particles = [];
-      let gameOver = false;
-      let victory = false;
-      let wave = 1;
-      let enemiesSpawnedThisWave = 0;
-      let enemiesPerWave = 5;
-      let spawnTimer = 0;
-      let gameLoopId = null;
-      let mouseX = 0;
-      let mouseY = 0;
+    // ---------- DOM элементы ----------
+    const gridEl = document.getElementById('gridContainer');
+    const energyEl = document.getElementById('energyValue');
+    const doorHPEl = document.getElementById('doorHP');
+    const bossHpFill = document.getElementById('bossHpFill');
+    const bossHpText = document.getElementById('bossHpText');
+    const waveTextEl = document.getElementById('waveText');
+    const logEl = document.getElementById('logMessage');
 
-      // Класс частицы (для эффектов)
-      class Particle {
-        constructor(x, y, color, life = 30) {
-          this.x = x;
-          this.y = y;
-          this.color = color;
-          this.life = life;
-          this.maxLife = life;
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 3 + 1;
-          this.vx = Math.cos(angle) * speed;
-          this.vy = Math.sin(angle) * speed;
-          this.size = Math.random() * 3 + 1;
-        }
-      }
+    const btnGenerator = document.getElementById('btnGenerator');
+    const btnTurret = document.getElementById('btnTurret');
+    const btnRepair = document.getElementById('btnRepair');
+    const btnSell = document.getElementById('btnSell');
 
-      // Класс юнита игрока
-      class Unit {
-        constructor(x, y, type) {
-          this.x = x;
-          this.y = y;
-          this.type = type; // 'turret', 'soldier', 'mine'
-          this.health = type === 'turret' ? 80 : 30;
-          this.maxHealth = this.health;
-          this.attackCooldown = 0;
-          this.attackRange = type === 'turret' ? 150 : 90;
-          this.damage = type === 'turret' ? 25 : 10;
-          this.attackSpeed = type === 'turret' ? 40 : 25; // кадров между атаками
-          this.repairCooldown = 0;
-        }
-      }
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+    function updateUI() {
+      energyEl.textContent = energy;
+      doorHPEl.textContent = doorHP;
+      let percent = Math.max(0, (bossHP / bossMaxHP) * 100);
+      bossHpFill.style.width = `${percent}%`;
+      bossHpText.textContent = `${Math.max(0, bossHP)}/${bossMaxHP}`;
+      waveTextEl.textContent = wave;
+      
+      // Блокировка кнопок по энергии
+      btnGenerator.disabled = energy < 35;
+      btnTurret.disabled = energy < 60;
+      btnRepair.disabled = energy < 30 || doorHP >= 100;
+    }
 
-      // Класс врага
-      class Enemy {
-        constructor(y) {
-          this.x = W - 30;
-          this.y = y || Math.random() * (H - 40) + 20;
-          this.health = 40 + wave * 10;
-          this.maxHealth = this.health;
-          this.speed = 0.6 + wave * 0.1;
-          this.damage = 5 + wave * 2;
-          this.attackCooldown = 0;
-        }
-      }
+    function log(msg) {
+      logEl.textContent = msg;
+    }
 
-      // Класс пули
-      class Bullet {
-        constructor(x, y, targetX, targetY, damage, isEnemy = false) {
-          this.x = x;
-          this.y = y;
-          this.damage = damage;
-          this.isEnemy = isEnemy;
-          const angle = Math.atan2(targetY - y, targetX - x);
-          this.vx = Math.cos(angle) * 8;
-          this.vy = Math.sin(angle) * 8;
-          this.lifetime = 0;
-          this.maxLifetime = 100;
-        }
-      }
+    // Проверка: свободна ли клетка и не дверь
+    function isCellEmpty(row, col) {
+      if (row === DOOR_ROW && col === DOOR_COL) return false; // дверь
+      return gridState[row][col] === null;
+    }
 
-      function addResources(amount) {
-        resources += amount;
-        updateDisplay();
-      }
+    // Стоимость построек
+    function getBuildCost(type) {
+      if (type === 'generator') return 35;
+      if (type === 'turret') return 60;
+      return 0;
+    }
 
-      function spendResources(amount) {
-        if (resources >= amount) {
-          resources -= amount;
-          updateDisplay();
-          return true;
-        }
+    // Продажа постройки (возврат 50%)
+    function sellBuilding(row, col) {
+      const building = gridState[row][col];
+      if (!building) return false;
+      let refund = 0;
+      if (building === 'generator') refund = Math.floor(35 * 0.5);
+      else if (building === 'turret') refund = Math.floor(60 * 0.5);
+      
+      gridState[row][col] = null;
+      energy += refund;
+      log(`Продано. +${refund}⚡`);
+      renderGrid();
+      updateUI();
+      return true;
+    }
+
+    // Постройка
+    function build(row, col, type) {
+      if (!isCellEmpty(row, col)) {
+        log("Клетка занята!");
         return false;
       }
-
-      function updateDisplay() {
-        resDisplay.textContent = resources;
+      const cost = getBuildCost(type);
+      if (energy < cost) {
+        log("Недостаточно энергии!");
+        return false;
       }
+      energy -= cost;
+      gridState[row][col] = type;
+      log(`Построено: ${type === 'generator' ? 'Генератор' : 'Пушка'}`);
+      renderGrid();
+      updateUI();
+      return true;
+    }
 
-      function showMessage(msg, isGood = false) {
-        messageText.textContent = msg;
-        messageText.style.color = isGood ? '#88ff88' : '#ff6666';
+    // Ремонт двери
+    function repairDoor() {
+      if (energy < 30) {
+        log("Мало энергии для ремонта!");
+        return;
       }
-
-      function clearMessage() {
-        messageText.textContent = '';
+      if (doorHP >= 100) {
+        log("Дверь цела!");
+        return;
       }
+      energy -= 30;
+      doorHP = Math.min(100, doorHP + 40);
+      log("Дверь укреплена +40 ❤️");
+      updateUI();
+      renderGrid();
+    }
 
-      // Создание частиц
-      function spawnParticles(x, y, count, color) {
-        for (let i = 0; i < count; i++) {
-          particles.push(new Particle(x, y, color, 20 + Math.random() * 20));
-        }
+    // Атака босса по двери
+    function bossAttack() {
+      if (doorHP <= 0) {
+        gameOver();
+        return;
       }
-
-      // Размещение юнита
-      function placeUnit(x, y, type) {
-        let cost = 0;
-        if (type === 'turret') cost = 30;
-        else if (type === 'soldier') cost = 15;
-        else if (type === 'mine') cost = 10;
-
-        if (!spendResources(cost)) {
-          showMessage('Недостаточно ресурсов!');
-          return false;
-        }
-
-        // Нельзя ставить слишком близко к базе или за ней
-        if (x < BASE_X + 15 || x > W - 20 || y < 10 || y > H - 10) {
-          resources += cost; // возврат
-          updateDisplay();
-          showMessage('Нельзя разместить здесь!');
-          return false;
-        }
-
-        units.push(new Unit(x, y, type));
-        spawnParticles(x, y, 8, type === 'mine' ? '#ff4444' : '#88ff88');
-        clearMessage();
-        return true;
+      let damage = 5 + wave * 3; // с каждой волной сильнее
+      doorHP = Math.max(0, doorHP - damage);
+      log(`👻 Босс бьёт дверь на ${damage} урона!`);
+      if (doorHP <= 0) {
+        gameOver();
       }
+      updateUI();
+      renderGrid();
+    }
 
-      // Артиллерийский удар
-      function callArtillery(x, y) {
-        if (!spendResources(50)) {
-          showMessage('Недостаточно ресурсов для артудара!');
-          return;
-        }
-        // Урон всем врагам в радиусе
-        for (let e of enemies) {
-          const dx = e.x - x;
-          const dy = e.y - y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            e.health -= 60;
-          } else if (dist < 150) {
-            e.health -= 30;
+    // Атака турелей по боссу
+    function turretsAttack() {
+      let totalDamage = 0;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (gridState[r][c] === 'turret') {
+            totalDamage += 7; // каждая пушка наносит 7 урона
           }
-        }
-        // Много частиц
-        spawnParticles(x, y, 30, '#ffaa00');
-        spawnParticles(x, y, 15, '#ff4400');
-        showMessage('Артиллерийский удар нанесён!');
-      }
-
-      // Спавн врага
-      function spawnEnemy() {
-        const y = Math.random() * (H - 60) + 30;
-        enemies.push(new Enemy(y));
-        enemiesSpawnedThisWave++;
-      }
-
-      // Игровой цикл
-      function update() {
-        if (gameOver || victory) return;
-
-        // Спавн врагов волнами
-        if (enemiesSpawnedThisWave < enemiesPerWave) {
-          spawnTimer++;
-          if (spawnTimer > 90) {
-            spawnEnemy();
-            spawnTimer = 0;
-          }
-        }
-
-        // Проверка: все враги волны уничтожены и все заспавнены
-        if (enemiesSpawnedThisWave >= enemiesPerWave && enemies.length === 0) {
-          wave++;
-          enemiesPerWave = 5 + wave * 2;
-          enemiesSpawnedThisWave = 0;
-          spawnTimer = 0;
-          addResources(30 + wave * 5);
-          showMessage(`Волна ${wave-1} отбита! +${30 + (wave-1)*5} ресурсов`, true);
-        }
-
-        // Обновление юнитов игрока
-        for (let u of units) {
-          if (u.attackCooldown > 0) u.attackCooldown--;
-          if (u.repairCooldown > 0) u.repairCooldown--;
-
-          if (u.type === 'turret' || u.type === 'soldier') {
-            // Поиск ближайшего врага в радиусе атаки
-            if (u.attackCooldown <= 0) {
-              let closestEnemy = null;
-              let closestDist = Infinity;
-              for (let e of enemies) {
-                const dx = e.x - u.x;
-                const dy = e.y - u.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < u.attackRange && dist < closestDist) {
-                  closestDist = dist;
-                  closestEnemy = e;
-                }
-              }
-              if (closestEnemy) {
-                bullets.push(new Bullet(u.x, u.y, closestEnemy.x, closestEnemy.y, u.damage));
-                u.attackCooldown = u.attackSpeed;
-              }
-            }
-
-            // Пехотинцы чинят ближайшие башни
-            if (u.type === 'soldier' && u.repairCooldown <= 0) {
-              let closestTurret = null;
-              let closestDist = Infinity;
-              for (let t of units) {
-                if (t.type === 'turret' && t.health < t.maxHealth) {
-                  const dx = t.x - u.x;
-                  const dy = t.y - u.y;
-                  const dist = Math.sqrt(dx * dx + dy * dy);
-                  if (dist < 60 && dist < closestDist) {
-                    closestDist = dist;
-                    closestTurret = t;
-                  }
-                }
-              }
-              if (closestTurret) {
-                closestTurret.health = Math.min(closestTurret.maxHealth, closestTurret.health + 2);
-                u.repairCooldown = 30;
-                spawnParticles(closestTurret.x, closestTurret.y, 2, '#44aaff');
-              }
-            }
-          }
-
-          // Мины взрываются при контакте с врагом
-          if (u.type === 'mine') {
-            for (let i = enemies.length - 1; i >= 0; i--) {
-              const e = enemies[i];
-              const dx = e.x - u.x;
-              const dy = e.y - u.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 25) {
-                e.health -= 40;
-                spawnParticles(u.x, u.y, 20, '#ff4400');
-                // Урон по области
-                for (let j = enemies.length - 1; j >= 0; j--) {
-                  if (j === i) continue;
-                  const ej = enemies[j];
-                  const dx2 = ej.x - u.x;
-                  const dy2 = ej.y - u.y;
-                  const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-                  if (dist2 < 60) {
-                    ej.health -= 15;
-                  }
-                }
-                units = units.filter(unit => unit !== u);
-                break;
-              }
-            }
-          }
-        }
-
-        // Движение врагов
-        for (let e of enemies) {
-          if (e.x <= BASE_X + 10) {
-            gameOver = true;
-            showMessage('Враг прорвал оборону! Игра окончена.');
-            break;
-          }
-
-          let blockingUnit = null;
-          for (let u of units) {
-            if (u.type === 'turret' || u.type === 'soldier') {
-              const dx = e.x - u.x;
-              const dy = e.y - u.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 30 && e.x > u.x) {
-                blockingUnit = u;
-                break;
-              }
-            }
-          }
-
-          if (blockingUnit && e.attackCooldown <= 0) {
-            blockingUnit.health -= e.damage;
-            e.attackCooldown = 40;
-            spawnParticles(blockingUnit.x, blockingUnit.y, 3, '#ff6666');
-            if (blockingUnit.health <= 0) {
-              spawnParticles(blockingUnit.x, blockingUnit.y, 12, '#ff4444');
-              units = units.filter(u => u !== blockingUnit);
-            }
-          }
-
-          if (e.attackCooldown > 0) e.attackCooldown--;
-          if (!blockingUnit || e.x > blockingUnit.x + 30) {
-            e.x -= e.speed;
-          }
-        }
-
-        // Удаление мертвых врагов
-        enemies = enemies.filter(e => {
-          if (e.health <= 0) {
-            addResources(5);
-            spawnParticles(e.x, e.y, 15, '#ffaa00');
-            return false;
-          }
-          return true;
-        });
-
-        // Обновление пуль
-        for (let b of bullets) {
-          b.x += b.vx;
-          b.y += b.vy;
-          b.lifetime++;
-
-          if (!b.isEnemy) {
-            for (let e of enemies) {
-              const dx = e.x - b.x;
-              const dy = e.y - b.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 15) {
-                e.health -= b.damage;
-                spawnParticles(b.x, b.y, 3, '#ffff44');
-                b.lifetime = 999;
-                break;
-              }
-            }
-          }
-        }
-        bullets = bullets.filter(b => b.lifetime < b.maxLifetime && b.x > 0 && b.x < W && b.y > 0 && b.y < H);
-
-        // Обновление частиц
-        for (let p of particles) {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.life--;
-        }
-        particles = particles.filter(p => p.life > 0);
-
-        // Проверка победы
-        if (wave > 5 && enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
-          victory = true;
-          showMessage('Победа! Вы удержали оборону!', true);
-          spawnParticles(W/2, H/2, 50, '#ffcc00');
         }
       }
-
-      // Отрисовка
-      function draw() {
-        ctx.clearRect(0, 0, W, H);
-
-        // Фон
-        ctx.fillStyle = '#3a4a3a';
-        ctx.fillRect(0, 0, W, H);
-
-        // Сетка
-        ctx.strokeStyle = '#4a5a4a';
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < W; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i, H);
-          ctx.stroke();
+      if (totalDamage > 0 && bossHP > 0) {
+        bossHP = Math.max(0, bossHP - totalDamage);
+        log(`🔫 Пушки наносят ${totalDamage} урона!`);
+        if (bossHP <= 0) {
+          winWave();
         }
-        for (let i = 0; i < H; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(0, i);
-          ctx.lineTo(W, i);
-          ctx.stroke();
+      }
+      updateUI();
+    }
+
+    // Генерация энергии от генераторов
+    function generateEnergy() {
+      let generators = 0;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (gridState[r][c] === 'generator') generators++;
         }
+      }
+      if (generators > 0) {
+        energy += generators * 4; // каждый генератор +4 энергии
+        updateUI();
+      }
+    }
 
-        // База
-        ctx.fillStyle = '#4a6fa5';
-        ctx.fillRect(0, 0, BASE_X, H);
-        ctx.fillStyle = '#5a7fb5';
-        ctx.fillRect(10, H/2-30, 30, 60);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 16px "Courier New"';
-        ctx.fillText('БАЗА', 5, H/2-10);
+    function winWave() {
+      clearInterval(bossAttackInterval);
+      clearInterval(turretAttackInterval);
+      log(`✅ Босс волны ${wave} повержен!`);
+      wave++;
+      bossMaxHP = Math.floor(bossMaxHP * 1.4);
+      bossHP = bossMaxHP;
+      // Бонус за победу
+      energy += 60;
+      updateUI();
+      renderGrid();
+      // Перезапускаем атаки для новой волны
+      startBossAttackCycle();
+      startTurretCycle();
+    }
 
-        // Юниты игрока
-        for (let u of units) {
-          if (u.type === 'turret') {
-            ctx.fillStyle = '#4a6b4a';
-            ctx.fillRect(u.x-15, u.y-15, 30, 30);
-            ctx.fillStyle = '#6b8b6b';
-            ctx.fillRect(u.x-10, u.y-10, 20, 20);
-            ctx.fillStyle = '#222';
-            ctx.fillRect(u.x-3, u.y-18, 6, 10);
-            // Полоска здоровья
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(u.x-15, u.y-22, 30, 4);
-            ctx.fillStyle = '#44ff44';
-            ctx.fillRect(u.x-15, u.y-22, 30 * (u.health/u.maxHealth), 4);
-          } else if (u.type === 'soldier') {
-            ctx.fillStyle = '#5a5a3a';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 12, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#8a8a5a';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(u.x-12, u.y-20, 24, 4);
-            ctx.fillStyle = '#44ff44';
-            ctx.fillRect(u.x-12, u.y-20, 24 * (u.health/u.maxHealth), 4);
-          } else if (u.type === 'mine') {
-            ctx.fillStyle = '#888';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#ff4444';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 4, 0, Math.PI*2);
-            ctx.fill();
-          }
+    function gameOver() {
+      clearInterval(bossAttackInterval);
+      clearInterval(turretAttackInterval);
+      clearInterval(generatorInterval);
+      log("💀 ДВЕРЬ РАЗРУШЕНА... ИГРА ОКОНЧЕНА");
+      // Делаем кнопки неактивными
+      btnGenerator.disabled = true;
+      btnTurret.disabled = true;
+      btnRepair.disabled = true;
+      btnSell.disabled = true;
+      // Можно добавить перезагрузку через 3 сек
+      setTimeout(() => {
+        if (confirm("Игра окончена. Начать заново?")) {
+          resetGame();
         }
+      }, 500);
+    }
 
-        // Враги
-        for (let e of enemies) {
-          ctx.fillStyle = '#aa4444';
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 13, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillStyle = '#cc6666';
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 9, 0, Math.PI*2);
-          ctx.fill();
-          // Глаза
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          ctx.arc(e.x-4, e.y-4, 3, 0, Math.PI*2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(e.x+4, e.y-4, 3, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillStyle = '#000';
-          ctx.beginPath();
-          ctx.arc(e.x-3, e.y-5, 1.5, 0, Math.PI*2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(e.x+5, e.y-5, 1.5, 0, Math.PI*2);
-          ctx.fill();
-          // Полоска здоровья
-          ctx.fillStyle = '#ff4444';
-          ctx.fillRect(e.x-14, e.y-22, 28, 4);
-          ctx.fillStyle = '#44ff44';
-          ctx.fillRect(e.x-14, e.y-22, 28 * (e.health/e.maxHealth), 4);
-        }
+    function resetGame() {
+      // Сброс всех параметров
+      clearInterval(bossAttackInterval);
+      clearInterval(turretAttackInterval);
+      clearInterval(generatorInterval);
+      
+      energy = 180;
+      doorHP = 100;
+      wave = 1;
+      bossMaxHP = 200;
+      bossHP = 200;
+      gridState = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+      selectedRow = -1;
+      selectedCol = -1;
+      
+      renderGrid();
+      updateUI();
+      log("Новая игра! Защити комнату.");
+      
+      // Включаем кнопки
+      btnGenerator.disabled = false;
+      btnTurret.disabled = false;
+      btnRepair.disabled = false;
+      btnSell.disabled = false;
+      
+      startIntervals();
+    }
 
-        // Пули
-        for (let b of bullets) {
-          ctx.fillStyle = b.isEnemy ? '#ff6666' : '#ffff66';
-          ctx.beginPath();
-          ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
-          ctx.fill();
-        }
+    function startIntervals() {
+      if (generatorInterval) clearInterval(generatorInterval);
+      generatorInterval = setInterval(generateEnergy, 2000);
+      startBossAttackCycle();
+      startTurretCycle();
+    }
 
-        // Частицы
-        for (let p of particles) {
-          const alpha = p.life / p.maxLife;
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = alpha;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
+    function startBossAttackCycle() {
+      if (bossAttackInterval) clearInterval(bossAttackInterval);
+      bossAttackInterval = setInterval(bossAttack, 3200);
+    }
 
-        // Предпросмотр размещения
-        if (selectedUnit && !gameOver && !victory) {
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 4]);
-          if (selectedUnit === 'artillery') {
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 100, 0, Math.PI*2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 150, 0, Math.PI*2);
-            ctx.strokeStyle = '#ffaa00';
-            ctx.stroke();
+    function startTurretCycle() {
+      if (turretAttackInterval) clearInterval(turretAttackInterval);
+      turretAttackInterval = setInterval(turretsAttack, 2500);
+    }
+
+    // ---------- ОТРИСОВКА СЕТКИ ----------
+    function renderGrid() {
+      gridEl.innerHTML = '';
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          
+          // Проверка: дверь
+          if (r === DOOR_ROW && c === DOOR_COL) {
+            cell.classList.add('door');
+            cell.textContent = '🚪';
+            cell.addEventListener('click', (e) => {
+              e.stopPropagation();
+              log("Это дверь — её нельзя строить, только чинить кнопкой.");
+            });
           } else {
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 15, 0, Math.PI*2);
-            ctx.stroke();
+            const building = gridState[r][c];
+            if (building === 'generator') {
+              cell.classList.add('occupied');
+              cell.textContent = '🔋';
+            } else if (building === 'turret') {
+              cell.classList.add('occupied');
+              cell.textContent = '🔫';
+            } else {
+              cell.textContent = '';
+            }
+            
+            // Выделение выбранной клетки
+            if (selectedRow === r && selectedCol === c) {
+              cell.classList.add('selected');
+            }
+            
+            cell.addEventListener('click', (e) => {
+              e.stopPropagation();
+              handleCellClick(r, c);
+            });
           }
-          ctx.setLineDash([]);
-          ctx.lineWidth = 1;
-        }
-
-        // Сообщения
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px "Courier New"';
-        ctx.fillText(`Волна: ${wave}`, W-100, 25);
-        ctx.fillText(`Врагов: ${enemies.length}/${enemiesPerWave}`, W-150, 45);
-
-        if (gameOver) {
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#ff4444';
-          ctx.font = 'bold 36px "Courier New"';
-          ctx.fillText('ПОРАЖЕНИЕ', W/2-130, H/2);
-        } else if (victory) {
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#ffcc00';
-          ctx.font = 'bold 36px "Courier New"';
-          ctx.fillText('ПОБЕДА!', W/2-100, H/2);
+          
+          gridEl.appendChild(cell);
         }
       }
-
-      function gameLoop() {
-        update();
-        draw();
-        gameLoopId = requestAnimationFrame(gameLoop);
+      // Обновляем состояние кнопки продажи (активна если есть выбранная постройка)
+      if (selectedRow !== -1 && selectedCol !== -1 && gridState[selectedRow]?.[selectedCol]) {
+        btnSell.disabled = false;
+      } else {
+        btnSell.disabled = true;
       }
+      updateUI();
+    }
 
-      // Сброс игры
-      function restartGame() {
-        resources = 100;
-        units = [];
-        enemies = [];
-        bullets = [];
-        particles = [];
-        gameOver = false;
-        victory = false;
-        wave = 1;
-        enemiesSpawnedThisWave = 0;
-        enemiesPerWave = 5;
-        spawnTimer = 0;
-        selectedUnit = null;
-        updateDisplay();
-        clearMessage();
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
+    function handleCellClick(row, col) {
+      // Если уже выбрана эта же клетка — снимаем выделение
+      if (selectedRow === row && selectedCol === col) {
+        selectedRow = -1;
+        selectedCol = -1;
+        renderGrid();
+        log("Выделение снято");
+        return;
       }
+      
+      // Иначе выделяем новую
+      selectedRow = row;
+      selectedCol = col;
+      renderGrid();
+      
+      if (gridState[row][col]) {
+        log(`Выбрана клетка с ${gridState[row][col] === 'generator' ? 'генератором' : 'пушкой'}. Можно продать.`);
+      } else {
+        log("Пустая клетка. Выберите постройку.");
+      }
+    }
 
-      // Отслеживание мыши для предпросмотра
-      canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        mouseX = (e.clientX - rect.left) * scaleX;
-        mouseY = (e.clientY - rect.top) * scaleY;
-      });
+    // ---------- ОБРАБОТЧИКИ КНОПОК ----------
+    btnGenerator.addEventListener('click', () => {
+      if (selectedRow === -1 || selectedCol === -1) {
+        log("Сначала выберите пустую клетку!");
+        return;
+      }
+      build(selectedRow, selectedCol, 'generator');
+    });
 
-      // Обработка кликов по канвасу
-      canvas.addEventListener('click', (e) => {
-        if (gameOver || victory) return;
-        if (!selectedUnit) {
-          showMessage('Выберите тип юнита для размещения!');
-          return;
+    btnTurret.addEventListener('click', () => {
+      if (selectedRow === -1 || selectedCol === -1) {
+        log("Сначала выберите клетку!");
+        return;
+      }
+      build(selectedRow, selectedCol, 'turret');
+    });
+
+    btnRepair.addEventListener('click', () => {
+      repairDoor();
+    });
+
+    btnSell.addEventListener('click', () => {
+      if (selectedRow !== -1 && selectedCol !== -1 && gridState[selectedRow]?.[selectedCol]) {
+        sellBuilding(selectedRow, selectedCol);
+        selectedRow = -1;
+        selectedCol = -1;
+        renderGrid();
+      } else {
+        log("Нечего продавать на выделенной клетке.");
+      }
+    });
+
+    // Сброс выделения при клике вне клеток (на контейнер сетки не вешаем, но можно на body)
+    document.body.addEventListener('click', function(e) {
+      if (!e.target.closest('.cell') && !e.target.closest('button')) {
+        if (selectedRow !== -1 || selectedCol !== -1) {
+          selectedRow = -1;
+          selectedCol = -1;
+          renderGrid();
         }
-
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        const clickX = (e.clientX - rect.left) * scaleX;
-        const clickY = (e.clientY - rect.top) * scaleY;
-
-        if (selectedUnit === 'artillery') {
-          callArtillery(clickX, clickY);
-        } else {
-          placeUnit(clickX, clickY, selectedUnit);
-        }
-      });
-
-      // Кнопки выбора юнитов
-      function clearSelection() {
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
       }
+    });
 
-      btnTurret.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'turret';
-        clearSelection();
-        btnTurret.classList.add('selected');
-        showMessage('Выбрана башня (30). Кликните на карту.');
-      });
+    // ---------- СТАРТ ----------
+    function initialGame() {
+      resetGame(); // устанавливает всё и запускает интервалы
+    }
 
-      btnSoldier.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'soldier';
-        clearSelection();
-        btnSoldier.classList.add('selected');
-        showMessage('Выбран пехотинец (15). Может чинить башни.');
-      });
+    initialGame();
 
-      btnMine.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'mine';
-        clearSelection();
-        btnMine.classList.add('selected');
-        showMessage('Выбрана мина (10). Взрывается при контакте.');
-      });
+    // Очистка интервалов при уходе (не обязательно, но хорошо)
+    window.addEventListener('beforeunload', () => {
+      clearInterval(generatorInterval);
+      clearInterval(bossAttackInterval);
+      clearInterval(turretAttackInterval);
+    });
 
-      btnArtillery.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'artillery';
-        clearSelection();
-        btnArtillery.classList.add('selected');
-        showMessage('Артудар (50). Урон по области.');
-      });
-
-      btnRestart.addEventListener('click', restartGame);
-
-      // Запуск
-      gameLoop();
-    })();
-  </script>
+  })();
+</script>
 </body>
 </html>
