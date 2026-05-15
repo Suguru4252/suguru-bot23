@@ -13,6 +13,7 @@
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
+      background: #000;
     }
     #info {
       position: absolute;
@@ -44,6 +45,7 @@
       border: 1px solid rgba(255,255,255,0.3);
       display: none;
       pointer-events: none;
+      z-index: 15;
     }
     #mode-btn {
       position: absolute;
@@ -79,6 +81,57 @@
       0%, 100% { box-shadow: 0 0 20px rgba(255,140,0,0.6); }
       50% { box-shadow: 0 0 40px rgba(255,140,0,0.9); }
     }
+    /* Панель настроек */
+    #settings-panel {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background: rgba(10, 10, 20, 0.85);
+      backdrop-filter: blur(15px);
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      z-index: 25;
+      min-width: 250px;
+      color: white;
+    }
+    #settings-panel h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 1px;
+      color: #ffaa00;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+    .setting-row label {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .setting-row input[type="range"] {
+      flex: 1;
+      accent-color: #ffaa00;
+      height: 6px;
+    }
+    .setting-row .value-display {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffaa00;
+      min-width: 55px;
+      text-align: right;
+    }
+    #time-speed-display {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffaa00;
+    }
     .instruction {
       position: absolute;
       bottom: 30px;
@@ -93,8 +146,9 @@
       white-space: nowrap;
       pointer-events: none;
       letter-spacing: 0.5px;
+      z-index: 15;
     }
-    /* Джойстик для телефонов */
+    /* Джойстик */
     #joystick-container {
       position: absolute;
       bottom: 40px;
@@ -125,7 +179,6 @@
       border: 2px solid rgba(255,255,255,0.6);
       box-shadow: 0 0 20px rgba(255,255,255,0.3);
     }
-    /* Область поворота камеры (правая часть экрана) */
     #look-area {
       position: absolute;
       top: 0;
@@ -136,20 +189,23 @@
       display: none;
     }
     @media (max-width: 768px) {
-      #joystick-container {
-        display: block;
-      }
-      #look-area {
-        display: block;
-      }
-      #mode-btn {
-        font-size: 14px;
-        padding: 10px 20px;
+      #joystick-container { display: block; }
+      #look-area { display: block; }
+      #mode-btn { font-size: 14px; padding: 10px 20px; }
+      #settings-panel {
+        top: 70px;
+        right: 10px;
+        padding: 15px;
+        min-width: 200px;
       }
       .instruction {
         font-size: 11px;
         bottom: 20px;
+        white-space: normal;
+        width: 80%;
+        text-align: center;
       }
+      #info { font-size: 14px; padding: 8px 18px; }
     }
   </style>
 </head>
@@ -157,9 +213,31 @@
   <div id="info">🌌 СОЛНЕЧНАЯ СИСТЕМА</div>
   <div id="current-planet"></div>
   <button id="mode-btn">🎮 ОБЗОР (мышь)</button>
-  <div class="instruction">🖱️ Вращайте камеру | 📜 Зум | ✨ Кликните по объекту | Пробел — общий вид</div>
   
-  <!-- Джойстик для телефонов -->
+  <!-- Панель настроек -->
+  <div id="settings-panel">
+    <h3>⚙️ НАСТРОЙКИ</h3>
+    <div class="setting-row">
+      <label>⏱️ Скорость времени:</label>
+      <span class="value-display" id="time-speed-display">1x</span>
+    </div>
+    <div class="setting-row">
+      <input type="range" id="time-speed-slider" min="1" max="5000" value="1" step="1">
+    </div>
+    <div class="setting-row">
+      <label>🖱️ Чувств. камеры:</label>
+      <span class="value-display" id="sensitivity-display">0.5</span>
+    </div>
+    <div class="setting-row">
+      <input type="range" id="sensitivity-slider" min="0.1" max="1.5" value="0.5" step="0.1">
+    </div>
+    <div class="setting-row" style="justify-content: center; margin-top: 5px;">
+      <button id="pause-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 14px;">⏯️ ПАУЗА</button>
+    </div>
+  </div>
+  
+  <div class="instruction">🖱️ Обзор: вращение/зум | 🚀 Полёт: WASD | ПРОБЕЛ — переключить режим | ⚙️ Справа — настройки</div>
+  
   <div id="joystick-container">
     <div id="joystick-base">
       <div id="joystick-thumb"></div>
@@ -227,65 +305,107 @@
     labelRenderer.domElement.style.pointerEvents = 'none';
     document.body.appendChild(labelRenderer.domElement);
 
-    // OrbitControls (режим обзора)
+    // OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
-    controls.rotateSpeed = 0.7;
-    controls.zoomSpeed = 1.8;
+    controls.rotateSpeed = 0.5;
+    controls.zoomSpeed = 1.5;
     controls.target.set(0, 0, 0);
     controls.maxDistance = 600;
     controls.minDistance = 2;
     controls.update();
+
+    // --- Настройки ---
+    const timeSpeedSlider = document.getElementById('time-speed-slider');
+    const timeSpeedDisplay = document.getElementById('time-speed-display');
+    const sensitivitySlider = document.getElementById('sensitivity-slider');
+    const sensitivityDisplay = document.getElementById('sensitivity-display');
+    const pauseBtn = document.getElementById('pause-btn');
+    
+    let timeSpeed = 1;
+    let isPaused = false;
+    let cameraSensitivity = 0.5;
+    
+    timeSpeedSlider.addEventListener('input', () => {
+      const val = parseInt(timeSpeedSlider.value);
+      if (val <= 10) {
+        timeSpeed = val;
+        timeSpeedDisplay.textContent = val + 'x';
+      } else if (val <= 100) {
+        timeSpeed = Math.round(val / 10) * 10;
+        timeSpeedDisplay.textContent = timeSpeed + 'x';
+      } else if (val <= 1000) {
+        timeSpeed = Math.round(val / 50) * 50;
+        timeSpeedDisplay.textContent = timeSpeed + 'x';
+      } else {
+        timeSpeed = Math.round(val / 250) * 250;
+        timeSpeedDisplay.textContent = timeSpeed + 'x';
+      }
+      timeSpeedSlider.value = val;
+    });
+    
+    sensitivitySlider.addEventListener('input', () => {
+      cameraSensitivity = parseFloat(sensitivitySlider.value);
+      sensitivityDisplay.textContent = cameraSensitivity.toFixed(1);
+      controls.rotateSpeed = cameraSensitivity;
+      flyRotateSpeed = 0.01 * cameraSensitivity;
+    });
+    
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? '▶️ ИГРАТЬ' : '⏯️ ПАУЗА';
+      pauseBtn.style.background = isPaused ? 'rgba(255,140,0,0.5)' : 'rgba(255,255,255,0.15)';
+    });
 
     // --- Режимы управления ---
     let flyMode = false;
     const modeBtn = document.getElementById('mode-btn');
     const instruction = document.querySelector('.instruction');
     
-    // Для WASD полёта
     const keys = { w: false, a: false, s: false, d: false, q: false, e: false, shift: false };
-    const flySpeed = 0.8;
-    const flyRotateSpeed = 0.03;
+    const flySpeed = 0.6;
+    let flyRotateSpeed = 0.01 * cameraSensitivity;
     let yaw = 0, pitch = 0;
     let mouseDown = false;
     let lastMouseX = 0, lastMouseY = 0;
     
-    modeBtn.addEventListener('click', () => {
+    function toggleFlyMode() {
       flyMode = !flyMode;
       
       if (flyMode) {
-        // Включаем режим полёта
         modeBtn.textContent = '🚀 ПОЛЁТ (WASD)';
         modeBtn.classList.add('fly-mode');
-        instruction.textContent = 'WASD — движение | Q/E — вверх/вниз | Shift — ускорение | Мышь — поворот | Пробел — общий вид';
+        instruction.textContent = 'WASD — движение | Q/E — вверх/вниз | Shift — уск. | Мышь — поворот | ПРОБЕЛ — обзор';
         controls.enabled = false;
         
-        // Сохраняем текущее направление камеры
         const direction = new THREE.Vector3();
         camera.getWorldDirection(direction);
         yaw = Math.atan2(direction.x, direction.z);
         pitch = Math.asin(direction.y);
         
-        // Блокируем указатель для управления мышью
         renderer.domElement.style.cursor = 'crosshair';
       } else {
-        // Включаем режим обзора
         modeBtn.textContent = '🎮 ОБЗОР (мышь)';
         modeBtn.classList.remove('fly-mode');
-        instruction.textContent = '🖱️ Вращайте камеру | 📜 Зум | ✨ Кликните по объекту | Пробел — общий вид';
+        instruction.textContent = '🖱️ Обзор: вращение/зум | ПРОБЕЛ — полёт | ⚙️ Справа — настройки';
         controls.enabled = true;
         controls.target.copy(camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10)));
         controls.update();
         renderer.domElement.style.cursor = 'default';
+        
+        // Сбрасываем клавиши
+        Object.keys(keys).forEach(k => keys[k] = false);
       }
-    });
-
-    // --- WASD и мышь для полёта ---
+    }
+    
+    modeBtn.addEventListener('click', toggleFlyMode);
+    
+    // Пробел для переключения режимов
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && !flyMode) {
+      if (e.code === 'Space') {
         e.preventDefault();
-        focusOnPlanet('all');
+        toggleFlyMode();
         return;
       }
       
@@ -300,10 +420,6 @@
         case 'KeyE': keys.e = true; e.preventDefault(); break;
         case 'ShiftLeft':
         case 'ShiftRight': keys.shift = true; e.preventDefault(); break;
-        case 'Space':
-          e.preventDefault();
-          focusOnPlanet('all');
-          break;
       }
     });
     
@@ -341,7 +457,7 @@
       
       yaw -= deltaX * flyRotateSpeed;
       pitch -= deltaY * flyRotateSpeed;
-      pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+      pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
       
       lastMouseX = e.clientX;
       lastMouseY = e.clientY;
@@ -366,10 +482,8 @@
     if (isMobile()) {
       joystickContainer.style.display = 'block';
       lookArea.style.display = 'block';
-      instruction.textContent = '🎮 Джойстик — движение | Правая часть — поворот | Клик — фокус';
     }
     
-    // Джойстик
     joystickBase.addEventListener('touchstart', (e) => {
       e.preventDefault();
       joystickActive = true;
@@ -409,7 +523,6 @@
       joystickThumb.style.transform = `translate(calc(-50% + ${joystickMoveX}px), calc(-50% + ${joystickMoveY}px))`;
     }
     
-    // Поворот камеры (правая часть экрана)
     lookArea.addEventListener('touchstart', (e) => {
       e.preventDefault();
       touchLookActive = true;
@@ -423,19 +536,19 @@
       
       const deltaX = e.touches[0].clientX - touchLookLastX;
       const deltaY = e.touches[0].clientY - touchLookLastY;
+      const sensitivity = cameraSensitivity * 0.8;
       
       if (flyMode) {
-        yaw -= deltaX * flyRotateSpeed;
-        pitch -= deltaY * flyRotateSpeed;
-        pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+        yaw -= deltaX * flyRotateSpeed * 0.8;
+        pitch -= deltaY * flyRotateSpeed * 0.8;
+        pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
       } else {
-        // В режиме обзора вращаем через OrbitControls
         const target = controls.target;
         const offset = camera.position.clone().sub(target);
         const spherical = new THREE.Spherical().setFromVector3(offset);
         
-        spherical.theta -= deltaX * 0.005;
-        spherical.phi -= deltaY * 0.005;
+        spherical.theta -= deltaX * 0.003 * sensitivity;
+        spherical.phi -= deltaY * 0.003 * sensitivity;
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
         
         offset.setFromSpherical(spherical);
@@ -460,7 +573,7 @@
     dirLight.position.set(10, 20, 5);
     scene.add(dirLight);
 
-    // --- Функция создания текстур ---
+    // --- Текстуры ---
     function createPlanetTexture(baseColor, type) {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
@@ -595,7 +708,6 @@
         ring1.rotation.x = Math.PI / 2 + 0.05;
         ring1.userData = { isRing: true, parentKey: data.key };
         planet.add(ring1);
-        allClickableObjects.push(ring1);
         
         const ringGeo2 = new THREE.RingGeometry(data.size * 2.05, data.size * 2.35, 64);
         const ring2 = new THREE.Mesh(ringGeo2, new THREE.MeshStandardMaterial({
@@ -604,7 +716,6 @@
         ring2.rotation.x = Math.PI / 2 - 0.03;
         ring2.userData = { isRing: true, parentKey: data.key };
         planet.add(ring2);
-        allClickableObjects.push(ring2);
       }
       
       const labelDiv = document.createElement('div');
@@ -732,9 +843,8 @@
     
     window.addEventListener('click', (event) => {
       if (event.target.tagName === 'BUTTON') return;
-      
-      // Не обрабатываем клики по джойстику
       if (event.target.closest('#joystick-container') || event.target.closest('#look-area')) return;
+      if (event.target.closest('#settings-panel')) return;
       
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -764,7 +874,7 @@
     function updateFlyMovement() {
       if (!flyMode) return;
       
-      const speed = keys.shift ? flySpeed * 3 : flySpeed;
+      const speed = keys.shift ? flySpeed * 2.5 : flySpeed;
       const forward = new THREE.Vector3();
       const right = new THREE.Vector3();
       const up = new THREE.Vector3(0, 1, 0);
@@ -772,25 +882,21 @@
       camera.getWorldDirection(forward);
       right.crossVectors(forward, up).normalize();
       
-      // Движение с джойстика (мобилки)
-      let moveX = 0, moveY = 0, moveUp = 0;
+      let moveX = 0, moveY = 0;
       
       if (joystickActive) {
         moveX = joystickMoveX / 50;
         moveY = joystickMoveY / 50;
       }
       
-      // WASD
       if (keys.w || moveY < -0.2) camera.position.addScaledVector(forward, speed);
       if (keys.s || moveY > 0.2) camera.position.addScaledVector(forward, -speed);
       if (keys.a || moveX < -0.2) camera.position.addScaledVector(right, -speed);
       if (keys.d || moveX > 0.2) camera.position.addScaledVector(right, speed);
       
-      // Вверх/вниз
-      if (keys.q) camera.position.y -= speed;
-      if (keys.e) camera.position.y += speed;
+      if (keys.q) camera.position.y -= speed * 0.7;
+      if (keys.e) camera.position.y += speed * 0.7;
       
-      // Поворот камеры
       const quaternion = new THREE.Quaternion();
       const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
       quaternion.setFromEuler(euler);
@@ -800,38 +906,38 @@
     function animate() {
       requestAnimationFrame(animate);
       
-      stars1.rotation.y += 0.00008;
-      stars2.rotation.y -= 0.00004;
+      stars1.rotation.y += 0.00008 * (isPaused ? 0 : timeSpeed);
+      stars2.rotation.y -= 0.00004 * (isPaused ? 0 : timeSpeed);
+      
+      const speedMultiplier = isPaused ? 0 : timeSpeed;
       
       // Планеты
       planets.forEach(planet => {
         const data = planet.userData;
         if (data.distance > 0) {
-          data.angle += data.speed * 0.25;
+          data.angle += data.speed * 0.25 * speedMultiplier;
           planet.position.x = data.distance * Math.cos(data.angle);
           planet.position.z = data.distance * Math.sin(data.angle);
         }
-        planet.rotation.y += 0.008;
+        planet.rotation.y += 0.008 * speedMultiplier;
       });
       
       // Астероиды
       asteroids.forEach(obj => {
-        obj.userData.angle += obj.userData.speed * 0.25;
+        obj.userData.angle += obj.userData.speed * 0.25 * speedMultiplier;
         obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
         obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
       });
       
       // Койпер
       kuiperObjects.forEach(obj => {
-        obj.userData.angle += obj.userData.speed * 0.25;
+        obj.userData.angle += obj.userData.speed * 0.25 * speedMultiplier;
         obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
         obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
       });
       
-      // Обновление полёта
       updateFlyMovement();
       
-      // Слежение в режиме обзора
       if (!flyMode && currentTarget !== 'all') {
         const targetPlanet = planets.find(p => p.userData.key === currentTarget);
         if (targetPlanet) {
@@ -852,13 +958,21 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      
+      if (isMobile()) {
+        joystickContainer.style.display = 'block';
+        lookArea.style.display = 'block';
+      } else {
+        joystickContainer.style.display = 'none';
+        lookArea.style.display = 'none';
+      }
     });
 
     console.log('🌠 Полная Солнечная система готова!');
-    console.log('🎮 Кнопка сверху — переключение режимов');
-    console.log('   🖱️ Обзор: мышь для вращения и зума');
-    console.log('   🚀 Полёт: WASD — движение, мышь — поворот');
-    console.log('   📱 Телефон: джойстик слева, поворот справа');
+    console.log('⚙️ Панель настроек справа — скорость времени, чувствительность, пауза');
+    console.log('🎮 ПРОБЕЛ — переключение Обзор/Полёт');
+    console.log('🚀 Полёт: WASD — движение, Q/E — вверх/вниз, Shift — ускорение');
+    console.log('📱 Телефон: джойстик слева, поворот справа');
   </script>
 </body>
 </html>
