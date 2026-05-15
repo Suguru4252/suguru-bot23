@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, touch-action: manipulation">
-  <title>🌍 Разрушитель планет | Детализированные атаки</title>
+  <title>🌍 Планетарный разрушитель | Реалистичное разрушение</title>
   <style>
     body {
       margin: 0;
@@ -11,6 +11,9 @@
       font-family: 'Segoe UI', 'Arial', sans-serif;
       background: #000;
       cursor: crosshair;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     #top-ui {
       position: absolute;
@@ -24,203 +27,137 @@
       z-index: 20;
     }
     .title {
-      color: white;
-      background: rgba(0,0,0,0.8);
-      padding: 12px 28px;
-      border-radius: 50px;
-      backdrop-filter: blur(15px);
-      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      background: rgba(0,0,0,0.7);
+      padding: 10px 24px;
+      border-radius: 40px;
+      backdrop-filter: blur(12px);
+      font-weight: 600;
       letter-spacing: 2px;
-      border: 1px solid rgba(255,255,255,0.3);
-      box-shadow: 0 4px 25px rgba(0,0,0,0.7);
-      font-size: 18px;
-    }
-    .health-panel {
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(15px);
-      padding: 12px 25px;
-      border-radius: 50px;
-      border: 1px solid rgba(255,100,100,0.5);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 4px 25px rgba(255,0,0,0.3);
-    }
-    .health-label {
-      color: #ff8888;
-      font-weight: bold;
+      border: 1px solid rgba(255,255,255,0.2);
       font-size: 16px;
-      letter-spacing: 1px;
+      text-shadow: 0 0 20px rgba(100,150,255,0.5);
     }
-    #health-bar-container {
-      width: 150px;
-      height: 14px;
-      background: #1a1a1a;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid #ff4444;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-    }
-    #health-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #ff3333, #ff8800, #ffcc00);
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 20px #ff6600;
-      border-radius: 10px;
-    }
-    #health-percent {
-      color: #ffaa00;
-      font-weight: bold;
-      font-size: 18px;
-      min-width: 50px;
-      text-align: center;
-      text-shadow: 0 0 15px #ff4400;
+    .damage-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff4444;
+      font-size: 28px;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 15;
+      opacity: 0;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #ff6600;
+      letter-spacing: 2px;
+      transition: none;
     }
     .weapon-panel {
       position: absolute;
-      bottom: 30px;
+      bottom: 25px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 12px;
-      background: rgba(10, 10, 20, 0.9);
-      backdrop-filter: blur(25px);
-      padding: 16px 28px;
-      border-radius: 60px;
-      border: 2px solid rgba(255,255,255,0.25);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 30px rgba(0,100,255,0.3);
+      gap: 8px;
+      background: rgba(8, 8, 18, 0.85);
+      backdrop-filter: blur(20px);
+      padding: 10px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 10px 35px rgba(0,0,0,0.8);
       z-index: 30;
       flex-wrap: wrap;
       justify-content: center;
     }
     .weapon-btn {
-      background: rgba(40, 40, 60, 0.7);
-      border: 2px solid rgba(255,255,255,0.2);
-      color: #ccc;
-      padding: 14px 24px;
-      border-radius: 45px;
-      font-size: 17px;
-      font-weight: 700;
+      background: rgba(30, 30, 50, 0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #aaa;
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 10px;
-      letter-spacing: 1px;
-      backdrop-filter: blur(10px);
+      gap: 6px;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(8px);
       white-space: nowrap;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
       position: relative;
       overflow: hidden;
     }
-    .weapon-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transition: left 0.5s;
-    }
-    .weapon-btn:hover::before {
-      left: 100%;
-    }
     .weapon-btn:hover {
-      background: rgba(80, 80, 120, 0.9);
-      color: white;
-      border-color: rgba(255,255,255,0.7);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,150,255,0.6);
+      background: rgba(60, 60, 90, 0.8);
+      color: #ddd;
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,120,255,0.4);
     }
     .weapon-btn.active {
-      background: linear-gradient(135deg, #ff4400, #ff6600);
-      color: white;
-      border-color: #ffaa00;
-      box-shadow: 0 0 35px #ff5500, 0 8px 25px rgba(255,80,0,0.8);
-      transform: scale(1.08);
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 35px #ff5500, 0 8px 25px rgba(255,80,0,0.8); }
-      50% { box-shadow: 0 0 55px #ff7700, 0 12px 35px rgba(255,120,0,0.9); }
+      background: rgba(255, 70, 0, 0.7);
+      color: #fff;
+      border-color: #ff9933;
+      box-shadow: 0 0 25px rgba(255,80,0,0.7);
+      text-shadow: 0 0 10px rgba(255,200,100,0.8);
     }
     .weapon-icon {
-      font-size: 22px;
-      filter: drop-shadow(0 0 5px currentColor);
+      font-size: 16px;
+      filter: drop-shadow(0 0 4px currentColor);
     }
     .instruction {
       position: absolute;
-      bottom: 115px;
+      bottom: 95px;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.6);
-      font-size: 13px;
-      background: rgba(0,0,0,0.6);
-      padding: 7px 22px;
-      border-radius: 25px;
-      backdrop-filter: blur(8px);
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 18px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
       white-space: nowrap;
       pointer-events: none;
       z-index: 15;
       letter-spacing: 0.5px;
     }
-    .impact-flash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(255,200,100,0.4) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 5;
-      opacity: 0;
-      transition: opacity 0.1s;
-    }
-    @media (max-width: 750px) {
+    @media (max-width: 700px) {
       .weapon-panel {
-        gap: 8px;
-        padding: 12px 18px;
+        gap: 5px;
+        padding: 8px 12px;
         bottom: 15px;
       }
       .weapon-btn {
-        padding: 10px 16px;
-        font-size: 14px;
+        padding: 6px 10px;
+        font-size: 11px;
       }
-      .title {
-        font-size: 14px;
-        padding: 8px 18px;
+      .weapon-icon {
+        font-size: 13px;
       }
-      .health-panel {
-        padding: 8px 15px;
-      }
-      #health-bar-container {
-        width: 80px;
+      .instruction {
+        bottom: 80px;
+        font-size: 10px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="impact-flash" id="impact-flash"></div>
+  <div class="damage-indicator" id="damage-indicator"></div>
   
   <div id="top-ui">
     <div class="title">🌍 ПЛАНЕТАРНЫЙ РАЗРУШИТЕЛЬ</div>
-    <div class="health-panel">
-      <span class="health-label">💥 ЦЕЛОСТНОСТЬ</span>
-      <div id="health-bar-container"><div id="health-fill"></div></div>
-      <span id="health-percent">100%</span>
-    </div>
   </div>
 
-  <div class="instruction">🖱️ Вращение колёсиком | 📜 Зум | 🎯 Клик ЛЕВОЙ кнопкой для удара | Выбери оружие</div>
+  <div class="instruction">🖱️ ЛКМ — удар | 📜 Колёсико — зум | Выбери оружие внизу</div>
 
   <div class="weapon-panel">
-    <button id="btn-laser" class="weapon-btn active"><span class="weapon-icon">🔴</span>ЛАЗЕРНЫЙ ЛУЧ</button>
-    <button id="btn-plasma" class="weapon-btn"><span class="weapon-icon">🟣</span>ПЛАЗМЕННЫЙ ШАР</button>
-    <button id="btn-missile" class="weapon-btn"><span class="weapon-icon">🚀</span>РАКЕТНЫЙ ЗАЛП</button>
-    <button id="btn-drill" class="weapon-btn"><span class="weapon-icon">⚙️</span>ТЕКТОНИЧЕСКИЙ БУР</button>
-    <button id="btn-nuke" class="weapon-btn"><span class="weapon-icon">☢️</span>ТЕРМОЯДЕРНЫЙ УДАР</button>
+    <button id="btn-laser" class="weapon-btn active"><span class="weapon-icon">🔴</span>Лазер</button>
+    <button id="btn-plasma" class="weapon-btn"><span class="weapon-icon">🟣</span>Плазма</button>
+    <button id="btn-missile" class="weapon-btn"><span class="weapon-icon">🚀</span>Ракета</button>
+    <button id="btn-drill" class="weapon-btn"><span class="weapon-icon">⚙️</span>Бур</button>
+    <button id="btn-nuke" class="weapon-btn"><span class="weapon-icon">☢️</span>Ядерный</button>
   </div>
 
   <script type="importmap">
@@ -238,56 +175,46 @@
 
     // ==================== СЦЕНА ====================
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000011, 0.000015);
     
-    // Звёздное небо с туманностями
+    // Звёзды
     const starsGeo = new THREE.BufferGeometry();
-    const starsCount = 4000;
+    const starsCount = 5000;
     const starsPositions = new Float32Array(starsCount * 3);
     const starsColors = new Float32Array(starsCount * 3);
     for (let i = 0; i < starsCount * 3; i += 3) {
-      starsPositions[i] = (Math.random() - 0.5) * 1000;
-      starsPositions[i+1] = (Math.random() - 0.5) * 700;
-      starsPositions[i+2] = (Math.random() - 0.5) * 800;
-      const colorChoice = Math.random();
-      if (colorChoice < 0.1) {
-        starsColors[i] = 0.8; starsColors[i+1] = 0.9; starsColors[i+2] = 1.0;
-      } else if (colorChoice < 0.2) {
-        starsColors[i] = 1.0; starsColors[i+1] = 0.8; starsColors[i+2] = 0.6;
-      } else {
-        starsColors[i] = 0.9; starsColors[i+1] = 0.9; starsColors[i+2] = 1.0;
-      }
+      starsPositions[i] = (Math.random() - 0.5) * 1200;
+      starsPositions[i+1] = (Math.random() - 0.5) * 800;
+      starsPositions[i+2] = (Math.random() - 0.5) * 900;
+      const r = Math.random();
+      if (r < 0.1) { starsColors[i]=0.7; starsColors[i+1]=0.8; starsColors[i+2]=1.0; }
+      else if (r < 0.2) { starsColors[i]=1.0; starsColors[i+1]=0.9; starsColors[i+2]=0.7; }
+      else if (r < 0.25) { starsColors[i]=1.0; starsColors[i+1]=0.7; starsColors[i+2]=0.5; }
+      else { starsColors[i]=0.85; starsColors[i+1]=0.85; starsColors[i+2]=0.95; }
     }
     starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
     starsGeo.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
-    const starsMat = new THREE.PointsMaterial({ 
-      size: 0.4, 
-      blending: THREE.AdditiveBlending, 
-      depthWrite: false,
-      vertexColors: true,
-      opacity: 0.9
-    });
-    const stars = new THREE.Points(starsGeo, starsMat);
+    const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ 
+      size: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, vertexColors: true, opacity: 0.85 
+    }));
     scene.add(stars);
     
     const starsGeo2 = new THREE.BufferGeometry();
-    const starsPositions2 = new Float32Array(2500 * 3);
-    for (let i = 0; i < 2500 * 3; i += 3) {
-      starsPositions2[i] = (Math.random() - 0.5) * 1200;
-      starsPositions2[i+1] = (Math.random() - 0.5) * 800;
-      starsPositions2[i+2] = (Math.random() - 0.5) * 1000;
+    const starsPositions2 = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000 * 3; i += 3) {
+      starsPositions2[i] = (Math.random() - 0.5) * 1500;
+      starsPositions2[i+1] = (Math.random() - 0.5) * 1000;
+      starsPositions2[i+2] = (Math.random() - 0.5) * 1100;
     }
     starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPositions2, 3));
     const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({ 
-      color: 0x8899dd, 
-      size: 0.3, 
-      blending: THREE.AdditiveBlending, 
-      depthWrite: false 
+      color: 0x6677aa, size: 0.3, blending: THREE.AdditiveBlending, depthWrite: false 
     }));
     scene.add(stars2);
 
     // Камера
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0.6, 5.5);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0.5, 5.8);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -296,146 +223,173 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.4;
     renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(renderer.domElement);
 
     // Управление
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.rotateSpeed = 0.7;
-    controls.zoomSpeed = 1.4;
-    controls.minDistance = 1.8;
-    controls.maxDistance = 20;
+    controls.dampingFactor = 0.07;
+    controls.rotateSpeed = 0.6;
+    controls.zoomSpeed = 1.5;
+    controls.minDistance = 1.7;
+    controls.maxDistance = 22;
     controls.target.set(0, 0, 0);
     controls.update();
 
     // Освещение
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    sunLight.position.set(5, 3, 5);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    sunLight.position.set(6, 4, 6);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 50;
     scene.add(sunLight);
     
-    const ambientLight = new THREE.AmbientLight(0x112244, 0.5);
+    const ambientLight = new THREE.AmbientLight(0x0a1a3a, 0.55);
     scene.add(ambientLight);
     
-    const rimLight = new THREE.DirectionalLight(0x5599dd, 0.6);
-    rimLight.position.set(-3, -1, -3);
+    const rimLight = new THREE.DirectionalLight(0x4488cc, 0.7);
+    rimLight.position.set(-4, -1, -4);
     scene.add(rimLight);
 
-    // ==================== ТЕКСТУРЫ ====================
+    // ==================== ТЕКСТУРЫ ВЫСОКОГО РАЗРЕШЕНИЯ ====================
     function createEarthTexture() {
       const canvas = document.createElement('canvas');
-      canvas.width = 2048;
-      canvas.height = 1024;
+      canvas.width = 4096;
+      canvas.height = 2048;
       const ctx = canvas.getContext('2d');
       
-      // Океан с глубиной
-      const oceanGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      oceanGrad.addColorStop(0, '#0a2a4a');
-      oceanGrad.addColorStop(0.2, '#153e6b');
-      oceanGrad.addColorStop(0.4, '#1a5080');
-      oceanGrad.addColorStop(0.5, '#1e5a8a');
-      oceanGrad.addColorStop(0.6, '#1a5080');
-      oceanGrad.addColorStop(0.8, '#153e6b');
-      oceanGrad.addColorStop(1, '#0a2a4a');
-      ctx.fillStyle = oceanGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Глубокий океан с вариациями
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x += 4) {
+          const depth = 0.7 + 0.3 * Math.sin(x * 0.005) * Math.cos(y * 0.005);
+          const r = Math.floor(10 * depth);
+          const g = Math.floor(30 * depth + 20);
+          const b = Math.floor(80 * depth + 40);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(x, y, 4, 1);
+        }
+      }
       
-      // Текстура океана
-      for (let i = 0; i < 3000; i++) {
-        const alpha = 0.02 + Math.random() * 0.06;
-        ctx.fillStyle = `rgba(30, 80, 140, ${alpha})`;
+      // Подводный рельеф
+      for (let i = 0; i < 5000; i++) {
+        const alpha = 0.01 + Math.random() * 0.04;
+        ctx.fillStyle = `rgba(20,60,120,${alpha})`;
         ctx.beginPath();
-        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 20 + 3, 0, Math.PI * 2);
+        ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*15+2, 0, Math.PI*2);
         ctx.fill();
       }
       
-      // Континенты с детализацией
+      // Континенты с детальными текстурами
       const continents = [
-        { x: 300, y: 120, w: 380, h: 320, name: 'Сев. Америка' },
-        { x: 400, y: 400, w: 180, h: 380, name: 'Юж. Америка' },
-        { x: 960, y: 140, w: 280, h: 220, name: 'Европа' },
-        { x: 940, y: 300, w: 300, h: 520, name: 'Африка' },
-        { x: 1200, y: 100, w: 620, h: 380, name: 'Азия' },
-        { x: 1500, y: 580, w: 200, h: 160, name: 'Австралия' },
-        { x: 0, y: 880, w: 2048, h: 144, name: 'Антарктида' }
+        { x: 600, y: 240, w: 760, h: 640 },
+        { x: 800, y: 800, w: 360, h: 760 },
+        { x: 1920, y: 280, w: 560, h: 440 },
+        { x: 1880, y: 600, w: 600, h: 1040 },
+        { x: 2400, y: 200, w: 1240, h: 760 },
+        { x: 3000, y: 1160, w: 400, h: 320 },
+        { x: 0, y: 1760, w: 4096, h: 288 }
       ];
       
       continents.forEach(c => {
         ctx.save();
-        
-        // Базовый цвет континента
-        const landGrad = ctx.createLinearGradient(c.x, c.y, c.x + c.w, c.y + c.h);
-        landGrad.addColorStop(0, '#4a7a3a');
-        landGrad.addColorStop(0.5, '#5a8a45');
-        landGrad.addColorStop(1, '#3d6530');
-        ctx.fillStyle = landGrad;
-        
         ctx.beginPath();
-        const points = 20;
+        const points = 30;
         for (let i = 0; i < points; i++) {
           const angle = (i / points) * Math.PI * 2;
-          const rx = c.w/2 + (Math.random() - 0.5) * c.w * 0.4;
-          const ry = c.h/2 + (Math.random() - 0.5) * c.h * 0.4;
+          const rx = c.w/2 + (Math.sin(i*3.7)*0.3 + Math.cos(i*1.3)*0.2) * c.w * 0.45;
+          const ry = c.h/2 + (Math.cos(i*2.9)*0.25 + Math.sin(i*4.1)*0.2) * c.h * 0.45;
           const px = c.x + c.w/2 + Math.cos(angle) * rx;
           const py = c.y + c.h/2 + Math.sin(angle) * ry;
-          if (i === 0) ctx.moveTo(px, py);
+          if (i===0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
         ctx.closePath();
+        
+        // Градиент земли
+        const grad = ctx.createLinearGradient(c.x, c.y, c.x+c.w, c.y+c.h);
+        grad.addColorStop(0, '#5a8a40');
+        grad.addColorStop(0.3, '#6a9a4a');
+        grad.addColorStop(0.5, '#4a7a35');
+        grad.addColorStop(0.7, '#5a8a40');
+        grad.addColorStop(1, '#3d6530');
+        ctx.fillStyle = grad;
         ctx.fill();
         
-        // Рельеф
-        for (let i = 0; i < 80; i++) {
+        // Рельеф местности
+        for (let i = 0; i < 200; i++) {
           const rx = c.x + Math.random() * c.w;
           const ry = c.y + Math.random() * c.h;
-          const shade = 0.3 + Math.random() * 0.5;
-          ctx.fillStyle = `rgba(${60 + Math.random()*40}, ${100 + Math.random()*60}, ${30 + Math.random()*40}, ${shade})`;
+          const shade = 0.2 + Math.random() * 0.5;
+          const g = Math.floor(100 + Math.random() * 80);
+          ctx.fillStyle = `rgba(${40+Math.random()*30},${g},${20+Math.random()*30},${shade})`;
           ctx.beginPath();
-          ctx.arc(rx, ry, Math.random() * 25 + 8, 0, Math.PI * 2);
+          ctx.arc(rx, ry, Math.random()*18+4, 0, Math.PI*2);
           ctx.fill();
         }
         
-        // Горы
-        for (let i = 0; i < 25; i++) {
+        // Горные цепи
+        for (let i = 0; i < 60; i++) {
           const mx = c.x + Math.random() * c.w;
           const my = c.y + Math.random() * c.h;
-          ctx.fillStyle = `rgba(80, 70, 50, ${0.4 + Math.random() * 0.4})`;
+          ctx.fillStyle = `rgba(90,75,50,${0.4+Math.random()*0.4})`;
           ctx.beginPath();
-          ctx.arc(mx, my, Math.random() * 12 + 4, 0, Math.PI * 2);
+          ctx.arc(mx, my, Math.random()*10+3, 0, Math.PI*2);
           ctx.fill();
         }
         
         // Пустыни
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 40; i++) {
           const dx = c.x + Math.random() * c.w;
           const dy = c.y + Math.random() * c.h;
-          ctx.fillStyle = `rgba(200, 170, 90, ${0.3 + Math.random() * 0.4})`;
+          ctx.fillStyle = `rgba(210,180,100,${0.25+Math.random()*0.35})`;
           ctx.beginPath();
-          ctx.arc(dx, dy, Math.random() * 20 + 6, 0, Math.PI * 2);
+          ctx.arc(dx, dy, Math.random()*22+8, 0, Math.PI*2);
           ctx.fill();
+        }
+        
+        // Реки
+        ctx.strokeStyle = 'rgba(30,80,180,0.3)';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 15; i++) {
+          ctx.beginPath();
+          let sx = c.x + Math.random()*c.w;
+          let sy = c.y + Math.random()*c.h;
+          ctx.moveTo(sx, sy);
+          for (let j = 0; j < 8; j++) {
+            sx += (Math.random()-0.5)*60;
+            sy += (Math.random()-0.3)*40;
+            ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
         }
         
         ctx.restore();
       });
       
-      // Ледники
-      ctx.fillStyle = 'rgba(220, 235, 255, 0.9)';
-      ctx.fillRect(0, 0, canvas.width, 45);
-      ctx.fillRect(0, canvas.height - 65, canvas.width, 65);
+      // Ледяные шапки
+      const iceGradTop = ctx.createLinearGradient(0, 0, 0, 120);
+      iceGradTop.addColorStop(0, 'rgba(230,240,255,0.95)');
+      iceGradTop.addColorStop(1, 'rgba(230,240,255,0)');
+      ctx.fillStyle = iceGradTop;
+      ctx.fillRect(0, 0, canvas.width, 120);
       
-      // Облака
-      for (let i = 0; i < 400; i++) {
-        const alpha = 0.05 + Math.random() * 0.2;
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      const iceGradBottom = ctx.createLinearGradient(0, canvas.height-140, 0, canvas.height);
+      iceGradBottom.addColorStop(0, 'rgba(230,240,255,0)');
+      iceGradBottom.addColorStop(1, 'rgba(230,240,255,0.95)');
+      ctx.fillStyle = iceGradBottom;
+      ctx.fillRect(0, canvas.height-140, canvas.width, 140);
+      
+      // Облачный покров
+      for (let i = 0; i < 800; i++) {
+        const alpha = 0.03 + Math.random() * 0.12;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
         ctx.beginPath();
-        ctx.ellipse(Math.random() * canvas.width, Math.random() * canvas.height, 
-                    Math.random() * 50 + 15, Math.random() * 18 + 5, 
-                    Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.ellipse(Math.random()*canvas.width, Math.random()*canvas.height, 
+                    Math.random()*60+10, Math.random()*20+4, Math.random()*Math.PI, 0, Math.PI*2);
         ctx.fill();
       }
       
@@ -444,73 +398,114 @@
     
     function createCloudTexture() {
       const canvas = document.createElement('canvas');
-      canvas.width = 2048;
-      canvas.height = 1024;
+      canvas.width = 4096;
+      canvas.height = 2048;
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
       
-      for (let i = 0; i < 800; i++) {
-        const alpha = 0.08 + Math.random() * 0.35;
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-        const cx = Math.random() * canvas.width;
-        const cy = Math.random() * canvas.height;
+      for (let i = 0; i < 2000; i++) {
+        const alpha = 0.04 + Math.random() * 0.3;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        const cx = Math.random()*canvas.width;
+        const cy = Math.random()*canvas.height;
         ctx.beginPath();
-        ctx.ellipse(cx, cy, Math.random() * 70 + 20, Math.random() * 22 + 6, Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, Math.random()*80+15, Math.random()*25+5, Math.random()*Math.PI, 0, Math.PI*2);
         ctx.fill();
         
-        for (let j = 0; j < 4; j++) {
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
+        for (let j=0; j<5; j++) {
+          ctx.fillStyle = `rgba(255,255,255,${alpha*0.4})`;
           ctx.beginPath();
-          ctx.ellipse(cx + (Math.random() - 0.5) * 50, cy + (Math.random() - 0.5) * 25, 
-                      Math.random() * 35 + 8, Math.random() * 12 + 3, Math.random() * Math.PI, 0, Math.PI * 2);
+          ctx.ellipse(cx+(Math.random()-0.5)*60, cy+(Math.random()-0.5)*30, 
+                      Math.random()*40+6, Math.random()*14+3, Math.random()*Math.PI, 0, Math.PI*2);
           ctx.fill();
         }
       }
-      
       return new THREE.CanvasTexture(canvas);
     }
 
     // ==================== ЗЕМЛЯ ====================
     const earthGroup = new THREE.Group();
     
-    const earthGeo = new THREE.SphereGeometry(1.5, 128, 128);
+    const earthGeo = new THREE.SphereGeometry(1.5, 192, 192);
     const earthTex = createEarthTexture();
+    earthTex.anisotropy = 16;
     const earthMat = new THREE.MeshPhongMaterial({ 
       map: earthTex, 
       specular: new THREE.Color(0x111122), 
-      shininess: 5,
+      shininess: 3,
     });
     const earth = new THREE.Mesh(earthGeo, earthMat);
     earth.castShadow = true;
     earth.receiveShadow = true;
     earthGroup.add(earth);
 
-    // Слой облаков
+    // Облака
     const cloudsGeo = new THREE.SphereGeometry(1.54, 128, 128);
     const cloudsTex = createCloudTexture();
     const cloudsMat = new THREE.MeshPhongMaterial({ 
-      map: cloudsTex, 
-      transparent: true, 
-      opacity: 0.5, 
-      blending: THREE.AdditiveBlending, 
-      depthWrite: false 
+      map: cloudsTex, transparent: true, opacity: 0.45, 
+      blending: THREE.AdditiveBlending, depthWrite: false 
     });
     const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
     clouds.renderOrder = 1;
     earthGroup.add(clouds);
 
-    // Атмосфера
-    const atmosphereGeo = new THREE.SphereGeometry(1.68, 96, 96);
-    const atmosphereMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: new THREE.Color('#5599ff') } },
+    // Атмосфера (реалистичная)
+    const atmoGeo = new THREE.SphereGeometry(1.7, 128, 128);
+    const atmoMat = new THREE.ShaderMaterial({
+      uniforms: { 
+        uColor: { value: new THREE.Color('#5599ff') },
+        uSunDir: { value: new THREE.Vector3(0.6, 0.4, 0.6).normalize() }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec3 vWorldPos;
+        void main() {
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          vNormal = normalize(mat3(modelMatrix) * normal);
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec3 vWorldPos;
+        uniform vec3 uColor;
+        uniform vec3 uSunDir;
+        void main() {
+          vec3 viewDir = normalize(cameraPosition - vWorldPos);
+          float fresnel = 1.0 - abs(dot(viewDir, vNormal));
+          fresnel = pow(fresnel, 3.5);
+          
+          float sunInfluence = dot(vNormal, uSunDir) * 0.5 + 0.5;
+          float alpha = fresnel * 0.45 * (0.6 + sunInfluence * 0.4);
+          
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+    atmosphere.renderOrder = 2;
+    earthGroup.add(atmosphere);
+    
+    // Внешнее свечение
+    const outerAtmoGeo = new THREE.SphereGeometry(1.85, 64, 64);
+    const outerAtmoMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: new THREE.Color('#88bbff') } },
       vertexShader: `
         varying vec3 vNormal;
         varying vec3 vPosition;
         void main() {
-          vec4 wp = modelMatrix * vec4(position, 1.0);
-          vNormal = normalize(mat3(modelMatrix) * normal);
+          vec4 wp = modelMatrix * vec4(position,1.0);
+          vNormal = normalize(mat3(modelMatrix)*normal);
           vPosition = wp.xyz;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
         }
       `,
       fragmentShader: `
@@ -519,18 +514,16 @@
         uniform vec3 uColor;
         void main() {
           vec3 viewDir = normalize(cameraPosition - vPosition);
-          float fresnel = 1.0 - abs(dot(viewDir, vNormal));
-          fresnel = pow(fresnel, 4.0);
-          gl_FragColor = vec4(uColor, fresnel * 0.6);
+          float f = 1.0 - abs(dot(viewDir, vNormal));
+          f = pow(f, 5.5);
+          gl_FragColor = vec4(uColor, f*0.2);
         }
       `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
+      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
     });
-    const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
-    atmosphere.renderOrder = 2;
-    earthGroup.add(atmosphere);
+    const outerAtmo = new THREE.Mesh(outerAtmoGeo, outerAtmoMat);
+    outerAtmo.renderOrder = 3;
+    earthGroup.add(outerAtmo);
     
     scene.add(earthGroup);
 
@@ -538,77 +531,65 @@
     const cratersGroup = new THREE.Group();
     earthGroup.add(cratersGroup);
     
-    function createCrater(position, size, depth = 0.08) {
-      const craterGeo = new THREE.SphereGeometry(size, 16, 16);
-      const craterMat = new THREE.MeshPhongMaterial({ 
-        color: 0x331100, 
-        emissive: new THREE.Color(0x220000),
-        specular: new THREE.Color(0x000000),
-        shininess: 0,
-        transparent: true,
-        opacity: 0.9
+    function createCrater(localPoint, size) {
+      const normal = localPoint.clone().normalize();
+      const depth = size * 0.5;
+      const craterPos = localPoint.clone().add(normal.clone().multiplyScalar(-depth));
+      
+      // Основной кратер
+      const craterGeo = new THREE.SphereGeometry(size, 12, 12);
+      const craterMat = new THREE.MeshStandardMaterial({ 
+        color: 0x1a0a00, 
+        roughness: 0.9,
+        metalness: 0.1,
+        emissive: new THREE.Color(0x0a0000),
+        emissiveIntensity: 0.3
       });
       const crater = new THREE.Mesh(craterGeo, craterMat);
-      
-      const normal = position.clone().normalize();
-      crater.position.copy(position.clone().add(normal.clone().multiplyScalar(-depth)));
+      crater.position.copy(craterPos);
       crater.lookAt(normal.clone().multiplyScalar(2));
-      
       cratersGroup.add(crater);
       
       // Кольцо выброса
-      const ringGeo = new THREE.TorusGeometry(size * 1.3, size * 0.2, 8, 16);
-      const ringMat = new THREE.MeshPhongMaterial({ 
-        color: 0x553300, 
-        emissive: new THREE.Color(0x110000),
-        transparent: true,
-        opacity: 0.7
+      const ringGeo = new THREE.TorusGeometry(size * 1.4, size * 0.25, 8, 20);
+      const ringMat = new THREE.MeshStandardMaterial({ 
+        color: 0x3a2010, 
+        roughness: 0.8,
+        metalness: 0.2,
+        emissive: new THREE.Color(0x050000),
+        emissiveIntensity: 0.2
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.copy(crater.position);
+      ring.position.copy(craterPos);
       ring.lookAt(normal.clone().multiplyScalar(2));
       cratersGroup.add(ring);
       
-      return { crater, ring };
-    }
-
-    // ==================== СИСТЕМА АТАК ====================
-    let planetHealth = 100;
-    const maxHealth = 100;
-    const destructionParticles = [];
-    const activeEffects = [];
-    
-    function updateHealthUI() {
-      const fill = document.getElementById('health-fill');
-      const percent = document.getElementById('health-percent');
-      fill.style.width = `${planetHealth}%`;
-      percent.textContent = `${Math.floor(planetHealth)}%`;
-      
-      if (planetHealth < 25) {
-        fill.style.background = "linear-gradient(90deg, #ff0000, #ff3300)";
-        percent.style.color = "#ff3333";
-      } else if (planetHealth < 50) {
-        fill.style.background = "linear-gradient(90deg, #ff4400, #ff8800)";
-        percent.style.color = "#ff8800";
-      } else {
-        fill.style.background = "linear-gradient(90deg, #ff6600, #ffaa00, #ffcc00)";
-        percent.style.color = "#ffaa00";
+      // Мелкие осколки вокруг
+      for (let i = 0; i < 8; i++) {
+        const debrisGeo = new THREE.SphereGeometry(size * 0.2, 3, 3);
+        const debrisMat = new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.7 });
+        const debris = new THREE.Mesh(debrisGeo, debrisMat);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = size * 1.6 + Math.random() * size * 0.8;
+        const perpX = new THREE.Vector3(-normal.y, normal.x, 0).normalize();
+        const perpY = new THREE.Vector3().crossVectors(normal, perpX).normalize();
+        const offset = perpX.clone().multiplyScalar(Math.cos(angle) * dist)
+                        .add(perpY.clone().multiplyScalar(Math.sin(angle) * dist));
+        debris.position.copy(craterPos).add(offset);
+        cratersGroup.add(debris);
       }
     }
 
-    function screenFlash(intensity = 0.5) {
-      const flash = document.getElementById('impact-flash');
-      flash.style.opacity = intensity;
-      setTimeout(() => { flash.style.opacity = '0'; }, 120);
-    }
-
-    function createExplosionParticles(position, color, count = 40, spread = 0.4) {
+    // ==================== ЭФФЕКТЫ АТАК ====================
+    const activeParticles = [];
+    
+    function createExplosion(worldPoint, color, count, spread, duration) {
       const group = new THREE.Group();
       const particles = [];
       
       for (let i = 0; i < count; i++) {
-        const size = 0.02 + Math.random() * 0.1;
-        const geo = new THREE.SphereGeometry(size, 4, 4);
+        const size = 0.015 + Math.random() * 0.08;
+        const geo = new THREE.SphereGeometry(size, 3, 3);
         const mat = new THREE.MeshBasicMaterial({ 
           color: color,
           blending: THREE.AdditiveBlending,
@@ -617,258 +598,269 @@
           opacity: 1
         });
         const particle = new THREE.Mesh(geo, mat);
-        
-        const dir = new THREE.Vector3(
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2
-        ).normalize();
-        
-        particle.position.copy(position);
+        const dir = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+        particle.position.copy(worldPoint);
         particle.userData = {
-          velocity: dir.multiplyScalar(spread * (0.5 + Math.random())),
+          velocity: dir.multiplyScalar(spread * (0.3 + Math.random())),
           life: 1.0,
-          decay: 0.015 + Math.random() * 0.04
+          decay: 1.0 / duration
         };
-        
         group.add(particle);
         particles.push(particle);
       }
       
       scene.add(group);
-      activeEffects.push({ type: 'particles', group, particles, timer: 0 });
-      
-      return group;
+      activeParticles.push({ group, particles, timer: 0 });
     }
 
-    function createLaserBeam(from, to, color = 0xff3300) {
-      const direction = to.clone().sub(from).normalize();
-      const length = from.distanceTo(to);
-      const midPoint = from.clone().add(direction.clone().multiplyScalar(length / 2));
-      
-      // Основной луч
-      const beamGeo = new THREE.CylinderGeometry(0.04, 0.04, length, 8);
-      const beamMat = new THREE.MeshBasicMaterial({ 
-        color: color, 
-        blending: THREE.AdditiveBlending, 
-        depthWrite: false,
-        transparent: true,
-        opacity: 0.9
-      });
-      const beam = new THREE.Mesh(beamGeo, beamMat);
-      beam.position.copy(midPoint);
-      beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-      scene.add(beam);
-      
-      // Свечение вокруг луча
-      const glowGeo = new THREE.CylinderGeometry(0.12, 0.12, length, 8);
-      const glowMat = new THREE.MeshBasicMaterial({ 
-        color: color, 
-        blending: THREE.AdditiveBlending, 
-        depthWrite: false,
-        transparent: true,
-        opacity: 0.3
-      });
-      const glow = new THREE.Mesh(glowGeo, glowMat);
-      glow.position.copy(midPoint);
-      glow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-      scene.add(glow);
-      
-      // Частицы вдоль луча
-      for (let i = 0; i < 15; i++) {
-        const sparkGeo = new THREE.SphereGeometry(0.03, 3, 3);
-        const sparkMat = new THREE.MeshBasicMaterial({ 
-          color: 0xffff88, 
-          blending: THREE.AdditiveBlending, 
-          depthWrite: false 
-        });
-        const spark = new THREE.Mesh(sparkGeo, sparkMat);
-        spark.position.copy(from.clone().add(direction.clone().multiplyScalar(Math.random() * length)));
-        scene.add(spark);
-        
-        setTimeout(() => scene.remove(spark), 100 + Math.random() * 200);
-      }
+    function showDamageIndicator(damage) {
+      const indicator = document.getElementById('damage-indicator');
+      indicator.textContent = `-${damage}`;
+      indicator.style.opacity = '1';
+      indicator.style.transform = 'translate(-50%, -50%) scale(1.5)';
+      indicator.style.color = damage > 20 ? '#ff2200' : damage > 10 ? '#ff6600' : '#ffaa00';
       
       setTimeout(() => {
-        scene.remove(beam);
-        scene.remove(glow);
-      }, 200);
+        indicator.style.transition = 'all 0.6s ease-out';
+        indicator.style.opacity = '0';
+        indicator.style.transform = 'translate(-50%, -80%) scale(1)';
+      }, 50);
+      
+      setTimeout(() => {
+        indicator.style.transition = 'none';
+      }, 700);
     }
 
-    function createPlasmaBall(from, to) {
-      const direction = to.clone().sub(from).normalize();
-      const distance = from.distanceTo(to);
-      const steps = 20;
+    function createLaserEffect(from, to) {
+      const dir = to.clone().sub(from).normalize();
+      const len = from.distanceTo(to);
+      const mid = from.clone().add(dir.clone().multiplyScalar(len/2));
       
-      for (let i = 0; i < steps; i++) {
+      // Яркое ядро луча
+      const coreGeo = new THREE.CylinderGeometry(0.025, 0.025, len, 6);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xff2200, blending: THREE.AdditiveBlending, depthWrite: false });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.copy(mid);
+      core.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+      scene.add(core);
+      
+      // Свечение
+      const glowGeo = new THREE.CylinderGeometry(0.1, 0.1, len, 6);
+      const glowMat = new THREE.MeshBasicMaterial({ color: 0xff4400, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.4, transparent: true });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.copy(mid);
+      glow.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+      scene.add(glow);
+      
+      // Искры вдоль луча
+      for (let i=0; i<20; i++) {
+        const sparkGeo = new THREE.SphereGeometry(0.02, 2, 2);
+        const sparkMat = new THREE.MeshBasicMaterial({ color: 0xffffaa, blending: THREE.AdditiveBlending, depthWrite: false });
+        const spark = new THREE.Mesh(sparkGeo, sparkMat);
+        spark.position.copy(from.clone().add(dir.clone().multiplyScalar(Math.random()*len)));
+        scene.add(spark);
+        setTimeout(() => scene.remove(spark), 80 + Math.random()*150);
+      }
+      
+      setTimeout(() => { scene.remove(core); scene.remove(glow); }, 180);
+    }
+
+    function createPlasmaTrail(from, to) {
+      const dir = to.clone().sub(from).normalize();
+      const dist = from.distanceTo(to);
+      for (let i=0; i<25; i++) {
         setTimeout(() => {
-          const pos = from.clone().add(direction.clone().multiplyScalar((i / steps) * distance));
-          const ballGeo = new THREE.SphereGeometry(0.08, 8, 8);
-          const ballMat = new THREE.MeshBasicMaterial({ 
-            color: 0x9944ff, 
-            blending: THREE.AdditiveBlending, 
-            depthWrite: false,
-            transparent: true,
-            opacity: 0.8
-          });
+          const pos = from.clone().add(dir.clone().multiplyScalar((i/25)*dist));
+          const ballGeo = new THREE.SphereGeometry(0.06, 6, 6);
+          const ballMat = new THREE.MeshBasicMaterial({ color: 0x9944ff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.7 });
           const ball = new THREE.Mesh(ballGeo, ballMat);
           ball.position.copy(pos);
           scene.add(ball);
-          
-          setTimeout(() => {
-            ball.material.opacity = 0;
-            setTimeout(() => scene.remove(ball), 100);
-          }, 150);
-        }, i * 15);
+          setTimeout(() => { ball.material.opacity=0; setTimeout(()=>scene.remove(ball),150); }, 120);
+        }, i*12);
       }
     }
 
     function createMissileTrail(from, to) {
-      const direction = to.clone().sub(from).normalize();
-      const distance = from.distanceTo(to);
-      const steps = 30;
-      
-      for (let i = 0; i < steps; i++) {
+      const dir = to.clone().sub(from).normalize();
+      const dist = from.distanceTo(to);
+      for (let i=0; i<35; i++) {
         setTimeout(() => {
-          const pos = from.clone().add(direction.clone().multiplyScalar((i / steps) * distance));
-          
-          // Огненный след
-          const trailGeo = new THREE.SphereGeometry(0.06, 4, 4);
+          const pos = from.clone().add(dir.clone().multiplyScalar((i/35)*dist));
+          const trailGeo = new THREE.SphereGeometry(0.05, 4, 4);
+          const hue = 0.07 + Math.random()*0.06;
           const trailMat = new THREE.MeshBasicMaterial({ 
-            color: new THREE.Color().setHSL(0.08, 1, 0.5 + Math.random() * 0.5),
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            transparent: true,
-            opacity: 0.7
+            color: new THREE.Color().setHSL(hue,1,0.5+Math.random()*0.4), 
+            blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 
           });
           const trail = new THREE.Mesh(trailGeo, trailMat);
           trail.position.copy(pos);
           scene.add(trail);
-          
-          setTimeout(() => {
-            trail.material.opacity = 0;
-            setTimeout(() => scene.remove(trail), 200);
-          }, 300);
-        }, i * 20);
+          setTimeout(() => { trail.material.opacity=0; setTimeout(()=>scene.remove(trail),250); }, 350);
+        }, i*16);
       }
     }
 
-    function damagePlanet(amount, worldPoint, weaponType) {
-      if (planetHealth <= 0) return;
+    function createShockwave(worldPoint) {
+      const ringGeo = new THREE.RingGeometry(0.05, 0.1, 48);
+      const ringMat = new THREE.MeshBasicMaterial({ 
+        color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, 
+        depthWrite: false, transparent: true, opacity: 0.9 
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.copy(worldPoint);
+      ring.lookAt(camera.position);
+      scene.add(ring);
       
-      planetHealth = Math.max(0, planetHealth - amount);
-      updateHealthUI();
+      let scale = 0.5;
+      const expand = setInterval(() => {
+        scale += 1.2;
+        ring.scale.set(scale, scale, 1);
+        ring.material.opacity -= 0.035;
+        if (ring.material.opacity <= 0) {
+          clearInterval(expand);
+          scene.remove(ring);
+        }
+      }, 25);
+    }
+
+    // ==================== ЛОГИКА РАЗРУШЕНИЯ ====================
+    let totalDamageDealt = 0;
+    const maxDamageForDestruction = 500; // Очень много ударов нужно для полного разрушения
+    
+    function getWeaponDamage() {
+      switch(currentWeapon) {
+        case 'laser': return 3 + Math.floor(Math.random() * 4);   // 3-6
+        case 'plasma': return 5 + Math.floor(Math.random() * 6);  // 5-10
+        case 'missile': return 8 + Math.floor(Math.random() * 8); // 8-15
+        case 'drill': return 12 + Math.floor(Math.random() * 10); // 12-21
+        case 'nuke': return 20 + Math.floor(Math.random() * 15);  // 20-34
+        default: return 5;
+      }
+    }
+
+    function attackPlanet(worldPoint, weaponType) {
+      if (totalDamageDealt >= maxDamageForDestruction) return;
       
+      const damage = getWeaponDamage();
+      totalDamageDealt += damage;
+      
+      // Показываем индикатор урона
+      showDamageIndicator(damage);
+      
+      // Создаём кратер (размер зависит от урона)
       const localPoint = earth.worldToLocal(worldPoint.clone());
-      const normal = localPoint.clone().normalize();
+      const craterSize = 0.04 + damage * 0.012;
+      createCrater(localPoint, craterSize);
       
-      // Создаём кратер
-      const craterSize = 0.08 + amount * 0.015;
-      createCrater(localPoint, craterSize, 0.06);
-      
-      // Эффекты в зависимости от оружия
+      // Визуальные эффекты
       switch(weaponType) {
         case 'laser':
-          screenFlash(0.4);
-          createExplosionParticles(worldPoint, 0xff4400, 25, 0.2);
-          createExplosionParticles(worldPoint, 0xffaa00, 15, 0.15);
+          createExplosion(worldPoint, 0xff4400, 20, 0.15, 40);
+          createExplosion(worldPoint, 0xffaa00, 10, 0.1, 30);
           break;
         case 'plasma':
-          screenFlash(0.5);
-          createExplosionParticles(worldPoint, 0x9944ff, 35, 0.3);
-          createExplosionParticles(worldPoint, 0xcc88ff, 20, 0.2);
+          createExplosion(worldPoint, 0x8844ff, 30, 0.25, 50);
+          createExplosion(worldPoint, 0xcc88ff, 15, 0.15, 35);
           break;
         case 'missile':
-          screenFlash(0.6);
-          createExplosionParticles(worldPoint, 0xff6600, 50, 0.45);
-          createExplosionParticles(worldPoint, 0xffcc00, 30, 0.3);
+          createExplosion(worldPoint, 0xff5500, 40, 0.35, 55);
+          createExplosion(worldPoint, 0xffcc00, 25, 0.2, 40);
           break;
         case 'drill':
-          screenFlash(0.55);
-          createExplosionParticles(worldPoint, 0x884400, 45, 0.35);
-          createExplosionParticles(worldPoint, 0xaa6600, 25, 0.25);
+          createExplosion(worldPoint, 0x774400, 35, 0.3, 50);
+          createExplosion(worldPoint, 0xaa6600, 20, 0.2, 35);
           break;
         case 'nuke':
-          screenFlash(1.0);
-          createExplosionParticles(worldPoint, 0xff2200, 80, 0.7);
-          createExplosionParticles(worldPoint, 0xff8800, 60, 0.5);
-          createExplosionParticles(worldPoint, 0xffff00, 40, 0.4);
-          
-          // Ударная волна
-          const shockwaveGeo = new THREE.RingGeometry(0.1, 0.15, 32);
-          const shockwaveMat = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, 
-            side: THREE.DoubleSide, 
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            transparent: true,
-            opacity: 0.8
-          });
-          const shockwave = new THREE.Mesh(shockwaveGeo, shockwaveMat);
-          shockwave.position.copy(worldPoint);
-          shockwave.lookAt(camera.position);
-          scene.add(shockwave);
-          
-          let scale = 1;
-          const expandShockwave = setInterval(() => {
-            scale += 0.8;
-            shockwave.scale.set(scale, scale, 1);
-            shockwave.material.opacity -= 0.04;
-            if (shockwave.material.opacity <= 0) {
-              clearInterval(expandShockwave);
-              scene.remove(shockwave);
-            }
-          }, 30);
+          createShockwave(worldPoint);
+          createExplosion(worldPoint, 0xff1100, 70, 0.6, 70);
+          createExplosion(worldPoint, 0xff8800, 50, 0.4, 55);
+          createExplosion(worldPoint, 0xffff00, 30, 0.25, 40);
           break;
       }
       
-      // Полное разрушение
-      if (planetHealth <= 0) {
-        triggerArmageddon();
+      // Проверка на полное разрушение
+      if (totalDamageDealt >= maxDamageForDestruction) {
+        triggerTotalDestruction();
+      }
+      
+      // Визуальная деградация планеты
+      updatePlanetAppearance();
+    }
+
+    function updatePlanetAppearance() {
+      const progress = totalDamageDealt / maxDamageForDestruction;
+      
+      // Постепенно меняем цвет планеты
+      if (progress > 0.3) {
+        earth.material.emissive = new THREE.Color(0x110000);
+        earth.material.emissiveIntensity = progress * 0.5;
+      }
+      if (progress > 0.6) {
+        earth.material.specular = new THREE.Color(0x330000);
+        earth.material.shininess = 1;
+      }
+      if (progress > 0.8) {
+        earth.material.opacity = 1 - (progress - 0.8) * 3;
+        earth.material.transparent = true;
       }
     }
 
-    function triggerArmageddon() {
-      earth.visible = false;
-      clouds.visible = false;
-      atmosphere.visible = false;
-      
-      for (let i = 0; i < 150; i++) {
+    function triggerTotalDestruction() {
+      // Массовый выброс фрагментов
+      for (let i = 0; i < 200; i++) {
         const pos = new THREE.Vector3(
-          (Math.random() - 0.5) * 3,
-          (Math.random() - 0.5) * 3,
-          (Math.random() - 0.5) * 3
-        ).normalize().multiplyScalar(1.5 + Math.random() * 0.5);
+          (Math.random()-0.5)*3, (Math.random()-0.5)*3, (Math.random()-0.5)*3
+        ).normalize().multiplyScalar(1.5 + Math.random()*0.8);
         
-        const fragGeo = new THREE.SphereGeometry(0.08 + Math.random() * 0.2, 6, 6);
-        const fragMat = new THREE.MeshPhongMaterial({ 
-          color: new THREE.Color().setHSL(0.08 + Math.random() * 0.1, 0.7, 0.3 + Math.random() * 0.4),
-          emissive: new THREE.Color(0x330000)
+        const size = 0.06 + Math.random() * 0.22;
+        const fragGeo = new THREE.SphereGeometry(size, 5, 5);
+        const fragMat = new THREE.MeshStandardMaterial({ 
+          color: new THREE.Color().setHSL(0.08+Math.random()*0.1, 0.7, 0.25+Math.random()*0.35),
+          roughness: 0.6,
+          emissive: new THREE.Color(0x220000),
+          emissiveIntensity: 0.6
         });
         const fragment = new THREE.Mesh(fragGeo, fragMat);
         fragment.position.copy(pos);
         fragment.userData = {
-          velocity: pos.clone().normalize().multiplyScalar(0.15 + Math.random() * 0.4),
+          velocity: pos.clone().normalize().multiplyScalar(0.12 + Math.random()*0.5),
           life: 1.0,
-          decay: 0.003 + Math.random() * 0.008
+          decay: 0.002 + Math.random()*0.006
         };
         scene.add(fragment);
-        destructionParticles.push(fragment);
+        activeParticles.push({ 
+          group: fragment, 
+          particles: [{ 
+            position: fragment.position, 
+            userData: fragment.userData, 
+            material: fragment.material 
+          }], 
+          timer: 0,
+          isFragment: true
+        });
       }
       
-      screenFlash(1.0);
+      // Скрываем планету
+      earth.visible = false;
+      clouds.visible = false;
+      atmosphere.visible = false;
+      outerAtmo.visible = false;
+      
+      createExplosion(new THREE.Vector3(0,0,0), 0xff4400, 100, 1.5, 100);
+      showDamageIndicator(999);
     }
 
-    // ==================== ОБРАБОТКА КЛИКОВ ====================
+    // ==================== ОБРАБОТКА ВВОДА ====================
     let currentWeapon = 'laser';
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    function handleAttack(event) {
-      if (planetHealth <= 0) return;
+    function handleAttack(clientX, clientY) {
+      if (totalDamageDealt >= maxDamageForDestruction) return;
       
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      mouse.x = (clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(clientY / window.innerHeight) * 2 + 1;
       
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObject(earth);
@@ -876,72 +868,48 @@
       if (intersects.length > 0) {
         const point = intersects[0].point;
         
-        // Визуальные эффекты атаки
+        // Трассировка снаряда
         switch(currentWeapon) {
-          case 'laser':
-            createLaserBeam(camera.position, point, 0xff3300);
-            break;
-          case 'plasma':
-            createPlasmaBall(camera.position, point);
-            break;
-          case 'missile':
-            createMissileTrail(camera.position, point);
-            break;
-          case 'drill':
-            createLaserBeam(camera.position, point, 0x886644);
-            break;
-          case 'nuke':
-            createMissileTrail(camera.position, point);
-            break;
+          case 'laser': createLaserEffect(camera.position, point); break;
+          case 'plasma': createPlasmaTrail(camera.position, point); break;
+          case 'missile': createMissileTrail(camera.position, point); break;
+          case 'drill': createLaserEffect(camera.position, point); break;
+          case 'nuke': createMissileTrail(camera.position, point); break;
         }
         
-        // Наносим урон с небольшой задержкой для эффекта
+        // Задержка удара для реализма
+        const delay = currentWeapon === 'nuke' ? 500 : currentWeapon === 'missile' ? 300 : 150;
         setTimeout(() => {
-          damagePlanet(getWeaponDamage(), point, currentWeapon);
-        }, currentWeapon === 'nuke' ? 400 : 150);
+          attackPlanet(point, currentWeapon);
+        }, delay);
       }
     }
 
-    function getWeaponDamage() {
-      switch(currentWeapon) {
-        case 'laser': return 5;
-        case 'plasma': return 8;
-        case 'missile': return 12;
-        case 'drill': return 16;
-        case 'nuke': return 28;
-        default: return 5;
-      }
-    }
-
-    window.addEventListener('click', handleAttack);
+    window.addEventListener('click', (e) => handleAttack(e.clientX, e.clientY));
     window.addEventListener('touchstart', (e) => {
       if (e.target.tagName === 'BUTTON') return;
       if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        handleAttack({ clientX: touch.clientX, clientY: touch.clientY });
+        e.preventDefault();
+        handleAttack(e.touches[0].clientX, e.touches[0].clientY);
       }
-    });
+    }, { passive: false });
 
     // Кнопки оружия
-    const weaponButtons = {
-      laser: document.getElementById('btn-laser'),
-      plasma: document.getElementById('btn-plasma'),
-      missile: document.getElementById('btn-missile'),
-      drill: document.getElementById('btn-drill'),
-      nuke: document.getElementById('btn-nuke')
-    };
+    const weapons = ['laser','plasma','missile','drill','nuke'];
+    const buttons = {};
+    weapons.forEach(w => {
+      buttons[w] = document.getElementById(`btn-${w}`);
+      buttons[w].addEventListener('click', (e) => {
+        e.stopPropagation();
+        setWeapon(w);
+      });
+    });
 
     function setWeapon(type) {
       currentWeapon = type;
-      Object.values(weaponButtons).forEach(btn => btn.classList.remove('active'));
-      weaponButtons[type].classList.add('active');
+      Object.values(buttons).forEach(b => b.classList.remove('active'));
+      buttons[type].classList.add('active');
     }
-
-    weaponButtons.laser.addEventListener('click', () => setWeapon('laser'));
-    weaponButtons.plasma.addEventListener('click', () => setWeapon('plasma'));
-    weaponButtons.missile.addEventListener('click', () => setWeapon('missile'));
-    weaponButtons.drill.addEventListener('click', () => setWeapon('drill'));
-    weaponButtons.nuke.addEventListener('click', () => setWeapon('nuke'));
 
     // ==================== АНИМАЦИЯ ====================
     const clock = new THREE.Clock();
@@ -950,41 +918,39 @@
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
       
-      // Вращение
-      earth.rotation.y += 0.0007;
-      clouds.rotation.y += 0.001;
-      stars.rotation.y += 0.00005;
-      stars2.rotation.y -= 0.00003;
+      earth.rotation.y += 0.0006;
+      clouds.rotation.y += 0.00085;
+      stars.rotation.y += 0.00004;
+      stars2.rotation.y -= 0.000025;
       
       // Анимация частиц
-      for (let i = activeEffects.length - 1; i >= 0; i--) {
-        const effect = activeEffects[i];
-        if (effect.type === 'particles') {
-          effect.timer++;
+      for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const effect = activeParticles[i];
+        effect.timer++;
+        
+        if (effect.isFragment) {
+          effect.particles.forEach(p => {
+            p.position.add(p.userData.velocity);
+            p.userData.life -= p.userData.decay;
+            p.material.opacity = p.userData.life;
+            if (p.userData.life <= 0.05 || p.position.length() > 12) {
+              scene.remove(effect.group);
+              activeParticles.splice(i,1);
+            }
+          });
+        } else {
           let allDead = true;
           effect.particles.forEach(p => {
             p.position.add(p.userData.velocity);
             p.userData.life -= p.userData.decay;
             p.material.opacity = p.userData.life;
-            p.scale.multiplyScalar(0.97);
-            if (p.userData.life > 0.05) allDead = false;
+            p.scale.multiplyScalar(0.96);
+            if (p.userData.life > 0.03) allDead = false;
           });
-          if (allDead || effect.timer > 120) {
+          if (allDead || effect.timer > 150) {
             scene.remove(effect.group);
-            activeEffects.splice(i, 1);
+            activeParticles.splice(i,1);
           }
-        }
-      }
-      
-      // Анимация фрагментов разрушения
-      for (let i = destructionParticles.length - 1; i >= 0; i--) {
-        const frag = destructionParticles[i];
-        frag.position.add(frag.userData.velocity);
-        frag.userData.life -= frag.userData.decay;
-        frag.material.opacity = frag.userData.life;
-        if (frag.userData.life <= 0.05 || frag.position.length() > 10) {
-          scene.remove(frag);
-          destructionParticles.splice(i, 1);
         }
       }
       
@@ -1000,12 +966,9 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    console.log('🌍 Разрушитель планет готов!');
-    console.log('🔴 Лазерный луч - точный удар');
-    console.log('🟣 Плазменный шар - энергетический взрыв');
-    console.log('🚀 Ракетный залп - огненный шлейф');
-    console.log('⚙️ Тектонический бур - глубокие кратеры');
-    console.log('☢️ Термоядерный удар - ударная волна');
+    console.log('🌍 Реалистичный разрушитель планет активирован!');
+    console.log('💥 Требуется около 500 единиц урона для полного разрушения');
+    console.log('🔴 Лазер: 3-6 урона | 🟣 Плазма: 5-10 | 🚀 Ракета: 8-15 | ⚙️ Бур: 12-21 | ☢️ Ядерный: 20-34');
   </script>
 </body>
 </html>
