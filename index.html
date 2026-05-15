@@ -1,2547 +1,864 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>President Simulator - TheoTown Edition</title>
-    <style>
-        :root {
-            --bg: #0a0a14;
-            --panel: #1a1a2e;
-            --accent: #f0c040;
-            --gold: #e8c547;
-            --text: #e8e8e8;
-            --border: #2e2e4e;
-            --hover: #2a2a50;
-            --zone-res: #4CAF50;
-            --zone-com: #2196F3;
-            --zone-ind: #FF9800;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #060610;
-            overflow: hidden;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            position: fixed;
-        }
-
-        #splash {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #060610 70%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-        #splash.hidden {
-            display: none;
-        }
-        .splash-stars {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-        .splash-title {
-            font-size: clamp(2em, 5vw, 3.2em);
-            font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(180deg, #ffe08a, #c8943e, #8b5e14);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
-            animation: titleGlow 2s ease-in-out infinite;
-        }
-        @keyframes titleGlow {
-            0%,
-            100% {
-                filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
-            }
-            50% {
-                filter: drop-shadow(0 4px 35px rgba(240, 200, 80, 0.7));
-            }
-        }
-        .splash-subtitle {
-            color: #b0a0c0;
-            font-size: clamp(0.9em, 2vw, 1.1em);
-            letter-spacing: 2px;
-        }
-        .splash-form {
-            background: rgba(20, 18, 40, 0.9);
-            border: 1px solid #3a3050;
-            border-radius: 20px;
-            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: min(440px, 90vw);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-        }
-        .splash-form label {
-            font-weight: 700;
-            color: #d4b060;
-            font-size: 0.95em;
-        }
-        .splash-form input {
-            background: #121025;
-            border: 2px solid #3a3050;
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            transition: 0.3s;
-            outline: none;
-        }
-        .splash-form input:focus {
-            border-color: #e8c547;
-            box-shadow: 0 0 25px rgba(232, 197, 71, 0.25);
-        }
-        .btn-create {
-            background: linear-gradient(180deg, #f0c040, #b8781a);
-            border: none;
-            color: #1a1020;
-            font-weight: 800;
-            font-size: 1.2em;
-            padding: 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            letter-spacing: 1.5px;
-            transition: 0.3s;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
-        .btn-create:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(240, 192, 64, 0.45);
-        }
-        .splash-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn-load {
-            background: rgba(40, 35, 70, 0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: 0.9em;
-        }
-        .btn-load:hover {
-            background: #3a3050;
-            border-color: #c8943e;
-        }
-
-        #game-screen {
-            display: none;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            position: relative;
-            flex-direction: column;
-        }
-        #game-screen.active {
-            display: flex;
-        }
-
-        #top-bar {
-            z-index: 100;
-            background: linear-gradient(180deg, rgba(18, 15, 35, 0.97), rgba(14, 12, 28, 0.95));
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            min-height: 50px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .country-name-display {
-            font-weight: 800;
-            font-size: clamp(0.9em, 2.5vw, 1.25em);
-            background: linear-gradient(180deg, #ffe08a, #c8943e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stats-panel {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 700;
-            font-size: clamp(0.7em, 1.8vw, 0.95em);
-            white-space: nowrap;
-        }
-        .stat-icon {
-            font-size: 1.2em;
-        }
-        .stat-money {
-            color: #f0d060;
-        }
-        .stat-pop {
-            color: #6dc8e8;
-        }
-        .stat-happy {
-            color: #6ce89c;
-        }
-        .stat-demand {
-            color: #ff9800;
-            font-size: 0.75em;
-        }
-        .top-buttons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .btn-top {
-            background: rgba(40, 35, 70, 0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: clamp(0.7em, 1.5vw, 0.85em);
-            white-space: nowrap;
-        }
-        .btn-top:hover {
-            background: #3a3050;
-            border-color: #c8943e;
-        }
-        .time-weather {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8em;
-            color: #ccc;
-        }
-        .time-display {
-            color: #f0d060;
-            font-weight: 700;
-        }
-        .weather-display {
-            font-size: 1.2em;
-        }
-
-        #game-canvas {
-            flex: 1;
-            cursor: grab;
-            display: block;
-            touch-action: none;
-            min-height: 0;
-        }
-        #game-canvas.zone {
-            cursor: cell;
-        }
-        #game-canvas.building {
-            cursor: crosshair;
-        }
-        #game-canvas.grabbing {
-            cursor: grabbing;
-        }
-
-        #bottom-panel {
-            z-index: 100;
-            background: rgba(16, 14, 30, 0.96);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 10px;
-            min-height: 55px;
-            flex-wrap: wrap;
-            overflow-x: auto;
-        }
-        .tool-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 6px 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
-            background: rgba(30, 25, 55, 0.7);
-            font-weight: 700;
-            font-size: 0.7em;
-            color: #ddd;
-            min-width: 48px;
-            text-align: center;
-        }
-        .tool-btn:active {
-            transform: scale(0.95);
-        }
-        .tool-btn.active {
-            border-color: #f0d060 !important;
-            background: rgba(200, 160, 50, 0.25) !important;
-        }
-        .tool-btn.zone-res {
-            border-color: #4CAF50;
-        }
-        .tool-btn.zone-com {
-            border-color: #2196F3;
-        }
-        .tool-btn.zone-ind {
-            border-color: #FF9800;
-        }
-        .tool-btn.danger {
-            border-color: #802020;
-            color: #f08888;
-        }
-        .tool-btn-icon {
-            font-size: 1.4em;
-            line-height: 1;
-        }
-        .tool-btn-label {
-            font-size: 0.65em;
-        }
-
-        #build-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #build-modal.open {
-            display: flex;
-        }
-        .modal-content {
-            background: #1a1830;
-            border: 1px solid #3a3050;
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 700px;
-            width: 95vw;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-        }
-        .modal-title {
-            font-weight: 800;
-            font-size: 1.2em;
-            color: #f0d060;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-        .modal-tabs {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .modal-tab {
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            background: rgba(30, 25, 55, 0.6);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            font-size: 0.75em;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-        .modal-tab:hover {
-            background: rgba(50, 40, 80, 0.8);
-        }
-        .modal-tab.active {
-            background: rgba(200, 160, 50, 0.3);
-            border-color: #f0d060;
-            color: #f0d060;
-        }
-        .modal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 6px;
-        }
-        .modal-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            padding: 8px 4px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.15s;
-            border: 2px solid transparent;
-            background: rgba(30, 25, 55, 0.6);
-            text-align: center;
-        }
-        .modal-item:hover {
-            background: rgba(50, 40, 80, 0.8);
-            border-color: #c8943e;
-        }
-        .modal-item.selected {
-            border-color: #f0d060 !important;
-            background: rgba(200, 160, 50, 0.25) !important;
-        }
-        .modal-item-emoji {
-            font-size: 1.8em;
-        }
-        .modal-item-name {
-            font-size: 0.7em;
-            font-weight: 600;
-            color: #ddd;
-            line-height: 1.2;
-        }
-        .modal-item-cost {
-            font-size: 0.65em;
-            color: #f0d060;
-            font-weight: 700;
-        }
-        .modal-close {
-            display: block;
-            margin: 16px auto 0;
-            background: #3a3050;
-            border: none;
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.9em;
-        }
-        .modal-close:hover {
-            background: #5a4070;
-        }
-
-        #info-popup {
-            position: absolute;
-            pointer-events: none;
-            z-index: 150;
-            background: rgba(15, 12, 35, 0.97);
-            border: 2px solid #5a5080;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 0.85em;
-            display: none;
-            white-space: nowrap;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
-            line-height: 1.7;
-            color: #f0f0f0;
-        }
-        #info-popup .pop-title {
-            font-weight: 800;
-            color: #ffd700;
-            font-size: 1.1em;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        #message-log {
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            z-index: 110;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            pointer-events: none;
-            max-width: 280px;
-        }
-        .log-msg {
-            background: rgba(0, 0, 0, 0.9);
-            border-left: 3px solid #f0c040;
-            padding: 7px 12px;
-            border-radius: 6px;
-            font-size: 0.8em;
-            animation: fadeInOut 3.5s forwards;
-            font-weight: 500;
-            color: #e0e0e0;
-        }
-        @keyframes fadeInOut {
-            0% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            12% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            75% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            #top-bar {
-                padding: 4px 6px;
-                min-height: 40px;
-            }
-            .stats-panel {
-                gap: 5px;
-            }
-            .stat-item {
-                font-size: 0.6em;
-            }
-            .btn-top {
-                padding: 4px 6px;
-                font-size: 0.6em;
-            }
-            #bottom-panel {
-                gap: 3px;
-                padding: 5px 4px;
-                min-height: 44px;
-            }
-            .tool-btn {
-                padding: 4px 6px;
-                min-width: 38px;
-                font-size: 0.6em;
-            }
-            .tool-btn-icon {
-                font-size: 1.1em;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, touch-action: manipulation">
+  <title>Солнечная система 3D | Полная модель</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 25px;
+      border-radius: 50px;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      font-weight: 500;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    #current-planet {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 15px 30px;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.3);
+      display: none;
+      pointer-events: none;
+    }
+    #mode-btn {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 30px;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 20;
+    }
+    #mode-btn:hover {
+      background: rgba(255,140,0,0.8);
+      border-color: #ffaa00;
+      box-shadow: 0 0 25px rgba(255,140,0,0.6);
+    }
+    #mode-btn.fly-mode {
+      background: rgba(255,140,0,0.9);
+      border-color: #ffaa00;
+      box-shadow: 0 0 30px rgba(255,140,0,0.8);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,140,0,0.6); }
+      50% { box-shadow: 0 0 40px rgba(255,140,0,0.9); }
+    }
+    .instruction {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      background: rgba(0,0,0,0.55);
+      padding: 8px 25px;
+      border-radius: 25px;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+      pointer-events: none;
+      letter-spacing: 0.5px;
+    }
+    /* Джойстик для телефонов */
+    #joystick-container {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 140px;
+      height: 140px;
+      display: none;
+      z-index: 30;
+    }
+    #joystick-base {
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      position: relative;
+      backdrop-filter: blur(5px);
+    }
+    #joystick-thumb {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+    /* Область поворота камеры (правая часть экрана) */
+    #look-area {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      z-index: 25;
+      display: none;
+    }
+    @media (max-width: 768px) {
+      #joystick-container {
+        display: block;
+      }
+      #look-area {
+        display: block;
+      }
+      #mode-btn {
+        font-size: 14px;
+        padding: 10px 20px;
+      }
+      .instruction {
+        font-size: 11px;
+        bottom: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <div id="splash">
-        <canvas class="splash-stars" id="splash-stars"></canvas>
-        <div class="splash-title">🏛️ PRESIDENT<br>SIMULATOR</div>
-        <div class="splash-subtitle">TheoTown Edition — Постройте мегаполис мечты</div>
-        <div class="splash-form">
-            <label for="country-name">📜 Название государства</label>
-            <input type="text" id="country-name" placeholder="Введите название..." maxlength="28" value="Великоречье">
-            <button class="btn-create" onclick="startGame()">🌟 ОСНОВАТЬ ГОСУДАРСТВО</button>
-            <div class="splash-buttons">
-                <button class="btn-load" onclick="loadGame()">💾 Загрузить сохранение</button>
-            </div>
-        </div>
+  <div id="info">🌌 СОЛНЕЧНАЯ СИСТЕМА</div>
+  <div id="current-planet"></div>
+  <button id="mode-btn">🎮 ОБЗОР (мышь)</button>
+  <div class="instruction">🖱️ Вращайте камеру | 📜 Зум | ✨ Кликните по объекту | Пробел — общий вид</div>
+  
+  <!-- Джойстик для телефонов -->
+  <div id="joystick-container">
+    <div id="joystick-base">
+      <div id="joystick-thumb"></div>
     </div>
+  </div>
+  <div id="look-area"></div>
 
-    <div id="game-screen">
-        <div id="top-bar">
-            <div class="country-name-display" id="display-country-name">🏛️ Великоречье</div>
-            <div class="stats-panel">
-                <div class="stat-item"><span class="stat-icon">💰</span> <span class="stat-money" id="money-val">50000</span></div>
-                <div class="stat-item"><span class="stat-icon">👥</span> <span class="stat-pop" id="pop-val">100</span></div>
-                <div class="stat-item"><span class="stat-icon">😊</span> <span class="stat-happy" id="happy-val">75</span>%</div>
-                <div class="stat-item"><span class="stat-demand" id="demand-val">🏘️50 🏪30 🏭20</span></div>
-            </div>
-            <div class="top-buttons">
-                <div class="time-weather">
-                    <span class="weather-display" id="weather-icon">☀️</span>
-                    <span class="time-display" id="time-display">17:26</span>
-                </div>
-                <button class="btn-top" onclick="expandBorder()">📏</button>
-                <button class="btn-top" onclick="saveGame()">💾</button>
-                <button class="btn-top" onclick="showHelp()">❓</button>
-            </div>
-        </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
 
-        <canvas id="game-canvas"></canvas>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-        <div id="info-popup"></div>
-        <div id="message-log"></div>
+    // --- Сцена ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+    
+    // Звёзды
+    const starsGeo1 = new THREE.BufferGeometry();
+    const starsPos1 = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000 * 3; i += 3) {
+      starsPos1[i] = (Math.random() - 0.5) * 1200;
+      starsPos1[i+1] = (Math.random() - 0.5) * 700;
+      starsPos1[i+2] = (Math.random() - 0.5) * 900;
+    }
+    starsGeo1.setAttribute('position', new THREE.BufferAttribute(starsPos1, 3));
+    const stars1 = new THREE.Points(starsGeo1, new THREE.PointsMaterial({color: 0xffffff, size: 0.25}));
+    scene.add(stars1);
+    
+    const starsGeo2 = new THREE.BufferGeometry();
+    const starsPos2 = new Float32Array(2000 * 3);
+    for (let i = 0; i < 2000 * 3; i += 3) {
+      starsPos2[i] = (Math.random() - 0.5) * 1600;
+      starsPos2[i+1] = (Math.random() - 0.5) * 900;
+      starsPos2[i+2] = (Math.random() - 0.5) * 1100;
+    }
+    starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPos2, 3));
+    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({color: 0xaaccff, size: 0.3}));
+    scene.add(stars2);
 
-        <div id="bottom-panel">
-            <button class="tool-btn zone-res" id="btn-zone-res" onclick="setTool('zone_residential')">
-                <span class="tool-btn-icon">🏘️</span><span class="tool-btn-label">Жилая</span>
-            </button>
-            <button class="tool-btn zone-com" id="btn-zone-com" onclick="setTool('zone_commercial')">
-                <span class="tool-btn-icon">🏪</span><span class="tool-btn-label">Коммерция</span>
-            </button>
-            <button class="tool-btn zone-ind" id="btn-zone-ind" onclick="setTool('zone_industrial')">
-                <span class="tool-btn-icon">🏭</span><span class="tool-btn-label">Индустрия</span>
-            </button>
-            <button class="tool-btn" id="btn-special" onclick="openBuildModal()">
-                <span class="tool-btn-icon">🏗️</span><span class="tool-btn-label">Спец.</span>
-            </button>
-            <button class="tool-btn" id="btn-rotate" onclick="rotateBuilding()">
-                <span class="tool-btn-icon">🔄</span><span class="tool-btn-label">Поворот</span>
-            </button>
-            <button class="tool-btn danger" id="btn-delete" onclick="toggleDeleteMode()">
-                <span class="tool-btn-icon">🗑️</span><span class="tool-btn-label">Снос</span>
-            </button>
-            <button class="tool-btn" id="btn-info" onclick="toggleSelectMode()">
-                <span class="tool-btn-icon">🔍</span><span class="tool-btn-label">Инфо</span>
-            </button>
-        </div>
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 2000);
+    camera.position.set(0, 40, 80);
+    camera.lookAt(0, 0, 0);
 
-        <div id="build-modal">
-            <div class="modal-content">
-                <div class="modal-title">🏗️ Специальные постройки</div>
-                <div class="modal-tabs" id="modal-tabs">
-                    <button class="modal-tab active" data-tab="roads">🛣️ Дороги</button>
-                    <button class="modal-tab" data-tab="services">🚒 Службы</button>
-                    <button class="modal-tab" data-tab="parks">🌳 Парки</button>
-                    <button class="modal-tab" data-tab="landmarks">🏛️ Достоприм.</button>
-                    <button class="modal-tab" data-tab="transport">🚌 Транспорт</button>
-                </div>
-                <div class="modal-grid" id="modal-grid"></div>
-                <div style="text-align:center;color:#aaa;margin-top:8px;">📏 Размер:</div>
-                <div id="size-selector" style="display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap;">
-                    <button class="size-btn selected" data-scale="1" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔹 1x</button>
-                    <button class="size-btn" data-scale="1.5" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔸 1.5x</button>
-                    <button class="size-btn" data-scale="2" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔶 2x</button>
-                    <button class="size-btn" data-scale="3" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">💎 3x</button>
-                </div>
-                <div style="text-align:center;color:#8af;font-size:0.75em;margin-top:4px;">🔄 R — поворот (сейчас: <span id="rot-display">0°</span>)</div>
-                <button class="modal-close" onclick="closeBuildModal()">✖ Закрыть</button>
-            </div>
-        </div>
-    </div>
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
 
-    <script>
-        // ==================== СОСТОЯНИЕ ИГРЫ ====================
-        const gameState = {
-            countryName: '',
-            money: 50000,
-            population: 100,
-            happiness: 75,
-            borderSize: 500,
-            borderExpandCost: 50000,
-            buildings: [],
-            roads: [],
-            rails: [],
-            zones: [],
-            waterBodies: [],
-            people: [],
-            cars: [],
-            boats: [],
-            buses: [],
-            particles: [],
-            selectedType: null,
-            buildScale: 1,
-            buildRotation: 0,
-            currentTool: null,
-            deleteMode: false,
-            selectMode: false,
-            activeTab: 'roads',
-            canvas: null,
-            ctx: null,
-            cameraX: 0,
-            cameraY: 0,
-            zoom: 1,
-            gridSize: 48,
-            dragging: false,
-            dragStartX: 0,
-            dragStartY: 0,
-            dragDistance: 0,
-            mouseX: 0,
-            mouseY: 0,
-            hoveredBuilding: null,
-            gameTime: 0,
-            incomeTimer: 0,
-            zoneTimer: 0,
-            demandTimer: 0,
-            saveInterval: null,
-            gameHour: 17,
-            gameMinute: 26,
-            weather: 'sunny',
-            weatherTimer: 0,
-            weatherDuration: 500,
-            raindrops: [],
-            snowflakes: [],
-            residentialDemand: 50,
-            commercialDemand: 30,
-            industrialDemand: 20,
-            touchStartTime: 0,
-            touchDistance: 0,
-            lastPinchZoom: 1,
-        };
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
 
-        // ==================== ТИПЫ ЗДАНИЙ ====================
-        const buildingTypes = {
-            road: { emoji: '🛣️', name: 'Асфальтовая дорога', cost: 50, income: 5, width: 48, height: 48, isRoad: true, tab: 'roads' },
-            road_curve: { emoji: '↪️', name: 'Поворот дороги', cost: 80, income: 8, width: 48, height: 48, isRoadCurve: true, tab: 'roads' },
-            rail: { emoji: '🚂', name: 'Железная дорога', cost: 200, income: 20, width: 48, height: 48, isRail: true, tab: 'roads' },
-            highway: { emoji: '🛤️', name: 'Автомагистраль', cost: 300, income: 40, width: 48, height: 48, isRoad: true, tab: 'roads' },
-            police_station: { emoji: '🚔', name: 'Полицейский участок', cost: 5000, income: -100, width: 48, height: 48, tab: 'services', capacity: 50, serviceType: 'police', serviceRadius: 200 },
-            fire_station: { emoji: '🚒', name: 'Пожарная станция', cost: 4000, income: -80, width: 48, height: 48, tab: 'services', capacity: 40, serviceType: 'fire', serviceRadius: 180 },
-            hospital: { emoji: '🏥', name: 'Больница', cost: 8000, income: -150, width: 52, height: 50, tab: 'services', capacity: 100, serviceType: 'health', serviceRadius: 250 },
-            school: { emoji: '🏫', name: 'Школа', cost: 6000, income: -120, width: 50, height: 48, tab: 'services', capacity: 80, serviceType: 'education', serviceRadius: 200 },
-            park: { emoji: '🌳', name: 'Парк', cost: 300, income: 0, width: 46, height: 46, tab: 'parks', happinessBonus: 10, serviceRadius: 100 },
-            playground: { emoji: '🛝', name: 'Детская площадка', cost: 500, income: 0, width: 40, height: 40, tab: 'parks', happinessBonus: 15, serviceRadius: 80 },
-            fountain: { emoji: '⛲', name: 'Фонтан', cost: 800, income: 0, width: 36, height: 36, tab: 'parks', happinessBonus: 20, serviceRadius: 120 },
-            statue_of_liberty: { emoji: '🗽', name: 'Статуя Свободы', cost: 50000, income: 500, width: 40, height: 60, tab: 'landmarks', happinessBonus: 50, tourismBonus: 100 },
-            eiffel_tower: { emoji: '🗼', name: 'Эйфелева башня', cost: 45000, income: 450, width: 40, height: 64, tab: 'landmarks', happinessBonus: 45, tourismBonus: 90 },
-            kremlin: { emoji: '🏯', name: 'Кремль', cost: 40000, income: 400, width: 56, height: 48, tab: 'landmarks', happinessBonus: 40, tourismBonus: 80 },
-            stadium: { emoji: '🏟️', name: 'Стадион', cost: 30000, income: 300, width: 64, height: 56, tab: 'landmarks', happinessBonus: 35, tourismBonus: 70 },
-            bus_stop: { emoji: '🚏', name: 'Автобусная остановка', cost: 200, income: 10, width: 24, height: 24, tab: 'transport', capacity: 20 },
-            bus_depot: { emoji: '🚌', name: 'Автобусное депо', cost: 10000, income: -200, width: 56, height: 48, tab: 'transport', capacity: 50 },
-            carshop: { emoji: '🚗', name: 'Автосалон', cost: 10000, income: 150, width: 48, height: 48, tab: 'transport' },
-            shipyard: { emoji: '🚢', name: 'Судостроительный', cost: 20000, income: 400, width: 56, height: 56, tab: 'transport', needsWater: true },
-        };
+    // OrbitControls (режим обзора)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.rotateSpeed = 0.7;
+    controls.zoomSpeed = 1.8;
+    controls.target.set(0, 0, 0);
+    controls.maxDistance = 600;
+    controls.minDistance = 2;
+    controls.update();
 
-        // ==================== ЗВЁЗДЫ ====================
-        function initSplashStars() {
-            const c = document.getElementById('splash-stars');
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-            const ctx = c.getContext('2d');
-            const stars = Array.from({ length: 200 }, () => ({
-                x: Math.random() * c.width,
-                y: Math.random() * c.height,
-                radius: Math.random() * 1.8 + 0.5,
-                twinkle: Math.random() * Math.PI * 2,
-                speed: Math.random() * 0.02 + 0.005,
-            }));
+    // --- Режимы управления ---
+    let flyMode = false;
+    const modeBtn = document.getElementById('mode-btn');
+    const instruction = document.querySelector('.instruction');
+    
+    // Для WASD полёта
+    const keys = { w: false, a: false, s: false, d: false, q: false, e: false, shift: false };
+    const flySpeed = 0.8;
+    const flyRotateSpeed = 0.03;
+    let yaw = 0, pitch = 0;
+    let mouseDown = false;
+    let lastMouseX = 0, lastMouseY = 0;
+    
+    modeBtn.addEventListener('click', () => {
+      flyMode = !flyMode;
+      
+      if (flyMode) {
+        // Включаем режим полёта
+        modeBtn.textContent = '🚀 ПОЛЁТ (WASD)';
+        modeBtn.classList.add('fly-mode');
+        instruction.textContent = 'WASD — движение | Q/E — вверх/вниз | Shift — ускорение | Мышь — поворот | Пробел — общий вид';
+        controls.enabled = false;
+        
+        // Сохраняем текущее направление камеры
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        yaw = Math.atan2(direction.x, direction.z);
+        pitch = Math.asin(direction.y);
+        
+        // Блокируем указатель для управления мышью
+        renderer.domElement.style.cursor = 'crosshair';
+      } else {
+        // Включаем режим обзора
+        modeBtn.textContent = '🎮 ОБЗОР (мышь)';
+        modeBtn.classList.remove('fly-mode');
+        instruction.textContent = '🖱️ Вращайте камеру | 📜 Зум | ✨ Кликните по объекту | Пробел — общий вид';
+        controls.enabled = true;
+        controls.target.copy(camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10)));
+        controls.update();
+        renderer.domElement.style.cursor = 'default';
+      }
+    });
 
-            function draw() {
-                ctx.clearRect(0, 0, c.width, c.height);
-                stars.forEach(star => {
-                    star.twinkle += star.speed;
-                    const alpha = 0.4 + Math.sin(star.twinkle) * 0.4;
-                    ctx.fillStyle = 'rgba(255,255,240,' + alpha + ')';
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
+    // --- WASD и мышь для полёта ---
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !flyMode) {
+        e.preventDefault();
+        focusOnPlanet('all');
+        return;
+      }
+      
+      if (!flyMode) return;
+      
+      switch(e.code) {
+        case 'KeyW': keys.w = true; e.preventDefault(); break;
+        case 'KeyA': keys.a = true; e.preventDefault(); break;
+        case 'KeyS': keys.s = true; e.preventDefault(); break;
+        case 'KeyD': keys.d = true; e.preventDefault(); break;
+        case 'KeyQ': keys.q = true; e.preventDefault(); break;
+        case 'KeyE': keys.e = true; e.preventDefault(); break;
+        case 'ShiftLeft':
+        case 'ShiftRight': keys.shift = true; e.preventDefault(); break;
+        case 'Space':
+          e.preventDefault();
+          focusOnPlanet('all');
+          break;
+      }
+    });
+    
+    window.addEventListener('keyup', (e) => {
+      if (!flyMode) return;
+      
+      switch(e.code) {
+        case 'KeyW': keys.w = false; break;
+        case 'KeyA': keys.a = false; break;
+        case 'KeyS': keys.s = false; break;
+        case 'KeyD': keys.d = false; break;
+        case 'KeyQ': keys.q = false; break;
+        case 'KeyE': keys.e = false; break;
+        case 'ShiftLeft':
+        case 'ShiftRight': keys.shift = false; break;
+      }
+    });
+    
+    renderer.domElement.addEventListener('mousedown', (e) => {
+      if (!flyMode) return;
+      mouseDown = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+    
+    window.addEventListener('mouseup', () => {
+      mouseDown = false;
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (!flyMode || !mouseDown) return;
+      
+      const deltaX = e.clientX - lastMouseX;
+      const deltaY = e.clientY - lastMouseY;
+      
+      yaw -= deltaX * flyRotateSpeed;
+      pitch -= deltaY * flyRotateSpeed;
+      pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+      
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
+    // --- Джойстик для телефонов ---
+    const joystickContainer = document.getElementById('joystick-container');
+    const joystickBase = document.getElementById('joystick-base');
+    const joystickThumb = document.getElementById('joystick-thumb');
+    const lookArea = document.getElementById('look-area');
+    
+    let joystickActive = false;
+    let joystickStartX = 0, joystickStartY = 0;
+    let joystickMoveX = 0, joystickMoveY = 0;
+    let touchLookActive = false;
+    let touchLookLastX = 0, touchLookLastY = 0;
+    
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    }
+    
+    if (isMobile()) {
+      joystickContainer.style.display = 'block';
+      lookArea.style.display = 'block';
+      instruction.textContent = '🎮 Джойстик — движение | Правая часть — поворот | Клик — фокус';
+    }
+    
+    // Джойстик
+    joystickBase.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      joystickActive = true;
+      const touch = e.touches[0];
+      const rect = joystickBase.getBoundingClientRect();
+      joystickStartX = rect.left + rect.width / 2;
+      joystickStartY = rect.top + rect.height / 2;
+      joystickMoveX = touch.clientX - joystickStartX;
+      joystickMoveY = touch.clientY - joystickStartY;
+      updateJoystickPosition();
+    });
+    
+    joystickBase.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!joystickActive) return;
+      const touch = e.touches[0];
+      joystickMoveX = touch.clientX - joystickStartX;
+      joystickMoveY = touch.clientY - joystickStartY;
+      
+      const maxDist = 50;
+      const dist = Math.sqrt(joystickMoveX ** 2 + joystickMoveY ** 2);
+      if (dist > maxDist) {
+        joystickMoveX = (joystickMoveX / dist) * maxDist;
+        joystickMoveY = (joystickMoveY / dist) * maxDist;
+      }
+      updateJoystickPosition();
+    });
+    
+    joystickBase.addEventListener('touchend', () => {
+      joystickActive = false;
+      joystickMoveX = 0;
+      joystickMoveY = 0;
+      updateJoystickPosition();
+    });
+    
+    function updateJoystickPosition() {
+      joystickThumb.style.transform = `translate(calc(-50% + ${joystickMoveX}px), calc(-50% + ${joystickMoveY}px))`;
+    }
+    
+    // Поворот камеры (правая часть экрана)
+    lookArea.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      touchLookActive = true;
+      touchLookLastX = e.touches[0].clientX;
+      touchLookLastY = e.touches[0].clientY;
+    });
+    
+    lookArea.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!touchLookActive) return;
+      
+      const deltaX = e.touches[0].clientX - touchLookLastX;
+      const deltaY = e.touches[0].clientY - touchLookLastY;
+      
+      if (flyMode) {
+        yaw -= deltaX * flyRotateSpeed;
+        pitch -= deltaY * flyRotateSpeed;
+        pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+      } else {
+        // В режиме обзора вращаем через OrbitControls
+        const target = controls.target;
+        const offset = camera.position.clone().sub(target);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        
+        spherical.theta -= deltaX * 0.005;
+        spherical.phi -= deltaY * 0.005;
+        spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+        
+        offset.setFromSpherical(spherical);
+        camera.position.copy(target.clone().add(offset));
+        camera.lookAt(target);
+      }
+      
+      touchLookLastX = e.touches[0].clientX;
+      touchLookLastY = e.touches[0].clientY;
+    });
+    
+    lookArea.addEventListener('touchend', () => {
+      touchLookActive = false;
+    });
+
+    // --- Освещение ---
+    const sunLight = new THREE.PointLight(0xfff5e6, 3, 0, 0);
+    sunLight.position.set(0, 0, 0);
+    scene.add(sunLight);
+    scene.add(new THREE.AmbientLight(0x111133));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.25);
+    dirLight.position.set(10, 20, 5);
+    scene.add(dirLight);
+
+    // --- Функция создания текстур ---
+    function createPlanetTexture(baseColor, type) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      
+      ctx.fillStyle = baseColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      if (type === 'sun') {
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#ffaa00');
+        gradient.addColorStop(0.3, '#ff7700');
+        gradient.addColorStop(0.6, '#ffaa00');
+        gradient.addColorStop(1, '#ff5500');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffcc00';
+        for(let i = 0; i < 25; i++) {
+          ctx.beginPath();
+          ctx.arc(Math.random()*256, Math.random()*128, Math.random()*12+4, 0, Math.PI*2);
+          ctx.fill();
         }
-        initSplashStars();
-
-        // ==================== ГЕНЕРАЦИЯ ВОДОЁМОВ ====================
-        function generateWaterBodies() {
-            gameState.waterBodies = [];
-            const count = 12 + Math.floor(Math.random() * 10);
-            for (let i = 0; i < count; i++) {
-                const centerX = (Math.random() - 0.5) * gameState.borderSize * 2;
-                const centerY = (Math.random() - 0.5) * gameState.borderSize * 2;
-                const baseRadius = 30 + Math.random() * 150;
-                const points = [];
-                const numPoints = 8 + Math.floor(Math.random() * 14);
-                for (let j = 0; j < numPoints; j++) {
-                    const angle = (j / numPoints) * Math.PI * 2;
-                    const radius = baseRadius * (0.4 + Math.random() * 0.8);
-                    points.push({
-                        x: centerX + Math.cos(angle) * radius,
-                        y: centerY + Math.sin(angle) * radius,
-                    });
-                }
-                const nameList = ['Великий Океан', 'Северное Море', 'Южный Залив', 'Тихое Озеро', 'Голубая Лагуна', 'Штормовой Пролив', 'Солнечная Бухта', 'Глубокое Водохранилище', 'Река Извилистая', 'Озеро Надежды', 'Море Спокойствия', 'Залив Приключений'];
-                gameState.waterBodies.push({
-                    points: points,
-                    name: nameList[Math.floor(Math.random() * nameList.length)],
-                    baseRadius: baseRadius,
-                });
-            }
+      } else if (type === 'jupiter') {
+        ctx.strokeStyle = '#b08060';
+        ctx.lineWidth = 7;
+        for(let y = 10; y < 128; y += 16) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(256, y + Math.sin(y)*4);
+          ctx.stroke();
         }
-
-        function isPointInWater(worldX, worldY) {
-            for (let w = 0; w < gameState.waterBodies.length; w++) {
-                const water = gameState.waterBodies[w];
-                let inside = false;
-                const points = water.points;
-                for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-                    const xi = points[i].x;
-                    const yi = points[i].y;
-                    const xj = points[j].x;
-                    const yj = points[j].y;
-                    if ((yi > worldY) !== (yj > worldY)) {
-                        const intersectX = (xj - xi) * (worldY - yi) / (yj - yi) + xi;
-                        if (worldX < intersectX) {
-                            inside = !inside;
-                        }
-                    }
-                }
-                if (inside) {
-                    return true;
-                }
-            }
-            return false;
+      } else if (type === 'saturn') {
+        ctx.strokeStyle = '#d4b896';
+        ctx.lineWidth = 5;
+        for(let y = 12; y < 128; y += 14) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(256, y);
+          ctx.stroke();
         }
+      } else if (type === 'earth') {
+        ctx.fillStyle = '#2288ff';
+        ctx.fillRect(0,0,256,128);
+        ctx.fillStyle = '#44aa44';
+        ctx.beginPath(); ctx.arc(100,50,40,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(180,70,35,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        for(let i=0;i<12;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*7+1.5,0,Math.PI*2); ctx.fill(); }
+      } else if (type === 'mars') {
+        ctx.fillStyle = '#8b2500';
+        for(let i=0;i<15;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*10+3,0,Math.PI*2); ctx.fill(); }
+      } else if (type === 'mercury') {
+        ctx.fillStyle = '#666666';
+        for(let i=0;i<20;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*6+2,0,Math.PI*2); ctx.fill(); }
+      }
+      
+      return new THREE.CanvasTexture(canvas);
+    }
 
-        // ==================== СОХРАНЕНИЯ ====================
-        function saveGame() {
-            if (!gameState.countryName) return;
-            const data = {
-                countryName: gameState.countryName,
-                money: gameState.money,
-                population: gameState.population,
-                happiness: gameState.happiness,
-                borderSize: gameState.borderSize,
-                buildings: gameState.buildings,
-                roads: gameState.roads,
-                rails: gameState.rails,
-                zones: gameState.zones,
-                waterBodies: gameState.waterBodies,
-                zoom: gameState.zoom,
-                cameraX: gameState.cameraX,
-                cameraY: gameState.cameraY,
-                gameHour: gameState.gameHour,
-                gameMinute: gameState.gameMinute,
-                weather: gameState.weather,
-                residentialDemand: gameState.residentialDemand,
-                commercialDemand: gameState.commercialDemand,
-                industrialDemand: gameState.industrialDemand,
-                version: 11,
-            };
-            try {
-                localStorage.setItem('president_theotown_v11', JSON.stringify(data));
-                addLog('💾 Игра сохранена!');
-            } catch (error) {
-                addLog('❌ Ошибка сохранения!');
-            }
+    // --- Планеты ---
+    const planetsData = [
+      { name: 'Солнце', key: 'sun', color: 0xffaa00, size: 2.5, distance: 0, speed: 0, emissive: 0xff5500 },
+      { name: 'Меркурий', key: 'mercury', color: 0xaaaaaa, size: 0.4, distance: 6, speed: 0.035 },
+      { name: 'Венера', key: 'venus', color: 0xffcc88, size: 0.7, distance: 9, speed: 0.022 },
+      { name: 'Земля', key: 'earth', color: 0x2299ff, size: 0.75, distance: 12, speed: 0.018 },
+      { name: 'Марс', key: 'mars', color: 0xc1440e, size: 0.55, distance: 16, speed: 0.015 },
+      { name: 'Церера', key: 'ceres', color: 0x999999, size: 0.3, distance: 20, speed: 0.012, dwarf: true },
+      { name: 'Юпитер', key: 'jupiter', color: 0xd8a27a, size: 1.8, distance: 28, speed: 0.009 },
+      { name: 'Сатурн', key: 'saturn', color: 0xf0d8b0, size: 1.5, distance: 36, speed: 0.007, hasRings: true },
+      { name: 'Уран', key: 'uranus', color: 0x6fd4d4, size: 1.2, distance: 45, speed: 0.005 },
+      { name: 'Нептун', key: 'neptune', color: 0x4169e1, size: 1.15, distance: 54, speed: 0.004 },
+      { name: 'Плутон', key: 'pluto', color: 0xccbb99, size: 0.35, distance: 65, speed: 0.003, dwarf: true },
+      { name: 'Эрида', key: 'eris', color: 0xddccbb, size: 0.32, distance: 78, speed: 0.0025, dwarf: true }
+    ];
+
+    const planets = [];
+    const allClickableObjects = [];
+
+    // Орбиты
+    planetsData.forEach(p => {
+      if (p.distance > 0) {
+        const orbitGeo = new THREE.RingGeometry(p.distance - 0.03, p.distance + 0.03, 128);
+        const opacity = p.dwarf ? 0.08 : 0.15;
+        const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
+          color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity 
+        }));
+        orbit.rotation.x = Math.PI / 2;
+        scene.add(orbit);
+      }
+    });
+
+    // Создание планет
+    planetsData.forEach(data => {
+      const geo = new THREE.SphereGeometry(data.size, data.key === 'sun' ? 64 : 40, 40);
+      const texture = createPlanetTexture(`#${data.color.toString(16).padStart(6, '0')}`, data.key);
+      const mat = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: data.key === 'sun' ? 0.4 : 0.75,
+        metalness: 0.1,
+        emissive: data.emissive ? new THREE.Color(data.emissive) : new THREE.Color(0x000000),
+        emissiveIntensity: data.key === 'sun' ? 1 : 0
+      });
+      
+      const planet = new THREE.Mesh(geo, mat);
+      planet.castShadow = true;
+      planet.receiveShadow = true;
+      
+      const angle = Math.random() * Math.PI * 2;
+      planet.position.x = data.distance * Math.cos(angle);
+      planet.position.z = data.distance * Math.sin(angle);
+      
+      planet.userData = {
+        name: data.name,
+        key: data.key,
+        distance: data.distance,
+        speed: data.speed,
+        angle: angle,
+        size: data.size,
+        hasRings: data.hasRings || false,
+        dwarf: data.dwarf || false
+      };
+      
+      scene.add(planet);
+      allClickableObjects.push(planet);
+      
+      if (data.hasRings) {
+        const ringGeo1 = new THREE.RingGeometry(data.size * 1.3, data.size * 2.0, 64);
+        const ring1 = new THREE.Mesh(ringGeo1, new THREE.MeshStandardMaterial({
+          color: 0xd4c090, side: THREE.DoubleSide, transparent: true, opacity: 0.55, roughness: 0.5
+        }));
+        ring1.rotation.x = Math.PI / 2 + 0.05;
+        ring1.userData = { isRing: true, parentKey: data.key };
+        planet.add(ring1);
+        allClickableObjects.push(ring1);
+        
+        const ringGeo2 = new THREE.RingGeometry(data.size * 2.05, data.size * 2.35, 64);
+        const ring2 = new THREE.Mesh(ringGeo2, new THREE.MeshStandardMaterial({
+          color: 0xb8a878, side: THREE.DoubleSide, transparent: true, opacity: 0.4, roughness: 0.5
+        }));
+        ring2.rotation.x = Math.PI / 2 - 0.03;
+        ring2.userData = { isRing: true, parentKey: data.key };
+        planet.add(ring2);
+        allClickableObjects.push(ring2);
+      }
+      
+      const labelDiv = document.createElement('div');
+      labelDiv.textContent = data.name;
+      labelDiv.style.color = 'white';
+      labelDiv.style.fontSize = data.dwarf ? '12px' : '15px';
+      labelDiv.style.fontWeight = 'bold';
+      labelDiv.style.textShadow = '1px 1px 3px black';
+      labelDiv.style.background = 'rgba(0,0,0,0.65)';
+      labelDiv.style.padding = '2px 12px';
+      labelDiv.style.borderRadius = '20px';
+      const label = new CSS2DObject(labelDiv);
+      label.position.set(0, data.size + 0.5, 0);
+      planet.add(label);
+      
+      planets.push(planet);
+    });
+
+    // --- Пояс астероидов ---
+    const asteroidCount = 800;
+    const asteroidGeo = new THREE.SphereGeometry(0.08, 3, 3);
+    const asteroidMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+    
+    const asteroids = [];
+    for (let i = 0; i < asteroidCount; i++) {
+      const asteroid = new THREE.Mesh(asteroidGeo, asteroidMat);
+      const distance = 17 + Math.random() * 7;
+      const angle = Math.random() * Math.PI * 2;
+      const yOffset = (Math.random() - 0.5) * 1.2;
+      
+      asteroid.position.x = distance * Math.cos(angle);
+      asteroid.position.y = yOffset;
+      asteroid.position.z = distance * Math.sin(angle);
+      
+      const scale = 0.5 + Math.random() * 1.5;
+      asteroid.scale.set(scale, scale * (0.5 + Math.random()), scale);
+      asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      
+      asteroid.userData = {
+        distance, speed: 0.008 + Math.random() * 0.01, angle, yOffset,
+        isAsteroid: true
+      };
+      
+      scene.add(asteroid);
+      asteroids.push(asteroid);
+    }
+
+    // --- Пояс Койпера ---
+    const kuiperCount = 1200;
+    const kuiperGeo = new THREE.SphereGeometry(0.06, 3, 3);
+    const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x998877, roughness: 0.9, emissive: 0x111111, emissiveIntensity: 0.3 });
+    
+    const kuiperObjects = [];
+    for (let i = 0; i < kuiperCount; i++) {
+      const obj = new THREE.Mesh(kuiperGeo, kuiperMat);
+      const distance = 58 + Math.random() * 30;
+      const angle = Math.random() * Math.PI * 2;
+      const yOffset = (Math.random() - 0.5) * 5;
+      
+      obj.position.x = distance * Math.cos(angle);
+      obj.position.y = yOffset;
+      obj.position.z = distance * Math.sin(angle);
+      
+      obj.scale.setScalar(0.4 + Math.random() * 1.2);
+      obj.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      
+      obj.userData = {
+        distance, speed: 0.0015 + Math.random() * 0.003, angle, yOffset,
+        isKuiper: true
+      };
+      
+      scene.add(obj);
+      kuiperObjects.push(obj);
+    }
+
+    // --- Навигация ---
+    let currentTarget = 'all';
+    const planetNameDiv = document.getElementById('current-planet');
+    
+    function focusOnPlanet(planetKey) {
+      planetNameDiv.style.display = 'none';
+      
+      if (planetKey === 'all') {
+        if (!flyMode) {
+          controls.target.set(0, 0, 0);
+          camera.position.set(0, 40, 80);
+          controls.update();
+        } else {
+          camera.position.set(0, 40, 80);
+          camera.lookAt(0, 0, 0);
+          const dir = new THREE.Vector3();
+          camera.getWorldDirection(dir);
+          yaw = Math.atan2(dir.x, dir.z);
+          pitch = Math.asin(dir.y);
         }
-
-        function loadGame() {
-            try {
-                const raw = localStorage.getItem('president_theotown_v11');
-                if (!raw) { alert('Нет сохранений!'); return; }
-                const data = JSON.parse(raw);
-                gameState.countryName = data.countryName;
-                gameState.money = data.money;
-                gameState.population = data.population;
-                gameState.happiness = data.happiness;
-                gameState.borderSize = data.borderSize || 500;
-                gameState.buildings = data.buildings || [];
-                gameState.roads = data.roads || [];
-                gameState.rails = data.rails || [];
-                gameState.zones = data.zones || [];
-                gameState.waterBodies = data.waterBodies || [];
-                gameState.zoom = data.zoom || 1;
-                gameState.cameraX = data.cameraX || 0;
-                gameState.cameraY = data.cameraY || 0;
-                gameState.gameHour = data.gameHour || 12;
-                gameState.gameMinute = data.gameMinute || 0;
-                gameState.weather = data.weather || 'sunny';
-                gameState.residentialDemand = data.residentialDemand || 50;
-                gameState.commercialDemand = data.commercialDemand || 30;
-                gameState.industrialDemand = data.industrialDemand || 20;
-                gameState.people = [];
-                gameState.cars = [];
-                gameState.boats = [];
-                gameState.buses = [];
-                gameState.particles = [];
-                gameState.selectedType = null;
-                gameState.buildScale = 1;
-                gameState.buildRotation = 0;
-                gameState.currentTool = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-                gameState.gameTime = 0;
-                gameState.incomeTimer = 0;
-                gameState.zoneTimer = 0;
-                gameState.demandTimer = 0;
-                gameState.dragging = false;
-                gameState.raindrops = [];
-                gameState.snowflakes = [];
-                if (gameState.waterBodies.length === 0) generateWaterBodies();
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('game-screen').classList.add('active');
-                document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
-                initCanvas();
-                buildModalGrid();
-                updateUI();
-                spawnInitialPeople();
-                addLog('💾 Сохранение загружено!');
-                if (gameState.saveInterval) clearInterval(gameState.saveInterval);
-                gameState.saveInterval = setInterval(saveGame, 30000);
-                gameLoop();
-            } catch (error) {
-                alert('Ошибка загрузки!');
-            }
+        return;
+      }
+      
+      const planet = planets.find(p => p.userData.key === planetKey);
+      if (planet) {
+        const pos = planet.position.clone();
+        planetNameDiv.textContent = planet.userData.name;
+        planetNameDiv.style.display = 'block';
+        
+        if (!flyMode) {
+          controls.target.copy(pos);
+          const dist = planet.userData.size * 6 + 3;
+          camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
+          controls.update();
+        } else {
+          const dist = planet.userData.size * 6 + 3;
+          camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
+          camera.lookAt(pos);
+          const dir = new THREE.Vector3();
+          camera.getWorldDirection(dir);
+          yaw = Math.atan2(dir.x, dir.z);
+          pitch = Math.asin(dir.y);
         }
-
-        function initCanvas() {
-            gameState.canvas = document.getElementById('game-canvas');
-            gameState.ctx = gameState.canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-        }
-
-        function resizeCanvas() {
-            if (!gameState.canvas) return;
-            const rect = gameState.canvas.getBoundingClientRect();
-            gameState.canvas.width = rect.width;
-            gameState.canvas.height = rect.height;
-        }
-
-        function startGame() {
-            const inp = document.getElementById('country-name');
-            const name = inp.value.trim();
-            if (!name) { inp.style.borderColor = '#f05555';
-                inp.focus();
-                setTimeout(() => inp.style.borderColor = '#3a3050', 1500); return; }
-            gameState.countryName = name;
-            gameState.buildings = [];
-            gameState.roads = [];
-            gameState.rails = [];
-            gameState.zones = [];
-            gameState.people = [];
-            gameState.cars = [];
-            gameState.boats = [];
-            gameState.buses = [];
-            gameState.particles = [];
-            gameState.money = 50000;
-            gameState.population = 100;
-            gameState.happiness = 75;
-            gameState.borderSize = 500;
-            gameState.selectedType = null;
-            gameState.buildScale = 1;
-            gameState.buildRotation = 0;
-            gameState.currentTool = null;
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            gameState.gameTime = 0;
-            gameState.incomeTimer = 0;
-            gameState.zoneTimer = 0;
-            gameState.demandTimer = 0;
-            gameState.zoom = 1;
-            gameState.gridSize = 48;
-            gameState.dragging = false;
-            gameState.gameHour = 17;
-            gameState.gameMinute = 26;
-            gameState.weather = 'sunny';
-            gameState.weatherTimer = 0;
-            gameState.raindrops = [];
-            gameState.snowflakes = [];
-            gameState.residentialDemand = 50;
-            gameState.commercialDemand = 30;
-            gameState.industrialDemand = 20;
-
-            generateWaterBodies();
-
-            gameState.roads.push({ type: 'road', x: -200, y: -24, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.roads.push({ type: 'road', x: -24, y: -200, w: 48, h: 400, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.roads.push({ type: 'road_curve', x: -24, y: -24, w: 48, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.rails.push({ type: 'rail', x: -200, y: -120, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-
-            document.getElementById('splash').classList.add('hidden');
-            document.getElementById('game-screen').classList.add('active');
-            document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
-            initCanvas();
-            buildModalGrid();
-            updateUI();
-            spawnInitialPeople();
-            addLog('🌟 Добро пожаловать, господин Президент!');
-            addLog('🌊 Сгенерированы случайные водоёмы');
-            addLog('🏘️ Используйте зоны для быстрой застройки');
-            if (gameState.saveInterval) clearInterval(gameState.saveInterval);
-            gameState.saveInterval = setInterval(saveGame, 30000);
-            gameLoop();
-        }
-
-        function spawnInitialPeople() {
-            for (let i = 0; i < 40; i++) {
-                gameState.people.push({
-                    x: (Math.random() - 0.5) * gameState.borderSize,
-                    y: (Math.random() - 0.5) * gameState.borderSize,
-                    vx: (Math.random() - 0.5) * 1.2,
-                    vy: (Math.random() - 0.5) * 1.2,
-                    color: 'hsl(' + Math.floor(Math.random() * 360) + ', 40%, 65%)',
-                    size: 4 + Math.random() * 3,
-                    target: null,
-                    state: 'walking',
-                    stateTimer: Math.random() * 200,
-                    hasCar: false,
-                    carRef: null,
-                    hasBoat: false,
-                    boatRef: null,
-                    homeRef: null,
-                    workRef: null,
-                });
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('money-val').textContent = Math.floor(gameState.money).toLocaleString();
-            document.getElementById('pop-val').textContent = gameState.population;
-            document.getElementById('happy-val').textContent = Math.round(gameState.happiness);
-            document.getElementById('demand-val').textContent = '🏘️' + Math.round(gameState.residentialDemand) + ' 🏪' + Math.round(gameState.commercialDemand) + ' 🏭' + Math.round(gameState.industrialDemand);
-            if (gameState.canvas) {
-                gameState.canvas.classList.toggle('zone', !!gameState.currentTool && gameState.currentTool.startsWith('zone_'));
-                gameState.canvas.classList.toggle('building', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
-                gameState.canvas.classList.toggle('grabbing', gameState.dragging);
-            }
-            document.getElementById('btn-zone-res').classList.toggle('active', gameState.currentTool === 'zone_residential');
-            document.getElementById('btn-zone-com').classList.toggle('active', gameState.currentTool === 'zone_commercial');
-            document.getElementById('btn-zone-ind').classList.toggle('active', gameState.currentTool === 'zone_industrial');
-            document.getElementById('btn-special').classList.toggle('active', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
-            document.getElementById('btn-delete').classList.toggle('active', gameState.deleteMode);
-            document.getElementById('btn-info').classList.toggle('active', gameState.selectMode);
-            document.getElementById('btn-rotate').classList.toggle('active', gameState.buildRotation !== 0);
-            const h = Math.floor(gameState.gameHour);
-            const m = Math.floor(gameState.gameMinute);
-            document.getElementById('time-display').textContent = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
-            const wi = { sunny: '☀️', cloudy: '⛅', rainy: '🌧️', stormy: '⛈️', snowy: '❄️' };
-            document.getElementById('weather-icon').textContent = wi[gameState.weather] || '☀️';
-        }
-
-        function expandBorder() {
-            const cost = gameState.borderExpandCost;
-            if (gameState.money < cost) { addLog('❌ Недостаточно средств!'); return; }
-            gameState.money -= cost;
-            gameState.borderSize += 200;
-            gameState.borderExpandCost = Math.floor(gameState.borderExpandCost * 2);
-            addLog('📏 Граница расширена!');
-            updateUI();
-        }
-
-        function setTool(tool) {
-            if (gameState.currentTool === tool) {
-                gameState.currentTool = null;
-            } else {
-                gameState.currentTool = tool;
-                gameState.selectedType = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-            }
-            updateUI();
-        }
-
-        // ==================== МОДАЛЬНОЕ ОКНО ====================
-        let modalBuilt = false;
-        let currentModalTab = 'roads';
-
-        function buildModalGrid() {
-            const grid = document.getElementById('modal-grid');
-            const tab = currentModalTab;
-            const filteredTypes = {};
-            for (const key in buildingTypes) {
-                if (buildingTypes[key].tab === tab) {
-                    filteredTypes[key] = buildingTypes[key];
-                }
-            }
-            if (!modalBuilt) {
-                grid.innerHTML = '';
-                const allKeys = Object.keys(filteredTypes);
-                for (let i = 0; i < allKeys.length; i++) {
-                    const key = allKeys[i];
-                    const info = filteredTypes[key];
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
-                        '<span class="modal-item-name">' + info.name + '</span>' +
-                        '<span class="modal-item-cost"></span>' +
-                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
-                    div.addEventListener('click', function() { selectModalItem(key); });
-                    grid.appendChild(div);
-                }
-                modalBuilt = true;
-            } else {
-                grid.innerHTML = '';
-                const allKeys = Object.keys(filteredTypes);
-                for (let i = 0; i < allKeys.length; i++) {
-                    const key = allKeys[i];
-                    const info = filteredTypes[key];
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
-                        '<span class="modal-item-name">' + info.name + '</span>' +
-                        '<span class="modal-item-cost"></span>' +
-                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
-                    div.addEventListener('click', function() { selectModalItem(key); });
-                    grid.appendChild(div);
-                }
-            }
-            const scale = gameState.buildScale || 1;
-            const allItems = grid.querySelectorAll('.modal-item');
-            for (let i = 0; i < allItems.length; i++) {
-                const div = allItems[i];
-                const key = div.dataset.type;
-                const info = filteredTypes[key];
-                const cost = getBuildCost(key, scale);
-                const size = getBuildSize(key, scale);
-                div.querySelector('.modal-item-cost').textContent = '💰' + cost.toLocaleString();
-                div.querySelector('.modal-item-size').textContent = size.w + 'x' + size.h;
-                if (gameState.selectedType === key) {
-                    div.classList.add('selected');
-                } else {
-                    div.classList.remove('selected');
-                }
-            }
-            const sizeButtons = document.querySelectorAll('#size-selector .size-btn');
-            for (let i = 0; i < sizeButtons.length; i++) {
-                const btn = sizeButtons[i];
-                if (parseFloat(btn.dataset.scale) === scale) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            }
-            document.getElementById('rot-display').textContent = gameState.buildRotation + '°';
-        }
-
-        function selectModalItem(key) {
-            gameState.selectedType = key;
-            gameState.currentTool = null;
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            const info = buildingTypes[key];
-            const size = getBuildSize(key, gameState.buildScale || 1);
-            addLog('🔨 Выбрано: ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
-            updateUI();
-            buildModalGrid();
-            closeBuildModal();
-        }
-
-        function openBuildModal() {
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            buildModalGrid();
-            document.getElementById('build-modal').classList.add('open');
-            updateUI();
-        }
-
-        function closeBuildModal() {
-            document.getElementById('build-modal').classList.remove('open');
-        }
-
-        function getBuildCost(type, scale) {
-            const info = buildingTypes[type];
-            if (!info) return 0;
-            return Math.floor(info.cost * scale * scale);
-        }
-
-        function getBuildSize(type, scale) {
-            const info = buildingTypes[type];
-            if (!info) return { w: 48, h: 48 };
-            let w = Math.round(info.width * scale);
-            let h = Math.round(info.height * scale);
-            if (gameState.buildRotation === 90 || gameState.buildRotation === 270) {
-                const temp = w;
-                w = h;
-                h = temp;
-            }
-            return { w: w, h: h };
-        }
-
-        function rotateBuilding() {
-            gameState.buildRotation = (gameState.buildRotation + 90) % 360;
-            addLog('🔄 Поворот: ' + gameState.buildRotation + '°');
-            updateUI();
-            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
-        }
-
-        function toggleDeleteMode() {
-            gameState.deleteMode = !gameState.deleteMode;
-            gameState.selectMode = false;
-            gameState.selectedType = null;
-            gameState.currentTool = null;
-            if (gameState.deleteMode) addLog('🗑️ Режим сноса (возврат 50%)');
-            updateUI();
-        }
-
-        function toggleSelectMode() {
-            gameState.selectMode = !gameState.selectMode;
-            gameState.deleteMode = false;
-            gameState.selectedType = null;
-            gameState.currentTool = null;
-            if (gameState.selectMode) addLog('🔍 Режим информации');
-            updateUI();
-        }
-
-        // ==================== СТРОИТЕЛЬСТВО ====================
-        function placeZone(worldX, worldY) {
-            if (!gameState.currentTool || !gameState.currentTool.startsWith('zone_')) return false;
-            const zoneType = gameState.currentTool.replace('zone_', '');
-            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
-                addLog('⚠️ За границей страны!');
-                return false;
-            }
-            if (isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Нельзя зонировать воду!');
-                return false;
-            }
-            const snap = gameState.gridSize;
-            const sx = Math.round(worldX / snap) * snap;
-            const sy = Math.round(worldY / snap) * snap;
-            const newZone = { type: zoneType, x: sx, y: sy, w: snap, h: snap, placedAt: gameState.gameTime };
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
-            let hasOverlap = false;
-            for (let i = 0; i < allObjects.length; i++) {
-                if (rectanglesOverlap(newZone, allObjects[i], 2)) {
-                    hasOverlap = true;
-                    break;
-                }
-            }
-            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
-            gameState.zones.push(newZone);
-            addLog('🏘️ Зона размечена: ' + (zoneType === 'residential' ? 'Жилая' : zoneType === 'commercial' ? 'Коммерческая' : 'Индустриальная'));
-            updateUI();
-            return true;
-        }
-
-        function buildAt(worldX, worldY) {
-            if (!gameState.selectedType || gameState.deleteMode || gameState.selectMode || gameState.currentTool) return false;
-            const type = gameState.selectedType;
-            const info = buildingTypes[type];
-            const scale = gameState.buildScale || 1;
-            const cost = getBuildCost(type, scale);
-            const size = getBuildSize(type, scale);
-            if (gameState.money < cost) { addLog('❌ Недостаточно средств! 💰' + cost.toLocaleString());
-                shakeEl('money-val'); return false; }
-            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
-                addLog('⚠️ За границей!');
-                return false;
-            }
-            if (info.needsWater && !isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Судостроительный завод только на воде!');
-                return false;
-            }
-            if (!info.needsWater && !info.isRoad && !info.isRail && !info.isRoadCurve && isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Нельзя строить на воде!');
-                return false;
-            }
-            const newBuilding = {
-                type: type,
-                x: worldX - size.w / 2,
-                y: worldY - size.h / 2,
-                w: size.w,
-                h: size.h,
-                scale: scale,
-                rotation: gameState.buildRotation,
-                placedAt: gameState.gameTime,
-            };
-            const allCollidables = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-            let hasOverlap = false;
-            for (let i = 0; i < allCollidables.length; i++) {
-                if (rectanglesOverlap(newBuilding, allCollidables[i], 2)) {
-                    hasOverlap = true;
-                    break;
-                }
-            }
-            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
-            gameState.money -= cost;
-            if (info.isRoad || info.isRoadCurve) {
-                gameState.roads.push(newBuilding);
-            } else if (info.isRail) {
-                gameState.rails.push(newBuilding);
-            } else {
-                gameState.buildings.push(newBuilding);
-                if (info.happinessBonus) {
-                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness + Math.floor(info.happinessBonus * scale)));
-                }
-                if (info.tourismBonus) {
-                    gameState.population += Math.floor(info.tourismBonus * scale);
-                }
-            }
-            updateUI();
-            addLog('✅ ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
-            spawnParticles(worldX, worldY, '#f0d060');
-            gameState.buildRotation = 0;
-            return true;
-        }
-
-        function deleteAt(worldX, worldY) {
-            if (!gameState.deleteMode) return false;
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
-            let foundObject = null;
-            for (let i = 0; i < allObjects.length; i++) {
-                const obj = allObjects[i];
-                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
-                    foundObject = obj;
-                    break;
-                }
-            }
-            if (!foundObject) return false;
-            if (foundObject.type && (foundObject.type === 'residential' || foundObject.type === 'commercial' || foundObject.type === 'industrial')) {
-                gameState.zones = gameState.zones.filter(function(z) { return z !== foundObject; });
-                updateUI();
-                addLog('🗑️ Зона убрана');
-                return true;
-            }
-            const info = buildingTypes[foundObject.type];
-            const scale = foundObject.scale || 1;
-            const refund = Math.floor(getBuildCost(foundObject.type, scale) * 0.5);
-            gameState.money += refund;
-            if (info.isRoad || info.isRoadCurve) {
-                gameState.roads = gameState.roads.filter(function(b) { return b !== foundObject; });
-            } else if (info.isRail) {
-                gameState.rails = gameState.rails.filter(function(b) { return b !== foundObject; });
-            } else {
-                gameState.buildings = gameState.buildings.filter(function(b) { return b !== foundObject; });
-                if (info.happinessBonus) {
-                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness - Math.floor((info.happinessBonus || 0) * scale)));
-                }
-            }
-            gameState.cars = gameState.cars.filter(function(c) { return c.homeRef !== foundObject; });
-            gameState.boats = gameState.boats.filter(function(b) { return b.homeRef !== foundObject; });
-            gameState.buses = gameState.buses.filter(function(b) { return b.homeRef !== foundObject; });
-            updateUI();
-            addLog('🗑️ Снесено (+💰' + refund.toLocaleString() + ')');
-            spawnParticles(foundObject.x + foundObject.w / 2, foundObject.y + foundObject.h / 2, '#f08888');
-            return true;
-        }
-
-        function rectanglesOverlap(a, b, margin) {
-            if (a.x + a.w - margin < b.x) return false;
-            if (a.x > b.x + b.w - margin) return false;
-            if (a.y + a.h - margin < b.y) return false;
-            if (a.y > b.y + b.h - margin) return false;
-            return true;
-        }
-
-        // ==================== КООРДИНАТЫ ====================
-        function worldToScreen(worldX, worldY) {
-            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
-            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
-            return { x: (worldX - cx) * gameState.zoom, y: (worldY - cy) * gameState.zoom };
-        }
-
-        function screenToWorld(screenX, screenY) {
-            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
-            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
-            return { x: screenX / gameState.zoom + cx, y: screenY / gameState.zoom + cy };
-        }
-
-        function getCanvasCoords(event) {
-            const rect = gameState.canvas.getBoundingClientRect();
-            return { sx: event.clientX - rect.left, sy: event.clientY - rect.top };
-        }
-
-        function getWorldFromEvent(event) {
-            const coords = getCanvasCoords(event);
-            const world = screenToWorld(coords.sx, coords.sy);
-            return { sx: coords.sx, sy: coords.sy, wx: world.x, wy: world.y };
-        }
-
-        function findBuildingAt(worldX, worldY) {
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-            for (let i = allObjects.length - 1; i >= 0; i--) {
-                const obj = allObjects[i];
-                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
-                    return obj;
-                }
-            }
-            return null;
-        }
-
-        // ==================== ОТРИСОВКА ====================
-        function getDayNightAlpha() {
-            const hour = gameState.gameHour + gameState.gameMinute / 60;
-            if (hour >= 6 && hour < 8) return 0.3 - (hour - 6) * 0.15;
-            if (hour >= 8 && hour < 17) return 0;
-            if (hour >= 17 && hour < 19) return (hour - 17) * 0.2;
-            if (hour >= 19 && hour < 21) return 0.4 + (hour - 19) * 0.2;
-            if (hour >= 21 || hour < 5) return 0.7;
-            if (hour >= 5 && hour < 6) return 0.7 - (hour - 5) * 0.4;
-            return 0;
-        }
-
-        function drawGround(ctx) {
-            const w = gameState.canvas.width;
-            const h = gameState.canvas.height;
-            const alpha = getDayNightAlpha();
-            const grad = ctx.createRadialGradient(w / 2, h / 2, 100, w / 2, h / 2, Math.max(w, h));
-            const r = Math.floor(61 * (1 - alpha));
-            const g = Math.floor(90 * (1 - alpha));
-            const b = Math.floor(46 * (1 - alpha));
-            grad.addColorStop(0, 'rgb(' + r + ',' + g + ',' + b + ')');
-            grad.addColorStop(0.6, 'rgb(' + Math.floor(r * 0.7) + ',' + Math.floor(g * 0.7) + ',' + Math.floor(b * 0.7) + ')');
-            grad.addColorStop(1, 'rgb(' + Math.floor(r * 0.4) + ',' + Math.floor(g * 0.4) + ',' + Math.floor(b * 0.4) + ')');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
-            const gs = gameState.gridSize;
-            const cx = gameState.cameraX - w / 2 / gameState.zoom;
-            const cy = gameState.cameraY - h / 2 / gameState.zoom;
-            const sx = -(((cx % gs) + gs) % gs);
-            const sy = -(((cy % gs) + gs) % gs);
-            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
-                for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
-                    const worldGX = Math.floor((x + cx) / gs);
-                    const worldGY = Math.floor((y + cy) / gs);
-                    const seed = Math.sin(worldGX * 1000 + worldGY) * 0.06;
-                    ctx.fillStyle = 'rgba(255,255,255,' + (0.02 + seed) + ')';
-                    ctx.fillRect(x * gameState.zoom, y * gameState.zoom, gs * gameState.zoom, gs * gameState.zoom);
-                    const flowerSeed = Math.sin(worldGX * 500 + worldGY * 300) * 0.5 + 0.5;
-                    if (flowerSeed > 0.85 && !isPointInWater(x + cx + gs / 2, y + cy + gs / 2)) {
-                        ctx.fillStyle = 'rgba(255,255,100,0.3)';
-                        ctx.beginPath();
-                        ctx.arc(x * gameState.zoom + gs * gameState.zoom * 0.7, y * gameState.zoom + gs * gameState.zoom * 0.3, 2 * gameState.zoom, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            }
-            if (alpha > 0) {
-                ctx.fillStyle = 'rgba(0,0,20,' + alpha + ')';
-                ctx.fillRect(0, 0, w, h);
-            }
-            if (alpha > 0.5) {
-                for (let i = 0; i < 50; i++) {
-                    const starX = ((i * 7919 + 12345) % w);
-                    const starY = ((i * 6271 + 12345) % h);
-                    const twinkle = Math.sin(gameState.gameTime * 0.003 + i) * 0.5 + 0.5;
-                    ctx.fillStyle = 'rgba(255,255,255,' + (twinkle * (alpha - 0.5) * 1.5) + ')';
-                    ctx.beginPath();
-                    ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawWater(ctx) {
-            for (let w = 0; w < gameState.waterBodies.length; w++) {
-                const water = gameState.waterBodies[w];
-                const points = water.points;
-                const alpha = getDayNightAlpha();
-                if (points.length < 3) continue;
-                ctx.beginPath();
-                const firstPoint = worldToScreen(points[0].x, points[0].y);
-                ctx.moveTo(firstPoint.x, firstPoint.y);
-                for (let i = 1; i < points.length; i++) {
-                    const sp = worldToScreen(points[i].x, points[i].y);
-                    ctx.lineTo(sp.x, sp.y);
-                }
-                ctx.closePath();
-                let minX = Infinity,
-                    minY = Infinity,
-                    maxX = -Infinity,
-                    maxY = -Infinity;
-                for (let i = 0; i < points.length; i++) {
-                    if (points[i].x < minX) minX = points[i].x;
-                    if (points[i].y < minY) minY = points[i].y;
-                    if (points[i].x > maxX) maxX = points[i].x;
-                    if (points[i].y > maxY) maxY = points[i].y;
-                }
-                const centerScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
-                const waterGrad = ctx.createRadialGradient(centerScreen.x, centerScreen.y, 0, centerScreen.x, centerScreen.y, water.baseRadius * gameState.zoom);
-                waterGrad.addColorStop(0, 'rgba(30,100,180,' + (0.8 - alpha * 0.3) + ')');
-                waterGrad.addColorStop(0.5, 'rgba(20,80,160,' + (0.75 - alpha * 0.3) + ')');
-                waterGrad.addColorStop(1, 'rgba(10,50,130,' + (0.8 - alpha * 0.3) + ')');
-                ctx.fillStyle = waterGrad;
-                ctx.fill();
-                const waveTime = gameState.gameTime * 0.02;
-                for (let i = 0; i < points.length; i++) {
-                    const p1 = points[i];
-                    const p2 = points[(i + 1) % points.length];
-                    const midX = (p1.x + p2.x) / 2;
-                    const midY = (p1.y + p2.y) / 2;
-                    const screenMid = worldToScreen(midX, midY);
-                    const waveOffset = Math.sin(waveTime + i * 0.5) * 5 * gameState.zoom;
-                    ctx.fillStyle = 'rgba(100,180,240,0.3)';
-                    ctx.beginPath();
-                    ctx.arc(screenMid.x + waveOffset, screenMid.y, 4 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.strokeStyle = 'rgba(150,210,255,0.5)';
-                ctx.lineWidth = 2 * gameState.zoom;
-                ctx.stroke();
-                if (water.name && water.baseRadius > 50) {
-                    const nameScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
-                    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                    ctx.font = Math.min(16, 12 * gameState.zoom) + 'px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(water.name, nameScreen.x, nameScreen.y);
-                }
-            }
-        }
-
-        function drawBorder(ctx) {
-            const bs = gameState.borderSize;
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = Math.max(2, 3 * gameState.zoom);
-            ctx.setLineDash([10 * gameState.zoom, 6 * gameState.zoom]);
-            ctx.beginPath();
-            const segments = 32;
-            for (let i = 0; i <= segments; i++) {
-                const angle = (i / segments) * Math.PI * 2;
-                const wobble = Math.sin(angle * 5 + gameState.gameTime * 0.001) * 15 + Math.cos(angle * 3) * 10;
-                const r = bs + wobble;
-                const wx = Math.cos(angle) * r;
-                const wy = Math.sin(angle) * r;
-                const p = worldToScreen(wx, wy);
-                if (i === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            ctx.setLineDash([]);
-            const flags = ['🚩', '🚩', '🚩', '🚩'];
-            for (let i = 0; i < 4; i++) {
-                const angle = i * Math.PI / 2 - Math.PI / 4;
-                const p = worldToScreen(Math.cos(angle) * bs, Math.sin(angle) * bs);
-                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(flags[i], p.x, p.y - 10 * gameState.zoom);
-            }
-            const pTable = worldToScreen(bs + 30, 0);
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(pTable.x - 40 * gameState.zoom, pTable.y - 20 * gameState.zoom, 80 * gameState.zoom, 35 * gameState.zoom);
-            ctx.fillStyle = '#f0d060';
-            ctx.font = Math.floor(12 * gameState.zoom) + 'px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('📏 Расширить', pTable.x, pTable.y - 5 * gameState.zoom);
-            ctx.fillText('💰' + gameState.borderExpandCost.toLocaleString(), pTable.x, pTable.y + 15 * gameState.zoom);
-        }
-
-        function drawGrid(ctx) {
-            const w = gameState.canvas.width;
-            const h = gameState.canvas.height;
-            const gs = gameState.gridSize;
-            const cx = gameState.cameraX - w / 2 / gameState.zoom;
-            const cy = gameState.cameraY - h / 2 / gameState.zoom;
-            const sx = -(((cx % gs) + gs) % gs);
-            const sy = -(((cy % gs) + gs) % gs);
-            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
-                ctx.moveTo(x * gameState.zoom, 0);
-                ctx.lineTo(x * gameState.zoom, h);
-            }
-            for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
-                ctx.moveTo(0, y * gameState.zoom);
-                ctx.lineTo(w, y * gameState.zoom);
-            }
-            ctx.stroke();
-        }
-
-        function drawZones(ctx) {
-            for (let i = 0; i < gameState.zones.length; i++) {
-                const zone = gameState.zones[i];
-                const p = worldToScreen(zone.x, zone.y);
-                const w = zone.w * gameState.zoom;
-                const h = zone.h * gameState.zoom;
-                let color = 'rgba(76,175,80,0.3)';
-                if (zone.type === 'commercial') color = 'rgba(33,150,243,0.3)';
-                if (zone.type === 'industrial') color = 'rgba(255,152,0,0.3)';
-                ctx.fillStyle = color;
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.strokeStyle = color.replace('0.3', '0.6');
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
-                ctx.strokeRect(p.x, p.y, w, h);
-                ctx.setLineDash([]);
-            }
-        }
-
-        function drawRoad(ctx, road, info) {
-            const p = worldToScreen(road.x, road.y);
-            const w = road.w * gameState.zoom;
-            const h = road.h * gameState.zoom;
-            ctx.save();
-            const cx = p.x + w / 2;
-            const cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (road.rotation) ctx.rotate(road.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
-            if (info.isRoadCurve) {
-                ctx.fillStyle = '#444444';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.strokeStyle = '#ffff88';
-                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
-                ctx.setLineDash([8 * gameState.zoom, 10 * gameState.zoom]);
-                ctx.beginPath();
-                ctx.arc(p.x + w, p.y, w * 0.7, 0, Math.PI / 2);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                const bw = Math.max(2, 3 * gameState.zoom);
-                ctx.fillStyle = '#666666';
-                ctx.fillRect(p.x, p.y, w, bw);
-                ctx.fillRect(p.x, p.y + h - bw, w, bw);
-                ctx.fillRect(p.x, p.y, bw, h);
-                ctx.fillRect(p.x + w - bw, p.y, bw, h);
-            } else if (info.isRoad) {
-                ctx.fillStyle = '#444444';
-                ctx.fillRect(p.x, p.y, w, h);
-                const bw = Math.max(2, 3 * gameState.zoom);
-                ctx.fillStyle = '#666666';
-                ctx.fillRect(p.x, p.y, w, bw);
-                ctx.fillRect(p.x, p.y + h - bw, w, bw);
-                ctx.fillRect(p.x, p.y, bw, h);
-                ctx.fillRect(p.x + w - bw, p.y, bw, h);
-                ctx.strokeStyle = '#ffff88';
-                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
-                ctx.setLineDash([10 * gameState.zoom, 14 * gameState.zoom]);
-                ctx.beginPath();
-                ctx.moveTo(p.x + w / 2, p.y);
-                ctx.lineTo(p.x + w / 2, p.y + h);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            } else {
-                ctx.fillStyle = '#8B7355';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#5c4030';
-                const sh = Math.max(3, 4 * gameState.zoom);
-                const sg = Math.max(5, 8 * gameState.zoom);
-                for (let i = 0; i < h; i += sg) {
-                    ctx.fillRect(p.x + 2 * gameState.zoom, p.y + i, w - 4 * gameState.zoom, sh);
-                }
-                ctx.strokeStyle = '#cccccc';
-                ctx.lineWidth = Math.max(1.5, 2.5 * gameState.zoom);
-                ctx.beginPath();
-                const rx = p.x + Math.max(6, 8 * gameState.zoom);
-                const rx2 = p.x + w - Math.max(6, 8 * gameState.zoom);
-                ctx.moveTo(rx, p.y);
-                ctx.lineTo(rx, p.y + h);
-                ctx.moveTo(rx2, p.y);
-                ctx.lineTo(rx2, p.y + h);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawBuildingShape(ctx, building, info) {
-            const p = worldToScreen(building.x, building.y);
-            const w = building.w * gameState.zoom;
-            const h = building.h * gameState.zoom;
-            const type = building.type;
-            ctx.save();
-            const cx = p.x + w / 2;
-            const cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (building.rotation) ctx.rotate(building.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w, h);
-            if (type === 'police_station') {
-                ctx.fillStyle = '#3a5a8a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#1a3a6a';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#1a3a6a';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 6 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'fire_station') {
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
-            } else if (type === 'hospital') {
-                ctx.fillStyle = '#f8f8f8';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + w / 2 - 8 * gameState.zoom, p.y, 16 * gameState.zoom, 12 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y + 2 * gameState.zoom, 4 * gameState.zoom, 8 * gameState.zoom);
-                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 5 * gameState.zoom, 12 * gameState.zoom, 3 * gameState.zoom);
-            } else if (type === 'school') {
-                ctx.fillStyle = '#d4a574';
-                ctx.fillRect(p.x, p.y + 4 * gameState.zoom, w, h - 4 * gameState.zoom);
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x - 2 * gameState.zoom, p.y, w + 4 * gameState.zoom, 10 * gameState.zoom);
-                ctx.fillStyle = '#87ceeb';
-                for (let i = 0; i < 4; i++) {
-                    ctx.fillRect(p.x + 5 * gameState.zoom + i * 11 * gameState.zoom, p.y + 16 * gameState.zoom, 7 * gameState.zoom, 8 * gameState.zoom);
-                }
-            } else if (type === 'park') {
-                ctx.fillStyle = '#5a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                const trees = [
-                    [0.2, 0.25],
-                    [0.5, 0.2],
-                    [0.8, 0.3],
-                    [0.3, 0.6],
-                    [0.7, 0.65],
-                    [0.5, 0.75]
-                ];
-                for (let i = 0; i < trees.length; i++) {
-                    const tx = p.x + trees[i][0] * w;
-                    const ty = p.y + trees[i][1] * h;
-                    ctx.fillStyle = '#3d2b1f';
-                    ctx.fillRect(tx - 1.5 * gameState.zoom, ty, 3 * gameState.zoom, 10 * gameState.zoom);
-                    ctx.fillStyle = '#2d6e2d';
-                    ctx.beginPath();
-                    ctx.arc(tx, ty - 2 * gameState.zoom, 7 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#3d8e3d';
-                    ctx.beginPath();
-                    ctx.arc(tx, ty - 5 * gameState.zoom, 6 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.fillStyle = '#4a90c8';
-                ctx.beginPath();
-                ctx.ellipse(p.x + w * 0.5, p.y + h * 0.45, 12 * gameState.zoom, 7 * gameState.zoom, 0, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'playground') {
-                ctx.fillStyle = '#e8d5b7';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ff9800';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 12 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
-                ctx.fillStyle = '#4CAF50';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 3, 8 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'fountain') {
-                ctx.fillStyle = '#b0b0b0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4a90c8';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#87ceeb';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 5 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'statue_of_liberty') {
-                ctx.fillStyle = '#4a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#7ec8a0';
-                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 8 * gameState.zoom, 12 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + 4 * gameState.zoom, 8 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'eiffel_tower') {
-                ctx.fillStyle = '#4a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#888888';
-                ctx.beginPath();
-                ctx.moveTo(p.x + w / 2, p.y);
-                ctx.lineTo(p.x + 4 * gameState.zoom, p.y + h);
-                ctx.lineTo(p.x + w - 4 * gameState.zoom, p.y + h);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = '#aaaaaa';
-                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y, 4 * gameState.zoom, h * 0.6);
-            } else if (type === 'kremlin') {
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x, p.y + 10 * gameState.zoom, w, h - 10 * gameState.zoom);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y, w - 8 * gameState.zoom, 18 * gameState.zoom);
-                for (let i = 0; i < 3; i++) {
-                    ctx.fillStyle = '#f0d060';
-                    ctx.beginPath();
-                    ctx.arc(p.x + w * (0.25 + i * 0.25), p.y, 6 * gameState.zoom, Math.PI, 0);
-                    ctx.fill();
-                }
-            } else if (type === 'stadium') {
-                ctx.fillStyle = '#d0d0d0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#3a8a3a';
-                ctx.beginPath();
-                ctx.ellipse(p.x + w / 2, p.y + h / 2, w / 2 - 4 * gameState.zoom, h / 2 - 4 * gameState.zoom, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } else if (type === 'bus_stop') {
-                ctx.fillStyle = '#888888';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4a90c8';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w - 4 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 6 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
-            } else if (type === 'bus_depot') {
-                ctx.fillStyle = '#708090';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4682B4';
-                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
-            } else if (type === 'carshop') {
-                ctx.fillStyle = '#e0e0e0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ff4444';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 6 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 10 * gameState.zoom, w - 8 * gameState.zoom, h - 22 * gameState.zoom);
-            } else if (type === 'shipyard') {
-                ctx.fillStyle = '#708090';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4682B4';
-                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
-                ctx.fillStyle = '#333333';
-                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('🚢', p.x + w * 0.5, p.y + h * 0.55);
-            }
-            ctx.restore();
-        }
-
-        function drawCars(ctx) {
-            for (let i = 0; i < gameState.cars.length; i++) {
-                const car = gameState.cars[i];
-                const p = worldToScreen(car.x, car.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 7 * gameState.zoom;
-                ctx.fillStyle = car.color;
-                ctx.fillRect(p.x - sz, p.y - sz / 2, sz * 2, sz);
-                ctx.fillStyle = '#333333';
-                ctx.fillRect(p.x - sz + 1.5 * gameState.zoom, p.y - sz / 2 - 1.5 * gameState.zoom, sz * 0.5, sz + 3 * gameState.zoom);
-                ctx.fillStyle = '#111111';
-                const wheels = [
-                    [-sz * 0.6, -sz / 2],
-                    [sz * 0.6, -sz / 2],
-                    [-sz * 0.6, sz / 2],
-                    [sz * 0.6, sz / 2]
-                ];
-                for (let w = 0; w < wheels.length; w++) {
-                    ctx.beginPath();
-                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 2.5 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.fillStyle = '#ffff88';
-                ctx.beginPath();
-                ctx.arc(p.x + sz, p.y, 1.5 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function drawBoats(ctx) {
-            for (let i = 0; i < gameState.boats.length; i++) {
-                const boat = gameState.boats[i];
-                const p = worldToScreen(boat.x, boat.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 8 * gameState.zoom;
-                ctx.fillStyle = boat.color;
-                ctx.beginPath();
-                ctx.ellipse(p.x, p.y, sz, sz * 0.4, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
-                ctx.strokeStyle = '#333333';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
-            }
-        }
-
-        function drawBuses(ctx) {
-            for (let i = 0; i < gameState.buses.length; i++) {
-                const bus = gameState.buses[i];
-                const p = worldToScreen(bus.x, bus.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 10 * gameState.zoom;
-                ctx.fillStyle = bus.color;
-                ctx.fillRect(p.x - sz * 1.5, p.y - sz / 2, sz * 3, sz);
-                ctx.fillStyle = '#87ceeb';
-                for (let j = 0; j < 4; j++) {
-                    ctx.fillRect(p.x - sz * 1.2 + j * sz * 0.7, p.y - sz / 2 + 2 * gameState.zoom, sz * 0.5, sz - 4 * gameState.zoom);
-                }
-                ctx.fillStyle = '#111111';
-                const wheels = [
-                    [-sz * 1.2, -sz / 2],
-                    [sz * 1.2, -sz / 2],
-                    [-sz * 1.2, sz / 2],
-                    [sz * 1.2, sz / 2]
-                ];
-                for (let w = 0; w < wheels.length; w++) {
-                    ctx.beginPath();
-                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 3 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawPeople(ctx) {
-            for (let i = 0; i < gameState.people.length; i++) {
-                const person = gameState.people[i];
-                if (person.hasCar && person.carRef) continue;
-                if (person.hasBoat && person.boatRef) continue;
-                const wp = worldToScreen(person.x, person.y);
-                if (wp.x < -20 || wp.x > gameState.canvas.width + 20 || wp.y < -20 || wp.y > gameState.canvas.height + 20) continue;
-                const sz = person.size * gameState.zoom;
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(wp.x, wp.y + sz * 0.8, sz * 0.8, sz * 0.3, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = person.color;
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y - sz * 0.5, sz * 0.6, 0, Math.PI * 2);
-                ctx.fill();
-                const hueMatch = person.color.match(/\d+/);
-                const baseHue = hueMatch ? parseInt(hueMatch[0]) : 0;
-                ctx.fillStyle = 'hsl(' + ((baseHue + 30) % 360) + ', 50%, 55%)';
-                ctx.fillRect(wp.x - sz * 0.4, wp.y - sz * 0.2, sz * 0.8, sz * 0.9);
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#000000';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.15, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.25, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function drawWeather(ctx) {
-            const alpha = getDayNightAlpha();
-            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
-                for (let i = 0; i < gameState.raindrops.length; i++) {
-                    const drop = gameState.raindrops[i];
-                    const p = worldToScreen(drop.x, drop.y);
-                    ctx.strokeStyle = 'rgba(100,150,255,' + (0.6 - alpha * 0.3) + ')';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p.x - drop.vx * 2, p.y + 8 * gameState.zoom);
-                    ctx.stroke();
-                }
-            }
-            if (gameState.weather === 'snowy') {
-                for (let i = 0; i < gameState.snowflakes.length; i++) {
-                    const flake = gameState.snowflakes[i];
-                    const p = worldToScreen(flake.x, flake.y);
-                    ctx.fillStyle = 'rgba(255,255,255,' + (0.8 - alpha * 0.2) + ')';
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, flake.size * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawParticles(ctx) {
-            gameState.particles = gameState.particles.filter(function(p) { return p.life > 0; });
-            for (let i = 0; i < gameState.particles.length; i++) {
-                const particle = gameState.particles[i];
-                const wp = worldToScreen(particle.x, particle.y);
-                ctx.fillStyle = 'rgba(' + particle.r + ',' + particle.g + ',' + particle.b + ',' + particle.life + ')';
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y, particle.size * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // ==================== ИГРОВОЙ ЦИКЛ ====================
-        function gameLoop(timestamp) {
-            gameState.gameTime = timestamp;
-            const ctx = gameState.ctx;
-            const canvas = gameState.canvas;
-            if (!canvas || !ctx) { requestAnimationFrame(gameLoop); return; }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            gameState.gameMinute += 0.05;
-            if (gameState.gameMinute >= 60) { gameState.gameMinute = 0;
-                gameState.gameHour++; if (gameState.gameHour >= 24) gameState.gameHour = 0; }
-            gameState.weatherTimer++;
-            if (gameState.weatherTimer >= gameState.weatherDuration) {
-                gameState.weatherTimer = 0;
-                gameState.weatherDuration = 500 + Math.random() * 1500;
-                const weathers = ['sunny', 'sunny', 'cloudy', 'cloudy', 'rainy', 'rainy', 'stormy', 'snowy'];
-                gameState.weather = weathers[Math.floor(Math.random() * weathers.length)];
-            }
-            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
-                if (gameState.raindrops.length < 60) gameState.raindrops.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: 2, vy: 8 });
-                for (let i = 0; i < gameState.raindrops.length; i++) {
-                    const drop = gameState.raindrops[i];
-                    drop.x += drop.vx;
-                    drop.y += drop.vy; if (drop.y > gameState.borderSize) drop.y = -gameState.borderSize;
-                }
-            } else gameState.raindrops = [];
-            if (gameState.weather === 'snowy') {
-                if (gameState.snowflakes.length < 40) gameState.snowflakes.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: (Math.random() - 0.5) * 0.5, vy: 1 + Math.random() * 2, size: 1 + Math.random() * 3 });
-                for (let i = 0; i < gameState.snowflakes.length; i++) {
-                    const flake = gameState.snowflakes[i];
-                    flake.x += flake.vx;
-                    flake.y += flake.vy; if (flake.y > gameState.borderSize) flake.y = -gameState.borderSize;
-                }
-            } else gameState.snowflakes = [];
-
-            drawGround(ctx);
-            drawWater(ctx);
-            drawGrid(ctx);
-            drawZones(ctx);
-            drawBorder(ctx);
-            for (let i = 0; i < gameState.roads.length; i++) {
-                const road = gameState.roads[i];
-                const info = buildingTypes[road.type] || buildingTypes.road;
-                drawRoad(ctx, road, info);
-            }
-            for (let i = 0; i < gameState.rails.length; i++) {
-                const rail = gameState.rails[i];
-                drawRoad(ctx, rail, buildingTypes.rail);
-            }
-            for (let i = 0; i < gameState.buildings.length; i++) {
-                const building = gameState.buildings[i];
-                const info = buildingTypes[building.type];
-                if (info) drawBuildingShape(ctx, building, info);
-            }
-            updateNPCs();
-            drawPeople(ctx);
-            drawCars(ctx);
-            drawBoats(ctx);
-            drawBuses(ctx);
-            drawWeather(ctx);
-            drawParticles(ctx);
-
-            if ((gameState.selectedType || gameState.currentTool) && !gameState.dragging && !gameState.deleteMode && !gameState.selectMode) {
-                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) {
-                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
-                    const snap = gameState.gridSize;
-                    const sx = Math.round(worldPos.x / snap) * snap;
-                    const sy = Math.round(worldPos.y / snap) * snap;
-                    const pp = worldToScreen(sx, sy);
-                    const gs = gameState.gridSize * gameState.zoom;
-                    let color = 'rgba(76,175,80,0.3)';
-                    if (gameState.currentTool === 'zone_commercial') color = 'rgba(33,150,243,0.3)';
-                    if (gameState.currentTool === 'zone_industrial') color = 'rgba(255,152,0,0.3)';
-                    ctx.fillStyle = color;
-                    ctx.fillRect(pp.x, pp.y, gs, gs);
-                    ctx.strokeStyle = color.replace('0.3', '0.7');
-                    ctx.lineWidth = 2 * gameState.zoom;
-                    ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
-                    ctx.strokeRect(pp.x, pp.y, gs, gs);
-                    ctx.setLineDash([]);
-                } else if (gameState.selectedType) {
-                    const info = buildingTypes[gameState.selectedType];
-                    const size = getBuildSize(gameState.selectedType, gameState.buildScale || 1);
-                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
-                    const buildX = worldPos.x - size.w / 2;
-                    const buildY = worldPos.y - size.h / 2;
-                    const pp = worldToScreen(buildX, buildY);
-                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                    ctx.fillRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                    ctx.setLineDash([5 * gameState.zoom, 5 * gameState.zoom]);
-                    ctx.lineWidth = 2 * gameState.zoom;
-                    ctx.strokeRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
-                    ctx.setLineDash([]);
-                    ctx.save();
-                    const ghostCX = pp.x + size.w * gameState.zoom / 2;
-                    const ghostCY = pp.y + size.h * gameState.zoom / 2;
-                    ctx.translate(ghostCX, ghostCY);
-                    if (gameState.buildRotation) ctx.rotate(gameState.buildRotation * Math.PI / 180);
-                    ctx.font = Math.floor(20 * gameState.zoom) + 'px serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(info.emoji, 0, 0);
-                    ctx.restore();
-                }
-            }
-
-            gameState.incomeTimer += 16;
-            if (gameState.incomeTimer >= 3000) {
-                gameState.incomeTimer = 0;
-                let totalIncome = 0;
-                for (let i = 0; i < gameState.buildings.length; i++) {
-                    const building = gameState.buildings[i];
-                    const info = buildingTypes[building.type];
-                    const scale = building.scale || 1;
-                    totalIncome += Math.floor((info ? info.income : 0) * scale);
-                }
-                totalIncome += gameState.roads.length * 5;
-                totalIncome += gameState.rails.length * 20;
-                totalIncome += gameState.cars.length * 10;
-                totalIncome += gameState.boats.length * 30;
-                totalIncome += gameState.buses.length * 50;
-                gameState.money += totalIncome;
-                gameState.happiness += (Math.random() - 0.47) * 0.4;
-                gameState.happiness = Math.max(0, Math.min(100, gameState.happiness));
-                updateUI();
-            }
-
-            gameState.zoneTimer += 16;
-            if (gameState.zoneTimer >= 5000 && gameState.zones.length > 0) {
-                gameState.zoneTimer = 0;
-                for (let i = 0; i < gameState.zones.length; i++) {
-                    const zone = gameState.zones[i];
-                    if (Math.random() < 0.1) {
-                        const services = checkServices(zone.x + zone.w / 2, zone.y + zone.h / 2);
-                        if (gameState.residentialDemand > 0 && zone.type === 'residential' && services.police && services.fire && services.health) {
-                            const house = { type: 'house', x: zone.x, y: zone.y, w: 44, h: 44, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(house, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 22, zone.y + 22)) {
-                                gameState.buildings.push(house);
-                                gameState.population += 8;
-                                gameState.residentialDemand = Math.max(0, gameState.residentialDemand - 5);
-                            }
-                        }
-                        if (gameState.commercialDemand > 0 && zone.type === 'commercial') {
-                            const shop = { type: 'shop', x: zone.x, y: zone.y, w: 42, h: 42, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(shop, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 21, zone.y + 21)) {
-                                gameState.buildings.push(shop);
-                                gameState.population += 3;
-                                gameState.commercialDemand = Math.max(0, gameState.commercialDemand - 5);
-                            }
-                        }
-                        if (gameState.industrialDemand > 0 && zone.type === 'industrial') {
-                            const factory = { type: 'factory', x: zone.x, y: zone.y, w: 52, h: 52, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(factory, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 26, zone.y + 26)) {
-                                gameState.buildings.push(factory);
-                                gameState.population += 20;
-                                gameState.industrialDemand = Math.max(0, gameState.industrialDemand - 5);
-                            }
-                        }
-                    }
-                }
-                gameState.residentialDemand += Math.random() * 2;
-                gameState.commercialDemand += Math.random() * 1.5;
-                gameState.industrialDemand += Math.random() * 1;
-                updateUI();
-            }
-
-            gameState.demandTimer += 16;
-            if (gameState.demandTimer >= 8000) {
-                gameState.demandTimer = 0;
-                gameState.residentialDemand = Math.min(100, gameState.residentialDemand + Math.random() * 5);
-                gameState.commercialDemand = Math.min(100, gameState.commercialDemand + Math.random() * 4);
-                gameState.industrialDemand = Math.min(100, gameState.industrialDemand + Math.random() * 3);
-                updateUI();
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        function checkServices(worldX, worldY) {
-            const result = { police: false, fire: false, health: false, education: false };
-            for (let i = 0; i < gameState.buildings.length; i++) {
-                const b = gameState.buildings[i];
-                const info = buildingTypes[b.type];
-                if (!info || !info.serviceType) continue;
-                const dist = Math.hypot(worldX - (b.x + b.w / 2), worldY - (b.y + b.h / 2));
-                if (dist <= info.serviceRadius) {
-                    result[info.serviceType] = true;
-                }
-            }
-            return result;
-        }
-
-        // ==================== ОБНОВЛЕНИЕ NPC ====================
-        function updateNPCs() {
-            for (let i = 0; i < gameState.people.length; i++) {
-                const person = gameState.people[i];
-                if (person.hasCar && person.carRef) { person.x = person.carRef.x;
-                    person.y = person.carRef.y; continue; }
-                if (person.hasBoat && person.boatRef) { person.x = person.boatRef.x;
-                    person.y = person.boatRef.y; continue; }
-                person.stateTimer--;
-                if (person.stateTimer <= 0) {
-                    person.stateTimer = 80 + Math.random() * 300;
-                    const targets = gameState.buildings.filter(function(b) { return buildingTypes[b.type] && !buildingTypes[b.type].isRoad && !buildingTypes[b.type].isRail && !buildingTypes[b.type].isRoadCurve; });
-                    if (targets.length > 0 && Math.random() < 0.7) { person.target = targets[Math.floor(Math.random() * targets.length)];
-                        person.state = 'visiting'; } else { person.target = null;
-                        person.state = 'walking';
-                        person.vx = (Math.random() - 0.5) * 1.5;
-                        person.vy = (Math.random() - 0.5) * 1.5; }
-                }
-                if (person.state === 'visiting' && person.target) {
-                    const dx = (person.target.x + person.target.w / 2) - person.x;
-                    const dy = (person.target.y + person.target.h / 2) - person.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 12) { person.state = 'inside';
-                        person.stateTimer = 100 + Math.random() * 300; } else { const sp = 1.5;
-                        person.vx = dx / dist * sp;
-                        person.vy = dy / dist * sp; }
-                } else if (person.state === 'inside') { person.vx = 0;
-                    person.vy = 0; }
-                person.x += person.vx;
-                person.y += person.vy; if (Math.abs(person.x) > gameState.borderSize) person.vx *= -1; if (Math.abs(person.y) > gameState.borderSize) person.vy *= -1;
-            }
-            for (let i = 0; i < gameState.cars.length; i++) {
-                const car = gameState.cars[i]; if (car.parked) continue;
-                car.x += car.vx;
-                car.y += car.vy;
-                let onRoad = false;
-                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r.h) { onRoad = true; break; } }
-                if (!onRoad) {
-                    let bestRoad = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
-                            ry = r.y + r.h / 2; const d = Math.hypot(car.x - rx, car.y - ry); if (d < bestDist) { bestDist = d;
-                            bestRoad = r; } }
-                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
-                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - car.x,
-                            dy = ry - car.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { car.vx = dx / d * 2;
-                            car.vy = dy / d * 2; } }
-                }
-                if (Math.abs(car.x) > gameState.borderSize || Math.abs(car.y) > gameState.borderSize) { car.vx *= -1;
-                    car.vy = (Math.random() - 0.5) * 2; }
-                if (Math.random() < 0.005) { const person = gameState.people.find(function(p) { return p.carRef === car; }); if (person && Math.random() < 0.3) { person.hasCar = false;
-                        person.carRef = null;
-                        person.x = car.x;
-                        person.y = car.y;
-                        car.parked = true;
-                        setTimeout(function() { car.parked = false; if (Math.random() < 0.5) { const np = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; }); if (np) { np.hasCar = true;
-                                    np.carRef = car; } } }, 2000 + Math.random() * 3000); } }
-            }
-            for (let i = 0; i < gameState.boats.length; i++) {
-                const boat = gameState.boats[i]; if (boat.parked) continue;
-                boat.x += boat.vx;
-                boat.y += boat.vy;
-                let onWater = isPointInWater(boat.x, boat.y);
-                if (!onWater) {
-                    let bestW = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.waterBodies.length; j++) { const w = gameState.waterBodies[j]; let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let k = 0; k < w.points.length; k++) { if (w.points[k].x < minX) minX = w.points[k].x; if (w.points[k].y < minY) minY = w.points[k].y; if (w.points[k].x > maxX) maxX = w.points[k].x; if (w.points[k].y > maxY) maxY = w.points[k].y; } const wx = (minX + maxX) / 2,
-                            wy = (minY + maxY) / 2; const d = Math.hypot(boat.x - wx, boat.y - wy); if (d < bestDist) { bestDist = d;
-                            bestW = w; } }
-                    if (bestW) { let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let k = 0; k < bestW.points.length; k++) { if (bestW.points[k].x < minX) minX = bestW.points[k].x; if (bestW.points[k].y < minY) minY = bestW.points[k].y; if (bestW.points[k].x > maxX) maxX = bestW.points[k].x; if (bestW.points[k].y > maxY) maxY = bestW.points[k].y; } const wx = (minX + maxX) / 2,
-                            wy = (minY + maxY) / 2; const dx = wx - boat.x,
-                            dy = wy - boat.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { boat.vx = dx / d * 2;
-                            boat.vy = dy / d * 2; } }
-                }
-                if (Math.random() < 0.01) { boat.vx = (Math.random() - 0.5) * 2;
-                    boat.vy = (Math.random() - 0.5) * 2; }
-            }
-            for (let i = 0; i < gameState.buses.length; i++) {
-                const bus = gameState.buses[i]; if (bus.parked) continue;
-                bus.x += bus.vx;
-                bus.y += bus.vy;
-                let onRoad = false;
-                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (bus.x >= r.x && bus.x <= r.x + r.w && bus.y >= r.y && bus.y <= r.y + r.h) { onRoad = true; break; } }
-                if (!onRoad) {
-                    let bestRoad = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
-                            ry = r.y + r.h / 2; const d = Math.hypot(bus.x - rx, bus.y - ry); if (d < bestDist) { bestDist = d;
-                            bestRoad = r; } }
-                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
-                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - bus.x,
-                            dy = ry - bus.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { bus.vx = dx / d * 1.5;
-                            bus.vy = dy / d * 1.5; } }
-                }
-                if (Math.abs(bus.x) > gameState.borderSize || Math.abs(bus.y) > gameState.borderSize) { bus.vx *= -1;
-                    bus.vy = (Math.random() - 0.5) * 1.5; }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'carshop'; }) && gameState.roads.length > 0 && gameState.cars.length < 15 && Math.random() < 0.005) {
-                const shop = gameState.buildings.find(function(b) { return b.type === 'carshop'; });
-                if (shop) {
-                    const car = { x: shop.x + shop.w / 2, y: shop.y + shop.h / 2, vx: 2, vy: 0, color: 'hsl(' + Math.floor(Math.random() * 360) + ',70%,55%)', parked: false, homeRef: shop };
-                    gameState.cars.push(car);
-                    const person = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; });
-                    if (person) { person.hasCar = true;
-                        person.carRef = car; }
-                }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'shipyard'; }) && gameState.waterBodies.length > 0 && gameState.boats.length < 8 && Math.random() < 0.003) {
-                const yard = gameState.buildings.find(function(b) { return b.type === 'shipyard'; });
-                if (yard) {
-                    let nearestWater = null;
-                    for (let i = 0; i < gameState.waterBodies.length; i++) { const w = gameState.waterBodies[i]; let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let j = 0; j < w.points.length; j++) { if (w.points[j].x < minX) minX = w.points[j].x; if (w.points[j].y < minY) minY = w.points[j].y; if (w.points[j].x > maxX) maxX = w.points[j].x; if (w.points[j].y > maxY) maxY = w.points[j].y; } if (yard.x >= minX && yard.x <= maxX && yard.y >= minY && yard.y <= maxY) { nearestWater = w; break; } }
-                    if (nearestWater) { let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let j = 0; j < nearestWater.points.length; j++) { if (nearestWater.points[j].x < minX) minX = nearestWater.points[j].x; if (nearestWater.points[j].y < minY) minY = nearestWater.points[j].y; if (nearestWater.points[j].x > maxX) maxX = nearestWater.points[j].x; if (nearestWater.points[j].y > maxY) maxY = nearestWater.points[j].y; } const boat = { x: (minX + maxX) / 2, y: (minY + maxY) / 2, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, color: 'hsl(' + Math.floor(Math.random() * 360) + ',50%,50%)', parked: false, homeRef: yard };
-                        gameState.boats.push(boat);
-                        const person = gameState.people.find(function(p) { return !p.hasBoat && !p.hasCar; }); if (person) { person.hasBoat = true;
-                            person.boatRef = boat; } }
-                }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'bus_depot'; }) && gameState.buildings.some(function(b) { return b.type === 'bus_stop'; }) && gameState.roads.length > 0 && gameState.buses.length < 5 && Math.random() < 0.003) {
-                const depot = gameState.buildings.find(function(b) { return b.type === 'bus_depot'; });
-                if (depot) {
-                    const bus = { x: depot.x + depot.w / 2, y: depot.y + depot.h / 2, vx: 1.5, vy: 0, color: '#4a90c8', parked: false, homeRef: depot };
-                    gameState.buses.push(bus);
-                }
-            }
-        }
-
-        function spawnParticles(worldX, worldY, colorHex) {
-            const hex = colorHex || '#f0d060';
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            for (let i = 0; i < 25; i++) {
-                gameState.particles.push({
-                    x: worldX,
-                    y: worldY,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 4,
-                    life: 1,
-                    size: Math.random() * 5 + 2,
-                    r: r,
-                    g: g,
-                    b: b,
-                });
-            }
-        }
-
-        // ==================== СОБЫТИЯ ====================
-        document.addEventListener('mousemove', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            const coords = getCanvasCoords(event);
-            gameState.mouseX = coords.sx;
-            gameState.mouseY = coords.sy;
-            if (gameState.dragging) {
-                const dx = event.clientX - gameState.dragStartX;
-                const dy = event.clientY - gameState.dragStartY;
-                gameState.cameraX -= dx / gameState.zoom;
-                gameState.cameraY -= dy / gameState.zoom;
-                gameState.dragStartX = event.clientX;
-                gameState.dragStartY = event.clientY;
-                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
-            }
-            const worldPos = screenToWorld(coords.sx, coords.sy);
-            gameState.hoveredBuilding = findBuildingAt(worldPos.x, worldPos.y);
-            updateInfoPopup(coords.sx, coords.sy);
+      }
+    }
+    
+    // Клик по объектам
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    window.addEventListener('click', (event) => {
+      if (event.target.tagName === 'BUTTON') return;
+      
+      // Не обрабатываем клики по джойстику
+      if (event.target.closest('#joystick-container') || event.target.closest('#look-area')) return;
+      
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const clickableObjects = [...planets];
+      planets.forEach(p => {
+        p.children.forEach(child => {
+          if (child.userData && child.userData.isRing) clickableObjects.push(child);
         });
-
-        document.addEventListener('mousedown', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
-            if (event.button === 0) {
-                const worldPos = getWorldFromEvent(event);
-                gameState.mouseX = worldPos.sx;
-                gameState.mouseY = worldPos.sy;
-                if (gameState.deleteMode) { if (deleteAt(worldPos.wx, worldPos.wy)) return; }
-                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) { if (placeZone(worldPos.wx, worldPos.wy)) return; }
-                if (gameState.selectedType && !gameState.selectMode) { if (buildAt(worldPos.wx, worldPos.wy)) return; }
-                gameState.dragging = true;
-                gameState.dragStartX = event.clientX;
-                gameState.dragStartY = event.clientY;
-                gameState.dragDistance = 0;
-                updateUI();
-            }
-        });
-
-        document.addEventListener('mouseup', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (gameState.dragging && gameState.dragDistance < 3) {
-                const worldPos = getWorldFromEvent(event);
-                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
-                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
-                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
-            }
-            gameState.dragging = false;
-            gameState.dragDistance = 0;
-            updateUI();
-        });
-
-        document.addEventListener('contextmenu', function(event) { if (event.target.closest('#game-canvas')) event.preventDefault(); });
-
-        document.addEventListener('wheel', function(event) {
-            if (!gameState.canvas || !gameState.countryName || event.target.closest('#build-modal')) return;
-            event.preventDefault();
-            const rect = gameState.canvas.getBoundingClientRect();
-            const mx = event.clientX - rect.left;
-            const my = event.clientY - rect.top;
-            const worldBefore = screenToWorld(mx, my);
-            const zf = 1.07;
-            if (event.deltaY < 0) gameState.zoom = Math.min(3, gameState.zoom * zf);
-            else gameState.zoom = Math.max(0.25, gameState.zoom / zf);
-            gameState.gridSize = Math.round(48 * gameState.zoom);
-            const worldAfter = screenToWorld(mx, my);
-            gameState.cameraX += worldBefore.x - worldAfter.x;
-            gameState.cameraY += worldBefore.y - worldAfter.y;
-        }, { passive: false });
-
-        document.addEventListener('touchstart', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
-            if (event.touches.length === 2) {
-                gameState.dragging = false;
-                gameState.touchDistance = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-                gameState.lastPinchZoom = gameState.zoom;
-                return;
-            }
-            if (event.touches.length === 1) {
-                const touch = event.touches[0];
-                const rect = gameState.canvas.getBoundingClientRect();
-                gameState.mouseX = touch.clientX - rect.left;
-                gameState.mouseY = touch.clientY - rect.top;
-                gameState.dragStartX = touch.clientX;
-                gameState.dragStartY = touch.clientY;
-                gameState.dragDistance = 0;
-                gameState.dragging = true;
-                gameState.touchStartTime = Date.now();
-                updateUI();
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchmove', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.touches.length === 2) {
-                event.preventDefault();
-                const dist = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-                gameState.zoom = Math.max(0.25, Math.min(3, gameState.lastPinchZoom * (dist / gameState.touchDistance)));
-                gameState.gridSize = Math.round(48 * gameState.zoom);
-            } else if (event.touches.length === 1 && gameState.dragging) {
-                const dx = event.touches[0].clientX - gameState.dragStartX;
-                const dy = event.touches[0].clientY - gameState.dragStartY;
-                gameState.cameraX -= dx / gameState.zoom;
-                gameState.cameraY -= dy / gameState.zoom;
-                gameState.dragStartX = event.touches[0].clientX;
-                gameState.dragStartY = event.touches[0].clientY;
-                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
-                const rect = gameState.canvas.getBoundingClientRect();
-                gameState.mouseX = event.touches[0].clientX - rect.left;
-                gameState.mouseY = event.touches[0].clientY - rect.top;
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            const wasTap = gameState.dragDistance < 8 && (Date.now() - gameState.touchStartTime) < 300;
-            if (wasTap && event.changedTouches.length === 1) {
-                const worldPos = getWorldFromEvent(event.changedTouches[0]);
-                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
-                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
-                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
-            }
-            gameState.dragging = false;
-            gameState.dragDistance = 0;
-            updateUI();
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (!gameState.countryName) return;
-            if (event.key === 'Escape') { gameState.selectedType = null;
-                gameState.currentTool = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-                closeBuildModal();
-                updateUI(); }
-            if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault();
-                toggleDeleteMode(); }
-            if (event.key === 'b' || event.key === 'B') openBuildModal();
-            if (event.key === 'i' || event.key === 'I') toggleSelectMode();
-            if (event.key === 'r' || event.key === 'R' || event.key === 'к' || event.key === 'К') { event.preventDefault();
-                rotateBuilding(); }
-            if (event.key === '1') setTool('zone_residential');
-            if (event.key === '2') setTool('zone_commercial');
-            if (event.key === '3') setTool('zone_industrial');
-        });
-
-        document.getElementById('build-modal').addEventListener('click', function(event) { if (event.target === this) closeBuildModal(); });
-
-        document.getElementById('modal-tabs').addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal-tab')) {
-                document.querySelectorAll('#modal-tabs .modal-tab').forEach(function(tab) { tab.classList.remove('active'); });
-                event.target.classList.add('active');
-                currentModalTab = event.target.dataset.tab;
-                modalBuilt = false;
-                buildModalGrid();
-            }
-        });
-
-        document.getElementById('size-selector').addEventListener('click', function(event) {
-            if (event.target.classList.contains('size-btn')) {
-                gameState.buildScale = parseFloat(event.target.dataset.scale);
-                buildModalGrid();
-            }
-        });
-
-        function updateInfoPopup(screenX, screenY) {
-            const popup = document.getElementById('info-popup');
-            if (gameState.hoveredBuilding && !gameState.dragging && (gameState.selectMode || (!gameState.selectedType && !gameState.deleteMode && !gameState.currentTool))) {
-                const building = gameState.hoveredBuilding;
-                const info = buildingTypes[building.type];
-                if (!info) { popup.style.display = 'none'; return; }
-                const scale = building.scale || 1;
-                const cost = getBuildCost(building.type, scale);
-                const income = Math.floor((info.income || 0) * scale);
-                popup.style.display = 'block';
-                popup.style.left = Math.min(screenX + 22, window.innerWidth - 280) + 'px';
-                popup.style.top = Math.max(10, screenY - 30) + 'px';
-                let html = '<span class="pop-title">' + (info.emoji || '?') + ' ' + (info.name || 'Объект') + '</span>';
-                html += '📏 ' + building.w + 'x' + building.h + ' (x' + scale + ') 🔄' + (building.rotation || 0) + '°<br>';
-                html += '💰 Цена: ' + cost.toLocaleString() + '<br>';
-                html += '📈 Доход: 💰' + income.toLocaleString() + '/мес<br>';
-                if (info.serviceType) html += '🔔 Тип: ' + info.serviceType + '<br>';
-                if (info.happinessBonus) html += '😊 Счастье: +' + Math.floor((info.happinessBonus || 0) * scale) + '<br>';
-                popup.innerHTML = html;
-            } else {
-                popup.style.display = 'none';
-            }
+      });
+      
+      const intersects = raycaster.intersectObjects(clickableObjects, true);
+      
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        if (obj.userData.isRing) obj = obj.parent;
+        const key = obj.userData.key;
+        if (key && key !== 'asteroid' && key !== 'kuiper') {
+          currentTarget = key;
+          focusOnPlanet(key);
         }
+      }
+    });
 
-        function addLog(message) {
-            const logContainer = document.getElementById('message-log');
-            const messageElement = document.createElement('div');
-            messageElement.className = 'log-msg';
-            messageElement.textContent = message;
-            logContainer.appendChild(messageElement);
-            setTimeout(function() { messageElement.remove(); }, 3500);
-            if (logContainer.children.length > 6) logContainer.firstChild.remove();
+    // --- Анимация ---
+    function updateFlyMovement() {
+      if (!flyMode) return;
+      
+      const speed = keys.shift ? flySpeed * 3 : flySpeed;
+      const forward = new THREE.Vector3();
+      const right = new THREE.Vector3();
+      const up = new THREE.Vector3(0, 1, 0);
+      
+      camera.getWorldDirection(forward);
+      right.crossVectors(forward, up).normalize();
+      
+      // Движение с джойстика (мобилки)
+      let moveX = 0, moveY = 0, moveUp = 0;
+      
+      if (joystickActive) {
+        moveX = joystickMoveX / 50;
+        moveY = joystickMoveY / 50;
+      }
+      
+      // WASD
+      if (keys.w || moveY < -0.2) camera.position.addScaledVector(forward, speed);
+      if (keys.s || moveY > 0.2) camera.position.addScaledVector(forward, -speed);
+      if (keys.a || moveX < -0.2) camera.position.addScaledVector(right, -speed);
+      if (keys.d || moveX > 0.2) camera.position.addScaledVector(right, speed);
+      
+      // Вверх/вниз
+      if (keys.q) camera.position.y -= speed;
+      if (keys.e) camera.position.y += speed;
+      
+      // Поворот камеры
+      const quaternion = new THREE.Quaternion();
+      const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
+      quaternion.setFromEuler(euler);
+      camera.quaternion.copy(quaternion);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      stars1.rotation.y += 0.00008;
+      stars2.rotation.y -= 0.00004;
+      
+      // Планеты
+      planets.forEach(planet => {
+        const data = planet.userData;
+        if (data.distance > 0) {
+          data.angle += data.speed * 0.25;
+          planet.position.x = data.distance * Math.cos(data.angle);
+          planet.position.z = data.distance * Math.sin(data.angle);
         }
-
-        function shakeEl(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.style.animation = 'shake 0.4s ease';
-            setTimeout(function() { el.style.animation = ''; }, 400);
+        planet.rotation.y += 0.008;
+      });
+      
+      // Астероиды
+      asteroids.forEach(obj => {
+        obj.userData.angle += obj.userData.speed * 0.25;
+        obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
+        obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
+      });
+      
+      // Койпер
+      kuiperObjects.forEach(obj => {
+        obj.userData.angle += obj.userData.speed * 0.25;
+        obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
+        obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
+      });
+      
+      // Обновление полёта
+      updateFlyMovement();
+      
+      // Слежение в режиме обзора
+      if (!flyMode && currentTarget !== 'all') {
+        const targetPlanet = planets.find(p => p.userData.key === currentTarget);
+        if (targetPlanet) {
+          controls.target.copy(targetPlanet.position);
         }
+      }
+      
+      if (!flyMode) controls.update();
+      
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    
+    animate();
 
-        function showHelp() {
-            alert('🎮 PRESIDENT SIMULATOR - THEOTOWN EDITION\n\n' +
-                '🏘️ ЗОНИРОВАНИЕ:\n' +
-                '• Кнопки Жилая/Коммерция/Индустрия\n' +
-                '• Или клавиши 1, 2, 3\n' +
-                '• Выделите зону — здания вырастут сами!\n\n' +
-                '🏗️ СПЕЦПОСТРОЙКИ:\n' +
-                '• Дороги, службы, парки, достопримечательности\n' +
-                '• Транспорт (автобусы, автосалон)\n\n' +
-                '🚒 СЛУЖБЫ:\n' +
-                '• Полиция, пожарные, больницы, школы\n' +
-                '• Необходимы для роста зон\n\n' +
-                '📈 СПРОС:\n' +
-                '• R — жилой, C — коммерческий, I — индустриальный\n' +
-                '• Растёт со временем\n\n' +
-                '⌨️ КЛАВИШИ:\n' +
-                '• 1/2/3 — зоны\n' +
-                '• B — спецпостройки\n' +
-                '• R — поворот\n' +
-                '• Delete — снос\n' +
-                '• I — информация\n\n' +
-                '🌊 Водоёмы генерируются случайно\n' +
-                '🌤️ Погода и день/ночь\n' +
-                '💾 Автосохранение каждые 30 сек');
-        }
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-        const shakeCSS = document.createElement('style');
-        shakeCSS.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
-        document.head.appendChild(shakeCSS);
-
-        console.log('🏛️ President Simulator - TheoTown Edition ГОТОВ!');
-        console.log('✅ Зонирование (жилое, коммерческое, индустриальное)');
-        console.log('✅ Городские службы (полиция, пожарные, больницы, школы)');
-        console.log('✅ Парки и достопримечательности');
-        console.log('✅ Транспорт (автобусы, автосалон, судостроительный)');
-        console.log('✅ Система спроса');
-        console.log('✅ Кривые водоёмы');
-        console.log('✅ День/ночь и погода');
-        console.log('✅ NPC, машины, лодки, автобусы');
-        console.log('✅ Сохранения');
-    </script>
+    console.log('🌠 Полная Солнечная система готова!');
+    console.log('🎮 Кнопка сверху — переключение режимов');
+    console.log('   🖱️ Обзор: мышь для вращения и зума');
+    console.log('   🚀 Полёт: WASD — движение, мышь — поворот');
+    console.log('   📱 Телефон: джойстик слева, поворот справа');
+  </script>
 </body>
 </html>
