@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, touch-action: manipulation">
-  <title>Вселенная 3D | 5 световых лет</title>
+  <title>Вселенная 3D | Реальные объекты • 5 световых лет</title>
   <style>
     body {
       margin: 0;
@@ -41,7 +41,7 @@
       padding: 12px 25px;
       border-radius: 50px;
       backdrop-filter: blur(10px);
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       letter-spacing: 2px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -154,13 +154,6 @@
     .search-result-item:hover {
       background: rgba(255,140,0,0.3);
       color: white;
-    }
-    .search-result-item .type-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      margin-left: 8px;
-      background: rgba(255,255,255,0.15);
     }
     #settings-panel {
       position: absolute;
@@ -337,7 +330,7 @@
     </div>
   </div>
   
-  <div class="instruction">🖱️ Обзор: вращение/зум | 🚀 Полёт: WASD | ПРОБЕЛ — режим | 🔍 Поиск справа | ⚙️ Настройки</div>
+  <div class="instruction">🖱️ Обзор: вращение/зум | 🚀 Полёт: WASD | ПРОБЕЛ — режим | 🔍 Поиск | ⚙️ Настройки</div>
   
   <div id="joystick-container">
     <div id="joystick-base"><div id="joystick-thumb"></div></div>
@@ -361,14 +354,13 @@
     // ============ КОНСТАНТЫ ============
     const LABEL_SHOW_DISTANCE = 4999;
     const LABEL_HIDE_DISTANCE = 1000;
-    const SCALE_FACTOR = 0.01; // Масштаб: 1 единица = 100 км (примерно)
+    const LY_SCALE = 200;
     
     // ============ СЦЕНА ============
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x020208);
     scene.fog = new THREE.FogExp2(0x020208, 0.0000005);
     
-    // Глубокое звёздное небо
     const starsGeo1 = new THREE.BufferGeometry();
     const starsPos1 = new Float32Array(6000 * 3);
     for (let i = 0; i < 6000 * 3; i += 3) {
@@ -447,7 +439,7 @@
       cameraSensitivity = parseFloat(sensitivitySlider.value);
       sensitivityDisplay.textContent = cameraSensitivity.toFixed(1);
       controls.rotateSpeed = cameraSensitivity;
-      flyRotateSpeed = 0.01 * cameraSensitivity;
+      flyRotateSpeed = 0.005 * cameraSensitivity;
     });
     
     flySpeedSlider.addEventListener('input', () => {
@@ -479,18 +471,12 @@
         modeBtn.classList.add('fly-mode');
         instruction.textContent = 'WASD — движение | Q/E — вверх/вниз | Shift — уск. | Мышь — поворот | ПРОБЕЛ — обзор';
         controls.enabled = false;
-        const direction = new THREE.Vector3();
-        camera.getWorldDirection(direction);
-        yaw = Math.atan2(direction.x, direction.z);
-        pitch = Math.asin(direction.y);
         renderer.domElement.style.cursor = 'crosshair';
       } else {
         modeBtn.textContent = '🎮 ОБЗОР (мышь)';
         modeBtn.classList.remove('fly-mode');
         instruction.textContent = '🖱️ Обзор: вращение/зум | ПРОБЕЛ — полёт | 🔍 Поиск | ⚙️ Настройки';
         controls.enabled = true;
-        controls.target.copy(camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10)));
-        controls.update();
         renderer.domElement.style.cursor = 'default';
         Object.keys(keys).forEach(k => keys[k] = false);
       }
@@ -652,9 +638,6 @@
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
     scene.add(new THREE.AmbientLight(0x111133));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.25);
-    dirLight.position.set(10, 20, 5);
-    scene.add(dirLight);
 
     // ============ ФУНКЦИИ ============
     function createTexture(baseColor, type) {
@@ -665,14 +648,7 @@
       ctx.fillStyle = baseColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      if (type === 'star') {
-        const gradient = ctx.createRadialGradient(128, 64, 0, 128, 64, 128);
-        gradient.addColorStop(0, '#ffffff');
-        gradient.addColorStop(0.3, baseColor);
-        gradient.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 256, 128);
-      } else if (type === 'sun') {
+      if (type === 'sun') {
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#ffaa00');
         gradient.addColorStop(0.3, '#ff7700');
@@ -686,6 +662,15 @@
           ctx.arc(Math.random()*256, Math.random()*128, Math.random()*12+4, 0, Math.PI*2);
           ctx.fill();
         }
+      } else if (type === 'star') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const gradient = ctx.createRadialGradient(128, 64, 0, 128, 64, 200);
+        gradient.addColorStop(0, '#ffffff');
+        gradient.addColorStop(0.4, baseColor);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 128);
       } else if (type === 'jupiter') {
         ctx.strokeStyle = '#b08060';
         ctx.lineWidth = 7;
@@ -733,70 +718,60 @@
       return new CSS2DObject(div);
     }
 
-    // ============ ВСЕ ОБЪЕКТЫ В ПРЕДЕЛАХ 5 СВЕТОВЫХ ЛЕТ ============
+    // ============ ВСЕ ОБЪЕКТЫ ============
     const allSpatialObjects = [];
     const allLabels = [];
     
-    // --- СОЛНЕЧНАЯ СИСТЕМА (Центр: 0,0,0) ---
-    const solarSystemObjects = [
-      // Солнце и планеты
-      { name: 'Солнце', key: 'sun', type: 'star', color: 0xffaa00, size: 2.5, distance: 0, angle: 0, speed: 0, parent: null, emissive: 0xff6600, starType: 'G2V' },
-      { name: 'Меркурий', key: 'mercury', type: 'planet', color: 0xaaaaaa, size: 0.4, distance: 6, angle: Math.random()*Math.PI*2, speed: 0.035, parent: 'sun' },
-      { name: 'Венера', key: 'venus', type: 'planet', color: 0xffcc88, size: 0.7, distance: 9, angle: Math.random()*Math.PI*2, speed: 0.022, parent: 'sun' },
-      { name: 'Земля', key: 'earth', type: 'planet', color: 0x2299ff, size: 0.75, distance: 12, angle: Math.random()*Math.PI*2, speed: 0.018, parent: 'sun' },
-      { name: 'Марс', key: 'mars', type: 'planet', color: 0xc1440e, size: 0.55, distance: 16, angle: Math.random()*Math.PI*2, speed: 0.015, parent: 'sun' },
-      { name: 'Церера', key: 'ceres', type: 'dwarf_planet', color: 0x999999, size: 0.3, distance: 20, angle: Math.random()*Math.PI*2, speed: 0.012, parent: 'sun' },
-      { name: 'Юпитер', key: 'jupiter', type: 'planet', color: 0xd8a27a, size: 1.8, distance: 28, angle: Math.random()*Math.PI*2, speed: 0.009, parent: 'sun', hasRings: false },
-      { name: 'Сатурн', key: 'saturn', type: 'planet', color: 0xf0d8b0, size: 1.5, distance: 36, angle: Math.random()*Math.PI*2, speed: 0.007, parent: 'sun', hasRings: true },
-      { name: 'Уран', key: 'uranus', type: 'planet', color: 0x6fd4d4, size: 1.2, distance: 45, angle: Math.random()*Math.PI*2, speed: 0.005, parent: 'sun' },
-      { name: 'Нептун', key: 'neptune', type: 'planet', color: 0x4169e1, size: 1.15, distance: 54, angle: Math.random()*Math.PI*2, speed: 0.004, parent: 'sun' },
-      { name: 'Плутон', key: 'pluto', type: 'dwarf_planet', color: 0xccbb99, size: 0.35, distance: 65, angle: Math.random()*Math.PI*2, speed: 0.003, parent: 'sun' },
-      { name: 'Эрида', key: 'eris', type: 'dwarf_planet', color: 0xddccbb, size: 0.32, distance: 78, angle: Math.random()*Math.PI*2, speed: 0.0025, parent: 'sun' }
+    // --- СОЛНЕЧНАЯ СИСТЕМА ---
+    const solarSystemData = [
+      { name: 'Солнце', key: 'sun', type: 'star', color: 0xffaa00, size: 2.5, distance: 0, speed: 0, starType: 'G2V', emissive: 0xff6600 },
+      { name: 'Меркурий', key: 'mercury', type: 'planet', color: 0xaaaaaa, size: 0.4, distance: 6, speed: 0.035 },
+      { name: 'Венера', key: 'venus', type: 'planet', color: 0xffcc88, size: 0.7, distance: 9, speed: 0.022 },
+      { name: 'Земля', key: 'earth', type: 'planet', color: 0x2299ff, size: 0.75, distance: 12, speed: 0.018 },
+      { name: 'Марс', key: 'mars', type: 'planet', color: 0xc1440e, size: 0.55, distance: 16, speed: 0.015 },
+      { name: 'Церера', key: 'ceres', type: 'dwarf_planet', color: 0x999999, size: 0.3, distance: 20, speed: 0.012 },
+      { name: 'Юпитер', key: 'jupiter', type: 'planet', color: 0xd8a27a, size: 1.8, distance: 28, speed: 0.009 },
+      { name: 'Сатурн', key: 'saturn', type: 'planet', color: 0xf0d8b0, size: 1.5, distance: 36, speed: 0.007, hasRings: true },
+      { name: 'Уран', key: 'uranus', type: 'planet', color: 0x6fd4d4, size: 1.2, distance: 45, speed: 0.005 },
+      { name: 'Нептун', key: 'neptune', type: 'planet', color: 0x4169e1, size: 1.15, distance: 54, speed: 0.004 },
+      { name: 'Плутон', key: 'pluto', type: 'dwarf_planet', color: 0xccbb99, size: 0.35, distance: 65, speed: 0.003 },
+      { name: 'Эрида', key: 'eris', type: 'dwarf_planet', color: 0xddccbb, size: 0.32, distance: 78, speed: 0.0025 }
     ];
 
     // --- ЗВЁЗДНЫЕ СИСТЕМЫ В ПРЕДЕЛАХ 5 СВ. ЛЕТ ---
-    // (1 св. год ≈ 63241 а.е., в нашем масштабе используем коэффициент)
-    const LY_SCALE = 200; // 1 световой год = 200 единиц в сцене
-    
-    const nearbyStars = [
-      { name: 'Проксима Центавра', key: 'proxima', type: 'star_system', color: 0xff6644, size: 0.8, distance: 4.24 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'M5.5Ve', planets: [
-        { name: 'Проксима b', key: 'proxima_b', type: 'exoplanet', color: 0x88aacc, size: 0.4, distance: 3, speed: 0.04 }
-      ]},
-      { name: 'Альфа Центавра A', key: 'alpha_cen_a', type: 'star_system', color: 0xffdd88, size: 1.2, distance: 4.37 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'G2V' },
-      { name: 'Альфа Центавра B', key: 'alpha_cen_b', type: 'star_system', color: 0xffaa44, size: 0.9, distance: 4.37 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'K1V', orbitParent: 'alpha_cen_a', orbitDistance: 8 },
-      { name: 'Звезда Барнарда', key: 'barnard', type: 'star_system', color: 0xff6644, size: 0.7, distance: 5.96 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'M4.0Ve', planets: [
-        { name: 'Барнард b', key: 'barnard_b', type: 'exoplanet', color: 0x998877, size: 0.35, distance: 3.5, speed: 0.035 }
-      ]},
-      { name: 'WISE 0855-0714', key: 'wise0855', type: 'brown_dwarf', color: 0x553344, size: 0.5, distance: 7.3 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'Y2' },
-      { name: 'Луман 16A', key: 'luhman16a', type: 'brown_dwarf', color: 0x664455, size: 0.55, distance: 6.5 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'L7.5' },
-      { name: 'Луман 16B', key: 'luhman16b', type: 'brown_dwarf', color: 0x553344, size: 0.5, distance: 6.5 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'T0.5', orbitParent: 'luhman16a', orbitDistance: 5 },
-      { name: 'WISE 1506+7027', key: 'wise1506', type: 'brown_dwarf', color: 0x443355, size: 0.4, distance: 11.1 * LY_SCALE, angle: Math.random()*Math.PI*2, starType: 'T6' }
-    ];
-
-    // --- ЧЁРНЫЕ ДЫРЫ (известные кандидаты в пределах ~3000 св. лет) ---
-    const blackHoles = [
-      { name: 'Gaia BH1', key: 'gaia_bh1', type: 'black_hole', size: 1.5, distance: 1560, angle: Math.random()*Math.PI*2, mass: '10 M☉', desc: 'Ближайшая известная чёрная дыра' },
-      { name: 'A0620-00', key: 'a0620', type: 'black_hole', size: 1.8, distance: 3000, angle: Math.random()*Math.PI*2, mass: '6.6 M☉', desc: 'Рентгеновская двойная' },
-      { name: 'V616 Mon', key: 'v616', type: 'black_hole', size: 1.6, distance: 3000, angle: Math.random()*Math.PI*2, mass: '9 M☉', desc: 'Чёрная дыра звёздной массы' }
-    ];
-
-    // Создание объектов Солнечной системы
-    const planets = [];
-    const allMoons = [];
-    
-    // Орбиты
-    solarSystemObjects.forEach(obj => {
-      if (obj.distance > 0 && !obj.parent) {
-        const orbitGeo = new THREE.RingGeometry(obj.distance - 0.03, obj.distance + 0.03, 128);
-        const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
-          color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity: 0.15 
-        }));
-        orbit.rotation.x = Math.PI / 2;
-        scene.add(orbit);
+    const nearbyStarsData = [
+      { 
+        name: 'Проксима Центавра', key: 'proxima', type: 'star', color: 0xff6644, size: 0.8, 
+        distance: 4.24 * LY_SCALE, angle: 2.1, starType: 'M5.5Ve',
+        planets: [
+          { name: 'Проксима b', key: 'proxima_b', type: 'exoplanet', color: 0x88aacc, size: 0.4, distance: 3, speed: 0.04 }
+        ]
+      },
+      { 
+        name: 'Альфа Центавра A', key: 'alpha_cen_a', type: 'star', color: 0xffdd88, size: 1.2, 
+        distance: 4.37 * LY_SCALE, angle: 2.3, starType: 'G2V' 
+      },
+      { 
+        name: 'Альфа Центавра B', key: 'alpha_cen_b', type: 'star', color: 0xffaa44, size: 0.9, 
+        distance: 4.37 * LY_SCALE, angle: 2.35, starType: 'K1V', 
+        orbitParent: 'alpha_cen_a', orbitDistance: 8 
+      },
+      { 
+        name: 'Звезда Барнарда', key: 'barnard', type: 'star', color: 0xff6644, size: 0.7, 
+        distance: 5.96 * LY_SCALE, angle: 4.5, starType: 'M4.0Ve',
+        planets: [
+          { name: 'Барнард b', key: 'barnard_b', type: 'exoplanet', color: 0x998877, size: 0.35, distance: 3.5, speed: 0.035 }
+        ]
       }
-    });
+    ];
 
-    solarSystemObjects.forEach(data => {
+    const planets = [];
+    const starObjects = [];
+    const allMoons = [];
+    const allExoplanets = [];
+
+    // Создание Солнечной системы
+    solarSystemData.forEach(data => {
       if (data.key === 'sun') {
         const geo = new THREE.SphereGeometry(data.size, 64, 64);
         const tex = createTexture('#ffaa00', 'sun');
@@ -807,7 +782,7 @@
         const sun = new THREE.Mesh(geo, mat);
         sun.position.set(0, 0, 0);
         sun.userData = { name: data.name, key: data.key, type: data.type, starType: data.starType };
-        const label = createLabel(data.name, '16px');
+        const label = createLabel(data.name, '16px', '#ffaa00');
         label.position.set(0, data.size + 0.8, 0);
         sun.add(label);
         allLabels.push({ obj: sun, label, planetKey: data.key });
@@ -817,15 +792,31 @@
         return;
       }
       
+      // Орбита
+      if (data.distance > 0) {
+        const orbitGeo = new THREE.RingGeometry(data.distance - 0.03, data.distance + 0.03, 128);
+        const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
+          color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity: 0.15 
+        }));
+        orbit.rotation.x = Math.PI / 2;
+        scene.add(orbit);
+      }
+      
       const geo = new THREE.SphereGeometry(data.size, 40, 40);
       const tex = createTexture(`#${data.color.toString(16).padStart(6, '0')}`, data.key);
       const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.75, metalness: 0.1 });
       const planet = new THREE.Mesh(geo, mat);
-      planet.position.x = data.distance * Math.cos(data.angle);
-      planet.position.z = data.distance * Math.sin(data.angle);
-      planet.userData = { name: data.name, key: data.key, type: data.type, distance: data.distance, speed: data.speed, angle: data.angle, size: data.size, hasRings: data.hasRings || false };
+      planet.position.x = data.distance * Math.cos(data.angle || Math.random() * Math.PI * 2);
+      planet.position.z = data.distance * Math.sin(data.angle || Math.random() * Math.PI * 2);
+      planet.userData = { 
+        name: data.name, key: data.key, type: data.type, 
+        distance: data.distance, speed: data.speed, 
+        angle: data.angle || Math.random() * Math.PI * 2, 
+        size: data.size, hasRings: data.hasRings || false,
+        isInSolarSystem: true
+      };
       
-      const label = createLabel(data.name, data.type === 'dwarf_planet' ? '12px' : '15px');
+      const label = createLabel(data.name, data.type === 'dwarf_planet' ? '12px' : '14px');
       label.position.set(0, data.size + 0.5, 0);
       planet.add(label);
       allLabels.push({ obj: planet, label, planetKey: data.key });
@@ -851,7 +842,7 @@
       planets.push(planet);
     });
 
-    // Спутники (добавим только для ключевых планет)
+    // Спутники
     const moonsData = [
       { parent: 'earth', name: 'Луна', key: 'moon', color: 0xcccccc, size: 0.2, distance: 1.5, speed: 0.25, showLabel: true },
       { parent: 'mars', name: 'Фобос', key: 'phobos', color: 0x999999, size: 0.08, distance: 0.9, speed: 0.4 },
@@ -876,7 +867,11 @@
       const angle = Math.random() * Math.PI * 2;
       moon.position.x = moonData.distance * Math.cos(angle);
       moon.position.z = moonData.distance * Math.sin(angle);
-      moon.userData = { name: moonData.name, key: moonData.key, type: 'moon', distance: moonData.distance, speed: moonData.speed, angle, isMoon: true, parentPlanet };
+      moon.userData = { 
+        name: moonData.name, key: moonData.key, type: 'moon', 
+        distance: moonData.distance, speed: moonData.speed, angle, 
+        isMoon: true, parentPlanet, isInSolarSystem: true
+      };
       
       if (moonData.showLabel) {
         const label = createLabel(moonData.name, '11px');
@@ -885,42 +880,41 @@
         allLabels.push({ obj: moon, label, planetKey: moonData.key, isMoon: true, parentKey: moonData.parent });
       }
       
+      const moonOrbitGeo = new THREE.RingGeometry(moonData.distance - 0.01, moonData.distance + 0.01, 64);
+      const moonOrbit = new THREE.Mesh(moonOrbitGeo, new THREE.MeshBasicMaterial({
+        color: 0x445566, side: THREE.DoubleSide, transparent: true, opacity: 0.2
+      }));
+      moonOrbit.rotation.x = Math.PI / 2;
+      parentPlanet.add(moonOrbit);
+      
       parentPlanet.add(moon);
       allMoons.push(moon);
       allSpatialObjects.push(moon);
     });
 
-    // --- ЗВЁЗДЫ И ИХ ПЛАНЕТЫ ---
-    const starObjects = [];
-    const allExoplanets = [];
-    
-    nearbyStars.forEach(starData => {
-      const distance = starData.distance;
-      const angle = starData.angle || Math.random() * Math.PI * 2;
-      const x = distance * Math.cos(angle);
-      const z = distance * Math.sin(angle);
+    // --- ЗВЁЗДЫ И ЭКЗОПЛАНЕТЫ ---
+    nearbyStarsData.forEach(starData => {
+      const x = starData.distance * Math.cos(starData.angle);
+      const z = starData.distance * Math.sin(starData.angle);
+      const y = (Math.random() - 0.5) * 30;
       
       // Звезда
       const starGeo = new THREE.SphereGeometry(starData.size, 32, 32);
-      const starTex = createTexture('#ffffff', 'star');
       const starMat = new THREE.MeshBasicMaterial({ color: starData.color });
       const star = new THREE.Mesh(starGeo, starMat);
-      star.position.set(x, (Math.random() - 0.5) * 20, z);
-      star.userData = { name: starData.name, key: starData.key, type: starData.type, starType: starData.starType };
+      star.position.set(x, y, z);
+      star.userData = { name: starData.name, key: starData.key, type: 'star', starType: starData.starType, isStar: true };
       
       const label = createLabel(starData.name, '14px', '#ffdd88');
       label.position.set(0, starData.size + 1, 0);
       star.add(label);
       allLabels.push({ obj: star, label, planetKey: starData.key, isStar: true });
       
-      // Свечение звезды
+      // Свечение
       const glowGeo = new THREE.SphereGeometry(starData.size * 2.5, 32, 32);
       const glowMat = new THREE.MeshBasicMaterial({ 
-        color: starData.color, 
-        transparent: true, 
-        opacity: 0.25,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
+        color: starData.color, transparent: true, opacity: 0.2,
+        blending: THREE.AdditiveBlending, depthWrite: false
       });
       const glow = new THREE.Mesh(glowGeo, glowMat);
       star.add(glow);
@@ -939,12 +933,23 @@
           const planetAngle = Math.random() * Math.PI * 2;
           planet.position.x = planetData.distance * Math.cos(planetAngle);
           planet.position.z = planetData.distance * Math.sin(planetAngle);
-          planet.userData = { name: planetData.name, key: planetData.key, type: 'exoplanet', distance: planetData.distance, speed: planetData.speed, angle: planetAngle, isExoplanet: true, parentStar: star };
+          planet.userData = { 
+            name: planetData.name, key: planetData.key, type: 'exoplanet', 
+            distance: planetData.distance, speed: planetData.speed, angle: planetAngle, 
+            isExoplanet: true, parentStar: star 
+          };
           
           const pLabel = createLabel(planetData.name, '11px', '#aaccff');
           pLabel.position.set(0, planetData.size + 0.3, 0);
           planet.add(pLabel);
           allLabels.push({ obj: planet, label: pLabel, planetKey: planetData.key, isExoplanet: true, parentKey: starData.key });
+          
+          const planetOrbitGeo = new THREE.RingGeometry(planetData.distance - 0.02, planetData.distance + 0.02, 64);
+          const planetOrbit = new THREE.Mesh(planetOrbitGeo, new THREE.MeshBasicMaterial({
+            color: 0x445566, side: THREE.DoubleSide, transparent: true, opacity: 0.25
+          }));
+          planetOrbit.rotation.x = Math.PI / 2;
+          star.add(planetOrbit);
           
           star.add(planet);
           allExoplanets.push(planet);
@@ -953,59 +958,7 @@
       }
     });
 
-    // --- ЧЁРНЫЕ ДЫРЫ ---
-    const blackHoleObjects = [];
-    blackHoles.forEach(bhData => {
-      const distance = bhData.distance;
-      const angle = bhData.angle;
-      const x = distance * Math.cos(angle);
-      const z = distance * Math.sin(angle);
-      
-      // Аккреционный диск
-      const diskGeo = new THREE.RingGeometry(bhData.size * 1.2, bhData.size * 2.5, 64);
-      const diskMat = new THREE.MeshBasicMaterial({
-        color: 0x8844ff,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.6
-      });
-      const disk = new THREE.Mesh(diskGeo, diskMat);
-      disk.rotation.x = Math.PI / 2 + 0.3;
-      
-      // Ядро (тёмное)
-      const coreGeo = new THREE.SphereGeometry(bhData.size, 32, 32);
-      const coreMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      const core = new THREE.Mesh(coreGeo, coreMat);
-      
-      const bhGroup = new THREE.Group();
-      bhGroup.add(disk);
-      bhGroup.add(core);
-      bhGroup.position.set(x, (Math.random() - 0.5) * 15, z);
-      bhGroup.userData = { name: bhData.name, key: bhData.key, type: 'black_hole', mass: bhData.mass, desc: bhData.desc };
-      
-      const label = createLabel(bhData.name, '13px', '#ff44ff');
-      label.position.set(0, bhData.size * 3, 0);
-      bhGroup.add(label);
-      allLabels.push({ obj: bhGroup, label, planetKey: bhData.key, isBlackHole: true });
-      
-      // Свечение
-      const haloGeo = new THREE.SphereGeometry(bhData.size * 3, 32, 32);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0x4400ff,
-        transparent: true,
-        opacity: 0.2,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-      const halo = new THREE.Mesh(haloGeo, haloMat);
-      bhGroup.add(halo);
-      
-      scene.add(bhGroup);
-      allSpatialObjects.push(bhGroup);
-      blackHoleObjects.push(bhGroup);
-    });
-
-    // --- ПОЯС АСТЕРОИДОВ (Солнечная система) ---
+    // --- ПОЯС АСТЕРОИДОВ ---
     const asteroids = [];
     for (let i = 0; i < 800; i++) {
       const geo = new THREE.SphereGeometry(0.08, 3, 3);
@@ -1014,7 +967,7 @@
       const angle = Math.random() * Math.PI * 2;
       asteroid.position.set(distance * Math.cos(angle), (Math.random() - 0.5) * 1.2, distance * Math.sin(angle));
       asteroid.scale.setScalar(0.5 + Math.random() * 1.5);
-      asteroid.userData = { type: 'asteroid', distance, speed: 0.008 + Math.random() * 0.01, angle };
+      asteroid.userData = { type: 'asteroid', distance, speed: 0.008 + Math.random() * 0.01, angle, isAsteroid: true };
       scene.add(asteroid);
       asteroids.push(asteroid);
     }
@@ -1027,7 +980,7 @@
       const distance = 58 + Math.random() * 30;
       const angle = Math.random() * Math.PI * 2;
       obj.position.set(distance * Math.cos(angle), (Math.random() - 0.5) * 5, distance * Math.sin(angle));
-      obj.userData = { type: 'kuiper', distance, speed: 0.0015 + Math.random() * 0.003, angle };
+      obj.userData = { type: 'kuiper', distance, speed: 0.0015 + Math.random() * 0.003, angle, isKuiper: true };
       scene.add(obj);
       kuiperObjects.push(obj);
     }
@@ -1062,27 +1015,25 @@
       }
       
       const results = allSpatialObjects.filter(obj => 
-        obj.userData.name && obj.userData.name.toLowerCase().includes(query)
+        obj.userData.name && obj.userData.name.toLowerCase().includes(query) &&
+        !obj.userData.isAsteroid && !obj.userData.isKuiper
       );
       
       if (results.length === 0) {
         searchResults.innerHTML = '<div class="search-result-item" style="color:#888;">Ничего не найдено</div>';
       } else {
-        searchResults.innerHTML = results.map(obj => {
+        searchResults.innerHTML = results.slice(0, 15).map(obj => {
           const typeNames = {
             'star': '⭐ Звезда',
             'planet': '🪐 Планета',
             'dwarf_planet': '🔮 Карлик',
             'moon': '🌙 Спутник',
-            'star_system': '✨ Система',
-            'exoplanet': '🌍 Экзопланета',
-            'brown_dwarf': '🟤 Корич. карлик',
-            'black_hole': '🕳️ Чёрная дыра'
+            'exoplanet': '🌍 Экзопланета'
           };
           const typeName = typeNames[obj.userData.type] || '📍 Объект';
           return `<div class="search-result-item" data-key="${obj.userData.key}">
             ${typeName} <strong>${obj.userData.name}</strong>
-            ${obj.userData.starType ? `<span class="type-badge">${obj.userData.starType}</span>` : ''}
+            ${obj.userData.starType ? `<span style="font-size:10px;opacity:0.7">${obj.userData.starType}</span>` : ''}
           </div>`;
         }).join('');
       }
@@ -1098,6 +1049,7 @@
       focusOnObject(key);
       searchResults.style.display = 'none';
       searchInput.value = '';
+      searchInput.blur();
     });
     
     document.addEventListener('click', (e) => {
@@ -1111,56 +1063,82 @@
     const planetNameDiv = document.getElementById('current-planet');
     const distanceDisplay = document.getElementById('distance-display');
     
+    function getWorldPosition(obj) {
+      const worldPos = new THREE.Vector3();
+      obj.getWorldPosition(worldPos);
+      return worldPos;
+    }
+    
     function focusOnObject(objectKey) {
       planetNameDiv.style.display = 'none';
       distanceDisplay.style.display = 'none';
       
       if (objectKey === 'all') {
-        if (!flyMode) {
-          controls.target.set(0, 0, 0);
-          camera.position.set(0, 50, 120);
-          controls.update();
-        } else {
-          camera.position.set(0, 50, 120);
-          camera.lookAt(0, 0, 0);
-        }
+        controls.target.set(0, 0, 0);
+        camera.position.set(0, 50, 120);
+        controls.update();
+        currentTarget = 'all';
         return;
       }
       
       const obj = allSpatialObjects.find(o => o.userData.key === objectKey);
       if (!obj) return;
       
-      const pos = obj.position.clone();
-      if (obj.userData.parentStar) pos.add(obj.userData.parentStar.position);
-      if (obj.userData.parentPlanet) pos.add(obj.userData.parentPlanet.position);
+      const worldPos = getWorldPosition(obj);
+      const objSize = obj.userData.size || 1;
+      const camDistance = objSize * 8 + 3;
       
-      planetNameDiv.textContent = obj.userData.name;
-      if (obj.userData.type) {
-        const types = {
-          'star': '⭐ Звезда',
-          'planet': '🪐 Планета',
-          'dwarf_planet': '🔮 Карликовая планета',
-          'moon': '🌙 Спутник',
-          'star_system': '✨ Звёздная система',
-          'exoplanet': '🌍 Экзопланета',
-          'brown_dwarf': '🟤 Коричневый карлик',
-          'black_hole': '🕳️ Чёрная дыра'
-        };
-        planetNameDiv.textContent = (types[obj.userData.type] || '') + ' ' + obj.userData.name;
+      // Позиция камеры: сзади и сверху под углом
+      const camOffset = new THREE.Vector3(
+        camDistance * 0.6,
+        camDistance * 0.4,
+        camDistance * 0.7
+      );
+      
+      // Убедимся что камера смотрит на объект
+      const newCamPos = worldPos.clone().add(camOffset);
+      
+      // Проверяем что позиция валидна
+      if (isNaN(newCamPos.x) || isNaN(newCamPos.y) || isNaN(newCamPos.z)) {
+        console.error('Invalid camera position for:', objectKey);
+        return;
       }
+      
+      // Тип объекта для отображения
+      const typeNames = {
+        'star': '⭐ Звезда',
+        'planet': '🪐 Планета',
+        'dwarf_planet': '🔮 Карликовая планета',
+        'moon': '🌙 Спутник',
+        'exoplanet': '🌍 Экзопланета'
+      };
+      const typeName = typeNames[obj.userData.type] || '';
+      planetNameDiv.textContent = typeName + ' ' + obj.userData.name;
       planetNameDiv.style.display = 'block';
       
-      const dist = obj.userData.size * 8 + 3;
+      // Плавное перемещение
+      const startTarget = controls.target.clone();
+      const startCamera = camera.position.clone();
+      const startTime = Date.now();
+      const duration = 800;
       
-      if (!flyMode) {
-        controls.target.copy(pos);
-        camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
+      function animateFocus() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing
+        const ease = 1 - Math.pow(1 - progress, 3);
+        
+        controls.target.lerpVectors(startTarget, worldPos, ease);
+        camera.position.lerpVectors(startCamera, newCamPos, ease);
         controls.update();
-      } else {
-        camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
-        camera.lookAt(pos);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateFocus);
+        }
       }
       
+      animateFocus();
       currentTarget = objectKey;
     }
     
@@ -1178,7 +1156,7 @@
       
       raycaster.setFromCamera(mouse, camera);
       const clickableObjects = allSpatialObjects.filter(o => 
-        !o.userData.isAsteroid && !o.userData.isKuiper && o.userData.type !== 'asteroid' && o.userData.type !== 'kuiper'
+        !o.userData.isAsteroid && !o.userData.isKuiper
       );
       
       const intersects = raycaster.intersectObjects(clickableObjects, true);
@@ -1186,7 +1164,7 @@
       if (intersects.length > 0) {
         let obj = intersects[0].object;
         while (obj) {
-          if (obj.userData && obj.userData.key && obj.userData.key !== 'asteroid' && obj.userData.key !== 'kuiper') {
+          if (obj.userData && obj.userData.key) {
             focusOnObject(obj.userData.key);
             return;
           }
@@ -1195,47 +1173,41 @@
       }
     });
 
-    // ============ ОБНОВЛЕНИЕ НАЗВАНИЙ ПО РАССТОЯНИЮ ============
+    // ============ ОБНОВЛЕНИЕ НАЗВАНИЙ ============
     function updateLabels() {
       const camPos = camera.position;
       
       allLabels.forEach(labelData => {
         const obj = labelData.obj;
-        let worldPos = new THREE.Vector3();
-        obj.getWorldPosition(worldPos);
-        
+        const worldPos = getWorldPosition(obj);
         const distance = camPos.distanceTo(worldPos);
         
-        if (distance > LABEL_SHOW_DISTANCE) {
-          labelData.label.element.style.display = 'none';
-        } else if (distance < LABEL_HIDE_DISTANCE) {
+        if (distance > LABEL_SHOW_DISTANCE || distance < LABEL_HIDE_DISTANCE) {
           labelData.label.element.style.display = 'none';
         } else {
           labelData.label.element.style.display = 'block';
-          // Плавное появление/исчезновение
           const fadeRange = 300;
           if (distance > LABEL_SHOW_DISTANCE - fadeRange) {
-            const opacity = (LABEL_SHOW_DISTANCE - distance) / fadeRange;
-            labelData.label.element.style.opacity = Math.max(0, Math.min(1, opacity));
+            labelData.label.element.style.opacity = Math.max(0, Math.min(1, (LABEL_SHOW_DISTANCE - distance) / fadeRange));
           } else if (distance < LABEL_HIDE_DISTANCE + fadeRange) {
-            const opacity = (distance - LABEL_HIDE_DISTANCE) / fadeRange;
-            labelData.label.element.style.opacity = Math.max(0, Math.min(1, opacity));
+            labelData.label.element.style.opacity = Math.max(0, Math.min(1, (distance - LABEL_HIDE_DISTANCE) / fadeRange));
           } else {
             labelData.label.element.style.opacity = '1';
           }
         }
       });
       
-      // Обновление информации о расстоянии для текущей цели
+      // Расстояние до цели
       if (currentTarget !== 'all') {
         const targetObj = allSpatialObjects.find(o => o.userData.key === currentTarget);
         if (targetObj) {
-          const worldPos = new THREE.Vector3();
-          targetObj.getWorldPosition(worldPos);
+          const worldPos = getWorldPosition(targetObj);
           const distance = camPos.distanceTo(worldPos);
           distanceDisplay.textContent = `📏 Расстояние: ${Math.round(distance)} ед.`;
           distanceDisplay.style.display = 'block';
         }
+      } else {
+        distanceDisplay.style.display = 'none';
       }
     }
 
@@ -1279,29 +1251,33 @@
       // Планеты Солнечной системы
       planets.forEach(planet => {
         const data = planet.userData;
-        if (data.distance > 0) {
+        if (data.distance > 0 && data.angle !== undefined) {
           data.angle += data.speed * 0.25 * speedMultiplier;
           planet.position.x = data.distance * Math.cos(data.angle);
           planet.position.z = data.distance * Math.sin(data.angle);
         }
-        planet.rotation.y += 0.008 * speedMultiplier;
+        if (data.isInSolarSystem !== false) planet.rotation.y += 0.008 * speedMultiplier;
       });
       
       // Спутники
       allMoons.forEach(moon => {
         const data = moon.userData;
-        data.angle += data.speed * 0.25 * speedMultiplier;
-        moon.position.x = data.distance * Math.cos(data.angle);
-        moon.position.z = data.distance * Math.sin(data.angle);
+        if (data.angle !== undefined) {
+          data.angle += data.speed * 0.25 * speedMultiplier;
+          moon.position.x = data.distance * Math.cos(data.angle);
+          moon.position.z = data.distance * Math.sin(data.angle);
+        }
         moon.rotation.y += 0.02 * speedMultiplier;
       });
       
       // Экзопланеты
       allExoplanets.forEach(planet => {
         const data = planet.userData;
-        data.angle += data.speed * 0.25 * speedMultiplier;
-        planet.position.x = data.distance * Math.cos(data.angle);
-        planet.position.z = data.distance * Math.sin(data.angle);
+        if (data.angle !== undefined) {
+          data.angle += data.speed * 0.25 * speedMultiplier;
+          planet.position.x = data.distance * Math.cos(data.angle);
+          planet.position.z = data.distance * Math.sin(data.angle);
+        }
       });
       
       // Астероиды
@@ -1318,22 +1294,8 @@
         obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
       });
       
-      // Чёрные дыры (вращение дисков)
-      blackHoleObjects.forEach(bh => {
-        bh.children[0].rotation.z += 0.01 * speedMultiplier;
-      });
-      
       updateFlyMovement();
       updateLabels();
-      
-      if (!flyMode && currentTarget !== 'all') {
-        const targetObj = allSpatialObjects.find(o => o.userData.key === currentTarget);
-        if (targetObj) {
-          const worldPos = new THREE.Vector3();
-          targetObj.getWorldPosition(worldPos);
-          controls.target.copy(worldPos);
-        }
-      }
       
       if (!flyMode) controls.update();
       
@@ -1358,14 +1320,15 @@
       }
     });
 
-    console.log('🌌 ВСЕЛЕННАЯ В ПРЕДЕЛАХ 5 СВЕТОВЫХ ЛЕТ ГОТОВА!');
-    console.log('☀️ Солнечная система: все планеты + спутники + пояса');
-    console.log('⭐ Ближайшие звёзды: Проксима Центавра, Альфа Центавра A/B, Звезда Барнарда');
-    console.log('🟤 Коричневые карлики: WISE 0855, Луман 16A/B, WISE 1506');
-    console.log('🕳️ Чёрные дыры: Gaia BH1, A0620-00, V616 Mon');
-    console.log('🌍 Экзопланеты: Проксима b, Барнард b');
-    console.log('🔍 Поиск объектов в правом верхнем углу');
-    console.log('📏 Названия исчезают при отдалении > 4999 ед. и приближении < 1000 ед.');
+    console.log('🌌 ВСЕЛЕННАЯ • 5 световых лет — ГОТОВА!');
+    console.log('☀️ Солнечная система: Солнце, 8 планет, 3 карликовые, 10 спутников');
+    console.log('⭐ Проксима Центавра (4.24 св.л) + Проксима b');
+    console.log('⭐ Альфа Центавра A и B (4.37 св.л)');
+    console.log('⭐ Звезда Барнарда (5.96 св.л) + Барнард b');
+    console.log('💫 Пояса: астероидов, Койпера, Облако Оорта');
+    console.log('🔍 Поиск — справа вверху');
+    console.log('📏 Названия: исчезают при <1000 и >4999 ед.');
+    console.log('✅ БАГ ИСПРАВЛЕН: плавный переход к найденному объекту');
   </script>
 </body>
 </html>
