@@ -28,6 +28,7 @@
       font-weight: 500;
       letter-spacing: 1px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      z-index: 10;
     }
     #current-planet {
       position: absolute;
@@ -81,7 +82,6 @@
       0%, 100% { box-shadow: 0 0 20px rgba(255,140,0,0.6); }
       50% { box-shadow: 0 0 40px rgba(255,140,0,0.9); }
     }
-    /* Панель настроек */
     #settings-panel {
       position: absolute;
       top: 80px;
@@ -93,7 +93,7 @@
       border: 1px solid rgba(255,255,255,0.25);
       box-shadow: 0 8px 30px rgba(0,0,0,0.7);
       z-index: 25;
-      min-width: 250px;
+      min-width: 260px;
       color: white;
     }
     #settings-panel h3 {
@@ -111,7 +111,7 @@
       gap: 10px;
     }
     .setting-row label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       white-space: nowrap;
     }
@@ -120,17 +120,25 @@
       accent-color: #ffaa00;
       height: 6px;
     }
-    .setting-row .value-display {
-      font-size: 14px;
+    .value-display {
+      font-size: 13px;
       font-weight: bold;
       color: #ffaa00;
       min-width: 55px;
       text-align: right;
     }
-    #time-speed-display {
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffaa00;
+    #settings-panel button {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    #settings-panel button:hover {
+      background: rgba(255,140,0,0.5);
     }
     .instruction {
       position: absolute;
@@ -148,7 +156,6 @@
       letter-spacing: 0.5px;
       z-index: 15;
     }
-    /* Джойстик */
     #joystick-container {
       position: absolute;
       bottom: 40px;
@@ -214,34 +221,38 @@
   <div id="current-planet"></div>
   <button id="mode-btn">🎮 ОБЗОР (мышь)</button>
   
-  <!-- Панель настроек -->
   <div id="settings-panel">
     <h3>⚙️ НАСТРОЙКИ</h3>
     <div class="setting-row">
-      <label>⏱️ Скорость времени:</label>
+      <label>⏱️ Время:</label>
       <span class="value-display" id="time-speed-display">1x</span>
     </div>
     <div class="setting-row">
       <input type="range" id="time-speed-slider" min="1" max="5000" value="1" step="1">
     </div>
     <div class="setting-row">
-      <label>🖱️ Чувств. камеры:</label>
+      <label>🖱️ Чувств.:</label>
       <span class="value-display" id="sensitivity-display">0.5</span>
     </div>
     <div class="setting-row">
       <input type="range" id="sensitivity-slider" min="0.1" max="1.5" value="0.5" step="0.1">
     </div>
+    <div class="setting-row">
+      <label>🚀 Скорость:</label>
+      <span class="value-display" id="fly-speed-display">1x</span>
+    </div>
+    <div class="setting-row">
+      <input type="range" id="fly-speed-slider" min="0.1" max="10" value="1" step="0.1">
+    </div>
     <div class="setting-row" style="justify-content: center; margin-top: 5px;">
-      <button id="pause-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 14px;">⏯️ ПАУЗА</button>
+      <button id="pause-btn">⏯️ ПАУЗА</button>
     </div>
   </div>
   
   <div class="instruction">🖱️ Обзор: вращение/зум | 🚀 Полёт: WASD | ПРОБЕЛ — переключить режим | ⚙️ Справа — настройки</div>
   
   <div id="joystick-container">
-    <div id="joystick-base">
-      <div id="joystick-thumb"></div>
-    </div>
+    <div id="joystick-base"><div id="joystick-thumb"></div></div>
   </div>
   <div id="look-area"></div>
 
@@ -259,35 +270,35 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    // --- Сцена ---
+    // ============ СЦЕНА ============
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050510);
+    scene.background = new THREE.Color(0x020208);
+    scene.fog = new THREE.FogExp2(0x020208, 0.0000008);
     
-    // Звёзды
     const starsGeo1 = new THREE.BufferGeometry();
-    const starsPos1 = new Float32Array(3000 * 3);
-    for (let i = 0; i < 3000 * 3; i += 3) {
-      starsPos1[i] = (Math.random() - 0.5) * 1200;
-      starsPos1[i+1] = (Math.random() - 0.5) * 700;
-      starsPos1[i+2] = (Math.random() - 0.5) * 900;
+    const starsPos1 = new Float32Array(4000 * 3);
+    for (let i = 0; i < 4000 * 3; i += 3) {
+      starsPos1[i] = (Math.random() - 0.5) * 2000;
+      starsPos1[i+1] = (Math.random() - 0.5) * 1200;
+      starsPos1[i+2] = (Math.random() - 0.5) * 1500;
     }
     starsGeo1.setAttribute('position', new THREE.BufferAttribute(starsPos1, 3));
-    const stars1 = new THREE.Points(starsGeo1, new THREE.PointsMaterial({color: 0xffffff, size: 0.25}));
+    const stars1 = new THREE.Points(starsGeo1, new THREE.PointsMaterial({color: 0xffffff, size: 0.3}));
     scene.add(stars1);
     
     const starsGeo2 = new THREE.BufferGeometry();
-    const starsPos2 = new Float32Array(2000 * 3);
-    for (let i = 0; i < 2000 * 3; i += 3) {
-      starsPos2[i] = (Math.random() - 0.5) * 1600;
-      starsPos2[i+1] = (Math.random() - 0.5) * 900;
-      starsPos2[i+2] = (Math.random() - 0.5) * 1100;
+    const starsPos2 = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000 * 3; i += 3) {
+      starsPos2[i] = (Math.random() - 0.5) * 2800;
+      starsPos2[i+1] = (Math.random() - 0.5) * 1600;
+      starsPos2[i+2] = (Math.random() - 0.5) * 2000;
     }
     starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPos2, 3));
-    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({color: 0xaaccff, size: 0.3}));
+    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({color: 0xaaccff, size: 0.35}));
     scene.add(stars2);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 2000);
-    camera.position.set(0, 40, 80);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 4000);
+    camera.position.set(0, 50, 100);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -305,44 +316,38 @@
     labelRenderer.domElement.style.pointerEvents = 'none';
     document.body.appendChild(labelRenderer.domElement);
 
-    // OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.rotateSpeed = 0.5;
-    controls.zoomSpeed = 1.5;
+    controls.zoomSpeed = 1.8;
     controls.target.set(0, 0, 0);
-    controls.maxDistance = 600;
+    controls.maxDistance = 1000;
     controls.minDistance = 2;
     controls.update();
 
-    // --- Настройки ---
+    // ============ НАСТРОЙКИ ============
     const timeSpeedSlider = document.getElementById('time-speed-slider');
     const timeSpeedDisplay = document.getElementById('time-speed-display');
     const sensitivitySlider = document.getElementById('sensitivity-slider');
     const sensitivityDisplay = document.getElementById('sensitivity-display');
+    const flySpeedSlider = document.getElementById('fly-speed-slider');
+    const flySpeedDisplay = document.getElementById('fly-speed-display');
     const pauseBtn = document.getElementById('pause-btn');
     
     let timeSpeed = 1;
     let isPaused = false;
     let cameraSensitivity = 0.5;
+    let baseFlySpeed = 0.7;
+    let currentFlySpeed = 0.7;
     
     timeSpeedSlider.addEventListener('input', () => {
       const val = parseInt(timeSpeedSlider.value);
-      if (val <= 10) {
-        timeSpeed = val;
-        timeSpeedDisplay.textContent = val + 'x';
-      } else if (val <= 100) {
-        timeSpeed = Math.round(val / 10) * 10;
-        timeSpeedDisplay.textContent = timeSpeed + 'x';
-      } else if (val <= 1000) {
-        timeSpeed = Math.round(val / 50) * 50;
-        timeSpeedDisplay.textContent = timeSpeed + 'x';
-      } else {
-        timeSpeed = Math.round(val / 250) * 250;
-        timeSpeedDisplay.textContent = timeSpeed + 'x';
-      }
-      timeSpeedSlider.value = val;
+      if (val <= 10) timeSpeed = val;
+      else if (val <= 100) timeSpeed = Math.round(val / 10) * 10;
+      else if (val <= 1000) timeSpeed = Math.round(val / 50) * 50;
+      else timeSpeed = Math.round(val / 250) * 250;
+      timeSpeedDisplay.textContent = timeSpeed + 'x';
     });
     
     sensitivitySlider.addEventListener('input', () => {
@@ -352,19 +357,24 @@
       flyRotateSpeed = 0.01 * cameraSensitivity;
     });
     
+    flySpeedSlider.addEventListener('input', () => {
+      baseFlySpeed = parseFloat(flySpeedSlider.value);
+      currentFlySpeed = baseFlySpeed;
+      flySpeedDisplay.textContent = baseFlySpeed.toFixed(1) + 'x';
+    });
+    
     pauseBtn.addEventListener('click', () => {
       isPaused = !isPaused;
       pauseBtn.textContent = isPaused ? '▶️ ИГРАТЬ' : '⏯️ ПАУЗА';
       pauseBtn.style.background = isPaused ? 'rgba(255,140,0,0.5)' : 'rgba(255,255,255,0.15)';
     });
 
-    // --- Режимы управления ---
+    // ============ РЕЖИМЫ УПРАВЛЕНИЯ ============
     let flyMode = false;
     const modeBtn = document.getElementById('mode-btn');
     const instruction = document.querySelector('.instruction');
     
     const keys = { w: false, a: false, s: false, d: false, q: false, e: false, shift: false };
-    const flySpeed = 0.6;
     let flyRotateSpeed = 0.01 * cameraSensitivity;
     let yaw = 0, pitch = 0;
     let mouseDown = false;
@@ -372,18 +382,15 @@
     
     function toggleFlyMode() {
       flyMode = !flyMode;
-      
       if (flyMode) {
         modeBtn.textContent = '🚀 ПОЛЁТ (WASD)';
         modeBtn.classList.add('fly-mode');
         instruction.textContent = 'WASD — движение | Q/E — вверх/вниз | Shift — уск. | Мышь — поворот | ПРОБЕЛ — обзор';
         controls.enabled = false;
-        
         const direction = new THREE.Vector3();
         camera.getWorldDirection(direction);
         yaw = Math.atan2(direction.x, direction.z);
         pitch = Math.asin(direction.y);
-        
         renderer.domElement.style.cursor = 'crosshair';
       } else {
         modeBtn.textContent = '🎮 ОБЗОР (мышь)';
@@ -393,22 +400,18 @@
         controls.target.copy(camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10)));
         controls.update();
         renderer.domElement.style.cursor = 'default';
-        
-        // Сбрасываем клавиши
         Object.keys(keys).forEach(k => keys[k] = false);
       }
     }
     
     modeBtn.addEventListener('click', toggleFlyMode);
     
-    // Пробел для переключения режимов
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
         toggleFlyMode();
         return;
       }
-      
       if (!flyMode) return;
       
       switch(e.code) {
@@ -425,7 +428,6 @@
     
     window.addEventListener('keyup', (e) => {
       if (!flyMode) return;
-      
       switch(e.code) {
         case 'KeyW': keys.w = false; break;
         case 'KeyA': keys.a = false; break;
@@ -445,25 +447,20 @@
       lastMouseY = e.clientY;
     });
     
-    window.addEventListener('mouseup', () => {
-      mouseDown = false;
-    });
+    window.addEventListener('mouseup', () => { mouseDown = false; });
     
     window.addEventListener('mousemove', (e) => {
       if (!flyMode || !mouseDown) return;
-      
       const deltaX = e.clientX - lastMouseX;
       const deltaY = e.clientY - lastMouseY;
-      
       yaw -= deltaX * flyRotateSpeed;
       pitch -= deltaY * flyRotateSpeed;
       pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
-      
       lastMouseX = e.clientX;
       lastMouseY = e.clientY;
     });
 
-    // --- Джойстик для телефонов ---
+    // ============ ДЖОЙСТИК ============
     const joystickContainer = document.getElementById('joystick-container');
     const joystickBase = document.getElementById('joystick-base');
     const joystickThumb = document.getElementById('joystick-thumb');
@@ -502,7 +499,6 @@
       const touch = e.touches[0];
       joystickMoveX = touch.clientX - joystickStartX;
       joystickMoveY = touch.clientY - joystickStartY;
-      
       const maxDist = 50;
       const dist = Math.sqrt(joystickMoveX ** 2 + joystickMoveY ** 2);
       if (dist > maxDist) {
@@ -533,7 +529,6 @@
     lookArea.addEventListener('touchmove', (e) => {
       e.preventDefault();
       if (!touchLookActive) return;
-      
       const deltaX = e.touches[0].clientX - touchLookLastX;
       const deltaY = e.touches[0].clientY - touchLookLastY;
       const sensitivity = cameraSensitivity * 0.8;
@@ -546,11 +541,9 @@
         const target = controls.target;
         const offset = camera.position.clone().sub(target);
         const spherical = new THREE.Spherical().setFromVector3(offset);
-        
         spherical.theta -= deltaX * 0.003 * sensitivity;
         spherical.phi -= deltaY * 0.003 * sensitivity;
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
-        
         offset.setFromSpherical(spherical);
         camera.position.copy(target.clone().add(offset));
         camera.lookAt(target);
@@ -560,11 +553,9 @@
       touchLookLastY = e.touches[0].clientY;
     });
     
-    lookArea.addEventListener('touchend', () => {
-      touchLookActive = false;
-    });
+    lookArea.addEventListener('touchend', () => { touchLookActive = false; });
 
-    // --- Освещение ---
+    // ============ ОСВЕЩЕНИЕ ============
     const sunLight = new THREE.PointLight(0xfff5e6, 3, 0, 0);
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
@@ -573,13 +564,12 @@
     dirLight.position.set(10, 20, 5);
     scene.add(dirLight);
 
-    // --- Текстуры ---
+    // ============ ТЕКСТУРЫ ============
     function createPlanetTexture(baseColor, type) {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 128;
       const ctx = canvas.getContext('2d');
-      
       ctx.fillStyle = baseColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
@@ -630,34 +620,54 @@
         ctx.fillStyle = '#666666';
         for(let i=0;i<20;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*6+2,0,Math.PI*2); ctx.fill(); }
       }
-      
       return new THREE.CanvasTexture(canvas);
     }
 
-    // --- Планеты ---
+    // ============ ПЛАНЕТЫ И СПУТНИКИ ============
     const planetsData = [
-      { name: 'Солнце', key: 'sun', color: 0xffaa00, size: 2.5, distance: 0, speed: 0, emissive: 0xff5500 },
-      { name: 'Меркурий', key: 'mercury', color: 0xaaaaaa, size: 0.4, distance: 6, speed: 0.035 },
-      { name: 'Венера', key: 'venus', color: 0xffcc88, size: 0.7, distance: 9, speed: 0.022 },
-      { name: 'Земля', key: 'earth', color: 0x2299ff, size: 0.75, distance: 12, speed: 0.018 },
-      { name: 'Марс', key: 'mars', color: 0xc1440e, size: 0.55, distance: 16, speed: 0.015 },
-      { name: 'Церера', key: 'ceres', color: 0x999999, size: 0.3, distance: 20, speed: 0.012, dwarf: true },
-      { name: 'Юпитер', key: 'jupiter', color: 0xd8a27a, size: 1.8, distance: 28, speed: 0.009 },
-      { name: 'Сатурн', key: 'saturn', color: 0xf0d8b0, size: 1.5, distance: 36, speed: 0.007, hasRings: true },
-      { name: 'Уран', key: 'uranus', color: 0x6fd4d4, size: 1.2, distance: 45, speed: 0.005 },
-      { name: 'Нептун', key: 'neptune', color: 0x4169e1, size: 1.15, distance: 54, speed: 0.004 },
-      { name: 'Плутон', key: 'pluto', color: 0xccbb99, size: 0.35, distance: 65, speed: 0.003, dwarf: true },
-      { name: 'Эрида', key: 'eris', color: 0xddccbb, size: 0.32, distance: 78, speed: 0.0025, dwarf: true }
+      { name: 'Солнце', key: 'sun', color: 0xffaa00, size: 2.5, distance: 0, speed: 0, emissive: 0xff5500, moons: [] },
+      { name: 'Меркурий', key: 'mercury', color: 0xaaaaaa, size: 0.4, distance: 6, speed: 0.035, moons: [] },
+      { name: 'Венера', key: 'venus', color: 0xffcc88, size: 0.7, distance: 9, speed: 0.022, moons: [] },
+      { name: 'Земля', key: 'earth', color: 0x2299ff, size: 0.75, distance: 12, speed: 0.018, moons: [
+        { name: 'Луна', key: 'moon', color: 0xcccccc, size: 0.2, distance: 1.5, speed: 0.25, showLabel: true }
+      ]},
+      { name: 'Марс', key: 'mars', color: 0xc1440e, size: 0.55, distance: 16, speed: 0.015, moons: [
+        { name: 'Фобос', key: 'phobos', color: 0x999999, size: 0.08, distance: 0.9, speed: 0.4 },
+        { name: 'Деймос', key: 'deimos', color: 0xaaaaaa, size: 0.06, distance: 1.3, speed: 0.25 }
+      ]},
+      { name: 'Церера', key: 'ceres', color: 0x999999, size: 0.3, distance: 20, speed: 0.012, dwarf: true, moons: [] },
+      { name: 'Юпитер', key: 'jupiter', color: 0xd8a27a, size: 1.8, distance: 28, speed: 0.009, moons: [
+        { name: 'Ио', key: 'io', color: 0xffcc66, size: 0.22, distance: 2.8, speed: 0.35 },
+        { name: 'Европа', key: 'europa', color: 0xddddcc, size: 0.2, distance: 3.5, speed: 0.28 },
+        { name: 'Ганимед', key: 'ganymede', color: 0xbbbbaa, size: 0.28, distance: 4.3, speed: 0.22 },
+        { name: 'Каллисто', key: 'callisto', color: 0x888877, size: 0.26, distance: 5.2, speed: 0.18 }
+      ]},
+      { name: 'Сатурн', key: 'saturn', color: 0xf0d8b0, size: 1.5, distance: 36, speed: 0.007, hasRings: true, moons: [
+        { name: 'Титан', key: 'titan', color: 0xddcc88, size: 0.25, distance: 2.5, speed: 0.3 },
+        { name: 'Энцелад', key: 'enceladus', color: 0xeeeeff, size: 0.12, distance: 3.2, speed: 0.38 },
+        { name: 'Мимас', key: 'mimas', color: 0xcccccc, size: 0.1, distance: 3.8, speed: 0.42 }
+      ]},
+      { name: 'Уран', key: 'uranus', color: 0x6fd4d4, size: 1.2, distance: 45, speed: 0.005, moons: [
+        { name: 'Титания', key: 'titania', color: 0xbbccbb, size: 0.18, distance: 2.2, speed: 0.28 },
+        { name: 'Оберон', key: 'oberon', color: 0xaaaabb, size: 0.17, distance: 2.8, speed: 0.22 }
+      ]},
+      { name: 'Нептун', key: 'neptune', color: 0x4169e1, size: 1.15, distance: 54, speed: 0.004, moons: [
+        { name: 'Тритон', key: 'triton', color: 0xddccbb, size: 0.2, distance: 2.3, speed: 0.32 }
+      ]},
+      { name: 'Плутон', key: 'pluto', color: 0xccbb99, size: 0.35, distance: 65, speed: 0.003, dwarf: true, moons: [
+        { name: 'Харон', key: 'charon', color: 0xbbaa99, size: 0.15, distance: 0.8, speed: 0.5 }
+      ]},
+      { name: 'Эрида', key: 'eris', color: 0xddccbb, size: 0.32, distance: 78, speed: 0.0025, dwarf: true, moons: [] }
     ];
 
     const planets = [];
-    const allClickableObjects = [];
+    const allMoons = [];
 
     // Орбиты
     planetsData.forEach(p => {
       if (p.distance > 0) {
         const orbitGeo = new THREE.RingGeometry(p.distance - 0.03, p.distance + 0.03, 128);
-        const opacity = p.dwarf ? 0.08 : 0.15;
+        const opacity = p.dwarf ? 0.06 : 0.15;
         const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
           color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity 
         }));
@@ -666,7 +676,7 @@
       }
     });
 
-    // Создание планет
+    // Создание планет и спутников
     planetsData.forEach(data => {
       const geo = new THREE.SphereGeometry(data.size, data.key === 'sun' ? 64 : 40, 40);
       const texture = createPlanetTexture(`#${data.color.toString(16).padStart(6, '0')}`, data.key);
@@ -698,15 +708,15 @@
       };
       
       scene.add(planet);
-      allClickableObjects.push(planet);
       
+      // Кольца Сатурна
       if (data.hasRings) {
         const ringGeo1 = new THREE.RingGeometry(data.size * 1.3, data.size * 2.0, 64);
         const ring1 = new THREE.Mesh(ringGeo1, new THREE.MeshStandardMaterial({
           color: 0xd4c090, side: THREE.DoubleSide, transparent: true, opacity: 0.55, roughness: 0.5
         }));
         ring1.rotation.x = Math.PI / 2 + 0.05;
-        ring1.userData = { isRing: true, parentKey: data.key };
+        ring1.userData = { isRing: true };
         planet.add(ring1);
         
         const ringGeo2 = new THREE.RingGeometry(data.size * 2.05, data.size * 2.35, 64);
@@ -714,10 +724,11 @@
           color: 0xb8a878, side: THREE.DoubleSide, transparent: true, opacity: 0.4, roughness: 0.5
         }));
         ring2.rotation.x = Math.PI / 2 - 0.03;
-        ring2.userData = { isRing: true, parentKey: data.key };
+        ring2.userData = { isRing: true };
         planet.add(ring2);
       }
       
+      // Подпись планеты
       const labelDiv = document.createElement('div');
       labelDiv.textContent = data.name;
       labelDiv.style.color = 'white';
@@ -731,10 +742,62 @@
       label.position.set(0, data.size + 0.5, 0);
       planet.add(label);
       
+      // Спутники
+      data.moons.forEach(moonData => {
+        const moonGeo = new THREE.SphereGeometry(moonData.size, 24, 24);
+        const moonMat = new THREE.MeshStandardMaterial({
+          color: moonData.color,
+          roughness: 0.8,
+          metalness: 0.05
+        });
+        const moon = new THREE.Mesh(moonGeo, moonMat);
+        
+        const moonAngle = Math.random() * Math.PI * 2;
+        moon.position.x = moonData.distance * Math.cos(moonAngle);
+        moon.position.z = moonData.distance * Math.sin(moonAngle);
+        
+        moon.userData = {
+          name: moonData.name,
+          key: moonData.key,
+          distance: moonData.distance,
+          speed: moonData.speed,
+          angle: moonAngle,
+          isMoon: true,
+          parentPlanet: planet
+        };
+        
+        // Подпись только для Луны
+        if (moonData.showLabel) {
+          const moonLabelDiv = document.createElement('div');
+          moonLabelDiv.textContent = moonData.name;
+          moonLabelDiv.style.color = 'white';
+          moonLabelDiv.style.fontSize = '11px';
+          moonLabelDiv.style.fontWeight = 'bold';
+          moonLabelDiv.style.textShadow = '1px 1px 3px black';
+          moonLabelDiv.style.background = 'rgba(0,0,0,0.5)';
+          moonLabelDiv.style.padding = '1px 8px';
+          moonLabelDiv.style.borderRadius = '12px';
+          const moonLabel = new CSS2DObject(moonLabelDiv);
+          moonLabel.position.set(0, moonData.size + 0.2, 0);
+          moon.add(moonLabel);
+        }
+        
+        // Орбита спутника
+        const moonOrbitGeo = new THREE.RingGeometry(moonData.distance - 0.01, moonData.distance + 0.01, 64);
+        const moonOrbit = new THREE.Mesh(moonOrbitGeo, new THREE.MeshBasicMaterial({
+          color: 0x445566, side: THREE.DoubleSide, transparent: true, opacity: 0.2
+        }));
+        moonOrbit.rotation.x = Math.PI / 2;
+        planet.add(moonOrbit);
+        
+        planet.add(moon);
+        allMoons.push(moon);
+      });
+      
       planets.push(planet);
     });
 
-    // --- Пояс астероидов ---
+    // ============ ПОЯС АСТЕРОИДОВ ============
     const asteroidCount = 800;
     const asteroidGeo = new THREE.SphereGeometry(0.08, 3, 3);
     const asteroidMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
@@ -754,16 +817,12 @@
       asteroid.scale.set(scale, scale * (0.5 + Math.random()), scale);
       asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       
-      asteroid.userData = {
-        distance, speed: 0.008 + Math.random() * 0.01, angle, yOffset,
-        isAsteroid: true
-      };
-      
+      asteroid.userData = { distance, speed: 0.008 + Math.random() * 0.01, angle, yOffset, isAsteroid: true };
       scene.add(asteroid);
       asteroids.push(asteroid);
     }
 
-    // --- Пояс Койпера ---
+    // ============ ПОЯС КОЙПЕРА ============
     const kuiperCount = 1200;
     const kuiperGeo = new THREE.SphereGeometry(0.06, 3, 3);
     const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x998877, roughness: 0.9, emissive: 0x111111, emissiveIntensity: 0.3 });
@@ -778,20 +837,39 @@
       obj.position.x = distance * Math.cos(angle);
       obj.position.y = yOffset;
       obj.position.z = distance * Math.sin(angle);
-      
       obj.scale.setScalar(0.4 + Math.random() * 1.2);
       obj.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       
-      obj.userData = {
-        distance, speed: 0.0015 + Math.random() * 0.003, angle, yOffset,
-        isKuiper: true
-      };
-      
+      obj.userData = { distance, speed: 0.0015 + Math.random() * 0.003, angle, yOffset, isKuiper: true };
       scene.add(obj);
       kuiperObjects.push(obj);
     }
 
-    // --- Навигация ---
+    // ============ ОБЛАКО ООРТА (внешняя сфера) ============
+    const oortCount = 2000;
+    const oortGeo = new THREE.BufferGeometry();
+    const oortPositions = new Float32Array(oortCount * 3);
+    for (let i = 0; i < oortCount * 3; i += 3) {
+      const radius = 100 + Math.random() * 60;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      oortPositions[i] = radius * Math.sin(phi) * Math.cos(theta);
+      oortPositions[i+1] = radius * Math.sin(phi) * Math.sin(theta) * 0.6;
+      oortPositions[i+2] = radius * Math.cos(phi);
+    }
+    oortGeo.setAttribute('position', new THREE.BufferAttribute(oortPositions, 3));
+    const oortCloud = new THREE.Points(oortGeo, new THREE.PointsMaterial({
+      color: 0x445566,
+      size: 0.2,
+      transparent: true,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    }));
+    oortCloud.userData = { isOort: true };
+    scene.add(oortCloud);
+
+    // ============ НАВИГАЦИЯ ============
     let currentTarget = 'all';
     const planetNameDiv = document.getElementById('current-planet');
     
@@ -801,10 +879,10 @@
       if (planetKey === 'all') {
         if (!flyMode) {
           controls.target.set(0, 0, 0);
-          camera.position.set(0, 40, 80);
+          camera.position.set(0, 50, 100);
           controls.update();
         } else {
-          camera.position.set(0, 40, 80);
+          camera.position.set(0, 50, 100);
           camera.lookAt(0, 0, 0);
           const dir = new THREE.Vector3();
           camera.getWorldDirection(dir);
@@ -814,19 +892,28 @@
         return;
       }
       
+      // Ищем среди планет
       const planet = planets.find(p => p.userData.key === planetKey);
-      if (planet) {
-        const pos = planet.position.clone();
-        planetNameDiv.textContent = planet.userData.name;
+      // Или среди спутников
+      const moon = allMoons.find(m => m.userData.key === planetKey);
+      
+      const targetObj = planet || moon;
+      if (targetObj) {
+        const pos = targetObj.position.clone();
+        if (moon && moon.userData.parentPlanet) {
+          pos.add(moon.userData.parentPlanet.position);
+        }
+        
+        planetNameDiv.textContent = targetObj.userData.name;
         planetNameDiv.style.display = 'block';
         
         if (!flyMode) {
           controls.target.copy(pos);
-          const dist = planet.userData.size * 6 + 3;
+          const dist = targetObj.userData.size * 8 + 2;
           camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
           controls.update();
         } else {
-          const dist = planet.userData.size * 6 + 3;
+          const dist = targetObj.userData.size * 8 + 2;
           camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
           camera.lookAt(pos);
           const dir = new THREE.Vector3();
@@ -837,7 +924,7 @@
       }
     }
     
-    // Клик по объектам
+    // Клик
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     
@@ -850,14 +937,15 @@
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       
       raycaster.setFromCamera(mouse, camera);
-      const clickableObjects = [...planets];
+      const allClickable = [...planets, ...allMoons];
+      
       planets.forEach(p => {
         p.children.forEach(child => {
-          if (child.userData && child.userData.isRing) clickableObjects.push(child);
+          if (child.userData && child.userData.isRing) allClickable.push(child);
         });
       });
       
-      const intersects = raycaster.intersectObjects(clickableObjects, true);
+      const intersects = raycaster.intersectObjects(allClickable, true);
       
       if (intersects.length > 0) {
         let obj = intersects[0].object;
@@ -870,11 +958,12 @@
       }
     });
 
-    // --- Анимация ---
+    // ============ АНИМАЦИЯ ============
     function updateFlyMovement() {
       if (!flyMode) return;
       
-      const speed = keys.shift ? flySpeed * 2.5 : flySpeed;
+      currentFlySpeed = baseFlySpeed * (keys.shift ? 3 : 1);
+      const speed = currentFlySpeed * 0.7;
       const forward = new THREE.Vector3();
       const right = new THREE.Vector3();
       const up = new THREE.Vector3(0, 1, 0);
@@ -883,7 +972,6 @@
       right.crossVectors(forward, up).normalize();
       
       let moveX = 0, moveY = 0;
-      
       if (joystickActive) {
         moveX = joystickMoveX / 50;
         moveY = joystickMoveY / 50;
@@ -893,7 +981,6 @@
       if (keys.s || moveY > 0.2) camera.position.addScaledVector(forward, -speed);
       if (keys.a || moveX < -0.2) camera.position.addScaledVector(right, -speed);
       if (keys.d || moveX > 0.2) camera.position.addScaledVector(right, speed);
-      
       if (keys.q) camera.position.y -= speed * 0.7;
       if (keys.e) camera.position.y += speed * 0.7;
       
@@ -908,6 +995,7 @@
       
       stars1.rotation.y += 0.00008 * (isPaused ? 0 : timeSpeed);
       stars2.rotation.y -= 0.00004 * (isPaused ? 0 : timeSpeed);
+      oortCloud.rotation.y += 0.00002 * (isPaused ? 0 : timeSpeed);
       
       const speedMultiplier = isPaused ? 0 : timeSpeed;
       
@@ -920,6 +1008,15 @@
           planet.position.z = data.distance * Math.sin(data.angle);
         }
         planet.rotation.y += 0.008 * speedMultiplier;
+      });
+      
+      // Спутники
+      allMoons.forEach(moon => {
+        const data = moon.userData;
+        data.angle += data.speed * 0.25 * speedMultiplier;
+        moon.position.x = data.distance * Math.cos(data.angle);
+        moon.position.z = data.distance * Math.sin(data.angle);
+        moon.rotation.y += 0.02 * speedMultiplier;
       });
       
       // Астероиды
@@ -969,10 +1066,11 @@
     });
 
     console.log('🌠 Полная Солнечная система готова!');
-    console.log('⚙️ Панель настроек справа — скорость времени, чувствительность, пауза');
-    console.log('🎮 ПРОБЕЛ — переключение Обзор/Полёт');
-    console.log('🚀 Полёт: WASD — движение, Q/E — вверх/вниз, Shift — ускорение');
-    console.log('📱 Телефон: джойстик слева, поворот справа');
+    console.log('🌍 Планеты со спутниками: Земля(Луна), Марс(Фобос, Деймос), Юпитер(Ио, Европа, Ганимед, Каллисто)');
+    console.log('🪐 Сатурн(Титан, Энцелад, Мимас), Уран(Титания, Оберон), Нептун(Тритон), Плутон(Харон)');
+    console.log('☁️ Добавлено Облако Оорта на расстоянии 100-160');
+    console.log('🚀 Скорость полёта регулируется в настройках (0.1x - 10x)');
+    console.log('Готов к масштабным дополнениям! 🚀✨');
   </script>
 </body>
 </html>
