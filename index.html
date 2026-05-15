@@ -2,616 +2,462 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=yes, viewport-fit=cover">
-  <title>Haunted Dorm · Комната 404</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Солнечная система 3D | Изучение планет</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      font-family: 'Segoe UI', 'Arial', sans-serif;
-    }
     body {
-      background: #0b0b0f;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       margin: 0;
-      padding: 10px;
-    }
-    .game-container {
-      background: linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%);
-      border-radius: 32px;
-      padding: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 0, 100, 0.3);
-      max-width: 500px;
-      width: 100%;
-      border: 1px solid #ff2a6d;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #ffb3c6;
-      font-weight: bold;
-      margin-bottom: 12px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 20px;
-      padding: 10px 16px;
-      backdrop-filter: blur(10px);
-      border: 1px solid #ff4d7a;
-    }
-    .energy-display {
-      font-size: 1.4rem;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #000;
-      padding: 5px 14px;
-      border-radius: 20px;
-      color: #ffdf00;
-      text-shadow: 0 0 8px #ffaa00;
-      box-shadow: inset 0 0 6px black;
     }
-    .door-hp {
-      font-size: 1.2rem;
-      background: #3a0a1a;
-      padding: 5px 16px;
-      border-radius: 20px;
-      color: #ff6b6b;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      background: #12121c;
-      padding: 10px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      border: 2px solid #3d2b3f;
-      box-shadow: inset 0 0 15px black;
-    }
-    .cell {
-      aspect-ratio: 1 / 1;
-      background: #25253a;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
       color: white;
-      background: radial-gradient(circle at 30% 30%, #3c3c5c, #1b1b2a);
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.6), 0 4px 6px black;
-      transition: 0.1s;
-      position: relative;
-      cursor: pointer;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 25px;
+      border-radius: 50px;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      font-weight: 500;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
     }
-    .cell.occupied {
-      background: radial-gradient(circle at 30% 30%, #5a3a6a, #2a1a3a);
-      color: #f0e68c;
-      font-weight: bold;
-      box-shadow: 0 0 12px #b983ff;
-    }
-    .cell.door {
-      background: radial-gradient(circle at 30% 30%, #8b0000, #4a0000);
-      font-size: 2rem;
-      box-shadow: 0 0 15px #ff4444;
-    }
-    .cell.selected {
-      outline: 3px solid #ffe484;
-      outline-offset: -2px;
-      filter: brightness(1.3);
-      transform: scale(0.96);
-    }
-    .action-panel {
+    #controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 15px;
-      background: #1e1e30;
-      border-radius: 24px;
-      padding: 12px;
       justify-content: center;
+      gap: 10px;
+      background: rgba(10, 10, 20, 0.75);
+      backdrop-filter: blur(15px);
+      padding: 15px 25px;
+      border-radius: 60px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.25);
+      z-index: 10;
     }
-    button {
-      background: #2c2c44;
+    .planet-btn {
+      background: rgba(255,255,255,0.1);
       border: none;
-      color: #ddd;
-      font-weight: bold;
-      padding: 10px 12px;
+      color: #ccc;
+      padding: 10px 18px;
       border-radius: 30px;
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 0 #0b0b15, 0 6px 10px black;
-      transition: all 0.07s;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      flex: 1;
-      min-width: 60px;
-      background: #383854;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(5px);
+      border: 1px solid transparent;
+    }
+    .planet-btn:hover {
+      background: rgba(255,255,255,0.25);
       color: white;
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
     }
-    button:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #0b0b15, 0 4px 6px black;
-      filter: brightness(1.3);
+    .planet-btn.active {
+      background: #ffaa00;
+      color: #000;
+      border-color: #ffcc80;
+      box-shadow: 0 0 25px #ff9900aa;
+      font-weight: bold;
     }
-    button:disabled {
-      opacity: 0.5;
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #0b0b15;
+    #reset-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      margin-left: 15px;
+      font-weight: bold;
+    }
+    .instruction {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      white-space: nowrap;
       pointer-events: none;
     }
-    .turret-btn { background: #5e3a6c; color: #ffddf4; }
-    .gen-btn { background: #2f5a4a; color: #c5ffc5; }
-    .door-btn { background: #8b3a3a; color: #ffc0c0; }
-    .boss-area {
-      text-align: center;
-      margin-top: 5px;
-      font-size: 1.1rem;
-      color: #ffaaaa;
-      background: #1a0e0e;
-      border-radius: 30px;
-      padding: 8px;
-      border: 1px solid #ff4d4d;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-    .boss-hp-bar {
-      width: 120px;
-      height: 12px;
-      background: #3a1a1a;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .boss-hp-fill {
-      width: 100%;
-      height: 100%;
-      background: #ff3a3a;
-      box-shadow: 0 0 15px red;
-    }
-    .log {
-      color: #aaa;
-      font-size: 0.75rem;
-      margin-top: 8px;
-      text-align: center;
-      min-height: 20px;
-    }
-    @media (max-width: 400px) {
-      button {
-        font-size: 0.7rem;
-        padding: 8px 6px;
+    @media (max-width: 750px) {
+      #controls {
+        gap: 5px;
+        padding: 10px 15px;
+      }
+      .planet-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      .instruction {
+        bottom: 100px;
+        font-size: 11px;
+        white-space: normal;
+        text-align: center;
+        width: 90%;
       }
     }
   </style>
 </head>
 <body>
-<div class="game-container">
-  <div class="header">
-    <span>⚡ <span id="energyValue">120</span></span>
-    <span class="door-hp">🚪 <span id="doorHP">100</span>%</span>
-    <span>👻BOSS <span id="waveText">1</span></span>
+  <div id="info">🪐 СОЛНЕЧНАЯ СИСТЕМА</div>
+  <div class="instruction">🖱️ Вращайте камеру | 📜 Прокрутка для зума | ✨ Нажмите на планету для фокуса</div>
+  
+  <div id="controls">
+    <button class="planet-btn active" data-planet="all">🌌 ВСЕ</button>
+    <button class="planet-btn" data-planet="sun">☀️ Солнце</button>
+    <button class="planet-btn" data-planet="mercury">☿ Меркурий</button>
+    <button class="planet-btn" data-planet="venus">♀ Венера</button>
+    <button class="planet-btn" data-planet="earth">🌍 Земля</button>
+    <button class="planet-btn" data-planet="mars">♂ Марс</button>
+    <button class="planet-btn" data-planet="jupiter">♃ Юпитер</button>
+    <button class="planet-btn" data-planet="saturn">♄ Сатурн</button>
+    <button class="planet-btn" data-planet="uranus">⛢ Уран</button>
+    <button class="planet-btn" data-planet="neptune">♆ Нептун</button>
+    <button id="reset-btn" title="Сбросить вид">↺</button>
   </div>
 
-  <div class="grid" id="gridContainer"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
 
-  <div class="action-panel">
-    <button class="gen-btn" id="btnGenerator">
-      <span>🔋</span> Генератор<br><small>35⚡</small>
-    </button>
-    <button class="turret-btn" id="btnTurret">
-      <span>🔫</span> Пушка<br><small>60⚡</small>
-    </button>
-    <button class="door-btn" id="btnRepair">
-      <span>🛡️</span> Чинить<br><small>30⚡</small>
-    </button>
-    <button id="btnSell" style="background:#4a4a5a;">
-      <span>💰</span> Продать<br><small>+50%</small>
-    </button>
-  </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-  <div class="boss-area">
-    <span>👾 Босс</span>
-    <div class="boss-hp-bar">
-      <div id="bossHpFill" class="boss-hp-fill" style="width: 100%;"></div>
-    </div>
-    <span id="bossHpText">200/200</span>
-  </div>
-  <div class="log" id="logMessage">Выбери клетку для постройки</div>
-</div>
+    // --- Сцена ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+    
+    // Звёзды (два слоя)
+    const starsGeo1 = new THREE.BufferGeometry();
+    const starsPos1 = new Float32Array(2000 * 3);
+    for (let i = 0; i < 2000 * 3; i += 3) {
+      starsPos1[i] = (Math.random() - 0.5) * 600;
+      starsPos1[i+1] = (Math.random() - 0.5) * 400;
+      starsPos1[i+2] = (Math.random() - 0.5) * 500;
+    }
+    starsGeo1.setAttribute('position', new THREE.BufferAttribute(starsPos1, 3));
+    const stars1 = new THREE.Points(starsGeo1, new THREE.PointsMaterial({color: 0xffffff, size: 0.25}));
+    scene.add(stars1);
+    
+    const starsGeo2 = new THREE.BufferGeometry();
+    const starsPos2 = new Float32Array(1000 * 3);
+    for (let i = 0; i < 1000 * 3; i += 3) {
+      starsPos2[i] = (Math.random() - 0.5) * 800;
+      starsPos2[i+1] = (Math.random() - 0.5) * 500;
+      starsPos2[i+2] = (Math.random() - 0.5) * 700;
+    }
+    starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPos2, 3));
+    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({color: 0xaaccff, size: 0.3}));
+    scene.add(stars2);
 
-<script>
-  (function() {
-    // ---------- НАСТРОЙКИ КОМНАТЫ ----------
-    const ROWS = 5;
-    const COLS = 5;
-    // Дверь находится в фиксированной клетке (индекс 2,2) - центр
-    const DOOR_ROW = 2;
-    const DOOR_COL = 2;
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 1000);
+    camera.position.set(0, 25, 45);
+    camera.lookAt(0, 0, 0);
 
-    // ---------- СОСТОЯНИЕ ИГРЫ ----------
-    let energy = 180;
-    let doorHP = 100;
-    let bossHP = 200;
-    let wave = 1;
-    let bossMaxHP = 200;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
 
-    // Ячейки: храним что построено: null, 'generator', 'turret'
-    let gridState = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
 
-    // Таймеры
-    let generatorInterval = null;
-    let bossAttackInterval = null;
-    let turretAttackInterval = null;
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.8;
+    controls.zoomSpeed = 1.5;
+    controls.target.set(0, 0, 0);
+    controls.maxDistance = 200;
+    controls.minDistance = 3;
+    controls.update();
 
-    // Выбранная ячейка (для продажи/подсветки)
-    let selectedRow = -1;
-    let selectedCol = -1;
+    // --- Освещение ---
+    const sunLight = new THREE.PointLight(0xfff5e6, 2, 0, 0);
+    sunLight.position.set(0, 0, 0);
+    scene.add(sunLight);
+    scene.add(new THREE.AmbientLight(0x111122));
 
-    // ---------- DOM элементы ----------
-    const gridEl = document.getElementById('gridContainer');
-    const energyEl = document.getElementById('energyValue');
-    const doorHPEl = document.getElementById('doorHP');
-    const bossHpFill = document.getElementById('bossHpFill');
-    const bossHpText = document.getElementById('bossHpText');
-    const waveTextEl = document.getElementById('waveText');
-    const logEl = document.getElementById('logMessage');
-
-    const btnGenerator = document.getElementById('btnGenerator');
-    const btnTurret = document.getElementById('btnTurret');
-    const btnRepair = document.getElementById('btnRepair');
-    const btnSell = document.getElementById('btnSell');
-
-    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-    function updateUI() {
-      energyEl.textContent = energy;
-      doorHPEl.textContent = doorHP;
-      let percent = Math.max(0, (bossHP / bossMaxHP) * 100);
-      bossHpFill.style.width = `${percent}%`;
-      bossHpText.textContent = `${Math.max(0, bossHP)}/${bossMaxHP}`;
-      waveTextEl.textContent = wave;
+    // --- Функция создания детальной текстуры (оптимизированная) ---
+    function createPlanetTexture(type, baseColor) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
       
-      // Блокировка кнопок по энергии
-      btnGenerator.disabled = energy < 35;
-      btnTurret.disabled = energy < 60;
-      btnRepair.disabled = energy < 30 || doorHP >= 100;
-    }
-
-    function log(msg) {
-      logEl.textContent = msg;
-    }
-
-    // Проверка: свободна ли клетка и не дверь
-    function isCellEmpty(row, col) {
-      if (row === DOOR_ROW && col === DOOR_COL) return false; // дверь
-      return gridState[row][col] === null;
-    }
-
-    // Стоимость построек
-    function getBuildCost(type) {
-      if (type === 'generator') return 35;
-      if (type === 'turret') return 60;
-      return 0;
-    }
-
-    // Продажа постройки (возврат 50%)
-    function sellBuilding(row, col) {
-      const building = gridState[row][col];
-      if (!building) return false;
-      let refund = 0;
-      if (building === 'generator') refund = Math.floor(35 * 0.5);
-      else if (building === 'turret') refund = Math.floor(60 * 0.5);
+      // Базовый градиент
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, baseColor);
+      grad.addColorStop(0.5, baseColor);
+      grad.addColorStop(1, baseColor);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      gridState[row][col] = null;
-      energy += refund;
-      log(`Продано. +${refund}⚡`);
-      renderGrid();
-      updateUI();
-      return true;
-    }
-
-    // Постройка
-    function build(row, col, type) {
-      if (!isCellEmpty(row, col)) {
-        log("Клетка занята!");
-        return false;
-      }
-      const cost = getBuildCost(type);
-      if (energy < cost) {
-        log("Недостаточно энергии!");
-        return false;
-      }
-      energy -= cost;
-      gridState[row][col] = type;
-      log(`Построено: ${type === 'generator' ? 'Генератор' : 'Пушка'}`);
-      renderGrid();
-      updateUI();
-      return true;
-    }
-
-    // Ремонт двери
-    function repairDoor() {
-      if (energy < 30) {
-        log("Мало энергии для ремонта!");
-        return;
-      }
-      if (doorHP >= 100) {
-        log("Дверь цела!");
-        return;
-      }
-      energy -= 30;
-      doorHP = Math.min(100, doorHP + 40);
-      log("Дверь укреплена +40 ❤️");
-      updateUI();
-      renderGrid();
-    }
-
-    // Атака босса по двери
-    function bossAttack() {
-      if (doorHP <= 0) {
-        gameOver();
-        return;
-      }
-      let damage = 5 + wave * 3; // с каждой волной сильнее
-      doorHP = Math.max(0, doorHP - damage);
-      log(`👻 Босс бьёт дверь на ${damage} урона!`);
-      if (doorHP <= 0) {
-        gameOver();
-      }
-      updateUI();
-      renderGrid();
-    }
-
-    // Атака турелей по боссу
-    function turretsAttack() {
-      let totalDamage = 0;
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (gridState[r][c] === 'turret') {
-            totalDamage += 7; // каждая пушка наносит 7 урона
-          }
-        }
-      }
-      if (totalDamage > 0 && bossHP > 0) {
-        bossHP = Math.max(0, bossHP - totalDamage);
-        log(`🔫 Пушки наносят ${totalDamage} урона!`);
-        if (bossHP <= 0) {
-          winWave();
-        }
-      }
-      updateUI();
-    }
-
-    // Генерация энергии от генераторов
-    function generateEnergy() {
-      let generators = 0;
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (gridState[r][c] === 'generator') generators++;
-        }
-      }
-      if (generators > 0) {
-        energy += generators * 4; // каждый генератор +4 энергии
-        updateUI();
-      }
-    }
-
-    function winWave() {
-      clearInterval(bossAttackInterval);
-      clearInterval(turretAttackInterval);
-      log(`✅ Босс волны ${wave} повержен!`);
-      wave++;
-      bossMaxHP = Math.floor(bossMaxHP * 1.4);
-      bossHP = bossMaxHP;
-      // Бонус за победу
-      energy += 60;
-      updateUI();
-      renderGrid();
-      // Перезапускаем атаки для новой волны
-      startBossAttackCycle();
-      startTurretCycle();
-    }
-
-    function gameOver() {
-      clearInterval(bossAttackInterval);
-      clearInterval(turretAttackInterval);
-      clearInterval(generatorInterval);
-      log("💀 ДВЕРЬ РАЗРУШЕНА... ИГРА ОКОНЧЕНА");
-      // Делаем кнопки неактивными
-      btnGenerator.disabled = true;
-      btnTurret.disabled = true;
-      btnRepair.disabled = true;
-      btnSell.disabled = true;
-      // Можно добавить перезагрузку через 3 сек
-      setTimeout(() => {
-        if (confirm("Игра окончена. Начать заново?")) {
-          resetGame();
-        }
-      }, 500);
-    }
-
-    function resetGame() {
-      // Сброс всех параметров
-      clearInterval(bossAttackInterval);
-      clearInterval(turretAttackInterval);
-      clearInterval(generatorInterval);
+      // Шум
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
       
-      energy = 180;
-      doorHP = 100;
-      wave = 1;
-      bossMaxHP = 200;
-      bossHP = 200;
-      gridState = Array(ROWS).fill().map(() => Array(COLS).fill(null));
-      selectedRow = -1;
-      selectedCol = -1;
-      
-      renderGrid();
-      updateUI();
-      log("Новая игра! Защити комнату.");
-      
-      // Включаем кнопки
-      btnGenerator.disabled = false;
-      btnTurret.disabled = false;
-      btnRepair.disabled = false;
-      btnSell.disabled = false;
-      
-      startIntervals();
-    }
-
-    function startIntervals() {
-      if (generatorInterval) clearInterval(generatorInterval);
-      generatorInterval = setInterval(generateEnergy, 2000);
-      startBossAttackCycle();
-      startTurretCycle();
-    }
-
-    function startBossAttackCycle() {
-      if (bossAttackInterval) clearInterval(bossAttackInterval);
-      bossAttackInterval = setInterval(bossAttack, 3200);
-    }
-
-    function startTurretCycle() {
-      if (turretAttackInterval) clearInterval(turretAttackInterval);
-      turretAttackInterval = setInterval(turretsAttack, 2500);
-    }
-
-    // ---------- ОТРИСОВКА СЕТКИ ----------
-    function renderGrid() {
-      gridEl.innerHTML = '';
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const i = (y * canvas.width + x) * 4;
+          let noise = (Math.random() - 0.5) * 20;
           
-          // Проверка: дверь
-          if (r === DOOR_ROW && c === DOOR_COL) {
-            cell.classList.add('door');
-            cell.textContent = '🚪';
-            cell.addEventListener('click', (e) => {
-              e.stopPropagation();
-              log("Это дверь — её нельзя строить, только чинить кнопкой.");
-            });
-          } else {
-            const building = gridState[r][c];
-            if (building === 'generator') {
-              cell.classList.add('occupied');
-              cell.textContent = '🔋';
-            } else if (building === 'turret') {
-              cell.classList.add('occupied');
-              cell.textContent = '🔫';
-            } else {
-              cell.textContent = '';
-            }
-            
-            // Выделение выбранной клетки
-            if (selectedRow === r && selectedCol === c) {
-              cell.classList.add('selected');
-            }
-            
-            cell.addEventListener('click', (e) => {
-              e.stopPropagation();
-              handleCellClick(r, c);
-            });
+          if (type === 'sun') {
+            noise = (Math.random() - 0.5) * 40;
+            if (Math.random() < 0.005) noise -= 60;
+            if (Math.random() < 0.03) noise += 40;
+          } else if (type === 'mercury') {
+            if (Math.random() < 0.015) noise -= 40;
+          } else if (type === 'venus') {
+            if (Math.random() < 0.08) noise += 30;
+          } else if (type === 'earth') {
+            // Континенты
+            if (y > 40 && y < 70 && x > 60 && x < 160) noise += 30;
+            if (y > 80 && y < 130 && x > 180 && x < 220) noise += 25;
+            if (Math.random() < 0.05) { d[i] += 60; d[i+1] += 60; d[i+2] += 60; }
+          } else if (type === 'mars') {
+            if (Math.random() < 0.008) noise -= 45;
+            if (y > 100 && y < 115 && x > 40 && x < 200) noise -= 30;
+          } else if (type === 'jupiter') {
+            const band = y % 14;
+            if (band < 6) noise -= 20;
+            else noise += 10;
+            // Красное пятно
+            const dx = x - 150, dy = y - 60;
+            if (dx*dx + dy*dy < 400) { d[i] += 50; d[i+1] += 15; }
+          } else if (type === 'saturn') {
+            const band = y % 12;
+            if (band < 5) noise -= 10;
           }
           
-          gridEl.appendChild(cell);
+          d[i] = Math.max(0, Math.min(255, d[i] + noise));
+          d[i+1] = Math.max(0, Math.min(255, d[i+1] + noise));
+          d[i+2] = Math.max(0, Math.min(255, d[i+2] + noise));
         }
       }
-      // Обновляем состояние кнопки продажи (активна если есть выбранная постройка)
-      if (selectedRow !== -1 && selectedCol !== -1 && gridState[selectedRow]?.[selectedCol]) {
-        btnSell.disabled = false;
-      } else {
-        btnSell.disabled = true;
-      }
-      updateUI();
+      ctx.putImageData(imageData, 0, 0);
+      return new THREE.CanvasTexture(canvas);
     }
 
-    function handleCellClick(row, col) {
-      // Если уже выбрана эта же клетка — снимаем выделение
-      if (selectedRow === row && selectedCol === col) {
-        selectedRow = -1;
-        selectedCol = -1;
-        renderGrid();
-        log("Выделение снято");
-        return;
+    // --- Данные планет ---
+    const planetsData = [
+      { name: 'Солнце', key: 'sun', color: '#ffaa00', size: 2.2, distance: 0, speed: 0, type: 'sun', emissive: '#ff6600' },
+      { name: 'Меркурий', key: 'mercury', color: '#b0b0b0', size: 0.4, distance: 4.5, speed: 0.04, type: 'mercury' },
+      { name: 'Венера', key: 'venus', color: '#e8cda0', size: 0.7, distance: 6.5, speed: 0.025, type: 'venus' },
+      { name: 'Земля', key: 'earth', color: '#3366cc', size: 0.75, distance: 8.5, speed: 0.02, type: 'earth' },
+      { name: 'Марс', key: 'mars', color: '#c1440e', size: 0.55, distance: 10.8, speed: 0.017, type: 'mars' },
+      { name: 'Юпитер', key: 'jupiter', color: '#d4b896', size: 1.6, distance: 14.5, speed: 0.011, type: 'jupiter' },
+      { name: 'Сатурн', key: 'saturn', color: '#ead8b8', size: 1.35, distance: 18.5, speed: 0.008, type: 'saturn', hasRings: true },
+      { name: 'Уран', key: 'uranus', color: '#7ec8c8', size: 1.1, distance: 22.5, speed: 0.006, type: 'uranus' },
+      { name: 'Нептун', key: 'neptune', color: '#4466cc', size: 1.05, distance: 26.5, speed: 0.005, type: 'neptune' }
+    ];
+
+    const planets = [];
+
+    // Орбиты
+    planetsData.forEach(p => {
+      if (p.distance > 0) {
+        const orbitGeo = new THREE.RingGeometry(p.distance - 0.02, p.distance + 0.02, 96);
+        const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
+          color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity: 0.2 
+        }));
+        orbit.rotation.x = Math.PI / 2;
+        scene.add(orbit);
+      }
+    });
+
+    // Создание планет
+    planetsData.forEach(data => {
+      const texture = createPlanetTexture(data.type, data.color);
+      const geometry = new THREE.SphereGeometry(data.size, 48, 48);
+      
+      const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: data.key === 'sun' ? 0.5 : 0.75,
+        metalness: 0.1,
+        emissive: data.emissive ? new THREE.Color(data.emissive) : new THREE.Color(0x000000),
+        emissiveIntensity: data.key === 'sun' ? 0.9 : 0
+      });
+      
+      const planet = new THREE.Mesh(geometry, material);
+      planet.castShadow = true;
+      planet.receiveShadow = true;
+      
+      const angle = Math.random() * Math.PI * 2;
+      planet.position.x = data.distance * Math.cos(angle);
+      planet.position.z = data.distance * Math.sin(angle);
+      
+      planet.userData = {
+        name: data.name,
+        key: data.key,
+        distance: data.distance,
+        speed: data.speed,
+        angle: angle,
+        size: data.size,
+        hasRings: data.hasRings || false
+      };
+      
+      scene.add(planet);
+      
+      // Кольца Сатурна (два слоя)
+      if (data.hasRings) {
+        const ringGeo1 = new THREE.RingGeometry(data.size * 1.3, data.size * 2.0, 64);
+        const ring1 = new THREE.Mesh(ringGeo1, new THREE.MeshStandardMaterial({
+          color: 0xd4c090, side: THREE.DoubleSide, transparent: true, opacity: 0.6, roughness: 0.5
+        }));
+        ring1.rotation.x = Math.PI / 2 + 0.05;
+        ring1.userData = { isRing: true };
+        planet.add(ring1);
+        
+        const ringGeo2 = new THREE.RingGeometry(data.size * 2.1, data.size * 2.4, 64);
+        const ring2 = new THREE.Mesh(ringGeo2, new THREE.MeshStandardMaterial({
+          color: 0xc0b080, side: THREE.DoubleSide, transparent: true, opacity: 0.4, roughness: 0.5
+        }));
+        ring2.rotation.x = Math.PI / 2 - 0.03;
+        ring2.userData = { isRing: true };
+        planet.add(ring2);
       }
       
-      // Иначе выделяем новую
-      selectedRow = row;
-      selectedCol = col;
-      renderGrid();
+      // Подпись
+      const labelDiv = document.createElement('div');
+      labelDiv.textContent = data.name;
+      labelDiv.style.color = 'white';
+      labelDiv.style.fontSize = '15px';
+      labelDiv.style.fontWeight = 'bold';
+      labelDiv.style.textShadow = '1px 1px 3px black';
+      labelDiv.style.background = 'rgba(0,0,0,0.65)';
+      labelDiv.style.padding = '2px 12px';
+      labelDiv.style.borderRadius = '20px';
+      const label = new CSS2DObject(labelDiv);
+      label.position.set(0, data.size + 0.5, 0);
+      planet.add(label);
       
-      if (gridState[row][col]) {
-        log(`Выбрана клетка с ${gridState[row][col] === 'generator' ? 'генератором' : 'пушкой'}. Можно продать.`);
-      } else {
-        log("Пустая клетка. Выберите постройку.");
+      planets.push(planet);
+    });
+
+    // --- Управление ---
+    let currentTarget = 'all';
+    const buttons = document.querySelectorAll('.planet-btn');
+    
+    function focusOnPlanet(planetKey) {
+      if (planetKey === 'all') {
+        controls.target.set(0, 0, 0);
+        camera.position.set(0, 25, 45);
+        controls.update();
+        return;
+      }
+      const planet = planets.find(p => p.userData.key === planetKey);
+      if (planet) {
+        const pos = planet.position.clone();
+        controls.target.copy(pos);
+        const dist = planet.userData.size * 5 + 2;
+        camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.6, dist)));
+        controls.update();
       }
     }
-
-    // ---------- ОБРАБОТЧИКИ КНОПОК ----------
-    btnGenerator.addEventListener('click', () => {
-      if (selectedRow === -1 || selectedCol === -1) {
-        log("Сначала выберите пустую клетку!");
-        return;
-      }
-      build(selectedRow, selectedCol, 'generator');
+    
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTarget = btn.dataset.planet;
+        focusOnPlanet(currentTarget);
+      });
+    });
+    
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-planet="all"]').classList.add('active');
+      currentTarget = 'all';
+      focusOnPlanet('all');
     });
 
-    btnTurret.addEventListener('click', () => {
-      if (selectedRow === -1 || selectedCol === -1) {
-        log("Сначала выберите клетку!");
-        return;
-      }
-      build(selectedRow, selectedCol, 'turret');
-    });
-
-    btnRepair.addEventListener('click', () => {
-      repairDoor();
-    });
-
-    btnSell.addEventListener('click', () => {
-      if (selectedRow !== -1 && selectedCol !== -1 && gridState[selectedRow]?.[selectedCol]) {
-        sellBuilding(selectedRow, selectedCol);
-        selectedRow = -1;
-        selectedCol = -1;
-        renderGrid();
-      } else {
-        log("Нечего продавать на выделенной клетке.");
-      }
-    });
-
-    // Сброс выделения при клике вне клеток (на контейнер сетки не вешаем, но можно на body)
-    document.body.addEventListener('click', function(e) {
-      if (!e.target.closest('.cell') && !e.target.closest('button')) {
-        if (selectedRow !== -1 || selectedCol !== -1) {
-          selectedRow = -1;
-          selectedCol = -1;
-          renderGrid();
+    // Клик по планете
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    window.addEventListener('click', (event) => {
+      if (event.target.tagName === 'BUTTON') return;
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(planets, true);
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        if (obj.userData.isRing) obj = obj.parent;
+        const key = obj.userData.key;
+        if (key) {
+          buttons.forEach(b => b.classList.remove('active'));
+          const btn = document.querySelector(`[data-planet="${key}"]`);
+          if (btn) btn.classList.add('active');
+          currentTarget = key;
+          focusOnPlanet(key);
         }
       }
     });
 
-    // ---------- СТАРТ ----------
-    function initialGame() {
-      resetGame(); // устанавливает всё и запускает интервалы
+    // --- Анимация ---
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      stars1.rotation.y += 0.0001;
+      stars2.rotation.y -= 0.00005;
+      
+      planets.forEach(planet => {
+        const data = planet.userData;
+        if (data.distance > 0) {
+          data.angle += data.speed * 0.3;
+          planet.position.x = data.distance * Math.cos(data.angle);
+          planet.position.z = data.distance * Math.sin(data.angle);
+        }
+        planet.rotation.y += 0.008;
+      });
+      
+      if (currentTarget !== 'all') {
+        const targetPlanet = planets.find(p => p.userData.key === currentTarget);
+        if (targetPlanet) controls.target.copy(targetPlanet.position);
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
     }
+    
+    animate();
 
-    initialGame();
-
-    // Очистка интервалов при уходе (не обязательно, но хорошо)
-    window.addEventListener('beforeunload', () => {
-      clearInterval(generatorInterval);
-      clearInterval(bossAttackInterval);
-      clearInterval(turretAttackInterval);
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-  })();
-</script>
+    console.log('🌌 Уютная Солнечная система готова!');
+  </script>
 </body>
 </html>
