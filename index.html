@@ -3,694 +3,687 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Фронт: Тактическая оборона</title>
+  <title>Солнечная система 3D | Детальные планеты</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
-      background: #1a1a1a;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      font-family: 'Courier New', monospace;
-    }
-
-    /* Стили для спойлера */
-    .spoiler-container {
-      width: 800px;
-      max-width: 95vw;
-      margin-bottom: 10px;
-    }
-    .spoiler-btn {
-      background: #3d3d3d;
-      color: #ccc;
-      border: 1px solid #555;
-      padding: 10px 15px;
-      width: 100%;
-      text-align: left;
-      font-size: 14px;
-      font-family: 'Courier New', monospace;
-      cursor: pointer;
-      transition: background 0.3s;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .spoiler-btn:hover {
-      background: #4a4a4a;
-    }
-    .spoiler-btn .arrow {
-      transition: transform 0.3s;
-      font-size: 12px;
-    }
-    .spoiler-btn.open .arrow {
-      transform: rotate(90deg);
-    }
-    .spoiler-content {
-      background: #262626;
-      border: 1px solid #555;
-      border-top: none;
-      padding: 0 15px;
-      max-height: 0;
+      margin: 0;
       overflow: hidden;
-      transition: max-height 0.4s ease, padding 0.4s ease;
-      color: #aaa;
-      font-size: 13px;
-      line-height: 1.5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
     }
-    .spoiler-content.open {
-      max-height: 200px;
-      padding: 15px;
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.75);
+      padding: 12px 25px;
+      border-radius: 50px;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
     }
-    .spoiler-content p {
-      margin: 5px 0;
+    #planet-name {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0,0,0,0.75);
+      padding: 15px 30px;
+      border-radius: 40px;
+      backdrop-filter: blur(10px);
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      display: none;
     }
-    .spoiler-content strong {
-      color: #ffaa00;
-    }
-
-    /* Основной контейнер игры */
-    .game-container {
-      background: #2d2d2d;
-      border: 2px solid #555;
-      border-radius: 8px;
-      padding: 20px;
-      width: 800px;
-      max-width: 95vw;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: #3a4a3a;
-      border: 2px solid #666;
-      border-radius: 4px;
-      width: 100%;
-      height: auto;
-    }
-    .hud {
+    #controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      color: #ccc;
-      font-size: 14px;
-      gap: 15px;
       flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(10, 10, 25, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 15px 25px;
+      border-radius: 60px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.2);
+      z-index: 10;
     }
-    .hud > div {
-      background: #1f1f1f;
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #444;
+    .planet-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #bbb;
+      padding: 10px 16px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(5px);
     }
-    .resources span {
-      color: #ffcc00;
+    .planet-btn:hover {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+    .planet-btn.active {
+      background: #ff8c00;
+      color: #000;
+      border-color: #ffaa00;
+      box-shadow: 0 0 30px rgba(255,140,0,0.8);
       font-weight: bold;
     }
-    .unit-btn {
-      background: #4a4a4a;
-      color: #ddd;
-      border: 1px solid #666;
-      padding: 8px 14px;
-      cursor: pointer;
-      font-family: 'Courier New', monospace;
+    #reset-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.35);
+      margin-left: 10px;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 10px 18px;
+    }
+    .instruction {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.55);
       font-size: 13px;
-      border-radius: 4px;
-      transition: all 0.2s;
-      white-space: nowrap;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 22px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      pointer-events: none;
     }
-    .unit-btn:hover {
-      background: #5a5a5a;
-    }
-    .unit-btn:active {
-      background: #3a3a3a;
-      transform: scale(0.96);
-    }
-    .unit-btn.selected {
-      background: #556b2f;
-      border-color: #8fbc8f;
-      box-shadow: 0 0 8px #8fbc8f;
-    }
-    .restart-btn {
-      background: #5c3a3a;
-      border-color: #8b3a3a;
-    }
-    .restart-btn:hover {
-      background: #6b4444;
-    }
-    .message {
-      color: #ff6666;
-      margin-top: 8px;
-      font-size: 13px;
-      text-align: center;
-      min-height: 20px;
-    }
-    @media (max-width: 600px) {
-      .hud {
-        flex-direction: column;
-        align-items: stretch;
+    @media (max-width: 800px) {
+      #controls {
+        gap: 4px;
+        padding: 10px 12px;
+        bottom: 15px;
+      }
+      .planet-btn {
+        padding: 7px 10px;
+        font-size: 12px;
+        letter-spacing: 0;
+      }
+      .instruction {
+        bottom: 100px;
+        font-size: 11px;
+        width: 95%;
+        text-align: center;
+        white-space: normal;
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- СПОЙЛЕР -->
-  <div class="spoiler-container">
-    <button class="spoiler-btn" id="spoilerBtn">
-      ⚠️ ПРЕДУПРЕЖДЕНИЕ <span class="arrow">▶</span>
-    </button>
-    <div class="spoiler-content" id="spoilerContent">
-      <p><strong>Внимание:</strong> данная игра представляет собой абстрактный тактический симулятор обороны.</p>
-      <p>Все события, юниты и локации являются вымышленными и не привязаны к реальным конфликтам.</p>
-      <p>Игра создана исключительно в развлекательных целях.</p>
-    </div>
+  <div id="info">🌌 СОЛНЕЧНАЯ СИСТЕМА</div>
+  <div id="planet-name"></div>
+  <div class="instruction">🖱️ Вращение | 📜 Зум | 👆 Клик по планете для фокуса</div>
+  
+  <div id="controls">
+    <button class="planet-btn active" data-planet="all">🌠 ВСЕ</button>
+    <button class="planet-btn" data-planet="sun">☀️ Солнце</button>
+    <button class="planet-btn" data-planet="mercury">☿ Меркурий</button>
+    <button class="planet-btn" data-planet="venus">♀ Венера</button>
+    <button class="planet-btn" data-planet="earth">🌍 Земля</button>
+    <button class="planet-btn" data-planet="mars">♂ Марс</button>
+    <button class="planet-btn" data-planet="jupiter">♃ Юпитер</button>
+    <button class="planet-btn" data-planet="saturn">♄ Сатурн</button>
+    <button class="planet-btn" data-planet="uranus">⛢ Уран</button>
+    <button class="planet-btn" data-planet="neptune">♆ Нептун</button>
+    <button id="reset-btn" title="Сбросить вид">↺</button>
   </div>
 
-  <!-- ИГРА -->
-  <div class="game-container">
-    <canvas id="gameCanvas" width="700" height="400"></canvas>
-    <div class="hud">
-      <div class="resources">🔧 Ресурсы: <span id="resDisplay">100</span></div>
-      <button class="unit-btn" id="btnTurret">🛡️ Башня (30)</button>
-      <button class="unit-btn" id="btnSoldier">👤 Пехотинец (15)</button>
-      <button class="unit-btn" id="btnMine">💣 Мина (10)</button>
-      <button class="unit-btn restart-btn" id="btnRestart">🔄 Сброс</button>
-    </div>
-    <div class="message" id="messageText"></div>
-  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/"
+      }
+    }
+  </script>
 
-  <script>
-    (function() {
-      // --- СПОЙЛЕР ---
-      const spoilerBtn = document.getElementById('spoilerBtn');
-      const spoilerContent = document.getElementById('spoilerContent');
-      spoilerBtn.addEventListener('click', () => {
-        spoilerBtn.classList.toggle('open');
-        spoilerContent.classList.toggle('open');
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // --- Сцена и рендереры ---
+    const scene = new THREE.Scene();
+    
+    // Глубокий космос с туманностью
+    scene.background = new THREE.Color(0x020210);
+    scene.fog = new THREE.FogExp2(0x020210, 0.000015);
+    
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.5, 500);
+    camera.position.set(0, 28, 50);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.rotateSpeed = 0.6;
+    controls.zoomSpeed = 1.4;
+    controls.target.set(0, 0, 0);
+    controls.maxDistance = 250;
+    controls.minDistance = 2.5;
+    controls.update();
+
+    // --- Освещение ---
+    const ambientLight = new THREE.AmbientLight(0x111133, 0.6);
+    scene.add(ambientLight);
+    
+    const sunLight = new THREE.PointLight(0xfff8e7, 80, 0, 0.5);
+    sunLight.position.set(0, 0, 0);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 100;
+    scene.add(sunLight);
+    
+    const sunLight2 = new THREE.PointLight(0xffcc88, 40, 60, 0.6);
+    sunLight2.position.set(0, 0, 0);
+    scene.add(sunLight2);
+
+    // --- Звёздное небо (многослойное) ---
+    function createStarField(count, spread, size, color) {
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * spread;
+        positions[i+1] = (Math.random() - 0.5) * spread * 0.7;
+        positions[i+2] = (Math.random() - 0.5) * spread;
+        
+        const brightness = 0.5 + Math.random() * 0.5;
+        colors[i] = color.r * brightness;
+        colors[i+1] = color.g * brightness;
+        colors[i+2] = color.b * brightness;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const mat = new THREE.PointsMaterial({ 
+        size, 
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
       });
+      return new THREE.Points(geo, mat);
+    }
+    
+    scene.add(createStarField(4000, 400, 0.3, new THREE.Color(1, 1, 1)));
+    scene.add(createStarField(2000, 300, 0.45, new THREE.Color(0.7, 0.8, 1)));
+    scene.add(createStarField(1500, 250, 0.55, new THREE.Color(1, 0.9, 0.7)));
 
-      // --- ИГРОВАЯ ЛОГИКА ---
-      const canvas = document.getElementById('gameCanvas');
+    // --- Функция создания процедурной текстуры высокого качества ---
+    function createDetailedTexture(type, baseColor1, baseColor2) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 256;
       const ctx = canvas.getContext('2d');
-
-      // Элементы HUD
-      const resDisplay = document.getElementById('resDisplay');
-      const messageText = document.getElementById('messageText');
-      const btnTurret = document.getElementById('btnTurret');
-      const btnSoldier = document.getElementById('btnSoldier');
-      const btnMine = document.getElementById('btnMine');
-      const btnRestart = document.getElementById('btnRestart');
-
-      // Размеры игрового поля
-      const W = canvas.width;
-      const H = canvas.height;
-
-      // Линия обороны (база) — левый край
-      const BASE_X = 50;
-
-      // Состояние игры
-      let resources = 100;
-      let selectedUnit = null; // 'turret', 'soldier', 'mine'
-      let units = [];
-      let enemies = [];
-      let bullets = [];
-      let gameOver = false;
-      let victory = false;
-      let wave = 1;
-      let enemiesSpawnedThisWave = 0;
-      let enemiesPerWave = 5;
-      let spawnTimer = 0;
-      let gameLoopId = null;
-
-      // Класс юнита игрока
-      class Unit {
-        constructor(x, y, type) {
-          this.x = x;
-          this.y = y;
-          this.type = type; // 'turret', 'soldier', 'mine'
-          this.health = type === 'turret' ? 80 : 30;
-          this.maxHealth = this.health;
-          this.attackCooldown = 0;
-          this.attackRange = type === 'turret' ? 150 : 90;
-          this.damage = type === 'turret' ? 25 : 10;
-          this.attackSpeed = type === 'turret' ? 40 : 25; // кадров между атаками
-        }
-      }
-
-      // Класс врага
-      class Enemy {
-        constructor(y) {
-          this.x = W - 30;
-          this.y = y || Math.random() * (H - 40) + 20;
-          this.health = 40 + wave * 10;
-          this.maxHealth = this.health;
-          this.speed = 0.6 + wave * 0.1;
-          this.damage = 5 + wave * 2;
-          this.attackCooldown = 0;
-        }
-      }
-
-      // Класс пули
-      class Bullet {
-        constructor(x, y, targetX, targetY, damage, isEnemy = false) {
-          this.x = x;
-          this.y = y;
-          this.damage = damage;
-          this.isEnemy = isEnemy;
-          const angle = Math.atan2(targetY - y, targetX - x);
-          this.vx = Math.cos(angle) * 8;
-          this.vy = Math.sin(angle) * 8;
-          this.lifetime = 0;
-          this.maxLifetime = 100;
-        }
-      }
-
-      function addResources(amount) {
-        resources += amount;
-        updateDisplay();
-      }
-
-      function spendResources(amount) {
-        if (resources >= amount) {
-          resources -= amount;
-          updateDisplay();
-          return true;
-        }
-        return false;
-      }
-
-      function updateDisplay() {
-        resDisplay.textContent = resources;
-      }
-
-      function showMessage(msg, isGood = false) {
-        messageText.textContent = msg;
-        messageText.style.color = isGood ? '#88ff88' : '#ff6666';
-      }
-
-      function clearMessage() {
-        messageText.textContent = '';
-      }
-
-      // Размещение юнита
-      function placeUnit(x, y, type) {
-        let cost = 0;
-        if (type === 'turret') cost = 30;
-        else if (type === 'soldier') cost = 15;
-        else if (type === 'mine') cost = 10;
-
-        if (!spendResources(cost)) {
-          showMessage('Недостаточно ресурсов!');
-          return false;
-        }
-
-        // Нельзя ставить слишком близко к базе или за ней
-        if (x < BASE_X + 15 || x > W - 20 || y < 10 || y > H - 10) {
-          resources += cost; // возврат
-          updateDisplay();
-          showMessage('Нельзя разместить здесь!');
-          return false;
-        }
-
-        // Мины невидимы для врагов, но мы их храним
-        units.push(new Unit(x, y, type));
-        clearMessage();
-        return true;
-      }
-
-      // Спавн врага
-      function spawnEnemy() {
-        const y = Math.random() * (H - 60) + 30;
-        enemies.push(new Enemy(y));
-        enemiesSpawnedThisWave++;
-      }
-
-      // Игровой цикл
-      function update() {
-        if (gameOver || victory) return;
-
-        // Спавн врагов волнами
-        if (enemiesSpawnedThisWave < enemiesPerWave) {
-          spawnTimer++;
-          if (spawnTimer > 90) { // примерно 1.5 сек при 60 fps
-            spawnEnemy();
-            spawnTimer = 0;
-          }
-        }
-
-        // Проверка: все враги волны уничтожены и все заспавнены
-        if (enemiesSpawnedThisWave >= enemiesPerWave && enemies.length === 0) {
-          wave++;
-          enemiesPerWave = 5 + wave * 2;
-          enemiesSpawnedThisWave = 0;
-          spawnTimer = 0;
-          addResources(30 + wave * 5);
-          showMessage(`Волна ${wave-1} отбита! +${30 + (wave-1)*5} ресурсов`, true);
-        }
-
-        // Обновление юнитов игрока
-        for (let u of units) {
-          if (u.attackCooldown > 0) u.attackCooldown--;
-
-          if (u.type === 'turret' || u.type === 'soldier') {
-            // Поиск ближайшего врага в радиусе атаки
-            if (u.attackCooldown <= 0) {
-              let closestEnemy = null;
-              let closestDist = Infinity;
-              for (let e of enemies) {
-                const dx = e.x - u.x;
-                const dy = e.y - u.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < u.attackRange && dist < closestDist) {
-                  closestDist = dist;
-                  closestEnemy = e;
-                }
-              }
-              if (closestEnemy) {
-                // Стрельба
-                bullets.push(new Bullet(u.x, u.y, closestEnemy.x, closestEnemy.y, u.damage));
-                u.attackCooldown = u.attackSpeed;
-              }
+      
+      // Заливка градиентом
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, baseColor1);
+      gradient.addColorStop(0.5, baseColor2);
+      gradient.addColorStop(1, baseColor1);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Шум и детали
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const i = (y * canvas.width + x) * 4;
+          let noise = (Math.random() - 0.5) * 30;
+          
+          if (type === 'sun') {
+            noise = (Math.random() - 0.5) * 50;
+            // Солнечные пятна
+            if (Math.random() < 0.003) {
+              noise -= 80;
+            }
+            // Яркие области
+            if (Math.random() < 0.02) {
+              noise += 60;
+            }
+          } else if (type === 'jupiter') {
+            // Полосы
+            const bandY = y % 16;
+            if (bandY < 7) noise -= 25 + Math.random() * 20;
+            else if (bandY > 10) noise += 15 + Math.random() * 25;
+            // Большое красное пятно
+            const dx = x - 200;
+            const dy = y - 120;
+            if (dx*dx + dy*dy < 900) {
+              noise += 40;
+              data[i] = Math.min(255, data[i] + 60);
+              data[i+1] = Math.min(255, data[i+1] + 20);
+            }
+          } else if (type === 'earth') {
+            // Океаны и континенты
+            if (y > 50 && y < 80 && x > 80 && x < 180) noise += 40;
+            if (y > 100 && y < 150 && x > 200 && x < 350) noise += 35;
+            if (y > 30 && y < 60 && x > 300 && x < 450) noise += 30;
+            // Облака
+            if (Math.random() < 0.08) {
+              data[i] = Math.min(255, data[i] + 80);
+              data[i+1] = Math.min(255, data[i+1] + 80);
+              data[i+2] = Math.min(255, data[i+2] + 80);
+            }
+          } else if (type === 'mars') {
+            // Кратеры и каньоны
+            if (Math.random() < 0.005) {
+              noise -= 60;
+            }
+            // Каньон
+            if (y > 110 && y < 125 && x > 50 && x < 400) {
+              noise -= 40;
+            }
+          } else if (type === 'venus') {
+            // Облачный покров
+            if (Math.random() < 0.1) {
+              data[i] = Math.min(255, data[i] + 50);
+              data[i+1] = Math.min(255, data[i+1] + 40);
+            }
+          } else if (type === 'mercury') {
+            // Кратеры
+            if (Math.random() < 0.01) {
+              noise -= 50;
             }
           }
-
-          // Мины взрываются при контакте с врагом
-          if (u.type === 'mine') {
-            for (let i = enemies.length - 1; i >= 0; i--) {
-              const e = enemies[i];
-              const dx = e.x - u.x;
-              const dy = e.y - u.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 25) {
-                // Взрыв мины
-                e.health -= 40;
-                // Урон по области
-                for (let j = enemies.length - 1; j >= 0; j--) {
-                  if (j === i) continue;
-                  const ej = enemies[j];
-                  const dx2 = ej.x - u.x;
-                  const dy2 = ej.y - u.y;
-                  const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-                  if (dist2 < 60) {
-                    ej.health -= 15;
-                  }
-                }
-                // Удаляем мину
-                units = units.filter(unit => unit !== u);
-                break;
-              }
-            }
-          }
+          
+          data[i] = Math.max(0, Math.min(255, data[i] + noise));
+          data[i+1] = Math.max(0, Math.min(255, data[i+1] + noise));
+          data[i+2] = Math.max(0, Math.min(255, data[i+2] + noise));
         }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      
+      return new THREE.CanvasTexture(canvas);
+    }
 
-        // Движение врагов
-        for (let e of enemies) {
-          // Если враг дошел до базы
-          if (e.x <= BASE_X + 10) {
-            gameOver = true;
-            showMessage('Враг прорвал оборону! Игра окончена.');
-            break;
-          }
+    // --- Данные планет ---
+    const planetsData = [
+      { name: 'Солнце', key: 'sun', color1: '#ff8800', color2: '#ffcc00', size: 2.4, distance: 0, speed: 0, type: 'sun' },
+      { name: 'Меркурий', key: 'mercury', color1: '#b0b0b0', color2: '#909090', size: 0.42, distance: 5, speed: 0.04, type: 'mercury' },
+      { name: 'Венера', key: 'venus', color1: '#e8cda0', color2: '#d4a96a', size: 0.75, distance: 7.2, speed: 0.025, type: 'venus' },
+      { name: 'Земля', key: 'earth', color1: '#3366cc', color2: '#2255aa', size: 0.78, distance: 9.5, speed: 0.02, type: 'earth' },
+      { name: 'Марс', key: 'mars', color1: '#d45a3a', color2: '#a04020', size: 0.55, distance: 12, speed: 0.017, type: 'mars' },
+      { name: 'Юпитер', key: 'jupiter', color1: '#d4b896', color2: '#c4a070', size: 1.9, distance: 16.5, speed: 0.01, type: 'jupiter' },
+      { name: 'Сатурн', key: 'saturn', color1: '#ead8b8', color2: '#d4c098', size: 1.55, distance: 21, speed: 0.007, type: 'saturn', rings: true },
+      { name: 'Уран', key: 'uranus', color1: '#7ec8c8', color2: '#5aa0a0', size: 1.2, distance: 26, speed: 0.005, type: 'uranus' },
+      { name: 'Нептун', key: 'neptune', color1: '#3355cc', color2: '#2244aa', size: 1.15, distance: 30.5, speed: 0.004, type: 'neptune' }
+    ];
 
-          // Атакует ли враг юнитов на пути?
-          let blockingUnit = null;
-          for (let u of units) {
-            if (u.type === 'turret' || u.type === 'soldier') {
-              const dx = e.x - u.x;
-              const dy = e.y - u.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 30 && e.x > u.x) {
-                blockingUnit = u;
-                break;
-              }
-            }
-          }
-
-          if (blockingUnit && e.attackCooldown <= 0) {
-            blockingUnit.health -= e.damage;
-            e.attackCooldown = 40;
-            if (blockingUnit.health <= 0) {
-              units = units.filter(u => u !== blockingUnit);
-            }
-          }
-
-          if (e.attackCooldown > 0) e.attackCooldown--;
-
-          // Движение к базе (если не атакует)
-          if (!blockingUnit || e.x > blockingUnit.x + 30) {
-            e.x -= e.speed;
-          }
+    const planets = [];
+    const atmospheres = [];
+    
+    // Создание орбит
+    planetsData.forEach(p => {
+      if (p.distance > 0) {
+        const points = [];
+        const radius = p.distance;
+        for (let i = 0; i <= 128; i++) {
+          const angle = (i / 128) * Math.PI * 2;
+          points.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
         }
-
-        // Удаление мертвых врагов
-        enemies = enemies.filter(e => {
-          if (e.health <= 0) {
-            addResources(5);
-            return false;
-          }
-          return true;
+        const orbitGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const orbitMat = new THREE.LineBasicMaterial({ 
+          color: 0x334466, 
+          transparent: true, 
+          opacity: 0.25 
         });
+        const orbitLine = new THREE.LineLoop(orbitGeo, orbitMat);
+        scene.add(orbitLine);
+      }
+    });
 
-        // Обновление пуль
-        for (let b of bullets) {
-          b.x += b.vx;
-          b.y += b.vy;
-          b.lifetime++;
-
-          // Попадание во врага (пули игрока)
-          if (!b.isEnemy) {
-            for (let e of enemies) {
-              const dx = e.x - b.x;
-              const dy = e.y - b.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < 15) {
-                e.health -= b.damage;
-                b.lifetime = 999; // пометить на удаление
-                break;
-              }
+    // Создание планет
+    planetsData.forEach((data) => {
+      const texture = createDetailedTexture(data.type, data.color1, data.color2);
+      const geometry = new THREE.SphereGeometry(data.size, 72, 72);
+      
+      let material;
+      if (data.key === 'sun') {
+        material = new THREE.MeshStandardMaterial({
+          map: texture,
+          emissive: new THREE.Color('#ff6600'),
+          emissiveIntensity: 1.4,
+          roughness: 0.5,
+          metalness: 0.1
+        });
+      } else {
+        material = new THREE.MeshStandardMaterial({
+          map: texture,
+          roughness: 0.75,
+          metalness: 0.05
+        });
+      }
+      
+      const planet = new THREE.Mesh(geometry, material);
+      planet.castShadow = true;
+      planet.receiveShadow = true;
+      
+      const angle = Math.random() * Math.PI * 2;
+      planet.position.x = data.distance * Math.cos(angle);
+      planet.position.z = data.distance * Math.sin(angle);
+      
+      planet.userData = {
+        name: data.name,
+        key: data.key,
+        distance: data.distance,
+        speed: data.speed,
+        angle: angle,
+        size: data.size,
+        hasRings: data.rings || false
+      };
+      
+      scene.add(planet);
+      
+      // Атмосфера (свечение)
+      if (data.key !== 'sun') {
+        const atmosphereGeo = new THREE.SphereGeometry(data.size * 1.08, 64, 64);
+        const atmosphereMat = new THREE.ShaderMaterial({
+          vertexShader: `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vNormal = normalize(mat3(modelMatrix) * normal);
+              vPosition = worldPos.xyz;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
             }
+          `,
+          fragmentShader: `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            uniform vec3 uColor;
+            uniform vec3 uLightPos;
+            void main() {
+              vec3 viewDir = normalize(cameraPosition - vPosition);
+              vec3 lightDir = normalize(uLightPos - vPosition);
+              float fresnel = 1.0 - abs(dot(viewDir, vNormal));
+              fresnel = pow(fresnel, 3.0);
+              float intensity = fresnel * 0.6;
+              gl_FragColor = vec4(uColor, intensity * 0.5);
+            }
+          `,
+          uniforms: {
+            uColor: { value: new THREE.Color(data.color1) },
+            uLightPos: { value: new THREE.Vector3(0, 0, 0) }
+          },
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+        planet.add(atmosphere);
+        atmospheres.push(atmosphere);
+      }
+      
+      // Кольца Сатурна
+      if (data.rings) {
+        // Внутреннее кольцо
+        const ringGeo1 = new THREE.RingGeometry(data.size * 1.3, data.size * 1.8, 128);
+        const ringMat1 = new THREE.MeshStandardMaterial({
+          color: 0xd4c090,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.7,
+          roughness: 0.5
+        });
+        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+        ring1.rotation.x = Math.PI / 2 + 0.05;
+        ring1.userData = { isRing: true };
+        planet.add(ring1);
+        
+        // Внешнее кольцо
+        const ringGeo2 = new THREE.RingGeometry(data.size * 1.9, data.size * 2.4, 128);
+        const ringMat2 = new THREE.MeshStandardMaterial({
+          color: 0xe8d8b0,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.45,
+          roughness: 0.5
+        });
+        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+        ring2.rotation.x = Math.PI / 2 + 0.03;
+        ring2.userData = { isRing: true };
+        planet.add(ring2);
+        
+        // Тонкое кольцо
+        const ringGeo3 = new THREE.RingGeometry(data.size * 2.45, data.size * 2.55, 128);
+        const ringMat3 = new THREE.MeshStandardMaterial({
+          color: 0xc0b090,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.3,
+          roughness: 0.6
+        });
+        const ring3 = new THREE.Mesh(ringGeo3, ringMat3);
+        ring3.rotation.x = Math.PI / 2 - 0.02;
+        ring3.userData = { isRing: true };
+        planet.add(ring3);
+      }
+      
+      // Подпись
+      const labelDiv = document.createElement('div');
+      labelDiv.textContent = data.name;
+      labelDiv.style.color = 'white';
+      labelDiv.style.fontSize = '15px';
+      labelDiv.style.fontWeight = 'bold';
+      labelDiv.style.textShadow = '1px 1px 4px black';
+      labelDiv.style.background = 'rgba(0,0,0,0.65)';
+      labelDiv.style.padding = '3px 14px';
+      labelDiv.style.borderRadius = '20px';
+      labelDiv.style.letterSpacing = '0.5px';
+      const label = new CSS2DObject(labelDiv);
+      label.position.set(0, data.size + 0.6, 0);
+      planet.add(label);
+      
+      planets.push(planet);
+    });
+
+    // Свечение Солнца
+    const sunGlowGeo = new THREE.SphereGeometry(2.8, 64, 64);
+    const sunGlowMat = new THREE.ShaderMaterial({
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vNormal = normalize(mat3(modelMatrix) * normal);
+          vPosition = worldPos.xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vec3 viewDir = normalize(cameraPosition - vPosition);
+          float fresnel = 1.0 - abs(dot(viewDir, vNormal));
+          fresnel = pow(fresnel, 4.0);
+          vec3 color = mix(vec3(1.0, 0.6, 0.1), vec3(1.0, 0.9, 0.3), fresnel);
+          float alpha = fresnel * 0.8;
+          gl_FragColor = vec4(color, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const sunGlow = new THREE.Mesh(sunGlowGeo, sunGlowMat);
+    sunGlow.position.set(0, 0, 0);
+    sunGlow.userData = { isGlow: true };
+    scene.add(sunGlow);
+
+    // --- Интерактивность ---
+    let currentTarget = 'all';
+    const buttons = document.querySelectorAll('.planet-btn');
+    const planetNameDiv = document.getElementById('planet-name');
+    
+    function focusOnPlanet(planetKey) {
+      planetNameDiv.style.display = 'none';
+      
+      if (planetKey === 'all') {
+        controls.target.set(0, 0, 0);
+        camera.position.set(0, 28, 50);
+        controls.update();
+        return;
+      }
+      
+      const planet = planets.find(p => p.userData.key === planetKey);
+      if (planet) {
+        const pos = planet.position.clone();
+        controls.target.copy(pos);
+        const dist = planet.userData.size * 4.5 + 2;
+        camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.6, dist * 0.5, dist * 0.7)));
+        controls.update();
+        planetNameDiv.textContent = planet.userData.name.toUpperCase();
+        planetNameDiv.style.display = 'block';
+      }
+    }
+    
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const planetKey = btn.dataset.planet;
+        currentTarget = planetKey;
+        focusOnPlanet(planetKey);
+      });
+    });
+    
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-planet="all"]').classList.add('active');
+      currentTarget = 'all';
+      focusOnPlanet('all');
+    });
+
+    // Клик по планете
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    window.addEventListener('click', (event) => {
+      if (event.target.tagName === 'BUTTON') return;
+      
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const allObjects = [...planets, sunGlow];
+      const intersects = raycaster.intersectObjects(allObjects, true);
+      
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        while (obj) {
+          if (obj.userData.key && !obj.userData.isRing && !obj.userData.isGlow) {
+            buttons.forEach(b => b.classList.remove('active'));
+            const activeBtn = document.querySelector(`[data-planet="${obj.userData.key}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            currentTarget = obj.userData.key;
+            focusOnPlanet(obj.userData.key);
+            return;
           }
-        }
-        bullets = bullets.filter(b => b.lifetime < b.maxLifetime && b.x > 0 && b.x < W && b.y > 0 && b.y < H);
-
-        // Проверка победы (условно после 5 волн)
-        if (wave > 5 && enemies.length === 0 && enemiesSpawnedThisWave >= enemiesPerWave) {
-          victory = true;
-          showMessage('Победа! Вы удержали оборону!', true);
-        }
-      }
-
-      // Отрисовка
-      function draw() {
-        ctx.clearRect(0, 0, W, H);
-
-        // Фон
-        ctx.fillStyle = '#3a4a3a';
-        ctx.fillRect(0, 0, W, H);
-
-        // Сетка
-        ctx.strokeStyle = '#4a5a4a';
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < W; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i, H);
-          ctx.stroke();
-        }
-        for (let i = 0; i < H; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(0, i);
-          ctx.lineTo(W, i);
-          ctx.stroke();
-        }
-
-        // База
-        ctx.fillStyle = '#4a6fa5';
-        ctx.fillRect(0, 0, BASE_X, H);
-        ctx.fillStyle = '#5a7fb5';
-        ctx.fillRect(10, H/2-30, 30, 60);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 16px "Courier New"';
-        ctx.fillText('БАЗА', 5, H/2-10);
-
-        // Юниты игрока
-        for (let u of units) {
-          if (u.type === 'turret') {
-            ctx.fillStyle = '#4a6b4a';
-            ctx.fillRect(u.x-15, u.y-15, 30, 30);
-            ctx.fillStyle = '#6b8b6b';
-            ctx.fillRect(u.x-10, u.y-10, 20, 20);
-            ctx.fillStyle = '#222';
-            ctx.fillRect(u.x-3, u.y-18, 6, 10);
-            // Полоска здоровья
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(u.x-15, u.y-22, 30, 4);
-            ctx.fillStyle = '#44ff44';
-            ctx.fillRect(u.x-15, u.y-22, 30 * (u.health/u.maxHealth), 4);
-          } else if (u.type === 'soldier') {
-            ctx.fillStyle = '#5a5a3a';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 12, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#8a8a5a';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(u.x-12, u.y-20, 24, 4);
-            ctx.fillStyle = '#44ff44';
-            ctx.fillRect(u.x-12, u.y-20, 24 * (u.health/u.maxHealth), 4);
-          } else if (u.type === 'mine') {
-            ctx.fillStyle = '#888';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#ff4444';
-            ctx.beginPath();
-            ctx.arc(u.x, u.y, 4, 0, Math.PI*2);
-            ctx.fill();
+          if (obj.userData.isGlow) {
+            buttons.forEach(b => b.classList.remove('active'));
+            const sunBtn = document.querySelector('[data-planet="sun"]');
+            if (sunBtn) sunBtn.classList.add('active');
+            currentTarget = 'sun';
+            focusOnPlanet('sun');
+            return;
           }
-        }
-
-        // Враги
-        for (let e of enemies) {
-          ctx.fillStyle = '#aa4444';
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 13, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillStyle = '#cc6666';
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 9, 0, Math.PI*2);
-          ctx.fill();
-          // Глаза
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          ctx.arc(e.x-4, e.y-4, 3, 0, Math.PI*2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(e.x+4, e.y-4, 3, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillStyle = '#000';
-          ctx.beginPath();
-          ctx.arc(e.x-3, e.y-5, 1.5, 0, Math.PI*2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(e.x+5, e.y-5, 1.5, 0, Math.PI*2);
-          ctx.fill();
-          // Полоска здоровья
-          ctx.fillStyle = '#ff4444';
-          ctx.fillRect(e.x-14, e.y-22, 28, 4);
-          ctx.fillStyle = '#44ff44';
-          ctx.fillRect(e.x-14, e.y-22, 28 * (e.health/e.maxHealth), 4);
-        }
-
-        // Пули
-        for (let b of bullets) {
-          ctx.fillStyle = b.isEnemy ? '#ff6666' : '#ffff66';
-          ctx.beginPath();
-          ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
-          ctx.fill();
-        }
-
-        // Сообщения
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px "Courier New"';
-        ctx.fillText(`Волна: ${wave}`, W-100, 25);
-        ctx.fillText(`Врагов: ${enemies.length}/${enemiesPerWave}`, W-150, 45);
-
-        if (gameOver) {
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#ff4444';
-          ctx.font = 'bold 36px "Courier New"';
-          ctx.fillText('ПОРАЖЕНИЕ', W/2-130, H/2);
-        } else if (victory) {
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#ffcc00';
-          ctx.font = 'bold 36px "Courier New"';
-          ctx.fillText('ПОБЕДА!', W/2-100, H/2);
+          obj = obj.parent;
         }
       }
+    });
 
-      function gameLoop() {
-        update();
-        draw();
-        gameLoopId = requestAnimationFrame(gameLoop);
-      }
-
-      // Сброс игры
-      function restartGame() {
-        resources = 100;
-        units = [];
-        enemies = [];
-        bullets = [];
-        gameOver = false;
-        victory = false;
-        wave = 1;
-        enemiesSpawnedThisWave = 0;
-        enemiesPerWave = 5;
-        spawnTimer = 0;
-        selectedUnit = null;
-        updateDisplay();
-        clearMessage();
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
-      }
-
-      // Обработка кликов по канвасу
-      canvas.addEventListener('click', (e) => {
-        if (gameOver || victory) return;
-        if (!selectedUnit) {
-          showMessage('Выберите тип юнита для размещения!');
-          return;
+    // --- Анимация ---
+    const clock = new THREE.Clock();
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      const delta = clock.getDelta();
+      const time = performance.now() * 0.001;
+      
+      // Движение планет
+      planets.forEach(planet => {
+        const data = planet.userData;
+        if (data.distance > 0) {
+          data.angle += data.speed * 0.25;
+          planet.position.x = data.distance * Math.cos(data.angle);
+          planet.position.z = data.distance * Math.sin(data.angle);
         }
-
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;   // масштаб по X
-        const scaleY = H / rect.height;  // масштаб по Y
-        const mouseX = (e.clientX - rect.left) * scaleX;
-        const mouseY = (e.clientY - rect.top) * scaleY;
-
-        placeUnit(mouseX, mouseY, selectedUnit);
+        planet.rotation.y += 0.005;
       });
+      
+      // Обновление цели при фокусе
+      if (currentTarget !== 'all') {
+        const targetPlanet = planets.find(p => p.userData.key === currentTarget);
+        if (targetPlanet) {
+          controls.target.lerp(targetPlanet.position, 0.1);
+        }
+      }
+      
+      // Пульсация свечения Солнца
+      const pulse = 1 + Math.sin(time * 2) * 0.05;
+      sunGlow.scale.setScalar(pulse);
+      
+      controls.update();
+      
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    
+    animate();
 
-      // Кнопки выбора юнитов
-      btnTurret.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'turret';
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
-        btnTurret.classList.add('selected');
-        showMessage('Выбрана башня (30 ресурсов). Кликните на карту для размещения.');
-      });
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-      btnSoldier.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'soldier';
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
-        btnSoldier.classList.add('selected');
-        showMessage('Выбран пехотинец (15 ресурсов). Кликните на карту для размещения.');
-      });
-
-      btnMine.addEventListener('click', () => {
-        if (gameOver || victory) return;
-        selectedUnit = 'mine';
-        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
-        btnMine.classList.add('selected');
-        showMessage('Выбрана мина (10 ресурсов). Кликните на карту для размещения.');
-      });
-
-      btnRestart.addEventListener('click', restartGame);
-
-      // Запуск
-      gameLoop();
-    })();
+    console.log('✨ Детальная Солнечная система готова!');
   </script>
 </body>
 </html>
