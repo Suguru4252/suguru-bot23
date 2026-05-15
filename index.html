@@ -2,19 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haunted Dorm - Tower Defense</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>President Simulator - TheoTown Edition</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --cell-bg: #1a1a2e;
-            --cell-border: #2a2a3e;
-            --ghost: #ff4444;
-            --tower: #4488ff;
-            --gold: #ffd700;
-            --text: #ccc;
-            --door: #8b4513;
-            --bed: #666;
+            --bg: #0a0a14;
+            --panel: #1a1a2e;
+            --accent: #f0c040;
+            --gold: #e8c547;
+            --text: #e8e8e8;
+            --border: #2e2e4e;
+            --hover: #2a2a50;
+            --zone-res: #4CAF50;
+            --zone-com: #2196F3;
+            --zone-ind: #FF9800;
         }
 
         * {
@@ -24,1205 +25,2523 @@
         }
 
         body {
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #060610;
             overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            position: fixed;
         }
 
-        #game-container {
-            position: relative;
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #060610 70%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
         }
-
-        #hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 600px;
-            padding: 10px 20px;
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 10px;
-            color: var(--text);
+        #splash.hidden {
+            display: none;
         }
-
-        .hud-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: bold;
+        .splash-stars {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
         }
-
-        .hud-icon {
-            font-size: 24px;
-        }
-
-        #money {
-            color: var(--gold);
-        }
-
-        #lives {
-            color: #ff6666;
-        }
-
-        #wave-display {
-            color: #88ccff;
-        }
-
-        #canvas-wrapper {
-            position: relative;
-            border: 3px solid #444;
-            border-radius: 5px;
-            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3), 0 0 80px rgba(0, 0, 255, 0.2);
-        }
-
-        canvas {
-            display: block;
-            cursor: crosshair;
-        }
-
-        #tower-panel {
-            display: flex;
-            gap: 10px;
-            padding: 10px 15px;
-            background: #111;
-            border: 2px solid #333;
-            border-radius: 10px;
-        }
-
-        .tower-btn {
-            padding: 12px 18px;
-            border: 2px solid #555;
-            background: #1a1a2e;
-            color: var(--text);
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s;
+        .splash-title {
+            font-size: clamp(2em, 5vw, 3.2em);
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(180deg, #ffe08a, #c8943e, #8b5e14);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-align: center;
-            min-width: 80px;
+            filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
+            animation: titleGlow 2s ease-in-out infinite;
         }
-
-        .tower-btn:hover {
-            border-color: var(--tower);
-            box-shadow: 0 0 15px rgba(68, 136, 255, 0.5);
-            background: #1e1e3a;
+        @keyframes titleGlow {
+            0%,
+            100% {
+                filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 4px 35px rgba(240, 200, 80, 0.7));
+            }
         }
-        .tower-btn.selected {
-            border-color: #fff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
-            background: #2a2a4e;
+        .splash-subtitle {
+            color: #b0a0c0;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            letter-spacing: 2px;
+        }
+        .splash-form {
+            background: rgba(20, 18, 40, 0.9);
+            border: 1px solid #3a3050;
+            border-radius: 20px;
+            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(440px, 90vw);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        }
+        .splash-form label {
+            font-weight: 700;
+            color: #d4b060;
+            font-size: 0.95em;
+        }
+        .splash-form input {
+            background: #121025;
+            border: 2px solid #3a3050;
             color: #fff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            transition: 0.3s;
+            outline: none;
         }
-        .tower-btn .cost {
-            font-size: 12px;
-            color: var(--gold);
-            display: block;
+        .splash-form input:focus {
+            border-color: #e8c547;
+            box-shadow: 0 0 25px rgba(232, 197, 71, 0.25);
         }
-        .tower-btn .name {
-            font-size: 13px;
+        .btn-create {
+            background: linear-gradient(180deg, #f0c040, #b8781a);
+            border: none;
+            color: #1a1020;
+            font-weight: 800;
+            font-size: 1.2em;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            margin-top: 8px;
+            text-transform: uppercase;
         }
-        .tower-btn .desc {
-            font-size: 10px;
-            color: #999;
-            display: block;
+        .btn-create:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(240, 192, 64, 0.45);
         }
-
-        #controls {
+        .splash-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
         }
+        .btn-load {
+            background: rgba(40, 35, 70, 0.8);
+            border: 1px solid #3a3050;
+            color: #ccc;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.9em;
+        }
+        .btn-load:hover {
+            background: #3a3050;
+            border-color: #c8943e;
+        }
 
-        .ctrl-btn {
-            padding: 10px 20px;
-            background: #222;
-            color: #fff;
-            border: 2px solid #555;
+        #game-screen {
+            display: none;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            position: relative;
+            flex-direction: column;
+        }
+        #game-screen.active {
+            display: flex;
+        }
+
+        #top-bar {
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(18, 15, 35, 0.97), rgba(14, 12, 28, 0.95));
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid #2e2e4e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            min-height: 50px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .country-name-display {
+            font-weight: 800;
+            font-size: clamp(0.9em, 2.5vw, 1.25em);
+            background: linear-gradient(180deg, #ffe08a, #c8943e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stats-panel {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            font-size: clamp(0.7em, 1.8vw, 0.95em);
+            white-space: nowrap;
+        }
+        .stat-icon {
+            font-size: 1.2em;
+        }
+        .stat-money {
+            color: #f0d060;
+        }
+        .stat-pop {
+            color: #6dc8e8;
+        }
+        .stat-happy {
+            color: #6ce89c;
+        }
+        .stat-demand {
+            color: #ff9800;
+            font-size: 0.75em;
+        }
+        .top-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-top {
+            background: rgba(40, 35, 70, 0.8);
+            border: 1px solid #3a3050;
+            color: #ccc;
+            padding: 6px 10px;
             border-radius: 8px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: clamp(0.7em, 1.5vw, 0.85em);
+            white-space: nowrap;
         }
-        .ctrl-btn:hover {
-            background: #333;
-            border-color: #fff;
+        .btn-top:hover {
+            background: #3a3050;
+            border-color: #c8943e;
         }
-        .ctrl-btn.wave-btn {
-            background: #331100;
-            border-color: #ff6600;
-            animation: pulse 2s infinite;
+        .time-weather {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8em;
+            color: #ccc;
         }
-        @keyframes pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 5px #ff6600;
-            }
-            50% {
-                box-shadow: 0 0 25px #ff6600, 0 0 50px #ff3300;
-            }
+        .time-display {
+            color: #f0d060;
+            font-weight: 700;
+        }
+        .weather-display {
+            font-size: 1.2em;
         }
 
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 36px;
-            font-weight: bold;
-            text-shadow: 0 0 20px red, 0 0 40px red;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 10;
+        #game-canvas {
+            flex: 1;
+            cursor: grab;
+            display: block;
+            touch-action: none;
+            min-height: 0;
+        }
+        #game-canvas.zone {
+            cursor: cell;
+        }
+        #game-canvas.building {
+            cursor: crosshair;
+        }
+        #game-canvas.grabbing {
+            cursor: grabbing;
+        }
+
+        #bottom-panel {
+            z-index: 100;
+            background: rgba(16, 14, 30, 0.96);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid #2e2e4e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 10px;
+            min-height: 55px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+        .tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+            background: rgba(30, 25, 55, 0.7);
+            font-weight: 700;
+            font-size: 0.7em;
+            color: #ddd;
+            min-width: 48px;
             text-align: center;
         }
-        #message.show {
-            opacity: 1;
+        .tool-btn:active {
+            transform: scale(0.95);
+        }
+        .tool-btn.active {
+            border-color: #f0d060 !important;
+            background: rgba(200, 160, 50, 0.25) !important;
+        }
+        .tool-btn.zone-res {
+            border-color: #4CAF50;
+        }
+        .tool-btn.zone-com {
+            border-color: #2196F3;
+        }
+        .tool-btn.zone-ind {
+            border-color: #FF9800;
+        }
+        .tool-btn.danger {
+            border-color: #802020;
+            color: #f08888;
+        }
+        .tool-btn-icon {
+            font-size: 1.4em;
+            line-height: 1;
+        }
+        .tool-btn-label {
+            font-size: 0.65em;
         }
 
-        #tooltip {
+        #build-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #build-modal.open {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1830;
+            border: 1px solid #3a3050;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 700px;
+            width: 95vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+        }
+        .modal-title {
+            font-weight: 800;
+            font-size: 1.2em;
+            color: #f0d060;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .modal-tabs {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .modal-tab {
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: rgba(30, 25, 55, 0.6);
+            border: 1px solid #3a3050;
+            color: #ccc;
+            font-size: 0.75em;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .modal-tab:hover {
+            background: rgba(50, 40, 80, 0.8);
+        }
+        .modal-tab.active {
+            background: rgba(200, 160, 50, 0.3);
+            border-color: #f0d060;
+            color: #f0d060;
+        }
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 6px;
+        }
+        .modal-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 2px solid transparent;
+            background: rgba(30, 25, 55, 0.6);
+            text-align: center;
+        }
+        .modal-item:hover {
+            background: rgba(50, 40, 80, 0.8);
+            border-color: #c8943e;
+        }
+        .modal-item.selected {
+            border-color: #f0d060 !important;
+            background: rgba(200, 160, 50, 0.25) !important;
+        }
+        .modal-item-emoji {
+            font-size: 1.8em;
+        }
+        .modal-item-name {
+            font-size: 0.7em;
+            font-weight: 600;
+            color: #ddd;
+            line-height: 1.2;
+        }
+        .modal-item-cost {
+            font-size: 0.65em;
+            color: #f0d060;
+            font-weight: 700;
+        }
+        .modal-close {
+            display: block;
+            margin: 16px auto 0;
+            background: #3a3050;
+            border: none;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+        .modal-close:hover {
+            background: #5a4070;
+        }
+
+        #info-popup {
             position: absolute;
             pointer-events: none;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #555;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 5px;
-            font-size: 12px;
+            z-index: 150;
+            background: rgba(15, 12, 35, 0.97);
+            border: 2px solid #5a5080;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 0.85em;
             display: none;
-            z-index: 5;
+            white-space: nowrap;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
+            line-height: 1.7;
+            color: #f0f0f0;
+        }
+        #info-popup .pop-title {
+            font-weight: 800;
+            color: #ffd700;
+            font-size: 1.1em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        #message-log {
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            z-index: 110;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none;
+            max-width: 280px;
+        }
+        .log-msg {
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 3px solid #f0c040;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            animation: fadeInOut 3.5s forwards;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            12% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            75% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #top-bar {
+                padding: 4px 6px;
+                min-height: 40px;
+            }
+            .stats-panel {
+                gap: 5px;
+            }
+            .stat-item {
+                font-size: 0.6em;
+            }
+            .btn-top {
+                padding: 4px 6px;
+                font-size: 0.6em;
+            }
+            #bottom-panel {
+                gap: 3px;
+                padding: 5px 4px;
+                min-height: 44px;
+            }
+            .tool-btn {
+                padding: 4px 6px;
+                min-width: 38px;
+                font-size: 0.6em;
+            }
+            .tool-btn-icon {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="hud">
-            <div class="hud-item"><span class="hud-icon">💰</span> <span id="money">500</span></div>
-            <div class="hud-item"><span class="hud-icon">❤️</span> <span id="lives">20</span></div>
-            <div class="hud-item"><span class="hud-icon">🌊</span> <span id="wave-display">Волна 0</span></div>
+    <div id="splash">
+        <canvas class="splash-stars" id="splash-stars"></canvas>
+        <div class="splash-title">🏛️ PRESIDENT<br>SIMULATOR</div>
+        <div class="splash-subtitle">TheoTown Edition — Постройте мегаполис мечты</div>
+        <div class="splash-form">
+            <label for="country-name">📜 Название государства</label>
+            <input type="text" id="country-name" placeholder="Введите название..." maxlength="28" value="Великоречье">
+            <button class="btn-create" onclick="startGame()">🌟 ОСНОВАТЬ ГОСУДАРСТВО</button>
+            <div class="splash-buttons">
+                <button class="btn-load" onclick="loadGame()">💾 Загрузить сохранение</button>
+            </div>
         </div>
-        <div id="canvas-wrapper">
-            <canvas id="gameCanvas"></canvas>
-            <div id="message"></div>
-            <div id="tooltip"></div>
+    </div>
+
+    <div id="game-screen">
+        <div id="top-bar">
+            <div class="country-name-display" id="display-country-name">🏛️ Великоречье</div>
+            <div class="stats-panel">
+                <div class="stat-item"><span class="stat-icon">💰</span> <span class="stat-money" id="money-val">50000</span></div>
+                <div class="stat-item"><span class="stat-icon">👥</span> <span class="stat-pop" id="pop-val">100</span></div>
+                <div class="stat-item"><span class="stat-icon">😊</span> <span class="stat-happy" id="happy-val">75</span>%</div>
+                <div class="stat-item"><span class="stat-demand" id="demand-val">🏘️50 🏪30 🏭20</span></div>
+            </div>
+            <div class="top-buttons">
+                <div class="time-weather">
+                    <span class="weather-display" id="weather-icon">☀️</span>
+                    <span class="time-display" id="time-display">17:26</span>
+                </div>
+                <button class="btn-top" onclick="expandBorder()">📏</button>
+                <button class="btn-top" onclick="saveGame()">💾</button>
+                <button class="btn-top" onclick="showHelp()">❓</button>
+            </div>
         </div>
-        <div id="tower-panel">
-            <button class="tower-btn" data-tower="basic">
-                <span class="name">🔫 Базовая</span>
-                <span class="cost">💰100</span>
-                <span class="desc">Урон: 25 | Скорость: 1.5с</span>
+
+        <canvas id="game-canvas"></canvas>
+
+        <div id="info-popup"></div>
+        <div id="message-log"></div>
+
+        <div id="bottom-panel">
+            <button class="tool-btn zone-res" id="btn-zone-res" onclick="setTool('zone_residential')">
+                <span class="tool-btn-icon">🏘️</span><span class="tool-btn-label">Жилая</span>
             </button>
-            <button class="tower-btn" data-tower="sniper">
-                <span class="name">🎯 Снайпер</span>
-                <span class="cost">💰200</span>
-                <span class="desc">Урон: 80 | Скорость: 3с</span>
+            <button class="tool-btn zone-com" id="btn-zone-com" onclick="setTool('zone_commercial')">
+                <span class="tool-btn-icon">🏪</span><span class="tool-btn-label">Коммерция</span>
             </button>
-            <button class="tower-btn" data-tower="splash">
-                <span class="name">💥 Взрывная</span>
-                <span class="cost">💰300</span>
-                <span class="desc">Урон: 40 | Радиус</span>
+            <button class="tool-btn zone-ind" id="btn-zone-ind" onclick="setTool('zone_industrial')">
+                <span class="tool-btn-icon">🏭</span><span class="tool-btn-label">Индустрия</span>
             </button>
-            <button class="tower-btn" data-tower="slow">
-                <span class="name">❄️ Заморозка</span>
-                <span class="cost">💰250</span>
-                <span class="desc">Замедление | Урон: 10</span>
+            <button class="tool-btn" id="btn-special" onclick="openBuildModal()">
+                <span class="tool-btn-icon">🏗️</span><span class="tool-btn-label">Спец.</span>
+            </button>
+            <button class="tool-btn" id="btn-rotate" onclick="rotateBuilding()">
+                <span class="tool-btn-icon">🔄</span><span class="tool-btn-label">Поворот</span>
+            </button>
+            <button class="tool-btn danger" id="btn-delete" onclick="toggleDeleteMode()">
+                <span class="tool-btn-icon">🗑️</span><span class="tool-btn-label">Снос</span>
+            </button>
+            <button class="tool-btn" id="btn-info" onclick="toggleSelectMode()">
+                <span class="tool-btn-icon">🔍</span><span class="tool-btn-label">Инфо</span>
             </button>
         </div>
-        <div id="controls">
-            <button class="ctrl-btn" id="sellBtn">🔨 Продать (ПКМ)</button>
-            <button class="ctrl-btn" id="upgradeBtn">⬆ Улучшить</button>
-            <button class="ctrl-btn wave-btn" id="startWaveBtn">▶ НАЧАТЬ ВОЛНУ</button>
-            <button class="ctrl-btn" id="restartBtn">🔄 Рестарт</button>
+
+        <div id="build-modal">
+            <div class="modal-content">
+                <div class="modal-title">🏗️ Специальные постройки</div>
+                <div class="modal-tabs" id="modal-tabs">
+                    <button class="modal-tab active" data-tab="roads">🛣️ Дороги</button>
+                    <button class="modal-tab" data-tab="services">🚒 Службы</button>
+                    <button class="modal-tab" data-tab="parks">🌳 Парки</button>
+                    <button class="modal-tab" data-tab="landmarks">🏛️ Достоприм.</button>
+                    <button class="modal-tab" data-tab="transport">🚌 Транспорт</button>
+                </div>
+                <div class="modal-grid" id="modal-grid"></div>
+                <div style="text-align:center;color:#aaa;margin-top:8px;">📏 Размер:</div>
+                <div id="size-selector" style="display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap;">
+                    <button class="size-btn selected" data-scale="1" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔹 1x</button>
+                    <button class="size-btn" data-scale="1.5" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔸 1.5x</button>
+                    <button class="size-btn" data-scale="2" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔶 2x</button>
+                    <button class="size-btn" data-scale="3" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">💎 3x</button>
+                </div>
+                <div style="text-align:center;color:#8af;font-size:0.75em;margin-top:4px;">🔄 R — поворот (сейчас: <span id="rot-display">0°</span>)</div>
+                <button class="modal-close" onclick="closeBuildModal()">✖ Закрыть</button>
+            </div>
         </div>
     </div>
 
     <script>
-        (function() {
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const messageEl = document.getElementById('message');
-            const tooltip = document.getElementById('tooltip');
-            const moneyEl = document.getElementById('money');
-            const livesEl = document.getElementById('lives');
-            const waveDisplay = document.getElementById('wave-display');
-            const startWaveBtn = document.getElementById('startWaveBtn');
-            const sellBtn = document.getElementById('sellBtn');
-            const upgradeBtn = document.getElementById('upgradeBtn');
-            const restartBtn = document.getElementById('restartBtn');
+        // ==================== СОСТОЯНИЕ ИГРЫ ====================
+        const gameState = {
+            countryName: '',
+            money: 50000,
+            population: 100,
+            happiness: 75,
+            borderSize: 500,
+            borderExpandCost: 50000,
+            buildings: [],
+            roads: [],
+            rails: [],
+            zones: [],
+            waterBodies: [],
+            people: [],
+            cars: [],
+            boats: [],
+            buses: [],
+            particles: [],
+            selectedType: null,
+            buildScale: 1,
+            buildRotation: 0,
+            currentTool: null,
+            deleteMode: false,
+            selectMode: false,
+            activeTab: 'roads',
+            canvas: null,
+            ctx: null,
+            cameraX: 0,
+            cameraY: 0,
+            zoom: 1,
+            gridSize: 48,
+            dragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            dragDistance: 0,
+            mouseX: 0,
+            mouseY: 0,
+            hoveredBuilding: null,
+            gameTime: 0,
+            incomeTimer: 0,
+            zoneTimer: 0,
+            demandTimer: 0,
+            saveInterval: null,
+            gameHour: 17,
+            gameMinute: 26,
+            weather: 'sunny',
+            weatherTimer: 0,
+            weatherDuration: 500,
+            raindrops: [],
+            snowflakes: [],
+            residentialDemand: 50,
+            commercialDemand: 30,
+            industrialDemand: 20,
+            touchStartTime: 0,
+            touchDistance: 0,
+            lastPinchZoom: 1,
+        };
 
-            // === КОНФИГУРАЦИЯ КАРТЫ (как общежитие) ===
-            const COLS = 15;
-            const ROWS = 10;
-            const CELL_SIZE = 48;
-            canvas.width = COLS * CELL_SIZE;
-            canvas.height = ROWS * CELL_SIZE;
+        // ==================== ТИПЫ ЗДАНИЙ ====================
+        const buildingTypes = {
+            road: { emoji: '🛣️', name: 'Асфальтовая дорога', cost: 50, income: 5, width: 48, height: 48, isRoad: true, tab: 'roads' },
+            road_curve: { emoji: '↪️', name: 'Поворот дороги', cost: 80, income: 8, width: 48, height: 48, isRoadCurve: true, tab: 'roads' },
+            rail: { emoji: '🚂', name: 'Железная дорога', cost: 200, income: 20, width: 48, height: 48, isRail: true, tab: 'roads' },
+            highway: { emoji: '🛤️', name: 'Автомагистраль', cost: 300, income: 40, width: 48, height: 48, isRoad: true, tab: 'roads' },
+            police_station: { emoji: '🚔', name: 'Полицейский участок', cost: 5000, income: -100, width: 48, height: 48, tab: 'services', capacity: 50, serviceType: 'police', serviceRadius: 200 },
+            fire_station: { emoji: '🚒', name: 'Пожарная станция', cost: 4000, income: -80, width: 48, height: 48, tab: 'services', capacity: 40, serviceType: 'fire', serviceRadius: 180 },
+            hospital: { emoji: '🏥', name: 'Больница', cost: 8000, income: -150, width: 52, height: 50, tab: 'services', capacity: 100, serviceType: 'health', serviceRadius: 250 },
+            school: { emoji: '🏫', name: 'Школа', cost: 6000, income: -120, width: 50, height: 48, tab: 'services', capacity: 80, serviceType: 'education', serviceRadius: 200 },
+            park: { emoji: '🌳', name: 'Парк', cost: 300, income: 0, width: 46, height: 46, tab: 'parks', happinessBonus: 10, serviceRadius: 100 },
+            playground: { emoji: '🛝', name: 'Детская площадка', cost: 500, income: 0, width: 40, height: 40, tab: 'parks', happinessBonus: 15, serviceRadius: 80 },
+            fountain: { emoji: '⛲', name: 'Фонтан', cost: 800, income: 0, width: 36, height: 36, tab: 'parks', happinessBonus: 20, serviceRadius: 120 },
+            statue_of_liberty: { emoji: '🗽', name: 'Статуя Свободы', cost: 50000, income: 500, width: 40, height: 60, tab: 'landmarks', happinessBonus: 50, tourismBonus: 100 },
+            eiffel_tower: { emoji: '🗼', name: 'Эйфелева башня', cost: 45000, income: 450, width: 40, height: 64, tab: 'landmarks', happinessBonus: 45, tourismBonus: 90 },
+            kremlin: { emoji: '🏯', name: 'Кремль', cost: 40000, income: 400, width: 56, height: 48, tab: 'landmarks', happinessBonus: 40, tourismBonus: 80 },
+            stadium: { emoji: '🏟️', name: 'Стадион', cost: 30000, income: 300, width: 64, height: 56, tab: 'landmarks', happinessBonus: 35, tourismBonus: 70 },
+            bus_stop: { emoji: '🚏', name: 'Автобусная остановка', cost: 200, income: 10, width: 24, height: 24, tab: 'transport', capacity: 20 },
+            bus_depot: { emoji: '🚌', name: 'Автобусное депо', cost: 10000, income: -200, width: 56, height: 48, tab: 'transport', capacity: 50 },
+            carshop: { emoji: '🚗', name: 'Автосалон', cost: 10000, income: 150, width: 48, height: 48, tab: 'transport' },
+            shipyard: { emoji: '🚢', name: 'Судостроительный', cost: 20000, income: 400, width: 56, height: 56, tab: 'transport', needsWater: true },
+        };
 
-            // Карта: 0=путь, 1=стена, 2=дверь(выход), 3=кровать(спавн), 4=место для башни
-            const MAP_TEMPLATE = [
-                //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0
-                [1, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 0, 0, 2, 1], // 1
-                [1, 1, 1, 1, 1, 1, 0, 1, 4, 4, 4, 0, 1, 1, 1], // 2
-                [3, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 4, 1], // 3
-                [1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 4, 1], // 4
-                [1, 4, 4, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 4, 1], // 5
-                [1, 4, 4, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1], // 6
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], // 7
-                [1, 4, 4, 4, 1, 4, 4, 4, 1, 0, 0, 0, 0, 0, 1], // 8
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 9
-            ];
-
-            // Путь (waypoints) для движения призраков
-            const WAYPOINTS = [
-                { x: 0, y: 3 }, // спавн у кровати
-                { x: 1, y: 3 },
-                { x: 2, y: 3 },
-                { x: 3, y: 3 },
-                { x: 4, y: 3 },
-                { x: 4, y: 4 },
-                { x: 4, y: 5 },
-                { x: 4, y: 6 },
-                { x: 5, y: 6 },
-                { x: 6, y: 6 },
-                { x: 7, y: 6 },
-                { x: 8, y: 6 },
-                { x: 9, y: 6 },
-                { x: 9, y: 7 },
-                { x: 9, y: 8 },
-                { x: 10, y: 8 },
-                { x: 11, y: 8 },
-                { x: 12, y: 8 },
-                { x: 13, y: 8 },
-                { x: 13, y: 7 },
-                { x: 13, y: 6 },
-                { x: 13, y: 5 },
-                { x: 13, y: 4 },
-                { x: 13, y: 3 },
-                { x: 13, y: 2 },
-                { x: 13, y: 1 },
-            ];
-
-            // === СОСТОЯНИЕ ИГРЫ ===
-            let mapData = JSON.parse(JSON.stringify(MAP_TEMPLATE));
-            let money = 500;
-            let lives = 20;
-            let wave = 0;
-            let waveActive = false;
-            let enemiesRemaining = 0;
-            let enemiesSpawned = 0;
-            let spawnQueue = [];
-            let spawnTimer = 0;
-            let selectedTowerType = null;
-            let selectedTower = null; // ссылка на выбранную башню на карте
-            let towers = [];
-            let enemies = [];
-            let projectiles = [];
-            let particles = [];
-            let gameOver = false;
-            let gameWon = false;
-            let mouseX = 0;
-            let mouseY = 0;
-            let mouseGridX = -1;
-            let mouseGridY = -1;
-
-            // Типы башен
-            const TOWER_TYPES = {
-                basic: {
-                    name: 'Базовая',
-                    cost: 100,
-                    damage: 25,
-                    range: 120,
-                    cooldown: 90, // кадров (1.5 сек при 60fps)
-                    color: '#4488ff',
-                    bulletColor: '#88bbff',
-                    bulletSpeed: 6,
-                    upgradeCost: 80,
-                    upgradeMult: 1.5,
-                    level: 1,
-                    maxLevel: 4,
-                },
-                sniper: {
-                    name: 'Снайпер',
-                    cost: 200,
-                    damage: 80,
-                    range: 220,
-                    cooldown: 180,
-                    color: '#ff8844',
-                    bulletColor: '#ffaa66',
-                    bulletSpeed: 10,
-                    upgradeCost: 150,
-                    upgradeMult: 1.6,
-                    level: 1,
-                    maxLevel: 4,
-                },
-                splash: {
-                    name: 'Взрывная',
-                    cost: 300,
-                    damage: 40,
-                    range: 100,
-                    cooldown: 120,
-                    splashRadius: 60,
-                    color: '#ff4444',
-                    bulletColor: '#ff6666',
-                    bulletSpeed: 4,
-                    upgradeCost: 200,
-                    upgradeMult: 1.4,
-                    level: 1,
-                    maxLevel: 4,
-                },
-                slow: {
-                    name: 'Заморозка',
-                    cost: 250,
-                    damage: 10,
-                    range: 110,
-                    cooldown: 60,
-                    slowAmount: 0.5,
-                    slowDuration: 120,
-                    color: '#44ccff',
-                    bulletColor: '#aaddff',
-                    bulletSpeed: 5,
-                    upgradeCost: 180,
-                    upgradeMult: 1.3,
-                    level: 1,
-                    maxLevel: 4,
-                },
-            };
-
-            // === КЛАССЫ ===
-            class Tower {
-                constructor(x, y, type) {
-                    this.gridX = x;
-                    this.gridY = y;
-                    this.px = x * CELL_SIZE + CELL_SIZE / 2;
-                    this.py = y * CELL_SIZE + CELL_SIZE / 2;
-                    this.type = type;
-                    this.config = { ...TOWER_TYPES[type] };
-                    this.cooldownRemaining = 0;
-                    this.target = null;
-                    this.angle = 0;
-                    this.level = 1;
-                    this.damage = this.config.damage;
-                    this.range = this.config.range;
-                    this.cooldown = this.config.cooldown;
-                    mapData[y][x] = 5; // занято башней
-                }
-
-                upgrade() {
-                    if (this.level >= this.config.maxLevel) return false;
-                    const cost = Math.floor(this.config.upgradeCost * this.level);
-                    if (money < cost) return false;
-                    money -= cost;
-                    this.level++;
-                    this.damage = Math.floor(this.config.damage * Math.pow(this.config.upgradeMult, this
-                        .level - 1));
-                    this.range = this.config.range + (this.level - 1) * 15;
-                    this.cooldown = Math.max(30, this.config.cooldown - (this.level - 1) * 10);
-                    updateHUD();
-                    return true;
-                }
-
-                getSellValue() {
-                    let total = this.config.cost;
-                    for (let i = 1; i < this.level; i++) {
-                        total += Math.floor(this.config.upgradeCost * i);
-                    }
-                    return Math.floor(total * 0.6);
-                }
-
-                findTarget() {
-                    let best = null;
-                    let bestProgress = -1;
-                    for (const enemy of enemies) {
-                        const dx = enemy.x - this.px;
-                        const dy = enemy.y - this.py;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist <= this.range && enemy.waypointIndex > bestProgress && enemy.hp > 0) {
-                            best = enemy;
-                            bestProgress = enemy.waypointIndex;
-                        }
-                    }
-                    return best;
-                }
-
-                update() {
-                    if (this.cooldownRemaining > 0) {
-                        this.cooldownRemaining--;
-                    }
-                    this.target = this.findTarget();
-                    if (this.target) {
-                        this.angle = Math.atan2(this.target.y - this.py, this.target.x - this.px);
-                        if (this.cooldownRemaining <= 0) {
-                            this.shoot();
-                            this.cooldownRemaining = this.cooldown;
-                        }
-                    }
-                }
-
-                shoot() {
-                    const proj = new Projectile(
-                        this.px, this.py,
-                        this.target,
-                        this.damage,
-                        this.config.bulletSpeed,
-                        this.config.bulletColor,
-                        this.type,
-                        this.config.splashRadius || 0,
-                        this.config.slowAmount || 0,
-                        this.config.slowDuration || 0,
-                    );
-                    projectiles.push(proj);
-                }
-
-                draw(ctx) {
-                    const cx = this.px;
-                    const cy = this.py;
-                    const r = CELL_SIZE * 0.35;
-
-                    // База
-                    ctx.fillStyle = '#333';
-                    ctx.beginPath();
-                    ctx.roundRect(cx - r, cy - r, r * 2, r * 2, 6);
-                    ctx.fill();
-                    ctx.strokeStyle = this.config.color;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Уровень
-                    for (let i = 0; i < this.level; i++) {
-                        ctx.fillStyle = '#ffd700';
-                        ctx.fillRect(cx - r + 4 + i * 8, cy + r - 10, 6, 6);
-                    }
-
-                    // Ствол
-                    ctx.save();
-                    ctx.translate(cx, cy);
-                    ctx.rotate(this.angle);
-                    ctx.fillStyle = this.config.color;
-                    ctx.fillRect(0, -3, r * 0.8, 6);
-                    ctx.restore();
-
-                    // Центр
-                    ctx.fillStyle = this.config.color;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-
-                    // Радиус при наведении
-                    if (selectedTower === this || (mouseGridX === this.gridX && mouseGridY === this.gridY &&
-                            !selectedTowerType)) {
-                        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([5, 5]);
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, this.range, 0, Math.PI * 2);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
-                    }
-                }
-            }
-
-            class Enemy {
-                constructor(hp, speed, reward, color, size = 14) {
-                    this.hp = hp;
-                    this.maxHp = hp;
-                    this.speed = speed;
-                    this.reward = reward;
-                    this.color = color;
-                    this.size = size;
-                    this.waypointIndex = 0;
-                    this.x = WAYPOINTS[0].x * CELL_SIZE + CELL_SIZE / 2;
-                    this.y = WAYPOINTS[0].y * CELL_SIZE + CELL_SIZE / 2;
-                    this.alive = true;
-                    this.slowTimer = 0;
-                    this.slowAmount = 0;
-                }
-
-                update() {
-                    if (!this.alive) return;
-                    if (this.slowTimer > 0) {
-                        this.slowTimer--;
-                    }
-                    const effectiveSpeed = this.slowTimer > 0 ? this.speed * (1 - this.slowAmount) : this.speed;
-                    if (this.waypointIndex >= WAYPOINTS.length - 1) {
-                        this.alive = false;
-                        lives--;
-                        updateHUD();
-                        if (lives <= 0) triggerGameOver();
-                        return;
-                    }
-                    const target = WAYPOINTS[this.waypointIndex + 1];
-                    const tx = target.x * CELL_SIZE + CELL_SIZE / 2;
-                    const ty = target.y * CELL_SIZE + CELL_SIZE / 2;
-                    const dx = tx - this.x;
-                    const dy = ty - this.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < effectiveSpeed) {
-                        this.x = tx;
-                        this.y = ty;
-                        this.waypointIndex++;
-                    } else {
-                        this.x += (dx / dist) * effectiveSpeed;
-                        this.y += (dy / dist) * effectiveSpeed;
-                    }
-                }
-
-                takeDamage(dmg) {
-                    this.hp -= dmg;
-                    if (this.hp <= 0) {
-                        this.alive = false;
-                        money += this.reward;
-                        updateHUD();
-                        // Частицы смерти
-                        for (let i = 0; i < 8; i++) {
-                            particles.push({
-                                x: this.x,
-                                y: this.y,
-                                vx: (Math.random() - 0.5) * 6,
-                                vy: (Math.random() - 0.5) * 6,
-                                life: 20,
-                                color: this.color,
-                                size: 3 + Math.random() * 4,
-                            });
-                        }
-                    }
-                }
-
-                applySlow(amount, duration) {
-                    this.slowAmount = Math.max(this.slowAmount, amount);
-                    this.slowTimer = Math.max(this.slowTimer, duration);
-                }
-
-                draw(ctx) {
-                    if (!this.alive) return;
-                    const s = this.size;
-                    // Тень
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.beginPath();
-                    ctx.arc(this.x + 2, this.y + 2, s, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Тело
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, s, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Глаза
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(this.x - s * 0.3, this.y - s * 0.2, s * 0.3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(this.x + s * 0.3, this.y - s * 0.2, s * 0.3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#000';
-                    ctx.beginPath();
-                    ctx.arc(this.x - s * 0.25, this.y - s * 0.2, s * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(this.x + s * 0.35, this.y - s * 0.2, s * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                    // HP бар
-                    if (this.hp < this.maxHp) {
-                        const barW = s * 2;
-                        const barH = 4;
-                        const barX = this.x - barW / 2;
-                        const barY = this.y - s - 8;
-                        ctx.fillStyle = '#333';
-                        ctx.fillRect(barX, barY, barW, barH);
-                        ctx.fillStyle = '#ff0000';
-                        ctx.fillRect(barX, barY, barW * (this.hp / this.maxHp), barH);
-                    }
-                    // Замедление
-                    if (this.slowTimer > 0) {
-                        ctx.strokeStyle = 'rgba(100,200,255,0.7)';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, s + 4, 0, Math.PI * 2);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            class Projectile {
-                constructor(x, y, target, damage, speed, color, type, splashRadius = 0, slowAmount = 0,
-                slowDuration = 0) {
-                    this.x = x;
-                    this.y = y;
-                    this.target = target;
-                    this.damage = damage;
-                    this.speed = speed;
-                    this.color = color;
-                    this.type = type;
-                    this.splashRadius = splashRadius;
-                    this.slowAmount = slowAmount;
-                    this.slowDuration = slowDuration;
-                    this.alive = true;
-                }
-
-                update() {
-                    if (!this.alive) return;
-                    if (!this.target || !this.target.alive) {
-                        this.alive = false;
-                        return;
-                    }
-                    const dx = this.target.x - this.x;
-                    const dy = this.target.y - this.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < this.speed + 5) {
-                        this.hit();
-                        this.alive = false;
-                    } else {
-                        this.x += (dx / dist) * this.speed;
-                        this.y += (dy / dist) * this.speed;
-                    }
-                }
-
-                hit() {
-                    if (this.splashRadius > 0) {
-                        // Урон по площади
-                        for (const enemy of enemies) {
-                            if (!enemy.alive) continue;
-                            const dx = enemy.x - this.target.x;
-                            const dy = enemy.y - this.target.y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist <= this.splashRadius) {
-                                const dmgScale = 1 - (dist / this.splashRadius) * 0.5;
-                                enemy.takeDamage(Math.floor(this.damage * dmgScale));
-                                if (this.slowAmount > 0) enemy.applySlow(this.slowAmount, this.slowDuration);
-                            }
-                        }
-                        // Частицы взрыва
-                        for (let i = 0; i < 15; i++) {
-                            const angle = Math.random() * Math.PI * 2;
-                            const spd = 2 + Math.random() * 5;
-                            particles.push({
-                                x: this.target.x,
-                                y: this.target.y,
-                                vx: Math.cos(angle) * spd,
-                                vy: Math.sin(angle) * spd,
-                                life: 15 + Math.random() * 15,
-                                color: '#ff8800',
-                                size: 3 + Math.random() * 5,
-                            });
-                        }
-                    } else {
-                        this.target.takeDamage(this.damage);
-                        if (this.slowAmount > 0 && this.target.alive) {
-                            this.target.applySlow(this.slowAmount, this.slowDuration);
-                        }
-                        // Маленькие частицы попадания
-                        for (let i = 0; i < 3; i++) {
-                            particles.push({
-                                x: this.target.x,
-                                y: this.target.y,
-                                vx: (Math.random() - 0.5) * 4,
-                                vy: (Math.random() - 0.5) * 4,
-                                life: 10,
-                                color: this.color,
-                                size: 2 + Math.random() * 3,
-                            });
-                        }
-                    }
-                }
-
-                draw(ctx) {
-                    if (!this.alive) return;
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            // === ФУНКЦИИ ===
-            function updateHUD() {
-                moneyEl.textContent = money;
-                livesEl.textContent = lives;
-                waveDisplay.textContent = `Волна ${wave}`;
-            }
-
-            function showMessage(text, duration = 2000) {
-                messageEl.textContent = text;
-                messageEl.classList.add('show');
-                clearTimeout(messageEl._timeout);
-                messageEl._timeout = setTimeout(() => {
-                    messageEl.classList.remove('show');
-                }, duration);
-            }
-
-            function triggerGameOver() {
-                gameOver = true;
-                waveActive = false;
-                showMessage('💀 ИГРА ОКОНЧЕНА 💀', 4000);
-                startWaveBtn.textContent = '▶ Игра окончена';
-                startWaveBtn.classList.remove('wave-btn');
-            }
-
-            function triggerWin() {
-                gameWon = true;
-                waveActive = false;
-                showMessage('🏆 ПОБЕДА! Все волны пройдены! 🏆', 5000);
-                startWaveBtn.textContent = '🏆 Победа!';
-                startWaveBtn.classList.remove('wave-btn');
-            }
-
-            function getWaveConfig(w) {
-                const configs = [
-                    { count: 8, hp: 40, speed: 0.8, reward: 30, color: '#ff6666', size: 12, name: 'Слабая' },
-                    { count: 12, hp: 60, speed: 0.9, reward: 35, color: '#ff8844', size: 13, name: 'Средняя' },
-                    { count: 10, hp: 100, speed: 0.7, reward: 45, color: '#cc44ff', size: 14, name: 'Сильная' },
-                    { count: 15, hp: 80, speed: 1.1, reward: 40, color: '#ff44aa', size: 12, name: 'Быстрая' },
-                    { count: 8, hp: 200, speed: 0.5, reward: 70, color: '#ff0000', size: 18, name: 'Босс' },
-                    { count: 20, hp: 70, speed: 1.0, reward: 38, color: '#ff9900', size: 13, name: 'Орда' },
-                    { count: 14, hp: 130, speed: 0.8, reward: 55, color: '#9900ff', size: 15, name: 'Тяжёлая' },
-                    { count: 10, hp: 160, speed: 0.6, reward: 65, color: '#ff0044', size: 17, name: 'Элита' },
-                    { count: 25, hp: 90, speed: 1.2, reward: 35, color: '#ff5500', size: 12, name: 'Рой' },
-                    { count: 5, hp: 400, speed: 0.4, reward: 120, color: '#ff0000', size: 22, name: 'СУПЕРБОСС' },
-                ];
-                const idx = Math.min(w - 1, configs.length - 1);
-                return { ...configs[idx], wave: w };
-            }
-
-            function startWave() {
-                if (gameOver || gameWon) return;
-                if (waveActive) return;
-                wave++;
-                if (wave > 50) {
-                    triggerWin();
-                    return;
-                }
-                const cfg = getWaveConfig(wave);
-                spawnQueue = [];
-                enemiesRemaining = cfg.count;
-                enemiesSpawned = 0;
-                spawnTimer = 0;
-                // Создаём очередь спавна с интервалами
-                for (let i = 0; i < cfg.count; i++) {
-                    spawnQueue.push({
-                        delay: i * 25, // кадров между спавнами
-                        hp: cfg.hp,
-                        speed: cfg.speed,
-                        reward: cfg.reward,
-                        color: cfg.color,
-                        size: cfg.size,
-                    });
-                }
-                waveActive = true;
-                showMessage(`🌊 Волна ${wave}: ${cfg.name}!`, 2000);
-                startWaveBtn.textContent = '⏳ Волна идёт...';
-                startWaveBtn.classList.remove('wave-btn');
-                updateHUD();
-            }
-
-            function spawnEnemy(cfg) {
-                const enemy = new Enemy(cfg.hp, cfg.speed, cfg.reward, cfg.color, cfg.size);
-                enemies.push(enemy);
-                enemiesSpawned++;
-            }
-
-            function placeTower(gridX, gridY, type) {
-                if (mapData[gridY][gridX] !== 4) return false;
-                const tconfig = TOWER_TYPES[type];
-                if (money < tconfig.cost) {
-                    showMessage('❌ Недостаточно денег!', 1500);
-                    return false;
-                }
-                money -= tconfig.cost;
-                const tower = new Tower(gridX, gridY, type);
-                towers.push(tower);
-                updateHUD();
-                return true;
-            }
-
-            function sellTower(tower) {
-                const val = tower.getSellValue();
-                money += val;
-                mapData[tower.gridY][tower.gridX] = 4;
-                towers = towers.filter(t => t !== tower);
-                if (selectedTower === tower) selectedTower = null;
-                updateHUD();
-                showMessage(`💰 Продано за ${val}`, 1500);
-            }
-
-            function restartGame() {
-                mapData = JSON.parse(JSON.stringify(MAP_TEMPLATE));
-                money = 500;
-                lives = 20;
-                wave = 0;
-                waveActive = false;
-                enemiesRemaining = 0;
-                enemiesSpawned = 0;
-                spawnQueue = [];
-                spawnTimer = 0;
-                selectedTowerType = null;
-                selectedTower = null;
-                towers = [];
-                enemies = [];
-                projectiles = [];
-                particles = [];
-                gameOver = false;
-                gameWon = false;
-                startWaveBtn.textContent = '▶ НАЧАТЬ ВОЛНУ';
-                startWaveBtn.classList.add('wave-btn');
-                updateHUD();
-                showMessage('🔄 Игра перезапущена', 1500);
-            }
-
-            // === СОБЫТИЯ ===
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                mouseX = e.clientX - rect.left;
-                mouseY = e.clientY - rect.top;
-                mouseGridX = Math.floor(mouseX / CELL_SIZE);
-                mouseGridY = Math.floor(mouseY / CELL_SIZE);
-                // Обновляем тултип
-                if (mouseGridX >= 0 && mouseGridX < COLS && mouseGridY >= 0 && mouseGridY < ROWS) {
-                    const cell = mapData[mouseGridY][mouseGridX];
-                    if (cell === 4) {
-                        tooltip.style.display = 'block';
-                        tooltip.style.left = (e.clientX + 20) + 'px';
-                        tooltip.style.top = (e.clientY - 30) + 'px';
-                        tooltip.textContent = '🟩 Свободное место для башни';
-                    } else if (cell === 5) {
-                        const tower = towers.find(t => t.gridX === mouseGridX && t.gridY === mouseGridY);
-                        if (tower) {
-                            tooltip.style.display = 'block';
-                            tooltip.style.left = (e.clientX + 20) + 'px';
-                            tooltip.style.top = (e.clientY - 30) + 'px';
-                            tooltip.textContent =
-                                `${tower.config.name} Ур.${tower.level} | Урон:${tower.damage} | Цена продажи:${tower.getSellValue()}`;
-                        } else {
-                            tooltip.style.display = 'none';
-                        }
-                    } else {
-                        tooltip.style.display = 'none';
-                    }
-                } else {
-                    tooltip.style.display = 'none';
-                }
-            });
-
-            canvas.addEventListener('click', (e) => {
-                if (gameOver || gameWon) return;
-                const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-                const gx = Math.floor(mx / CELL_SIZE);
-                const gy = Math.floor(my / CELL_SIZE);
-                if (gx < 0 || gx >= COLS || gy < 0 || gy >= ROWS) return;
-                // Если выбран тип башни — ставим
-                if (selectedTowerType) {
-                    if (placeTower(gx, gy, selectedTowerType)) {
-                        // Башня поставлена, снимаем выбор
-                        selectedTowerType = null;
-                        document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove(
-                            'selected'));
-                    }
-                    return;
-                }
-                // Иначе выбираем башню на клетке
-                const tower = towers.find(t => t.gridX === gx && t.gridY === gy);
-                if (tower) {
-                    selectedTower = tower;
-                    selectedTowerType = null;
-                    document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove('selected'));
-                } else {
-                    selectedTower = null;
-                }
-            });
-
-            canvas.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                if (gameOver || gameWon) return;
-                const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-                const gx = Math.floor(mx / CELL_SIZE);
-                const gy = Math.floor(my / CELL_SIZE);
-                const tower = towers.find(t => t.gridX === gx && t.gridY === gy);
-                if (tower) {
-                    sellTower(tower);
-                }
-            });
-
-            // Кнопки башен
-            document.querySelectorAll('.tower-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (gameOver || gameWon) return;
-                    const type = btn.dataset.tower;
-                    if (selectedTowerType === type) {
-                        selectedTowerType = null;
-                        btn.classList.remove('selected');
-                    } else {
-                        selectedTowerType = type;
-                        selectedTower = null;
-                        document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove(
-                            'selected'));
-                        btn.classList.add('selected');
-                        if (money < TOWER_TYPES[type].cost) {
-                            showMessage('❌ Недостаточно денег для этой башни!', 1500);
-                        }
-                    }
-                });
-            });
-
-            sellBtn.addEventListener('click', () => {
-                if (selectedTower) {
-                    sellTower(selectedTower);
-                } else {
-                    showMessage('🔍 Сначала выберите башню (кликните по ней)', 1500);
-                }
-            });
-
-            upgradeBtn.addEventListener('click', () => {
-                if (!selectedTower) {
-                    showMessage('🔍 Сначала выберите башню для улучшения', 1500);
-                    return;
-                }
-                if (!selectedTower.upgrade()) {
-                    if (selectedTower.level >= selectedTower.config.maxLevel) {
-                        showMessage('⭐ Максимальный уровень!', 1500);
-                    } else {
-                        showMessage('❌ Недостаточно денег для улучшения!', 1500);
-                    }
-                } else {
-                    showMessage(
-                        `⬆ ${selectedTower.config.name} улучшена до уровня ${selectedTower.level}!`,
-                        1500);
-                }
-            });
-
-            startWaveBtn.addEventListener('click', startWave);
-            restartBtn.addEventListener('click', restartGame);
-
-            // === ИГРОВОЙ ЦИКЛ ===
-            function update() {
-                if (gameOver || gameWon) {
-                    // Только частицы обновляем
-                    particles = particles.filter(p => { p.life--; return p.life > 0; });
-                    particles.forEach(p => { p.x += p.vx;
-                        p.y += p.vy; });
-                    return;
-                }
-
-                // Спавн врагов
-                if (waveActive && spawnQueue.length > 0) {
-                    spawnTimer++;
-                    while (spawnQueue.length > 0 && spawnTimer >= spawnQueue[0].delay) {
-                        spawnEnemy(spawnQueue.shift());
-                    }
-                }
-
-                // Обновление врагов
-                for (const enemy of enemies) enemy.update();
-                enemies = enemies.filter(e => e.alive);
-
-                // Проверка окончания волны
-                if (waveActive && spawnQueue.length === 0 && enemies.length === 0 && enemiesSpawned >=
-                    enemiesRemaining) {
-                    waveActive = false;
-                    enemiesSpawned = 0;
-                    enemiesRemaining = 0;
-                    money += 50 + wave * 10; // бонус за волну
-                    updateHUD();
-                    showMessage(`✅ Волна ${wave} пройдена! +${50 + wave * 10}💰`, 2000);
-                    startWaveBtn.textContent = '▶ НАЧАТЬ ВОЛНУ';
-                    startWaveBtn.classList.add('wave-btn');
-                }
-
-                // Обновление башен
-                for (const tower of towers) tower.update();
-
-                // Обновление снарядов
-                for (const proj of projectiles) proj.update();
-                projectiles = projectiles.filter(p => p.alive);
-
-                // Обновление частиц
-                particles = particles.filter(p => { p.life--; return p.life > 0; });
-                particles.forEach(p => { p.x += p.vx;
-                    p.y += p.vy; });
-
-                // Проверка game over
-                if (lives <= 0 && !gameOver) {
-                    triggerGameOver();
-                }
-            }
-
-            function drawMap() {
-                for (let y = 0; y < ROWS; y++) {
-                    for (let x = 0; x < COLS; x++) {
-                        const px = x * CELL_SIZE;
-                        const py = y * CELL_SIZE;
-                        const cell = mapData[y][x];
-
-                        // Пол
-                        ctx.fillStyle = '#1a1a25';
-                        ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
-
-                        switch (cell) {
-                            case 1: // Стена
-                                ctx.fillStyle = '#3a3a4a';
-                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
-                                ctx.strokeStyle = '#555';
-                                ctx.lineWidth = 1;
-                                ctx.strokeRect(px + 1, py + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-                                // Кирпичный узор
-                                ctx.fillStyle = '#444';
-                                for (let bx = px; bx < px + CELL_SIZE; bx += 12) {
-                                    for (let by = py; by < py + CELL_SIZE; by += 8) {
-                                        ctx.fillRect(bx + (by % 16 === 0 ? 6 : 0), by, 10, 6);
-                                    }
-                                }
-                                break;
-                            case 2: // Дверь (выход)
-                                ctx.fillStyle = '#5c3a1e';
-                                ctx.fillRect(px + 4, py + 4, CELL_SIZE - 8, CELL_SIZE - 8);
-                                ctx.fillStyle = '#8b6914';
-                                ctx.fillRect(px + 8, py + 8, CELL_SIZE - 16, CELL_SIZE - 16);
-                                ctx.fillStyle = '#ffd700';
-                                ctx.beginPath();
-                                ctx.arc(px + CELL_SIZE - 16, py + CELL_SIZE / 2, 3, 0, Math.PI * 2);
-                                ctx.fill();
-                                // Надпись
-                                ctx.fillStyle = '#fff';
-                                ctx.font = '9px monospace';
-                                ctx.textAlign = 'center';
-                                ctx.fillText('ВЫХОД', px + CELL_SIZE / 2, py + CELL_SIZE / 2 + 3);
-                                break;
-                            case 3: // Кровать (спавн)
-                                ctx.fillStyle = '#4a3030';
-                                ctx.fillRect(px + 2, py + 10, CELL_SIZE - 4, CELL_SIZE - 18);
-                                ctx.fillStyle = '#8b0000';
-                                ctx.fillRect(px + 4, py + 14, CELL_SIZE - 12, CELL_SIZE - 28);
-                                ctx.fillStyle = '#fff';
-                                ctx.font = '8px monospace';
-                                ctx.textAlign = 'center';
-                                ctx.fillText('СПАВН', px + CELL_SIZE / 2, py + 8);
-                                break;
-                            case 4: // Место для башни
-                                ctx.fillStyle = '#1a2a1a';
-                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
-                                ctx.strokeStyle = '#3a5a3a';
-                                ctx.lineWidth = 1;
-                                ctx.setLineDash([4, 4]);
-                                ctx.strokeRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-                                ctx.setLineDash([]);
-                                // Иконка +
-                                if (!towers.some(t => t.gridX === x && t.gridY === y)) {
-                                    ctx.fillStyle = 'rgba(100,255,100,0.3)';
-                                    ctx.font = '20px monospace';
-                                    ctx.textAlign = 'center';
-                                    ctx.fillText('+', px + CELL_SIZE / 2, py + CELL_SIZE / 2 + 7);
-                                }
-                                break;
-                            case 0: // Путь
-                                ctx.fillStyle = '#252530';
-                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
-                                ctx.strokeStyle = '#333';
-                                ctx.lineWidth = 0.5;
-                                ctx.strokeRect(px, py, CELL_SIZE, CELL_SIZE);
-                                break;
-                        }
-
-                        // Сетка
-                        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-                        ctx.lineWidth = 0.5;
-                        ctx.strokeRect(px, py, CELL_SIZE, CELL_SIZE);
-                    }
-                }
-            }
+        // ==================== ЗВЁЗДЫ ====================
+        function initSplashStars() {
+            const c = document.getElementById('splash-stars');
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+            const ctx = c.getContext('2d');
+            const stars = Array.from({ length: 200 }, () => ({
+                x: Math.random() * c.width,
+                y: Math.random() * c.height,
+                radius: Math.random() * 1.8 + 0.5,
+                twinkle: Math.random() * Math.PI * 2,
+                speed: Math.random() * 0.02 + 0.005,
+            }));
 
             function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Карта
-                drawMap();
-
-                // Башни
-                for (const tower of towers) tower.draw(ctx);
-
-                // Враги
-                for (const enemy of enemies) enemy.draw(ctx);
-
-                // Снаряды
-                for (const proj of projectiles) proj.draw(ctx);
-
-                // Частицы
-                for (const p of particles) {
-                    ctx.globalAlpha = p.life / 30;
-                    ctx.fillStyle = p.color;
+                ctx.clearRect(0, 0, c.width, c.height);
+                stars.forEach(star => {
+                    star.twinkle += star.speed;
+                    const alpha = 0.4 + Math.sin(star.twinkle) * 0.4;
+                    ctx.fillStyle = 'rgba(255,255,240,' + alpha + ')';
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
                     ctx.fill();
-                }
-                ctx.globalAlpha = 1;
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+        initSplashStars();
 
-                // Подсветка выбранной башни
-                if (selectedTower) {
-                    const sx = selectedTower.gridX * CELL_SIZE;
-                    const sy = selectedTower.gridY * CELL_SIZE;
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(sx + 1, sy + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-                    // Кнопка продажи подсказка
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.font = '10px monospace';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('ПКМ-продать', sx + CELL_SIZE / 2, sy - 4);
+        // ==================== ГЕНЕРАЦИЯ ВОДОЁМОВ ====================
+        function generateWaterBodies() {
+            gameState.waterBodies = [];
+            const count = 12 + Math.floor(Math.random() * 10);
+            for (let i = 0; i < count; i++) {
+                const centerX = (Math.random() - 0.5) * gameState.borderSize * 2;
+                const centerY = (Math.random() - 0.5) * gameState.borderSize * 2;
+                const baseRadius = 30 + Math.random() * 150;
+                const points = [];
+                const numPoints = 8 + Math.floor(Math.random() * 14);
+                for (let j = 0; j < numPoints; j++) {
+                    const angle = (j / numPoints) * Math.PI * 2;
+                    const radius = baseRadius * (0.4 + Math.random() * 0.8);
+                    points.push({
+                        x: centerX + Math.cos(angle) * radius,
+                        y: centerY + Math.sin(angle) * radius,
+                    });
                 }
+                const nameList = ['Великий Океан', 'Северное Море', 'Южный Залив', 'Тихое Озеро', 'Голубая Лагуна', 'Штормовой Пролив', 'Солнечная Бухта', 'Глубокое Водохранилище', 'Река Извилистая', 'Озеро Надежды', 'Море Спокойствия', 'Залив Приключений'];
+                gameState.waterBodies.push({
+                    points: points,
+                    name: nameList[Math.floor(Math.random() * nameList.length)],
+                    baseRadius: baseRadius,
+                });
+            }
+        }
 
-                // Подсветка курсора при выборе башни
-                if (selectedTowerType && mouseGridX >= 0 && mouseGridX < COLS && mouseGridY >= 0 && mouseGridY <
-                    ROWS) {
-                    if (mapData[mouseGridY][mouseGridX] === 4) {
-                        const hx = mouseGridX * CELL_SIZE;
-                        const hy = mouseGridY * CELL_SIZE;
-                        ctx.strokeStyle = 'rgba(100,255,100,0.7)';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(hx + 1, hy + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+        function isPointInWater(worldX, worldY) {
+            for (let w = 0; w < gameState.waterBodies.length; w++) {
+                const water = gameState.waterBodies[w];
+                let inside = false;
+                const points = water.points;
+                for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                    const xi = points[i].x;
+                    const yi = points[i].y;
+                    const xj = points[j].x;
+                    const yj = points[j].y;
+                    if ((yi > worldY) !== (yj > worldY)) {
+                        const intersectX = (xj - xi) * (worldY - yi) / (yj - yi) + xi;
+                        if (worldX < intersectX) {
+                            inside = !inside;
+                        }
+                    }
+                }
+                if (inside) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ==================== СОХРАНЕНИЯ ====================
+        function saveGame() {
+            if (!gameState.countryName) return;
+            const data = {
+                countryName: gameState.countryName,
+                money: gameState.money,
+                population: gameState.population,
+                happiness: gameState.happiness,
+                borderSize: gameState.borderSize,
+                buildings: gameState.buildings,
+                roads: gameState.roads,
+                rails: gameState.rails,
+                zones: gameState.zones,
+                waterBodies: gameState.waterBodies,
+                zoom: gameState.zoom,
+                cameraX: gameState.cameraX,
+                cameraY: gameState.cameraY,
+                gameHour: gameState.gameHour,
+                gameMinute: gameState.gameMinute,
+                weather: gameState.weather,
+                residentialDemand: gameState.residentialDemand,
+                commercialDemand: gameState.commercialDemand,
+                industrialDemand: gameState.industrialDemand,
+                version: 11,
+            };
+            try {
+                localStorage.setItem('president_theotown_v11', JSON.stringify(data));
+                addLog('💾 Игра сохранена!');
+            } catch (error) {
+                addLog('❌ Ошибка сохранения!');
+            }
+        }
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem('president_theotown_v11');
+                if (!raw) { alert('Нет сохранений!'); return; }
+                const data = JSON.parse(raw);
+                gameState.countryName = data.countryName;
+                gameState.money = data.money;
+                gameState.population = data.population;
+                gameState.happiness = data.happiness;
+                gameState.borderSize = data.borderSize || 500;
+                gameState.buildings = data.buildings || [];
+                gameState.roads = data.roads || [];
+                gameState.rails = data.rails || [];
+                gameState.zones = data.zones || [];
+                gameState.waterBodies = data.waterBodies || [];
+                gameState.zoom = data.zoom || 1;
+                gameState.cameraX = data.cameraX || 0;
+                gameState.cameraY = data.cameraY || 0;
+                gameState.gameHour = data.gameHour || 12;
+                gameState.gameMinute = data.gameMinute || 0;
+                gameState.weather = data.weather || 'sunny';
+                gameState.residentialDemand = data.residentialDemand || 50;
+                gameState.commercialDemand = data.commercialDemand || 30;
+                gameState.industrialDemand = data.industrialDemand || 20;
+                gameState.people = [];
+                gameState.cars = [];
+                gameState.boats = [];
+                gameState.buses = [];
+                gameState.particles = [];
+                gameState.selectedType = null;
+                gameState.buildScale = 1;
+                gameState.buildRotation = 0;
+                gameState.currentTool = null;
+                gameState.deleteMode = false;
+                gameState.selectMode = false;
+                gameState.gameTime = 0;
+                gameState.incomeTimer = 0;
+                gameState.zoneTimer = 0;
+                gameState.demandTimer = 0;
+                gameState.dragging = false;
+                gameState.raindrops = [];
+                gameState.snowflakes = [];
+                if (gameState.waterBodies.length === 0) generateWaterBodies();
+                document.getElementById('splash').classList.add('hidden');
+                document.getElementById('game-screen').classList.add('active');
+                document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
+                initCanvas();
+                buildModalGrid();
+                updateUI();
+                spawnInitialPeople();
+                addLog('💾 Сохранение загружено!');
+                if (gameState.saveInterval) clearInterval(gameState.saveInterval);
+                gameState.saveInterval = setInterval(saveGame, 30000);
+                gameLoop();
+            } catch (error) {
+                alert('Ошибка загрузки!');
+            }
+        }
+
+        function initCanvas() {
+            gameState.canvas = document.getElementById('game-canvas');
+            gameState.ctx = gameState.canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            if (!gameState.canvas) return;
+            const rect = gameState.canvas.getBoundingClientRect();
+            gameState.canvas.width = rect.width;
+            gameState.canvas.height = rect.height;
+        }
+
+        function startGame() {
+            const inp = document.getElementById('country-name');
+            const name = inp.value.trim();
+            if (!name) { inp.style.borderColor = '#f05555';
+                inp.focus();
+                setTimeout(() => inp.style.borderColor = '#3a3050', 1500); return; }
+            gameState.countryName = name;
+            gameState.buildings = [];
+            gameState.roads = [];
+            gameState.rails = [];
+            gameState.zones = [];
+            gameState.people = [];
+            gameState.cars = [];
+            gameState.boats = [];
+            gameState.buses = [];
+            gameState.particles = [];
+            gameState.money = 50000;
+            gameState.population = 100;
+            gameState.happiness = 75;
+            gameState.borderSize = 500;
+            gameState.selectedType = null;
+            gameState.buildScale = 1;
+            gameState.buildRotation = 0;
+            gameState.currentTool = null;
+            gameState.deleteMode = false;
+            gameState.selectMode = false;
+            gameState.gameTime = 0;
+            gameState.incomeTimer = 0;
+            gameState.zoneTimer = 0;
+            gameState.demandTimer = 0;
+            gameState.zoom = 1;
+            gameState.gridSize = 48;
+            gameState.dragging = false;
+            gameState.gameHour = 17;
+            gameState.gameMinute = 26;
+            gameState.weather = 'sunny';
+            gameState.weatherTimer = 0;
+            gameState.raindrops = [];
+            gameState.snowflakes = [];
+            gameState.residentialDemand = 50;
+            gameState.commercialDemand = 30;
+            gameState.industrialDemand = 20;
+
+            generateWaterBodies();
+
+            gameState.roads.push({ type: 'road', x: -200, y: -24, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
+            gameState.roads.push({ type: 'road', x: -24, y: -200, w: 48, h: 400, scale: 1, rotation: 0, placedAt: 0 });
+            gameState.roads.push({ type: 'road_curve', x: -24, y: -24, w: 48, h: 48, scale: 1, rotation: 0, placedAt: 0 });
+            gameState.rails.push({ type: 'rail', x: -200, y: -120, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
+
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('active');
+            document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
+            initCanvas();
+            buildModalGrid();
+            updateUI();
+            spawnInitialPeople();
+            addLog('🌟 Добро пожаловать, господин Президент!');
+            addLog('🌊 Сгенерированы случайные водоёмы');
+            addLog('🏘️ Используйте зоны для быстрой застройки');
+            if (gameState.saveInterval) clearInterval(gameState.saveInterval);
+            gameState.saveInterval = setInterval(saveGame, 30000);
+            gameLoop();
+        }
+
+        function spawnInitialPeople() {
+            for (let i = 0; i < 40; i++) {
+                gameState.people.push({
+                    x: (Math.random() - 0.5) * gameState.borderSize,
+                    y: (Math.random() - 0.5) * gameState.borderSize,
+                    vx: (Math.random() - 0.5) * 1.2,
+                    vy: (Math.random() - 0.5) * 1.2,
+                    color: 'hsl(' + Math.floor(Math.random() * 360) + ', 40%, 65%)',
+                    size: 4 + Math.random() * 3,
+                    target: null,
+                    state: 'walking',
+                    stateTimer: Math.random() * 200,
+                    hasCar: false,
+                    carRef: null,
+                    hasBoat: false,
+                    boatRef: null,
+                    homeRef: null,
+                    workRef: null,
+                });
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('money-val').textContent = Math.floor(gameState.money).toLocaleString();
+            document.getElementById('pop-val').textContent = gameState.population;
+            document.getElementById('happy-val').textContent = Math.round(gameState.happiness);
+            document.getElementById('demand-val').textContent = '🏘️' + Math.round(gameState.residentialDemand) + ' 🏪' + Math.round(gameState.commercialDemand) + ' 🏭' + Math.round(gameState.industrialDemand);
+            if (gameState.canvas) {
+                gameState.canvas.classList.toggle('zone', !!gameState.currentTool && gameState.currentTool.startsWith('zone_'));
+                gameState.canvas.classList.toggle('building', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
+                gameState.canvas.classList.toggle('grabbing', gameState.dragging);
+            }
+            document.getElementById('btn-zone-res').classList.toggle('active', gameState.currentTool === 'zone_residential');
+            document.getElementById('btn-zone-com').classList.toggle('active', gameState.currentTool === 'zone_commercial');
+            document.getElementById('btn-zone-ind').classList.toggle('active', gameState.currentTool === 'zone_industrial');
+            document.getElementById('btn-special').classList.toggle('active', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
+            document.getElementById('btn-delete').classList.toggle('active', gameState.deleteMode);
+            document.getElementById('btn-info').classList.toggle('active', gameState.selectMode);
+            document.getElementById('btn-rotate').classList.toggle('active', gameState.buildRotation !== 0);
+            const h = Math.floor(gameState.gameHour);
+            const m = Math.floor(gameState.gameMinute);
+            document.getElementById('time-display').textContent = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+            const wi = { sunny: '☀️', cloudy: '⛅', rainy: '🌧️', stormy: '⛈️', snowy: '❄️' };
+            document.getElementById('weather-icon').textContent = wi[gameState.weather] || '☀️';
+        }
+
+        function expandBorder() {
+            const cost = gameState.borderExpandCost;
+            if (gameState.money < cost) { addLog('❌ Недостаточно средств!'); return; }
+            gameState.money -= cost;
+            gameState.borderSize += 200;
+            gameState.borderExpandCost = Math.floor(gameState.borderExpandCost * 2);
+            addLog('📏 Граница расширена!');
+            updateUI();
+        }
+
+        function setTool(tool) {
+            if (gameState.currentTool === tool) {
+                gameState.currentTool = null;
+            } else {
+                gameState.currentTool = tool;
+                gameState.selectedType = null;
+                gameState.deleteMode = false;
+                gameState.selectMode = false;
+            }
+            updateUI();
+        }
+
+        // ==================== МОДАЛЬНОЕ ОКНО ====================
+        let modalBuilt = false;
+        let currentModalTab = 'roads';
+
+        function buildModalGrid() {
+            const grid = document.getElementById('modal-grid');
+            const tab = currentModalTab;
+            const filteredTypes = {};
+            for (const key in buildingTypes) {
+                if (buildingTypes[key].tab === tab) {
+                    filteredTypes[key] = buildingTypes[key];
+                }
+            }
+            if (!modalBuilt) {
+                grid.innerHTML = '';
+                const allKeys = Object.keys(filteredTypes);
+                for (let i = 0; i < allKeys.length; i++) {
+                    const key = allKeys[i];
+                    const info = filteredTypes[key];
+                    const div = document.createElement('div');
+                    div.className = 'modal-item';
+                    div.dataset.type = key;
+                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
+                        '<span class="modal-item-name">' + info.name + '</span>' +
+                        '<span class="modal-item-cost"></span>' +
+                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
+                    div.addEventListener('click', function() { selectModalItem(key); });
+                    grid.appendChild(div);
+                }
+                modalBuilt = true;
+            } else {
+                grid.innerHTML = '';
+                const allKeys = Object.keys(filteredTypes);
+                for (let i = 0; i < allKeys.length; i++) {
+                    const key = allKeys[i];
+                    const info = filteredTypes[key];
+                    const div = document.createElement('div');
+                    div.className = 'modal-item';
+                    div.dataset.type = key;
+                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
+                        '<span class="modal-item-name">' + info.name + '</span>' +
+                        '<span class="modal-item-cost"></span>' +
+                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
+                    div.addEventListener('click', function() { selectModalItem(key); });
+                    grid.appendChild(div);
+                }
+            }
+            const scale = gameState.buildScale || 1;
+            const allItems = grid.querySelectorAll('.modal-item');
+            for (let i = 0; i < allItems.length; i++) {
+                const div = allItems[i];
+                const key = div.dataset.type;
+                const info = filteredTypes[key];
+                const cost = getBuildCost(key, scale);
+                const size = getBuildSize(key, scale);
+                div.querySelector('.modal-item-cost').textContent = '💰' + cost.toLocaleString();
+                div.querySelector('.modal-item-size').textContent = size.w + 'x' + size.h;
+                if (gameState.selectedType === key) {
+                    div.classList.add('selected');
+                } else {
+                    div.classList.remove('selected');
+                }
+            }
+            const sizeButtons = document.querySelectorAll('#size-selector .size-btn');
+            for (let i = 0; i < sizeButtons.length; i++) {
+                const btn = sizeButtons[i];
+                if (parseFloat(btn.dataset.scale) === scale) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            }
+            document.getElementById('rot-display').textContent = gameState.buildRotation + '°';
+        }
+
+        function selectModalItem(key) {
+            gameState.selectedType = key;
+            gameState.currentTool = null;
+            gameState.deleteMode = false;
+            gameState.selectMode = false;
+            const info = buildingTypes[key];
+            const size = getBuildSize(key, gameState.buildScale || 1);
+            addLog('🔨 Выбрано: ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
+            updateUI();
+            buildModalGrid();
+            closeBuildModal();
+        }
+
+        function openBuildModal() {
+            gameState.deleteMode = false;
+            gameState.selectMode = false;
+            buildModalGrid();
+            document.getElementById('build-modal').classList.add('open');
+            updateUI();
+        }
+
+        function closeBuildModal() {
+            document.getElementById('build-modal').classList.remove('open');
+        }
+
+        function getBuildCost(type, scale) {
+            const info = buildingTypes[type];
+            if (!info) return 0;
+            return Math.floor(info.cost * scale * scale);
+        }
+
+        function getBuildSize(type, scale) {
+            const info = buildingTypes[type];
+            if (!info) return { w: 48, h: 48 };
+            let w = Math.round(info.width * scale);
+            let h = Math.round(info.height * scale);
+            if (gameState.buildRotation === 90 || gameState.buildRotation === 270) {
+                const temp = w;
+                w = h;
+                h = temp;
+            }
+            return { w: w, h: h };
+        }
+
+        function rotateBuilding() {
+            gameState.buildRotation = (gameState.buildRotation + 90) % 360;
+            addLog('🔄 Поворот: ' + gameState.buildRotation + '°');
+            updateUI();
+            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
+        }
+
+        function toggleDeleteMode() {
+            gameState.deleteMode = !gameState.deleteMode;
+            gameState.selectMode = false;
+            gameState.selectedType = null;
+            gameState.currentTool = null;
+            if (gameState.deleteMode) addLog('🗑️ Режим сноса (возврат 50%)');
+            updateUI();
+        }
+
+        function toggleSelectMode() {
+            gameState.selectMode = !gameState.selectMode;
+            gameState.deleteMode = false;
+            gameState.selectedType = null;
+            gameState.currentTool = null;
+            if (gameState.selectMode) addLog('🔍 Режим информации');
+            updateUI();
+        }
+
+        // ==================== СТРОИТЕЛЬСТВО ====================
+        function placeZone(worldX, worldY) {
+            if (!gameState.currentTool || !gameState.currentTool.startsWith('zone_')) return false;
+            const zoneType = gameState.currentTool.replace('zone_', '');
+            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
+                addLog('⚠️ За границей страны!');
+                return false;
+            }
+            if (isPointInWater(worldX, worldY)) {
+                addLog('⚠️ Нельзя зонировать воду!');
+                return false;
+            }
+            const snap = gameState.gridSize;
+            const sx = Math.round(worldX / snap) * snap;
+            const sy = Math.round(worldY / snap) * snap;
+            const newZone = { type: zoneType, x: sx, y: sy, w: snap, h: snap, placedAt: gameState.gameTime };
+            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
+            let hasOverlap = false;
+            for (let i = 0; i < allObjects.length; i++) {
+                if (rectanglesOverlap(newZone, allObjects[i], 2)) {
+                    hasOverlap = true;
+                    break;
+                }
+            }
+            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
+            gameState.zones.push(newZone);
+            addLog('🏘️ Зона размечена: ' + (zoneType === 'residential' ? 'Жилая' : zoneType === 'commercial' ? 'Коммерческая' : 'Индустриальная'));
+            updateUI();
+            return true;
+        }
+
+        function buildAt(worldX, worldY) {
+            if (!gameState.selectedType || gameState.deleteMode || gameState.selectMode || gameState.currentTool) return false;
+            const type = gameState.selectedType;
+            const info = buildingTypes[type];
+            const scale = gameState.buildScale || 1;
+            const cost = getBuildCost(type, scale);
+            const size = getBuildSize(type, scale);
+            if (gameState.money < cost) { addLog('❌ Недостаточно средств! 💰' + cost.toLocaleString());
+                shakeEl('money-val'); return false; }
+            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
+                addLog('⚠️ За границей!');
+                return false;
+            }
+            if (info.needsWater && !isPointInWater(worldX, worldY)) {
+                addLog('⚠️ Судостроительный завод только на воде!');
+                return false;
+            }
+            if (!info.needsWater && !info.isRoad && !info.isRail && !info.isRoadCurve && isPointInWater(worldX, worldY)) {
+                addLog('⚠️ Нельзя строить на воде!');
+                return false;
+            }
+            const newBuilding = {
+                type: type,
+                x: worldX - size.w / 2,
+                y: worldY - size.h / 2,
+                w: size.w,
+                h: size.h,
+                scale: scale,
+                rotation: gameState.buildRotation,
+                placedAt: gameState.gameTime,
+            };
+            const allCollidables = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
+            let hasOverlap = false;
+            for (let i = 0; i < allCollidables.length; i++) {
+                if (rectanglesOverlap(newBuilding, allCollidables[i], 2)) {
+                    hasOverlap = true;
+                    break;
+                }
+            }
+            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
+            gameState.money -= cost;
+            if (info.isRoad || info.isRoadCurve) {
+                gameState.roads.push(newBuilding);
+            } else if (info.isRail) {
+                gameState.rails.push(newBuilding);
+            } else {
+                gameState.buildings.push(newBuilding);
+                if (info.happinessBonus) {
+                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness + Math.floor(info.happinessBonus * scale)));
+                }
+                if (info.tourismBonus) {
+                    gameState.population += Math.floor(info.tourismBonus * scale);
+                }
+            }
+            updateUI();
+            addLog('✅ ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
+            spawnParticles(worldX, worldY, '#f0d060');
+            gameState.buildRotation = 0;
+            return true;
+        }
+
+        function deleteAt(worldX, worldY) {
+            if (!gameState.deleteMode) return false;
+            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
+            let foundObject = null;
+            for (let i = 0; i < allObjects.length; i++) {
+                const obj = allObjects[i];
+                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
+                    foundObject = obj;
+                    break;
+                }
+            }
+            if (!foundObject) return false;
+            if (foundObject.type && (foundObject.type === 'residential' || foundObject.type === 'commercial' || foundObject.type === 'industrial')) {
+                gameState.zones = gameState.zones.filter(function(z) { return z !== foundObject; });
+                updateUI();
+                addLog('🗑️ Зона убрана');
+                return true;
+            }
+            const info = buildingTypes[foundObject.type];
+            const scale = foundObject.scale || 1;
+            const refund = Math.floor(getBuildCost(foundObject.type, scale) * 0.5);
+            gameState.money += refund;
+            if (info.isRoad || info.isRoadCurve) {
+                gameState.roads = gameState.roads.filter(function(b) { return b !== foundObject; });
+            } else if (info.isRail) {
+                gameState.rails = gameState.rails.filter(function(b) { return b !== foundObject; });
+            } else {
+                gameState.buildings = gameState.buildings.filter(function(b) { return b !== foundObject; });
+                if (info.happinessBonus) {
+                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness - Math.floor((info.happinessBonus || 0) * scale)));
+                }
+            }
+            gameState.cars = gameState.cars.filter(function(c) { return c.homeRef !== foundObject; });
+            gameState.boats = gameState.boats.filter(function(b) { return b.homeRef !== foundObject; });
+            gameState.buses = gameState.buses.filter(function(b) { return b.homeRef !== foundObject; });
+            updateUI();
+            addLog('🗑️ Снесено (+💰' + refund.toLocaleString() + ')');
+            spawnParticles(foundObject.x + foundObject.w / 2, foundObject.y + foundObject.h / 2, '#f08888');
+            return true;
+        }
+
+        function rectanglesOverlap(a, b, margin) {
+            if (a.x + a.w - margin < b.x) return false;
+            if (a.x > b.x + b.w - margin) return false;
+            if (a.y + a.h - margin < b.y) return false;
+            if (a.y > b.y + b.h - margin) return false;
+            return true;
+        }
+
+        // ==================== КООРДИНАТЫ ====================
+        function worldToScreen(worldX, worldY) {
+            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
+            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
+            return { x: (worldX - cx) * gameState.zoom, y: (worldY - cy) * gameState.zoom };
+        }
+
+        function screenToWorld(screenX, screenY) {
+            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
+            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
+            return { x: screenX / gameState.zoom + cx, y: screenY / gameState.zoom + cy };
+        }
+
+        function getCanvasCoords(event) {
+            const rect = gameState.canvas.getBoundingClientRect();
+            return { sx: event.clientX - rect.left, sy: event.clientY - rect.top };
+        }
+
+        function getWorldFromEvent(event) {
+            const coords = getCanvasCoords(event);
+            const world = screenToWorld(coords.sx, coords.sy);
+            return { sx: coords.sx, sy: coords.sy, wx: world.x, wy: world.y };
+        }
+
+        function findBuildingAt(worldX, worldY) {
+            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
+            for (let i = allObjects.length - 1; i >= 0; i--) {
+                const obj = allObjects[i];
+                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
+                    return obj;
+                }
+            }
+            return null;
+        }
+
+        // ==================== ОТРИСОВКА ====================
+        function getDayNightAlpha() {
+            const hour = gameState.gameHour + gameState.gameMinute / 60;
+            if (hour >= 6 && hour < 8) return 0.3 - (hour - 6) * 0.15;
+            if (hour >= 8 && hour < 17) return 0;
+            if (hour >= 17 && hour < 19) return (hour - 17) * 0.2;
+            if (hour >= 19 && hour < 21) return 0.4 + (hour - 19) * 0.2;
+            if (hour >= 21 || hour < 5) return 0.7;
+            if (hour >= 5 && hour < 6) return 0.7 - (hour - 5) * 0.4;
+            return 0;
+        }
+
+        function drawGround(ctx) {
+            const w = gameState.canvas.width;
+            const h = gameState.canvas.height;
+            const alpha = getDayNightAlpha();
+            const grad = ctx.createRadialGradient(w / 2, h / 2, 100, w / 2, h / 2, Math.max(w, h));
+            const r = Math.floor(61 * (1 - alpha));
+            const g = Math.floor(90 * (1 - alpha));
+            const b = Math.floor(46 * (1 - alpha));
+            grad.addColorStop(0, 'rgb(' + r + ',' + g + ',' + b + ')');
+            grad.addColorStop(0.6, 'rgb(' + Math.floor(r * 0.7) + ',' + Math.floor(g * 0.7) + ',' + Math.floor(b * 0.7) + ')');
+            grad.addColorStop(1, 'rgb(' + Math.floor(r * 0.4) + ',' + Math.floor(g * 0.4) + ',' + Math.floor(b * 0.4) + ')');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            const gs = gameState.gridSize;
+            const cx = gameState.cameraX - w / 2 / gameState.zoom;
+            const cy = gameState.cameraY - h / 2 / gameState.zoom;
+            const sx = -(((cx % gs) + gs) % gs);
+            const sy = -(((cy % gs) + gs) % gs);
+            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
+                for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
+                    const worldGX = Math.floor((x + cx) / gs);
+                    const worldGY = Math.floor((y + cy) / gs);
+                    const seed = Math.sin(worldGX * 1000 + worldGY) * 0.06;
+                    ctx.fillStyle = 'rgba(255,255,255,' + (0.02 + seed) + ')';
+                    ctx.fillRect(x * gameState.zoom, y * gameState.zoom, gs * gameState.zoom, gs * gameState.zoom);
+                    const flowerSeed = Math.sin(worldGX * 500 + worldGY * 300) * 0.5 + 0.5;
+                    if (flowerSeed > 0.85 && !isPointInWater(x + cx + gs / 2, y + cy + gs / 2)) {
+                        ctx.fillStyle = 'rgba(255,255,100,0.3)';
+                        ctx.beginPath();
+                        ctx.arc(x * gameState.zoom + gs * gameState.zoom * 0.7, y * gameState.zoom + gs * gameState.zoom * 0.3, 2 * gameState.zoom, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                 }
             }
+            if (alpha > 0) {
+                ctx.fillStyle = 'rgba(0,0,20,' + alpha + ')';
+                ctx.fillRect(0, 0, w, h);
+            }
+            if (alpha > 0.5) {
+                for (let i = 0; i < 50; i++) {
+                    const starX = ((i * 7919 + 12345) % w);
+                    const starY = ((i * 6271 + 12345) % h);
+                    const twinkle = Math.sin(gameState.gameTime * 0.003 + i) * 0.5 + 0.5;
+                    ctx.fillStyle = 'rgba(255,255,255,' + (twinkle * (alpha - 0.5) * 1.5) + ')';
+                    ctx.beginPath();
+                    ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
 
-            function gameLoop() {
-                update();
-                draw();
-                requestAnimationFrame(gameLoop);
+        function drawWater(ctx) {
+            for (let w = 0; w < gameState.waterBodies.length; w++) {
+                const water = gameState.waterBodies[w];
+                const points = water.points;
+                const alpha = getDayNightAlpha();
+                if (points.length < 3) continue;
+                ctx.beginPath();
+                const firstPoint = worldToScreen(points[0].x, points[0].y);
+                ctx.moveTo(firstPoint.x, firstPoint.y);
+                for (let i = 1; i < points.length; i++) {
+                    const sp = worldToScreen(points[i].x, points[i].y);
+                    ctx.lineTo(sp.x, sp.y);
+                }
+                ctx.closePath();
+                let minX = Infinity,
+                    minY = Infinity,
+                    maxX = -Infinity,
+                    maxY = -Infinity;
+                for (let i = 0; i < points.length; i++) {
+                    if (points[i].x < minX) minX = points[i].x;
+                    if (points[i].y < minY) minY = points[i].y;
+                    if (points[i].x > maxX) maxX = points[i].x;
+                    if (points[i].y > maxY) maxY = points[i].y;
+                }
+                const centerScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
+                const waterGrad = ctx.createRadialGradient(centerScreen.x, centerScreen.y, 0, centerScreen.x, centerScreen.y, water.baseRadius * gameState.zoom);
+                waterGrad.addColorStop(0, 'rgba(30,100,180,' + (0.8 - alpha * 0.3) + ')');
+                waterGrad.addColorStop(0.5, 'rgba(20,80,160,' + (0.75 - alpha * 0.3) + ')');
+                waterGrad.addColorStop(1, 'rgba(10,50,130,' + (0.8 - alpha * 0.3) + ')');
+                ctx.fillStyle = waterGrad;
+                ctx.fill();
+                const waveTime = gameState.gameTime * 0.02;
+                for (let i = 0; i < points.length; i++) {
+                    const p1 = points[i];
+                    const p2 = points[(i + 1) % points.length];
+                    const midX = (p1.x + p2.x) / 2;
+                    const midY = (p1.y + p2.y) / 2;
+                    const screenMid = worldToScreen(midX, midY);
+                    const waveOffset = Math.sin(waveTime + i * 0.5) * 5 * gameState.zoom;
+                    ctx.fillStyle = 'rgba(100,180,240,0.3)';
+                    ctx.beginPath();
+                    ctx.arc(screenMid.x + waveOffset, screenMid.y, 4 * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.strokeStyle = 'rgba(150,210,255,0.5)';
+                ctx.lineWidth = 2 * gameState.zoom;
+                ctx.stroke();
+                if (water.name && water.baseRadius > 50) {
+                    const nameScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
+                    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                    ctx.font = Math.min(16, 12 * gameState.zoom) + 'px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(water.name, nameScreen.x, nameScreen.y);
+                }
+            }
+        }
+
+        function drawBorder(ctx) {
+            const bs = gameState.borderSize;
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = Math.max(2, 3 * gameState.zoom);
+            ctx.setLineDash([10 * gameState.zoom, 6 * gameState.zoom]);
+            ctx.beginPath();
+            const segments = 32;
+            for (let i = 0; i <= segments; i++) {
+                const angle = (i / segments) * Math.PI * 2;
+                const wobble = Math.sin(angle * 5 + gameState.gameTime * 0.001) * 15 + Math.cos(angle * 3) * 10;
+                const r = bs + wobble;
+                const wx = Math.cos(angle) * r;
+                const wy = Math.sin(angle) * r;
+                const p = worldToScreen(wx, wy);
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]);
+            const flags = ['🚩', '🚩', '🚩', '🚩'];
+            for (let i = 0; i < 4; i++) {
+                const angle = i * Math.PI / 2 - Math.PI / 4;
+                const p = worldToScreen(Math.cos(angle) * bs, Math.sin(angle) * bs);
+                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(flags[i], p.x, p.y - 10 * gameState.zoom);
+            }
+            const pTable = worldToScreen(bs + 30, 0);
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(pTable.x - 40 * gameState.zoom, pTable.y - 20 * gameState.zoom, 80 * gameState.zoom, 35 * gameState.zoom);
+            ctx.fillStyle = '#f0d060';
+            ctx.font = Math.floor(12 * gameState.zoom) + 'px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('📏 Расширить', pTable.x, pTable.y - 5 * gameState.zoom);
+            ctx.fillText('💰' + gameState.borderExpandCost.toLocaleString(), pTable.x, pTable.y + 15 * gameState.zoom);
+        }
+
+        function drawGrid(ctx) {
+            const w = gameState.canvas.width;
+            const h = gameState.canvas.height;
+            const gs = gameState.gridSize;
+            const cx = gameState.cameraX - w / 2 / gameState.zoom;
+            const cy = gameState.cameraY - h / 2 / gameState.zoom;
+            const sx = -(((cx % gs) + gs) % gs);
+            const sy = -(((cy % gs) + gs) % gs);
+            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
+                ctx.moveTo(x * gameState.zoom, 0);
+                ctx.lineTo(x * gameState.zoom, h);
+            }
+            for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
+                ctx.moveTo(0, y * gameState.zoom);
+                ctx.lineTo(w, y * gameState.zoom);
+            }
+            ctx.stroke();
+        }
+
+        function drawZones(ctx) {
+            for (let i = 0; i < gameState.zones.length; i++) {
+                const zone = gameState.zones[i];
+                const p = worldToScreen(zone.x, zone.y);
+                const w = zone.w * gameState.zoom;
+                const h = zone.h * gameState.zoom;
+                let color = 'rgba(76,175,80,0.3)';
+                if (zone.type === 'commercial') color = 'rgba(33,150,243,0.3)';
+                if (zone.type === 'industrial') color = 'rgba(255,152,0,0.3)';
+                ctx.fillStyle = color;
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.strokeStyle = color.replace('0.3', '0.6');
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
+                ctx.strokeRect(p.x, p.y, w, h);
+                ctx.setLineDash([]);
+            }
+        }
+
+        function drawRoad(ctx, road, info) {
+            const p = worldToScreen(road.x, road.y);
+            const w = road.w * gameState.zoom;
+            const h = road.h * gameState.zoom;
+            ctx.save();
+            const cx = p.x + w / 2;
+            const cy = p.y + h / 2;
+            ctx.translate(cx, cy);
+            if (road.rotation) ctx.rotate(road.rotation * Math.PI / 180);
+            ctx.translate(-cx, -cy);
+            if (info.isRoadCurve) {
+                ctx.fillStyle = '#444444';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.strokeStyle = '#ffff88';
+                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
+                ctx.setLineDash([8 * gameState.zoom, 10 * gameState.zoom]);
+                ctx.beginPath();
+                ctx.arc(p.x + w, p.y, w * 0.7, 0, Math.PI / 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                const bw = Math.max(2, 3 * gameState.zoom);
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(p.x, p.y, w, bw);
+                ctx.fillRect(p.x, p.y + h - bw, w, bw);
+                ctx.fillRect(p.x, p.y, bw, h);
+                ctx.fillRect(p.x + w - bw, p.y, bw, h);
+            } else if (info.isRoad) {
+                ctx.fillStyle = '#444444';
+                ctx.fillRect(p.x, p.y, w, h);
+                const bw = Math.max(2, 3 * gameState.zoom);
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(p.x, p.y, w, bw);
+                ctx.fillRect(p.x, p.y + h - bw, w, bw);
+                ctx.fillRect(p.x, p.y, bw, h);
+                ctx.fillRect(p.x + w - bw, p.y, bw, h);
+                ctx.strokeStyle = '#ffff88';
+                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
+                ctx.setLineDash([10 * gameState.zoom, 14 * gameState.zoom]);
+                ctx.beginPath();
+                ctx.moveTo(p.x + w / 2, p.y);
+                ctx.lineTo(p.x + w / 2, p.y + h);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else {
+                ctx.fillStyle = '#8B7355';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#5c4030';
+                const sh = Math.max(3, 4 * gameState.zoom);
+                const sg = Math.max(5, 8 * gameState.zoom);
+                for (let i = 0; i < h; i += sg) {
+                    ctx.fillRect(p.x + 2 * gameState.zoom, p.y + i, w - 4 * gameState.zoom, sh);
+                }
+                ctx.strokeStyle = '#cccccc';
+                ctx.lineWidth = Math.max(1.5, 2.5 * gameState.zoom);
+                ctx.beginPath();
+                const rx = p.x + Math.max(6, 8 * gameState.zoom);
+                const rx2 = p.x + w - Math.max(6, 8 * gameState.zoom);
+                ctx.moveTo(rx, p.y);
+                ctx.lineTo(rx, p.y + h);
+                ctx.moveTo(rx2, p.y);
+                ctx.lineTo(rx2, p.y + h);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawBuildingShape(ctx, building, info) {
+            const p = worldToScreen(building.x, building.y);
+            const w = building.w * gameState.zoom;
+            const h = building.h * gameState.zoom;
+            const type = building.type;
+            ctx.save();
+            const cx = p.x + w / 2;
+            const cy = p.y + h / 2;
+            ctx.translate(cx, cy);
+            if (building.rotation) ctx.rotate(building.rotation * Math.PI / 180);
+            ctx.translate(-cx, -cy);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w, h);
+            if (type === 'police_station') {
+                ctx.fillStyle = '#3a5a8a';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
+                ctx.fillStyle = '#1a3a6a';
+                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#1a3a6a';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + h / 2, 6 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'fire_station') {
+                ctx.fillStyle = '#c0392b';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
+            } else if (type === 'hospital') {
+                ctx.fillStyle = '#f8f8f8';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(p.x + w / 2 - 8 * gameState.zoom, p.y, 16 * gameState.zoom, 12 * gameState.zoom);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y + 2 * gameState.zoom, 4 * gameState.zoom, 8 * gameState.zoom);
+                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 5 * gameState.zoom, 12 * gameState.zoom, 3 * gameState.zoom);
+            } else if (type === 'school') {
+                ctx.fillStyle = '#d4a574';
+                ctx.fillRect(p.x, p.y + 4 * gameState.zoom, w, h - 4 * gameState.zoom);
+                ctx.fillStyle = '#c0392b';
+                ctx.fillRect(p.x - 2 * gameState.zoom, p.y, w + 4 * gameState.zoom, 10 * gameState.zoom);
+                ctx.fillStyle = '#87ceeb';
+                for (let i = 0; i < 4; i++) {
+                    ctx.fillRect(p.x + 5 * gameState.zoom + i * 11 * gameState.zoom, p.y + 16 * gameState.zoom, 7 * gameState.zoom, 8 * gameState.zoom);
+                }
+            } else if (type === 'park') {
+                ctx.fillStyle = '#5a8a5a';
+                ctx.fillRect(p.x, p.y, w, h);
+                const trees = [
+                    [0.2, 0.25],
+                    [0.5, 0.2],
+                    [0.8, 0.3],
+                    [0.3, 0.6],
+                    [0.7, 0.65],
+                    [0.5, 0.75]
+                ];
+                for (let i = 0; i < trees.length; i++) {
+                    const tx = p.x + trees[i][0] * w;
+                    const ty = p.y + trees[i][1] * h;
+                    ctx.fillStyle = '#3d2b1f';
+                    ctx.fillRect(tx - 1.5 * gameState.zoom, ty, 3 * gameState.zoom, 10 * gameState.zoom);
+                    ctx.fillStyle = '#2d6e2d';
+                    ctx.beginPath();
+                    ctx.arc(tx, ty - 2 * gameState.zoom, 7 * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#3d8e3d';
+                    ctx.beginPath();
+                    ctx.arc(tx, ty - 5 * gameState.zoom, 6 * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#4a90c8';
+                ctx.beginPath();
+                ctx.ellipse(p.x + w * 0.5, p.y + h * 0.45, 12 * gameState.zoom, 7 * gameState.zoom, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'playground') {
+                ctx.fillStyle = '#e8d5b7';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#ff9800';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 12 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + h / 3, 8 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'fountain') {
+                ctx.fillStyle = '#b0b0b0';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#4a90c8';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#87ceeb';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + h / 2, 5 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'statue_of_liberty') {
+                ctx.fillStyle = '#4a8a5a';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#7ec8a0';
+                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 8 * gameState.zoom, 12 * gameState.zoom, h - 8 * gameState.zoom);
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(p.x + w / 2, p.y + 4 * gameState.zoom, 8 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'eiffel_tower') {
+                ctx.fillStyle = '#4a8a5a';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#888888';
+                ctx.beginPath();
+                ctx.moveTo(p.x + w / 2, p.y);
+                ctx.lineTo(p.x + 4 * gameState.zoom, p.y + h);
+                ctx.lineTo(p.x + w - 4 * gameState.zoom, p.y + h);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#aaaaaa';
+                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y, 4 * gameState.zoom, h * 0.6);
+            } else if (type === 'kremlin') {
+                ctx.fillStyle = '#c0392b';
+                ctx.fillRect(p.x, p.y + 10 * gameState.zoom, w, h - 10 * gameState.zoom);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y, w - 8 * gameState.zoom, 18 * gameState.zoom);
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillStyle = '#f0d060';
+                    ctx.beginPath();
+                    ctx.arc(p.x + w * (0.25 + i * 0.25), p.y, 6 * gameState.zoom, Math.PI, 0);
+                    ctx.fill();
+                }
+            } else if (type === 'stadium') {
+                ctx.fillStyle = '#d0d0d0';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#3a8a3a';
+                ctx.beginPath();
+                ctx.ellipse(p.x + w / 2, p.y + h / 2, w / 2 - 4 * gameState.zoom, h / 2 - 4 * gameState.zoom, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } else if (type === 'bus_stop') {
+                ctx.fillStyle = '#888888';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#4a90c8';
+                ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w - 4 * gameState.zoom, h - 8 * gameState.zoom);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 6 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
+            } else if (type === 'bus_depot') {
+                ctx.fillStyle = '#708090';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#4682B4';
+                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
+            } else if (type === 'carshop') {
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#ff4444';
+                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 6 * gameState.zoom);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 10 * gameState.zoom, w - 8 * gameState.zoom, h - 22 * gameState.zoom);
+            } else if (type === 'shipyard') {
+                ctx.fillStyle = '#708090';
+                ctx.fillRect(p.x, p.y, w, h);
+                ctx.fillStyle = '#4682B4';
+                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
+                ctx.fillStyle = '#333333';
+                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('🚢', p.x + w * 0.5, p.y + h * 0.55);
+            }
+            ctx.restore();
+        }
+
+        function drawCars(ctx) {
+            for (let i = 0; i < gameState.cars.length; i++) {
+                const car = gameState.cars[i];
+                const p = worldToScreen(car.x, car.y);
+                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
+                const sz = 7 * gameState.zoom;
+                ctx.fillStyle = car.color;
+                ctx.fillRect(p.x - sz, p.y - sz / 2, sz * 2, sz);
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(p.x - sz + 1.5 * gameState.zoom, p.y - sz / 2 - 1.5 * gameState.zoom, sz * 0.5, sz + 3 * gameState.zoom);
+                ctx.fillStyle = '#111111';
+                const wheels = [
+                    [-sz * 0.6, -sz / 2],
+                    [sz * 0.6, -sz / 2],
+                    [-sz * 0.6, sz / 2],
+                    [sz * 0.6, sz / 2]
+                ];
+                for (let w = 0; w < wheels.length; w++) {
+                    ctx.beginPath();
+                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 2.5 * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#ffff88';
+                ctx.beginPath();
+                ctx.arc(p.x + sz, p.y, 1.5 * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawBoats(ctx) {
+            for (let i = 0; i < gameState.boats.length; i++) {
+                const boat = gameState.boats[i];
+                const p = worldToScreen(boat.x, boat.y);
+                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
+                const sz = 8 * gameState.zoom;
+                ctx.fillStyle = boat.color;
+                ctx.beginPath();
+                ctx.ellipse(p.x, p.y, sz, sz * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
+                ctx.strokeStyle = '#333333';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
+            }
+        }
+
+        function drawBuses(ctx) {
+            for (let i = 0; i < gameState.buses.length; i++) {
+                const bus = gameState.buses[i];
+                const p = worldToScreen(bus.x, bus.y);
+                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
+                const sz = 10 * gameState.zoom;
+                ctx.fillStyle = bus.color;
+                ctx.fillRect(p.x - sz * 1.5, p.y - sz / 2, sz * 3, sz);
+                ctx.fillStyle = '#87ceeb';
+                for (let j = 0; j < 4; j++) {
+                    ctx.fillRect(p.x - sz * 1.2 + j * sz * 0.7, p.y - sz / 2 + 2 * gameState.zoom, sz * 0.5, sz - 4 * gameState.zoom);
+                }
+                ctx.fillStyle = '#111111';
+                const wheels = [
+                    [-sz * 1.2, -sz / 2],
+                    [sz * 1.2, -sz / 2],
+                    [-sz * 1.2, sz / 2],
+                    [sz * 1.2, sz / 2]
+                ];
+                for (let w = 0; w < wheels.length; w++) {
+                    ctx.beginPath();
+                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 3 * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function drawPeople(ctx) {
+            for (let i = 0; i < gameState.people.length; i++) {
+                const person = gameState.people[i];
+                if (person.hasCar && person.carRef) continue;
+                if (person.hasBoat && person.boatRef) continue;
+                const wp = worldToScreen(person.x, person.y);
+                if (wp.x < -20 || wp.x > gameState.canvas.width + 20 || wp.y < -20 || wp.y > gameState.canvas.height + 20) continue;
+                const sz = person.size * gameState.zoom;
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(wp.x, wp.y + sz * 0.8, sz * 0.8, sz * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = person.color;
+                ctx.beginPath();
+                ctx.arc(wp.x, wp.y - sz * 0.5, sz * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+                const hueMatch = person.color.match(/\d+/);
+                const baseHue = hueMatch ? parseInt(hueMatch[0]) : 0;
+                ctx.fillStyle = 'hsl(' + ((baseHue + 30) % 360) + ', 50%, 55%)';
+                ctx.fillRect(wp.x - sz * 0.4, wp.y - sz * 0.2, sz * 0.8, sz * 0.9);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(wp.x - sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
+                ctx.arc(wp.x + sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(wp.x - sz * 0.15, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
+                ctx.arc(wp.x + sz * 0.25, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawWeather(ctx) {
+            const alpha = getDayNightAlpha();
+            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
+                for (let i = 0; i < gameState.raindrops.length; i++) {
+                    const drop = gameState.raindrops[i];
+                    const p = worldToScreen(drop.x, drop.y);
+                    ctx.strokeStyle = 'rgba(100,150,255,' + (0.6 - alpha * 0.3) + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - drop.vx * 2, p.y + 8 * gameState.zoom);
+                    ctx.stroke();
+                }
+            }
+            if (gameState.weather === 'snowy') {
+                for (let i = 0; i < gameState.snowflakes.length; i++) {
+                    const flake = gameState.snowflakes[i];
+                    const p = worldToScreen(flake.x, flake.y);
+                    ctx.fillStyle = 'rgba(255,255,255,' + (0.8 - alpha * 0.2) + ')';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, flake.size * gameState.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function drawParticles(ctx) {
+            gameState.particles = gameState.particles.filter(function(p) { return p.life > 0; });
+            for (let i = 0; i < gameState.particles.length; i++) {
+                const particle = gameState.particles[i];
+                const wp = worldToScreen(particle.x, particle.y);
+                ctx.fillStyle = 'rgba(' + particle.r + ',' + particle.g + ',' + particle.b + ',' + particle.life + ')';
+                ctx.beginPath();
+                ctx.arc(wp.x, wp.y, particle.size * gameState.zoom, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // ==================== ИГРОВОЙ ЦИКЛ ====================
+        function gameLoop(timestamp) {
+            gameState.gameTime = timestamp;
+            const ctx = gameState.ctx;
+            const canvas = gameState.canvas;
+            if (!canvas || !ctx) { requestAnimationFrame(gameLoop); return; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            gameState.gameMinute += 0.05;
+            if (gameState.gameMinute >= 60) { gameState.gameMinute = 0;
+                gameState.gameHour++; if (gameState.gameHour >= 24) gameState.gameHour = 0; }
+            gameState.weatherTimer++;
+            if (gameState.weatherTimer >= gameState.weatherDuration) {
+                gameState.weatherTimer = 0;
+                gameState.weatherDuration = 500 + Math.random() * 1500;
+                const weathers = ['sunny', 'sunny', 'cloudy', 'cloudy', 'rainy', 'rainy', 'stormy', 'snowy'];
+                gameState.weather = weathers[Math.floor(Math.random() * weathers.length)];
+            }
+            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
+                if (gameState.raindrops.length < 60) gameState.raindrops.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: 2, vy: 8 });
+                for (let i = 0; i < gameState.raindrops.length; i++) {
+                    const drop = gameState.raindrops[i];
+                    drop.x += drop.vx;
+                    drop.y += drop.vy; if (drop.y > gameState.borderSize) drop.y = -gameState.borderSize;
+                }
+            } else gameState.raindrops = [];
+            if (gameState.weather === 'snowy') {
+                if (gameState.snowflakes.length < 40) gameState.snowflakes.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: (Math.random() - 0.5) * 0.5, vy: 1 + Math.random() * 2, size: 1 + Math.random() * 3 });
+                for (let i = 0; i < gameState.snowflakes.length; i++) {
+                    const flake = gameState.snowflakes[i];
+                    flake.x += flake.vx;
+                    flake.y += flake.vy; if (flake.y > gameState.borderSize) flake.y = -gameState.borderSize;
+                }
+            } else gameState.snowflakes = [];
+
+            drawGround(ctx);
+            drawWater(ctx);
+            drawGrid(ctx);
+            drawZones(ctx);
+            drawBorder(ctx);
+            for (let i = 0; i < gameState.roads.length; i++) {
+                const road = gameState.roads[i];
+                const info = buildingTypes[road.type] || buildingTypes.road;
+                drawRoad(ctx, road, info);
+            }
+            for (let i = 0; i < gameState.rails.length; i++) {
+                const rail = gameState.rails[i];
+                drawRoad(ctx, rail, buildingTypes.rail);
+            }
+            for (let i = 0; i < gameState.buildings.length; i++) {
+                const building = gameState.buildings[i];
+                const info = buildingTypes[building.type];
+                if (info) drawBuildingShape(ctx, building, info);
+            }
+            updateNPCs();
+            drawPeople(ctx);
+            drawCars(ctx);
+            drawBoats(ctx);
+            drawBuses(ctx);
+            drawWeather(ctx);
+            drawParticles(ctx);
+
+            if ((gameState.selectedType || gameState.currentTool) && !gameState.dragging && !gameState.deleteMode && !gameState.selectMode) {
+                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) {
+                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
+                    const snap = gameState.gridSize;
+                    const sx = Math.round(worldPos.x / snap) * snap;
+                    const sy = Math.round(worldPos.y / snap) * snap;
+                    const pp = worldToScreen(sx, sy);
+                    const gs = gameState.gridSize * gameState.zoom;
+                    let color = 'rgba(76,175,80,0.3)';
+                    if (gameState.currentTool === 'zone_commercial') color = 'rgba(33,150,243,0.3)';
+                    if (gameState.currentTool === 'zone_industrial') color = 'rgba(255,152,0,0.3)';
+                    ctx.fillStyle = color;
+                    ctx.fillRect(pp.x, pp.y, gs, gs);
+                    ctx.strokeStyle = color.replace('0.3', '0.7');
+                    ctx.lineWidth = 2 * gameState.zoom;
+                    ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
+                    ctx.strokeRect(pp.x, pp.y, gs, gs);
+                    ctx.setLineDash([]);
+                } else if (gameState.selectedType) {
+                    const info = buildingTypes[gameState.selectedType];
+                    const size = getBuildSize(gameState.selectedType, gameState.buildScale || 1);
+                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
+                    const buildX = worldPos.x - size.w / 2;
+                    const buildY = worldPos.y - size.h / 2;
+                    const pp = worldToScreen(buildX, buildY);
+                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                    ctx.fillRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                    ctx.setLineDash([5 * gameState.zoom, 5 * gameState.zoom]);
+                    ctx.lineWidth = 2 * gameState.zoom;
+                    ctx.strokeRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
+                    ctx.setLineDash([]);
+                    ctx.save();
+                    const ghostCX = pp.x + size.w * gameState.zoom / 2;
+                    const ghostCY = pp.y + size.h * gameState.zoom / 2;
+                    ctx.translate(ghostCX, ghostCY);
+                    if (gameState.buildRotation) ctx.rotate(gameState.buildRotation * Math.PI / 180);
+                    ctx.font = Math.floor(20 * gameState.zoom) + 'px serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(info.emoji, 0, 0);
+                    ctx.restore();
+                }
             }
 
-            // === ЗАПУСК ===
-            updateHUD();
-            gameLoop();
-            console.log('🏚️ Haunted Dorm Tower Defense запущена!');
-            console.log('💰 Ставьте башни на зелёные клетки (с +)');
-            console.log('👻 Защитите выход (коричневая дверь) от призраков!');
-            console.log('🖱️ ЛКМ - поставить/выбрать башню | ПКМ - продать');
-        })();
+            gameState.incomeTimer += 16;
+            if (gameState.incomeTimer >= 3000) {
+                gameState.incomeTimer = 0;
+                let totalIncome = 0;
+                for (let i = 0; i < gameState.buildings.length; i++) {
+                    const building = gameState.buildings[i];
+                    const info = buildingTypes[building.type];
+                    const scale = building.scale || 1;
+                    totalIncome += Math.floor((info ? info.income : 0) * scale);
+                }
+                totalIncome += gameState.roads.length * 5;
+                totalIncome += gameState.rails.length * 20;
+                totalIncome += gameState.cars.length * 10;
+                totalIncome += gameState.boats.length * 30;
+                totalIncome += gameState.buses.length * 50;
+                gameState.money += totalIncome;
+                gameState.happiness += (Math.random() - 0.47) * 0.4;
+                gameState.happiness = Math.max(0, Math.min(100, gameState.happiness));
+                updateUI();
+            }
+
+            gameState.zoneTimer += 16;
+            if (gameState.zoneTimer >= 5000 && gameState.zones.length > 0) {
+                gameState.zoneTimer = 0;
+                for (let i = 0; i < gameState.zones.length; i++) {
+                    const zone = gameState.zones[i];
+                    if (Math.random() < 0.1) {
+                        const services = checkServices(zone.x + zone.w / 2, zone.y + zone.h / 2);
+                        if (gameState.residentialDemand > 0 && zone.type === 'residential' && services.police && services.fire && services.health) {
+                            const house = { type: 'house', x: zone.x, y: zone.y, w: 44, h: 44, scale: 1, rotation: 0, placedAt: gameState.gameTime };
+                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
+                            let overlap = false;
+                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(house, allC[j], 2)) { overlap = true; break; } }
+                            if (!overlap && !isPointInWater(zone.x + 22, zone.y + 22)) {
+                                gameState.buildings.push(house);
+                                gameState.population += 8;
+                                gameState.residentialDemand = Math.max(0, gameState.residentialDemand - 5);
+                            }
+                        }
+                        if (gameState.commercialDemand > 0 && zone.type === 'commercial') {
+                            const shop = { type: 'shop', x: zone.x, y: zone.y, w: 42, h: 42, scale: 1, rotation: 0, placedAt: gameState.gameTime };
+                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
+                            let overlap = false;
+                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(shop, allC[j], 2)) { overlap = true; break; } }
+                            if (!overlap && !isPointInWater(zone.x + 21, zone.y + 21)) {
+                                gameState.buildings.push(shop);
+                                gameState.population += 3;
+                                gameState.commercialDemand = Math.max(0, gameState.commercialDemand - 5);
+                            }
+                        }
+                        if (gameState.industrialDemand > 0 && zone.type === 'industrial') {
+                            const factory = { type: 'factory', x: zone.x, y: zone.y, w: 52, h: 52, scale: 1, rotation: 0, placedAt: gameState.gameTime };
+                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
+                            let overlap = false;
+                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(factory, allC[j], 2)) { overlap = true; break; } }
+                            if (!overlap && !isPointInWater(zone.x + 26, zone.y + 26)) {
+                                gameState.buildings.push(factory);
+                                gameState.population += 20;
+                                gameState.industrialDemand = Math.max(0, gameState.industrialDemand - 5);
+                            }
+                        }
+                    }
+                }
+                gameState.residentialDemand += Math.random() * 2;
+                gameState.commercialDemand += Math.random() * 1.5;
+                gameState.industrialDemand += Math.random() * 1;
+                updateUI();
+            }
+
+            gameState.demandTimer += 16;
+            if (gameState.demandTimer >= 8000) {
+                gameState.demandTimer = 0;
+                gameState.residentialDemand = Math.min(100, gameState.residentialDemand + Math.random() * 5);
+                gameState.commercialDemand = Math.min(100, gameState.commercialDemand + Math.random() * 4);
+                gameState.industrialDemand = Math.min(100, gameState.industrialDemand + Math.random() * 3);
+                updateUI();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkServices(worldX, worldY) {
+            const result = { police: false, fire: false, health: false, education: false };
+            for (let i = 0; i < gameState.buildings.length; i++) {
+                const b = gameState.buildings[i];
+                const info = buildingTypes[b.type];
+                if (!info || !info.serviceType) continue;
+                const dist = Math.hypot(worldX - (b.x + b.w / 2), worldY - (b.y + b.h / 2));
+                if (dist <= info.serviceRadius) {
+                    result[info.serviceType] = true;
+                }
+            }
+            return result;
+        }
+
+        // ==================== ОБНОВЛЕНИЕ NPC ====================
+        function updateNPCs() {
+            for (let i = 0; i < gameState.people.length; i++) {
+                const person = gameState.people[i];
+                if (person.hasCar && person.carRef) { person.x = person.carRef.x;
+                    person.y = person.carRef.y; continue; }
+                if (person.hasBoat && person.boatRef) { person.x = person.boatRef.x;
+                    person.y = person.boatRef.y; continue; }
+                person.stateTimer--;
+                if (person.stateTimer <= 0) {
+                    person.stateTimer = 80 + Math.random() * 300;
+                    const targets = gameState.buildings.filter(function(b) { return buildingTypes[b.type] && !buildingTypes[b.type].isRoad && !buildingTypes[b.type].isRail && !buildingTypes[b.type].isRoadCurve; });
+                    if (targets.length > 0 && Math.random() < 0.7) { person.target = targets[Math.floor(Math.random() * targets.length)];
+                        person.state = 'visiting'; } else { person.target = null;
+                        person.state = 'walking';
+                        person.vx = (Math.random() - 0.5) * 1.5;
+                        person.vy = (Math.random() - 0.5) * 1.5; }
+                }
+                if (person.state === 'visiting' && person.target) {
+                    const dx = (person.target.x + person.target.w / 2) - person.x;
+                    const dy = (person.target.y + person.target.h / 2) - person.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 12) { person.state = 'inside';
+                        person.stateTimer = 100 + Math.random() * 300; } else { const sp = 1.5;
+                        person.vx = dx / dist * sp;
+                        person.vy = dy / dist * sp; }
+                } else if (person.state === 'inside') { person.vx = 0;
+                    person.vy = 0; }
+                person.x += person.vx;
+                person.y += person.vy; if (Math.abs(person.x) > gameState.borderSize) person.vx *= -1; if (Math.abs(person.y) > gameState.borderSize) person.vy *= -1;
+            }
+            for (let i = 0; i < gameState.cars.length; i++) {
+                const car = gameState.cars[i]; if (car.parked) continue;
+                car.x += car.vx;
+                car.y += car.vy;
+                let onRoad = false;
+                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r.h) { onRoad = true; break; } }
+                if (!onRoad) {
+                    let bestRoad = null,
+                        bestDist = 99999;
+                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
+                            ry = r.y + r.h / 2; const d = Math.hypot(car.x - rx, car.y - ry); if (d < bestDist) { bestDist = d;
+                            bestRoad = r; } }
+                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
+                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - car.x,
+                            dy = ry - car.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { car.vx = dx / d * 2;
+                            car.vy = dy / d * 2; } }
+                }
+                if (Math.abs(car.x) > gameState.borderSize || Math.abs(car.y) > gameState.borderSize) { car.vx *= -1;
+                    car.vy = (Math.random() - 0.5) * 2; }
+                if (Math.random() < 0.005) { const person = gameState.people.find(function(p) { return p.carRef === car; }); if (person && Math.random() < 0.3) { person.hasCar = false;
+                        person.carRef = null;
+                        person.x = car.x;
+                        person.y = car.y;
+                        car.parked = true;
+                        setTimeout(function() { car.parked = false; if (Math.random() < 0.5) { const np = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; }); if (np) { np.hasCar = true;
+                                    np.carRef = car; } } }, 2000 + Math.random() * 3000); } }
+            }
+            for (let i = 0; i < gameState.boats.length; i++) {
+                const boat = gameState.boats[i]; if (boat.parked) continue;
+                boat.x += boat.vx;
+                boat.y += boat.vy;
+                let onWater = isPointInWater(boat.x, boat.y);
+                if (!onWater) {
+                    let bestW = null,
+                        bestDist = 99999;
+                    for (let j = 0; j < gameState.waterBodies.length; j++) { const w = gameState.waterBodies[j]; let minX = Infinity,
+                            minY = Infinity,
+                            maxX = -Infinity,
+                            maxY = -Infinity; for (let k = 0; k < w.points.length; k++) { if (w.points[k].x < minX) minX = w.points[k].x; if (w.points[k].y < minY) minY = w.points[k].y; if (w.points[k].x > maxX) maxX = w.points[k].x; if (w.points[k].y > maxY) maxY = w.points[k].y; } const wx = (minX + maxX) / 2,
+                            wy = (minY + maxY) / 2; const d = Math.hypot(boat.x - wx, boat.y - wy); if (d < bestDist) { bestDist = d;
+                            bestW = w; } }
+                    if (bestW) { let minX = Infinity,
+                            minY = Infinity,
+                            maxX = -Infinity,
+                            maxY = -Infinity; for (let k = 0; k < bestW.points.length; k++) { if (bestW.points[k].x < minX) minX = bestW.points[k].x; if (bestW.points[k].y < minY) minY = bestW.points[k].y; if (bestW.points[k].x > maxX) maxX = bestW.points[k].x; if (bestW.points[k].y > maxY) maxY = bestW.points[k].y; } const wx = (minX + maxX) / 2,
+                            wy = (minY + maxY) / 2; const dx = wx - boat.x,
+                            dy = wy - boat.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { boat.vx = dx / d * 2;
+                            boat.vy = dy / d * 2; } }
+                }
+                if (Math.random() < 0.01) { boat.vx = (Math.random() - 0.5) * 2;
+                    boat.vy = (Math.random() - 0.5) * 2; }
+            }
+            for (let i = 0; i < gameState.buses.length; i++) {
+                const bus = gameState.buses[i]; if (bus.parked) continue;
+                bus.x += bus.vx;
+                bus.y += bus.vy;
+                let onRoad = false;
+                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (bus.x >= r.x && bus.x <= r.x + r.w && bus.y >= r.y && bus.y <= r.y + r.h) { onRoad = true; break; } }
+                if (!onRoad) {
+                    let bestRoad = null,
+                        bestDist = 99999;
+                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
+                            ry = r.y + r.h / 2; const d = Math.hypot(bus.x - rx, bus.y - ry); if (d < bestDist) { bestDist = d;
+                            bestRoad = r; } }
+                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
+                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - bus.x,
+                            dy = ry - bus.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { bus.vx = dx / d * 1.5;
+                            bus.vy = dy / d * 1.5; } }
+                }
+                if (Math.abs(bus.x) > gameState.borderSize || Math.abs(bus.y) > gameState.borderSize) { bus.vx *= -1;
+                    bus.vy = (Math.random() - 0.5) * 1.5; }
+            }
+            if (gameState.buildings.some(function(b) { return b.type === 'carshop'; }) && gameState.roads.length > 0 && gameState.cars.length < 15 && Math.random() < 0.005) {
+                const shop = gameState.buildings.find(function(b) { return b.type === 'carshop'; });
+                if (shop) {
+                    const car = { x: shop.x + shop.w / 2, y: shop.y + shop.h / 2, vx: 2, vy: 0, color: 'hsl(' + Math.floor(Math.random() * 360) + ',70%,55%)', parked: false, homeRef: shop };
+                    gameState.cars.push(car);
+                    const person = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; });
+                    if (person) { person.hasCar = true;
+                        person.carRef = car; }
+                }
+            }
+            if (gameState.buildings.some(function(b) { return b.type === 'shipyard'; }) && gameState.waterBodies.length > 0 && gameState.boats.length < 8 && Math.random() < 0.003) {
+                const yard = gameState.buildings.find(function(b) { return b.type === 'shipyard'; });
+                if (yard) {
+                    let nearestWater = null;
+                    for (let i = 0; i < gameState.waterBodies.length; i++) { const w = gameState.waterBodies[i]; let minX = Infinity,
+                            minY = Infinity,
+                            maxX = -Infinity,
+                            maxY = -Infinity; for (let j = 0; j < w.points.length; j++) { if (w.points[j].x < minX) minX = w.points[j].x; if (w.points[j].y < minY) minY = w.points[j].y; if (w.points[j].x > maxX) maxX = w.points[j].x; if (w.points[j].y > maxY) maxY = w.points[j].y; } if (yard.x >= minX && yard.x <= maxX && yard.y >= minY && yard.y <= maxY) { nearestWater = w; break; } }
+                    if (nearestWater) { let minX = Infinity,
+                            minY = Infinity,
+                            maxX = -Infinity,
+                            maxY = -Infinity; for (let j = 0; j < nearestWater.points.length; j++) { if (nearestWater.points[j].x < minX) minX = nearestWater.points[j].x; if (nearestWater.points[j].y < minY) minY = nearestWater.points[j].y; if (nearestWater.points[j].x > maxX) maxX = nearestWater.points[j].x; if (nearestWater.points[j].y > maxY) maxY = nearestWater.points[j].y; } const boat = { x: (minX + maxX) / 2, y: (minY + maxY) / 2, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, color: 'hsl(' + Math.floor(Math.random() * 360) + ',50%,50%)', parked: false, homeRef: yard };
+                        gameState.boats.push(boat);
+                        const person = gameState.people.find(function(p) { return !p.hasBoat && !p.hasCar; }); if (person) { person.hasBoat = true;
+                            person.boatRef = boat; } }
+                }
+            }
+            if (gameState.buildings.some(function(b) { return b.type === 'bus_depot'; }) && gameState.buildings.some(function(b) { return b.type === 'bus_stop'; }) && gameState.roads.length > 0 && gameState.buses.length < 5 && Math.random() < 0.003) {
+                const depot = gameState.buildings.find(function(b) { return b.type === 'bus_depot'; });
+                if (depot) {
+                    const bus = { x: depot.x + depot.w / 2, y: depot.y + depot.h / 2, vx: 1.5, vy: 0, color: '#4a90c8', parked: false, homeRef: depot };
+                    gameState.buses.push(bus);
+                }
+            }
+        }
+
+        function spawnParticles(worldX, worldY, colorHex) {
+            const hex = colorHex || '#f0d060';
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            for (let i = 0; i < 25; i++) {
+                gameState.particles.push({
+                    x: worldX,
+                    y: worldY,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5 - 4,
+                    life: 1,
+                    size: Math.random() * 5 + 2,
+                    r: r,
+                    g: g,
+                    b: b,
+                });
+            }
+        }
+
+        // ==================== СОБЫТИЯ ====================
+        document.addEventListener('mousemove', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            const coords = getCanvasCoords(event);
+            gameState.mouseX = coords.sx;
+            gameState.mouseY = coords.sy;
+            if (gameState.dragging) {
+                const dx = event.clientX - gameState.dragStartX;
+                const dy = event.clientY - gameState.dragStartY;
+                gameState.cameraX -= dx / gameState.zoom;
+                gameState.cameraY -= dy / gameState.zoom;
+                gameState.dragStartX = event.clientX;
+                gameState.dragStartY = event.clientY;
+                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
+            }
+            const worldPos = screenToWorld(coords.sx, coords.sy);
+            gameState.hoveredBuilding = findBuildingAt(worldPos.x, worldPos.y);
+            updateInfoPopup(coords.sx, coords.sy);
+        });
+
+        document.addEventListener('mousedown', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
+            if (event.button === 0) {
+                const worldPos = getWorldFromEvent(event);
+                gameState.mouseX = worldPos.sx;
+                gameState.mouseY = worldPos.sy;
+                if (gameState.deleteMode) { if (deleteAt(worldPos.wx, worldPos.wy)) return; }
+                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) { if (placeZone(worldPos.wx, worldPos.wy)) return; }
+                if (gameState.selectedType && !gameState.selectMode) { if (buildAt(worldPos.wx, worldPos.wy)) return; }
+                gameState.dragging = true;
+                gameState.dragStartX = event.clientX;
+                gameState.dragStartY = event.clientY;
+                gameState.dragDistance = 0;
+                updateUI();
+            }
+        });
+
+        document.addEventListener('mouseup', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            if (gameState.dragging && gameState.dragDistance < 3) {
+                const worldPos = getWorldFromEvent(event);
+                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
+                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
+                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
+            }
+            gameState.dragging = false;
+            gameState.dragDistance = 0;
+            updateUI();
+        });
+
+        document.addEventListener('contextmenu', function(event) { if (event.target.closest('#game-canvas')) event.preventDefault(); });
+
+        document.addEventListener('wheel', function(event) {
+            if (!gameState.canvas || !gameState.countryName || event.target.closest('#build-modal')) return;
+            event.preventDefault();
+            const rect = gameState.canvas.getBoundingClientRect();
+            const mx = event.clientX - rect.left;
+            const my = event.clientY - rect.top;
+            const worldBefore = screenToWorld(mx, my);
+            const zf = 1.07;
+            if (event.deltaY < 0) gameState.zoom = Math.min(3, gameState.zoom * zf);
+            else gameState.zoom = Math.max(0.25, gameState.zoom / zf);
+            gameState.gridSize = Math.round(48 * gameState.zoom);
+            const worldAfter = screenToWorld(mx, my);
+            gameState.cameraX += worldBefore.x - worldAfter.x;
+            gameState.cameraY += worldBefore.y - worldAfter.y;
+        }, { passive: false });
+
+        document.addEventListener('touchstart', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
+            if (event.touches.length === 2) {
+                gameState.dragging = false;
+                gameState.touchDistance = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+                gameState.lastPinchZoom = gameState.zoom;
+                return;
+            }
+            if (event.touches.length === 1) {
+                const touch = event.touches[0];
+                const rect = gameState.canvas.getBoundingClientRect();
+                gameState.mouseX = touch.clientX - rect.left;
+                gameState.mouseY = touch.clientY - rect.top;
+                gameState.dragStartX = touch.clientX;
+                gameState.dragStartY = touch.clientY;
+                gameState.dragDistance = 0;
+                gameState.dragging = true;
+                gameState.touchStartTime = Date.now();
+                updateUI();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            if (event.touches.length === 2) {
+                event.preventDefault();
+                const dist = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+                gameState.zoom = Math.max(0.25, Math.min(3, gameState.lastPinchZoom * (dist / gameState.touchDistance)));
+                gameState.gridSize = Math.round(48 * gameState.zoom);
+            } else if (event.touches.length === 1 && gameState.dragging) {
+                const dx = event.touches[0].clientX - gameState.dragStartX;
+                const dy = event.touches[0].clientY - gameState.dragStartY;
+                gameState.cameraX -= dx / gameState.zoom;
+                gameState.cameraY -= dy / gameState.zoom;
+                gameState.dragStartX = event.touches[0].clientX;
+                gameState.dragStartY = event.touches[0].clientY;
+                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
+                const rect = gameState.canvas.getBoundingClientRect();
+                gameState.mouseX = event.touches[0].clientX - rect.left;
+                gameState.mouseY = event.touches[0].clientY - rect.top;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', function(event) {
+            if (!gameState.canvas || !gameState.countryName) return;
+            const wasTap = gameState.dragDistance < 8 && (Date.now() - gameState.touchStartTime) < 300;
+            if (wasTap && event.changedTouches.length === 1) {
+                const worldPos = getWorldFromEvent(event.changedTouches[0]);
+                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
+                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
+                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
+            }
+            gameState.dragging = false;
+            gameState.dragDistance = 0;
+            updateUI();
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (!gameState.countryName) return;
+            if (event.key === 'Escape') { gameState.selectedType = null;
+                gameState.currentTool = null;
+                gameState.deleteMode = false;
+                gameState.selectMode = false;
+                closeBuildModal();
+                updateUI(); }
+            if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault();
+                toggleDeleteMode(); }
+            if (event.key === 'b' || event.key === 'B') openBuildModal();
+            if (event.key === 'i' || event.key === 'I') toggleSelectMode();
+            if (event.key === 'r' || event.key === 'R' || event.key === 'к' || event.key === 'К') { event.preventDefault();
+                rotateBuilding(); }
+            if (event.key === '1') setTool('zone_residential');
+            if (event.key === '2') setTool('zone_commercial');
+            if (event.key === '3') setTool('zone_industrial');
+        });
+
+        document.getElementById('build-modal').addEventListener('click', function(event) { if (event.target === this) closeBuildModal(); });
+
+        document.getElementById('modal-tabs').addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-tab')) {
+                document.querySelectorAll('#modal-tabs .modal-tab').forEach(function(tab) { tab.classList.remove('active'); });
+                event.target.classList.add('active');
+                currentModalTab = event.target.dataset.tab;
+                modalBuilt = false;
+                buildModalGrid();
+            }
+        });
+
+        document.getElementById('size-selector').addEventListener('click', function(event) {
+            if (event.target.classList.contains('size-btn')) {
+                gameState.buildScale = parseFloat(event.target.dataset.scale);
+                buildModalGrid();
+            }
+        });
+
+        function updateInfoPopup(screenX, screenY) {
+            const popup = document.getElementById('info-popup');
+            if (gameState.hoveredBuilding && !gameState.dragging && (gameState.selectMode || (!gameState.selectedType && !gameState.deleteMode && !gameState.currentTool))) {
+                const building = gameState.hoveredBuilding;
+                const info = buildingTypes[building.type];
+                if (!info) { popup.style.display = 'none'; return; }
+                const scale = building.scale || 1;
+                const cost = getBuildCost(building.type, scale);
+                const income = Math.floor((info.income || 0) * scale);
+                popup.style.display = 'block';
+                popup.style.left = Math.min(screenX + 22, window.innerWidth - 280) + 'px';
+                popup.style.top = Math.max(10, screenY - 30) + 'px';
+                let html = '<span class="pop-title">' + (info.emoji || '?') + ' ' + (info.name || 'Объект') + '</span>';
+                html += '📏 ' + building.w + 'x' + building.h + ' (x' + scale + ') 🔄' + (building.rotation || 0) + '°<br>';
+                html += '💰 Цена: ' + cost.toLocaleString() + '<br>';
+                html += '📈 Доход: 💰' + income.toLocaleString() + '/мес<br>';
+                if (info.serviceType) html += '🔔 Тип: ' + info.serviceType + '<br>';
+                if (info.happinessBonus) html += '😊 Счастье: +' + Math.floor((info.happinessBonus || 0) * scale) + '<br>';
+                popup.innerHTML = html;
+            } else {
+                popup.style.display = 'none';
+            }
+        }
+
+        function addLog(message) {
+            const logContainer = document.getElementById('message-log');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'log-msg';
+            messageElement.textContent = message;
+            logContainer.appendChild(messageElement);
+            setTimeout(function() { messageElement.remove(); }, 3500);
+            if (logContainer.children.length > 6) logContainer.firstChild.remove();
+        }
+
+        function shakeEl(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.animation = 'shake 0.4s ease';
+            setTimeout(function() { el.style.animation = ''; }, 400);
+        }
+
+        function showHelp() {
+            alert('🎮 PRESIDENT SIMULATOR - THEOTOWN EDITION\n\n' +
+                '🏘️ ЗОНИРОВАНИЕ:\n' +
+                '• Кнопки Жилая/Коммерция/Индустрия\n' +
+                '• Или клавиши 1, 2, 3\n' +
+                '• Выделите зону — здания вырастут сами!\n\n' +
+                '🏗️ СПЕЦПОСТРОЙКИ:\n' +
+                '• Дороги, службы, парки, достопримечательности\n' +
+                '• Транспорт (автобусы, автосалон)\n\n' +
+                '🚒 СЛУЖБЫ:\n' +
+                '• Полиция, пожарные, больницы, школы\n' +
+                '• Необходимы для роста зон\n\n' +
+                '📈 СПРОС:\n' +
+                '• R — жилой, C — коммерческий, I — индустриальный\n' +
+                '• Растёт со временем\n\n' +
+                '⌨️ КЛАВИШИ:\n' +
+                '• 1/2/3 — зоны\n' +
+                '• B — спецпостройки\n' +
+                '• R — поворот\n' +
+                '• Delete — снос\n' +
+                '• I — информация\n\n' +
+                '🌊 Водоёмы генерируются случайно\n' +
+                '🌤️ Погода и день/ночь\n' +
+                '💾 Автосохранение каждые 30 сек');
+        }
+
+        const shakeCSS = document.createElement('style');
+        shakeCSS.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
+        document.head.appendChild(shakeCSS);
+
+        console.log('🏛️ President Simulator - TheoTown Edition ГОТОВ!');
+        console.log('✅ Зонирование (жилое, коммерческое, индустриальное)');
+        console.log('✅ Городские службы (полиция, пожарные, больницы, школы)');
+        console.log('✅ Парки и достопримечательности');
+        console.log('✅ Транспорт (автобусы, автосалон, судостроительный)');
+        console.log('✅ Система спроса');
+        console.log('✅ Кривые водоёмы');
+        console.log('✅ День/ночь и погода');
+        console.log('✅ NPC, машины, лодки, автобусы');
+        console.log('✅ Сохранения');
     </script>
 </body>
 </html>
