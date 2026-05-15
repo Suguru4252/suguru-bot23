@@ -1,536 +1,1228 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Солнечная система 3D | Полная модель</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    #info {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: white;
-      background: rgba(0,0,0,0.7);
-      padding: 12px 25px;
-      border-radius: 50px;
-      pointer-events: none;
-      backdrop-filter: blur(10px);
-      font-weight: 500;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
-    #current-planet {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-      background: rgba(0,0,0,0.7);
-      padding: 15px 30px;
-      border-radius: 50px;
-      backdrop-filter: blur(10px);
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.3);
-      display: none;
-      pointer-events: none;
-    }
-    .instruction {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255,255,255,0.7);
-      font-size: 14px;
-      background: rgba(0,0,0,0.55);
-      padding: 8px 25px;
-      border-radius: 25px;
-      backdrop-filter: blur(8px);
-      white-space: nowrap;
-      pointer-events: none;
-      letter-spacing: 0.5px;
-    }
-    @media (max-width: 750px) {
-      .instruction {
-        font-size: 11px;
-        white-space: normal;
-        text-align: center;
-        width: 85%;
-        bottom: 20px;
-      }
-      #current-planet {
-        font-size: 16px;
-        padding: 10px 20px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haunted Dorm - Tower Defense</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --cell-bg: #1a1a2e;
+            --cell-border: #2a2a3e;
+            --ghost: #ff4444;
+            --tower: #4488ff;
+            --gold: #ffd700;
+            --text: #ccc;
+            --door: #8b4513;
+            --bed: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 10px 20px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: var(--text);
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .hud-icon {
+            font-size: 24px;
+        }
+
+        #money {
+            color: var(--gold);
+        }
+
+        #lives {
+            color: #ff6666;
+        }
+
+        #wave-display {
+            color: #88ccff;
+        }
+
+        #canvas-wrapper {
+            position: relative;
+            border: 3px solid #444;
+            border-radius: 5px;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3), 0 0 80px rgba(0, 0, 255, 0.2);
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        #tower-panel {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+
+        .tower-btn {
+            padding: 12px 18px;
+            border: 2px solid #555;
+            background: #1a1a2e;
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .tower-btn:hover {
+            border-color: var(--tower);
+            box-shadow: 0 0 15px rgba(68, 136, 255, 0.5);
+            background: #1e1e3a;
+        }
+        .tower-btn.selected {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            background: #2a2a4e;
+            color: #fff;
+        }
+        .tower-btn .cost {
+            font-size: 12px;
+            color: var(--gold);
+            display: block;
+        }
+        .tower-btn .name {
+            font-size: 13px;
+        }
+        .tower-btn .desc {
+            font-size: 10px;
+            color: #999;
+            display: block;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ctrl-btn {
+            padding: 10px 20px;
+            background: #222;
+            color: #fff;
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .ctrl-btn:hover {
+            background: #333;
+            border-color: #fff;
+        }
+        .ctrl-btn.wave-btn {
+            background: #331100;
+            border-color: #ff6600;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 5px #ff6600;
+            }
+            50% {
+                box-shadow: 0 0 25px #ff6600, 0 0 50px #ff3300;
+            }
+        }
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 20px red, 0 0 40px red;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+            text-align: center;
+        }
+        #message.show {
+            opacity: 1;
+        }
+
+        #tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #555;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+            z-index: 5;
+        }
+    </style>
 </head>
 <body>
-  <div id="info">🌌 СОЛНЕЧНАЯ СИСТЕМА</div>
-  <div id="current-planet"></div>
-  <div class="instruction">🖱️ Вращайте камеру | 📜 Зум | ✨ Кликните по объекту для фокуса | ↩️ Пробел — общий вид</div>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-      }
-    }
-  </script>
+    <div id="game-container">
+        <div id="hud">
+            <div class="hud-item"><span class="hud-icon">💰</span> <span id="money">500</span></div>
+            <div class="hud-item"><span class="hud-icon">❤️</span> <span id="lives">20</span></div>
+            <div class="hud-item"><span class="hud-icon">🌊</span> <span id="wave-display">Волна 0</span></div>
+        </div>
+        <div id="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+            <div id="message"></div>
+            <div id="tooltip"></div>
+        </div>
+        <div id="tower-panel">
+            <button class="tower-btn" data-tower="basic">
+                <span class="name">🔫 Базовая</span>
+                <span class="cost">💰100</span>
+                <span class="desc">Урон: 25 | Скорость: 1.5с</span>
+            </button>
+            <button class="tower-btn" data-tower="sniper">
+                <span class="name">🎯 Снайпер</span>
+                <span class="cost">💰200</span>
+                <span class="desc">Урон: 80 | Скорость: 3с</span>
+            </button>
+            <button class="tower-btn" data-tower="splash">
+                <span class="name">💥 Взрывная</span>
+                <span class="cost">💰300</span>
+                <span class="desc">Урон: 40 | Радиус</span>
+            </button>
+            <button class="tower-btn" data-tower="slow">
+                <span class="name">❄️ Заморозка</span>
+                <span class="cost">💰250</span>
+                <span class="desc">Замедление | Урон: 10</span>
+            </button>
+        </div>
+        <div id="controls">
+            <button class="ctrl-btn" id="sellBtn">🔨 Продать (ПКМ)</button>
+            <button class="ctrl-btn" id="upgradeBtn">⬆ Улучшить</button>
+            <button class="ctrl-btn wave-btn" id="startWaveBtn">▶ НАЧАТЬ ВОЛНУ</button>
+            <button class="ctrl-btn" id="restartBtn">🔄 Рестарт</button>
+        </div>
+    </div>
 
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const messageEl = document.getElementById('message');
+            const tooltip = document.getElementById('tooltip');
+            const moneyEl = document.getElementById('money');
+            const livesEl = document.getElementById('lives');
+            const waveDisplay = document.getElementById('wave-display');
+            const startWaveBtn = document.getElementById('startWaveBtn');
+            const sellBtn = document.getElementById('sellBtn');
+            const upgradeBtn = document.getElementById('upgradeBtn');
+            const restartBtn = document.getElementById('restartBtn');
 
-    // --- Сцена ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050510);
-    
-    // Звёзды
-    const starsGeo1 = new THREE.BufferGeometry();
-    const starsPos1 = new Float32Array(3000 * 3);
-    for (let i = 0; i < 3000 * 3; i += 3) {
-      starsPos1[i] = (Math.random() - 0.5) * 1200;
-      starsPos1[i+1] = (Math.random() - 0.5) * 700;
-      starsPos1[i+2] = (Math.random() - 0.5) * 900;
-    }
-    starsGeo1.setAttribute('position', new THREE.BufferAttribute(starsPos1, 3));
-    const stars1 = new THREE.Points(starsGeo1, new THREE.PointsMaterial({color: 0xffffff, size: 0.25}));
-    scene.add(stars1);
-    
-    const starsGeo2 = new THREE.BufferGeometry();
-    const starsPos2 = new Float32Array(2000 * 3);
-    for (let i = 0; i < 2000 * 3; i += 3) {
-      starsPos2[i] = (Math.random() - 0.5) * 1600;
-      starsPos2[i+1] = (Math.random() - 0.5) * 900;
-      starsPos2[i+2] = (Math.random() - 0.5) * 1100;
-    }
-    starsGeo2.setAttribute('position', new THREE.BufferAttribute(starsPos2, 3));
-    const stars2 = new THREE.Points(starsGeo2, new THREE.PointsMaterial({color: 0xaaccff, size: 0.3}));
-    scene.add(stars2);
+            // === КОНФИГУРАЦИЯ КАРТЫ (как общежитие) ===
+            const COLS = 15;
+            const ROWS = 10;
+            const CELL_SIZE = 48;
+            canvas.width = COLS * CELL_SIZE;
+            canvas.height = ROWS * CELL_SIZE;
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 2000);
-    camera.position.set(0, 40, 80);
-    camera.lookAt(0, 0, 0);
+            // Карта: 0=путь, 1=стена, 2=дверь(выход), 3=кровать(спавн), 4=место для башни
+            const MAP_TEMPLATE = [
+                //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0
+                [1, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 0, 0, 2, 1], // 1
+                [1, 1, 1, 1, 1, 1, 0, 1, 4, 4, 4, 0, 1, 1, 1], // 2
+                [3, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 4, 1], // 3
+                [1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 4, 1], // 4
+                [1, 4, 4, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 4, 1], // 5
+                [1, 4, 4, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1], // 6
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], // 7
+                [1, 4, 4, 4, 1, 4, 4, 4, 1, 0, 0, 0, 0, 0, 1], // 8
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 9
+            ];
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
+            // Путь (waypoints) для движения призраков
+            const WAYPOINTS = [
+                { x: 0, y: 3 }, // спавн у кровати
+                { x: 1, y: 3 },
+                { x: 2, y: 3 },
+                { x: 3, y: 3 },
+                { x: 4, y: 3 },
+                { x: 4, y: 4 },
+                { x: 4, y: 5 },
+                { x: 4, y: 6 },
+                { x: 5, y: 6 },
+                { x: 6, y: 6 },
+                { x: 7, y: 6 },
+                { x: 8, y: 6 },
+                { x: 9, y: 6 },
+                { x: 9, y: 7 },
+                { x: 9, y: 8 },
+                { x: 10, y: 8 },
+                { x: 11, y: 8 },
+                { x: 12, y: 8 },
+                { x: 13, y: 8 },
+                { x: 13, y: 7 },
+                { x: 13, y: 6 },
+                { x: 13, y: 5 },
+                { x: 13, y: 4 },
+                { x: 13, y: 3 },
+                { x: 13, y: 2 },
+                { x: 13, y: 1 },
+            ];
 
-    const labelRenderer = new CSS2DRenderer();
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    labelRenderer.domElement.style.position = 'absolute';
-    labelRenderer.domElement.style.top = '0px';
-    labelRenderer.domElement.style.left = '0px';
-    labelRenderer.domElement.style.pointerEvents = 'none';
-    document.body.appendChild(labelRenderer.domElement);
+            // === СОСТОЯНИЕ ИГРЫ ===
+            let mapData = JSON.parse(JSON.stringify(MAP_TEMPLATE));
+            let money = 500;
+            let lives = 20;
+            let wave = 0;
+            let waveActive = false;
+            let enemiesRemaining = 0;
+            let enemiesSpawned = 0;
+            let spawnQueue = [];
+            let spawnTimer = 0;
+            let selectedTowerType = null;
+            let selectedTower = null; // ссылка на выбранную башню на карте
+            let towers = [];
+            let enemies = [];
+            let projectiles = [];
+            let particles = [];
+            let gameOver = false;
+            let gameWon = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            let mouseGridX = -1;
+            let mouseGridY = -1;
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.rotateSpeed = 0.7;
-    controls.zoomSpeed = 1.8;
-    controls.target.set(0, 0, 0);
-    controls.maxDistance = 600;
-    controls.minDistance = 2;
-    controls.update();
+            // Типы башен
+            const TOWER_TYPES = {
+                basic: {
+                    name: 'Базовая',
+                    cost: 100,
+                    damage: 25,
+                    range: 120,
+                    cooldown: 90, // кадров (1.5 сек при 60fps)
+                    color: '#4488ff',
+                    bulletColor: '#88bbff',
+                    bulletSpeed: 6,
+                    upgradeCost: 80,
+                    upgradeMult: 1.5,
+                    level: 1,
+                    maxLevel: 4,
+                },
+                sniper: {
+                    name: 'Снайпер',
+                    cost: 200,
+                    damage: 80,
+                    range: 220,
+                    cooldown: 180,
+                    color: '#ff8844',
+                    bulletColor: '#ffaa66',
+                    bulletSpeed: 10,
+                    upgradeCost: 150,
+                    upgradeMult: 1.6,
+                    level: 1,
+                    maxLevel: 4,
+                },
+                splash: {
+                    name: 'Взрывная',
+                    cost: 300,
+                    damage: 40,
+                    range: 100,
+                    cooldown: 120,
+                    splashRadius: 60,
+                    color: '#ff4444',
+                    bulletColor: '#ff6666',
+                    bulletSpeed: 4,
+                    upgradeCost: 200,
+                    upgradeMult: 1.4,
+                    level: 1,
+                    maxLevel: 4,
+                },
+                slow: {
+                    name: 'Заморозка',
+                    cost: 250,
+                    damage: 10,
+                    range: 110,
+                    cooldown: 60,
+                    slowAmount: 0.5,
+                    slowDuration: 120,
+                    color: '#44ccff',
+                    bulletColor: '#aaddff',
+                    bulletSpeed: 5,
+                    upgradeCost: 180,
+                    upgradeMult: 1.3,
+                    level: 1,
+                    maxLevel: 4,
+                },
+            };
 
-    // --- Освещение ---
-    const sunLight = new THREE.PointLight(0xfff5e6, 3, 0, 0);
-    sunLight.position.set(0, 0, 0);
-    scene.add(sunLight);
-    scene.add(new THREE.AmbientLight(0x111133));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.25);
-    dirLight.position.set(10, 20, 5);
-    scene.add(dirLight);
+            // === КЛАССЫ ===
+            class Tower {
+                constructor(x, y, type) {
+                    this.gridX = x;
+                    this.gridY = y;
+                    this.px = x * CELL_SIZE + CELL_SIZE / 2;
+                    this.py = y * CELL_SIZE + CELL_SIZE / 2;
+                    this.type = type;
+                    this.config = { ...TOWER_TYPES[type] };
+                    this.cooldownRemaining = 0;
+                    this.target = null;
+                    this.angle = 0;
+                    this.level = 1;
+                    this.damage = this.config.damage;
+                    this.range = this.config.range;
+                    this.cooldown = this.config.cooldown;
+                    mapData[y][x] = 5; // занято башней
+                }
 
-    // --- Функция создания текстур ---
-    function createPlanetTexture(baseColor, type) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-      
-      ctx.fillStyle = baseColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      if (type === 'sun') {
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#ffaa00');
-        gradient.addColorStop(0.3, '#ff7700');
-        gradient.addColorStop(0.6, '#ffaa00');
-        gradient.addColorStop(1, '#ff5500');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffcc00';
-        for(let i = 0; i < 25; i++) {
-          ctx.beginPath();
-          ctx.arc(Math.random()*256, Math.random()*128, Math.random()*12+4, 0, Math.PI*2);
-          ctx.fill();
-        }
-      } else if (type === 'jupiter') {
-        ctx.strokeStyle = '#b08060';
-        ctx.lineWidth = 7;
-        for(let y = 10; y < 128; y += 16) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(256, y + Math.sin(y)*4);
-          ctx.stroke();
-        }
-      } else if (type === 'saturn') {
-        ctx.strokeStyle = '#d4b896';
-        ctx.lineWidth = 5;
-        for(let y = 12; y < 128; y += 14) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(256, y);
-          ctx.stroke();
-        }
-      } else if (type === 'earth') {
-        ctx.fillStyle = '#2288ff';
-        ctx.fillRect(0,0,256,128);
-        ctx.fillStyle = '#44aa44';
-        ctx.beginPath(); ctx.arc(100,50,40,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(180,70,35,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        for(let i=0;i<12;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*7+1.5,0,Math.PI*2); ctx.fill(); }
-      } else if (type === 'mars') {
-        ctx.fillStyle = '#8b2500';
-        for(let i=0;i<15;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*10+3,0,Math.PI*2); ctx.fill(); }
-      } else if (type === 'mercury') {
-        ctx.fillStyle = '#666666';
-        for(let i=0;i<20;i++){ ctx.beginPath(); ctx.arc(Math.random()*256,Math.random()*128,Math.random()*6+2,0,Math.PI*2); ctx.fill(); }
-      }
-      
-      return new THREE.CanvasTexture(canvas);
-    }
+                upgrade() {
+                    if (this.level >= this.config.maxLevel) return false;
+                    const cost = Math.floor(this.config.upgradeCost * this.level);
+                    if (money < cost) return false;
+                    money -= cost;
+                    this.level++;
+                    this.damage = Math.floor(this.config.damage * Math.pow(this.config.upgradeMult, this
+                        .level - 1));
+                    this.range = this.config.range + (this.level - 1) * 15;
+                    this.cooldown = Math.max(30, this.config.cooldown - (this.level - 1) * 10);
+                    updateHUD();
+                    return true;
+                }
 
-    // --- Планеты (увеличенные расстояния) ---
-    const planetsData = [
-      { name: 'Солнце', key: 'sun', color: 0xffaa00, size: 2.5, distance: 0, speed: 0, emissive: 0xff5500 },
-      { name: 'Меркурий', key: 'mercury', color: 0xaaaaaa, size: 0.4, distance: 6, speed: 0.035 },
-      { name: 'Венера', key: 'venus', color: 0xffcc88, size: 0.7, distance: 9, speed: 0.022 },
-      { name: 'Земля', key: 'earth', color: 0x2299ff, size: 0.75, distance: 12, speed: 0.018 },
-      { name: 'Марс', key: 'mars', color: 0xc1440e, size: 0.55, distance: 16, speed: 0.015 },
-      // Пояс астероидов между Марсом и Юпитером (расстояния 18-24)
-      { name: 'Церера', key: 'ceres', color: 0x999999, size: 0.3, distance: 20, speed: 0.012, dwarf: true },
-      { name: 'Юпитер', key: 'jupiter', color: 0xd8a27a, size: 1.8, distance: 28, speed: 0.009 },
-      { name: 'Сатурн', key: 'saturn', color: 0xf0d8b0, size: 1.5, distance: 36, speed: 0.007, hasRings: true },
-      { name: 'Уран', key: 'uranus', color: 0x6fd4d4, size: 1.2, distance: 45, speed: 0.005 },
-      { name: 'Нептун', key: 'neptune', color: 0x4169e1, size: 1.15, distance: 54, speed: 0.004 },
-      // Пояс Койпера
-      { name: 'Плутон', key: 'pluto', color: 0xccbb99, size: 0.35, distance: 65, speed: 0.003, dwarf: true },
-      { name: 'Эрида', key: 'eris', color: 0xddccbb, size: 0.32, distance: 78, speed: 0.0025, dwarf: true }
-    ];
+                getSellValue() {
+                    let total = this.config.cost;
+                    for (let i = 1; i < this.level; i++) {
+                        total += Math.floor(this.config.upgradeCost * i);
+                    }
+                    return Math.floor(total * 0.6);
+                }
 
-    const planets = [];
-    const allClickableObjects = [];
+                findTarget() {
+                    let best = null;
+                    let bestProgress = -1;
+                    for (const enemy of enemies) {
+                        const dx = enemy.x - this.px;
+                        const dy = enemy.y - this.py;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist <= this.range && enemy.waypointIndex > bestProgress && enemy.hp > 0) {
+                            best = enemy;
+                            bestProgress = enemy.waypointIndex;
+                        }
+                    }
+                    return best;
+                }
 
-    // Орбиты
-    planetsData.forEach(p => {
-      if (p.distance > 0) {
-        const orbitGeo = new THREE.RingGeometry(p.distance - 0.03, p.distance + 0.03, 128);
-        const opacity = p.dwarf ? 0.08 : 0.15;
-        const orbit = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({ 
-          color: 0x334466, side: THREE.DoubleSide, transparent: true, opacity 
-        }));
-        orbit.rotation.x = Math.PI / 2;
-        scene.add(orbit);
-      }
-    });
+                update() {
+                    if (this.cooldownRemaining > 0) {
+                        this.cooldownRemaining--;
+                    }
+                    this.target = this.findTarget();
+                    if (this.target) {
+                        this.angle = Math.atan2(this.target.y - this.py, this.target.x - this.px);
+                        if (this.cooldownRemaining <= 0) {
+                            this.shoot();
+                            this.cooldownRemaining = this.cooldown;
+                        }
+                    }
+                }
 
-    // Создание планет
-    planetsData.forEach(data => {
-      const geo = new THREE.SphereGeometry(data.size, data.key === 'sun' ? 64 : 40, 40);
-      const texture = createPlanetTexture(`#${data.color.toString(16).padStart(6, '0')}`, data.key);
-      const mat = new THREE.MeshStandardMaterial({
-        map: texture,
-        roughness: data.key === 'sun' ? 0.4 : 0.75,
-        metalness: 0.1,
-        emissive: data.emissive ? new THREE.Color(data.emissive) : new THREE.Color(0x000000),
-        emissiveIntensity: data.key === 'sun' ? 1 : 0
-      });
-      
-      const planet = new THREE.Mesh(geo, mat);
-      planet.castShadow = true;
-      planet.receiveShadow = true;
-      
-      const angle = Math.random() * Math.PI * 2;
-      planet.position.x = data.distance * Math.cos(angle);
-      planet.position.z = data.distance * Math.sin(angle);
-      
-      planet.userData = {
-        name: data.name,
-        key: data.key,
-        distance: data.distance,
-        speed: data.speed,
-        angle: angle,
-        size: data.size,
-        hasRings: data.hasRings || false,
-        dwarf: data.dwarf || false
-      };
-      
-      scene.add(planet);
-      allClickableObjects.push(planet);
-      
-      // Кольца Сатурна
-      if (data.hasRings) {
-        const ringGeo1 = new THREE.RingGeometry(data.size * 1.3, data.size * 2.0, 64);
-        const ring1 = new THREE.Mesh(ringGeo1, new THREE.MeshStandardMaterial({
-          color: 0xd4c090, side: THREE.DoubleSide, transparent: true, opacity: 0.55, roughness: 0.5
-        }));
-        ring1.rotation.x = Math.PI / 2 + 0.05;
-        ring1.userData = { isRing: true, parentKey: data.key };
-        planet.add(ring1);
-        allClickableObjects.push(ring1);
-        
-        const ringGeo2 = new THREE.RingGeometry(data.size * 2.05, data.size * 2.35, 64);
-        const ring2 = new THREE.Mesh(ringGeo2, new THREE.MeshStandardMaterial({
-          color: 0xb8a878, side: THREE.DoubleSide, transparent: true, opacity: 0.4, roughness: 0.5
-        }));
-        ring2.rotation.x = Math.PI / 2 - 0.03;
-        ring2.userData = { isRing: true, parentKey: data.key };
-        planet.add(ring2);
-        allClickableObjects.push(ring2);
-      }
-      
-      // Подпись
-      const labelDiv = document.createElement('div');
-      labelDiv.textContent = data.name;
-      labelDiv.style.color = 'white';
-      labelDiv.style.fontSize = data.dwarf ? '12px' : '15px';
-      labelDiv.style.fontWeight = 'bold';
-      labelDiv.style.textShadow = '1px 1px 3px black';
-      labelDiv.style.background = 'rgba(0,0,0,0.65)';
-      labelDiv.style.padding = '2px 12px';
-      labelDiv.style.borderRadius = '20px';
-      const label = new CSS2DObject(labelDiv);
-      label.position.set(0, data.size + 0.5, 0);
-      planet.add(label);
-      
-      planets.push(planet);
-    });
+                shoot() {
+                    const proj = new Projectile(
+                        this.px, this.py,
+                        this.target,
+                        this.damage,
+                        this.config.bulletSpeed,
+                        this.config.bulletColor,
+                        this.type,
+                        this.config.splashRadius || 0,
+                        this.config.slowAmount || 0,
+                        this.config.slowDuration || 0,
+                    );
+                    projectiles.push(proj);
+                }
 
-    // --- Пояс астероидов (между Марсом и Юпитером) ---
-    const asteroidCount = 800;
-    const asteroidGeo = new THREE.SphereGeometry(0.08, 3, 3);
-    const asteroidMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
-    
-    for (let i = 0; i < asteroidCount; i++) {
-      const asteroid = new THREE.Mesh(asteroidGeo, asteroidMat);
-      const distance = 17 + Math.random() * 7; // 17-24
-      const angle = Math.random() * Math.PI * 2;
-      const yOffset = (Math.random() - 0.5) * 1.2;
-      
-      asteroid.position.x = distance * Math.cos(angle);
-      asteroid.position.y = yOffset;
-      asteroid.position.z = distance * Math.sin(angle);
-      
-      const scale = 0.5 + Math.random() * 1.5;
-      asteroid.scale.set(scale, scale * (0.5 + Math.random()), scale);
-      asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-      
-      asteroid.userData = {
-        name: 'Астероид',
-        key: 'asteroid',
-        distance: distance,
-        speed: 0.008 + Math.random() * 0.01,
-        angle: angle,
-        yOffset: yOffset,
-        isAsteroid: true
-      };
-      
-      scene.add(asteroid);
-      allClickableObjects.push(asteroid);
-    }
+                draw(ctx) {
+                    const cx = this.px;
+                    const cy = this.py;
+                    const r = CELL_SIZE * 0.35;
 
-    // --- Пояс Койпера (за Нептуном) ---
-    const kuiperCount = 1200;
-    const kuiperGeo = new THREE.SphereGeometry(0.06, 3, 3);
-    const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x998877, roughness: 0.9, emissive: 0x111111, emissiveIntensity: 0.3 });
-    
-    const kuiperObjects = [];
-    for (let i = 0; i < kuiperCount; i++) {
-      const kuiperObj = new THREE.Mesh(kuiperGeo, kuiperMat);
-      const distance = 58 + Math.random() * 30; // 58-88
-      const angle = Math.random() * Math.PI * 2;
-      const yOffset = (Math.random() - 0.5) * 5;
-      
-      kuiperObj.position.x = distance * Math.cos(angle);
-      kuiperObj.position.y = yOffset;
-      kuiperObj.position.z = distance * Math.sin(angle);
-      
-      const scale = 0.4 + Math.random() * 1.2;
-      kuiperObj.scale.setScalar(scale);
-      kuiperObj.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-      
-      kuiperObj.userData = {
-        name: 'Объект Койпера',
-        key: 'kuiper',
-        distance: distance,
-        speed: 0.0015 + Math.random() * 0.003,
-        angle: angle,
-        yOffset: yOffset,
-        isKuiper: true
-      };
-      
-      scene.add(kuiperObj);
-      kuiperObjects.push(kuiperObj);
-      allClickableObjects.push(kuiperObj);
-    }
+                    // База
+                    ctx.fillStyle = '#333';
+                    ctx.beginPath();
+                    ctx.roundRect(cx - r, cy - r, r * 2, r * 2, 6);
+                    ctx.fill();
+                    ctx.strokeStyle = this.config.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-    // --- Навигация ---
-    let currentTarget = 'all';
-    const planetNameDiv = document.getElementById('current-planet');
-    
-    function focusOnPlanet(planetKey) {
-      planetNameDiv.style.display = 'none';
-      
-      if (planetKey === 'all') {
-        controls.target.set(0, 0, 0);
-        camera.position.set(0, 40, 80);
-        controls.update();
-        return;
-      }
-      
-      let targetObj = null;
-      
-      // Ищем среди планет
-      const planet = planets.find(p => p.userData.key === planetKey);
-      if (planet) {
-        targetObj = planet;
-        planetNameDiv.textContent = planet.userData.name;
-      }
-      
-      if (targetObj) {
-        const pos = targetObj.position.clone();
-        controls.target.copy(pos);
-        const dist = targetObj.userData.size * 6 + 3;
-        camera.position.copy(pos.clone().add(new THREE.Vector3(dist * 0.7, dist * 0.5, dist * 0.7)));
-        controls.update();
-        planetNameDiv.style.display = 'block';
-      }
-    }
-    
-    // Клик по объектам
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    
-    window.addEventListener('click', (event) => {
-      if (event.target.tagName === 'BUTTON') return;
-      
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(allClickableObjects);
-      
-      if (intersects.length > 0) {
-        let obj = intersects[0].object;
-        
-        // Если кольцо — берём родителя
-        if (obj.userData.isRing) {
-          obj = obj.parent;
-        }
-        
-        // Если астероид или объект Койпера — не фокусируемся (слишком много)
-        if (obj.userData.isAsteroid || obj.userData.isKuiper) {
-          // Можно показать подсказку, но не фокусируем
-          return;
-        }
-        
-        const key = obj.userData.key;
-        if (key && key !== 'asteroid' && key !== 'kuiper') {
-          currentTarget = key;
-          focusOnPlanet(key);
-        }
-      }
-    });
-    
-    // Пробел — общий вид
-    window.addEventListener('keydown', (event) => {
-      if (event.code === 'Space') {
-        event.preventDefault();
-        currentTarget = 'all';
-        focusOnPlanet('all');
-      }
-    });
+                    // Уровень
+                    for (let i = 0; i < this.level; i++) {
+                        ctx.fillStyle = '#ffd700';
+                        ctx.fillRect(cx - r + 4 + i * 8, cy + r - 10, 6, 6);
+                    }
 
-    // --- Анимация ---
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      stars1.rotation.y += 0.00008;
-      stars2.rotation.y -= 0.00004;
-      
-      // Планеты
-      planets.forEach(planet => {
-        const data = planet.userData;
-        if (data.distance > 0) {
-          data.angle += data.speed * 0.25;
-          planet.position.x = data.distance * Math.cos(data.angle);
-          planet.position.z = data.distance * Math.sin(data.angle);
-        }
-        planet.rotation.y += 0.008;
-      });
-      
-      // Астероиды
-      allClickableObjects.forEach(obj => {
-        if (obj.userData.isAsteroid) {
-          obj.userData.angle += obj.userData.speed * 0.25;
-          obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
-          obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
-        }
-      });
-      
-      // Объекты Койпера
-      kuiperObjects.forEach(obj => {
-        obj.userData.angle += obj.userData.speed * 0.25;
-        obj.position.x = obj.userData.distance * Math.cos(obj.userData.angle);
-        obj.position.z = obj.userData.distance * Math.sin(obj.userData.angle);
-      });
-      
-      // Слежение за целью
-      if (currentTarget !== 'all') {
-        const targetPlanet = planets.find(p => p.userData.key === currentTarget);
-        if (targetPlanet) {
-          controls.target.copy(targetPlanet.position);
-        }
-      }
-      
-      controls.update();
-      renderer.render(scene, camera);
-      labelRenderer.render(scene, camera);
-    }
-    
-    animate();
+                    // Ствол
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = this.config.color;
+                    ctx.fillRect(0, -3, r * 0.8, 6);
+                    ctx.restore();
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    });
+                    // Центр
+                    ctx.fillStyle = this.config.color;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
 
-    console.log('🌠 Полная Солнечная система готова!');
-    console.log('   ☀️ Солнце');
-    console.log('   🪨 Планеты земной группы: Меркурий, Венера, Земля, Марс');
-    console.log('   💫 Пояс астероидов + Церера');
-    console.log('   🪐 Газовые гиганты: Юпитер, Сатурн');
-    console.log('   🔵 Ледяные гиганты: Уран, Нептун');
-    console.log('   ❄️ Пояс Койпера: Плутон, Эрида');
-    console.log('   Кликайте по планетам для фокуса, Пробел — общий вид');
-  </script>
+                    // Радиус при наведении
+                    if (selectedTower === this || (mouseGridX === this.gridX && mouseGridY === this.gridY &&
+                            !selectedTowerType)) {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, this.range, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+
+            class Enemy {
+                constructor(hp, speed, reward, color, size = 14) {
+                    this.hp = hp;
+                    this.maxHp = hp;
+                    this.speed = speed;
+                    this.reward = reward;
+                    this.color = color;
+                    this.size = size;
+                    this.waypointIndex = 0;
+                    this.x = WAYPOINTS[0].x * CELL_SIZE + CELL_SIZE / 2;
+                    this.y = WAYPOINTS[0].y * CELL_SIZE + CELL_SIZE / 2;
+                    this.alive = true;
+                    this.slowTimer = 0;
+                    this.slowAmount = 0;
+                }
+
+                update() {
+                    if (!this.alive) return;
+                    if (this.slowTimer > 0) {
+                        this.slowTimer--;
+                    }
+                    const effectiveSpeed = this.slowTimer > 0 ? this.speed * (1 - this.slowAmount) : this.speed;
+                    if (this.waypointIndex >= WAYPOINTS.length - 1) {
+                        this.alive = false;
+                        lives--;
+                        updateHUD();
+                        if (lives <= 0) triggerGameOver();
+                        return;
+                    }
+                    const target = WAYPOINTS[this.waypointIndex + 1];
+                    const tx = target.x * CELL_SIZE + CELL_SIZE / 2;
+                    const ty = target.y * CELL_SIZE + CELL_SIZE / 2;
+                    const dx = tx - this.x;
+                    const dy = ty - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < effectiveSpeed) {
+                        this.x = tx;
+                        this.y = ty;
+                        this.waypointIndex++;
+                    } else {
+                        this.x += (dx / dist) * effectiveSpeed;
+                        this.y += (dy / dist) * effectiveSpeed;
+                    }
+                }
+
+                takeDamage(dmg) {
+                    this.hp -= dmg;
+                    if (this.hp <= 0) {
+                        this.alive = false;
+                        money += this.reward;
+                        updateHUD();
+                        // Частицы смерти
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: this.x,
+                                y: this.y,
+                                vx: (Math.random() - 0.5) * 6,
+                                vy: (Math.random() - 0.5) * 6,
+                                life: 20,
+                                color: this.color,
+                                size: 3 + Math.random() * 4,
+                            });
+                        }
+                    }
+                }
+
+                applySlow(amount, duration) {
+                    this.slowAmount = Math.max(this.slowAmount, amount);
+                    this.slowTimer = Math.max(this.slowTimer, duration);
+                }
+
+                draw(ctx) {
+                    if (!this.alive) return;
+                    const s = this.size;
+                    // Тень
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.beginPath();
+                    ctx.arc(this.x + 2, this.y + 2, s, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Тело
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, s, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Глаза
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(this.x - s * 0.3, this.y - s * 0.2, s * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.x + s * 0.3, this.y - s * 0.2, s * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(this.x - s * 0.25, this.y - s * 0.2, s * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.x + s * 0.35, this.y - s * 0.2, s * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    // HP бар
+                    if (this.hp < this.maxHp) {
+                        const barW = s * 2;
+                        const barH = 4;
+                        const barX = this.x - barW / 2;
+                        const barY = this.y - s - 8;
+                        ctx.fillStyle = '#333';
+                        ctx.fillRect(barX, barY, barW, barH);
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(barX, barY, barW * (this.hp / this.maxHp), barH);
+                    }
+                    // Замедление
+                    if (this.slowTimer > 0) {
+                        ctx.strokeStyle = 'rgba(100,200,255,0.7)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, s + 4, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            class Projectile {
+                constructor(x, y, target, damage, speed, color, type, splashRadius = 0, slowAmount = 0,
+                slowDuration = 0) {
+                    this.x = x;
+                    this.y = y;
+                    this.target = target;
+                    this.damage = damage;
+                    this.speed = speed;
+                    this.color = color;
+                    this.type = type;
+                    this.splashRadius = splashRadius;
+                    this.slowAmount = slowAmount;
+                    this.slowDuration = slowDuration;
+                    this.alive = true;
+                }
+
+                update() {
+                    if (!this.alive) return;
+                    if (!this.target || !this.target.alive) {
+                        this.alive = false;
+                        return;
+                    }
+                    const dx = this.target.x - this.x;
+                    const dy = this.target.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < this.speed + 5) {
+                        this.hit();
+                        this.alive = false;
+                    } else {
+                        this.x += (dx / dist) * this.speed;
+                        this.y += (dy / dist) * this.speed;
+                    }
+                }
+
+                hit() {
+                    if (this.splashRadius > 0) {
+                        // Урон по площади
+                        for (const enemy of enemies) {
+                            if (!enemy.alive) continue;
+                            const dx = enemy.x - this.target.x;
+                            const dy = enemy.y - this.target.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist <= this.splashRadius) {
+                                const dmgScale = 1 - (dist / this.splashRadius) * 0.5;
+                                enemy.takeDamage(Math.floor(this.damage * dmgScale));
+                                if (this.slowAmount > 0) enemy.applySlow(this.slowAmount, this.slowDuration);
+                            }
+                        }
+                        // Частицы взрыва
+                        for (let i = 0; i < 15; i++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const spd = 2 + Math.random() * 5;
+                            particles.push({
+                                x: this.target.x,
+                                y: this.target.y,
+                                vx: Math.cos(angle) * spd,
+                                vy: Math.sin(angle) * spd,
+                                life: 15 + Math.random() * 15,
+                                color: '#ff8800',
+                                size: 3 + Math.random() * 5,
+                            });
+                        }
+                    } else {
+                        this.target.takeDamage(this.damage);
+                        if (this.slowAmount > 0 && this.target.alive) {
+                            this.target.applySlow(this.slowAmount, this.slowDuration);
+                        }
+                        // Маленькие частицы попадания
+                        for (let i = 0; i < 3; i++) {
+                            particles.push({
+                                x: this.target.x,
+                                y: this.target.y,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: (Math.random() - 0.5) * 4,
+                                life: 10,
+                                color: this.color,
+                                size: 2 + Math.random() * 3,
+                            });
+                        }
+                    }
+                }
+
+                draw(ctx) {
+                    if (!this.alive) return;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // === ФУНКЦИИ ===
+            function updateHUD() {
+                moneyEl.textContent = money;
+                livesEl.textContent = lives;
+                waveDisplay.textContent = `Волна ${wave}`;
+            }
+
+            function showMessage(text, duration = 2000) {
+                messageEl.textContent = text;
+                messageEl.classList.add('show');
+                clearTimeout(messageEl._timeout);
+                messageEl._timeout = setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, duration);
+            }
+
+            function triggerGameOver() {
+                gameOver = true;
+                waveActive = false;
+                showMessage('💀 ИГРА ОКОНЧЕНА 💀', 4000);
+                startWaveBtn.textContent = '▶ Игра окончена';
+                startWaveBtn.classList.remove('wave-btn');
+            }
+
+            function triggerWin() {
+                gameWon = true;
+                waveActive = false;
+                showMessage('🏆 ПОБЕДА! Все волны пройдены! 🏆', 5000);
+                startWaveBtn.textContent = '🏆 Победа!';
+                startWaveBtn.classList.remove('wave-btn');
+            }
+
+            function getWaveConfig(w) {
+                const configs = [
+                    { count: 8, hp: 40, speed: 0.8, reward: 30, color: '#ff6666', size: 12, name: 'Слабая' },
+                    { count: 12, hp: 60, speed: 0.9, reward: 35, color: '#ff8844', size: 13, name: 'Средняя' },
+                    { count: 10, hp: 100, speed: 0.7, reward: 45, color: '#cc44ff', size: 14, name: 'Сильная' },
+                    { count: 15, hp: 80, speed: 1.1, reward: 40, color: '#ff44aa', size: 12, name: 'Быстрая' },
+                    { count: 8, hp: 200, speed: 0.5, reward: 70, color: '#ff0000', size: 18, name: 'Босс' },
+                    { count: 20, hp: 70, speed: 1.0, reward: 38, color: '#ff9900', size: 13, name: 'Орда' },
+                    { count: 14, hp: 130, speed: 0.8, reward: 55, color: '#9900ff', size: 15, name: 'Тяжёлая' },
+                    { count: 10, hp: 160, speed: 0.6, reward: 65, color: '#ff0044', size: 17, name: 'Элита' },
+                    { count: 25, hp: 90, speed: 1.2, reward: 35, color: '#ff5500', size: 12, name: 'Рой' },
+                    { count: 5, hp: 400, speed: 0.4, reward: 120, color: '#ff0000', size: 22, name: 'СУПЕРБОСС' },
+                ];
+                const idx = Math.min(w - 1, configs.length - 1);
+                return { ...configs[idx], wave: w };
+            }
+
+            function startWave() {
+                if (gameOver || gameWon) return;
+                if (waveActive) return;
+                wave++;
+                if (wave > 50) {
+                    triggerWin();
+                    return;
+                }
+                const cfg = getWaveConfig(wave);
+                spawnQueue = [];
+                enemiesRemaining = cfg.count;
+                enemiesSpawned = 0;
+                spawnTimer = 0;
+                // Создаём очередь спавна с интервалами
+                for (let i = 0; i < cfg.count; i++) {
+                    spawnQueue.push({
+                        delay: i * 25, // кадров между спавнами
+                        hp: cfg.hp,
+                        speed: cfg.speed,
+                        reward: cfg.reward,
+                        color: cfg.color,
+                        size: cfg.size,
+                    });
+                }
+                waveActive = true;
+                showMessage(`🌊 Волна ${wave}: ${cfg.name}!`, 2000);
+                startWaveBtn.textContent = '⏳ Волна идёт...';
+                startWaveBtn.classList.remove('wave-btn');
+                updateHUD();
+            }
+
+            function spawnEnemy(cfg) {
+                const enemy = new Enemy(cfg.hp, cfg.speed, cfg.reward, cfg.color, cfg.size);
+                enemies.push(enemy);
+                enemiesSpawned++;
+            }
+
+            function placeTower(gridX, gridY, type) {
+                if (mapData[gridY][gridX] !== 4) return false;
+                const tconfig = TOWER_TYPES[type];
+                if (money < tconfig.cost) {
+                    showMessage('❌ Недостаточно денег!', 1500);
+                    return false;
+                }
+                money -= tconfig.cost;
+                const tower = new Tower(gridX, gridY, type);
+                towers.push(tower);
+                updateHUD();
+                return true;
+            }
+
+            function sellTower(tower) {
+                const val = tower.getSellValue();
+                money += val;
+                mapData[tower.gridY][tower.gridX] = 4;
+                towers = towers.filter(t => t !== tower);
+                if (selectedTower === tower) selectedTower = null;
+                updateHUD();
+                showMessage(`💰 Продано за ${val}`, 1500);
+            }
+
+            function restartGame() {
+                mapData = JSON.parse(JSON.stringify(MAP_TEMPLATE));
+                money = 500;
+                lives = 20;
+                wave = 0;
+                waveActive = false;
+                enemiesRemaining = 0;
+                enemiesSpawned = 0;
+                spawnQueue = [];
+                spawnTimer = 0;
+                selectedTowerType = null;
+                selectedTower = null;
+                towers = [];
+                enemies = [];
+                projectiles = [];
+                particles = [];
+                gameOver = false;
+                gameWon = false;
+                startWaveBtn.textContent = '▶ НАЧАТЬ ВОЛНУ';
+                startWaveBtn.classList.add('wave-btn');
+                updateHUD();
+                showMessage('🔄 Игра перезапущена', 1500);
+            }
+
+            // === СОБЫТИЯ ===
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+                mouseGridX = Math.floor(mouseX / CELL_SIZE);
+                mouseGridY = Math.floor(mouseY / CELL_SIZE);
+                // Обновляем тултип
+                if (mouseGridX >= 0 && mouseGridX < COLS && mouseGridY >= 0 && mouseGridY < ROWS) {
+                    const cell = mapData[mouseGridY][mouseGridX];
+                    if (cell === 4) {
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (e.clientX + 20) + 'px';
+                        tooltip.style.top = (e.clientY - 30) + 'px';
+                        tooltip.textContent = '🟩 Свободное место для башни';
+                    } else if (cell === 5) {
+                        const tower = towers.find(t => t.gridX === mouseGridX && t.gridY === mouseGridY);
+                        if (tower) {
+                            tooltip.style.display = 'block';
+                            tooltip.style.left = (e.clientX + 20) + 'px';
+                            tooltip.style.top = (e.clientY - 30) + 'px';
+                            tooltip.textContent =
+                                `${tower.config.name} Ур.${tower.level} | Урон:${tower.damage} | Цена продажи:${tower.getSellValue()}`;
+                        } else {
+                            tooltip.style.display = 'none';
+                        }
+                    } else {
+                        tooltip.style.display = 'none';
+                    }
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            });
+
+            canvas.addEventListener('click', (e) => {
+                if (gameOver || gameWon) return;
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const gx = Math.floor(mx / CELL_SIZE);
+                const gy = Math.floor(my / CELL_SIZE);
+                if (gx < 0 || gx >= COLS || gy < 0 || gy >= ROWS) return;
+                // Если выбран тип башни — ставим
+                if (selectedTowerType) {
+                    if (placeTower(gx, gy, selectedTowerType)) {
+                        // Башня поставлена, снимаем выбор
+                        selectedTowerType = null;
+                        document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove(
+                            'selected'));
+                    }
+                    return;
+                }
+                // Иначе выбираем башню на клетке
+                const tower = towers.find(t => t.gridX === gx && t.gridY === gy);
+                if (tower) {
+                    selectedTower = tower;
+                    selectedTowerType = null;
+                    document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove('selected'));
+                } else {
+                    selectedTower = null;
+                }
+            });
+
+            canvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if (gameOver || gameWon) return;
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const gx = Math.floor(mx / CELL_SIZE);
+                const gy = Math.floor(my / CELL_SIZE);
+                const tower = towers.find(t => t.gridX === gx && t.gridY === gy);
+                if (tower) {
+                    sellTower(tower);
+                }
+            });
+
+            // Кнопки башен
+            document.querySelectorAll('.tower-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (gameOver || gameWon) return;
+                    const type = btn.dataset.tower;
+                    if (selectedTowerType === type) {
+                        selectedTowerType = null;
+                        btn.classList.remove('selected');
+                    } else {
+                        selectedTowerType = type;
+                        selectedTower = null;
+                        document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove(
+                            'selected'));
+                        btn.classList.add('selected');
+                        if (money < TOWER_TYPES[type].cost) {
+                            showMessage('❌ Недостаточно денег для этой башни!', 1500);
+                        }
+                    }
+                });
+            });
+
+            sellBtn.addEventListener('click', () => {
+                if (selectedTower) {
+                    sellTower(selectedTower);
+                } else {
+                    showMessage('🔍 Сначала выберите башню (кликните по ней)', 1500);
+                }
+            });
+
+            upgradeBtn.addEventListener('click', () => {
+                if (!selectedTower) {
+                    showMessage('🔍 Сначала выберите башню для улучшения', 1500);
+                    return;
+                }
+                if (!selectedTower.upgrade()) {
+                    if (selectedTower.level >= selectedTower.config.maxLevel) {
+                        showMessage('⭐ Максимальный уровень!', 1500);
+                    } else {
+                        showMessage('❌ Недостаточно денег для улучшения!', 1500);
+                    }
+                } else {
+                    showMessage(
+                        `⬆ ${selectedTower.config.name} улучшена до уровня ${selectedTower.level}!`,
+                        1500);
+                }
+            });
+
+            startWaveBtn.addEventListener('click', startWave);
+            restartBtn.addEventListener('click', restartGame);
+
+            // === ИГРОВОЙ ЦИКЛ ===
+            function update() {
+                if (gameOver || gameWon) {
+                    // Только частицы обновляем
+                    particles = particles.filter(p => { p.life--; return p.life > 0; });
+                    particles.forEach(p => { p.x += p.vx;
+                        p.y += p.vy; });
+                    return;
+                }
+
+                // Спавн врагов
+                if (waveActive && spawnQueue.length > 0) {
+                    spawnTimer++;
+                    while (spawnQueue.length > 0 && spawnTimer >= spawnQueue[0].delay) {
+                        spawnEnemy(spawnQueue.shift());
+                    }
+                }
+
+                // Обновление врагов
+                for (const enemy of enemies) enemy.update();
+                enemies = enemies.filter(e => e.alive);
+
+                // Проверка окончания волны
+                if (waveActive && spawnQueue.length === 0 && enemies.length === 0 && enemiesSpawned >=
+                    enemiesRemaining) {
+                    waveActive = false;
+                    enemiesSpawned = 0;
+                    enemiesRemaining = 0;
+                    money += 50 + wave * 10; // бонус за волну
+                    updateHUD();
+                    showMessage(`✅ Волна ${wave} пройдена! +${50 + wave * 10}💰`, 2000);
+                    startWaveBtn.textContent = '▶ НАЧАТЬ ВОЛНУ';
+                    startWaveBtn.classList.add('wave-btn');
+                }
+
+                // Обновление башен
+                for (const tower of towers) tower.update();
+
+                // Обновление снарядов
+                for (const proj of projectiles) proj.update();
+                projectiles = projectiles.filter(p => p.alive);
+
+                // Обновление частиц
+                particles = particles.filter(p => { p.life--; return p.life > 0; });
+                particles.forEach(p => { p.x += p.vx;
+                    p.y += p.vy; });
+
+                // Проверка game over
+                if (lives <= 0 && !gameOver) {
+                    triggerGameOver();
+                }
+            }
+
+            function drawMap() {
+                for (let y = 0; y < ROWS; y++) {
+                    for (let x = 0; x < COLS; x++) {
+                        const px = x * CELL_SIZE;
+                        const py = y * CELL_SIZE;
+                        const cell = mapData[y][x];
+
+                        // Пол
+                        ctx.fillStyle = '#1a1a25';
+                        ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+
+                        switch (cell) {
+                            case 1: // Стена
+                                ctx.fillStyle = '#3a3a4a';
+                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                                ctx.strokeStyle = '#555';
+                                ctx.lineWidth = 1;
+                                ctx.strokeRect(px + 1, py + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+                                // Кирпичный узор
+                                ctx.fillStyle = '#444';
+                                for (let bx = px; bx < px + CELL_SIZE; bx += 12) {
+                                    for (let by = py; by < py + CELL_SIZE; by += 8) {
+                                        ctx.fillRect(bx + (by % 16 === 0 ? 6 : 0), by, 10, 6);
+                                    }
+                                }
+                                break;
+                            case 2: // Дверь (выход)
+                                ctx.fillStyle = '#5c3a1e';
+                                ctx.fillRect(px + 4, py + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                                ctx.fillStyle = '#8b6914';
+                                ctx.fillRect(px + 8, py + 8, CELL_SIZE - 16, CELL_SIZE - 16);
+                                ctx.fillStyle = '#ffd700';
+                                ctx.beginPath();
+                                ctx.arc(px + CELL_SIZE - 16, py + CELL_SIZE / 2, 3, 0, Math.PI * 2);
+                                ctx.fill();
+                                // Надпись
+                                ctx.fillStyle = '#fff';
+                                ctx.font = '9px monospace';
+                                ctx.textAlign = 'center';
+                                ctx.fillText('ВЫХОД', px + CELL_SIZE / 2, py + CELL_SIZE / 2 + 3);
+                                break;
+                            case 3: // Кровать (спавн)
+                                ctx.fillStyle = '#4a3030';
+                                ctx.fillRect(px + 2, py + 10, CELL_SIZE - 4, CELL_SIZE - 18);
+                                ctx.fillStyle = '#8b0000';
+                                ctx.fillRect(px + 4, py + 14, CELL_SIZE - 12, CELL_SIZE - 28);
+                                ctx.fillStyle = '#fff';
+                                ctx.font = '8px monospace';
+                                ctx.textAlign = 'center';
+                                ctx.fillText('СПАВН', px + CELL_SIZE / 2, py + 8);
+                                break;
+                            case 4: // Место для башни
+                                ctx.fillStyle = '#1a2a1a';
+                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                                ctx.strokeStyle = '#3a5a3a';
+                                ctx.lineWidth = 1;
+                                ctx.setLineDash([4, 4]);
+                                ctx.strokeRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                                ctx.setLineDash([]);
+                                // Иконка +
+                                if (!towers.some(t => t.gridX === x && t.gridY === y)) {
+                                    ctx.fillStyle = 'rgba(100,255,100,0.3)';
+                                    ctx.font = '20px monospace';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText('+', px + CELL_SIZE / 2, py + CELL_SIZE / 2 + 7);
+                                }
+                                break;
+                            case 0: // Путь
+                                ctx.fillStyle = '#252530';
+                                ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                                ctx.strokeStyle = '#333';
+                                ctx.lineWidth = 0.5;
+                                ctx.strokeRect(px, py, CELL_SIZE, CELL_SIZE);
+                                break;
+                        }
+
+                        // Сетка
+                        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(px, py, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Карта
+                drawMap();
+
+                // Башни
+                for (const tower of towers) tower.draw(ctx);
+
+                // Враги
+                for (const enemy of enemies) enemy.draw(ctx);
+
+                // Снаряды
+                for (const proj of projectiles) proj.draw(ctx);
+
+                // Частицы
+                for (const p of particles) {
+                    ctx.globalAlpha = p.life / 30;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+
+                // Подсветка выбранной башни
+                if (selectedTower) {
+                    const sx = selectedTower.gridX * CELL_SIZE;
+                    const sy = selectedTower.gridY * CELL_SIZE;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(sx + 1, sy + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+                    // Кнопка продажи подсказка
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.font = '10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ПКМ-продать', sx + CELL_SIZE / 2, sy - 4);
+                }
+
+                // Подсветка курсора при выборе башни
+                if (selectedTowerType && mouseGridX >= 0 && mouseGridX < COLS && mouseGridY >= 0 && mouseGridY <
+                    ROWS) {
+                    if (mapData[mouseGridY][mouseGridX] === 4) {
+                        const hx = mouseGridX * CELL_SIZE;
+                        const hy = mouseGridY * CELL_SIZE;
+                        ctx.strokeStyle = 'rgba(100,255,100,0.7)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(hx + 1, hy + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+                    }
+                }
+            }
+
+            function gameLoop() {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+
+            // === ЗАПУСК ===
+            updateHUD();
+            gameLoop();
+            console.log('🏚️ Haunted Dorm Tower Defense запущена!');
+            console.log('💰 Ставьте башни на зелёные клетки (с +)');
+            console.log('👻 Защитите выход (коричневая дверь) от призраков!');
+            console.log('🖱️ ЛКМ - поставить/выбрать башню | ПКМ - продать');
+        })();
+    </script>
 </body>
 </html>
