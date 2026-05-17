@@ -198,47 +198,34 @@
             transition: opacity 1s;
         }
 
-        /* Экран смерти/паузы */
-        .overlay {
+        /* Ползунок чувствительности */
+        .sensitivity-panel {
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 200;
+            top: 80px;
+            right: 20px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 10px 16px;
+            z-index: 70;
+            pointer-events: all;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
-            justify-content: center;
-            pointer-events: all;
+            gap: 10px;
+            color: #ccc;
+            font-size: 0.8em;
         }
-        .overlay-box {
-            background: #111;
-            border: 2px solid #ffd700;
-            border-radius: 20px;
-            padding: 30px 40px;
-            text-align: center;
-            color: #fff;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        .sensitivity-panel input[type="range"] {
+            width: 100px;
+            accent-color: #ffd700;
         }
-        .overlay-box h2 {
-            font-size: 2em;
+        .sensitivity-value {
             color: #ffd700;
-            margin-bottom: 10px;
-        }
-        .overlay-box button {
-            margin-top: 16px;
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: 700;
-            background: #ffd700;
-            color: #000;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .overlay-box button:hover {
-            background: #fff;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
         }
 
         @media (max-width: 600px) {
@@ -255,6 +242,15 @@
             .controls-hint {
                 font-size: 0.65em;
                 padding: 6px 12px;
+            }
+            .sensitivity-panel {
+                top: 60px;
+                right: 8px;
+                padding: 6px 10px;
+                font-size: 0.7em;
+            }
+            .sensitivity-panel input[type="range"] {
+                width: 70px;
             }
         }
     </style>
@@ -290,6 +286,13 @@
         🎮 WASD — ходить | 🖱️ Мышь — смотреть | 🖱️ ЛКМ — стрелять | 🔢 1-5 — оружие | R — перезарядка
     </div>
 
+    <!-- Ползунок чувствительности -->
+    <div class="sensitivity-panel" id="sensitivityPanel">
+        🖱️ Чувств:
+        <input type="range" id="sensitivitySlider" min="0.1" max="2.0" step="0.1" value="0.6">
+        <span class="sensitivity-value" id="sensitivityValue">0.6</span>
+    </div>
+
     <!-- Сообщения -->
     <div class="message-center" id="messageCenter"></div>
 
@@ -304,6 +307,16 @@
 
     <script type="module">
         import * as THREE from 'three';
+
+        // ==================== ЧУВСТВИТЕЛЬНОСТЬ ====================
+        let mouseSensitivity = 0.6;
+        const sensitivitySlider = document.getElementById('sensitivitySlider');
+        const sensitivityValue = document.getElementById('sensitivityValue');
+
+        sensitivitySlider.addEventListener('input', () => {
+            mouseSensitivity = parseFloat(sensitivitySlider.value);
+            sensitivityValue.textContent = mouseSensitivity.toFixed(1);
+        });
 
         // ==================== СОСТОЯНИЕ ИГРЫ ====================
         const state = {
@@ -718,8 +731,11 @@
 
         document.addEventListener('mousemove', (e) => {
             if (!isLocked) return;
-            mouse.x += e.movementX * 0.002;
-            mouse.y += e.movementY * 0.002;
+            // ИСПРАВЛЕНО: Уменьшена чувствительность (было 0.002, стало с учётом слайдера)
+            // ИСПРАВЛЕНО: Инверсия Y — теперь movementY ВЫЧИТАЕТСЯ (вверх = вверх)
+            mouse.x += e.movementX * 0.0008 * mouseSensitivity;
+            mouse.y -= e.movementY * 0.0008 * mouseSensitivity; // МИНУС — убрана инверсия!
+            // Ограничение по вертикали
             mouse.y = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, mouse.y));
         });
 
@@ -740,8 +756,10 @@
             isLocked = document.pointerLockElement === renderer.domElement;
             if (!isLocked) {
                 document.getElementById('controlsHint').style.opacity = '0';
+                document.getElementById('sensitivityPanel').style.opacity = '0.4';
             } else {
                 document.getElementById('controlsHint').style.opacity = '1';
+                document.getElementById('sensitivityPanel').style.opacity = '1';
             }
         });
 
@@ -774,7 +792,7 @@
             muzzleFlashEffect();
 
             // Отдача
-            mouse.y -= 0.015;
+            mouse.y += 0.01; // Отдача вверх (плюс, потому что у нас Y инвертирован)
             weaponGroup.position.z += 0.08;
             setTimeout(() => { weaponGroup.position.z -= 0.08; }, 80);
 
@@ -783,7 +801,6 @@
             const intersects = raycaster.intersectObjects(state.animals, true);
 
             if (intersects.length > 0) {
-                // Нашли животное
                 let hitAnimal = null;
                 let obj = intersects[0].object;
                 while (obj) {
@@ -799,14 +816,10 @@
                     data.hp -= weapon.damage;
                     const pos = intersects[0].point.clone();
 
-                    // Частицы крови
                     spawnParticles(pos, 0xff0000, 8);
-
-                    // Хит-маркер
                     showHitMarker();
 
                     if (data.hp <= 0) {
-                        // Убит!
                         data.alive = false;
                         state.kills++;
                         state.coins += data.type.price;
@@ -814,12 +827,10 @@
                         spawnParticles(pos, 0xff0000, 15);
                         showMessage(`💀 ${data.type.name} убит! +${data.type.price}🪙`, '#ffd700');
 
-                        // Анимация смерти
                         hitAnimal.rotation.x = Math.PI / 2;
                         hitAnimal.position.y = -0.3;
                         hitAnimal.scale.setScalar(0.3);
 
-                        // Удалить через время
                         setTimeout(() => {
                             scene.remove(hitAnimal);
                             const idx = state.animals.indexOf(hitAnimal);
@@ -829,7 +840,6 @@
                     updateHUD();
                 }
             } else {
-                // Промах — частицы от земли
                 const farPoint = raycaster.ray.at(50, new THREE.Vector3());
                 spawnParticles(farPoint, 0xaa9966, 5);
             }
@@ -888,6 +898,7 @@
                 euler.x += mouse.y;
                 euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
                 camera.quaternion.setFromEuler(euler);
+                // Затухание движения мыши
                 mouse.x *= 0.85;
                 mouse.y *= 0.85;
 
@@ -923,7 +934,6 @@
                 const data = animal.userData;
                 const distToPlayer = animal.position.distanceTo(camera.position);
 
-                // Убегают если близко или ранены
                 if (distToPlayer < 12 || data.hp < data.maxHp * 0.5) {
                     const away = animal.position.clone().sub(camera.position).normalize();
                     const fleeSpeed = data.type.speed * 1.5;
@@ -931,7 +941,6 @@
                     animal.position.z += away.z * fleeSpeed * dt;
                     animal.rotation.y = Math.atan2(away.x, away.z);
                 } else {
-                    // Брожение
                     data.wanderTimer -= dt;
                     if (data.wanderTimer <= 0) {
                         data.wanderTimer = 2 + Math.random() * 4;
@@ -942,20 +951,13 @@
                     animal.rotation.y += (data.wanderAngle - animal.rotation.y) * 2 * dt;
                 }
 
-                // Ограничение по карте
                 animal.position.x = Math.max(-45, Math.min(45, animal.position.x));
                 animal.position.z = Math.max(-45, Math.min(45, animal.position.z));
-
-                // Подпрыгивание при ходьбе
                 animal.position.y = Math.abs(Math.sin(Date.now() * 0.004 + animal.id)) * 0.2;
             });
 
-            // Частицы
             updateParticles(dt);
-
-            // Облака (простая анимация)
             sunLight.position.x += dt * 0.5;
-
             renderer.render(scene, camera);
         }
 
@@ -968,7 +970,6 @@
 
         // ==================== СТАРТ ====================
         function init() {
-            // Стартовые животные
             for (let i = 0; i < 8; i++) {
                 const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
                 const animal = createAnimal(type);
@@ -978,12 +979,14 @@
             updateWeaponColor();
             showMessage('🎯 Кликни для захвата мыши | WASD — ходить | ЛКМ — стрелять', '#ffffff');
             document.getElementById('controlsHint').style.opacity = '1';
+            document.getElementById('sensitivityPanel').style.opacity = '0.4';
             animate();
         }
 
         init();
         console.log('🏹 3D Охота готова!');
         console.log('🎮 WASD — ходить | 🖱️ Мышь — смотреть | 🖱️ ЛКМ — стрелять | 1-5 — оружие | R — перезарядка');
+        console.log('🖱️ Ползунок чувствительности мыши — справа сверху');
     </script>
 </body>
 </html>
