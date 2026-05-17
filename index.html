@@ -1,344 +1,1178 @@
-import pygame
-import math
-import sys
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Flight Simulator - BRO Edition</title>
+    <style>
+        :root {
+            --bg: #050510;
+            --panel-bg: #12122a;
+            --panel-border: #2a2a4a;
+            --accent: #4da6ff;
+            --gold: #ffd740;
+            --danger: #ff4444;
+            --success: #4cff4c;
+            --text: #ddd;
+            --text-dim: #888;
+            --engine-orange: #ff8c00;
+            --tank-red: #d44040;
+        }
 
-# Инициализация
-pygame.init()
-WIDTH, HEIGHT = 1200, 800
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("🚀 Space Flight Simulator BRO")
-clock = pygame.time.Clock()
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-# Цвета
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 50, 50)
-BLUE = (50, 50, 255)
-GREEN = (50, 255, 50)
-YELLOW = (255, 255, 0)
-GRAY = (100, 100, 100)
-ORANGE = (255, 150, 0)
-CYAN = (0, 255, 255)
+        body {
+            background: #000;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            height: 100vh;
+            width: 100vw;
+        }
 
-# Физические константы
-G = 500  # Гравитационная постоянная
-GROUND_Y = HEIGHT - 50
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
 
-class CelestialBody:
-    def __init__(self, x, y, radius, mass, color, name):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.mass = mass
-        self.color = color
-        self.name = name
-    
-    def draw(self, screen, offset_x, offset_y):
-        pygame.draw.circle(screen, self.color, 
-                          (int(self.x - offset_x), int(self.y - offset_y)), 
-                          self.radius)
-        # Атмосфера
-        if self.radius > 30:
-            pygame.draw.circle(screen, (*self.color, 30), 
-                              (int(self.x - offset_x), int(self.y - offset_y)), 
-                              self.radius + 20, 3)
+        /* Верхняя панель */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            pointer-events: none;
+        }
 
-class Rocket:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.vx = 0
-        self.vy = 0
-        self.angle = -math.pi/2  # Направлен вверх
-        self.fuel = 100
-        self.max_fuel = 100
-        self.thrust = 0
-        self.max_thrust = 15
-        self.mass = 10
-        self.parts = []
-        self.is_thrusting = False
-        self.alive = True
-        self.trail = []
-        
-        # Строим ракету (упрощённо)
-        self.build_default_rocket()
-    
-    def build_default_rocket(self):
-        # Капсула
-        self.parts.append({'type': 'capsule', 'rel_x': 0, 'rel_y': -20, 'w': 14, 'h': 16})
-        # Топливный бак
-        self.parts.append({'type': 'tank', 'rel_x': 0, 'rel_y': -4, 'w': 16, 'h': 24})
-        # Двигатель
-        self.parts.append({'type': 'engine', 'rel_x': 0, 'rel_y': 18, 'w': 12, 'h': 10})
-    
-    def apply_force(self, fx, fy):
-        self.vx += fx / self.mass
-        self.vy += fy / self.mass
-    
-    def update(self, bodies):
-        if not self.alive:
-            return
-        
-        # Гравитация
-        for body in bodies:
-            dx = body.x - self.x
-            dy = body.y - self.y
-            dist = math.sqrt(dx**2 + dy**2)
-            
-            if dist < body.radius:
-                self.alive = False
-                return
-            
-            if dist > 0:
-                force = G * body.mass / (dist**2)
-                self.vx += force * dx / dist
-                self.vy += force * dy / dist
-        
-        # Тяга
-        if self.is_thrusting and self.fuel > 0:
-            thrust_x = math.cos(self.angle) * self.thrust
-            thrust_y = math.sin(self.angle) * self.thrust
-            self.vx += thrust_x / self.mass
-            self.vy += thrust_y / self.mass
-            self.fuel -= 0.2
-            if self.fuel < 0:
-                self.fuel = 0
-            
-            # Добавляем след
-            if len(self.trail) > 20:
-                self.trail.pop(0)
-            self.trail.append((self.x, self.y, self.angle))
-        
-        # Движение
-        self.x += self.vx
-        self.y += self.vy
-        
-        # Проверка столкновения с землей
-        for body in bodies:
-            dx = body.x - self.x
-            dy = body.y - self.y
-            dist = math.sqrt(dx**2 + dy**2)
-            if dist < body.radius:
-                self.alive = False
-    
-    def draw(self, screen, offset_x, offset_y):
-        # Рисуем след
-        for i, (tx, ty, ta) in enumerate(self.trail):
-            alpha = i * 10
-            if alpha > 255: alpha = 255
-            x = tx - offset_x
-            y = ty - offset_y
-            pygame.draw.circle(screen, (255, 200, 50, alpha), (int(x), int(y)), 3)
-        
-        # Рисуем части ракеты
-        for part in self.parts:
-            # Поворачиваем относительные координаты
-            rel_x = part['rel_x'] * math.cos(self.angle) - part['rel_y'] * math.sin(self.angle)
-            rel_y = part['rel_x'] * math.sin(self.angle) + part['rel_y'] * math.cos(self.angle)
-            
-            px = self.x + rel_x - offset_x
-            py = self.y + rel_y - offset_y
-            
-            if part['type'] == 'capsule':
-                pygame.draw.ellipse(screen, WHITE, 
-                                   (int(px-part['w']/2), int(py-part['h']/2), 
-                                    part['w'], part['h']))
-                # Иллюминатор
-                pygame.draw.circle(screen, CYAN, (int(px), int(py-4)), 3)
-            elif part['type'] == 'tank':
-                pygame.draw.rect(screen, ORANGE, 
-                               (int(px-part['w']/2), int(py-part['h']/2), 
-                                part['w'], part['h']))
-                pygame.draw.rect(screen, RED, 
-                               (int(px-part['w']/2+2), int(py-part['h']/2+2), 
-                                part['w']-4, part['h']-4))
-            elif part['type'] == 'engine':
-                pygame.draw.polygon(screen, GRAY, [
-                    (px-part['w']/2, py-part['h']/2),
-                    (px+part['w']/2, py-part['h']/2),
-                    (px+part['w']/4, py+part['h']/2),
-                    (px-part['w']/4, py+part['h']/2)
-                ])
-        
-        # Рисуем пламя
-        if self.is_thrusting and self.fuel > 0:
-            flame_x = self.x + math.cos(self.angle) * 18 - offset_x
-            flame_y = self.y + math.sin(self.angle) * 18 - offset_y
-            for _ in range(3):
-                flame_len = 15 + math.sin(pygame.time.get_ticks() * 0.02) * 5
-                fx = flame_x - math.cos(self.angle) * flame_len
-                fy = flame_y - math.sin(self.angle) * flame_len
-                pygame.draw.circle(screen, YELLOW, (int(fx), int(fy)), 4)
-                pygame.draw.circle(screen, RED, (int(fx), int(fy)), 2)
+        .top-btn {
+            pointer-events: all;
+            background: var(--panel-bg);
+            color: var(--text);
+            border: 1px solid var(--panel-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-class Game:
-    def __init__(self):
-        self.earth = CelestialBody(WIDTH//2, HEIGHT//2 + 200, 80, 1000, BLUE, "Earth")
-        self.moon = CelestialBody(WIDTH//2 + 400, HEIGHT//2 - 100, 25, 100, GRAY, "Moon")
-        self.bodies = [self.earth, self.moon]
-        
-        self.rocket = Rocket(WIDTH//2, HEIGHT//2 + 50)
-        self.camera_x = 0
-        self.camera_y = 0
-        self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
-        
-        self.show_trajectory = True
-        self.time_warp = 1
-    
-    def update_camera(self):
-        self.camera_x = self.rocket.x - WIDTH//2
-        self.camera_y = self.rocket.y - HEIGHT//2
-    
-    def handle_input(self):
-        keys = pygame.key.get_pressed()
-        
-        # Управление тягой
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
-            self.rocket.is_thrusting = True
-            self.rocket.thrust = self.rocket.max_thrust
-        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            self.rocket.is_thrusting = True
-            self.rocket.thrust = self.rocket.max_thrust * 0.3
-        else:
-            self.rocket.is_thrusting = False
-            self.rocket.thrust = 0
-        
-        # Вращение
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.rocket.angle -= 0.05
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.rocket.angle += 0.05
-        
-        # Time warp
-        if keys[pygame.K_1]:
-            self.time_warp = 1
-        if keys[pygame.K_2]:
-            self.time_warp = 2
-        if keys[pygame.K_3]:
-            self.time_warp = 5
-        if keys[pygame.K_4]:
-            self.time_warp = 10
-    
-    def update(self):
-        if self.rocket.alive:
-            self.handle_input()
-            for _ in range(self.time_warp):
-                self.rocket.update(self.bodies)
-            self.update_camera()
-    
-    def draw_hud(self):
-        # Индикатор топлива
-        fuel_text = self.font.render(f"⛽ Fuel: {int(self.rocket.fuel)}%", True, WHITE)
-        screen.blit(fuel_text, (10, 10))
-        
-        # Скорость
-        speed = math.sqrt(self.rocket.vx**2 + self.rocket.vy**2)
-        speed_text = self.font.render(f"🚀 Speed: {speed:.1f} m/s", True, WHITE)
-        screen.blit(speed_text, (10, 50))
-        
-        # Высота над землей
-        alt = math.sqrt((self.rocket.x - self.earth.x)**2 + 
-                       (self.rocket.y - self.earth.y)**2) - self.earth.radius
-        alt_text = self.font.render(f"📏 Altitude: {max(0, alt):.1f} km", True, WHITE)
-        screen.blit(alt_text, (10, 90))
-        
-        # Time warp
-        warp_text = self.font.render(f"⏩ Warp: x{self.time_warp}", True, YELLOW)
-        screen.blit(warp_text, (10, 130))
-        
-        # Управление
-        controls = [
-            "W/UP: Full thrust | S/DOWN: Low thrust",
-            "A/LEFT D/RIGHT: Rotate",
-            "1-4: Time warp",
-            "R: Restart"
-        ]
-        y_offset = HEIGHT - 100
-        for control in controls:
-            ctrl_text = self.small_font.render(control, True, GRAY)
-            screen.blit(ctrl_text, (10, y_offset))
-            y_offset += 25
-    
-    def draw(self):
-        screen.fill(BLACK)
-        
-        # Рисуем звезды
-        for i in range(100):
-            x = (i * 137 + 50) % WIDTH
-            y = (i * 97 + 30) % HEIGHT
-            if i % 3 == 0:
-                pygame.draw.circle(screen, WHITE, (x, y), 2)
-            else:
-                pygame.draw.circle(screen, (100, 100, 100), (x, y), 1)
-        
-        # Рисуем небесные тела
-        for body in self.bodies:
-            body.draw(screen, self.camera_x, self.camera_y)
-        
-        # Рисуем траекторию
-        if self.show_trajectory and self.rocket.alive:
-            sim_x, sim_y = self.rocket.x, self.rocket.y
-            sim_vx, sim_vy = self.rocket.vx, self.rocket.vy
-            
-            for i in range(100):
-                # Гравитация
-                for body in self.bodies:
-                    dx = body.x - sim_x
-                    dy = body.y - sim_y
-                    dist = math.sqrt(dx**2 + dy**2)
-                    if dist > body.radius:
-                        force = G * body.mass / (dist**2)
-                        sim_vx += force * dx / dist * 0.5
-                        sim_vy += force * dy / dist * 0.5
-                
-                sim_x += sim_vx * 0.5
-                sim_y += sim_vy * 0.5
-                
-                if i % 3 == 0:
-                    px = int(sim_x - self.camera_x)
-                    py = int(sim_y - self.camera_y)
-                    if 0 <= px < WIDTH and 0 <= py < HEIGHT:
-                        alpha = 200 - i * 2
-                        if alpha > 0:
-                            pygame.draw.circle(screen, (100, 200, 255, alpha), (px, py), 1)
-        
-        # Рисуем ракету
-        self.rocket.draw(screen, self.camera_x, self.camera_y)
-        
-        # HUD
-        self.draw_hud()
-        
-        # Смерть
-        if not self.rocket.alive:
-            game_over = self.font.render("💥 ROCKET DESTROYED! Press R to restart", True, RED)
-            text_rect = game_over.get_rect(center=(WIDTH//2, HEIGHT//2))
-            screen.blit(game_over, text_rect)
-        
-        pygame.display.flip()
-    
-    def run(self):
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        self.rocket = Rocket(WIDTH//2, HEIGHT//2 + 50)
-                    elif event.key == pygame.K_t:
-                        self.show_trajectory = not self.show_trajectory
-                    elif event.key == pygame.K_ESCAPE:
-                        running = False
-            
-            self.update()
-            self.draw()
-            clock.tick(60)
-        
-        pygame.quit()
-        sys.exit()
+        .top-btn:hover {
+            background: #1e1e42;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(77, 166, 255, 0.3);
+        }
+        .top-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
 
-# Запуск
-if __name__ == "__main__":
-    game = Game()
-    game.run()
+        /* Панель строительства */
+        #build-panel {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .part-btn {
+            width: 55px;
+            height: 55px;
+            background: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s;
+            position: relative;
+            color: var(--text);
+        }
+
+        .part-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(77, 166, 255, 0.4);
+            transform: scale(1.08);
+        }
+        .part-btn.selected {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 64, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 215, 64, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 215, 64, 0.8);
+            }
+        }
+
+        .part-btn .label {
+            position: absolute;
+            bottom: -18px;
+            font-size: 9px;
+            white-space: nowrap;
+            color: var(--text-dim);
+        }
+
+        /* Нижняя панель управления */
+        #control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            color: var(--text);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: scale(0.9);
+        }
+        .control-btn.big {
+            width: 75px;
+            height: 75px;
+            font-size: 34px;
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .control-btn.big:active {
+            background: #ff6666;
+            box-shadow: 0 0 40px rgba(255, 68, 68, 0.7);
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-item {
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-value {
+            color: var(--accent);
+            font-size: 16px;
+        }
+
+        /* Модальное окно */
+        #modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        #modal.active {
+            pointer-events: all;
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: var(--text);
+            display: none;
+            max-width: 500px;
+            backdrop-filter: blur(20px);
+        }
+        #modal.active .modal-content {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.2s;
+        }
+        .modal-btn:hover {
+            box-shadow: 0 0 25px rgba(77, 166, 255, 0.6);
+        }
+        .modal-btn.danger {
+            background: var(--danger);
+        }
+
+        /* Сообщение */
+        #toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            background: var(--panel-bg);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            border: 1px solid var(--panel-border);
+        }
+        #toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="game"></canvas>
+
+    <!-- Верхняя панель -->
+    <div id="top-bar">
+        <div style="display:flex;gap:8px;">
+            <button class="top-btn" id="btn-build" onclick="toggleMode()">🏗️ Строить</button>
+            <button class="top-btn" id="btn-fly" onclick="launchRocket()">🚀 Запуск</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="top-btn" onclick="saveRocket()">💾 Сохранить</button>
+            <button class="top-btn" onclick="loadRocket()">📂 Загрузить</button>
+            <button class="top-btn" onclick="resetRocket()">🔄 Сброс</button>
+        </div>
+    </div>
+
+    <!-- Панель частей (режим стройки) -->
+    <div id="build-panel">
+        <button class="part-btn selected" data-part="capsule" onclick="selectPart('capsule')" title="Капсула">🛸<span class="label">Капсула</span></button>
+        <button class="part-btn" data-part="fuel_tank" onclick="selectPart('fuel_tank')" title="Топливный бак">🛢️<span class="label">Бак</span></button>
+        <button class="part-btn" data-part="engine_small" onclick="selectPart('engine_small')" title="Малый двигатель">🔵<span class="label">Двиг.мал</span></button>
+        <button class="part-btn" data-part="engine_large" onclick="selectPart('engine_large')" title="Большой двигатель">🔴<span class="label">Двиг.бол</span></button>
+        <button class="part-btn" data-part="separator" onclick="selectPart('separator')" title="Разделитель">⚡<span class="label">Раздел.</span></button>
+        <button class="part-btn" data-part="parachute" onclick="selectPart('parachute')" title="Парашют">🪂<span class="label">Парашют</span></button>
+        <button class="part-btn" data-part="nose_cone" onclick="selectPart('nose_cone')" title="Носовой конус">🔺<span class="label">Конус</span></button>
+        <button class="part-btn" onclick="removeLastPart()" title="Удалить последнюю" style="background:#3a1010;border-color:#ff4444;">🗑️<span class="label">Удалить</span></button>
+    </div>
+
+    <!-- Панель управления полетом -->
+    <div id="control-panel" style="display:none;">
+        <button class="control-btn" id="btn-left" onmousedown="startTurn(-1)" onmouseup="stopTurn()" ontouchstart="startTurn(-1)" ontouchend="stopTurn()">◀</button>
+        <button class="control-btn big" id="btn-thrust" onmousedown="startThrust()" onmouseup="stopThrust()" ontouchstart="startThrust()" ontouchend="stopThrust()">🔥</button>
+        <button class="control-btn" id="btn-right" onmousedown="startTurn(1)" onmouseup="stopTurn()" ontouchstart="startTurn(1)" ontouchend="stopTurn()">▶</button>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud"></div>
+
+    <!-- Модалка -->
+    <div id="modal">
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+        // ==================== SPACE FLIGHT SIMULATOR - BRO EDITION ====================
+
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        // Размеры
+        const W = canvas.width = window.innerWidth;
+        const H = canvas.height = window.innerHeight;
+
+        // Состояния
+        let mode = 'build'; // 'build' | 'fly'
+        let selectedPart = 'capsule';
+        let rocketParts = []; // Части ракеты (снизу вверх)
+        let camera = { x: 0, y: 0, zoom: 1, targetX: 0, targetY: 0 };
+        let rocket = null;
+        let planets = [];
+        let stars = [];
+        let particles = [];
+        let trailPoints = [];
+
+        // Управление
+        let keys = {};
+        let thrustActive = false;
+        let turnDirection = 0;
+
+        // Гравитация
+        const G = 5000;
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            // Звезды
+            for (let i = 0; i < 300; i++) {
+                stars.push({
+                    x: Math.random() * 4000 - 2000,
+                    y: Math.random() * 4000 - 2000,
+                    r: Math.random() * 2 + 0.5,
+                    brightness: Math.random(),
+                    twinkleSpeed: Math.random() * 0.02 + 0.005
+                });
+            }
+
+            // Планеты
+            planets.push({ name: 'Земля', x: 0, y: 500, radius: 80, mass: 50000, color: '#2255cc',
+                atmosphereColor: 'rgba(100,160,255,0.3)', atmosphereRadius: 100, hasAtmosphere: true });
+            planets.push({ name: 'Луна', x: 500, y: -200, radius: 22, mass: 3000, color: '#999',
+                atmosphereColor: 'rgba(150,150,150,0.1)', atmosphereRadius: 28, hasAtmosphere: false });
+            planets.push({ name: 'Марс', x: 900, y: 600, radius: 45, mass: 15000, color: '#cc4422',
+                atmosphereColor: 'rgba(200,120,80,0.25)', atmosphereRadius: 58, hasAtmosphere: true });
+
+            // Стартовая ракета
+            addPart('capsule');
+            addPart('fuel_tank');
+            addPart('engine_small');
+
+            updateBuildPanel();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== ЧАСТИ РАКЕТЫ ====================
+        const partDefs = {
+            capsule: { name: 'Капсула', width: 20, height: 24, mass: 8, color: '#eee', type: 'capsule',
+                fuel: 0, thrust: 0, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#e8e8e8';
+                    ctx.beginPath();
+                    ctx.roundRect(x - w / 2, y - h / 2, w, h, 8);
+                    ctx.fill();
+                    ctx.fillStyle = '#4fc3f7';
+                    ctx.beginPath();
+                    ctx.arc(x, y - 3, w * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                } },
+            fuel_tank: { name: 'Топливный бак', width: 22, height: 30, mass: 5, color: '#d44040', type: 'tank',
+                fuel: 80, thrust: 0, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#cc3333';
+                    ctx.fillRect(x - w / 2, y - h / 2, w, h);
+                    ctx.strokeStyle = '#ff6666';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x - w / 2 + 3, y - h / 2 + 3, w - 6, h - 6);
+                } },
+            engine_small: { name: 'Малый двигатель', width: 18, height: 16, mass: 4, color: '#888', type: 'engine',
+                fuel: 0, thrust: 200, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#777';
+                    ctx.beginPath();
+                    ctx.moveTo(x - w / 2, y - h / 2);
+                    ctx.lineTo(x + w / 2, y - h / 2);
+                    ctx.lineTo(x + w * 0.3, y + h / 2);
+                    ctx.lineTo(x - w * 0.3, y + h / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#ff8800';
+                    ctx.beginPath();
+                    ctx.arc(x, y + h / 2, w * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                } },
+            engine_large: { name: 'Большой двигатель', width: 28, height: 22, mass: 8, color: '#666', type: 'engine',
+                fuel: 0, thrust: 500, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#555';
+                    ctx.beginPath();
+                    ctx.moveTo(x - w / 2, y - h / 2);
+                    ctx.lineTo(x + w / 2, y - h / 2);
+                    ctx.lineTo(x + w * 0.35, y + h / 2);
+                    ctx.lineTo(x - w * 0.35, y + h / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#ff4400';
+                    ctx.beginPath();
+                    ctx.arc(x, y + h / 2, w * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                } },
+            separator: { name: 'Разделитель', width: 22, height: 8, mass: 2, color: '#aaa', type: 'separator',
+                fuel: 0, thrust: 0, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#999';
+                    ctx.fillRect(x - w / 2, y - h / 2, w, h);
+                    ctx.fillStyle = '#ff4444';
+                    for (let i = 0; i < 3; i++) {
+                        ctx.fillRect(x - w / 2 + 4 + i * 5, y - h / 2 + 1, 3, h - 2);
+                    }
+                } },
+            parachute: { name: 'Парашют', width: 16, height: 12, mass: 1, color: '#ff8800', type: 'parachute',
+                fuel: 0, thrust: 0, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#ff6600';
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - h / 2);
+                    ctx.lineTo(x - w / 2, y + h / 2);
+                    ctx.lineTo(x + w / 2, y + h / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                } },
+            nose_cone: { name: 'Носовой конус', width: 20, height: 20, mass: 2, color: '#ddd', type: 'nose',
+                fuel: 0, thrust: 0, draw: function(ctx, x, y, w, h) {
+                    ctx.fillStyle = '#ccc';
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - h / 2);
+                    ctx.lineTo(x - w / 2, y + h / 2);
+                    ctx.lineTo(x + w / 2, y + h / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                } }
+        };
+
+        function addPart(partType) {
+            const def = partDefs[partType];
+            if (!def) return;
+            rocketParts.push({
+                type: partType,
+                def: def,
+                fuel: def.fuel || 0,
+                active: true
+            });
+            updateBuildPanel();
+        }
+
+        function removeLastPart() {
+            if (rocketParts.length > 1) {
+                rocketParts.pop();
+                updateBuildPanel();
+                showToast('Часть удалена 🗑️');
+            }
+        }
+
+        function resetRocket() {
+            rocketParts = [];
+            addPart('capsule');
+            addPart('fuel_tank');
+            addPart('engine_small');
+            updateBuildPanel();
+            showToast('Ракета сброшена 🔄');
+        }
+
+        function updateBuildPanel() {
+            document.querySelectorAll('.part-btn[data-part]').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.part === selectedPart) btn.classList.add('selected');
+            });
+        }
+
+        function selectPart(partType) {
+            selectedPart = partType;
+            if (mode === 'build') {
+                addPart(partType);
+            }
+            updateBuildPanel();
+            showToast(`Выбрано: ${partDefs[partType].name}`);
+        }
+
+        // ==================== СБОРКА РАКЕТЫ ДЛЯ ПОЛЕТА ====================
+        function assembleRocket() {
+            if (rocketParts.length === 0) return null;
+
+            let totalHeight = 0;
+            let totalMass = 0;
+            let totalFuel = 0;
+            let stages = [];
+            let currentStage = [];
+
+            rocketParts.forEach((part, index) => {
+                const def = part.def;
+                totalHeight += def.height;
+                totalMass += def.mass;
+                if (def.fuel) totalFuel += def.fuel;
+                currentStage.push({ ...part, localY: totalHeight - def.height / 2 });
+
+                if (def.type === 'separator' || index === rocketParts.length - 1) {
+                    if (currentStage.length > 0) {
+                        stages.push({ parts: currentStage, separated: false });
+                        currentStage = [];
+                    }
+                }
+            });
+
+            if (currentStage.length > 0) {
+                if (stages.length > 0) {
+                    stages[stages.length - 1].parts.push(...currentStage);
+                } else {
+                    stages.push({ parts: currentStage, separated: false });
+                }
+            }
+
+            return {
+                x: 0,
+                y: 420,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+                angularVel: 0,
+                fuel: totalFuel,
+                mass: totalMass,
+                totalHeight: totalHeight,
+                stages: stages,
+                currentStage: 0,
+                alive: true,
+                landed: false,
+                thrusting: false,
+                parachuteDeployed: false
+            };
+        }
+
+        // ==================== ФИЗИКА ====================
+        function updatePhysics(dt) {
+            if (!rocket || !rocket.alive) return;
+
+            const subSteps = 4;
+            const subDt = dt / subSteps;
+
+            for (let s = 0; s < subSteps; s++) {
+                // Гравитация
+                for (const planet of planets) {
+                    const dx = planet.x - rocket.x;
+                    const dy = planet.y - rocket.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < planet.radius + 2) {
+                        crashRocket(planet);
+                        return;
+                    }
+
+                    const force = G * planet.mass / (dist * dist);
+                    const fx = force * dx / dist;
+                    const fy = force * dy / dist;
+
+                    rocket.vx += fx / rocket.mass * subDt;
+                    rocket.vy += fy / rocket.mass * subDt;
+
+                    // Атмосферное торможение (Земля)
+                    if (planet.hasAtmosphere && dist < planet.atmosphereRadius + 50) {
+                        const atmosFactor = 1 - (dist - planet.radius) / (planet.atmosphereRadius + 50 - planet
+                            .radius);
+                        const drag = 0.3 * atmosFactor * Math.max(0, atmosFactor);
+                        rocket.vx *= (1 - drag * subDt);
+                        rocket.vy *= (1 - drag * subDt);
+                    }
+                }
+
+                // Тяга
+                if (rocket.thrusting && rocket.fuel > 0 && rocket.currentStage < rocket.stages.length) {
+                    const stage = rocket.stages[rocket.currentStage];
+                    let stageThrust = 0;
+                    for (const part of stage.parts) {
+                        if (part.def.thrust && part.active) {
+                            stageThrust += part.def.thrust;
+                        }
+                    }
+
+                    if (stageThrust > 0) {
+                        const tx = Math.cos(rocket.angle) * stageThrust;
+                        const ty = Math.sin(rocket.angle) * stageThrust;
+                        rocket.vx += tx / rocket.mass * subDt;
+                        rocket.vy += ty / rocket.mass * subDt;
+                        rocket.fuel -= 15 * subDt;
+                        if (rocket.fuel < 0) rocket.fuel = 0;
+
+                        // Частицы выхлопа
+                        const exhaustX = rocket.x - Math.cos(rocket.angle) * rocket.totalHeight / 2;
+                        const exhaustY = rocket.y - Math.sin(rocket.angle) * rocket.totalHeight / 2;
+                        for (let i = 0; i < 3; i++) {
+                            particles.push({
+                                x: exhaustX + (Math.random() - 0.5) * 10,
+                                y: exhaustY + (Math.random() - 0.5) * 10,
+                                vx: -Math.cos(rocket.angle) * (2 + Math.random() * 3),
+                                vy: -Math.sin(rocket.angle) * (2 + Math.random() * 3),
+                                life: 0.3 + Math.random() * 0.4,
+                                color: Math.random() < 0.5 ? '#ffaa00' : '#ff4400'
+                            });
+                        }
+                    }
+                }
+
+                // Вращение
+                rocket.angle += turnDirection * 2.5 * subDt;
+                rocket.angle += rocket.angularVel * subDt;
+                rocket.angularVel *= 0.95;
+
+                // Движение
+                rocket.x += rocket.vx * subDt;
+                rocket.y += rocket.vy * subDt;
+
+                // Трейл
+                if (rocket.thrusting && rocket.fuel > 0) {
+                    trailPoints.push({ x: rocket.x, y: rocket.y, life: 1.5 });
+                }
+
+                // Проверка посадки
+                for (const planet of planets) {
+                    const dx = planet.x - rocket.x;
+                    const dy = planet.y - rocket.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < planet.radius + 5) {
+                        const speed = Math.sqrt(rocket.vx * rocket.vx + rocket.vy * rocket.vy);
+                        if (speed < 15 && Math.abs(rocket.angle + Math.PI / 2) < 0.5) {
+                            rocket.landed = true;
+                            rocket.alive = true;
+                            rocket.vx = 0;
+                            rocket.vy = 0;
+                            rocket.x = planet.x - Math.cos(rocket.angle) * (planet.radius + rocket.totalHeight / 2);
+                            rocket.y = planet.y - Math.sin(rocket.angle) * (planet.radius + rocket.totalHeight / 2);
+                            showToast('✅ Мягкая посадка на ' + planet.name + '!');
+                        } else if (dist < planet.radius) {
+                            crashRocket(planet);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Обновление частиц
+            particles = particles.filter(p => {
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= dt;
+                return p.life > 0;
+            });
+
+            // Обновление трейла
+            trailPoints = trailPoints.filter(p => {
+                p.life -= dt;
+                return p.life > 0;
+            });
+        }
+
+        function crashRocket(planet) {
+            rocket.alive = false;
+            // Частицы взрыва
+            for (let i = 0; i < 80; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 200 + 50;
+                particles.push({
+                    x: rocket.x,
+                    y: rocket.y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1 + Math.random() * 1.5,
+                    color: ['#ff4400', '#ffaa00', '#ffffff', '#ff0000'][Math.floor(Math.random() * 4)]
+                });
+            }
+            showToast('💥 Ракета разрушена! Нажмите Сброс для перезапуска');
+            showModal('💥 Крушение!',
+                `Ракета разбилась о ${planet.name}.<br>Скорость была слишком высокой!`,
+                [{ text: '🔄 Попробовать снова', action: resetRocket, class: '' }]);
+        }
+
+        function separateStage() {
+            if (!rocket || !rocket.alive || rocket.landed) return;
+            if (rocket.currentStage < rocket.stages.length - 1) {
+                const oldStage = rocket.stages[rocket.currentStage];
+                oldStage.separated = true;
+                rocket.currentStage++;
+                // Пересчет массы
+                let newMass = 0;
+                for (let i = rocket.currentStage; i < rocket.stages.length; i++) {
+                    for (const part of rocket.stages[i].parts) {
+                        newMass += part.def.mass;
+                    }
+                }
+                rocket.mass = newMass;
+                rocket.totalHeight -= oldStage.parts.reduce((sum, p) => sum + p.def.height, 0);
+                showToast('🚀 Ступень отделена!');
+            }
+        }
+
+        // ==================== ОТРИСОВКА ====================
+        function drawStars() {
+            stars.forEach(star => {
+                star.brightness += star.twinkleSpeed;
+                const alpha = 0.3 + Math.abs(Math.sin(star.brightness)) * 0.7;
+                const sx = star.x - camera.x;
+                const sy = star.y - camera.y;
+                if (sx > -50 && sx < W + 50 && sy > -50 && sy < H + 50) {
+                    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, star.r * camera.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+
+        function drawPlanets() {
+            planets.forEach(planet => {
+                const px = planet.x - camera.x;
+                const py = planet.y - camera.y;
+                const r = planet.radius * camera.zoom;
+
+                // Атмосфера
+                if (planet.hasAtmosphere) {
+                    const ar = planet.atmosphereRadius * camera.zoom;
+                    const grad = ctx.createRadialGradient(px, py, r, px, py, ar);
+                    grad.addColorStop(0, 'rgba(100,160,255,0)');
+                    grad.addColorStop(1, planet.atmosphereColor);
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(px, py, ar, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Тело планеты
+                const grad2 = ctx.createRadialGradient(px - r * 0.2, py - r * 0.2, r * 0.1, px, py, r);
+                grad2.addColorStop(0, '#ffffff');
+                grad2.addColorStop(0.3, planet.color);
+                grad2.addColorStop(1, '#000000');
+                ctx.fillStyle = grad2;
+                ctx.beginPath();
+                ctx.arc(px, py, r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Название
+                ctx.fillStyle = '#fff';
+                ctx.font = `${14 * camera.zoom}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillText(planet.name, px, py - r - 10 * camera.zoom);
+            });
+        }
+
+        function drawRocketOnPad() {
+            if (mode !== 'build') return;
+
+            // Стартовая площадка
+            const padX = 0 - camera.x;
+            const padY = 500 - camera.y;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(padX - 60, padY - 10, 120, 20);
+            ctx.fillStyle = '#555';
+            ctx.fillRect(padX - 40, padY - 15, 80, 5);
+
+            let currentY = padY;
+            const partsToDraw = [...rocketParts].reverse(); // Сверху вниз
+
+            partsToDraw.forEach(part => {
+                const def = part.def;
+                const x = padX;
+                const y = currentY - def.height / 2;
+                currentY -= def.height;
+
+                ctx.save();
+                ctx.translate(x, y);
+                def.draw(ctx, 0, 0, def.width * camera.zoom, def.height * camera.zoom);
+                ctx.restore();
+            });
+        }
+
+        function drawRocketInFlight() {
+            if (!rocket) return;
+            if (mode !== 'fly') return;
+
+            const rx = rocket.x - camera.x;
+            const ry = rocket.y - camera.y;
+
+            // Трейл
+            trailPoints.forEach(p => {
+                const tx = p.x - camera.x;
+                const ty = p.y - camera.y;
+                const alpha = p.life / 1.5;
+                ctx.fillStyle = `rgba(255,200,50,${alpha * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(tx, ty, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Частицы
+            particles.forEach(p => {
+                const px = p.x - camera.x;
+                const py = p.y - camera.y;
+                const alpha = p.life;
+                ctx.fillStyle = p.color.replace(')', `,${alpha})`).replace('rgb',
+                'rgba');
+                if (p.color.startsWith('#')) {
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = p.color;
+                }
+                ctx.beginPath();
+                ctx.arc(px, py, 2 + alpha * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+
+            // Ракета
+            ctx.save();
+            ctx.translate(rx, ry);
+            ctx.rotate(rocket.angle + Math.PI / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+
+            let currentY = 0;
+            for (let i = rocket.currentStage; i < rocket.stages.length; i++) {
+                const stage = rocket.stages[i];
+                if (stage.separated) continue;
+                for (const part of stage.parts) {
+                    const def = part.def;
+                    const y = currentY - def.height / 2;
+                    currentY -= def.height;
+                    def.draw(ctx, 0, y, def.width, def.height);
+
+                    // Топливная полоска
+                    if (part.fuel > 0 && part.def.fuel) {
+                        const fuelRatio = part.fuel / part.def.fuel;
+                        ctx.fillStyle = fuelRatio > 0.3 ? '#ffaa00' : '#ff0000';
+                        ctx.fillRect(-def.width / 2, y + def.height / 2 - 3, def.width * fuelRatio, 3);
+                    }
+                }
+            }
+
+            // Пламя
+            if (rocket.thrusting && rocket.fuel > 0) {
+                const flameY = currentY;
+                const flameLen = 20 + Math.sin(Date.now() * 0.03) * 8;
+                const grad = ctx.createLinearGradient(0, flameY, 0, flameY - flameLen);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.2, '#ffdd00');
+                grad.addColorStop(0.5, '#ff6600');
+                grad.addColorStop(1, 'rgba(255,0,0,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(-8, flameY);
+                ctx.lineTo(8, flameY);
+                ctx.lineTo(0, flameY - flameLen);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Парашют
+            if (rocket.parachuteDeployed) {
+                ctx.fillStyle = 'rgba(255,150,0,0.7)';
+                ctx.beginPath();
+                ctx.arc(0, -rocket.totalHeight / 2 - 15, 25, Math.PI, 0);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(-25, -rocket.totalHeight / 2 - 15);
+                ctx.lineTo(0, -rocket.totalHeight / 2);
+                ctx.lineTo(25, -rocket.totalHeight / 2 - 15);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawHUD() {
+            const hud = document.getElementById('hud');
+            if (mode === 'fly' && rocket && rocket.alive) {
+                const speed = Math.sqrt(rocket.vx * rocket.vx + rocket.vy * rocket.vy);
+                let alt = 0;
+                for (const planet of planets) {
+                    const dx = planet.x - rocket.x;
+                    const dy = planet.y - rocket.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) - planet.radius;
+                    if (dist < alt || alt === 0) alt = dist;
+                }
+                hud.innerHTML = `
+                    <div class="hud-item">⛽ Топливо: <span class="hud-value">${Math.round(rocket.fuel)}</span></div>
+                    <div class="hud-item">🚀 Скорость: <span class="hud-value">${speed.toFixed(1)} м/с</span></div>
+                    <div class="hud-item">📏 Высота: <span class="hud-value">${Math.max(0, alt).toFixed(1)} м</span></div>
+                    <div class="hud-item">📡 Ступень: <span class="hud-value">${rocket.currentStage + 1}/${rocket.stages.length}</span></div>
+                    ${rocket.landed ? '<div class="hud-item" style="color:#4cff4c;">✅ ПОСАДКА!</div>' : ''}
+                `;
+            } else {
+                hud.innerHTML = `
+                    <div class="hud-item">🏗️ Режим строительства</div>
+                    <div class="hud-item">Частей: <span class="hud-value">${rocketParts.length}</span></div>
+                    <div class="hud-item">Клик по части в панели = добавить</div>
+                `;
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+
+            // Фон
+            ctx.fillStyle = '#050515';
+            ctx.fillRect(0, 0, W, H);
+
+            drawStars();
+            drawPlanets();
+
+            if (mode === 'build') {
+                drawRocketOnPad();
+            } else {
+                drawRocketInFlight();
+            }
+
+            drawHUD();
+        }
+
+        // ==================== КАМЕРА ====================
+        function updateCamera(dt) {
+            if (mode === 'fly' && rocket && rocket.alive) {
+                camera.targetX = rocket.x;
+                camera.targetY = rocket.y;
+                camera.zoom += (1.2 - camera.zoom) * 2 * dt;
+            } else {
+                camera.targetX = 0;
+                camera.targetY = 250;
+                camera.zoom += (1 - camera.zoom) * 3 * dt;
+            }
+            camera.x += (camera.targetX - camera.x) * 5 * dt;
+            camera.y += (camera.targetY - camera.y) * 5 * dt;
+        }
+
+        // ==================== УПРАВЛЕНИЕ ====================
+        function startThrust() {
+            if (rocket && rocket.alive && !rocket.landed) {
+                rocket.thrusting = true;
+            }
+        }
+
+        function stopThrust() {
+            if (rocket) {
+                rocket.thrusting = false;
+            }
+        }
+
+        function startTurn(dir) {
+            turnDirection = dir;
+            if (rocket) rocket.angularVel = dir * 1.5;
+        }
+
+        function stopTurn() {
+            turnDirection = 0;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (mode === 'fly') {
+                if (e.key === 'w' || e.key === 'ArrowUp') startThrust();
+                if (e.key === 'a' || e.key === 'ArrowLeft') startTurn(-1);
+                if (e.key === 'd' || e.key === 'ArrowRight') startTurn(1);
+                if (e.key === ' ' || e.key === 's') separateStage();
+                if (e.key === 'p') {
+                    if (rocket && rocket.alive) {
+                        rocket.parachuteDeployed = !rocket.parachuteDeployed;
+                        if (rocket.parachuteDeployed) {
+                            rocket.vx *= 0.5;
+                            rocket.vy *= 0.5;
+                        }
+                        showToast(rocket.parachuteDeployed ? '🪂 Парашют раскрыт!' : '🪂 Парашют убран');
+                    }
+                }
+            }
+            if (e.key === '1') { mode = 'build';
+                resetFlightMode(); }
+            if (e.key === '2') launchRocket();
+            if (e.key === 'r') resetRocket();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+            if (e.key === 'w' || e.key === 'ArrowUp') stopThrust();
+            if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') stopTurn();
+        });
+
+        // ==================== РЕЖИМЫ ====================
+        function toggleMode() {
+            if (mode === 'build') {
+                launchRocket();
+            } else {
+                mode = 'build';
+                resetFlightMode();
+                updateModeButtons();
+            }
+        }
+
+        function launchRocket() {
+            if (rocketParts.length === 0) {
+                showToast('⚠️ Добавьте части ракеты!');
+                return;
+            }
+            mode = 'fly';
+            rocket = assembleRocket();
+            if (rocket) {
+                rocket.x = 0;
+                rocket.y = 420;
+                rocket.vy = 0;
+                rocket.vx = 0;
+                rocket.angle = -Math.PI / 2;
+                trailPoints = [];
+                particles = [];
+                showToast('🚀 ЗАПУСК! W/▲ = тяга, A/D = поворот, Space = сброс ступени, P = парашют');
+            }
+            updateModeButtons();
+        }
+
+        function resetFlightMode() {
+            rocket = null;
+            trailPoints = [];
+            particles = [];
+            updateModeButtons();
+        }
+
+        function updateModeButtons() {
+            const buildBtn = document.getElementById('btn-build');
+            const flyBtn = document.getElementById('btn-fly');
+            const controlPanel = document.getElementById('control-panel');
+
+            if (mode === 'build') {
+                buildBtn.classList.add('active');
+                flyBtn.classList.remove('active');
+                controlPanel.style.display = 'none';
+            } else {
+                buildBtn.classList.remove('active');
+                flyBtn.classList.add('active');
+                controlPanel.style.display = 'flex';
+            }
+        }
+
+        // ==================== СОХРАНЕНИЯ ====================
+        function saveRocket() {
+            const data = {
+                parts: rocketParts.map(p => ({ type: p.type, fuel: p.fuel })),
+                version: '1.0'
+            };
+            localStorage.setItem('sfs_rocket_bro', JSON.stringify(data));
+            showToast('💾 Ракета сохранена!');
+        }
+
+        function loadRocket() {
+            const data = localStorage.getItem('sfs_rocket_bro');
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    rocketParts = [];
+                    parsed.parts.forEach(p => {
+                        const def = partDefs[p.type];
+                        if (def) {
+                            rocketParts.push({
+                                type: p.type,
+                                def: def,
+                                fuel: p.fuel || def.fuel || 0,
+                                active: true
+                            });
+                        }
+                    });
+                    updateBuildPanel();
+                    showToast('📂 Ракета загружена!');
+                } catch (e) {
+                    showToast('❌ Ошибка загрузки');
+                }
+            } else {
+                showToast('📂 Нет сохранений');
+            }
+        }
+
+        // ==================== UI ====================
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function showModal(title, message, buttons) {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            let html = `<h2>${title}</h2><p>${message}</p><div style="margin-top:20px;">`;
+            buttons.forEach(btn => {
+                html +=
+                    `<button class="modal-btn ${btn.class}" onclick="document.getElementById('modal').classList.remove('active');(${btn.action.toString()})()">${btn.text}</button>`;
+            });
+            html += '</div>';
+            content.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        // ==================== ИГРОВОЙ ЦИКЛ ====================
+        let lastTime = performance.now();
+
+        function gameLoop(time) {
+            const dt = Math.min((time - lastTime) / 1000, 0.1);
+            lastTime = time;
+
+            updateCamera(dt);
+            if (mode === 'fly') {
+                updatePhysics(dt);
+            }
+
+            // Автосохранение позиции камеры
+            if (mode === 'build') {
+                camera.x += (0 - camera.x) * 3 * dt;
+                camera.y += (250 - camera.y) * 3 * dt;
+            }
+
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== СТАРТ ====================
+        init();
+        updateModeButtons();
+        showToast('🚀 Space Flight Simulator BRO Edition | 1=Стройка 2=Запуск | Добавляй части!');
+
+        console.log('🚀 Space Flight Simulator - BRO Edition загружен!');
+        console.log('Управление в полете: W/▲ = тяга, A/D = поворот, Space = сброс ступени, P = парашют');
+        console.log('Режимы: 1 = стройка, 2 = запуск');
+        console.log('💾 Сохранение в LocalStorage');
+    </script>
+</body>
+</html>
