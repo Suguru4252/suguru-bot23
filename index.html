@@ -3,25 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C++ Terminal Graphics — Охота</title>
+    <title>🏹 3D Охота — Лесная стрелялка</title>
     <style>
         :root {
             --bg: #0a0a0a;
-            --terminal-bg: #0c0c0c;
-            --text: #00ff41;
-            --text-dim: #00cc33;
-            --text-bright: #00ff88;
-            --cursor: #ffffff;
-            --header: #1a1a1a;
-            --border: #333;
-            --error: #ff4444;
-            --warning: #ffaa00;
-            --info: #00aaff;
+            --panel-bg: rgba(10, 10, 10, 0.9);
             --gold: #ffd700;
-            --highlight: #ffffff;
-            --selection: rgba(0, 255, 65, 0.15);
-            --scrollbar-bg: #111;
-            --scrollbar-thumb: #333;
+            --accent: #ff4444;
+            --green: #00ff41;
         }
 
         * {
@@ -30,959 +19,971 @@
             box-sizing: border-box;
         }
 
-        @font-face {
-            font-family: 'Terminal';
-            src: local('Consolas'), local('Monaco'), local('Courier New'), local('monospace');
-        }
-
         body {
-            background: #050505;
-            font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background-image:
-                radial-gradient(ellipse at 30% 50%, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 50%, rgba(0, 170, 255, 0.03) 0%, transparent 50%);
-        }
-
-        /* Главный контейнер — имитация окна терминала */
-        .terminal-window {
-            width: 100%;
-            max-width: 850px;
-            background: var(--terminal-bg);
-            border-radius: 12px;
-            box-shadow:
-                0 0 0 2px #1a1a1a,
-                0 0 0 4px #0d0d0d,
-                0 20px 60px rgba(0, 0, 0, 0.8),
-                0 0 80px rgba(0, 255, 65, 0.06);
+            background: #000;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
             overflow: hidden;
-            border: 1px solid #222;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: none;
         }
 
-        /* Заголовок окна — как в Windows/Linux */
-        .terminal-titlebar {
-            background: #1a1a1a;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid #2a2a2a;
-            user-select: none;
+        canvas {
+            display: block;
         }
-        .titlebar-dots {
-            display: flex;
-            gap: 8px;
+
+        /* Прицел */
+        .crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 100;
+            width: 30px;
+            height: 30px;
         }
-        .titlebar-dot {
-            width: 12px;
-            height: 12px;
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);
+        }
+        .crosshair::before {
+            width: 2px;
+            height: 24px;
+            left: 50%;
+            top: 3px;
+            transform: translateX(-50%);
+        }
+        .crosshair::after {
+            width: 24px;
+            height: 2px;
+            top: 50%;
+            left: 3px;
+            transform: translateY(-50%);
+        }
+        .crosshair-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: #ff0000;
             border-radius: 50%;
-            transition: all 0.2s;
-        }
-        .dot-red {
-            background: #ff5f56;
-            box-shadow: 0 0 6px rgba(255, 95, 86, 0.4);
-        }
-        .dot-yellow {
-            background: #ffbd2e;
-            box-shadow: 0 0 6px rgba(255, 189, 46, 0.4);
-        }
-        .dot-green {
-            background: #27c93f;
-            box-shadow: 0 0 6px rgba(39, 201, 63, 0.4);
-        }
-        .titlebar-text {
-            color: #888;
-            font-size: 0.8em;
-            letter-spacing: 1px;
-            flex: 1;
-            text-align: center;
-        }
-        .titlebar-text span {
-            color: #ccc;
-            font-weight: bold;
+            box-shadow: 0 0 10px #ff0000, 0 0 20px rgba(255, 0, 0, 0.8);
         }
 
-        /* Тело терминала */
-        .terminal-body {
-            padding: 16px 20px;
-            min-height: 550px;
-            max-height: 75vh;
-            overflow-y: auto;
-            background: var(--terminal-bg);
-            position: relative;
-        }
-
-        /* Кастомный скроллбар */
-        .terminal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-        .terminal-body::-webkit-scrollbar-track {
-            background: var(--scrollbar-bg);
-        }
-        .terminal-body::-webkit-scrollbar-thumb {
-            background: var(--scrollbar-thumb);
-            border-radius: 3px;
-        }
-
-        /* Строки терминала */
-        .terminal-line {
-            color: var(--text);
-            font-size: 0.9em;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin: 2px 0;
-            letter-spacing: 0.3px;
-        }
-        .terminal-line .prompt {
-            color: #00ff41;
-            font-weight: bold;
-        }
-        .terminal-line .path {
-            color: #00aaff;
-        }
-        .terminal-line .cmd {
-            color: #ffffff;
-        }
-        .terminal-line .comment {
-            color: #666;
-            font-style: italic;
-        }
-        .terminal-line .keyword {
-            color: #ff79c6;
-            font-weight: bold;
-        }
-        .terminal-line .type {
-            color: #8be9fd;
-        }
-        .terminal-line .string {
-            color: #f1fa8c;
-        }
-        .terminal-line .number {
-            color: #bd93f9;
-        }
-        .terminal-line .function {
-            color: #50fa7b;
-            font-weight: bold;
-        }
-        .terminal-line .error {
-            color: #ff4444;
-        }
-        .terminal-line .warning {
-            color: #ffaa00;
-        }
-        .terminal-line .success {
-            color: #00ff41;
-        }
-        .terminal-line .gold {
-            color: #ffd700;
-        }
-
-        /* ASCII графика */
-        .ascii-art {
-            color: #00ff41;
-            font-size: 0.65em;
-            line-height: 1.1;
-            white-space: pre;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
-            margin: 8px 0;
-            letter-spacing: 0;
-        }
-        .ascii-art-small {
-            font-size: 0.55em;
-            line-height: 1;
-        }
-        .ascii-art-gold {
-            color: #ffd700;
-            text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Охотничья сцена — ASCII лес */
-        .hunting-scene {
-            background: #0a0f0a;
-            border: 1px solid #1a3a1a;
-            border-radius: 4px;
-            padding: 10px 14px;
-            margin: 12px 0;
-            position: relative;
-            font-size: 0.65em;
-            line-height: 1;
-            white-space: pre;
-            color: #00cc33;
-            min-height: 200px;
-            overflow: hidden;
-            cursor: crosshair;
-            text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
-            user-select: none;
-            transition: all 0.3s;
-        }
-        .hunting-scene:hover {
-            border-color: #00ff41;
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.15), inset 0 0 30px rgba(0, 255, 65, 0.03);
-        }
-        .hunting-scene .animal-clickable {
-            cursor: pointer;
-            display: inline;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .hunting-scene .animal-clickable:hover {
-            color: #ffffff;
-            text-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700;
-            background: rgba(255, 215, 0, 0.2);
-            border-radius: 2px;
-        }
-        .hunting-scene .tree-green {
-            color: #006600;
-        }
-        .hunting-scene .tree-dark {
-            color: #004400;
-        }
-        .hunting-scene .sky {
-            color: #001a33;
-        }
-        .hunting-scene .ground {
-            color: #003300;
-        }
-
-        /* Таблица */
-        .terminal-table {
-            border-collapse: collapse;
-            margin: 8px 0;
-            font-size: 0.85em;
-            width: 100%;
-        }
-        .terminal-table td,
-        .terminal-table th {
-            border: 1px solid #333;
-            padding: 6px 10px;
-            text-align: left;
-            color: var(--text);
-        }
-        .terminal-table th {
-            background: #111;
-            color: #ffd700;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-        .terminal-table tr:hover td {
-            background: rgba(0, 255, 65, 0.04);
-        }
-
-        /* Кнопки в стиле терминала */
-        .terminal-input-row {
-            display: flex;
-            gap: 8px;
-            margin: 10px 0;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .terminal-btn {
-            background: #111;
-            color: #00ff41;
-            border: 1px solid #333;
-            padding: 8px 16px;
-            font-family: inherit;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
-            border-radius: 3px;
-            text-transform: uppercase;
-        }
-        .terminal-btn:hover {
-            background: #1a2a1a;
-            border-color: #00ff41;
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
-        }
-        .terminal-btn:active {
-            background: #00ff41;
-            color: #000;
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
-        }
-        .terminal-btn.gold {
-            border-color: #ffd700;
-            color: #ffd700;
-        }
-        .terminal-btn.gold:hover {
-            background: #1a1a00;
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
-            color: #fff;
-        }
-        .terminal-btn.danger {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-        .terminal-btn.danger:hover {
-            background: #1a0000;
-            border-color: #ff6666;
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
-            color: #fff;
-        }
-
-        /* Статус-бар */
-        .status-bar {
+        /* HUD */
+        .hud {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background: #0d0d0d;
-            border-top: 1px solid #222;
-            border-bottom: 1px solid #222;
-            padding: 10px 16px;
-            font-size: 0.8em;
-            letter-spacing: 0.5px;
-            gap: 16px;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 50;
             flex-wrap: wrap;
+            gap: 10px;
         }
-        .status-item {
-            color: #888;
+        .hud-panel {
+            background: var(--panel-bg);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 12px 18px;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            min-width: 100px;
         }
-        .status-value {
-            color: #00ff41;
-            font-weight: bold;
-        }
-        .status-gold {
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        /* Мигающий курсор */
-        .cursor-blink {
-            display: inline-block;
-            width: 8px;
-            height: 14px;
-            background: #00ff41;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-            margin-left: 2px;
-            box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        /* Уведомление */
-        .terminal-notification {
-            background: #0d0d0d;
-            border-left: 3px solid #00ff41;
-            padding: 8px 14px;
-            margin: 8px 0;
-            font-size: 0.85em;
+        .hud-label {
+            font-size: 0.7em;
             color: #aaa;
-            animation: fadeInOut 0.4s;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        @keyframes fadeInOut {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
+        .hud-value {
+            font-size: 1.6em;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .gold {
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        .red {
+            color: #ff4444;
+            text-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+        }
+        .green {
+            color: #00ff41;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+
+        /* Сообщения */
+        .message-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateY(60px);
+            pointer-events: none;
+            z-index: 80;
+            text-align: center;
+        }
+        .kill-msg {
+            color: #ffd700;
+            font-size: 1.2em;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            animation: killFloat 1.5s ease-out forwards;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        @keyframes killFloat {
+            0% {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px);
+            }
+        }
+        .hit-marker {
+            position: fixed;
+            pointer-events: none;
+            z-index: 90;
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: 900;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            animation: hitPop 0.5s ease-out forwards;
+        }
+        @keyframes hitPop {
+            0% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
             }
         }
 
-        /* Прогресс-бар */
-        .hp-bar {
-            display: inline-block;
-            height: 8px;
-            background: #222;
-            border-radius: 2px;
-            vertical-align: middle;
-            margin: 0 4px;
+        /* Управление подсказка */
+        .controls-hint {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 20px;
+            color: #ccc;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+            z-index: 60;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: opacity 1s;
         }
-        .hp-bar-fill {
-            height: 100%;
-            background: #00ff41;
-            border-radius: 2px;
-            transition: width 0.3s;
+
+        /* Экран смерти/паузы */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: all;
         }
-        .hp-bar-fill.low {
-            background: #ff4444;
+        .overlay-box {
+            background: #111;
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
-        .hp-bar-fill.medium {
-            background: #ffaa00;
+        .overlay-box h2 {
+            font-size: 2em;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        .overlay-box button {
+            margin-top: 16px;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: 700;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .overlay-box button:hover {
+            background: #fff;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
         }
 
         @media (max-width: 600px) {
-            .terminal-body {
-                padding: 10px;
-                min-height: 400px;
+            .hud {
+                padding: 8px 12px;
             }
-            .ascii-art {
-                font-size: 0.45em;
+            .hud-panel {
+                padding: 8px 12px;
+                border-radius: 10px;
             }
-            .hunting-scene {
-                font-size: 0.5em;
-                padding: 6px;
+            .hud-value {
+                font-size: 1.1em;
             }
-            .terminal-btn {
-                padding: 6px 10px;
-                font-size: 0.75em;
+            .controls-hint {
+                font-size: 0.65em;
+                padding: 6px 12px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="terminal-window">
-        <!-- Titlebar -->
-        <div class="terminal-titlebar">
-            <div class="titlebar-dots">
-                <div class="titlebar-dot dot-red"></div>
-                <div class="titlebar-dot dot-yellow"></div>
-                <div class="titlebar-dot dot-green"></div>
-            </div>
-            <div class="titlebar-text">
-                📁 <span>hunting.cpp</span> — Visual Studio Code
-            </div>
+    <!-- Прицел -->
+    <div class="crosshair">
+        <div class="crosshair-dot"></div>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-panel">
+            <div class="hud-label">💰 Монеты</div>
+            <div class="hud-value gold" id="hudCoins">0</div>
         </div>
-
-        <!-- Status bar -->
-        <div class="status-bar">
-            <div><span class="status-item">💰 МОНЕТЫ:</span> <span class="status-gold" id="coins">100</span></div>
-            <div><span class="status-item">🔫 ОРУЖИЕ:</span> <span class="status-value" id="weaponName">Лук</span></div>
-            <div><span class="status-item">💥 УРОН:</span> <span class="status-value" id="weaponDmg">15</span></div>
-            <div><span class="status-item">🔫 ПАТРОНЫ:</span> <span class="status-value" id="ammoCount">∞</span></div>
-            <div><span class="status-item">🎒 ТРОФЕЕВ:</span> <span class="status-value" id="trophyCount">0</span></div>
+        <div class="hud-panel">
+            <div class="hud-label">🔫 Патроны</div>
+            <div class="hud-value green" id="hudAmmo">∞</div>
         </div>
-
-        <!-- Terminal body -->
-        <div class="terminal-body" id="terminalBody">
-            <!-- Начальный вывод -->
-            <div class="terminal-line">
-                <span class="prompt">hunter@forest:~$</span> <span class="cmd">./hunting.exe</span>
-            </div>
-            <div class="terminal-line">
-                <span class="success">[INFO]</span> Загрузка модуля охоты...
-            </div>
-            <div class="terminal-line">
-                <span class="success">[OK]</span> Движок визуализации ASCII запущен.
-            </div>
-            <div class="terminal-line">
-                <span class="success">[OK]</span> <span class="type">std::vector&lt;Animal&gt;</span> forest_animals инициализирован.
-            </div>
-            <div class="terminal-line">
-                <span class="comment">// Охотничья сцена готова. Нажмите [Искать зверей]</span>
-            </div>
-            <div class="terminal-line" style="margin-top:8px;">
-                ═══════════════════════════════════════════════════════════
-            </div>
-
-            <!-- ASCII Art заголовок -->
-            <div class="ascii-art ascii-art-gold">
-                ██╗  ██╗██╗   ██╗███╗   ██╗████████╗
-                ██║  ██║██║   ██║████╗  ██║╚══██╔══╝
-                ███████║██║   ██║██╔██╗ ██║   ██║
-                ██╔══██║██║   ██║██║╚██╗██║   ██║
-                ██║  ██║╚██████╔╝██║ ╚████║   ██║
-                ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝
-            </div>
-            <div class="terminal-line" style="text-align:center; color:#ffd700; font-weight:bold;">
-                ЛЕСНАЯ ОХОТА v2.4.1 [ASCII EDITION]
-            </div>
-            <div class="terminal-line" style="margin-top:4px;">
-                ═══════════════════════════════════════════════════════════
-            </div>
-
-            <!-- Охотничья сцена -->
-            <div class="hunting-scene" id="huntingScene" title="Лесная сцена — кликай по животным!">
-            </div>
-
-            <!-- Область уведомлений -->
-            <div id="notificationArea"></div>
-
-            <!-- Кнопки -->
-            <div class="terminal-input-row">
-                <button class="terminal-btn" id="btnHunt" title="Сгенерировать зверей в лесу">
-                    ▶ Искать зверей
-                </button>
-                <button class="terminal-btn gold" id="btnShop" title="Открыть магазин оружия">
-                    🛒 Магазин
-                </button>
-                <button class="terminal-btn" id="btnSell" title="Продать всех трофеев за монеты">
-                    💰 Продать трофеи
-                </button>
-                <button class="terminal-btn danger" id="btnClear" title="Очистить сцену">
-                    ✕ Очистить
-                </button>
-            </div>
-
-            <!-- Магазин (скрыт изначально) -->
-            <div id="shopArea"></div>
-
-            <!-- Инвентарь -->
-            <div id="inventoryArea" style="margin-top:8px;"></div>
-
-            <!-- Финальная строка -->
-            <div class="terminal-line" style="margin-top:8px;">
-                <span class="prompt">hunter@forest:~$</span> <span class="cursor-blink"></span>
-            </div>
+        <div class="hud-panel">
+            <div class="hud-label">💀 Убито</div>
+            <div class="hud-value red" id="hudKills">0</div>
+        </div>
+        <div class="hud-panel">
+            <div class="hud-label">🎯 Оружие</div>
+            <div class="hud-value" style="font-size:1em;" id="hudWeapon">🏹 Лук</div>
         </div>
     </div>
 
-    <script>
+    <!-- Подсказка управления -->
+    <div class="controls-hint" id="controlsHint">
+        🎮 WASD — ходить | 🖱️ Мышь — смотреть | 🖱️ ЛКМ — стрелять | 🔢 1-5 — оружие | R — перезарядка
+    </div>
+
+    <!-- Сообщения -->
+    <div class="message-center" id="messageCenter"></div>
+
+    <!-- Импорт Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.157.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
         // ==================== СОСТОЯНИЕ ИГРЫ ====================
         const state = {
-            coins: 100,
-            weapons: [
-                { id: 'bow', name: 'Лук', damage: 15, price: 0, ammo: Infinity, ammoType: '∞', owned: true },
-                { id: 'crossbow', name: 'Арбалет', damage: 30, price: 200, ammo: Infinity, ammoType: '∞', owned: false },
-                { id: 'rifle', name: 'Винтовка', damage: 55, price: 500, ammo: 10, ammoType: '10', owned: false },
-                { id: 'shotgun', name: 'Дробовик', damage: 80, price: 1000, ammo: 6, ammoType: '6', owned: false },
-                { id: 'sniper', name: 'Снайперская винтовка', damage: 150, price: 2000, ammo: 4, ammoType: '4', owned: false },
-            ],
-            equippedWeaponId: 'bow',
+            coins: 0,
+            kills: 0,
             ammo: Infinity,
-            inventory: [],
-            animalsOnField: [],
-            isHunting: false,
-            shopOpen: false,
+            currentWeaponIndex: 0,
+            weapons: [
+                { name: '🏹 Лук', damage: 25, ammo: Infinity, color: 0x8B4513, fireRate: 0.6 },
+                { name: '🔫 Винтовка', damage: 55, ammo: 30, color: 0x444444, fireRate: 0.3 },
+                { name: '💥 Дробовик', damage: 80, ammo: 12, color: 0x666666, fireRate: 0.8 },
+                { name: '🔭 Снайперка', damage: 150, ammo: 8, color: 0x222222, fireRate: 1.2 },
+                { name: '🔥 Пулемёт', damage: 35, ammo: 100, color: 0x333333, fireRate: 0.1 },
+            ],
+            canShoot: true,
+            animals: [],
+            maxAnimals: 12,
         };
 
+        // ==================== THREE.JS ====================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 30, 150);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.5, 300);
+        camera.position.set(0, 3.5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.body.appendChild(renderer.domElement);
+
+        // ==================== ОСВЕЩЕНИЕ ====================
+        const ambientLight = new THREE.AmbientLight(0x8899aa, 0.6);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffeedd, 4.5);
+        sunLight.position.set(40, 50, 20);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 200;
+        sunLight.shadow.camera.left = -60;
+        sunLight.shadow.camera.right = 60;
+        sunLight.shadow.camera.top = 60;
+        sunLight.shadow.camera.bottom = -60;
+        sunLight.shadow.bias = -0.0001;
+        scene.add(sunLight);
+
+        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x3d7a3d, 0.5);
+        scene.add(hemisphereLight);
+
+        // ==================== ЗЕМЛЯ ====================
+        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a8c3f,
+            roughness: 0.9,
+            metalness: 0.05,
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Трава (много мелких плоскостей)
+        const grassGroup = new THREE.Group();
+        for (let i = 0; i < 800; i++) {
+            const x = (Math.random() - 0.5) * 100;
+            const z = (Math.random() - 0.5) * 100;
+            if (Math.abs(x) < 6 && Math.abs(z) < 6) continue;
+            const blade = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.15, 0.5 + Math.random() * 0.7),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color().setHSL(0.25 + Math.random() * 0.15, 0.7, 0.25 + Math.random() * 0.2),
+                    side: THREE.DoubleSide,
+                    roughness: 0.9,
+                })
+            );
+            blade.position.set(x, 0.2, z);
+            blade.rotation.y = Math.random() * Math.PI;
+            blade.rotation.x = -0.2 + Math.random() * 0.4;
+            blade.castShadow = true;
+            blade.receiveShadow = true;
+            grassGroup.add(blade);
+        }
+        scene.add(grassGroup);
+
+        // ==================== ДЕРЕВЬЯ ====================
+        function createTree(x, z, scale = 1) {
+            const tree = new THREE.Group();
+
+            // Ствол
+            const trunkGeo = new THREE.CylinderGeometry(0.4 * scale, 0.55 * scale, 5 * scale, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({
+                color: 0x6b3a1f,
+                roughness: 0.8,
+                metalness: 0.05,
+            });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 2.5 * scale;
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            tree.add(trunk);
+
+            // Крона (несколько сфер)
+            const crownColors = [0x3d7a3d, 0x2d6a2d, 0x4a8c3f, 0x357535];
+            for (let i = 0; i < 4; i++) {
+                const crownGeo = new THREE.SphereGeometry(1.6 * scale * (0.7 + Math.random() * 0.6), 10, 8);
+                const crownMat = new THREE.MeshStandardMaterial({
+                    color: crownColors[Math.floor(Math.random() * crownColors.length)],
+                    roughness: 0.7,
+                    metalness: 0.02,
+                });
+                const crown = new THREE.Mesh(crownGeo, crownMat);
+                crown.position.y = 5 * scale + i * 1.2 * scale;
+                crown.position.x = (Math.random() - 0.5) * 1.5 * scale;
+                crown.position.z = (Math.random() - 0.5) * 1.5 * scale;
+                crown.scale.set(
+                    0.8 + Math.random() * 0.6,
+                    0.6 + Math.random() * 0.5,
+                    0.8 + Math.random() * 0.6
+                );
+                crown.castShadow = true;
+                crown.receiveShadow = true;
+                tree.add(crown);
+            }
+
+            tree.position.set(x, 0, z);
+            scene.add(tree);
+            return tree;
+        }
+
+        // Размещаем деревья
+        const trees = [];
+        for (let i = 0; i < 60; i++) {
+            const x = (Math.random() - 0.5) * 80;
+            const z = (Math.random() - 0.5) * 80;
+            if (Math.abs(x) < 7 && Math.abs(z) < 7) continue;
+            const s = 0.6 + Math.random() * 1.4;
+            trees.push(createTree(x, z, s));
+        }
+
+        // ==================== КАМНИ ====================
+        for (let i = 0; i < 25; i++) {
+            const x = (Math.random() - 0.5) * 70;
+            const z = (Math.random() - 0.5) * 70;
+            if (Math.abs(x) < 5 && Math.abs(z) < 5) continue;
+            const rockGeo = new THREE.IcosahedronGeometry(0.4 + Math.random() * 1.2, 1);
+            const rockMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color().setHSL(0.08, 0.05, 0.35 + Math.random() * 0.3),
+                roughness: 0.7,
+                metalness: 0.1,
+            });
+            const rock = new THREE.Mesh(rockGeo, rockMat);
+            rock.position.set(x, 0.1, z);
+            rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            scene.add(rock);
+        }
+
+        // ==================== ЦВЕТЫ ====================
+        for (let i = 0; i < 200; i++) {
+            const x = (Math.random() - 0.5) * 60;
+            const z = (Math.random() - 0.5) * 60;
+            if (Math.abs(x) < 4 && Math.abs(z) < 4) continue;
+            const flowerGroup = new THREE.Group();
+            const stemGeo = new THREE.CylinderGeometry(0.03, 0.04, 0.5, 6);
+            const stemMat = new THREE.MeshStandardMaterial({ color: 0x2d5a1e, roughness: 0.8 });
+            const stem = new THREE.Mesh(stemGeo, stemMat);
+            stem.position.y = 0.25;
+            flowerGroup.add(stem);
+            const petalGeo = new THREE.SphereGeometry(0.12, 6, 4);
+            const petalMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color().setHSL(Math.random() * 0.9, 0.8, 0.5 + Math.random() * 0.4),
+                roughness: 0.4,
+            });
+            const petal = new THREE.Mesh(petalGeo, petalMat);
+            petal.position.y = 0.5;
+            flowerGroup.add(petal);
+            flowerGroup.position.set(x, 0, z);
+            scene.add(flowerGroup);
+        }
+
+        // ==================== ЖИВОТНЫЕ ====================
         const animalTypes = [
-            { ascii: '🐰', name: 'Заяц', price: 20, hp: 1, symbol: '@' },
-            { ascii: '🦊', name: 'Лиса', price: 45, hp: 2, symbol: '&' },
-            { ascii: '🦌', name: 'Олень', price: 100, hp: 3, symbol: '%' },
-            { ascii: '🐗', name: 'Кабан', price: 160, hp: 5, symbol: '#' },
-            { ascii: '🐻', name: 'Медведь', price: 350, hp: 8, symbol: 'M' },
-            { ascii: '🦅', name: 'Орёл', price: 90, hp: 2, symbol: '^' },
-            { ascii: '🐺', name: 'Волк', price: 130, hp: 4, symbol: 'W' },
+            { name: 'Заяц', color: 0xd4a574, size: 0.7, speed: 3.5, price: 20, hp: 25, bodyColor: 0xc4956a },
+            { name: 'Лиса', color: 0xe87722, size: 0.9, speed: 4.5, price: 45, hp: 50, bodyColor: 0xd4651f },
+            { name: 'Олень', color: 0x8b5e3c, size: 1.5, speed: 5.5, price: 100, hp: 80, bodyColor: 0x7a4e2d },
+            { name: 'Кабан', color: 0x4a3728, size: 1.2, speed: 3.8, price: 160, hp: 120, bodyColor: 0x3d2b1f },
+            { name: 'Медведь', color: 0x5c4033, size: 2.0, speed: 2.5, price: 350, hp: 200, bodyColor: 0x4a3528 },
+            { name: 'Волк', color: 0x808080, size: 1.0, speed: 5.0, price: 130, hp: 90, bodyColor: 0x6e6e6e },
         ];
 
-        // ==================== DOM ====================
-        const huntingScene = document.getElementById('huntingScene');
-        const notificationArea = document.getElementById('notificationArea');
-        const shopArea = document.getElementById('shopArea');
-        const inventoryArea = document.getElementById('inventoryArea');
-        const coinsEl = document.getElementById('coins');
-        const weaponNameEl = document.getElementById('weaponName');
-        const weaponDmgEl = document.getElementById('weaponDmg');
-        const ammoCountEl = document.getElementById('ammoCount');
-        const trophyCountEl = document.getElementById('trophyCount');
-        const btnHunt = document.getElementById('btnHunt');
-        const btnShop = document.getElementById('btnShop');
-        const btnSell = document.getElementById('btnSell');
-        const btnClear = document.getElementById('btnClear');
+        function createAnimal(type) {
+            const group = new THREE.Group();
+            const s = type.size;
 
-        // ==================== ФУНКЦИИ ====================
-        function getEquippedWeapon() {
-            return state.weapons.find(w => w.id === state.equippedWeaponId);
-        }
-
-        function updateStatusBar() {
-            const w = getEquippedWeapon();
-            coinsEl.textContent = state.coins;
-            weaponNameEl.textContent = w.name;
-            weaponDmgEl.textContent = w.damage;
-            ammoCountEl.textContent = state.ammo === Infinity ? '∞' : state.ammo;
-            trophyCountEl.textContent = state.inventory.length;
-        }
-
-        function addNotification(text, type = 'info') {
-            const div = document.createElement('div');
-            div.className = 'terminal-notification';
-            const prefix = type === 'error' ? '[ERROR]' :
-                type === 'warning' ? '[WARN]' :
-                type === 'success' ? '[OK]' : '[INFO]';
-            const colorClass = type === 'error' ? 'error' :
-                type === 'warning' ? 'warning' :
-                type === 'success' ? 'success' : '';
-            div.innerHTML = `<span class="${colorClass}">${prefix}</span> ${text}`;
-            notificationArea.prepend(div);
-            // Удаляем старые уведомления
-            while (notificationArea.children.length > 6) {
-                notificationArea.removeChild(notificationArea.lastChild);
-            }
-        }
-
-        function updateInventoryDisplay() {
-            if (state.inventory.length === 0) {
-                inventoryArea.innerHTML = `
-              <div class="terminal-line" style="color:#666;">
-                <span class="comment">// std::vector&lt;Trophy&gt; inventory = {}; (пусто)</span>
-              </div>`;
-            } else {
-                const counts = {};
-                state.inventory.forEach(emoji => {
-                    counts[emoji] = (counts[emoji] || 0) + 1;
-                });
-                const items = Object.entries(counts)
-                    .map(([emoji, count]) => {
-                        const animal = animalTypes.find(a => a.ascii === emoji);
-                        const name = animal ? animal.name : '?';
-                        const price = animal ? animal.price : 0;
-                        return `<span style="color:#ffd700;">${emoji}</span>x${count} <span style="color:#aaa;">(${name}, ${price * count}🪙)</span>`;
-                    })
-                    .join(' | ');
-
-                inventoryArea.innerHTML = `
-              <div class="terminal-line">
-                <span class="comment">// Трофеи в инвентаре:</span>
-              </div>
-              <div class="terminal-line" style="color:#00ff41;">
-                🎒 ${items}
-              </div>`;
-            }
-        }
-
-        function updateAll() {
-            updateStatusBar();
-            updateInventoryDisplay();
-            if (state.shopOpen) renderShop();
-        }
-
-        // ==================== ASCII ЛЕС ====================
-        function renderForestScene(animals) {
-            const width = 72;
-            const height = 20;
-
-            // Создаём пустую сцену
-            const grid = [];
-            for (let y = 0; y < height; y++) {
-                grid[y] = [];
-                for (let x = 0; x < width; x++) {
-                    // Небо (верхние 6 строк)
-                    if (y < 6) {
-                        grid[y][x] = ' ';
-                    }
-                    // Кроны деревьев
-                    else if (y >= 4 && y < 10) {
-                        const r = Math.random();
-                        if (r < 0.12) grid[y][x] = '*';
-                        else if (r < 0.18) grid[y][x] = '✦';
-                        else grid[y][x] = ' ';
-                    }
-                    // Земля
-                    else if (y >= 10 && y < 16) {
-                        const r = Math.random();
-                        if (r < 0.25) grid[y][x] = '░';
-                        else if (r < 0.35) grid[y][x] = '▒';
-                        else if (r < 0.40) grid[y][x] = '▓';
-                        else grid[y][x] = ' ';
-                    }
-                    // Трава
-                    else if (y >= 16) {
-                        const r = Math.random();
-                        if (r < 0.3) grid[y][x] = '╎';
-                        else if (r < 0.4) grid[y][x] = '╵';
-                        else if (r < 0.45) grid[y][x] = '╷';
-                        else grid[y][x] = ' ';
-                    } else {
-                        grid[y][x] = ' ';
-                    }
-                }
-            }
-
-            // Фиксированные деревья (стволы)
-            const treePositions = [6, 18, 30, 42, 55, 66];
-            treePositions.forEach(tx => {
-                // Ствол
-                for (let y = 8; y < 16; y++) {
-                    if (tx < width) grid[y][tx] = '║';
-                }
-                // Крона
-                for (let dy = -4; dy <= 1; dy++) {
-                    for (let dx = -3; dx <= 3; dx++) {
-                        const y = 8 + dy;
-                        const x = tx + dx;
-                        if (y >= 0 && y < height && x >= 0 && x < width) {
-                            if (Math.abs(dx) + Math.abs(dy) <= 4) {
-                                const r = Math.random();
-                                grid[y][x] = r < 0.4 ? '*' : r < 0.7 ? '✦' : '•';
-                            }
-                        }
-                    }
-                }
-                // Верхушка
-                if (tx < width && 4 < height) grid[4][tx] = '▲';
+            // Тело
+            const bodyGeo = new THREE.SphereGeometry(0.7 * s, 10, 8);
+            bodyGeo.scale(1, 0.7, 1.3);
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: type.bodyColor,
+                roughness: 0.6,
+                metalness: 0.05,
             });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.8 * s;
+            body.castShadow = true;
+            group.add(body);
 
-            // Размещаем животных
-            const animalSpots = [];
-            animals.forEach((animal, index) => {
-                let ax, ay;
-                let attempts = 0;
-                do {
-                    ax = Math.floor(Math.random() * (width - 4)) + 2;
-                    ay = animal.type.flying ?
-                        Math.floor(Math.random() * 4) + 2 // в небе
-                        :
-                        Math.floor(Math.random() * 3) + 12; // на земле
-                    attempts++;
-                } while (
-                    attempts < 30 &&
-                    animalSpots.some(s => Math.abs(s.x - ax) < 5 && Math.abs(s.y - ay) < 3)
-                );
-                animalSpots.push({ x: ax, y: ay });
-                animal.gridX = ax;
-                animal.gridY = ay;
-                grid[ay][ax] = animal.type.ascii;
+            // Голова
+            const headGeo = new THREE.SphereGeometry(0.4 * s, 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({
+                color: type.color,
+                roughness: 0.5,
+                metalness: 0.05,
             });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.set(0, 1.2 * s, 0.7 * s);
+            head.castShadow = true;
+            group.add(head);
 
-            // Преобразуем в HTML с раскраской
-            let html = '';
-            for (let y = 0; y < height; y++) {
-                let line = '';
-                for (let x = 0; x < width; x++) {
-                    const char = grid[y][x];
-                    // Проверяем, есть ли здесь животное
-                    const animalHere = animals.find(a => a.gridX === x && a.gridY === y);
-                    if (animalHere) {
-                        line +=
-                            `<span class="animal-clickable" data-animal-index="${animals.indexOf(animalHere)}" title="${animalHere.type.name} | HP: ${animalHere.hp}/${animalHere.type.hp} | Цена: ${animalHere.type.price}🪙">${char}</span>`;
-                    } else if (char === '*' || char === '✦' || char === '•' || char === '▲') {
-                        line += `<span class="tree-green">${char}</span>`;
-                    } else if (char === '║') {
-                        line += `<span class="tree-dark">${char}</span>`;
-                    } else if (char === '░' || char === '▒' || char === '▓') {
-                        line += `<span class="ground">${char}</span>`;
-                    } else if (char === '╎' || char === '╵' || char === '╷') {
-                        line += `<span style="color:#005500;">${char}</span>`;
-                    } else if (y < 6 && char === ' ') {
-                        line += `<span class="sky">·</span>`;
-                    } else {
-                        line += char === ' ' ? '&nbsp;' : char;
-                    }
+            // Уши (для зайца, оленя)
+            if (type.name === 'Заяц' || type.name === 'Олень') {
+                for (let side = -1; side <= 1; side += 2) {
+                    const earGeo = new THREE.ConeGeometry(0.12 * s, 0.6 * s, 6);
+                    const ear = new THREE.Mesh(earGeo, new THREE.MeshStandardMaterial({
+                        color: type.name === 'Заяц' ? 0xe8c9a0 : 0x8b5e3c,
+                        roughness: 0.5,
+                    }));
+                    ear.position.set(side * 0.25 * s, 1.5 * s, 0.6 * s);
+                    ear.rotation.x = -0.3;
+                    ear.rotation.z = side * 0.2;
+                    ear.castShadow = true;
+                    group.add(ear);
                 }
-                html += line + '\n';
             }
 
-            huntingScene.innerHTML = html;
+            // Рога (олень)
+            if (type.name === 'Олень') {
+                for (let side = -1; side <= 1; side += 2) {
+                    const antlerGeo = new THREE.CylinderGeometry(0.05 * s, 0.08 * s, 0.8 * s, 6);
+                    const antler = new THREE.Mesh(antlerGeo, new THREE.MeshStandardMaterial({
+                        color: 0x4a3520,
+                        roughness: 0.7,
+                    }));
+                    antler.position.set(side * 0.3 * s, 1.4 * s, 0.5 * s);
+                    antler.rotation.z = side * 0.4;
+                    antler.rotation.x = -0.3;
+                    antler.castShadow = true;
+                    group.add(antler);
+                }
+            }
 
-            // Вешаем обработчики на животных
-            huntingScene.querySelectorAll('.animal-clickable').forEach(el => {
-                el.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const index = parseInt(this.dataset.animalIndex);
-                    if (!isNaN(index) && index < state.animalsOnField.length) {
-                        shootAnimal(index);
-                    }
-                });
-            });
+            // Ноги
+            for (let front = -1; front <= 1; front += 2) {
+                for (let side = -1; side <= 1; side += 2) {
+                    const legGeo = new THREE.CylinderGeometry(0.12 * s, 0.14 * s, 0.7 * s, 6);
+                    const leg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({
+                        color: type.bodyColor,
+                        roughness: 0.7,
+                    }));
+                    leg.position.set(side * 0.3 * s, 0.35 * s, front * 0.5 * s);
+                    leg.castShadow = true;
+                    group.add(leg);
+                }
+            }
+
+            // Хвост
+            const tailGeo = new THREE.SphereGeometry(0.2 * s, 6, 6);
+            const tail = new THREE.Mesh(tailGeo, new THREE.MeshStandardMaterial({
+                color: type.name === 'Лиса' ? 0xffffff : type.bodyColor,
+                roughness: 0.5,
+            }));
+            tail.position.set(0, 0.9 * s, -0.8 * s);
+            group.add(tail);
+
+            // Случайная позиция
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 15 + Math.random() * 35;
+            group.position.set(
+                Math.cos(angle) * distance,
+                0,
+                Math.sin(angle) * distance
+            );
+            group.rotation.y = Math.random() * Math.PI * 2;
+
+            group.userData = {
+                type: type,
+                hp: type.hp,
+                maxHp: type.hp,
+                speed: type.speed,
+                alive: true,
+                wanderTimer: Math.random() * 3,
+                wanderAngle: Math.random() * Math.PI * 2,
+            };
+
+            scene.add(group);
+            return group;
         }
 
-        function spawnAnimals() {
-            state.animalsOnField = [];
-            state.isHunting = true;
-            const count = Math.floor(Math.random() * 4) + 2; // 2-5
-
+        // ==================== ЧАСТИЦЫ ====================
+        const particles = [];
+        function spawnParticles(position, color, count = 15) {
             for (let i = 0; i < count; i++) {
-                const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
-                state.animalsOnField.push({
-                    type: type,
-                    hp: type.hp,
+                const geo = new THREE.SphereGeometry(0.08, 4, 4);
+                const mat = new THREE.MeshStandardMaterial({
+                    color: color,
+                    roughness: 0.3,
+                    emissive: color,
+                    emissiveIntensity: 0.6,
                 });
+                const particle = new THREE.Mesh(geo, mat);
+                particle.position.copy(position);
+                particle.userData = {
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 5,
+                        Math.random() * 6 + 2,
+                        (Math.random() - 0.5) * 5
+                    ),
+                    life: 0.7 + Math.random() * 0.6,
+                };
+                scene.add(particle);
+                particles.push(particle);
             }
-
-            renderForestScene(state.animalsOnField);
-            const names = state.animalsOnField.map(a => a.type.name).join(', ');
-            addNotification(`Обнаружено ${count} целей: ${names}`, 'info');
-            btnHunt.textContent = '▶ Обновить зверей';
-
-            updateAll();
         }
 
-        function shootAnimal(index) {
-            if (!state.isHunting || index >= state.animalsOnField.length) return;
-            const weapon = getEquippedWeapon();
-            const animalData = state.animalsOnField[index];
+        function updateParticles(dt) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.userData.life -= dt;
+                if (p.userData.life <= 0) {
+                    scene.remove(p);
+                    particles.splice(i, 1);
+                } else {
+                    p.userData.velocity.y -= 9.8 * dt;
+                    p.position.add(p.userData.velocity.clone().multiplyScalar(dt));
+                    p.scale.setScalar(p.userData.life / 0.7);
+                }
+            }
+        }
 
-            // Проверка патронов
+        // ==================== ОРУЖИЕ (визуал) ====================
+        const weaponGroup = new THREE.Group();
+        const weaponBarrel = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.07, 0.8, 8),
+            new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.3, metalness: 0.9 })
+        );
+        weaponBarrel.rotation.x = Math.PI / 2;
+        weaponBarrel.position.set(0.3, -0.2, -0.6);
+        weaponGroup.add(weaponBarrel);
+
+        const weaponBody = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 0.2, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.5, metalness: 0.3 })
+        );
+        weaponBody.position.set(0.25, -0.25, -0.35);
+        weaponGroup.add(weaponBody);
+
+        weaponGroup.position.set(0.4, -0.35, -0.8);
+        camera.add(weaponGroup);
+        scene.add(camera);
+
+        // Вспышка выстрела
+        const muzzleFlash = new THREE.PointLight(0xffaa00, 0, 20);
+        muzzleFlash.position.set(0.3, -0.2, -1.1);
+        camera.add(muzzleFlash);
+
+        function muzzleFlashEffect() {
+            muzzleFlash.intensity = 15;
+            setTimeout(() => { muzzleFlash.intensity = 0; }, 60);
+        }
+
+        // ==================== УПРАВЛЕНИЕ ====================
+        const keys = {};
+        let mouseDown = false;
+        const mouse = { x: 0, y: 0 };
+        const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        let isLocked = false;
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            // Смена оружия
+            if (e.key >= '1' && e.key <= '5') {
+                const index = parseInt(e.key) - 1;
+                if (index < state.weapons.length) {
+                    state.currentWeaponIndex = index;
+                    const w = state.weapons[index];
+                    state.ammo = w.ammo;
+                    updateHUD();
+                    updateWeaponColor();
+                    showMessage(`Экипировано: ${w.name}`, '#ffd700');
+                }
+            }
+            // Перезарядка
+            if (e.key.toLowerCase() === 'r') {
+                const w = state.weapons[state.currentWeaponIndex];
+                state.ammo = w.ammo;
+                updateHUD();
+                showMessage('Перезарядка!', '#00ff41');
+            }
+        });
+        document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isLocked) return;
+            mouse.x += e.movementX * 0.002;
+            mouse.y += e.movementY * 0.002;
+            mouse.y = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, mouse.y));
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.button === 0) mouseDown = true;
+        });
+        document.addEventListener('mouseup', (e) => {
+            if (e.button === 0) mouseDown = false;
+        });
+
+        renderer.domElement.addEventListener('click', () => {
+            if (!isLocked) {
+                renderer.domElement.requestPointerLock();
+            }
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            isLocked = document.pointerLockElement === renderer.domElement;
+            if (!isLocked) {
+                document.getElementById('controlsHint').style.opacity = '0';
+            } else {
+                document.getElementById('controlsHint').style.opacity = '1';
+            }
+        });
+
+        function updateWeaponColor() {
+            const w = state.weapons[state.currentWeaponIndex];
+            weaponBarrel.material.color.set(w.color);
+            weaponBody.material.color.set(
+                w.name.includes('Лук') ? 0x8B4513 :
+                w.name.includes('Снайпер') ? 0x1a1a1a : 0x444444
+            );
+        }
+
+        // ==================== СТРЕЛЬБА ====================
+        const raycaster = new THREE.Raycaster();
+
+        function shoot() {
+            if (!state.canShoot || !isLocked) return;
+            const weapon = state.weapons[state.currentWeaponIndex];
+
             if (state.ammo !== Infinity && state.ammo <= 0) {
-                addNotification('Нет патронов! Посетите магазин.', 'error');
+                showMessage('Нет патронов! Нажми R для перезарядки.', '#ff4444');
                 return;
             }
 
-            // Расход
             if (state.ammo !== Infinity) state.ammo--;
 
-            // Урон
-            animalData.hp -= weapon.damage;
+            state.canShoot = false;
+            setTimeout(() => { state.canShoot = true; }, weapon.fireRate * 1000);
 
-            if (animalData.hp <= 0) {
-                // Убит
-                state.inventory.push(animalData.type.ascii);
-                const price = animalData.type.price;
-                state.animalsOnField.splice(index, 1);
-                addNotification(`Цель уничтожена: ${animalData.type.name}! Трофей в инвентаре. (+${price}🪙)`,
-                    'success');
+            muzzleFlashEffect();
 
-                if (state.animalsOnField.length === 0) {
-                    state.isHunting = false;
-                    btnHunt.textContent = '▶ Искать зверей';
-                    addNotification('Все цели поражены. Охота завершена.', 'success');
+            // Отдача
+            mouse.y -= 0.015;
+            weaponGroup.position.z += 0.08;
+            setTimeout(() => { weaponGroup.position.z -= 0.08; }, 80);
+
+            // Raycast
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const intersects = raycaster.intersectObjects(state.animals, true);
+
+            if (intersects.length > 0) {
+                // Нашли животное
+                let hitAnimal = null;
+                let obj = intersects[0].object;
+                while (obj) {
+                    if (obj.userData && obj.userData.type && obj.userData.alive) {
+                        hitAnimal = obj;
+                        break;
+                    }
+                    obj = obj.parent;
+                }
+
+                if (hitAnimal) {
+                    const data = hitAnimal.userData;
+                    data.hp -= weapon.damage;
+                    const pos = intersects[0].point.clone();
+
+                    // Частицы крови
+                    spawnParticles(pos, 0xff0000, 8);
+
+                    // Хит-маркер
+                    showHitMarker();
+
+                    if (data.hp <= 0) {
+                        // Убит!
+                        data.alive = false;
+                        state.kills++;
+                        state.coins += data.type.price;
+                        spawnParticles(pos, 0xffd700, 20);
+                        spawnParticles(pos, 0xff0000, 15);
+                        showMessage(`💀 ${data.type.name} убит! +${data.type.price}🪙`, '#ffd700');
+
+                        // Анимация смерти
+                        hitAnimal.rotation.x = Math.PI / 2;
+                        hitAnimal.position.y = -0.3;
+                        hitAnimal.scale.setScalar(0.3);
+
+                        // Удалить через время
+                        setTimeout(() => {
+                            scene.remove(hitAnimal);
+                            const idx = state.animals.indexOf(hitAnimal);
+                            if (idx > -1) state.animals.splice(idx, 1);
+                        }, 2000);
+                    }
+                    updateHUD();
                 }
             } else {
-                addNotification(
-                    `Попадание! ${animalData.type.name}: осталось ${animalData.hp} HP (оружие: ${weapon.name}, урон: ${weapon.damage})`,
-                    'warning');
+                // Промах — частицы от земли
+                const farPoint = raycaster.ray.at(50, new THREE.Vector3());
+                spawnParticles(farPoint, 0xaa9966, 5);
+            }
+        }
+
+        // ==================== HUD И СООБЩЕНИЯ ====================
+        function updateHUD() {
+            document.getElementById('hudCoins').textContent = state.coins;
+            document.getElementById('hudKills').textContent = state.kills;
+            document.getElementById('hudAmmo').textContent = state.ammo === Infinity ? '∞' : state.ammo;
+            document.getElementById('hudWeapon').textContent = state.weapons[state.currentWeaponIndex].name;
+        }
+
+        function showMessage(text, color) {
+            const msg = document.createElement('div');
+            msg.className = 'kill-msg';
+            msg.textContent = text;
+            msg.style.color = color;
+            document.getElementById('messageCenter').appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function showHitMarker() {
+            const marker = document.createElement('div');
+            marker.className = 'hit-marker';
+            marker.textContent = '✕';
+            marker.style.left = '50%';
+            marker.style.top = '50%';
+            marker.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(marker);
+            setTimeout(() => marker.remove(), 500);
+        }
+
+        // ==================== ИГРОВОЙ ЦИКЛ ====================
+        const clock = new THREE.Clock();
+        let animalSpawnTimer = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.1);
+
+            // Спавн животных
+            animalSpawnTimer += dt;
+            if (state.animals.length < state.maxAnimals && animalSpawnTimer > 2.5) {
+                animalSpawnTimer = 0;
+                const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
+                const animal = createAnimal(type);
+                state.animals.push(animal);
             }
 
-            renderForestScene(state.animalsOnField);
-            updateAll();
-        }
+            // Движение игрока
+            if (isLocked) {
+                euler.setFromQuaternion(camera.quaternion);
+                euler.y += mouse.x;
+                euler.x += mouse.y;
+                euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
+                camera.quaternion.setFromEuler(euler);
+                mouse.x *= 0.85;
+                mouse.y *= 0.85;
 
-        function clearScene() {
-            state.animalsOnField = [];
-            state.isHunting = false;
-            btnHunt.textContent = '▶ Искать зверей';
-            huntingScene.innerHTML =
-                '<span style="color:#444;">// Лесная сцена очищена. Нажмите [Искать зверей] для генерации.</span>';
-            addNotification('Сцена очищена.', 'info');
-            updateAll();
-        }
+                velocity.x = 0;
+                velocity.z = 0;
+                direction.set(0, 0, -1).applyQuaternion(camera.quaternion);
+                direction.y = 0;
+                direction.normalize();
 
-        // ==================== МАГАЗИН ====================
-        function renderShop() {
-            const weapon = getEquippedWeapon();
-            let html = `
-            <div class="terminal-line" style="margin-top:10px;">
-              ════════════════════ <span class="gold">МАГАЗИН ОРУЖИЯ</span> ════════════════════
-            </div>
-            <table class="terminal-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Оружие</th>
-                  <th>Урон</th>
-                  <th>Патроны</th>
-                  <th>Цена</th>
-                  <th>Статус</th>
-                  <th>Действие</th>
-                </tr>
-              </thead>
-              <tbody>`;
+                const speed = 8;
+                const forward = direction.clone();
+                const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
 
-            state.weapons.forEach(w => {
-                const isEquipped = state.equippedWeaponId === w.id;
-                const canBuy = !w.owned && state.coins >= w.price;
-                const status = w.owned ?
-                    (isEquipped ? '✅ Экипировано' : '🎯 Доступно') :
-                    (canBuy ? '💰 Доступно' : '🔒 Не хватает');
+                if (keys['w']) velocity.add(forward);
+                if (keys['s']) velocity.sub(forward);
+                if (keys['a']) velocity.sub(right);
+                if (keys['d']) velocity.add(right);
 
-                const action = w.owned ?
-                    (isEquipped ?
-                        '<span style="color:#666;">экипировано</span>' :
-                        `<span class="animal-clickable" style="color:#00ff41;cursor:pointer;" onclick="equipWeapon('${w.id}')">[экипировать]</span>`
-                    ) :
-                    (canBuy ?
-                        `<span class="animal-clickable" style="color:#ffd700;cursor:pointer;" onclick="buyWeapon('${w.id}')">[купить]</span>` :
-                        `<span style="color:#666;">${w.price}🪙</span>`
-                    );
+                if (velocity.length() > 0) {
+                    velocity.normalize().multiplyScalar(speed * dt);
+                    camera.position.add(velocity);
+                }
 
-                html += `
-                <tr style="${isEquipped ? 'background:rgba(255,215,0,0.08);' : ''}">
-                  <td style="color:#888;">${w.id}</td>
-                  <td>${w.name}</td>
-                  <td style="color:#ff4444;">${w.damage}</td>
-                  <td>${w.ammoType}</td>
-                  <td style="color:#ffd700;">${w.price}🪙</td>
-                  <td>${status}</td>
-                  <td>${action}</td>
-                </tr>`;
+                // Стрельба
+                if (mouseDown) {
+                    shoot();
+                }
+            }
+
+            // ИИ животных
+            state.animals.forEach(animal => {
+                if (!animal.userData.alive) return;
+                const data = animal.userData;
+                const distToPlayer = animal.position.distanceTo(camera.position);
+
+                // Убегают если близко или ранены
+                if (distToPlayer < 12 || data.hp < data.maxHp * 0.5) {
+                    const away = animal.position.clone().sub(camera.position).normalize();
+                    const fleeSpeed = data.type.speed * 1.5;
+                    animal.position.x += away.x * fleeSpeed * dt;
+                    animal.position.z += away.z * fleeSpeed * dt;
+                    animal.rotation.y = Math.atan2(away.x, away.z);
+                } else {
+                    // Брожение
+                    data.wanderTimer -= dt;
+                    if (data.wanderTimer <= 0) {
+                        data.wanderTimer = 2 + Math.random() * 4;
+                        data.wanderAngle += (Math.random() - 0.5) * 2;
+                    }
+                    animal.position.x += Math.sin(data.wanderAngle) * data.type.speed * 0.5 * dt;
+                    animal.position.z += Math.cos(data.wanderAngle) * data.type.speed * 0.5 * dt;
+                    animal.rotation.y += (data.wanderAngle - animal.rotation.y) * 2 * dt;
+                }
+
+                // Ограничение по карте
+                animal.position.x = Math.max(-45, Math.min(45, animal.position.x));
+                animal.position.z = Math.max(-45, Math.min(45, animal.position.z));
+
+                // Подпрыгивание при ходьбе
+                animal.position.y = Math.abs(Math.sin(Date.now() * 0.004 + animal.id)) * 0.2;
             });
 
-            html += `
-              </tbody>
-            </table>
-            <div class="terminal-line">
-              <span class="comment">// Используйте кнопку [Магазин] чтобы скрыть/показать.</span>
-            </div>`;
+            // Частицы
+            updateParticles(dt);
 
-            shopArea.innerHTML = html;
+            // Облака (простая анимация)
+            sunLight.position.x += dt * 0.5;
+
+            renderer.render(scene, camera);
         }
 
-        function equipWeapon(id) {
-            const weapon = state.weapons.find(w => w.id === id);
-            if (!weapon || !weapon.owned) return;
-            state.equippedWeaponId = id;
-            state.ammo = weapon.ammo;
-            addNotification(`Экипировано: ${weapon.name} (урон: ${weapon.damage}, патроны: ${weapon.ammoType})`,
-                'success');
-            updateAll();
-        }
-
-        function buyWeapon(id) {
-            const weapon = state.weapons.find(w => w.id === id);
-            if (!weapon || weapon.owned) return;
-            if (state.coins < weapon.price) {
-                addNotification(`Недостаточно монет! Нужно ${weapon.price}🪙, у вас ${state.coins}🪙.`, 'error');
-                return;
-            }
-            state.coins -= weapon.price;
-            weapon.owned = true;
-            state.equippedWeaponId = id;
-            state.ammo = weapon.ammo;
-            addNotification(`Куплено и экипировано: ${weapon.name} за ${weapon.price}🪙!`, 'success');
-            updateAll();
-        }
-
-        function toggleShop() {
-            state.shopOpen = !state.shopOpen;
-            if (state.shopOpen) {
-                renderShop();
-                btnShop.textContent = '🛒 Закрыть магазин';
-                btnShop.classList.add('gold');
-            } else {
-                shopArea.innerHTML = '';
-                btnShop.textContent = '🛒 Магазин';
-                btnShop.classList.remove('gold');
-            }
-            updateAll();
-        }
-
-        function sellAllTrophies() {
-            if (state.inventory.length === 0) {
-                addNotification('Нет трофеев для продажи. Сначала убейте зверей!', 'warning');
-                return;
-            }
-            let total = 0;
-            state.inventory.forEach(emoji => {
-                const a = animalTypes.find(t => t.ascii === emoji);
-                if (a) total += a.price;
-            });
-            const count = state.inventory.length;
-            state.coins += total;
-            state.inventory = [];
-            addNotification(`Продано ${count} трофеев. Получено ${total}🪙. Баланс: ${state.coins}🪙`, 'success');
-            updateAll();
-        }
-
-        // ==================== СОБЫТИЯ ====================
-        btnHunt.addEventListener('click', () => {
-            clearScene();
-            spawnAnimals();
+        // ==================== РЕСАЙЗ ====================
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        btnShop.addEventListener('click', toggleShop);
-        btnSell.addEventListener('click', sellAllTrophies);
-        btnClear.addEventListener('click', clearScene);
 
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        // ==================== СТАРТ ====================
         function init() {
-            clearScene();
-            updateAll();
-            // Начальное сообщение
-            addNotification('Терминал готов. Нажмите [Искать зверей] для начала охоты.', 'info');
+            // Стартовые животные
+            for (let i = 0; i < 8; i++) {
+                const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
+                const animal = createAnimal(type);
+                state.animals.push(animal);
+            }
+            updateHUD();
+            updateWeaponColor();
+            showMessage('🎯 Кликни для захвата мыши | WASD — ходить | ЛКМ — стрелять', '#ffffff');
+            document.getElementById('controlsHint').style.opacity = '1';
+            animate();
         }
-
-        // Делаем функции глобальными для onclick в HTML
-        window.equipWeapon = equipWeapon;
-        window.buyWeapon = buyWeapon;
 
         init();
-        console.log('%c🐻 C++ Terminal Hunting v2.4.1 %cготов!',
-            'color:#ffd700;font-size:14px;', 'color:#00ff41;');
-        console.log('%c  Ищи зверей, стреляй, продавай трофеи, покупай оружие!', 'color:#aaa;');
+        console.log('🏹 3D Охота готова!');
+        console.log('🎮 WASD — ходить | 🖱️ Мышь — смотреть | 🖱️ ЛКМ — стрелять | 1-5 — оружие | R — перезарядка');
     </script>
 </body>
 </html>
