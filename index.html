@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏹 Лесная охота — Охотник и дичь</title>
+    <title>C++ Terminal Graphics — Охота</title>
     <style>
         :root {
-            --bg: #1a1a2e;
-            --panel: #16213e;
-            --gold: #f0a500;
-            --accent: #e94560;
-            --green: #2ecc71;
-            --wood: #5c3a21;
-            --text: #eee;
-            --dark-text: #222;
+            --bg: #0a0a0a;
+            --terminal-bg: #0c0c0c;
+            --text: #00ff41;
+            --text-dim: #00cc33;
+            --text-bright: #00ff88;
+            --cursor: #ffffff;
+            --header: #1a1a1a;
+            --border: #333;
+            --error: #ff4444;
+            --warning: #ffaa00;
+            --info: #00aaff;
+            --gold: #ffd700;
+            --highlight: #ffffff;
+            --selection: rgba(0, 255, 65, 0.15);
+            --scrollbar-bg: #111;
+            --scrollbar-thumb: #333;
         }
 
         * {
@@ -22,477 +30,504 @@
             box-sizing: border-box;
         }
 
+        @font-face {
+            font-family: 'Terminal';
+            src: local('Consolas'), local('Monaco'), local('Courier New'), local('monospace');
+        }
+
         body {
-            background: var(--bg);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #050505;
+            font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
             background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(46, 204, 113, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 50%, rgba(233, 68, 96, 0.08) 0%, transparent 50%);
+                radial-gradient(ellipse at 30% 50%, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(0, 170, 255, 0.03) 0%, transparent 50%);
         }
 
-        .game-container {
-            background: var(--panel);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow:
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 3px rgba(240, 165, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            max-width: 750px;
+        /* Главный контейнер — имитация окна терминала */
+        .terminal-window {
             width: 100%;
-            border: 2px solid rgba(240, 165, 0, 0.2);
+            max-width: 850px;
+            background: var(--terminal-bg);
+            border-radius: 12px;
+            box-shadow:
+                0 0 0 2px #1a1a1a,
+                0 0 0 4px #0d0d0d,
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                0 0 80px rgba(0, 255, 65, 0.06);
+            overflow: hidden;
+            border: 1px solid #222;
         }
 
-        h1 {
-            text-align: center;
-            color: var(--gold);
-            font-size: 2.4em;
-            margin-bottom: 8px;
-            text-shadow: 0 0 30px rgba(240, 165, 0, 0.4);
-            letter-spacing: 2px;
+        /* Заголовок окна — как в Windows/Linux */
+        .terminal-titlebar {
+            background: #1a1a1a;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            user-select: none;
         }
-
-        .subtitle {
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 25px;
-            font-style: italic;
+        .titlebar-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .titlebar-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .dot-red {
+            background: #ff5f56;
+            box-shadow: 0 0 6px rgba(255, 95, 86, 0.4);
+        }
+        .dot-yellow {
+            background: #ffbd2e;
+            box-shadow: 0 0 6px rgba(255, 189, 46, 0.4);
+        }
+        .dot-green {
+            background: #27c93f;
+            box-shadow: 0 0 6px rgba(39, 201, 63, 0.4);
+        }
+        .titlebar-text {
+            color: #888;
+            font-size: 0.8em;
             letter-spacing: 1px;
+            flex: 1;
+            text-align: center;
+        }
+        .titlebar-text span {
+            color: #ccc;
+            font-weight: bold;
         }
 
-        .stats-bar {
+        /* Тело терминала */
+        .terminal-body {
+            padding: 16px 20px;
+            min-height: 550px;
+            max-height: 75vh;
+            overflow-y: auto;
+            background: var(--terminal-bg);
+            position: relative;
+        }
+
+        /* Кастомный скроллбар */
+        .terminal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal-body::-webkit-scrollbar-track {
+            background: var(--scrollbar-bg);
+        }
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
+        /* Строки терминала */
+        .terminal-line {
+            color: var(--text);
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 2px 0;
+            letter-spacing: 0.3px;
+        }
+        .terminal-line .prompt {
+            color: #00ff41;
+            font-weight: bold;
+        }
+        .terminal-line .path {
+            color: #00aaff;
+        }
+        .terminal-line .cmd {
+            color: #ffffff;
+        }
+        .terminal-line .comment {
+            color: #666;
+            font-style: italic;
+        }
+        .terminal-line .keyword {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+        .terminal-line .type {
+            color: #8be9fd;
+        }
+        .terminal-line .string {
+            color: #f1fa8c;
+        }
+        .terminal-line .number {
+            color: #bd93f9;
+        }
+        .terminal-line .function {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+        .terminal-line .error {
+            color: #ff4444;
+        }
+        .terminal-line .warning {
+            color: #ffaa00;
+        }
+        .terminal-line .success {
+            color: #00ff41;
+        }
+        .terminal-line .gold {
+            color: #ffd700;
+        }
+
+        /* ASCII графика */
+        .ascii-art {
+            color: #00ff41;
+            font-size: 0.65em;
+            line-height: 1.1;
+            white-space: pre;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+            margin: 8px 0;
+            letter-spacing: 0;
+        }
+        .ascii-art-small {
+            font-size: 0.55em;
+            line-height: 1;
+        }
+        .ascii-art-gold {
+            color: #ffd700;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Охотничья сцена — ASCII лес */
+        .hunting-scene {
+            background: #0a0f0a;
+            border: 1px solid #1a3a1a;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin: 12px 0;
+            position: relative;
+            font-size: 0.65em;
+            line-height: 1;
+            white-space: pre;
+            color: #00cc33;
+            min-height: 200px;
+            overflow: hidden;
+            cursor: crosshair;
+            text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+            user-select: none;
+            transition: all 0.3s;
+        }
+        .hunting-scene:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.15), inset 0 0 30px rgba(0, 255, 65, 0.03);
+        }
+        .hunting-scene .animal-clickable {
+            cursor: pointer;
+            display: inline;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .hunting-scene .animal-clickable:hover {
+            color: #ffffff;
+            text-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 2px;
+        }
+        .hunting-scene .tree-green {
+            color: #006600;
+        }
+        .hunting-scene .tree-dark {
+            color: #004400;
+        }
+        .hunting-scene .sky {
+            color: #001a33;
+        }
+        .hunting-scene .ground {
+            color: #003300;
+        }
+
+        /* Таблица */
+        .terminal-table {
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85em;
+            width: 100%;
+        }
+        .terminal-table td,
+        .terminal-table th {
+            border: 1px solid #333;
+            padding: 6px 10px;
+            text-align: left;
+            color: var(--text);
+        }
+        .terminal-table th {
+            background: #111;
+            color: #ffd700;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .terminal-table tr:hover td {
+            background: rgba(0, 255, 65, 0.04);
+        }
+
+        /* Кнопки в стиле терминала */
+        .terminal-input-row {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .terminal-btn {
+            background: #111;
+            color: #00ff41;
+            border: 1px solid #333;
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+        .terminal-btn:hover {
+            background: #1a2a1a;
+            border-color: #00ff41;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+        .terminal-btn:active {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+        }
+        .terminal-btn.gold {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        .terminal-btn.gold:hover {
+            background: #1a1a00;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+            color: #fff;
+        }
+        .terminal-btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        .terminal-btn.danger:hover {
+            background: #1a0000;
+            border-color: #ff6666;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+            color: #fff;
+        }
+
+        /* Статус-бар */
+        .status-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
+            background: #0d0d0d;
+            border-top: 1px solid #222;
+            border-bottom: 1px solid #222;
+            padding: 10px 16px;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            gap: 16px;
             flex-wrap: wrap;
-            gap: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .status-item {
+            color: #888;
+        }
+        .status-value {
+            color: #00ff41;
+            font-weight: bold;
+        }
+        .status-gold {
+            color: #ffd700;
+            font-weight: bold;
         }
 
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--text);
+        /* Мигающий курсор */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #00ff41;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
         }
-
-        .stat-icon {
-            font-size: 1.5em;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-        }
-
-        .gold-text {
-            color: var(--gold);
-            text-shadow: 0 0 15px rgba(240, 165, 0, 0.5);
-        }
-
-        .weapon-display {
-            background: var(--wood);
-            color: #fff;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Охотничья сцена */
-        .hunting-ground {
-            position: relative;
-            background: linear-gradient(180deg,
-                    #3a7d44 0%, #2d6a3b 15%, #4a8c3f 30%,
-                    #5c4a2e 30%, #4a3820 35%, #6b8c5c 35%,
-                    #3d6b3d 50%, #2a5c2a 60%, #1a3d1a 70%,
-                    #5c8a4a 80%, #3a6b3a 100%);
-            border-radius: 20px;
-            height: 320px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            cursor: crosshair;
-            border: 3px solid rgba(139, 90, 43, 0.6);
-            box-shadow:
-                inset 0 0 80px rgba(0, 0, 0, 0.4),
-                0 8px 30px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s;
-        }
-
-        .hunting-ground:hover {
-            border-color: rgba(240, 165, 0, 0.6);
-            box-shadow:
-                inset 0 0 80px rgba(0, 0, 0, 0.4),
-                0 8px 40px rgba(240, 165, 0, 0.2);
-        }
-
-        /* Деревья */
-        .tree {
-            position: absolute;
-            bottom: 40%;
-            width: 0;
-            height: 0;
-            pointer-events: none;
-        }
-        .tree-trunk {
-            position: absolute;
-            bottom: 0;
-            background: #5c3a21;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-        .tree-crown {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        /* Животные */
-        .animal {
-            position: absolute;
-            font-size: 50px;
-            cursor: pointer;
-            transition: transform 0.15s, filter 0.15s;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-            animation: animalIdle 2s ease-in-out infinite;
-            user-select: none;
-            z-index: 10;
-        }
-        .animal:hover {
-            transform: scale(1.2);
-            filter: drop-shadow(0 6px 15px rgba(255, 200, 0, 0.7)) brightness(1.2);
-        }
-        .animal:active {
-            transform: scale(0.8);
-            filter: brightness(0.6) drop-shadow(0 0 20px red);
-        }
-
-        @keyframes animalIdle {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
+        @keyframes blink {
             50% {
-                transform: translateY(-8px);
-            }
-        }
-        @keyframes animalRun {
-            0% {
-                transform: translateX(0) translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(var(--run-x, 200px)) translateY(var(--run-y, -100px));
                 opacity: 0;
             }
         }
-        @keyframes hitFlash {
-            0% {
-                filter: brightness(1);
-            }
-            50% {
-                filter: brightness(3) drop-shadow(0 0 30px red);
-            }
-            100% {
-                filter: brightness(1);
-            }
-        }
 
-        /* Прицел */
-        .crosshair {
-            position: absolute;
-            pointer-events: none;
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
-            display: none;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        /* Уведомление */
+        .terminal-notification {
+            background: #0d0d0d;
+            border-left: 3px solid #00ff41;
+            padding: 8px 14px;
+            margin: 8px 0;
+            font-size: 0.85em;
+            color: #aaa;
+            animation: fadeInOut 0.4s;
         }
-        .crosshair::before,
-        .crosshair::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 0, 0, 0.9);
-        }
-        .crosshair::before {
-            width: 2px;
-            height: 20px;
-            left: 50%;
-            top: -10px;
-            transform: translateX(-50%);
-        }
-        .crosshair::after {
-            width: 20px;
-            height: 2px;
-            top: 50%;
-            left: -10px;
-            transform: translateY(-50%);
-        }
-
-        /* Кнопки */
-        .buttons-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 14px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s;
-            letter-spacing: 0.5px;
-            font-family: inherit;
-            flex: 1;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .btn-hunt {
-            background: linear-gradient(135deg, #e94560, #c0392b);
-            color: #fff;
-            box-shadow: 0 6px 20px rgba(233, 68, 96, 0.4);
-        }
-        .btn-hunt:hover {
-            box-shadow: 0 8px 28px rgba(233, 68, 96, 0.7);
-            transform: translateY(-2px);
-        }
-
-        .btn-shop {
-            background: linear-gradient(135deg, #f0a500, #d68910);
-            color: #1a1a2e;
-            box-shadow: 0 6px 20px rgba(240, 165, 0, 0.4);
-        }
-        .btn-shop:hover {
-            box-shadow: 0 8px 28px rgba(240, 165, 0, 0.7);
-            transform: translateY(-2px);
-        }
-
-        .btn-sell {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: #fff;
-            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
-        }
-        .btn-sell:hover {
-            box-shadow: 0 8px 28px rgba(46, 204, 113, 0.7);
-            transform: translateY(-2px);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Магазин */
-        .shop-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            display: none;
-            border: 2px solid rgba(240, 165, 0, 0.3);
-            animation: fadeIn 0.3s;
-        }
-        .shop-panel.open {
-            display: block;
-        }
-        @keyframes fadeIn {
+        @keyframes fadeInOut {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateX(-10px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
-        }
-        .shop-title {
-            color: var(--gold);
-            font-size: 1.3em;
-            margin-bottom: 12px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        .shop-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-        }
-        .shop-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s;
-            border: 2px solid transparent;
-            color: var(--text);
-        }
-        .shop-item:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--gold);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        .shop-item.equipped {
-            border-color: var(--green) !important;
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-        }
-        .shop-item .item-icon {
-            font-size: 2.5em;
-        }
-        .shop-item .item-name {
-            font-weight: 700;
-            margin: 4px 0;
-        }
-        .shop-item .item-dmg {
-            font-size: 0.85em;
-            color: #e94560;
-            font-weight: 600;
-        }
-        .shop-item .item-price {
-            color: var(--gold);
-            font-weight: 700;
-        }
-        .shop-item .item-ammo {
-            font-size: 0.8em;
-            color: #aaa;
         }
 
-        /* Инвентарь */
-        .inventory {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            color: var(--text);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Прогресс-бар */
+        .hp-bar {
+            display: inline-block;
+            height: 8px;
+            background: #222;
+            border-radius: 2px;
+            vertical-align: middle;
+            margin: 0 4px;
         }
-        .inv-label {
-            font-weight: 700;
-            color: #aaa;
-            letter-spacing: 0.5px;
+        .hp-bar-fill {
+            height: 100%;
+            background: #00ff41;
+            border-radius: 2px;
+            transition: width 0.3s;
         }
-        .inv-animals {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .hp-bar-fill.low {
+            background: #ff4444;
         }
-        .inv-animal {
-            background: rgba(46, 204, 113, 0.2);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            border: 1px solid rgba(46, 204, 113, 0.4);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .inv-animal:hover {
-            background: rgba(46, 204, 113, 0.4);
+        .hp-bar-fill.medium {
+            background: #ffaa00;
         }
 
-        /* Сообщения */
-        .message {
-            text-align: center;
-            color: #ccc;
-            min-height: 24px;
-            font-style: italic;
-            font-size: 0.95em;
-            padding: 6px;
-            transition: all 0.3s;
-        }
-        .message.flash {
-            color: var(--gold);
-            text-shadow: 0 0 15px rgba(240, 165, 0, 0.6);
-        }
-
-        @media (max-width: 500px) {
-            .game-container {
-                padding: 15px;
+        @media (max-width: 600px) {
+            .terminal-body {
+                padding: 10px;
+                min-height: 400px;
             }
-            h1 {
-                font-size: 1.6em;
+            .ascii-art {
+                font-size: 0.45em;
             }
-            .hunting-ground {
-                height: 250px;
+            .hunting-scene {
+                font-size: 0.5em;
+                padding: 6px;
             }
-            .animal {
-                font-size: 35px;
-            }
-            .btn {
-                padding: 10px 14px;
-                font-size: 0.85em;
+            .terminal-btn {
+                padding: 6px 10px;
+                font-size: 0.75em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🏹 Лесная охота</h1>
-        <p class="subtitle">Выследи добычу • Продай трофеи • Купи оружие</p>
-
-        <!-- Статистика -->
-        <div class="stats-bar">
-            <div class="stat">
-                <span class="stat-icon">🪙</span>
-                <span>Монеты: <span class="gold-text" id="coins">100</span></span>
+    <div class="terminal-window">
+        <!-- Titlebar -->
+        <div class="terminal-titlebar">
+            <div class="titlebar-dots">
+                <div class="titlebar-dot dot-red"></div>
+                <div class="titlebar-dot dot-yellow"></div>
+                <div class="titlebar-dot dot-green"></div>
             </div>
-            <div class="stat">
-                <span class="stat-icon">🔫</span>
-                <span class="weapon-display" id="weaponDisplay">🏹 Лук (15)</span>
-            </div>
-            <div class="stat">
-                <span class="stat-icon">🔫</span>
-                <span>Патроны: <span id="ammo">∞</span></span>
+            <div class="titlebar-text">
+                📁 <span>hunting.cpp</span> — Visual Studio Code
             </div>
         </div>
 
-        <!-- Охотничья сцена -->
-        <div class="hunting-ground" id="huntingGround">
-            <div class="crosshair" id="crosshair"></div>
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div><span class="status-item">💰 МОНЕТЫ:</span> <span class="status-gold" id="coins">100</span></div>
+            <div><span class="status-item">🔫 ОРУЖИЕ:</span> <span class="status-value" id="weaponName">Лук</span></div>
+            <div><span class="status-item">💥 УРОН:</span> <span class="status-value" id="weaponDmg">15</span></div>
+            <div><span class="status-item">🔫 ПАТРОНЫ:</span> <span class="status-value" id="ammoCount">∞</span></div>
+            <div><span class="status-item">🎒 ТРОФЕЕВ:</span> <span class="status-value" id="trophyCount">0</span></div>
         </div>
 
-        <!-- Кнопки -->
-        <div class="buttons-row">
-            <button class="btn btn-hunt" id="btnHunt" title="Выйти на охоту и найти зверей">🔍 Искать зверей</button>
-            <button class="btn btn-shop" id="btnShop" title="Открыть магазин оружия">🏪 Магазин</button>
-            <button class="btn btn-sell" id="btnSell" title="Продать всех пойманных животных">💰 Продать трофеи</button>
-        </div>
+        <!-- Terminal body -->
+        <div class="terminal-body" id="terminalBody">
+            <!-- Начальный вывод -->
+            <div class="terminal-line">
+                <span class="prompt">hunter@forest:~$</span> <span class="cmd">./hunting.exe</span>
+            </div>
+            <div class="terminal-line">
+                <span class="success">[INFO]</span> Загрузка модуля охоты...
+            </div>
+            <div class="terminal-line">
+                <span class="success">[OK]</span> Движок визуализации ASCII запущен.
+            </div>
+            <div class="terminal-line">
+                <span class="success">[OK]</span> <span class="type">std::vector&lt;Animal&gt;</span> forest_animals инициализирован.
+            </div>
+            <div class="terminal-line">
+                <span class="comment">// Охотничья сцена готова. Нажмите [Искать зверей]</span>
+            </div>
+            <div class="terminal-line" style="margin-top:8px;">
+                ═══════════════════════════════════════════════════════════
+            </div>
 
-        <!-- Магазин -->
-        <div class="shop-panel" id="shopPanel">
-            <div class="shop-title">🏪 Магазин оружия и патронов</div>
-            <div class="shop-items" id="shopItems"></div>
-        </div>
+            <!-- ASCII Art заголовок -->
+            <div class="ascii-art ascii-art-gold">
+                ██╗  ██╗██╗   ██╗███╗   ██╗████████╗
+                ██║  ██║██║   ██║████╗  ██║╚══██╔══╝
+                ███████║██║   ██║██╔██╗ ██║   ██║
+                ██╔══██║██║   ██║██║╚██╗██║   ██║
+                ██║  ██║╚██████╔╝██║ ╚████║   ██║
+                ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝
+            </div>
+            <div class="terminal-line" style="text-align:center; color:#ffd700; font-weight:bold;">
+                ЛЕСНАЯ ОХОТА v2.4.1 [ASCII EDITION]
+            </div>
+            <div class="terminal-line" style="margin-top:4px;">
+                ═══════════════════════════════════════════════════════════
+            </div>
 
-        <!-- Инвентарь -->
-        <div class="inventory">
-            <span class="inv-label">🎒 Трофеи:</span>
-            <span class="inv-animals" id="invAnimals">Пока пусто...</span>
-        </div>
+            <!-- Охотничья сцена -->
+            <div class="hunting-scene" id="huntingScene" title="Лесная сцена — кликай по животным!">
+            </div>
 
-        <!-- Сообщение -->
-        <div class="message" id="message">Нажми «Искать зверей», чтобы начать охоту!</div>
+            <!-- Область уведомлений -->
+            <div id="notificationArea"></div>
+
+            <!-- Кнопки -->
+            <div class="terminal-input-row">
+                <button class="terminal-btn" id="btnHunt" title="Сгенерировать зверей в лесу">
+                    ▶ Искать зверей
+                </button>
+                <button class="terminal-btn gold" id="btnShop" title="Открыть магазин оружия">
+                    🛒 Магазин
+                </button>
+                <button class="terminal-btn" id="btnSell" title="Продать всех трофеев за монеты">
+                    💰 Продать трофеи
+                </button>
+                <button class="terminal-btn danger" id="btnClear" title="Очистить сцену">
+                    ✕ Очистить
+                </button>
+            </div>
+
+            <!-- Магазин (скрыт изначально) -->
+            <div id="shopArea"></div>
+
+            <!-- Инвентарь -->
+            <div id="inventoryArea" style="margin-top:8px;"></div>
+
+            <!-- Финальная строка -->
+            <div class="terminal-line" style="margin-top:8px;">
+                <span class="prompt">hunter@forest:~$</span> <span class="cursor-blink"></span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -500,383 +535,454 @@
         const state = {
             coins: 100,
             weapons: [
-                { id: 'bow', name: '🏹 Лук', damage: 15, price: 0, ammo: Infinity, ammoType: '∞', owned: true },
-                { id: 'crossbow', name: '🏹 Арбалет', damage: 30, price: 200, ammo: Infinity, ammoType: '∞', owned: false },
-                { id: 'rifle', name: '🔫 Винтовка', damage: 55, price: 500, ammo: 10, ammoType: '10', owned: false },
-                { id: 'shotgun', name: '💥 Дробовик', damage: 80, price: 1000, ammo: 6, ammoType: '6', owned: false },
-                { id: 'sniper', name: '🔭 Снайперка', damage: 150, price: 2000, ammo: 4, ammoType: '4', owned: false },
+                { id: 'bow', name: 'Лук', damage: 15, price: 0, ammo: Infinity, ammoType: '∞', owned: true },
+                { id: 'crossbow', name: 'Арбалет', damage: 30, price: 200, ammo: Infinity, ammoType: '∞', owned: false },
+                { id: 'rifle', name: 'Винтовка', damage: 55, price: 500, ammo: 10, ammoType: '10', owned: false },
+                { id: 'shotgun', name: 'Дробовик', damage: 80, price: 1000, ammo: 6, ammoType: '6', owned: false },
+                { id: 'sniper', name: 'Снайперская винтовка', damage: 150, price: 2000, ammo: 4, ammoType: '4', owned: false },
             ],
             equippedWeaponId: 'bow',
-            ammo: Infinity, // для лука/арбалета бесконечно
-            inventory: [], // массив строк-эмодзи животных
+            ammo: Infinity,
+            inventory: [],
             animalsOnField: [],
             isHunting: false,
+            shopOpen: false,
         };
 
-        // Животные с эмодзи, названиями и ценой
         const animalTypes = [
-            { emoji: '🐰', name: 'Заяц', price: 20, hp: 1 },
-            { emoji: '🦊', name: 'Лиса', price: 45, hp: 2 },
-            { emoji: '🦌', name: 'Олень', price: 100, hp: 3 },
-            { emoji: '🐗', name: 'Кабан', price: 160, hp: 5 },
-            { emoji: '🐻', name: 'Медведь', price: 350, hp: 8 },
-            { emoji: '🦅', name: 'Орёл', price: 90, hp: 2, flying: true },
-            { emoji: '🐺', name: 'Волк', price: 130, hp: 4 },
+            { ascii: '🐰', name: 'Заяц', price: 20, hp: 1, symbol: '@' },
+            { ascii: '🦊', name: 'Лиса', price: 45, hp: 2, symbol: '&' },
+            { ascii: '🦌', name: 'Олень', price: 100, hp: 3, symbol: '%' },
+            { ascii: '🐗', name: 'Кабан', price: 160, hp: 5, symbol: '#' },
+            { ascii: '🐻', name: 'Медведь', price: 350, hp: 8, symbol: 'M' },
+            { ascii: '🦅', name: 'Орёл', price: 90, hp: 2, symbol: '^' },
+            { ascii: '🐺', name: 'Волк', price: 130, hp: 4, symbol: 'W' },
         ];
 
-        // ==================== DOM ЭЛЕМЕНТЫ ====================
-        const huntingGround = document.getElementById('huntingGround');
-        const crosshair = document.getElementById('crosshair');
+        // ==================== DOM ====================
+        const huntingScene = document.getElementById('huntingScene');
+        const notificationArea = document.getElementById('notificationArea');
+        const shopArea = document.getElementById('shopArea');
+        const inventoryArea = document.getElementById('inventoryArea');
         const coinsEl = document.getElementById('coins');
-        const weaponDisplay = document.getElementById('weaponDisplay');
-        const ammoEl = document.getElementById('ammo');
-        const invAnimals = document.getElementById('invAnimals');
-        const messageEl = document.getElementById('message');
-        const shopPanel = document.getElementById('shopPanel');
-        const shopItems = document.getElementById('shopItems');
+        const weaponNameEl = document.getElementById('weaponName');
+        const weaponDmgEl = document.getElementById('weaponDmg');
+        const ammoCountEl = document.getElementById('ammoCount');
+        const trophyCountEl = document.getElementById('trophyCount');
         const btnHunt = document.getElementById('btnHunt');
         const btnShop = document.getElementById('btnShop');
         const btnSell = document.getElementById('btnSell');
+        const btnClear = document.getElementById('btnClear');
 
         // ==================== ФУНКЦИИ ====================
         function getEquippedWeapon() {
             return state.weapons.find(w => w.id === state.equippedWeaponId);
         }
 
-        function updateUI() {
+        function updateStatusBar() {
+            const w = getEquippedWeapon();
             coinsEl.textContent = state.coins;
-            const weapon = getEquippedWeapon();
-            weaponDisplay.textContent = `${weapon.name} (${weapon.damage} урон)`;
-            ammoEl.textContent = state.ammo === Infinity ? '∞' : state.ammo;
+            weaponNameEl.textContent = w.name;
+            weaponDmgEl.textContent = w.damage;
+            ammoCountEl.textContent = state.ammo === Infinity ? '∞' : state.ammo;
+            trophyCountEl.textContent = state.inventory.length;
+        }
 
-            // Инвентарь
+        function addNotification(text, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'terminal-notification';
+            const prefix = type === 'error' ? '[ERROR]' :
+                type === 'warning' ? '[WARN]' :
+                type === 'success' ? '[OK]' : '[INFO]';
+            const colorClass = type === 'error' ? 'error' :
+                type === 'warning' ? 'warning' :
+                type === 'success' ? 'success' : '';
+            div.innerHTML = `<span class="${colorClass}">${prefix}</span> ${text}`;
+            notificationArea.prepend(div);
+            // Удаляем старые уведомления
+            while (notificationArea.children.length > 6) {
+                notificationArea.removeChild(notificationArea.lastChild);
+            }
+        }
+
+        function updateInventoryDisplay() {
             if (state.inventory.length === 0) {
-                invAnimals.textContent = 'Пока пусто...';
+                inventoryArea.innerHTML = `
+              <div class="terminal-line" style="color:#666;">
+                <span class="comment">// std::vector&lt;Trophy&gt; inventory = {}; (пусто)</span>
+              </div>`;
             } else {
-                invAnimals.innerHTML = state.inventory
-                    .map((a, i) =>
-                        `<span class="inv-animal" title="Нажми чтобы продать одного" onclick="sellOne(${i})">${a}</span>`
-                    )
-                    .join('');
-            }
+                const counts = {};
+                state.inventory.forEach(emoji => {
+                    counts[emoji] = (counts[emoji] || 0) + 1;
+                });
+                const items = Object.entries(counts)
+                    .map(([emoji, count]) => {
+                        const animal = animalTypes.find(a => a.ascii === emoji);
+                        const name = animal ? animal.name : '?';
+                        const price = animal ? animal.price : 0;
+                        return `<span style="color:#ffd700;">${emoji}</span>x${count} <span style="color:#aaa;">(${name}, ${price * count}🪙)</span>`;
+                    })
+                    .join(' | ');
 
-            renderShop();
+                inventoryArea.innerHTML = `
+              <div class="terminal-line">
+                <span class="comment">// Трофеи в инвентаре:</span>
+              </div>
+              <div class="terminal-line" style="color:#00ff41;">
+                🎒 ${items}
+              </div>`;
+            }
         }
 
-        function showMessage(text, flash = false) {
-            messageEl.textContent = text;
-            if (flash) {
-                messageEl.classList.add('flash');
-                setTimeout(() => messageEl.classList.remove('flash'), 800);
-            }
+        function updateAll() {
+            updateStatusBar();
+            updateInventoryDisplay();
+            if (state.shopOpen) renderShop();
         }
 
-        // ==================== ОХОТА: ПОЯВЛЕНИЕ ЖИВОТНЫХ ====================
-        function clearAnimals() {
-            state.animalsOnField.forEach(a => a.el.remove());
-            state.animalsOnField = [];
+        // ==================== ASCII ЛЕС ====================
+        function renderForestScene(animals) {
+            const width = 72;
+            const height = 20;
+
+            // Создаём пустую сцену
+            const grid = [];
+            for (let y = 0; y < height; y++) {
+                grid[y] = [];
+                for (let x = 0; x < width; x++) {
+                    // Небо (верхние 6 строк)
+                    if (y < 6) {
+                        grid[y][x] = ' ';
+                    }
+                    // Кроны деревьев
+                    else if (y >= 4 && y < 10) {
+                        const r = Math.random();
+                        if (r < 0.12) grid[y][x] = '*';
+                        else if (r < 0.18) grid[y][x] = '✦';
+                        else grid[y][x] = ' ';
+                    }
+                    // Земля
+                    else if (y >= 10 && y < 16) {
+                        const r = Math.random();
+                        if (r < 0.25) grid[y][x] = '░';
+                        else if (r < 0.35) grid[y][x] = '▒';
+                        else if (r < 0.40) grid[y][x] = '▓';
+                        else grid[y][x] = ' ';
+                    }
+                    // Трава
+                    else if (y >= 16) {
+                        const r = Math.random();
+                        if (r < 0.3) grid[y][x] = '╎';
+                        else if (r < 0.4) grid[y][x] = '╵';
+                        else if (r < 0.45) grid[y][x] = '╷';
+                        else grid[y][x] = ' ';
+                    } else {
+                        grid[y][x] = ' ';
+                    }
+                }
+            }
+
+            // Фиксированные деревья (стволы)
+            const treePositions = [6, 18, 30, 42, 55, 66];
+            treePositions.forEach(tx => {
+                // Ствол
+                for (let y = 8; y < 16; y++) {
+                    if (tx < width) grid[y][tx] = '║';
+                }
+                // Крона
+                for (let dy = -4; dy <= 1; dy++) {
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const y = 8 + dy;
+                        const x = tx + dx;
+                        if (y >= 0 && y < height && x >= 0 && x < width) {
+                            if (Math.abs(dx) + Math.abs(dy) <= 4) {
+                                const r = Math.random();
+                                grid[y][x] = r < 0.4 ? '*' : r < 0.7 ? '✦' : '•';
+                            }
+                        }
+                    }
+                }
+                // Верхушка
+                if (tx < width && 4 < height) grid[4][tx] = '▲';
+            });
+
+            // Размещаем животных
+            const animalSpots = [];
+            animals.forEach((animal, index) => {
+                let ax, ay;
+                let attempts = 0;
+                do {
+                    ax = Math.floor(Math.random() * (width - 4)) + 2;
+                    ay = animal.type.flying ?
+                        Math.floor(Math.random() * 4) + 2 // в небе
+                        :
+                        Math.floor(Math.random() * 3) + 12; // на земле
+                    attempts++;
+                } while (
+                    attempts < 30 &&
+                    animalSpots.some(s => Math.abs(s.x - ax) < 5 && Math.abs(s.y - ay) < 3)
+                );
+                animalSpots.push({ x: ax, y: ay });
+                animal.gridX = ax;
+                animal.gridY = ay;
+                grid[ay][ax] = animal.type.ascii;
+            });
+
+            // Преобразуем в HTML с раскраской
+            let html = '';
+            for (let y = 0; y < height; y++) {
+                let line = '';
+                for (let x = 0; x < width; x++) {
+                    const char = grid[y][x];
+                    // Проверяем, есть ли здесь животное
+                    const animalHere = animals.find(a => a.gridX === x && a.gridY === y);
+                    if (animalHere) {
+                        line +=
+                            `<span class="animal-clickable" data-animal-index="${animals.indexOf(animalHere)}" title="${animalHere.type.name} | HP: ${animalHere.hp}/${animalHere.type.hp} | Цена: ${animalHere.type.price}🪙">${char}</span>`;
+                    } else if (char === '*' || char === '✦' || char === '•' || char === '▲') {
+                        line += `<span class="tree-green">${char}</span>`;
+                    } else if (char === '║') {
+                        line += `<span class="tree-dark">${char}</span>`;
+                    } else if (char === '░' || char === '▒' || char === '▓') {
+                        line += `<span class="ground">${char}</span>`;
+                    } else if (char === '╎' || char === '╵' || char === '╷') {
+                        line += `<span style="color:#005500;">${char}</span>`;
+                    } else if (y < 6 && char === ' ') {
+                        line += `<span class="sky">·</span>`;
+                    } else {
+                        line += char === ' ' ? '&nbsp;' : char;
+                    }
+                }
+                html += line + '\n';
+            }
+
+            huntingScene.innerHTML = html;
+
+            // Вешаем обработчики на животных
+            huntingScene.querySelectorAll('.animal-clickable').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const index = parseInt(this.dataset.animalIndex);
+                    if (!isNaN(index) && index < state.animalsOnField.length) {
+                        shootAnimal(index);
+                    }
+                });
+            });
         }
 
         function spawnAnimals() {
-            clearAnimals();
+            state.animalsOnField = [];
             state.isHunting = true;
-            const count = Math.floor(Math.random() * 4) + 2; // 2–5 животных
-            const usedPositions = [];
+            const count = Math.floor(Math.random() * 4) + 2; // 2-5
 
             for (let i = 0; i < count; i++) {
                 const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
-                const el = document.createElement('span');
-                el.className = 'animal';
-                el.textContent = type.emoji;
-                el.title = `${type.name} | Цена: ${type.price}🪙 | HP: ${type.hp}`;
-                el.dataset.name = type.name;
-                el.dataset.price = type.price;
-                el.dataset.hp = type.hp;
-                el.dataset.maxHp = type.hp;
-                el.dataset.flying = type.flying || false;
-
-                // Позиция (избегаем наложений)
-                let x, y;
-                let attempts = 0;
-                do {
-                    x = Math.random() * 75 + 5; // 5%–80%
-                    y = type.flying ?
-                        Math.random() * 30 + 8 // выше — птицы
-                        :
-                        Math.random() * 40 + 35; // ниже — наземные
-                    attempts++;
-                } while (
-                    attempts < 20 &&
-                    usedPositions.some(p => Math.abs(p.x - x) < 15 && Math.abs(p.y - y) < 15)
-                );
-                usedPositions.push({ x, y });
-
-                el.style.left = x + '%';
-                el.style.top = y + '%';
-
-                // Обработчик клика по животному
-                el.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (!state.isHunting) return;
-                    shootAnimal(el, type);
+                state.animalsOnField.push({
+                    type: type,
+                    hp: type.hp,
                 });
-
-                huntingGround.appendChild(el);
-                state.animalsOnField.push({ el, type, hp: type.hp });
             }
 
-            showMessage(`🔍 Найдено ${count} зверей! Стреляй по ним!`, true);
-            btnHunt.textContent = '🔄 Обновить зверей';
+            renderForestScene(state.animalsOnField);
+            const names = state.animalsOnField.map(a => a.type.name).join(', ');
+            addNotification(`Обнаружено ${count} целей: ${names}`, 'info');
+            btnHunt.textContent = '▶ Обновить зверей';
+
+            updateAll();
         }
 
-        function shootAnimal(el, type) {
+        function shootAnimal(index) {
+            if (!state.isHunting || index >= state.animalsOnField.length) return;
             const weapon = getEquippedWeapon();
+            const animalData = state.animalsOnField[index];
 
             // Проверка патронов
             if (state.ammo !== Infinity && state.ammo <= 0) {
-                showMessage('❌ Нет патронов! Купи в магазине.', true);
+                addNotification('Нет патронов! Посетите магазин.', 'error');
                 return;
             }
 
-            // Расход патронов
-            if (state.ammo !== Infinity) {
-                state.ammo--;
-            }
+            // Расход
+            if (state.ammo !== Infinity) state.ammo--;
 
             // Урон
-            const currentHp = parseInt(el.dataset.hp) - weapon.damage;
-            el.dataset.hp = currentHp;
+            animalData.hp -= weapon.damage;
 
-            // Анимация попадания
-            el.style.animation = 'none';
-            el.offsetHeight;
-            el.style.animation = 'hitFlash 0.4s ease-out';
+            if (animalData.hp <= 0) {
+                // Убит
+                state.inventory.push(animalData.type.ascii);
+                const price = animalData.type.price;
+                state.animalsOnField.splice(index, 1);
+                addNotification(`Цель уничтожена: ${animalData.type.name}! Трофей в инвентаре. (+${price}🪙)`,
+                    'success');
 
-            if (currentHp <= 0) {
-                // Убит!
-                el.style.animation = `animalRun 0.5s ease-out forwards`;
-                el.style.setProperty('--run-x', (Math.random() * 150 - 75) + 'px');
-                el.style.setProperty('--run-y', '-120px');
-                el.style.pointerEvents = 'none';
-
-                const price = parseInt(el.dataset.price);
-                state.inventory.push(type.emoji);
-                showMessage(`🎯 ${type.name} убит! Трофей в инвентаре. (+${price}🪙 при продаже)`, true);
-
-                // Удалить со сцены после анимации
-                setTimeout(() => {
-                    el.remove();
-                    state.animalsOnField = state.animalsOnField.filter(a => a.el !== el);
-                    // Если все убиты
-                    if (state.animalsOnField.length === 0) {
-                        showMessage('🏆 Все звери добыты! Можно искать новых или продать трофеи.');
-                        state.isHunting = false;
-                        btnHunt.textContent = '🔍 Искать зверей';
-                    }
-                }, 500);
+                if (state.animalsOnField.length === 0) {
+                    state.isHunting = false;
+                    btnHunt.textContent = '▶ Искать зверей';
+                    addNotification('Все цели поражены. Охота завершена.', 'success');
+                }
             } else {
-                showMessage(`💥 Попадание! ${type.name}: осталось ${currentHp} HP`);
-                // Испуг — небольшое смещение
-                const currentLeft = parseFloat(el.style.left);
-                const newLeft = Math.max(3, Math.min(82, currentLeft + (Math.random() * 20 - 10)));
-                el.style.left = newLeft + '%';
+                addNotification(
+                    `Попадание! ${animalData.type.name}: осталось ${animalData.hp} HP (оружие: ${weapon.name}, урон: ${weapon.damage})`,
+                    'warning');
             }
 
-            updateUI();
+            renderForestScene(state.animalsOnField);
+            updateAll();
         }
 
-        // Прицел
-        huntingGround.addEventListener('mousemove', (e) => {
-            if (!state.isHunting) {
-                crosshair.style.display = 'none';
-                return;
-            }
-            crosshair.style.display = 'block';
-            const rect = huntingGround.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            crosshair.style.left = x + 'px';
-            crosshair.style.top = y + 'px';
-        });
-
-        huntingGround.addEventListener('mouseleave', () => {
-            crosshair.style.display = 'none';
-        });
+        function clearScene() {
+            state.animalsOnField = [];
+            state.isHunting = false;
+            btnHunt.textContent = '▶ Искать зверей';
+            huntingScene.innerHTML =
+                '<span style="color:#444;">// Лесная сцена очищена. Нажмите [Искать зверей] для генерации.</span>';
+            addNotification('Сцена очищена.', 'info');
+            updateAll();
+        }
 
         // ==================== МАГАЗИН ====================
         function renderShop() {
-            shopItems.innerHTML = state.weapons
-                .map(w => {
-                    const isEquipped = state.equippedWeaponId === w.id;
-                    const canBuy = state.coins >= w.price && !w.owned;
-                    const cls = isEquipped ? 'equipped' : '';
-                    const actionText = w.owned ?
-                        (isEquipped ? '✅ Экипировано' : '🎯 Экипировать') :
-                        (canBuy ? `💰 Купить за ${w.price}🪙` : `🔒 ${w.price}🪙 (не хватает)`);
+            const weapon = getEquippedWeapon();
+            let html = `
+            <div class="terminal-line" style="margin-top:10px;">
+              ════════════════════ <span class="gold">МАГАЗИН ОРУЖИЯ</span> ════════════════════
+            </div>
+            <table class="terminal-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Оружие</th>
+                  <th>Урон</th>
+                  <th>Патроны</th>
+                  <th>Цена</th>
+                  <th>Статус</th>
+                  <th>Действие</th>
+                </tr>
+              </thead>
+              <tbody>`;
 
-                    return `
-                <div class="shop-item ${cls}" onclick="handleShopAction('${w.id}')" 
-                     style="${!w.owned && state.coins < w.price ? 'opacity:0.5;' : ''}">
-                  <div class="item-icon">${w.name.split(' ')[0]}</div>
-                  <div class="item-name">${w.name.split(' ').slice(1).join(' ')}</div>
-                  <div class="item-dmg">💥 Урон: ${w.damage}</div>
-                  <div class="item-ammo">🔫 Патроны: ${w.ammoType}</div>
-                  <div class="item-price">${actionText}</div>
-                </div>
-              `;
-                })
-                .join('');
+            state.weapons.forEach(w => {
+                const isEquipped = state.equippedWeaponId === w.id;
+                const canBuy = !w.owned && state.coins >= w.price;
+                const status = w.owned ?
+                    (isEquipped ? '✅ Экипировано' : '🎯 Доступно') :
+                    (canBuy ? '💰 Доступно' : '🔒 Не хватает');
+
+                const action = w.owned ?
+                    (isEquipped ?
+                        '<span style="color:#666;">экипировано</span>' :
+                        `<span class="animal-clickable" style="color:#00ff41;cursor:pointer;" onclick="equipWeapon('${w.id}')">[экипировать]</span>`
+                    ) :
+                    (canBuy ?
+                        `<span class="animal-clickable" style="color:#ffd700;cursor:pointer;" onclick="buyWeapon('${w.id}')">[купить]</span>` :
+                        `<span style="color:#666;">${w.price}🪙</span>`
+                    );
+
+                html += `
+                <tr style="${isEquipped ? 'background:rgba(255,215,0,0.08);' : ''}">
+                  <td style="color:#888;">${w.id}</td>
+                  <td>${w.name}</td>
+                  <td style="color:#ff4444;">${w.damage}</td>
+                  <td>${w.ammoType}</td>
+                  <td style="color:#ffd700;">${w.price}🪙</td>
+                  <td>${status}</td>
+                  <td>${action}</td>
+                </tr>`;
+            });
+
+            html += `
+              </tbody>
+            </table>
+            <div class="terminal-line">
+              <span class="comment">// Используйте кнопку [Магазин] чтобы скрыть/показать.</span>
+            </div>`;
+
+            shopArea.innerHTML = html;
         }
 
-        function handleShopAction(weaponId) {
-            const weapon = state.weapons.find(w => w.id === weaponId);
+        function equipWeapon(id) {
+            const weapon = state.weapons.find(w => w.id === id);
+            if (!weapon || !weapon.owned) return;
+            state.equippedWeaponId = id;
+            state.ammo = weapon.ammo;
+            addNotification(`Экипировано: ${weapon.name} (урон: ${weapon.damage}, патроны: ${weapon.ammoType})`,
+                'success');
+            updateAll();
+        }
 
-            if (weapon.owned) {
-                // Экипировать
-                state.equippedWeaponId = weaponId;
-                state.ammo = weapon.ammo;
-                showMessage(`🎯 Экипировано: ${weapon.name}!`, true);
-            } else if (state.coins >= weapon.price) {
-                // Купить
-                state.coins -= weapon.price;
-                weapon.owned = true;
-                state.equippedWeaponId = weaponId;
-                state.ammo = weapon.ammo;
-                showMessage(`🛒 Куплено: ${weapon.name}!`, true);
-            } else {
-                showMessage('❌ Недостаточно монет! Продайте трофеи.', true);
+        function buyWeapon(id) {
+            const weapon = state.weapons.find(w => w.id === id);
+            if (!weapon || weapon.owned) return;
+            if (state.coins < weapon.price) {
+                addNotification(`Недостаточно монет! Нужно ${weapon.price}🪙, у вас ${state.coins}🪙.`, 'error');
+                return;
             }
-
-            updateUI();
+            state.coins -= weapon.price;
+            weapon.owned = true;
+            state.equippedWeaponId = id;
+            state.ammo = weapon.ammo;
+            addNotification(`Куплено и экипировано: ${weapon.name} за ${weapon.price}🪙!`, 'success');
+            updateAll();
         }
 
         function toggleShop() {
-            shopPanel.classList.toggle('open');
-            if (shopPanel.classList.contains('open')) {
-                btnShop.textContent = '❌ Закрыть магазин';
+            state.shopOpen = !state.shopOpen;
+            if (state.shopOpen) {
+                renderShop();
+                btnShop.textContent = '🛒 Закрыть магазин';
+                btnShop.classList.add('gold');
             } else {
-                btnShop.textContent = '🏪 Магазин';
+                shopArea.innerHTML = '';
+                btnShop.textContent = '🛒 Магазин';
+                btnShop.classList.remove('gold');
             }
-            renderShop();
+            updateAll();
         }
 
-        // ==================== ПРОДАЖА ТРОФЕЕВ ====================
         function sellAllTrophies() {
             if (state.inventory.length === 0) {
-                showMessage('😕 Нет трофеев для продажи. Убейте зверей!');
+                addNotification('Нет трофеев для продажи. Сначала убейте зверей!', 'warning');
                 return;
             }
-
-            let totalEarned = 0;
+            let total = 0;
             state.inventory.forEach(emoji => {
-                const animalType = animalTypes.find(a => a.emoji === emoji);
-                if (animalType) totalEarned += animalType.price;
+                const a = animalTypes.find(t => t.ascii === emoji);
+                if (a) total += a.price;
             });
-
-            state.coins += totalEarned;
             const count = state.inventory.length;
+            state.coins += total;
             state.inventory = [];
-            showMessage(`💰 Продано ${count} трофеев! Получено ${totalEarned} 🪙`, true);
-            updateUI();
+            addNotification(`Продано ${count} трофеев. Получено ${total}🪙. Баланс: ${state.coins}🪙`, 'success');
+            updateAll();
         }
 
-        function sellOne(index) {
-            if (index < 0 || index >= state.inventory.length) return;
-            const emoji = state.inventory[index];
-            const animalType = animalTypes.find(a => a.emoji === emoji);
-            const price = animalType ? animalType.price : 10;
-            state.coins += price;
-            state.inventory.splice(index, 1);
-            showMessage(`💰 Продан ${animalType?.name || 'трофей'} за ${price}🪙`, true);
-            updateUI();
-        }
-
-        // ==================== ДЕРЕВЬЯ (декор) ====================
-        function createTrees() {
-            const treePositions = [
-                { left: 8, bottom: 38, height: 70 },
-                { left: 25, bottom: 36, height: 85 },
-                { left: 55, bottom: 37, height: 60 },
-                { left: 75, bottom: 39, height: 75 },
-                { left: 90, bottom: 35, height: 55 },
-            ];
-
-            treePositions.forEach(pos => {
-                const tree = document.createElement('div');
-                tree.className = 'tree';
-                tree.style.left = pos.left + '%';
-                tree.style.bottom = pos.bottom + '%';
-
-                const trunk = document.createElement('div');
-                trunk.className = 'tree-trunk';
-                trunk.style.width = '14px';
-                trunk.style.height = pos.height + 'px';
-                trunk.style.left = '-7px';
-                trunk.style.bottom = '0';
-                trunk.style.background =
-                    'linear-gradient(180deg, #6b3a1f, #4a2512)';
-
-                const crown = document.createElement('div');
-                crown.className = 'tree-crown';
-                const crownSize = pos.height * 0.7;
-                crown.style.width = crownSize + 'px';
-                crown.style.height = crownSize + 'px';
-                crown.style.left = -(crownSize / 2 - 7) + 'px';
-                crown.style.bottom = (pos.height * 0.55) + 'px';
-                crown.style.background =
-                    'radial-gradient(ellipse, #3d7a3d 0%, #2d5a2d 40%, #1a3d1a 100%)';
-                crown.style.boxShadow = 'inset 0 -8px 20px rgba(0,0,0,0.3)';
-
-                tree.appendChild(trunk);
-                tree.appendChild(crown);
-                huntingGround.appendChild(tree);
-            });
-
-            // Трава и кусты (декор)
-            for (let i = 0; i < 12; i++) {
-                const bush = document.createElement('div');
-                bush.style.cssText = `
-              position: absolute;
-              bottom: ${32 + Math.random() * 4}%;
-              left: ${Math.random() * 90 + 2}%;
-              width: ${20 + Math.random() * 30}px;
-              height: ${12 + Math.random() * 16}px;
-              background: radial-gradient(ellipse, #4a8c3f, #2d5a2d);
-              border-radius: 50%;
-              pointer-events: none;
-              opacity: 0.7;
-              z-index: 1;
-            `;
-                huntingGround.appendChild(bush);
-            }
-        }
-
-        // ==================== СОБЫТИЯ КНОПОК ====================
+        // ==================== СОБЫТИЯ ====================
         btnHunt.addEventListener('click', () => {
-            if (state.isHunting && state.animalsOnField.length > 0) {
-                // Обновить зверей
-                clearAnimals();
-                spawnAnimals();
-            } else if (!state.isHunting || state.animalsOnField.length === 0) {
-                spawnAnimals();
-            } else {
-                clearAnimals();
-                spawnAnimals();
-            }
+            clearScene();
+            spawnAnimals();
         });
-
         btnShop.addEventListener('click', toggleShop);
         btnSell.addEventListener('click', sellAllTrophies);
+        btnClear.addEventListener('click', clearScene);
 
         // ==================== ИНИЦИАЛИЗАЦИЯ ====================
         function init() {
-            createTrees();
-            updateUI();
-            renderShop();
+            clearScene();
+            updateAll();
+            // Начальное сообщение
+            addNotification('Терминал готов. Нажмите [Искать зверей] для начала охоты.', 'info');
         }
 
+        // Делаем функции глобальными для onclick в HTML
+        window.equipWeapon = equipWeapon;
+        window.buyWeapon = buyWeapon;
+
         init();
-        console.log('🏹 Лесная охота готова! Ищи зверей, убивай, продавай трофеи и покупай оружие!');
+        console.log('%c🐻 C++ Terminal Hunting v2.4.1 %cготов!',
+            'color:#ffd700;font-size:14px;', 'color:#00ff41;');
+        console.log('%c  Ищи зверей, стреляй, продавай трофеи, покупай оружие!', 'color:#aaa;');
     </script>
 </body>
 </html>
