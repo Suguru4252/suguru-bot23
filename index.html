@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             background: #1a1a2e;
             display: flex;
             justify-content: center;
@@ -19,13 +19,14 @@
         .game-wrapper {
             text-align: center;
             background: #16213e;
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            max-width: 95vw;
         }
         canvas {
             border: 2px solid #0f3460;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: crosshair;
             background: #0a0a1a;
             display: block;
@@ -35,60 +36,75 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 3px;
+            margin-top: 6px;
             background: #0f3460;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 6px;
+            border-radius: 8px;
+            max-width: 100%;
         }
         .element-btn {
-            padding: 10px 16px;
+            padding: 4px 8px;
             border: none;
-            border-radius: 20px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 10px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             color: white;
             text-shadow: 0 1px 2px black;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
         }
         .element-btn.active {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px currentColor;
+            transform: scale(1.15);
+            box-shadow: 0 0 12px currentColor;
             border: 2px solid white;
+            z-index: 2;
         }
         .info {
-            color: #e0e0e0;
-            margin-top: 8px;
-            font-size: 14px;
+            color: #b0b0b0;
+            margin-top: 5px;
+            font-size: 10px;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         .clear-btn {
             background: #e94560;
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 4px 14px;
+            border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 5px;
+            margin-top: 4px;
+            font-size: 11px;
+        }
+        .brush-label {
+            color: #ccc;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        .brush-input {
+            width: 40px;
+            vertical-align: middle;
+            margin: 0 3px;
         }
     </style>
 </head>
 <body>
     <div class="game-wrapper">
         <canvas id="sandCanvas"></canvas>
-        <div class="toolbar" id="toolbar">
-            <!-- Кнопки создаются в JS -->
+        <div class="toolbar" id="toolbar"></div>
+        <div style="margin-top:4px;">
+            <span class="brush-label">🖌️ Размер кисти: <input type="range" class="brush-input" id="brushSize" min="1" max="8" value="3"></span>
         </div>
         <div class="info">
-            <span>🖱️ Левая кнопка — рисовать</span>
-            <span>🖱️ Правая кнопка — стереть</span>
+            <span>🖱️ ЛКМ — рисовать</span>
+            <span>🖱️ ПКМ — стереть</span>
             <span>🎨 Выбери элемент</span>
         </div>
         <button class="clear-btn" id="clearBtn">🧹 Очистить всё</button>
@@ -99,22 +115,18 @@
             const canvas = document.getElementById('sandCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Размеры поля в пикселях (каждый пиксель - частица)
             const WIDTH = 200;
             const HEIGHT = 150;
-            const SCALE = 3; // Масштаб отображения
+            const SCALE = 3;
 
             canvas.width = WIDTH;
             canvas.height = HEIGHT;
             canvas.style.width = `${WIDTH * SCALE}px`;
             canvas.style.height = `${HEIGHT * SCALE}px`;
 
-            // Сетка частиц (храним тип элемента или 0)
             const grid = new Uint8Array(WIDTH * HEIGHT);
-            // Дополнительные данные (например, для воды - направление, для огня - жизнь)
             const extraData = new Float32Array(WIDTH * HEIGHT);
 
-            // Типы элементов
             const ELEMENTS = {
                 EMPTY: 0,
                 SAND: 1,
@@ -127,6 +139,58 @@
                 PLANT: 8,
                 SMOKE: 9,
                 ACID: 10,
+                // Новые элементы
+                SALT: 11,
+                OIL: 12,
+                GUNPOWDER: 13,
+                ICE: 14,
+                MUD: 15,
+                SEED: 16,
+                VIRUS: 17,
+                METAL: 18,
+                SPORE: 19,
+                WAX: 20,
+                SLIME: 21,
+                CRYSTAL: 22,
+                ASH: 23,
+                GLASS: 24,
+                COAL: 25,
+                DUST: 26,
+                MERCURY: 27,
+                BOMB: 28,
+                FUSE: 29,
+                VINE: 30,
+                SPONGE: 31,
+                MAGMA: 32,
+                TNT: 33,
+                CONCRETE: 34,
+                GAS: 35,
+                ACID_GAS: 36,
+                ANT: 37,
+                WALL: 38,
+                CLOUD: 39,
+                ELECTRIC: 40,
+                RUST: 41,
+                CLAY: 42,
+                PORCELAIN: 43,
+                PLASMA: 44,
+                FABRIC: 45,
+                BACTERIA: 46,
+                FERTILIZER: 47,
+                QUICKSAND: 48,
+                SAP: 49,
+                RESIN: 50,
+                AMBER: 51,
+                COAL_ORE: 52,
+                IRON_ORE: 53,
+                GOLD_ORE: 54,
+                DIAMOND: 55,
+                MYCELIUM: 56,
+                MUSHROOM: 57,
+                SULFUR: 58,
+                CHARCOAL: 59,
+                SANDSTONE: 60,
+                OBSIDIAN: 61,
             };
 
             const ELEMENT_COLORS = {
@@ -139,42 +203,117 @@
                 [ELEMENTS.LAVA]: '#e67e22',
                 [ELEMENTS.STEAM]: '#bdc3c7',
                 [ELEMENTS.PLANT]: '#2ecc71',
-                [ELEMENTS.SMOKE]: '#7f8c8d',
+                [ELEMENTS.SMOKE]: '#95a5a6',
                 [ELEMENTS.ACID]: '#9b59b6',
+                [ELEMENTS.SALT]: '#ffffff',
+                [ELEMENTS.OIL]: '#2c3e50',
+                [ELEMENTS.GUNPOWDER]: '#4a4a4a',
+                [ELEMENTS.ICE]: '#a0d8ef',
+                [ELEMENTS.MUD]: '#6b4c3a',
+                [ELEMENTS.SEED]: '#d4a76a',
+                [ELEMENTS.VIRUS]: '#c0392b',
+                [ELEMENTS.METAL]: '#bdc3c7',
+                [ELEMENTS.SPORE]: '#aab7b8',
+                [ELEMENTS.WAX]: '#f5deb3',
+                [ELEMENTS.SLIME]: '#7fff00',
+                [ELEMENTS.CRYSTAL]: '#e0b0ff',
+                [ELEMENTS.ASH]: '#b0b0b0',
+                [ELEMENTS.GLASS]: 'rgba(200,220,255,0.7)',
+                [ELEMENTS.COAL]: '#212121',
+                [ELEMENTS.DUST]: '#d2b48c',
+                [ELEMENTS.MERCURY]: '#c0c0c0',
+                [ELEMENTS.BOMB]: '#e74c3c',
+                [ELEMENTS.FUSE]: '#f39c12',
+                [ELEMENTS.VINE]: '#27ae60',
+                [ELEMENTS.SPONGE]: '#f0c040',
+                [ELEMENTS.MAGMA]: '#ff4500',
+                [ELEMENTS.TNT]: '#ff4444',
+                [ELEMENTS.CONCRETE]: '#a0a0a0',
+                [ELEMENTS.GAS]: '#ccddcc',
+                [ELEMENTS.ACID_GAS]: '#ccff00',
+                [ELEMENTS.ANT]: '#000000',
+                [ELEMENTS.WALL]: '#555555',
+                [ELEMENTS.CLOUD]: '#f0f8ff',
+                [ELEMENTS.ELECTRIC]: '#ffff00',
+                [ELEMENTS.RUST]: '#8b4513',
+                [ELEMENTS.CLAY]: '#b66a4a',
+                [ELEMENTS.PORCELAIN]: '#fffff0',
+                [ELEMENTS.PLASMA]: '#ff00ff',
+                [ELEMENTS.FABRIC]: '#d2691e',
+                [ELEMENTS.BACTERIA]: '#00cc66',
+                [ELEMENTS.FERTILIZER]: '#8b7355',
+                [ELEMENTS.QUICKSAND]: '#d4a017',
+                [ELEMENTS.SAP]: '#ffd700',
+                [ELEMENTS.RESIN]: '#daa520',
+                [ELEMENTS.AMBER]: '#ff8c00',
+                [ELEMENTS.COAL_ORE]: '#333333',
+                [ELEMENTS.IRON_ORE]: '#8b6b4a',
+                [ELEMENTS.GOLD_ORE]: '#b8860b',
+                [ELEMENTS.DIAMOND]: '#b9f2ff',
+                [ELEMENTS.MYCELIUM]: '#708090',
+                [ELEMENTS.MUSHROOM]: '#cd5c5c',
+                [ELEMENTS.SULFUR]: '#ffff00',
+                [ELEMENTS.CHARCOAL]: '#36454f',
+                [ELEMENTS.SANDSTONE]: '#d2b48c',
+                [ELEMENTS.OBSIDIAN]: '#1a1a1a',
             };
 
-            const ELEMENT_NAMES = {
-                [ELEMENTS.EMPTY]: 'Пусто',
-                [ELEMENTS.SAND]: '🏖️ Песок',
-                [ELEMENTS.WATER]: '💧 Вода',
-                [ELEMENTS.STONE]: '🪨 Камень',
-                [ELEMENTS.WOOD]: '🪵 Дерево',
-                [ELEMENTS.FIRE]: '🔥 Огонь',
-                [ELEMENTS.LAVA]: '🌋 Лава',
-                [ELEMENTS.STEAM]: '💨 Пар',
-                [ELEMENTS.PLANT]: '🌿 Растение',
-                [ELEMENTS.SMOKE]: '💭 Дым',
-                [ELEMENTS.ACID]: '🧪 Кислота',
+            const ELEMENT_NAMES = {};
+            const elementsToShow = [
+                ELEMENTS.SAND, ELEMENTS.WATER, ELEMENTS.STONE, ELEMENTS.WOOD,
+                ELEMENTS.FIRE, ELEMENTS.LAVA, ELEMENTS.ACID, ELEMENTS.OIL,
+                ELEMENTS.GUNPOWDER, ELEMENTS.ICE, ELEMENTS.MUD, ELEMENTS.PLANT,
+                ELEMENTS.SEED, ELEMENTS.VIRUS, ELEMENTS.METAL, ELEMENTS.SLIME,
+                ELEMENTS.CRYSTAL, ELEMENTS.WAX, ELEMENTS.COAL, ELEMENTS.DUST,
+                ELEMENTS.MERCURY, ELEMENTS.BOMB, ELEMENTS.VINE, ELEMENTS.SPONGE,
+                ELEMENTS.CONCRETE, ELEMENTS.GAS, ELEMENTS.ANT, ELEMENTS.WALL,
+                ELEMENTS.CLAY, ELEMENTS.PORCELAIN, ELEMENTS.FABRIC, ELEMENTS.MUSHROOM,
+                ELEMENTS.SALT, ELEMENTS.TNT, ELEMENTS.DIAMOND, ELEMENTS.OBSIDIAN
+            ];
+
+            // Сопоставление имён
+            const rawNames = {
+                [ELEMENTS.EMPTY]: 'Пусто', [ELEMENTS.SAND]: '🏖️', [ELEMENTS.WATER]: '💧',
+                [ELEMENTS.STONE]: '🪨', [ELEMENTS.WOOD]: '🪵', [ELEMENTS.FIRE]: '🔥',
+                [ELEMENTS.LAVA]: '🌋', [ELEMENTS.STEAM]: '💨', [ELEMENTS.PLANT]: '🌿',
+                [ELEMENTS.SMOKE]: '💭', [ELEMENTS.ACID]: '🧪', [ELEMENTS.SALT]: '🧂',
+                [ELEMENTS.OIL]: '🛢️', [ELEMENTS.GUNPOWDER]: '💣', [ELEMENTS.ICE]: '🧊',
+                [ELEMENTS.MUD]: '🟤', [ELEMENTS.SEED]: '🌱', [ELEMENTS.VIRUS]: '🦠',
+                [ELEMENTS.METAL]: '🔩', [ELEMENTS.SPORE]: '🟢', [ELEMENTS.WAX]: '🕯️',
+                [ELEMENTS.SLIME]: '🟢', [ELEMENTS.CRYSTAL]: '💎', [ELEMENTS.ASH]: '⬜',
+                [ELEMENTS.GLASS]: '🪟', [ELEMENTS.COAL]: '⬛', [ELEMENTS.DUST]: '💨',
+                [ELEMENTS.MERCURY]: '⚪', [ELEMENTS.BOMB]: '💥', [ELEMENTS.FUSE]: '🧨',
+                [ELEMENTS.VINE]: '🌿', [ELEMENTS.SPONGE]: '🧽', [ELEMENTS.MAGMA]: '🌋',
+                [ELEMENTS.TNT]: '🧨', [ELEMENTS.CONCRETE]: '🏗️', [ELEMENTS.GAS]: '💨',
+                [ELEMENTS.ACID_GAS]: '☣️', [ELEMENTS.ANT]: '🐜', [ELEMENTS.WALL]: '🧱',
+                [ELEMENTS.CLOUD]: '☁️', [ELEMENTS.ELECTRIC]: '⚡', [ELEMENTS.RUST]: '🟤',
+                [ELEMENTS.CLAY]: '🏺', [ELEMENTS.PORCELAIN]: '🍽️', [ELEMENTS.PLASMA]: '💜',
+                [ELEMENTS.FABRIC]: '🧵', [ELEMENTS.BACTERIA]: '🦠', [ELEMENTS.FERTILIZER]: '💩',
+                [ELEMENTS.QUICKSAND]: '🟨', [ELEMENTS.SAP]: '🍯', [ELEMENTS.RESIN]: '🍂',
+                [ELEMENTS.AMBER]: '🟠', [ELEMENTS.COAL_ORE]: '🪨', [ELEMENTS.IRON_ORE]: '⛰️',
+                [ELEMENTS.GOLD_ORE]: '✨', [ELEMENTS.DIAMOND]: '💎', [ELEMENTS.MYCELIUM]: '🍄',
+                [ELEMENTS.MUSHROOM]: '🍄', [ELEMENTS.SULFUR]: '🟡', [ELEMENTS.CHARCOAL]: '🖤',
+                [ELEMENTS.SANDSTONE]: '🟫', [ELEMENTS.OBSIDIAN]: '🖤',
             };
+
+            // Копируем короткие имена в ELEMENT_NAMES
+            Object.assign(ELEMENT_NAMES, rawNames);
 
             let currentElement = ELEMENTS.SAND;
-            let mouseDown = 0; // 0 - не нажата, 1 - левая, 2 - правая
+            let mouseDown = 0;
             let brushSize = 3;
             let lastMouseX = -1, lastMouseY = -1;
 
-            // Создаём кнопки элементов
             const toolbar = document.getElementById('toolbar');
             const elementButtons = {};
 
             function createToolbar() {
-                const elementsToShow = [ELEMENTS.SAND, ELEMENTS.WATER, ELEMENTS.STONE, ELEMENTS.WOOD, 
-                                       ELEMENTS.FIRE, ELEMENTS.LAVA, ELEMENTS.PLANT, ELEMENTS.ACID, 
-                                       ELEMENTS.STEAM, ELEMENTS.SMOKE];
                 elementsToShow.forEach(el => {
                     const btn = document.createElement('button');
                     btn.className = 'element-btn';
-                    btn.textContent = ELEMENT_NAMES[el];
-                    btn.style.backgroundColor = ELEMENT_COLORS[el];
+                    btn.textContent = ELEMENT_NAMES[el] || '?';
+                    btn.style.backgroundColor = ELEMENT_COLORS[el] || '#555';
+                    btn.title = Object.keys(ELEMENTS).find(k => ELEMENTS[k] === el) || '?';
                     btn.dataset.element = el;
                     btn.addEventListener('click', () => {
                         currentElement = parseInt(el);
@@ -188,562 +327,435 @@
 
             function updateActiveButton() {
                 Object.entries(elementButtons).forEach(([el, btn]) => {
-                    if (parseInt(el) === currentElement) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
+                    btn.classList.toggle('active', parseInt(el) === currentElement);
                 });
             }
 
-            // Индекс в массиве
-            function getIndex(x, y) {
-                return y * WIDTH + x;
-            }
+            function getIndex(x, y) { return y * WIDTH + x; }
+            function inBounds(x, y) { return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT; }
 
-            // Проверка границ
-            function inBounds(x, y) {
-                return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
-            }
-
-            // Поменять две ячейки местами
             function swapCells(x1, y1, x2, y2) {
-                const idx1 = getIndex(x1, y1);
-                const idx2 = getIndex(x2, y2);
-                [grid[idx1], grid[idx2]] = [grid[idx2], grid[idx1]];
-                [extraData[idx1], extraData[idx2]] = [extraData[idx2], extraData[idx1]];
+                const i1 = getIndex(x1, y1), i2 = getIndex(x2, y2);
+                [grid[i1], grid[i2]] = [grid[i2], grid[i1]];
+                [extraData[i1], extraData[i2]] = [extraData[i2], extraData[i1]];
             }
 
-            // Переместить частицу из (x1,y1) в (x2,y2) — ячейка назначения должна быть пустой
             function moveCell(x1, y1, x2, y2) {
-                const idx1 = getIndex(x1, y1);
-                const idx2 = getIndex(x2, y2);
-                grid[idx2] = grid[idx1];
-                extraData[idx2] = extraData[idx1];
-                grid[idx1] = ELEMENTS.EMPTY;
-                extraData[idx1] = 0;
+                const i1 = getIndex(x1, y1), i2 = getIndex(x2, y2);
+                grid[i2] = grid[i1]; extraData[i2] = extraData[i1];
+                grid[i1] = 0; extraData[i1] = 0;
             }
 
-            // Обработка физики одного пикселя
+            // Проверка соседей на наличие элемента
+            function hasNeighbor(x, y, elem) {
+                for (let dy = -1; dy <= 1; dy++)
+                    for (let dx = -1; dx <= 1; dx++)
+                        if (dx || dy)
+                            if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === elem)
+                                return true;
+                return false;
+            }
+
             function updatePixel(x, y) {
                 const idx = getIndex(x, y);
                 const elem = grid[idx];
-
                 if (elem === ELEMENTS.EMPTY) return;
 
-                // ---- ПЕСОК ----
-                if (elem === ELEMENTS.SAND) {
-                    if (y < HEIGHT - 1) {
-                        // Падает вниз
-                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY || 
-                            grid[getIndex(x, y + 1)] === ELEMENTS.WATER) {
-                            swapCells(x, y, x, y + 1);
-                            return;
-                        }
-                        // Диагонально вниз-влево
-                        if (x > 0 && (grid[getIndex(x - 1, y + 1)] === ELEMENTS.EMPTY || 
-                                      grid[getIndex(x - 1, y + 1)] === ELEMENTS.WATER)) {
-                            swapCells(x, y, x - 1, y + 1);
-                            return;
-                        }
-                        // Диагонально вниз-вправо
-                        if (x < WIDTH - 1 && (grid[getIndex(x + 1, y + 1)] === ELEMENTS.EMPTY || 
-                                              grid[getIndex(x + 1, y + 1)] === ELEMENTS.WATER)) {
-                            swapCells(x, y, x + 1, y + 1);
-                            return;
-                        }
-                    }
-                    // Взаимодействие с кислотой: песок растворяется
-                    checkAcidDissolve(x, y, 0.02);
-                }
+                // === Базовые элементы ===
+                if (elem === ELEMENTS.SAND) updateSand(x, y, idx);
+                else if (elem === ELEMENTS.WATER) updateWater(x, y, idx);
+                else if (elem === ELEMENTS.STONE) updateStone(x, y, idx);
+                else if (elem === ELEMENTS.WOOD) updateWood(x, y, idx);
+                else if (elem === ELEMENTS.FIRE) updateFire(x, y, idx);
+                else if (elem === ELEMENTS.LAVA) updateLava(x, y, idx);
+                else if (elem === ELEMENTS.STEAM) updateSteam(x, y, idx);
+                else if (elem === ELEMENTS.PLANT) updatePlant(x, y, idx);
+                else if (elem === ELEMENTS.SMOKE) updateSmoke(x, y, idx);
+                else if (elem === ELEMENTS.ACID) updateAcid(x, y, idx);
+                // === Новые элементы ===
+                else if (elem === ELEMENTS.SALT) updateSalt(x, y, idx);
+                else if (elem === ELEMENTS.OIL) updateOil(x, y, idx);
+                else if (elem === ELEMENTS.GUNPOWDER) updateGunpowder(x, y, idx);
+                else if (elem === ELEMENTS.ICE) updateIce(x, y, idx);
+                else if (elem === ELEMENTS.MUD) updateMud(x, y, idx);
+                else if (elem === ELEMENTS.SEED) updateSeed(x, y, idx);
+                else if (elem === ELEMENTS.VIRUS) updateVirus(x, y, idx);
+                else if (elem === ELEMENTS.METAL) updateMetal(x, y, idx);
+                else if (elem === ELEMENTS.SLIME) updateSlime(x, y, idx);
+                else if (elem === ELEMENTS.CRYSTAL) updateCrystal(x, y, idx);
+                else if (elem === ELEMENTS.WAX) updateWax(x, y, idx);
+                else if (elem === ELEMENTS.COAL) updateCoal(x, y, idx);
+                else if (elem === ELEMENTS.DUST) updateDust(x, y, idx);
+                else if (elem === ELEMENTS.MERCURY) updateMercury(x, y, idx);
+                else if (elem === ELEMENTS.BOMB) updateBomb(x, y, idx);
+                else if (elem === ELEMENTS.VINE) updateVine(x, y, idx);
+                else if (elem === ELEMENTS.SPONGE) updateSponge(x, y, idx);
+                else if (elem === ELEMENTS.CONCRETE) updateConcrete(x, y, idx);
+                else if (elem === ELEMENTS.GAS) updateGas(x, y, idx);
+                else if (elem === ELEMENTS.ANT) updateAnt(x, y, idx);
+                else if (elem === ELEMENTS.WALL) { /* неподвижен */ }
+                else if (elem === ELEMENTS.CLAY) updateClay(x, y, idx);
+                else if (elem === ELEMENTS.PORCELAIN) { /* неподвижен */ }
+                else if (elem === ELEMENTS.FABRIC) updateFabric(x, y, idx);
+                else if (elem === ELEMENTS.MUSHROOM) updateMushroom(x, y, idx);
+                else if (elem === ELEMENTS.TNT) updateTNT(x, y, idx);
+                else if (elem === ELEMENTS.DIAMOND) { /* неподвижен */ }
+                else if (elem === ELEMENTS.OBSIDIAN) { /* неподвижен */ }
+                else if (elem === ELEMENTS.DUST) updateDust(x, y, idx);
+            }
 
-                // ---- ВОДА ----
-                else if (elem === ELEMENTS.WATER) {
-                    if (y < HEIGHT - 1) {
-                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y + 1);
-                            return;
-                        }
-                    }
-                    // Течёт в стороны
-                    const dir = Math.random() < 0.5 ? -1 : 1;
-                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY) {
-                        swapCells(x, y, x + dir, y);
-                        return;
-                    }
-                    if (x - dir >= 0 && x - dir < WIDTH && grid[getIndex(x - dir, y)] === ELEMENTS.EMPTY) {
-                        swapCells(x, y, x - dir, y);
-                        return;
-                    }
-                    // Вода тушит огонь/лаву при контакте
-                    checkWaterExtinguish(x, y);
+            // === Физика элементов ===
+            function updateSand(x, y, idx) {
+                if (y < HEIGHT-1 && (grid[getIndex(x,y+1)] === 0 || grid[getIndex(x,y+1)] === ELEMENTS.WATER)) {
+                    swapCells(x, y, x, y+1); return;
                 }
-
-                // ---- КАМЕНЬ (неподвижен) ----
-                else if (elem === ELEMENTS.STONE) {
-                    // Камень не двигается, но может растворяться кислотой
-                    checkAcidDissolve(x, y, 0.005);
+                if (x > 0 && y < HEIGHT-1 && (grid[getIndex(x-1,y+1)] === 0 || grid[getIndex(x-1,y+1)] === ELEMENTS.WATER)) {
+                    swapCells(x, y, x-1, y+1); return;
                 }
-
-                // ---- ДЕРЕВО ----
-                else if (elem === ELEMENTS.WOOD) {
-                    // Горит при контакте с огнём или лавой
-                    if (checkFireSpread(x, y, 0.08)) return;
-                    checkAcidDissolve(x, y, 0.03);
+                if (x < WIDTH-1 && y < HEIGHT-1 && (grid[getIndex(x+1,y+1)] === 0 || grid[getIndex(x+1,y+1)] === ELEMENTS.WATER)) {
+                    swapCells(x, y, x+1, y+1); return;
                 }
+                if (hasNeighbor(x,y,ELEMENTS.ACID) && Math.random() < 0.02) grid[idx] = 0;
+            }
 
-                // ---- ОГОНЬ ----
-                else if (elem === ELEMENTS.FIRE) {
-                    // Огонь живёт ограниченное время
-                    extraData[idx] = (extraData[idx] || 1) - 0.01;
-                    if (extraData[idx] <= 0) {
-                        // Превращается в дым
-                        grid[idx] = ELEMENTS.SMOKE;
-                        extraData[idx] = 1.0;
-                        return;
-                    }
-                    // Поднимается вверх
-                    if (y > 0 && Math.random() < 0.3) {
-                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y - 1);
-                            return;
-                        }
-                    }
-                    // Случайное движение
-                    const dx = Math.floor(Math.random() * 3) - 1;
-                    const dy = Math.random() < 0.5 ? 0 : Math.floor(Math.random() * 3) - 1;
-                    const nx = x + dx, ny = y + dy;
-                    if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.EMPTY && Math.random() < 0.3) {
-                        swapCells(x, y, nx, ny);
-                        return;
-                    }
-                    // Поджигает соседние горючие элементы
-                    burnNeighbors(x, y);
-                    // Тушится водой
-                    checkWaterExtinguishFire(x, y);
+            function updateWater(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                const dir = Math.random() < 0.5 ? -1 : 1;
+                if (inBounds(x+dir, y) && grid[getIndex(x+dir, y)] === 0) { swapCells(x, y, x+dir, y); return; }
+                if (inBounds(x-dir, y) && grid[getIndex(x-dir, y)] === 0) { swapCells(x, y, x-dir, y); return; }
+                if (hasNeighbor(x,y,ELEMENTS.FIRE)) { grid[idx] = ELEMENTS.STEAM; extraData[idx] = 1; }
+                if (hasNeighbor(x,y,ELEMENTS.LAVA)) { grid[idx] = ELEMENTS.STONE; }
+                if (hasNeighbor(x,y,ELEMENTS.SALT) && Math.random() < 0.01) grid[idx] = ELEMENTS.WATER;
+            }
+
+            function updateStone(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.ACID) && Math.random() < 0.005) grid[idx] = 0;
+                if (hasNeighbor(x,y,ELEMENTS.LAVA) && Math.random() < 0.001) grid[idx] = ELEMENTS.MAGMA;
+            }
+
+            function updateWood(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    if (Math.random() < 0.08) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 1; }
                 }
+                if (hasNeighbor(x,y,ELEMENTS.ACID) && Math.random() < 0.03) grid[idx] = 0;
+            }
 
-                // ---- ЛАВА ----
-                else if (elem === ELEMENTS.LAVA) {
-                    // Медленно течёт как очень вязкая жидкость
-                    if (y < HEIGHT - 1 && Math.random() < 0.4) {
-                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y + 1);
-                            return;
-                        }
-                    }
-                    const dir = Math.random() < 0.5 ? -1 : 1;
-                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY && Math.random() < 0.2) {
-                        swapCells(x, y, x + dir, y);
-                        return;
-                    }
-                    // Поджигает соседей
-                    burnNeighbors(x, y);
-                    // При контакте с водой превращается в камень
-                    if (checkLavaWaterContact(x, y)) return;
-                    // Медленно застывает в камень
-                    if (Math.random() < 0.0005) {
-                        grid[idx] = ELEMENTS.STONE;
-                    }
-                    checkAcidDissolve(x, y, 0.002);
+            function updateFire(x, y, idx) {
+                extraData[idx] = (extraData[idx] || 1) - 0.01;
+                if (extraData[idx] <= 0) { grid[idx] = ELEMENTS.SMOKE; extraData[idx] = 1; return; }
+                if (y > 0 && Math.random() < 0.3 && grid[getIndex(x,y-1)] === 0) { swapCells(x, y, x, y-1); return; }
+                const dx = Math.floor(Math.random()*3)-1, dy = Math.random()<0.5 ? 0 : Math.floor(Math.random()*3)-1;
+                if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0 && Math.random() < 0.3) { swapCells(x, y, x+dx, y+dy); return; }
+                burnNeighbors(x, y);
+                if (hasNeighbor(x,y,ELEMENTS.WATER)) { grid[idx] = ELEMENTS.STEAM; extraData[idx] = 1; }
+            }
+
+            function updateLava(x, y, idx) {
+                if (y < HEIGHT-1 && Math.random() < 0.4 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                const dir = Math.random() < 0.5 ? -1 : 1;
+                if (inBounds(x+dir, y) && grid[getIndex(x+dir, y)] === 0 && Math.random() < 0.2) { swapCells(x, y, x+dir, y); return; }
+                burnNeighbors(x, y);
+                if (hasNeighbor(x,y,ELEMENTS.WATER)) { grid[idx] = ELEMENTS.STONE; return; }
+                if (Math.random() < 0.0005) grid[idx] = ELEMENTS.STONE;
+            }
+
+            function updateSteam(x, y, idx) {
+                if (y > 0 && grid[getIndex(x,y-1)] === 0) { swapCells(x, y, x, y-1); return; }
+                if (inBounds(x+1, y) && grid[getIndex(x+1, y)] === 0) { swapCells(x, y, x+1, y); return; }
+                if (inBounds(x-1, y) && grid[getIndex(x-1, y)] === 0) { swapCells(x, y, x-1, y); return; }
+                if (Math.random() < 0.005) grid[idx] = ELEMENTS.WATER;
+            }
+
+            function updatePlant(x, y, idx) {
+                if (Math.random() < 0.001) {
+                    const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                    const [dx, dy] = dirs[Math.floor(Math.random()*4)];
+                    if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0) grid[getIndex(x+dx, y+dy)] = ELEMENTS.PLANT;
                 }
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.15) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 1; }
+            }
 
-                // ---- ПАР ----
-                else if (elem === ELEMENTS.STEAM) {
-                    if (y > 0) {
-                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y - 1);
-                            return;
-                        }
-                    }
-                    const dx = Math.floor(Math.random() * 3) - 1;
-                    if (x + dx >= 0 && x + dx < WIDTH && grid[getIndex(x + dx, y)] === ELEMENTS.EMPTY) {
-                        swapCells(x, y, x + dx, y);
-                        return;
-                    }
-                    // Конденсируется в воду
-                    if (Math.random() < 0.005) {
-                        grid[idx] = ELEMENTS.WATER;
-                    }
-                }
+            function updateSmoke(x, y, idx) {
+                if (y > 0 && Math.random() < 0.3 && grid[getIndex(x,y-1)] === 0) { swapCells(x, y, x, y-1); return; }
+                if (Math.random() < 0.01) grid[idx] = 0;
+            }
 
-                // ---- РАСТЕНИЕ ----
-                else if (elem === ELEMENTS.PLANT) {
-                    // Растёт на соседних пустых клетках (очень медленно)
-                    if (Math.random() < 0.001) {
-                        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
-                        const [dx, dy] = dirs[Math.floor(Math.random() * dirs.length)];
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.EMPTY) {
-                            grid[getIndex(nx, ny)] = ELEMENTS.PLANT;
-                        }
-                    }
-                    // Горит
-                    if (checkFireSpread(x, y, 0.15)) return;
-                    checkAcidDissolve(x, y, 0.05);
-                }
+            function updateAcid(x, y, idx) {
+                if (y < HEIGHT-1 && Math.random() < 0.4 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                dissolveNeighbors(x, y);
+                if (Math.random() < 0.001) grid[idx] = 0;
+            }
 
-                // ---- ДЫМ ----
-                else if (elem === ELEMENTS.SMOKE) {
-                    if (y > 0 && Math.random() < 0.3) {
-                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y - 1);
-                            return;
-                        }
-                    }
-                    const dx = Math.floor(Math.random() * 3) - 1;
-                    if (x + dx >= 0 && x + dx < WIDTH && grid[getIndex(x + dx, y)] === ELEMENTS.EMPTY) {
-                        swapCells(x, y, x + dx, y);
-                        return;
-                    }
-                    // Исчезает
-                    if (Math.random() < 0.01) {
-                        grid[idx] = ELEMENTS.EMPTY;
-                    }
-                }
+            function updateSalt(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                if (hasNeighbor(x,y,ELEMENTS.WATER) && Math.random() < 0.01) grid[idx] = 0; // Растворяется
+            }
 
-                // ---- КИСЛОТА ----
-                else if (elem === ELEMENTS.ACID) {
-                    if (y < HEIGHT - 1 && Math.random() < 0.4) {
-                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
-                            swapCells(x, y, x, y + 1);
-                            return;
-                        }
-                    }
-                    const dir = Math.random() < 0.5 ? -1 : 1;
-                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY && Math.random() < 0.3) {
-                        swapCells(x, y, x + dir, y);
-                        return;
-                    }
-                    // Растворяет почти всё
-                    dissolveNeighbors(x, y);
-                    // Медленно исчезает
-                    if (Math.random() < 0.001) {
-                        grid[idx] = ELEMENTS.EMPTY;
-                    }
+            function updateOil(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                const dir = Math.random() < 0.5 ? -1 : 1;
+                if (inBounds(x+dir, y) && grid[getIndex(x+dir, y)] === 0) { swapCells(x, y, x+dir, y); return; }
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    if (Math.random() < 0.2) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 1; }
                 }
             }
 
-            // Вспомогательные функции взаимодействий
-            function checkFireSpread(x, y, probability) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny)) {
-                            const nElem = grid[getIndex(nx, ny)];
-                            if (nElem === ELEMENTS.FIRE || nElem === ELEMENTS.LAVA) {
-                                if (Math.random() < probability) {
-                                    grid[getIndex(x, y)] = ELEMENTS.FIRE;
-                                    extraData[getIndex(x, y)] = 1.0;
-                                    return true;
-                                }
-                            }
-                        }
-                    }
+            function updateGunpowder(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    explode(x, y, 5);
                 }
-                return false;
             }
 
+            function updateIce(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    if (Math.random() < 0.1) grid[idx] = ELEMENTS.WATER;
+                }
+            }
+
+            function updateMud(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                if (Math.random() < 0.0001) grid[idx] = ELEMENTS.CLAY;
+            }
+
+            function updateSeed(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                if (hasNeighbor(x,y,ELEMENTS.WATER) && Math.random() < 0.005) grid[idx] = ELEMENTS.PLANT;
+            }
+
+            function updateVirus(x, y, idx) {
+                if (Math.random() < 0.01) {
+                    for (let dy = -2; dy <= 2; dy++)
+                        for (let dx = -2; dx <= 2; dx++)
+                            if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] !== 0 && grid[getIndex(x+dx, y+dy)] !== ELEMENTS.VIRUS && Math.random() < 0.1)
+                                grid[getIndex(x+dx, y+dy)] = ELEMENTS.VIRUS;
+                }
+            }
+
+            function updateMetal(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.ACID) && Math.random() < 0.01) grid[idx] = ELEMENTS.RUST;
+                if (hasNeighbor(x,y,ELEMENTS.LAVA) && Math.random() < 0.005) grid[idx] = ELEMENTS.LAVA;
+            }
+
+            function updateSlime(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0 && Math.random() < 0.3) { swapCells(x, y, x, y+1); return; }
+                if (Math.random() < 0.001) {
+                    const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                    const [dx, dy] = dirs[Math.floor(Math.random()*4)];
+                    if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0) grid[getIndex(x+dx, y+dy)] = ELEMENTS.SLIME;
+                }
+            }
+
+            function updateCrystal(x, y, idx) {
+                if (Math.random() < 0.0005) {
+                    for (let dy = -1; dy <= 1; dy++)
+                        for (let dx = -1; dx <= 1; dx++)
+                            if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0 && Math.random() < 0.1)
+                                grid[getIndex(x+dx, y+dy)] = ELEMENTS.CRYSTAL;
+                }
+            }
+
+            function updateWax(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.05) grid[idx] = ELEMENTS.FIRE;
+            }
+
+            function updateCoal(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.02) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 2; }
+            }
+
+            function updateDust(x, y, idx) {
+                if (y > 0 && Math.random() < 0.2 && grid[getIndex(x,y-1)] === 0) { swapCells(x, y, x, y-1); return; }
+                if (Math.random() < 0.005) grid[idx] = 0;
+            }
+
+            function updateMercury(x, y, idx) {
+                if (y < HEIGHT-1 && grid[getIndex(x,y+1)] === 0) { swapCells(x, y, x, y+1); return; }
+                const dir = Math.random() < 0.5 ? -1 : 1;
+                if (inBounds(x+dir, y) && grid[getIndex(x+dir, y)] === 0) { swapCells(x, y, x+dir, y); return; }
+            }
+
+            function updateBomb(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    explode(x, y, 12);
+                }
+            }
+
+            function updateVine(x, y, idx) {
+                if (Math.random() < 0.002) {
+                    const dirs = [[0,-1],[1,0],[-1,0],[1,-1],[-1,-1]];
+                    const [dx, dy] = dirs[Math.floor(Math.random()*5)];
+                    if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0) grid[getIndex(x+dx, y+dy)] = ELEMENTS.VINE;
+                }
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.1) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 1; }
+            }
+
+            function updateSponge(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.WATER)) {
+                    for (let dy = -2; dy <= 2; dy++)
+                        for (let dx = -2; dx <= 2; dx++)
+                            if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === ELEMENTS.WATER && Math.random() < 0.1)
+                                grid[getIndex(x+dx, y+dy)] = 0;
+                }
+            }
+
+            function updateConcrete(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.WATER) && Math.random() < 0.001) grid[idx] = ELEMENTS.STONE;
+            }
+
+            function updateGas(x, y, idx) {
+                if (y > 0 && grid[getIndex(x,y-1)] === 0) { swapCells(x, y, x, y-1); return; }
+                if (Math.random() < 0.01) grid[idx] = 0;
+                if (hasNeighbor(x,y,ELEMENTS.FIRE)) { explode(x, y, 3); }
+            }
+
+            function updateAnt(x, y, idx) {
+                const dirs = [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
+                const [dx, dy] = dirs[Math.floor(Math.random()*8)];
+                if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0 && Math.random() < 0.2) { swapCells(x, y, x+dx, y+dy); }
+            }
+
+            function updateClay(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.002) grid[idx] = ELEMENTS.PORCELAIN;
+            }
+
+            function updateFabric(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) && Math.random() < 0.3) { grid[idx] = ELEMENTS.FIRE; extraData[idx] = 1; }
+            }
+
+            function updateMushroom(x, y, idx) {
+                if (Math.random() < 0.001) {
+                    const [dx, dy] = [[0,1],[0,-1],[1,0],[-1,0]][Math.floor(Math.random()*4)];
+                    if (inBounds(x+dx, y+dy) && grid[getIndex(x+dx, y+dy)] === 0) grid[getIndex(x+dx, y+dy)] = ELEMENTS.SPORE;
+                }
+            }
+
+            function updateTNT(x, y, idx) {
+                if (hasNeighbor(x,y,ELEMENTS.FIRE) || hasNeighbor(x,y,ELEMENTS.LAVA)) {
+                    explode(x, y, 15);
+                }
+            }
+
+            // Вспомогательные функции
             function burnNeighbors(x, y) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny)) {
-                            const nIdx = getIndex(nx, ny);
-                            const nElem = grid[nIdx];
-                            if (nElem === ELEMENTS.WOOD || nElem === ELEMENTS.PLANT) {
-                                if (Math.random() < 0.1) {
-                                    grid[nIdx] = ELEMENTS.FIRE;
-                                    extraData[nIdx] = 1.0;
+                for (let dy = -1; dy <= 1; dy++)
+                    for (let dx = -1; dx <= 1; dx++)
+                        if (dx || dy)
+                            if (inBounds(x+dx, y+dy)) {
+                                const n = grid[getIndex(x+dx, y+dy)];
+                                if ((n === ELEMENTS.WOOD || n === ELEMENTS.PLANT || n === ELEMENTS.OIL || n === ELEMENTS.WAX || n === ELEMENTS.FABRIC) && Math.random() < 0.1) {
+                                    grid[getIndex(x+dx, y+dy)] = ELEMENTS.FIRE; extraData[getIndex(x+dx, y+dy)] = 1;
                                 }
                             }
-                        }
-                    }
-                }
-            }
-
-            function checkWaterExtinguish(x, y) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
-                            grid[getIndex(x, y)] = ELEMENTS.EMPTY;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            function checkWaterExtinguishFire(x, y) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
-                            grid[getIndex(x, y)] = ELEMENTS.STEAM;
-                            extraData[getIndex(x, y)] = 1.0;
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-
-            function checkLavaWaterContact(x, y) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
-                            grid[getIndex(x, y)] = ELEMENTS.STONE;
-                            grid[getIndex(nx, ny)] = ELEMENTS.STEAM;
-                            extraData[getIndex(nx, ny)] = 1.0;
-                            return true;
-                        }
-                    }
-                }
-                return false;
             }
 
             function dissolveNeighbors(x, y) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny)) {
-                            const nIdx = getIndex(nx, ny);
-                            const nElem = grid[nIdx];
-                            if (nElem !== ELEMENTS.EMPTY && nElem !== ELEMENTS.ACID && nElem !== ELEMENTS.STONE) {
-                                if (Math.random() < 0.1) {
-                                    grid[nIdx] = ELEMENTS.EMPTY;
+                for (let dy = -1; dy <= 1; dy++)
+                    for (let dx = -1; dx <= 1; dx++)
+                        if (dx || dy)
+                            if (inBounds(x+dx, y+dy)) {
+                                const n = grid[getIndex(x+dx, y+dy)];
+                                if (n !== 0 && n !== ELEMENTS.ACID && n !== ELEMENTS.GLASS && n !== ELEMENTS.DIAMOND && n !== ELEMENTS.OBSIDIAN && Math.random() < 0.1)
+                                    grid[getIndex(x+dx, y+dy)] = 0;
+                            }
+            }
+
+            function explode(x, y, radius) {
+                for (let dy = -radius; dy <= radius; dy++)
+                    for (let dx = -radius; dx <= radius; dx++)
+                        if (dx*dx + dy*dy <= radius*radius)
+                            if (inBounds(x+dx, y+dy)) {
+                                const idx = getIndex(x+dx, y+dy);
+                                if (grid[idx] !== ELEMENTS.WALL && grid[idx] !== ELEMENTS.OBSIDIAN) {
+                                    grid[idx] = Math.random() < 0.7 ? ELEMENTS.FIRE : ELEMENTS.EMPTY;
+                                    extraData[idx] = grid[idx] === ELEMENTS.FIRE ? 1 : 0;
                                 }
-                            } else if (nElem === ELEMENTS.STONE && Math.random() < 0.02) {
-                                grid[nIdx] = ELEMENTS.EMPTY;
                             }
-                        }
-                    }
-                }
             }
 
-            function checkAcidDissolve(x, y, prob) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        const nx = x + dx, ny = y + dy;
-                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.ACID) {
-                            if (Math.random() < prob) {
-                                grid[getIndex(x, y)] = ELEMENTS.EMPTY;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Главный цикл обновления
             function update() {
-                // Обновляем снизу вверх, справа налево (для корректного падения)
-                for (let y = HEIGHT - 1; y >= 0; y--) {
-                    // Чередуем направление для более равномерного поведения
-                    const startX = (y % 2 === 0) ? 0 : WIDTH - 1;
-                    const endX = (y % 2 === 0) ? WIDTH : -1;
-                    const stepX = (y % 2 === 0) ? 1 : -1;
-                    
-                    for (let x = startX; x !== endX; x += stepX) {
-                        updatePixel(x, y);
-                    }
+                for (let y = HEIGHT-1; y >= 0; y--) {
+                    const startX = (y%2===0) ? 0 : WIDTH-1;
+                    const endX = (y%2===0) ? WIDTH : -1;
+                    const stepX = (y%2===0) ? 1 : -1;
+                    for (let x = startX; x !== endX; x += stepX) updatePixel(x, y);
                 }
             }
 
-            // Отрисовка
             function draw() {
                 const imageData = ctx.createImageData(WIDTH, HEIGHT);
                 const data = imageData.data;
-                
                 for (let i = 0; i < grid.length; i++) {
                     const elem = grid[i];
-                    const color = ELEMENT_COLORS[elem] || '#0a0a1a';
-                    // Парсим hex цвет
-                    let r, g, b;
-                    if (color.startsWith('#')) {
-                        const hex = color.substring(1);
-                        r = parseInt(hex.substring(0,2), 16);
-                        g = parseInt(hex.substring(2,4), 16);
-                        b = parseInt(hex.substring(4,6), 16);
-                    } else {
-                        r = 10; g = 10; b = 26;
+                    let colorStr = ELEMENT_COLORS[elem] || '#0a0a1a';
+                    let r=10,g=10,b=26;
+                    if (typeof colorStr === 'string' && colorStr.startsWith('#')) {
+                        r = parseInt(colorStr.substring(1,3),16); g = parseInt(colorStr.substring(3,5),16); b = parseInt(colorStr.substring(5,7),16);
                     }
-                    
-                    // Немного вариации для текстуры
-                    const variation = elem === ELEMENTS.SAND || elem === ELEMENTS.WOOD ? (Math.random() * 20 - 10) : 0;
-                    
-                    const pixelIndex = i * 4;
-                    data[pixelIndex] = Math.min(255, Math.max(0, r + variation));
-                    data[pixelIndex + 1] = Math.min(255, Math.max(0, g + variation));
-                    data[pixelIndex + 2] = Math.min(255, Math.max(0, b + variation));
-                    data[pixelIndex + 3] = 255;
+                    const pi = i*4; data[pi]=r; data[pi+1]=g; data[pi+2]=b; data[pi+3]=255;
                 }
-                
                 ctx.putImageData(imageData, 0, 0);
             }
 
-            // Рисование элементов мышью
             function drawElements(mx, my, erase) {
-                const px = Math.floor(mx / SCALE);
-                const py = Math.floor(my / SCALE);
-                
-                for (let dy = -brushSize; dy <= brushSize; dy++) {
-                    for (let dx = -brushSize; dx <= brushSize; dx++) {
-                        if (dx*dx + dy*dy <= brushSize*brushSize) {
-                            const nx = px + dx;
-                            const ny = py + dy;
-                            if (inBounds(nx, ny)) {
-                                const idx = getIndex(nx, ny);
-                                if (erase) {
-                                    grid[idx] = ELEMENTS.EMPTY;
-                                    extraData[idx] = 0;
-                                } else {
-                                    if (currentElement === ELEMENTS.FIRE || currentElement === ELEMENTS.LAVA) {
-                                        grid[idx] = currentElement;
-                                        extraData[idx] = 1.0;
-                                    } else {
-                                        grid[idx] = currentElement;
-                                        extraData[idx] = 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                const px = Math.floor(mx/SCALE), py = Math.floor(my/SCALE);
+                const points = [{x:px, y:py}];
+                if (lastMouseX>=0 && lastMouseY>=0) {
+                    const lpx = Math.floor(lastMouseX/SCALE), lpy = Math.floor(lastMouseY/SCALE);
+                    const dist = Math.sqrt((px-lpx)**2+(py-lpy)**2);
+                    for (let i=1; i<=dist; i++) points.push({x:Math.round(lpx+(px-lpx)*i/dist), y:Math.round(lpy+(py-lpy)*i/dist)});
                 }
-                
-                // Также рисуем линию между последней и текущей точкой
-                if (lastMouseX >= 0 && lastMouseY >= 0) {
-                    const lpx = Math.floor(lastMouseX / SCALE);
-                    const lpy = Math.floor(lastMouseY / SCALE);
-                    const dist = Math.sqrt((px-lpx)**2 + (py-lpy)**2);
-                    const steps = Math.ceil(dist);
-                    for (let i = 1; i <= steps; i++) {
-                        const t = i / steps;
-                        const ix = Math.round(lpx + (px - lpx) * t);
-                        const iy = Math.round(lpy + (py - lpy) * t);
-                        for (let dy = -brushSize; dy <= brushSize; dy++) {
-                            for (let dx = -brushSize; dx <= brushSize; dx++) {
-                                if (dx*dx + dy*dy <= brushSize*brushSize) {
-                                    const nx = ix + dx;
-                                    const ny = iy + dy;
-                                    if (inBounds(nx, ny)) {
-                                        const idx = getIndex(nx, ny);
-                                        if (erase) {
-                                            grid[idx] = ELEMENTS.EMPTY;
-                                            extraData[idx] = 0;
-                                        } else {
-                                            if (currentElement === ELEMENTS.FIRE || currentElement === ELEMENTS.LAVA) {
-                                                grid[idx] = currentElement;
-                                                extraData[idx] = 1.0;
-                                            } else {
-                                                grid[idx] = currentElement;
-                                                extraData[idx] = 0;
-                                            }
-                                        }
-                                    }
-                                }
+                points.forEach(p => {
+                    for (let dy=-brushSize; dy<=brushSize; dy++)
+                        for (let dx=-brushSize; dx<=brushSize; dx++)
+                            if (dx*dx+dy*dy <= brushSize*brushSize && inBounds(p.x+dx, p.y+dy)) {
+                                const idx = getIndex(p.x+dx, p.y+dy);
+                                if (erase) { grid[idx]=0; extraData[idx]=0; }
+                                else { grid[idx]=currentElement; extraData[idx]=(currentElement===ELEMENTS.FIRE||currentElement===ELEMENTS.LAVA)?1:0; }
                             }
-                        }
-                    }
-                }
-                lastMouseX = mx;
-                lastMouseY = my;
+                });
+                lastMouseX=mx; lastMouseY=my;
             }
 
-            // Обработчики событий мыши
-            canvas.addEventListener('mousedown', (e) => {
+            canvas.addEventListener('mousedown', e => {
                 e.preventDefault();
                 const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-                
-                if (e.button === 0) { // Левая кнопка
-                    mouseDown = 1;
-                    lastMouseX = mx;
-                    lastMouseY = my;
-                    drawElements(mx, my, false);
-                } else if (e.button === 2) { // Правая кнопка
-                    mouseDown = 2;
-                    lastMouseX = mx;
-                    lastMouseY = my;
-                    drawElements(mx, my, true);
-                }
+                const mx = e.clientX-rect.left, my = e.clientY-rect.top;
+                mouseDown = e.button===0 ? 1 : (e.button===2 ? 2 : 0);
+                lastMouseX=mx; lastMouseY=my;
+                drawElements(mx, my, mouseDown===2);
             });
-
-            canvas.addEventListener('mousemove', (e) => {
+            canvas.addEventListener('mousemove', e => {
                 const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-                
-                if (mouseDown === 1) {
-                    drawElements(mx, my, false);
-                } else if (mouseDown === 2) {
-                    drawElements(mx, my, true);
-                } else {
-                    lastMouseX = mx;
-                    lastMouseY = my;
-                }
+                const mx = e.clientX-rect.left, my = e.clientY-rect.top;
+                if (mouseDown===1) drawElements(mx, my, false);
+                else if (mouseDown===2) drawElements(mx, my, true);
+                else { lastMouseX=mx; lastMouseY=my; }
             });
+            window.addEventListener('mouseup', () => { mouseDown=0; lastMouseX=-1; lastMouseY=-1; });
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
 
-            window.addEventListener('mouseup', () => {
-                mouseDown = 0;
-                lastMouseX = -1;
-                lastMouseY = -1;
-            });
-
-            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-            // Тач-управление для мобильных
-            canvas.addEventListener('touchstart', (e) => {
+            canvas.addEventListener('touchstart', e => {
                 e.preventDefault();
                 const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const mx = touch.clientX - rect.left;
-                const my = touch.clientY - rect.top;
-                mouseDown = 1;
-                lastMouseX = mx;
-                lastMouseY = my;
+                const t = e.touches[0];
+                const mx=t.clientX-rect.left, my=t.clientY-rect.top;
+                mouseDown=1; lastMouseX=mx; lastMouseY=my;
                 drawElements(mx, my, false);
             });
-
-            canvas.addEventListener('touchmove', (e) => {
+            canvas.addEventListener('touchmove', e => {
                 e.preventDefault();
                 const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const mx = touch.clientX - rect.left;
-                const my = touch.clientY - rect.top;
-                if (mouseDown === 1) {
-                    drawElements(mx, my, false);
-                }
+                const t = e.touches[0];
+                const mx=t.clientX-rect.left, my=t.clientY-rect.top;
+                if (mouseDown===1) drawElements(mx, my, false);
             });
+            canvas.addEventListener('touchend', e => { e.preventDefault(); mouseDown=0; lastMouseX=-1; lastMouseY=-1; });
 
-            canvas.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                mouseDown = 0;
-                lastMouseX = -1;
-                lastMouseY = -1;
-            });
+            document.getElementById('clearBtn').addEventListener('click', () => { grid.fill(0); extraData.fill(0); });
+            document.getElementById('brushSize').addEventListener('input', e => { brushSize = parseInt(e.target.value); });
 
-            // Кнопка очистки
-            document.getElementById('clearBtn').addEventListener('click', () => {
-                grid.fill(ELEMENTS.EMPTY);
-                extraData.fill(0);
-            });
-
-            // Инициализация
             createToolbar();
-
-            // Главный игровой цикл
-            function gameLoop() {
-                update();
-                draw();
-                requestAnimationFrame(gameLoop);
-            }
-
+            function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
             gameLoop();
         })();
     </script>
