@@ -2,2546 +2,750 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>President Simulator - TheoTown Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Песочница — Физика частиц</title>
     <style>
-        :root {
-            --bg: #0a0a14;
-            --panel: #1a1a2e;
-            --accent: #f0c040;
-            --gold: #e8c547;
-            --text: #e8e8e8;
-            --border: #2e2e4e;
-            --hover: #2a2a50;
-            --zone-res: #4CAF50;
-            --zone-com: #2196F3;
-            --zone-ind: #FF9800;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #060610;
-            overflow: hidden;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            position: fixed;
-        }
-
-        #splash {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: radial-gradient(ellipse at 50% 30%, #1a1040 0%, #060610 70%);
+            margin: 0;
+            padding: 10px;
+            background: #1a1a2e;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+        .game-wrapper {
+            text-align: center;
+            background: #16213e;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        canvas {
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            cursor: crosshair;
+            background: #0a0a1a;
+            display: block;
+            margin: 0 auto;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            background: #0f3460;
+            padding: 12px;
+            border-radius: 12px;
+        }
+        .element-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            text-shadow: 0 1px 2px black;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+        .element-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px currentColor;
+            border: 2px solid white;
+        }
+        .info {
+            color: #e0e0e0;
+            margin-top: 8px;
+            font-size: 14px;
+            display: flex;
             justify-content: center;
             gap: 20px;
-            padding: 20px;
+            flex-wrap: wrap;
         }
-        #splash.hidden {
-            display: none;
-        }
-        .splash-stars {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-        .splash-title {
-            font-size: clamp(2em, 5vw, 3.2em);
-            font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(180deg, #ffe08a, #c8943e, #8b5e14);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
-            animation: titleGlow 2s ease-in-out infinite;
-        }
-        @keyframes titleGlow {
-            0%,
-            100% {
-                filter: drop-shadow(0 4px 20px rgba(200, 150, 50, 0.4));
-            }
-            50% {
-                filter: drop-shadow(0 4px 35px rgba(240, 200, 80, 0.7));
-            }
-        }
-        .splash-subtitle {
-            color: #b0a0c0;
-            font-size: clamp(0.9em, 2vw, 1.1em);
-            letter-spacing: 2px;
-        }
-        .splash-form {
-            background: rgba(20, 18, 40, 0.9);
-            border: 1px solid #3a3050;
-            border-radius: 20px;
-            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: min(440px, 90vw);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-        }
-        .splash-form label {
-            font-weight: 700;
-            color: #d4b060;
-            font-size: 0.95em;
-        }
-        .splash-form input {
-            background: #121025;
-            border: 2px solid #3a3050;
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            transition: 0.3s;
-            outline: none;
-        }
-        .splash-form input:focus {
-            border-color: #e8c547;
-            box-shadow: 0 0 25px rgba(232, 197, 71, 0.25);
-        }
-        .btn-create {
-            background: linear-gradient(180deg, #f0c040, #b8781a);
+        .clear-btn {
+            background: #e94560;
+            color: white;
             border: none;
-            color: #1a1020;
-            font-weight: 800;
-            font-size: 1.2em;
-            padding: 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            letter-spacing: 1.5px;
-            transition: 0.3s;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
-        .btn-create:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(240, 192, 64, 0.45);
-        }
-        .splash-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn-load {
-            background: rgba(40, 35, 70, 0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: 0.9em;
-        }
-        .btn-load:hover {
-            background: #3a3050;
-            border-color: #c8943e;
-        }
-
-        #game-screen {
-            display: none;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            position: relative;
-            flex-direction: column;
-        }
-        #game-screen.active {
-            display: flex;
-        }
-
-        #top-bar {
-            z-index: 100;
-            background: linear-gradient(180deg, rgba(18, 15, 35, 0.97), rgba(14, 12, 28, 0.95));
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            min-height: 50px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .country-name-display {
-            font-weight: 800;
-            font-size: clamp(0.9em, 2.5vw, 1.25em);
-            background: linear-gradient(180deg, #ffe08a, #c8943e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stats-panel {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 700;
-            font-size: clamp(0.7em, 1.8vw, 0.95em);
-            white-space: nowrap;
-        }
-        .stat-icon {
-            font-size: 1.2em;
-        }
-        .stat-money {
-            color: #f0d060;
-        }
-        .stat-pop {
-            color: #6dc8e8;
-        }
-        .stat-happy {
-            color: #6ce89c;
-        }
-        .stat-demand {
-            color: #ff9800;
-            font-size: 0.75em;
-        }
-        .top-buttons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .btn-top {
-            background: rgba(40, 35, 70, 0.8);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: clamp(0.7em, 1.5vw, 0.85em);
-            white-space: nowrap;
-        }
-        .btn-top:hover {
-            background: #3a3050;
-            border-color: #c8943e;
-        }
-        .time-weather {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8em;
-            color: #ccc;
-        }
-        .time-display {
-            color: #f0d060;
-            font-weight: 700;
-        }
-        .weather-display {
-            font-size: 1.2em;
-        }
-
-        #game-canvas {
-            flex: 1;
-            cursor: grab;
-            display: block;
-            touch-action: none;
-            min-height: 0;
-        }
-        #game-canvas.zone {
-            cursor: cell;
-        }
-        #game-canvas.building {
-            cursor: crosshair;
-        }
-        #game-canvas.grabbing {
-            cursor: grabbing;
-        }
-
-        #bottom-panel {
-            z-index: 100;
-            background: rgba(16, 14, 30, 0.96);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid #2e2e4e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 10px;
-            min-height: 55px;
-            flex-wrap: wrap;
-            overflow-x: auto;
-        }
-        .tool-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 6px 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
-            background: rgba(30, 25, 55, 0.7);
-            font-weight: 700;
-            font-size: 0.7em;
-            color: #ddd;
-            min-width: 48px;
-            text-align: center;
-        }
-        .tool-btn:active {
-            transform: scale(0.95);
-        }
-        .tool-btn.active {
-            border-color: #f0d060 !important;
-            background: rgba(200, 160, 50, 0.25) !important;
-        }
-        .tool-btn.zone-res {
-            border-color: #4CAF50;
-        }
-        .tool-btn.zone-com {
-            border-color: #2196F3;
-        }
-        .tool-btn.zone-ind {
-            border-color: #FF9800;
-        }
-        .tool-btn.danger {
-            border-color: #802020;
-            color: #f08888;
-        }
-        .tool-btn-icon {
-            font-size: 1.4em;
-            line-height: 1;
-        }
-        .tool-btn-label {
-            font-size: 0.65em;
-        }
-
-        #build-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #build-modal.open {
-            display: flex;
-        }
-        .modal-content {
-            background: #1a1830;
-            border: 1px solid #3a3050;
+            padding: 8px 20px;
             border-radius: 20px;
-            padding: 20px;
-            max-width: 700px;
-            width: 95vw;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-        }
-        .modal-title {
-            font-weight: 800;
-            font-size: 1.2em;
-            color: #f0d060;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-        .modal-tabs {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .modal-tab {
-            padding: 6px 12px;
-            border-radius: 8px;
+            font-weight: bold;
             cursor: pointer;
-            background: rgba(30, 25, 55, 0.6);
-            border: 1px solid #3a3050;
-            color: #ccc;
-            font-size: 0.75em;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-        .modal-tab:hover {
-            background: rgba(50, 40, 80, 0.8);
-        }
-        .modal-tab.active {
-            background: rgba(200, 160, 50, 0.3);
-            border-color: #f0d060;
-            color: #f0d060;
-        }
-        .modal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 6px;
-        }
-        .modal-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            padding: 8px 4px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.15s;
-            border: 2px solid transparent;
-            background: rgba(30, 25, 55, 0.6);
-            text-align: center;
-        }
-        .modal-item:hover {
-            background: rgba(50, 40, 80, 0.8);
-            border-color: #c8943e;
-        }
-        .modal-item.selected {
-            border-color: #f0d060 !important;
-            background: rgba(200, 160, 50, 0.25) !important;
-        }
-        .modal-item-emoji {
-            font-size: 1.8em;
-        }
-        .modal-item-name {
-            font-size: 0.7em;
-            font-weight: 600;
-            color: #ddd;
-            line-height: 1.2;
-        }
-        .modal-item-cost {
-            font-size: 0.65em;
-            color: #f0d060;
-            font-weight: 700;
-        }
-        .modal-close {
-            display: block;
-            margin: 16px auto 0;
-            background: #3a3050;
-            border: none;
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.9em;
-        }
-        .modal-close:hover {
-            background: #5a4070;
-        }
-
-        #info-popup {
-            position: absolute;
-            pointer-events: none;
-            z-index: 150;
-            background: rgba(15, 12, 35, 0.97);
-            border: 2px solid #5a5080;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 0.85em;
-            display: none;
-            white-space: nowrap;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
-            line-height: 1.7;
-            color: #f0f0f0;
-        }
-        #info-popup .pop-title {
-            font-weight: 800;
-            color: #ffd700;
-            font-size: 1.1em;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        #message-log {
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            z-index: 110;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            pointer-events: none;
-            max-width: 280px;
-        }
-        .log-msg {
-            background: rgba(0, 0, 0, 0.9);
-            border-left: 3px solid #f0c040;
-            padding: 7px 12px;
-            border-radius: 6px;
-            font-size: 0.8em;
-            animation: fadeInOut 3.5s forwards;
-            font-weight: 500;
-            color: #e0e0e0;
-        }
-        @keyframes fadeInOut {
-            0% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            12% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            75% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            #top-bar {
-                padding: 4px 6px;
-                min-height: 40px;
-            }
-            .stats-panel {
-                gap: 5px;
-            }
-            .stat-item {
-                font-size: 0.6em;
-            }
-            .btn-top {
-                padding: 4px 6px;
-                font-size: 0.6em;
-            }
-            #bottom-panel {
-                gap: 3px;
-                padding: 5px 4px;
-                min-height: 44px;
-            }
-            .tool-btn {
-                padding: 4px 6px;
-                min-width: 38px;
-                font-size: 0.6em;
-            }
-            .tool-btn-icon {
-                font-size: 1.1em;
-            }
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-
-    <div id="splash">
-        <canvas class="splash-stars" id="splash-stars"></canvas>
-        <div class="splash-title">🏛️ PRESIDENT<br>SIMULATOR</div>
-        <div class="splash-subtitle">TheoTown Edition — Постройте мегаполис мечты</div>
-        <div class="splash-form">
-            <label for="country-name">📜 Название государства</label>
-            <input type="text" id="country-name" placeholder="Введите название..." maxlength="28" value="Великоречье">
-            <button class="btn-create" onclick="startGame()">🌟 ОСНОВАТЬ ГОСУДАРСТВО</button>
-            <div class="splash-buttons">
-                <button class="btn-load" onclick="loadGame()">💾 Загрузить сохранение</button>
-            </div>
+    <div class="game-wrapper">
+        <canvas id="sandCanvas"></canvas>
+        <div class="toolbar" id="toolbar">
+            <!-- Кнопки создаются в JS -->
         </div>
-    </div>
-
-    <div id="game-screen">
-        <div id="top-bar">
-            <div class="country-name-display" id="display-country-name">🏛️ Великоречье</div>
-            <div class="stats-panel">
-                <div class="stat-item"><span class="stat-icon">💰</span> <span class="stat-money" id="money-val">50000</span></div>
-                <div class="stat-item"><span class="stat-icon">👥</span> <span class="stat-pop" id="pop-val">100</span></div>
-                <div class="stat-item"><span class="stat-icon">😊</span> <span class="stat-happy" id="happy-val">75</span>%</div>
-                <div class="stat-item"><span class="stat-demand" id="demand-val">🏘️50 🏪30 🏭20</span></div>
-            </div>
-            <div class="top-buttons">
-                <div class="time-weather">
-                    <span class="weather-display" id="weather-icon">☀️</span>
-                    <span class="time-display" id="time-display">17:26</span>
-                </div>
-                <button class="btn-top" onclick="expandBorder()">📏</button>
-                <button class="btn-top" onclick="saveGame()">💾</button>
-                <button class="btn-top" onclick="showHelp()">❓</button>
-            </div>
+        <div class="info">
+            <span>🖱️ Левая кнопка — рисовать</span>
+            <span>🖱️ Правая кнопка — стереть</span>
+            <span>🎨 Выбери элемент</span>
         </div>
-
-        <canvas id="game-canvas"></canvas>
-
-        <div id="info-popup"></div>
-        <div id="message-log"></div>
-
-        <div id="bottom-panel">
-            <button class="tool-btn zone-res" id="btn-zone-res" onclick="setTool('zone_residential')">
-                <span class="tool-btn-icon">🏘️</span><span class="tool-btn-label">Жилая</span>
-            </button>
-            <button class="tool-btn zone-com" id="btn-zone-com" onclick="setTool('zone_commercial')">
-                <span class="tool-btn-icon">🏪</span><span class="tool-btn-label">Коммерция</span>
-            </button>
-            <button class="tool-btn zone-ind" id="btn-zone-ind" onclick="setTool('zone_industrial')">
-                <span class="tool-btn-icon">🏭</span><span class="tool-btn-label">Индустрия</span>
-            </button>
-            <button class="tool-btn" id="btn-special" onclick="openBuildModal()">
-                <span class="tool-btn-icon">🏗️</span><span class="tool-btn-label">Спец.</span>
-            </button>
-            <button class="tool-btn" id="btn-rotate" onclick="rotateBuilding()">
-                <span class="tool-btn-icon">🔄</span><span class="tool-btn-label">Поворот</span>
-            </button>
-            <button class="tool-btn danger" id="btn-delete" onclick="toggleDeleteMode()">
-                <span class="tool-btn-icon">🗑️</span><span class="tool-btn-label">Снос</span>
-            </button>
-            <button class="tool-btn" id="btn-info" onclick="toggleSelectMode()">
-                <span class="tool-btn-icon">🔍</span><span class="tool-btn-label">Инфо</span>
-            </button>
-        </div>
-
-        <div id="build-modal">
-            <div class="modal-content">
-                <div class="modal-title">🏗️ Специальные постройки</div>
-                <div class="modal-tabs" id="modal-tabs">
-                    <button class="modal-tab active" data-tab="roads">🛣️ Дороги</button>
-                    <button class="modal-tab" data-tab="services">🚒 Службы</button>
-                    <button class="modal-tab" data-tab="parks">🌳 Парки</button>
-                    <button class="modal-tab" data-tab="landmarks">🏛️ Достоприм.</button>
-                    <button class="modal-tab" data-tab="transport">🚌 Транспорт</button>
-                </div>
-                <div class="modal-grid" id="modal-grid"></div>
-                <div style="text-align:center;color:#aaa;margin-top:8px;">📏 Размер:</div>
-                <div id="size-selector" style="display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap;">
-                    <button class="size-btn selected" data-scale="1" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔹 1x</button>
-                    <button class="size-btn" data-scale="1.5" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔸 1.5x</button>
-                    <button class="size-btn" data-scale="2" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">🔶 2x</button>
-                    <button class="size-btn" data-scale="3" style="padding:6px 10px;border-radius:8px;border:2px solid #3a3050;background:rgba(30,25,55,0.6);color:#ccc;cursor:pointer;font-weight:700;font-size:0.75em;">💎 3x</button>
-                </div>
-                <div style="text-align:center;color:#8af;font-size:0.75em;margin-top:4px;">🔄 R — поворот (сейчас: <span id="rot-display">0°</span>)</div>
-                <button class="modal-close" onclick="closeBuildModal()">✖ Закрыть</button>
-            </div>
-        </div>
+        <button class="clear-btn" id="clearBtn">🧹 Очистить всё</button>
     </div>
 
     <script>
-        // ==================== СОСТОЯНИЕ ИГРЫ ====================
-        const gameState = {
-            countryName: '',
-            money: 50000,
-            population: 100,
-            happiness: 75,
-            borderSize: 500,
-            borderExpandCost: 50000,
-            buildings: [],
-            roads: [],
-            rails: [],
-            zones: [],
-            waterBodies: [],
-            people: [],
-            cars: [],
-            boats: [],
-            buses: [],
-            particles: [],
-            selectedType: null,
-            buildScale: 1,
-            buildRotation: 0,
-            currentTool: null,
-            deleteMode: false,
-            selectMode: false,
-            activeTab: 'roads',
-            canvas: null,
-            ctx: null,
-            cameraX: 0,
-            cameraY: 0,
-            zoom: 1,
-            gridSize: 48,
-            dragging: false,
-            dragStartX: 0,
-            dragStartY: 0,
-            dragDistance: 0,
-            mouseX: 0,
-            mouseY: 0,
-            hoveredBuilding: null,
-            gameTime: 0,
-            incomeTimer: 0,
-            zoneTimer: 0,
-            demandTimer: 0,
-            saveInterval: null,
-            gameHour: 17,
-            gameMinute: 26,
-            weather: 'sunny',
-            weatherTimer: 0,
-            weatherDuration: 500,
-            raindrops: [],
-            snowflakes: [],
-            residentialDemand: 50,
-            commercialDemand: 30,
-            industrialDemand: 20,
-            touchStartTime: 0,
-            touchDistance: 0,
-            lastPinchZoom: 1,
-        };
+        (function() {
+            const canvas = document.getElementById('sandCanvas');
+            const ctx = canvas.getContext('2d');
 
-        // ==================== ТИПЫ ЗДАНИЙ ====================
-        const buildingTypes = {
-            road: { emoji: '🛣️', name: 'Асфальтовая дорога', cost: 50, income: 5, width: 48, height: 48, isRoad: true, tab: 'roads' },
-            road_curve: { emoji: '↪️', name: 'Поворот дороги', cost: 80, income: 8, width: 48, height: 48, isRoadCurve: true, tab: 'roads' },
-            rail: { emoji: '🚂', name: 'Железная дорога', cost: 200, income: 20, width: 48, height: 48, isRail: true, tab: 'roads' },
-            highway: { emoji: '🛤️', name: 'Автомагистраль', cost: 300, income: 40, width: 48, height: 48, isRoad: true, tab: 'roads' },
-            police_station: { emoji: '🚔', name: 'Полицейский участок', cost: 5000, income: -100, width: 48, height: 48, tab: 'services', capacity: 50, serviceType: 'police', serviceRadius: 200 },
-            fire_station: { emoji: '🚒', name: 'Пожарная станция', cost: 4000, income: -80, width: 48, height: 48, tab: 'services', capacity: 40, serviceType: 'fire', serviceRadius: 180 },
-            hospital: { emoji: '🏥', name: 'Больница', cost: 8000, income: -150, width: 52, height: 50, tab: 'services', capacity: 100, serviceType: 'health', serviceRadius: 250 },
-            school: { emoji: '🏫', name: 'Школа', cost: 6000, income: -120, width: 50, height: 48, tab: 'services', capacity: 80, serviceType: 'education', serviceRadius: 200 },
-            park: { emoji: '🌳', name: 'Парк', cost: 300, income: 0, width: 46, height: 46, tab: 'parks', happinessBonus: 10, serviceRadius: 100 },
-            playground: { emoji: '🛝', name: 'Детская площадка', cost: 500, income: 0, width: 40, height: 40, tab: 'parks', happinessBonus: 15, serviceRadius: 80 },
-            fountain: { emoji: '⛲', name: 'Фонтан', cost: 800, income: 0, width: 36, height: 36, tab: 'parks', happinessBonus: 20, serviceRadius: 120 },
-            statue_of_liberty: { emoji: '🗽', name: 'Статуя Свободы', cost: 50000, income: 500, width: 40, height: 60, tab: 'landmarks', happinessBonus: 50, tourismBonus: 100 },
-            eiffel_tower: { emoji: '🗼', name: 'Эйфелева башня', cost: 45000, income: 450, width: 40, height: 64, tab: 'landmarks', happinessBonus: 45, tourismBonus: 90 },
-            kremlin: { emoji: '🏯', name: 'Кремль', cost: 40000, income: 400, width: 56, height: 48, tab: 'landmarks', happinessBonus: 40, tourismBonus: 80 },
-            stadium: { emoji: '🏟️', name: 'Стадион', cost: 30000, income: 300, width: 64, height: 56, tab: 'landmarks', happinessBonus: 35, tourismBonus: 70 },
-            bus_stop: { emoji: '🚏', name: 'Автобусная остановка', cost: 200, income: 10, width: 24, height: 24, tab: 'transport', capacity: 20 },
-            bus_depot: { emoji: '🚌', name: 'Автобусное депо', cost: 10000, income: -200, width: 56, height: 48, tab: 'transport', capacity: 50 },
-            carshop: { emoji: '🚗', name: 'Автосалон', cost: 10000, income: 150, width: 48, height: 48, tab: 'transport' },
-            shipyard: { emoji: '🚢', name: 'Судостроительный', cost: 20000, income: 400, width: 56, height: 56, tab: 'transport', needsWater: true },
-        };
+            // Размеры поля в пикселях (каждый пиксель - частица)
+            const WIDTH = 200;
+            const HEIGHT = 150;
+            const SCALE = 3; // Масштаб отображения
 
-        // ==================== ЗВЁЗДЫ ====================
-        function initSplashStars() {
-            const c = document.getElementById('splash-stars');
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-            const ctx = c.getContext('2d');
-            const stars = Array.from({ length: 200 }, () => ({
-                x: Math.random() * c.width,
-                y: Math.random() * c.height,
-                radius: Math.random() * 1.8 + 0.5,
-                twinkle: Math.random() * Math.PI * 2,
-                speed: Math.random() * 0.02 + 0.005,
-            }));
+            canvas.width = WIDTH;
+            canvas.height = HEIGHT;
+            canvas.style.width = `${WIDTH * SCALE}px`;
+            canvas.style.height = `${HEIGHT * SCALE}px`;
 
-            function draw() {
-                ctx.clearRect(0, 0, c.width, c.height);
-                stars.forEach(star => {
-                    star.twinkle += star.speed;
-                    const alpha = 0.4 + Math.sin(star.twinkle) * 0.4;
-                    ctx.fillStyle = 'rgba(255,255,240,' + alpha + ')';
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-        initSplashStars();
+            // Сетка частиц (храним тип элемента или 0)
+            const grid = new Uint8Array(WIDTH * HEIGHT);
+            // Дополнительные данные (например, для воды - направление, для огня - жизнь)
+            const extraData = new Float32Array(WIDTH * HEIGHT);
 
-        // ==================== ГЕНЕРАЦИЯ ВОДОЁМОВ ====================
-        function generateWaterBodies() {
-            gameState.waterBodies = [];
-            const count = 12 + Math.floor(Math.random() * 10);
-            for (let i = 0; i < count; i++) {
-                const centerX = (Math.random() - 0.5) * gameState.borderSize * 2;
-                const centerY = (Math.random() - 0.5) * gameState.borderSize * 2;
-                const baseRadius = 30 + Math.random() * 150;
-                const points = [];
-                const numPoints = 8 + Math.floor(Math.random() * 14);
-                for (let j = 0; j < numPoints; j++) {
-                    const angle = (j / numPoints) * Math.PI * 2;
-                    const radius = baseRadius * (0.4 + Math.random() * 0.8);
-                    points.push({
-                        x: centerX + Math.cos(angle) * radius,
-                        y: centerY + Math.sin(angle) * radius,
+            // Типы элементов
+            const ELEMENTS = {
+                EMPTY: 0,
+                SAND: 1,
+                WATER: 2,
+                STONE: 3,
+                WOOD: 4,
+                FIRE: 5,
+                LAVA: 6,
+                STEAM: 7,
+                PLANT: 8,
+                SMOKE: 9,
+                ACID: 10,
+            };
+
+            const ELEMENT_COLORS = {
+                [ELEMENTS.EMPTY]: '#0a0a1a',
+                [ELEMENTS.SAND]: '#e8c170',
+                [ELEMENTS.WATER]: '#3498db',
+                [ELEMENTS.STONE]: '#7f8c8d',
+                [ELEMENTS.WOOD]: '#b56a3c',
+                [ELEMENTS.FIRE]: '#e74c3c',
+                [ELEMENTS.LAVA]: '#e67e22',
+                [ELEMENTS.STEAM]: '#bdc3c7',
+                [ELEMENTS.PLANT]: '#2ecc71',
+                [ELEMENTS.SMOKE]: '#7f8c8d',
+                [ELEMENTS.ACID]: '#9b59b6',
+            };
+
+            const ELEMENT_NAMES = {
+                [ELEMENTS.EMPTY]: 'Пусто',
+                [ELEMENTS.SAND]: '🏖️ Песок',
+                [ELEMENTS.WATER]: '💧 Вода',
+                [ELEMENTS.STONE]: '🪨 Камень',
+                [ELEMENTS.WOOD]: '🪵 Дерево',
+                [ELEMENTS.FIRE]: '🔥 Огонь',
+                [ELEMENTS.LAVA]: '🌋 Лава',
+                [ELEMENTS.STEAM]: '💨 Пар',
+                [ELEMENTS.PLANT]: '🌿 Растение',
+                [ELEMENTS.SMOKE]: '💭 Дым',
+                [ELEMENTS.ACID]: '🧪 Кислота',
+            };
+
+            let currentElement = ELEMENTS.SAND;
+            let mouseDown = 0; // 0 - не нажата, 1 - левая, 2 - правая
+            let brushSize = 3;
+            let lastMouseX = -1, lastMouseY = -1;
+
+            // Создаём кнопки элементов
+            const toolbar = document.getElementById('toolbar');
+            const elementButtons = {};
+
+            function createToolbar() {
+                const elementsToShow = [ELEMENTS.SAND, ELEMENTS.WATER, ELEMENTS.STONE, ELEMENTS.WOOD, 
+                                       ELEMENTS.FIRE, ELEMENTS.LAVA, ELEMENTS.PLANT, ELEMENTS.ACID, 
+                                       ELEMENTS.STEAM, ELEMENTS.SMOKE];
+                elementsToShow.forEach(el => {
+                    const btn = document.createElement('button');
+                    btn.className = 'element-btn';
+                    btn.textContent = ELEMENT_NAMES[el];
+                    btn.style.backgroundColor = ELEMENT_COLORS[el];
+                    btn.dataset.element = el;
+                    btn.addEventListener('click', () => {
+                        currentElement = parseInt(el);
+                        updateActiveButton();
                     });
-                }
-                const nameList = ['Великий Океан', 'Северное Море', 'Южный Залив', 'Тихое Озеро', 'Голубая Лагуна', 'Штормовой Пролив', 'Солнечная Бухта', 'Глубокое Водохранилище', 'Река Извилистая', 'Озеро Надежды', 'Море Спокойствия', 'Залив Приключений'];
-                gameState.waterBodies.push({
-                    points: points,
-                    name: nameList[Math.floor(Math.random() * nameList.length)],
-                    baseRadius: baseRadius,
+                    toolbar.appendChild(btn);
+                    elementButtons[el] = btn;
+                });
+                updateActiveButton();
+            }
+
+            function updateActiveButton() {
+                Object.entries(elementButtons).forEach(([el, btn]) => {
+                    if (parseInt(el) === currentElement) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
                 });
             }
-        }
 
-        function isPointInWater(worldX, worldY) {
-            for (let w = 0; w < gameState.waterBodies.length; w++) {
-                const water = gameState.waterBodies[w];
-                let inside = false;
-                const points = water.points;
-                for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-                    const xi = points[i].x;
-                    const yi = points[i].y;
-                    const xj = points[j].x;
-                    const yj = points[j].y;
-                    if ((yi > worldY) !== (yj > worldY)) {
-                        const intersectX = (xj - xi) * (worldY - yi) / (yj - yi) + xi;
-                        if (worldX < intersectX) {
-                            inside = !inside;
+            // Индекс в массиве
+            function getIndex(x, y) {
+                return y * WIDTH + x;
+            }
+
+            // Проверка границ
+            function inBounds(x, y) {
+                return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
+            }
+
+            // Поменять две ячейки местами
+            function swapCells(x1, y1, x2, y2) {
+                const idx1 = getIndex(x1, y1);
+                const idx2 = getIndex(x2, y2);
+                [grid[idx1], grid[idx2]] = [grid[idx2], grid[idx1]];
+                [extraData[idx1], extraData[idx2]] = [extraData[idx2], extraData[idx1]];
+            }
+
+            // Переместить частицу из (x1,y1) в (x2,y2) — ячейка назначения должна быть пустой
+            function moveCell(x1, y1, x2, y2) {
+                const idx1 = getIndex(x1, y1);
+                const idx2 = getIndex(x2, y2);
+                grid[idx2] = grid[idx1];
+                extraData[idx2] = extraData[idx1];
+                grid[idx1] = ELEMENTS.EMPTY;
+                extraData[idx1] = 0;
+            }
+
+            // Обработка физики одного пикселя
+            function updatePixel(x, y) {
+                const idx = getIndex(x, y);
+                const elem = grid[idx];
+
+                if (elem === ELEMENTS.EMPTY) return;
+
+                // ---- ПЕСОК ----
+                if (elem === ELEMENTS.SAND) {
+                    if (y < HEIGHT - 1) {
+                        // Падает вниз
+                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY || 
+                            grid[getIndex(x, y + 1)] === ELEMENTS.WATER) {
+                            swapCells(x, y, x, y + 1);
+                            return;
+                        }
+                        // Диагонально вниз-влево
+                        if (x > 0 && (grid[getIndex(x - 1, y + 1)] === ELEMENTS.EMPTY || 
+                                      grid[getIndex(x - 1, y + 1)] === ELEMENTS.WATER)) {
+                            swapCells(x, y, x - 1, y + 1);
+                            return;
+                        }
+                        // Диагонально вниз-вправо
+                        if (x < WIDTH - 1 && (grid[getIndex(x + 1, y + 1)] === ELEMENTS.EMPTY || 
+                                              grid[getIndex(x + 1, y + 1)] === ELEMENTS.WATER)) {
+                            swapCells(x, y, x + 1, y + 1);
+                            return;
+                        }
+                    }
+                    // Взаимодействие с кислотой: песок растворяется
+                    checkAcidDissolve(x, y, 0.02);
+                }
+
+                // ---- ВОДА ----
+                else if (elem === ELEMENTS.WATER) {
+                    if (y < HEIGHT - 1) {
+                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y + 1);
+                            return;
+                        }
+                    }
+                    // Течёт в стороны
+                    const dir = Math.random() < 0.5 ? -1 : 1;
+                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY) {
+                        swapCells(x, y, x + dir, y);
+                        return;
+                    }
+                    if (x - dir >= 0 && x - dir < WIDTH && grid[getIndex(x - dir, y)] === ELEMENTS.EMPTY) {
+                        swapCells(x, y, x - dir, y);
+                        return;
+                    }
+                    // Вода тушит огонь/лаву при контакте
+                    checkWaterExtinguish(x, y);
+                }
+
+                // ---- КАМЕНЬ (неподвижен) ----
+                else if (elem === ELEMENTS.STONE) {
+                    // Камень не двигается, но может растворяться кислотой
+                    checkAcidDissolve(x, y, 0.005);
+                }
+
+                // ---- ДЕРЕВО ----
+                else if (elem === ELEMENTS.WOOD) {
+                    // Горит при контакте с огнём или лавой
+                    if (checkFireSpread(x, y, 0.08)) return;
+                    checkAcidDissolve(x, y, 0.03);
+                }
+
+                // ---- ОГОНЬ ----
+                else if (elem === ELEMENTS.FIRE) {
+                    // Огонь живёт ограниченное время
+                    extraData[idx] = (extraData[idx] || 1) - 0.01;
+                    if (extraData[idx] <= 0) {
+                        // Превращается в дым
+                        grid[idx] = ELEMENTS.SMOKE;
+                        extraData[idx] = 1.0;
+                        return;
+                    }
+                    // Поднимается вверх
+                    if (y > 0 && Math.random() < 0.3) {
+                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y - 1);
+                            return;
+                        }
+                    }
+                    // Случайное движение
+                    const dx = Math.floor(Math.random() * 3) - 1;
+                    const dy = Math.random() < 0.5 ? 0 : Math.floor(Math.random() * 3) - 1;
+                    const nx = x + dx, ny = y + dy;
+                    if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.EMPTY && Math.random() < 0.3) {
+                        swapCells(x, y, nx, ny);
+                        return;
+                    }
+                    // Поджигает соседние горючие элементы
+                    burnNeighbors(x, y);
+                    // Тушится водой
+                    checkWaterExtinguishFire(x, y);
+                }
+
+                // ---- ЛАВА ----
+                else if (elem === ELEMENTS.LAVA) {
+                    // Медленно течёт как очень вязкая жидкость
+                    if (y < HEIGHT - 1 && Math.random() < 0.4) {
+                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y + 1);
+                            return;
+                        }
+                    }
+                    const dir = Math.random() < 0.5 ? -1 : 1;
+                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY && Math.random() < 0.2) {
+                        swapCells(x, y, x + dir, y);
+                        return;
+                    }
+                    // Поджигает соседей
+                    burnNeighbors(x, y);
+                    // При контакте с водой превращается в камень
+                    if (checkLavaWaterContact(x, y)) return;
+                    // Медленно застывает в камень
+                    if (Math.random() < 0.0005) {
+                        grid[idx] = ELEMENTS.STONE;
+                    }
+                    checkAcidDissolve(x, y, 0.002);
+                }
+
+                // ---- ПАР ----
+                else if (elem === ELEMENTS.STEAM) {
+                    if (y > 0) {
+                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y - 1);
+                            return;
+                        }
+                    }
+                    const dx = Math.floor(Math.random() * 3) - 1;
+                    if (x + dx >= 0 && x + dx < WIDTH && grid[getIndex(x + dx, y)] === ELEMENTS.EMPTY) {
+                        swapCells(x, y, x + dx, y);
+                        return;
+                    }
+                    // Конденсируется в воду
+                    if (Math.random() < 0.005) {
+                        grid[idx] = ELEMENTS.WATER;
+                    }
+                }
+
+                // ---- РАСТЕНИЕ ----
+                else if (elem === ELEMENTS.PLANT) {
+                    // Растёт на соседних пустых клетках (очень медленно)
+                    if (Math.random() < 0.001) {
+                        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                        const [dx, dy] = dirs[Math.floor(Math.random() * dirs.length)];
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.EMPTY) {
+                            grid[getIndex(nx, ny)] = ELEMENTS.PLANT;
+                        }
+                    }
+                    // Горит
+                    if (checkFireSpread(x, y, 0.15)) return;
+                    checkAcidDissolve(x, y, 0.05);
+                }
+
+                // ---- ДЫМ ----
+                else if (elem === ELEMENTS.SMOKE) {
+                    if (y > 0 && Math.random() < 0.3) {
+                        if (grid[getIndex(x, y - 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y - 1);
+                            return;
+                        }
+                    }
+                    const dx = Math.floor(Math.random() * 3) - 1;
+                    if (x + dx >= 0 && x + dx < WIDTH && grid[getIndex(x + dx, y)] === ELEMENTS.EMPTY) {
+                        swapCells(x, y, x + dx, y);
+                        return;
+                    }
+                    // Исчезает
+                    if (Math.random() < 0.01) {
+                        grid[idx] = ELEMENTS.EMPTY;
+                    }
+                }
+
+                // ---- КИСЛОТА ----
+                else if (elem === ELEMENTS.ACID) {
+                    if (y < HEIGHT - 1 && Math.random() < 0.4) {
+                        if (grid[getIndex(x, y + 1)] === ELEMENTS.EMPTY) {
+                            swapCells(x, y, x, y + 1);
+                            return;
+                        }
+                    }
+                    const dir = Math.random() < 0.5 ? -1 : 1;
+                    if (x + dir >= 0 && x + dir < WIDTH && grid[getIndex(x + dir, y)] === ELEMENTS.EMPTY && Math.random() < 0.3) {
+                        swapCells(x, y, x + dir, y);
+                        return;
+                    }
+                    // Растворяет почти всё
+                    dissolveNeighbors(x, y);
+                    // Медленно исчезает
+                    if (Math.random() < 0.001) {
+                        grid[idx] = ELEMENTS.EMPTY;
+                    }
+                }
+            }
+
+            // Вспомогательные функции взаимодействий
+            function checkFireSpread(x, y, probability) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny)) {
+                            const nElem = grid[getIndex(nx, ny)];
+                            if (nElem === ELEMENTS.FIRE || nElem === ELEMENTS.LAVA) {
+                                if (Math.random() < probability) {
+                                    grid[getIndex(x, y)] = ELEMENTS.FIRE;
+                                    extraData[getIndex(x, y)] = 1.0;
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
-                if (inside) {
-                    return true;
+                return false;
+            }
+
+            function burnNeighbors(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny)) {
+                            const nIdx = getIndex(nx, ny);
+                            const nElem = grid[nIdx];
+                            if (nElem === ELEMENTS.WOOD || nElem === ELEMENTS.PLANT) {
+                                if (Math.random() < 0.1) {
+                                    grid[nIdx] = ELEMENTS.FIRE;
+                                    extraData[nIdx] = 1.0;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            return false;
-        }
 
-        // ==================== СОХРАНЕНИЯ ====================
-        function saveGame() {
-            if (!gameState.countryName) return;
-            const data = {
-                countryName: gameState.countryName,
-                money: gameState.money,
-                population: gameState.population,
-                happiness: gameState.happiness,
-                borderSize: gameState.borderSize,
-                buildings: gameState.buildings,
-                roads: gameState.roads,
-                rails: gameState.rails,
-                zones: gameState.zones,
-                waterBodies: gameState.waterBodies,
-                zoom: gameState.zoom,
-                cameraX: gameState.cameraX,
-                cameraY: gameState.cameraY,
-                gameHour: gameState.gameHour,
-                gameMinute: gameState.gameMinute,
-                weather: gameState.weather,
-                residentialDemand: gameState.residentialDemand,
-                commercialDemand: gameState.commercialDemand,
-                industrialDemand: gameState.industrialDemand,
-                version: 11,
-            };
-            try {
-                localStorage.setItem('president_theotown_v11', JSON.stringify(data));
-                addLog('💾 Игра сохранена!');
-            } catch (error) {
-                addLog('❌ Ошибка сохранения!');
+            function checkWaterExtinguish(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
+                            grid[getIndex(x, y)] = ELEMENTS.EMPTY;
+                            return;
+                        }
+                    }
+                }
             }
-        }
 
-        function loadGame() {
-            try {
-                const raw = localStorage.getItem('president_theotown_v11');
-                if (!raw) { alert('Нет сохранений!'); return; }
-                const data = JSON.parse(raw);
-                gameState.countryName = data.countryName;
-                gameState.money = data.money;
-                gameState.population = data.population;
-                gameState.happiness = data.happiness;
-                gameState.borderSize = data.borderSize || 500;
-                gameState.buildings = data.buildings || [];
-                gameState.roads = data.roads || [];
-                gameState.rails = data.rails || [];
-                gameState.zones = data.zones || [];
-                gameState.waterBodies = data.waterBodies || [];
-                gameState.zoom = data.zoom || 1;
-                gameState.cameraX = data.cameraX || 0;
-                gameState.cameraY = data.cameraY || 0;
-                gameState.gameHour = data.gameHour || 12;
-                gameState.gameMinute = data.gameMinute || 0;
-                gameState.weather = data.weather || 'sunny';
-                gameState.residentialDemand = data.residentialDemand || 50;
-                gameState.commercialDemand = data.commercialDemand || 30;
-                gameState.industrialDemand = data.industrialDemand || 20;
-                gameState.people = [];
-                gameState.cars = [];
-                gameState.boats = [];
-                gameState.buses = [];
-                gameState.particles = [];
-                gameState.selectedType = null;
-                gameState.buildScale = 1;
-                gameState.buildRotation = 0;
-                gameState.currentTool = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-                gameState.gameTime = 0;
-                gameState.incomeTimer = 0;
-                gameState.zoneTimer = 0;
-                gameState.demandTimer = 0;
-                gameState.dragging = false;
-                gameState.raindrops = [];
-                gameState.snowflakes = [];
-                if (gameState.waterBodies.length === 0) generateWaterBodies();
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('game-screen').classList.add('active');
-                document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
-                initCanvas();
-                buildModalGrid();
-                updateUI();
-                spawnInitialPeople();
-                addLog('💾 Сохранение загружено!');
-                if (gameState.saveInterval) clearInterval(gameState.saveInterval);
-                gameState.saveInterval = setInterval(saveGame, 30000);
-                gameLoop();
-            } catch (error) {
-                alert('Ошибка загрузки!');
+            function checkWaterExtinguishFire(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
+                            grid[getIndex(x, y)] = ELEMENTS.STEAM;
+                            extraData[getIndex(x, y)] = 1.0;
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
-        }
 
-        function initCanvas() {
-            gameState.canvas = document.getElementById('game-canvas');
-            gameState.ctx = gameState.canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-        }
+            function checkLavaWaterContact(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.WATER) {
+                            grid[getIndex(x, y)] = ELEMENTS.STONE;
+                            grid[getIndex(nx, ny)] = ELEMENTS.STEAM;
+                            extraData[getIndex(nx, ny)] = 1.0;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
 
-        function resizeCanvas() {
-            if (!gameState.canvas) return;
-            const rect = gameState.canvas.getBoundingClientRect();
-            gameState.canvas.width = rect.width;
-            gameState.canvas.height = rect.height;
-        }
+            function dissolveNeighbors(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny)) {
+                            const nIdx = getIndex(nx, ny);
+                            const nElem = grid[nIdx];
+                            if (nElem !== ELEMENTS.EMPTY && nElem !== ELEMENTS.ACID && nElem !== ELEMENTS.STONE) {
+                                if (Math.random() < 0.1) {
+                                    grid[nIdx] = ELEMENTS.EMPTY;
+                                }
+                            } else if (nElem === ELEMENTS.STONE && Math.random() < 0.02) {
+                                grid[nIdx] = ELEMENTS.EMPTY;
+                            }
+                        }
+                    }
+                }
+            }
 
-        function startGame() {
-            const inp = document.getElementById('country-name');
-            const name = inp.value.trim();
-            if (!name) { inp.style.borderColor = '#f05555';
-                inp.focus();
-                setTimeout(() => inp.style.borderColor = '#3a3050', 1500); return; }
-            gameState.countryName = name;
-            gameState.buildings = [];
-            gameState.roads = [];
-            gameState.rails = [];
-            gameState.zones = [];
-            gameState.people = [];
-            gameState.cars = [];
-            gameState.boats = [];
-            gameState.buses = [];
-            gameState.particles = [];
-            gameState.money = 50000;
-            gameState.population = 100;
-            gameState.happiness = 75;
-            gameState.borderSize = 500;
-            gameState.selectedType = null;
-            gameState.buildScale = 1;
-            gameState.buildRotation = 0;
-            gameState.currentTool = null;
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            gameState.gameTime = 0;
-            gameState.incomeTimer = 0;
-            gameState.zoneTimer = 0;
-            gameState.demandTimer = 0;
-            gameState.zoom = 1;
-            gameState.gridSize = 48;
-            gameState.dragging = false;
-            gameState.gameHour = 17;
-            gameState.gameMinute = 26;
-            gameState.weather = 'sunny';
-            gameState.weatherTimer = 0;
-            gameState.raindrops = [];
-            gameState.snowflakes = [];
-            gameState.residentialDemand = 50;
-            gameState.commercialDemand = 30;
-            gameState.industrialDemand = 20;
+            function checkAcidDissolve(x, y, prob) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = x + dx, ny = y + dy;
+                        if (inBounds(nx, ny) && grid[getIndex(nx, ny)] === ELEMENTS.ACID) {
+                            if (Math.random() < prob) {
+                                grid[getIndex(x, y)] = ELEMENTS.EMPTY;
+                            }
+                        }
+                    }
+                }
+            }
 
-            generateWaterBodies();
+            // Главный цикл обновления
+            function update() {
+                // Обновляем снизу вверх, справа налево (для корректного падения)
+                for (let y = HEIGHT - 1; y >= 0; y--) {
+                    // Чередуем направление для более равномерного поведения
+                    const startX = (y % 2 === 0) ? 0 : WIDTH - 1;
+                    const endX = (y % 2 === 0) ? WIDTH : -1;
+                    const stepX = (y % 2 === 0) ? 1 : -1;
+                    
+                    for (let x = startX; x !== endX; x += stepX) {
+                        updatePixel(x, y);
+                    }
+                }
+            }
 
-            gameState.roads.push({ type: 'road', x: -200, y: -24, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.roads.push({ type: 'road', x: -24, y: -200, w: 48, h: 400, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.roads.push({ type: 'road_curve', x: -24, y: -24, w: 48, h: 48, scale: 1, rotation: 0, placedAt: 0 });
-            gameState.rails.push({ type: 'rail', x: -200, y: -120, w: 400, h: 48, scale: 1, rotation: 0, placedAt: 0 });
+            // Отрисовка
+            function draw() {
+                const imageData = ctx.createImageData(WIDTH, HEIGHT);
+                const data = imageData.data;
+                
+                for (let i = 0; i < grid.length; i++) {
+                    const elem = grid[i];
+                    const color = ELEMENT_COLORS[elem] || '#0a0a1a';
+                    // Парсим hex цвет
+                    let r, g, b;
+                    if (color.startsWith('#')) {
+                        const hex = color.substring(1);
+                        r = parseInt(hex.substring(0,2), 16);
+                        g = parseInt(hex.substring(2,4), 16);
+                        b = parseInt(hex.substring(4,6), 16);
+                    } else {
+                        r = 10; g = 10; b = 26;
+                    }
+                    
+                    // Немного вариации для текстуры
+                    const variation = elem === ELEMENTS.SAND || elem === ELEMENTS.WOOD ? (Math.random() * 20 - 10) : 0;
+                    
+                    const pixelIndex = i * 4;
+                    data[pixelIndex] = Math.min(255, Math.max(0, r + variation));
+                    data[pixelIndex + 1] = Math.min(255, Math.max(0, g + variation));
+                    data[pixelIndex + 2] = Math.min(255, Math.max(0, b + variation));
+                    data[pixelIndex + 3] = 255;
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+            }
 
-            document.getElementById('splash').classList.add('hidden');
-            document.getElementById('game-screen').classList.add('active');
-            document.getElementById('display-country-name').textContent = '🏛️ ' + gameState.countryName;
-            initCanvas();
-            buildModalGrid();
-            updateUI();
-            spawnInitialPeople();
-            addLog('🌟 Добро пожаловать, господин Президент!');
-            addLog('🌊 Сгенерированы случайные водоёмы');
-            addLog('🏘️ Используйте зоны для быстрой застройки');
-            if (gameState.saveInterval) clearInterval(gameState.saveInterval);
-            gameState.saveInterval = setInterval(saveGame, 30000);
+            // Рисование элементов мышью
+            function drawElements(mx, my, erase) {
+                const px = Math.floor(mx / SCALE);
+                const py = Math.floor(my / SCALE);
+                
+                for (let dy = -brushSize; dy <= brushSize; dy++) {
+                    for (let dx = -brushSize; dx <= brushSize; dx++) {
+                        if (dx*dx + dy*dy <= brushSize*brushSize) {
+                            const nx = px + dx;
+                            const ny = py + dy;
+                            if (inBounds(nx, ny)) {
+                                const idx = getIndex(nx, ny);
+                                if (erase) {
+                                    grid[idx] = ELEMENTS.EMPTY;
+                                    extraData[idx] = 0;
+                                } else {
+                                    if (currentElement === ELEMENTS.FIRE || currentElement === ELEMENTS.LAVA) {
+                                        grid[idx] = currentElement;
+                                        extraData[idx] = 1.0;
+                                    } else {
+                                        grid[idx] = currentElement;
+                                        extraData[idx] = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Также рисуем линию между последней и текущей точкой
+                if (lastMouseX >= 0 && lastMouseY >= 0) {
+                    const lpx = Math.floor(lastMouseX / SCALE);
+                    const lpy = Math.floor(lastMouseY / SCALE);
+                    const dist = Math.sqrt((px-lpx)**2 + (py-lpy)**2);
+                    const steps = Math.ceil(dist);
+                    for (let i = 1; i <= steps; i++) {
+                        const t = i / steps;
+                        const ix = Math.round(lpx + (px - lpx) * t);
+                        const iy = Math.round(lpy + (py - lpy) * t);
+                        for (let dy = -brushSize; dy <= brushSize; dy++) {
+                            for (let dx = -brushSize; dx <= brushSize; dx++) {
+                                if (dx*dx + dy*dy <= brushSize*brushSize) {
+                                    const nx = ix + dx;
+                                    const ny = iy + dy;
+                                    if (inBounds(nx, ny)) {
+                                        const idx = getIndex(nx, ny);
+                                        if (erase) {
+                                            grid[idx] = ELEMENTS.EMPTY;
+                                            extraData[idx] = 0;
+                                        } else {
+                                            if (currentElement === ELEMENTS.FIRE || currentElement === ELEMENTS.LAVA) {
+                                                grid[idx] = currentElement;
+                                                extraData[idx] = 1.0;
+                                            } else {
+                                                grid[idx] = currentElement;
+                                                extraData[idx] = 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                lastMouseX = mx;
+                lastMouseY = my;
+            }
+
+            // Обработчики событий мыши
+            canvas.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                
+                if (e.button === 0) { // Левая кнопка
+                    mouseDown = 1;
+                    lastMouseX = mx;
+                    lastMouseY = my;
+                    drawElements(mx, my, false);
+                } else if (e.button === 2) { // Правая кнопка
+                    mouseDown = 2;
+                    lastMouseX = mx;
+                    lastMouseY = my;
+                    drawElements(mx, my, true);
+                }
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                
+                if (mouseDown === 1) {
+                    drawElements(mx, my, false);
+                } else if (mouseDown === 2) {
+                    drawElements(mx, my, true);
+                } else {
+                    lastMouseX = mx;
+                    lastMouseY = my;
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                mouseDown = 0;
+                lastMouseX = -1;
+                lastMouseY = -1;
+            });
+
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // Тач-управление для мобильных
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const mx = touch.clientX - rect.left;
+                const my = touch.clientY - rect.top;
+                mouseDown = 1;
+                lastMouseX = mx;
+                lastMouseY = my;
+                drawElements(mx, my, false);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const mx = touch.clientX - rect.left;
+                const my = touch.clientY - rect.top;
+                if (mouseDown === 1) {
+                    drawElements(mx, my, false);
+                }
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                mouseDown = 0;
+                lastMouseX = -1;
+                lastMouseY = -1;
+            });
+
+            // Кнопка очистки
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                grid.fill(ELEMENTS.EMPTY);
+                extraData.fill(0);
+            });
+
+            // Инициализация
+            createToolbar();
+
+            // Главный игровой цикл
+            function gameLoop() {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+
             gameLoop();
-        }
-
-        function spawnInitialPeople() {
-            for (let i = 0; i < 40; i++) {
-                gameState.people.push({
-                    x: (Math.random() - 0.5) * gameState.borderSize,
-                    y: (Math.random() - 0.5) * gameState.borderSize,
-                    vx: (Math.random() - 0.5) * 1.2,
-                    vy: (Math.random() - 0.5) * 1.2,
-                    color: 'hsl(' + Math.floor(Math.random() * 360) + ', 40%, 65%)',
-                    size: 4 + Math.random() * 3,
-                    target: null,
-                    state: 'walking',
-                    stateTimer: Math.random() * 200,
-                    hasCar: false,
-                    carRef: null,
-                    hasBoat: false,
-                    boatRef: null,
-                    homeRef: null,
-                    workRef: null,
-                });
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('money-val').textContent = Math.floor(gameState.money).toLocaleString();
-            document.getElementById('pop-val').textContent = gameState.population;
-            document.getElementById('happy-val').textContent = Math.round(gameState.happiness);
-            document.getElementById('demand-val').textContent = '🏘️' + Math.round(gameState.residentialDemand) + ' 🏪' + Math.round(gameState.commercialDemand) + ' 🏭' + Math.round(gameState.industrialDemand);
-            if (gameState.canvas) {
-                gameState.canvas.classList.toggle('zone', !!gameState.currentTool && gameState.currentTool.startsWith('zone_'));
-                gameState.canvas.classList.toggle('building', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
-                gameState.canvas.classList.toggle('grabbing', gameState.dragging);
-            }
-            document.getElementById('btn-zone-res').classList.toggle('active', gameState.currentTool === 'zone_residential');
-            document.getElementById('btn-zone-com').classList.toggle('active', gameState.currentTool === 'zone_commercial');
-            document.getElementById('btn-zone-ind').classList.toggle('active', gameState.currentTool === 'zone_industrial');
-            document.getElementById('btn-special').classList.toggle('active', !!gameState.selectedType && !gameState.deleteMode && !gameState.selectMode);
-            document.getElementById('btn-delete').classList.toggle('active', gameState.deleteMode);
-            document.getElementById('btn-info').classList.toggle('active', gameState.selectMode);
-            document.getElementById('btn-rotate').classList.toggle('active', gameState.buildRotation !== 0);
-            const h = Math.floor(gameState.gameHour);
-            const m = Math.floor(gameState.gameMinute);
-            document.getElementById('time-display').textContent = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
-            const wi = { sunny: '☀️', cloudy: '⛅', rainy: '🌧️', stormy: '⛈️', snowy: '❄️' };
-            document.getElementById('weather-icon').textContent = wi[gameState.weather] || '☀️';
-        }
-
-        function expandBorder() {
-            const cost = gameState.borderExpandCost;
-            if (gameState.money < cost) { addLog('❌ Недостаточно средств!'); return; }
-            gameState.money -= cost;
-            gameState.borderSize += 200;
-            gameState.borderExpandCost = Math.floor(gameState.borderExpandCost * 2);
-            addLog('📏 Граница расширена!');
-            updateUI();
-        }
-
-        function setTool(tool) {
-            if (gameState.currentTool === tool) {
-                gameState.currentTool = null;
-            } else {
-                gameState.currentTool = tool;
-                gameState.selectedType = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-            }
-            updateUI();
-        }
-
-        // ==================== МОДАЛЬНОЕ ОКНО ====================
-        let modalBuilt = false;
-        let currentModalTab = 'roads';
-
-        function buildModalGrid() {
-            const grid = document.getElementById('modal-grid');
-            const tab = currentModalTab;
-            const filteredTypes = {};
-            for (const key in buildingTypes) {
-                if (buildingTypes[key].tab === tab) {
-                    filteredTypes[key] = buildingTypes[key];
-                }
-            }
-            if (!modalBuilt) {
-                grid.innerHTML = '';
-                const allKeys = Object.keys(filteredTypes);
-                for (let i = 0; i < allKeys.length; i++) {
-                    const key = allKeys[i];
-                    const info = filteredTypes[key];
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
-                        '<span class="modal-item-name">' + info.name + '</span>' +
-                        '<span class="modal-item-cost"></span>' +
-                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
-                    div.addEventListener('click', function() { selectModalItem(key); });
-                    grid.appendChild(div);
-                }
-                modalBuilt = true;
-            } else {
-                grid.innerHTML = '';
-                const allKeys = Object.keys(filteredTypes);
-                for (let i = 0; i < allKeys.length; i++) {
-                    const key = allKeys[i];
-                    const info = filteredTypes[key];
-                    const div = document.createElement('div');
-                    div.className = 'modal-item';
-                    div.dataset.type = key;
-                    div.innerHTML = '<span class="modal-item-emoji">' + info.emoji + '</span>' +
-                        '<span class="modal-item-name">' + info.name + '</span>' +
-                        '<span class="modal-item-cost"></span>' +
-                        '<span style="font-size:0.6em;color:#aaa;" class="modal-item-size"></span>';
-                    div.addEventListener('click', function() { selectModalItem(key); });
-                    grid.appendChild(div);
-                }
-            }
-            const scale = gameState.buildScale || 1;
-            const allItems = grid.querySelectorAll('.modal-item');
-            for (let i = 0; i < allItems.length; i++) {
-                const div = allItems[i];
-                const key = div.dataset.type;
-                const info = filteredTypes[key];
-                const cost = getBuildCost(key, scale);
-                const size = getBuildSize(key, scale);
-                div.querySelector('.modal-item-cost').textContent = '💰' + cost.toLocaleString();
-                div.querySelector('.modal-item-size').textContent = size.w + 'x' + size.h;
-                if (gameState.selectedType === key) {
-                    div.classList.add('selected');
-                } else {
-                    div.classList.remove('selected');
-                }
-            }
-            const sizeButtons = document.querySelectorAll('#size-selector .size-btn');
-            for (let i = 0; i < sizeButtons.length; i++) {
-                const btn = sizeButtons[i];
-                if (parseFloat(btn.dataset.scale) === scale) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            }
-            document.getElementById('rot-display').textContent = gameState.buildRotation + '°';
-        }
-
-        function selectModalItem(key) {
-            gameState.selectedType = key;
-            gameState.currentTool = null;
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            const info = buildingTypes[key];
-            const size = getBuildSize(key, gameState.buildScale || 1);
-            addLog('🔨 Выбрано: ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
-            updateUI();
-            buildModalGrid();
-            closeBuildModal();
-        }
-
-        function openBuildModal() {
-            gameState.deleteMode = false;
-            gameState.selectMode = false;
-            buildModalGrid();
-            document.getElementById('build-modal').classList.add('open');
-            updateUI();
-        }
-
-        function closeBuildModal() {
-            document.getElementById('build-modal').classList.remove('open');
-        }
-
-        function getBuildCost(type, scale) {
-            const info = buildingTypes[type];
-            if (!info) return 0;
-            return Math.floor(info.cost * scale * scale);
-        }
-
-        function getBuildSize(type, scale) {
-            const info = buildingTypes[type];
-            if (!info) return { w: 48, h: 48 };
-            let w = Math.round(info.width * scale);
-            let h = Math.round(info.height * scale);
-            if (gameState.buildRotation === 90 || gameState.buildRotation === 270) {
-                const temp = w;
-                w = h;
-                h = temp;
-            }
-            return { w: w, h: h };
-        }
-
-        function rotateBuilding() {
-            gameState.buildRotation = (gameState.buildRotation + 90) % 360;
-            addLog('🔄 Поворот: ' + gameState.buildRotation + '°');
-            updateUI();
-            if (document.getElementById('build-modal').classList.contains('open')) buildModalGrid();
-        }
-
-        function toggleDeleteMode() {
-            gameState.deleteMode = !gameState.deleteMode;
-            gameState.selectMode = false;
-            gameState.selectedType = null;
-            gameState.currentTool = null;
-            if (gameState.deleteMode) addLog('🗑️ Режим сноса (возврат 50%)');
-            updateUI();
-        }
-
-        function toggleSelectMode() {
-            gameState.selectMode = !gameState.selectMode;
-            gameState.deleteMode = false;
-            gameState.selectedType = null;
-            gameState.currentTool = null;
-            if (gameState.selectMode) addLog('🔍 Режим информации');
-            updateUI();
-        }
-
-        // ==================== СТРОИТЕЛЬСТВО ====================
-        function placeZone(worldX, worldY) {
-            if (!gameState.currentTool || !gameState.currentTool.startsWith('zone_')) return false;
-            const zoneType = gameState.currentTool.replace('zone_', '');
-            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
-                addLog('⚠️ За границей страны!');
-                return false;
-            }
-            if (isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Нельзя зонировать воду!');
-                return false;
-            }
-            const snap = gameState.gridSize;
-            const sx = Math.round(worldX / snap) * snap;
-            const sy = Math.round(worldY / snap) * snap;
-            const newZone = { type: zoneType, x: sx, y: sy, w: snap, h: snap, placedAt: gameState.gameTime };
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
-            let hasOverlap = false;
-            for (let i = 0; i < allObjects.length; i++) {
-                if (rectanglesOverlap(newZone, allObjects[i], 2)) {
-                    hasOverlap = true;
-                    break;
-                }
-            }
-            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
-            gameState.zones.push(newZone);
-            addLog('🏘️ Зона размечена: ' + (zoneType === 'residential' ? 'Жилая' : zoneType === 'commercial' ? 'Коммерческая' : 'Индустриальная'));
-            updateUI();
-            return true;
-        }
-
-        function buildAt(worldX, worldY) {
-            if (!gameState.selectedType || gameState.deleteMode || gameState.selectMode || gameState.currentTool) return false;
-            const type = gameState.selectedType;
-            const info = buildingTypes[type];
-            const scale = gameState.buildScale || 1;
-            const cost = getBuildCost(type, scale);
-            const size = getBuildSize(type, scale);
-            if (gameState.money < cost) { addLog('❌ Недостаточно средств! 💰' + cost.toLocaleString());
-                shakeEl('money-val'); return false; }
-            if (Math.abs(worldX) > gameState.borderSize || Math.abs(worldY) > gameState.borderSize) {
-                addLog('⚠️ За границей!');
-                return false;
-            }
-            if (info.needsWater && !isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Судостроительный завод только на воде!');
-                return false;
-            }
-            if (!info.needsWater && !info.isRoad && !info.isRail && !info.isRoadCurve && isPointInWater(worldX, worldY)) {
-                addLog('⚠️ Нельзя строить на воде!');
-                return false;
-            }
-            const newBuilding = {
-                type: type,
-                x: worldX - size.w / 2,
-                y: worldY - size.h / 2,
-                w: size.w,
-                h: size.h,
-                scale: scale,
-                rotation: gameState.buildRotation,
-                placedAt: gameState.gameTime,
-            };
-            const allCollidables = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-            let hasOverlap = false;
-            for (let i = 0; i < allCollidables.length; i++) {
-                if (rectanglesOverlap(newBuilding, allCollidables[i], 2)) {
-                    hasOverlap = true;
-                    break;
-                }
-            }
-            if (hasOverlap) { addLog('⚠️ Место занято!'); return false; }
-            gameState.money -= cost;
-            if (info.isRoad || info.isRoadCurve) {
-                gameState.roads.push(newBuilding);
-            } else if (info.isRail) {
-                gameState.rails.push(newBuilding);
-            } else {
-                gameState.buildings.push(newBuilding);
-                if (info.happinessBonus) {
-                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness + Math.floor(info.happinessBonus * scale)));
-                }
-                if (info.tourismBonus) {
-                    gameState.population += Math.floor(info.tourismBonus * scale);
-                }
-            }
-            updateUI();
-            addLog('✅ ' + info.emoji + ' ' + info.name + ' (' + size.w + 'x' + size.h + ')');
-            spawnParticles(worldX, worldY, '#f0d060');
-            gameState.buildRotation = 0;
-            return true;
-        }
-
-        function deleteAt(worldX, worldY) {
-            if (!gameState.deleteMode) return false;
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails).concat(gameState.zones);
-            let foundObject = null;
-            for (let i = 0; i < allObjects.length; i++) {
-                const obj = allObjects[i];
-                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
-                    foundObject = obj;
-                    break;
-                }
-            }
-            if (!foundObject) return false;
-            if (foundObject.type && (foundObject.type === 'residential' || foundObject.type === 'commercial' || foundObject.type === 'industrial')) {
-                gameState.zones = gameState.zones.filter(function(z) { return z !== foundObject; });
-                updateUI();
-                addLog('🗑️ Зона убрана');
-                return true;
-            }
-            const info = buildingTypes[foundObject.type];
-            const scale = foundObject.scale || 1;
-            const refund = Math.floor(getBuildCost(foundObject.type, scale) * 0.5);
-            gameState.money += refund;
-            if (info.isRoad || info.isRoadCurve) {
-                gameState.roads = gameState.roads.filter(function(b) { return b !== foundObject; });
-            } else if (info.isRail) {
-                gameState.rails = gameState.rails.filter(function(b) { return b !== foundObject; });
-            } else {
-                gameState.buildings = gameState.buildings.filter(function(b) { return b !== foundObject; });
-                if (info.happinessBonus) {
-                    gameState.happiness = Math.max(0, Math.min(100, gameState.happiness - Math.floor((info.happinessBonus || 0) * scale)));
-                }
-            }
-            gameState.cars = gameState.cars.filter(function(c) { return c.homeRef !== foundObject; });
-            gameState.boats = gameState.boats.filter(function(b) { return b.homeRef !== foundObject; });
-            gameState.buses = gameState.buses.filter(function(b) { return b.homeRef !== foundObject; });
-            updateUI();
-            addLog('🗑️ Снесено (+💰' + refund.toLocaleString() + ')');
-            spawnParticles(foundObject.x + foundObject.w / 2, foundObject.y + foundObject.h / 2, '#f08888');
-            return true;
-        }
-
-        function rectanglesOverlap(a, b, margin) {
-            if (a.x + a.w - margin < b.x) return false;
-            if (a.x > b.x + b.w - margin) return false;
-            if (a.y + a.h - margin < b.y) return false;
-            if (a.y > b.y + b.h - margin) return false;
-            return true;
-        }
-
-        // ==================== КООРДИНАТЫ ====================
-        function worldToScreen(worldX, worldY) {
-            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
-            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
-            return { x: (worldX - cx) * gameState.zoom, y: (worldY - cy) * gameState.zoom };
-        }
-
-        function screenToWorld(screenX, screenY) {
-            const cx = gameState.cameraX - gameState.canvas.width / 2 / gameState.zoom;
-            const cy = gameState.cameraY - gameState.canvas.height / 2 / gameState.zoom;
-            return { x: screenX / gameState.zoom + cx, y: screenY / gameState.zoom + cy };
-        }
-
-        function getCanvasCoords(event) {
-            const rect = gameState.canvas.getBoundingClientRect();
-            return { sx: event.clientX - rect.left, sy: event.clientY - rect.top };
-        }
-
-        function getWorldFromEvent(event) {
-            const coords = getCanvasCoords(event);
-            const world = screenToWorld(coords.sx, coords.sy);
-            return { sx: coords.sx, sy: coords.sy, wx: world.x, wy: world.y };
-        }
-
-        function findBuildingAt(worldX, worldY) {
-            const allObjects = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-            for (let i = allObjects.length - 1; i >= 0; i--) {
-                const obj = allObjects[i];
-                if (worldX >= obj.x && worldX <= obj.x + obj.w && worldY >= obj.y && worldY <= obj.y + obj.h) {
-                    return obj;
-                }
-            }
-            return null;
-        }
-
-        // ==================== ОТРИСОВКА ====================
-        function getDayNightAlpha() {
-            const hour = gameState.gameHour + gameState.gameMinute / 60;
-            if (hour >= 6 && hour < 8) return 0.3 - (hour - 6) * 0.15;
-            if (hour >= 8 && hour < 17) return 0;
-            if (hour >= 17 && hour < 19) return (hour - 17) * 0.2;
-            if (hour >= 19 && hour < 21) return 0.4 + (hour - 19) * 0.2;
-            if (hour >= 21 || hour < 5) return 0.7;
-            if (hour >= 5 && hour < 6) return 0.7 - (hour - 5) * 0.4;
-            return 0;
-        }
-
-        function drawGround(ctx) {
-            const w = gameState.canvas.width;
-            const h = gameState.canvas.height;
-            const alpha = getDayNightAlpha();
-            const grad = ctx.createRadialGradient(w / 2, h / 2, 100, w / 2, h / 2, Math.max(w, h));
-            const r = Math.floor(61 * (1 - alpha));
-            const g = Math.floor(90 * (1 - alpha));
-            const b = Math.floor(46 * (1 - alpha));
-            grad.addColorStop(0, 'rgb(' + r + ',' + g + ',' + b + ')');
-            grad.addColorStop(0.6, 'rgb(' + Math.floor(r * 0.7) + ',' + Math.floor(g * 0.7) + ',' + Math.floor(b * 0.7) + ')');
-            grad.addColorStop(1, 'rgb(' + Math.floor(r * 0.4) + ',' + Math.floor(g * 0.4) + ',' + Math.floor(b * 0.4) + ')');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
-            const gs = gameState.gridSize;
-            const cx = gameState.cameraX - w / 2 / gameState.zoom;
-            const cy = gameState.cameraY - h / 2 / gameState.zoom;
-            const sx = -(((cx % gs) + gs) % gs);
-            const sy = -(((cy % gs) + gs) % gs);
-            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
-                for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
-                    const worldGX = Math.floor((x + cx) / gs);
-                    const worldGY = Math.floor((y + cy) / gs);
-                    const seed = Math.sin(worldGX * 1000 + worldGY) * 0.06;
-                    ctx.fillStyle = 'rgba(255,255,255,' + (0.02 + seed) + ')';
-                    ctx.fillRect(x * gameState.zoom, y * gameState.zoom, gs * gameState.zoom, gs * gameState.zoom);
-                    const flowerSeed = Math.sin(worldGX * 500 + worldGY * 300) * 0.5 + 0.5;
-                    if (flowerSeed > 0.85 && !isPointInWater(x + cx + gs / 2, y + cy + gs / 2)) {
-                        ctx.fillStyle = 'rgba(255,255,100,0.3)';
-                        ctx.beginPath();
-                        ctx.arc(x * gameState.zoom + gs * gameState.zoom * 0.7, y * gameState.zoom + gs * gameState.zoom * 0.3, 2 * gameState.zoom, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            }
-            if (alpha > 0) {
-                ctx.fillStyle = 'rgba(0,0,20,' + alpha + ')';
-                ctx.fillRect(0, 0, w, h);
-            }
-            if (alpha > 0.5) {
-                for (let i = 0; i < 50; i++) {
-                    const starX = ((i * 7919 + 12345) % w);
-                    const starY = ((i * 6271 + 12345) % h);
-                    const twinkle = Math.sin(gameState.gameTime * 0.003 + i) * 0.5 + 0.5;
-                    ctx.fillStyle = 'rgba(255,255,255,' + (twinkle * (alpha - 0.5) * 1.5) + ')';
-                    ctx.beginPath();
-                    ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawWater(ctx) {
-            for (let w = 0; w < gameState.waterBodies.length; w++) {
-                const water = gameState.waterBodies[w];
-                const points = water.points;
-                const alpha = getDayNightAlpha();
-                if (points.length < 3) continue;
-                ctx.beginPath();
-                const firstPoint = worldToScreen(points[0].x, points[0].y);
-                ctx.moveTo(firstPoint.x, firstPoint.y);
-                for (let i = 1; i < points.length; i++) {
-                    const sp = worldToScreen(points[i].x, points[i].y);
-                    ctx.lineTo(sp.x, sp.y);
-                }
-                ctx.closePath();
-                let minX = Infinity,
-                    minY = Infinity,
-                    maxX = -Infinity,
-                    maxY = -Infinity;
-                for (let i = 0; i < points.length; i++) {
-                    if (points[i].x < minX) minX = points[i].x;
-                    if (points[i].y < minY) minY = points[i].y;
-                    if (points[i].x > maxX) maxX = points[i].x;
-                    if (points[i].y > maxY) maxY = points[i].y;
-                }
-                const centerScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
-                const waterGrad = ctx.createRadialGradient(centerScreen.x, centerScreen.y, 0, centerScreen.x, centerScreen.y, water.baseRadius * gameState.zoom);
-                waterGrad.addColorStop(0, 'rgba(30,100,180,' + (0.8 - alpha * 0.3) + ')');
-                waterGrad.addColorStop(0.5, 'rgba(20,80,160,' + (0.75 - alpha * 0.3) + ')');
-                waterGrad.addColorStop(1, 'rgba(10,50,130,' + (0.8 - alpha * 0.3) + ')');
-                ctx.fillStyle = waterGrad;
-                ctx.fill();
-                const waveTime = gameState.gameTime * 0.02;
-                for (let i = 0; i < points.length; i++) {
-                    const p1 = points[i];
-                    const p2 = points[(i + 1) % points.length];
-                    const midX = (p1.x + p2.x) / 2;
-                    const midY = (p1.y + p2.y) / 2;
-                    const screenMid = worldToScreen(midX, midY);
-                    const waveOffset = Math.sin(waveTime + i * 0.5) * 5 * gameState.zoom;
-                    ctx.fillStyle = 'rgba(100,180,240,0.3)';
-                    ctx.beginPath();
-                    ctx.arc(screenMid.x + waveOffset, screenMid.y, 4 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.strokeStyle = 'rgba(150,210,255,0.5)';
-                ctx.lineWidth = 2 * gameState.zoom;
-                ctx.stroke();
-                if (water.name && water.baseRadius > 50) {
-                    const nameScreen = worldToScreen((minX + maxX) / 2, (minY + maxY) / 2);
-                    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                    ctx.font = Math.min(16, 12 * gameState.zoom) + 'px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(water.name, nameScreen.x, nameScreen.y);
-                }
-            }
-        }
-
-        function drawBorder(ctx) {
-            const bs = gameState.borderSize;
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = Math.max(2, 3 * gameState.zoom);
-            ctx.setLineDash([10 * gameState.zoom, 6 * gameState.zoom]);
-            ctx.beginPath();
-            const segments = 32;
-            for (let i = 0; i <= segments; i++) {
-                const angle = (i / segments) * Math.PI * 2;
-                const wobble = Math.sin(angle * 5 + gameState.gameTime * 0.001) * 15 + Math.cos(angle * 3) * 10;
-                const r = bs + wobble;
-                const wx = Math.cos(angle) * r;
-                const wy = Math.sin(angle) * r;
-                const p = worldToScreen(wx, wy);
-                if (i === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            ctx.setLineDash([]);
-            const flags = ['🚩', '🚩', '🚩', '🚩'];
-            for (let i = 0; i < 4; i++) {
-                const angle = i * Math.PI / 2 - Math.PI / 4;
-                const p = worldToScreen(Math.cos(angle) * bs, Math.sin(angle) * bs);
-                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(flags[i], p.x, p.y - 10 * gameState.zoom);
-            }
-            const pTable = worldToScreen(bs + 30, 0);
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(pTable.x - 40 * gameState.zoom, pTable.y - 20 * gameState.zoom, 80 * gameState.zoom, 35 * gameState.zoom);
-            ctx.fillStyle = '#f0d060';
-            ctx.font = Math.floor(12 * gameState.zoom) + 'px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('📏 Расширить', pTable.x, pTable.y - 5 * gameState.zoom);
-            ctx.fillText('💰' + gameState.borderExpandCost.toLocaleString(), pTable.x, pTable.y + 15 * gameState.zoom);
-        }
-
-        function drawGrid(ctx) {
-            const w = gameState.canvas.width;
-            const h = gameState.canvas.height;
-            const gs = gameState.gridSize;
-            const cx = gameState.cameraX - w / 2 / gameState.zoom;
-            const cy = gameState.cameraY - h / 2 / gameState.zoom;
-            const sx = -(((cx % gs) + gs) % gs);
-            const sy = -(((cy % gs) + gs) % gs);
-            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let x = sx; x < w / gameState.zoom + gs; x += gs) {
-                ctx.moveTo(x * gameState.zoom, 0);
-                ctx.lineTo(x * gameState.zoom, h);
-            }
-            for (let y = sy; y < h / gameState.zoom + gs; y += gs) {
-                ctx.moveTo(0, y * gameState.zoom);
-                ctx.lineTo(w, y * gameState.zoom);
-            }
-            ctx.stroke();
-        }
-
-        function drawZones(ctx) {
-            for (let i = 0; i < gameState.zones.length; i++) {
-                const zone = gameState.zones[i];
-                const p = worldToScreen(zone.x, zone.y);
-                const w = zone.w * gameState.zoom;
-                const h = zone.h * gameState.zoom;
-                let color = 'rgba(76,175,80,0.3)';
-                if (zone.type === 'commercial') color = 'rgba(33,150,243,0.3)';
-                if (zone.type === 'industrial') color = 'rgba(255,152,0,0.3)';
-                ctx.fillStyle = color;
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.strokeStyle = color.replace('0.3', '0.6');
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
-                ctx.strokeRect(p.x, p.y, w, h);
-                ctx.setLineDash([]);
-            }
-        }
-
-        function drawRoad(ctx, road, info) {
-            const p = worldToScreen(road.x, road.y);
-            const w = road.w * gameState.zoom;
-            const h = road.h * gameState.zoom;
-            ctx.save();
-            const cx = p.x + w / 2;
-            const cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (road.rotation) ctx.rotate(road.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
-            if (info.isRoadCurve) {
-                ctx.fillStyle = '#444444';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.strokeStyle = '#ffff88';
-                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
-                ctx.setLineDash([8 * gameState.zoom, 10 * gameState.zoom]);
-                ctx.beginPath();
-                ctx.arc(p.x + w, p.y, w * 0.7, 0, Math.PI / 2);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                const bw = Math.max(2, 3 * gameState.zoom);
-                ctx.fillStyle = '#666666';
-                ctx.fillRect(p.x, p.y, w, bw);
-                ctx.fillRect(p.x, p.y + h - bw, w, bw);
-                ctx.fillRect(p.x, p.y, bw, h);
-                ctx.fillRect(p.x + w - bw, p.y, bw, h);
-            } else if (info.isRoad) {
-                ctx.fillStyle = '#444444';
-                ctx.fillRect(p.x, p.y, w, h);
-                const bw = Math.max(2, 3 * gameState.zoom);
-                ctx.fillStyle = '#666666';
-                ctx.fillRect(p.x, p.y, w, bw);
-                ctx.fillRect(p.x, p.y + h - bw, w, bw);
-                ctx.fillRect(p.x, p.y, bw, h);
-                ctx.fillRect(p.x + w - bw, p.y, bw, h);
-                ctx.strokeStyle = '#ffff88';
-                ctx.lineWidth = Math.max(1, 2 * gameState.zoom);
-                ctx.setLineDash([10 * gameState.zoom, 14 * gameState.zoom]);
-                ctx.beginPath();
-                ctx.moveTo(p.x + w / 2, p.y);
-                ctx.lineTo(p.x + w / 2, p.y + h);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            } else {
-                ctx.fillStyle = '#8B7355';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#5c4030';
-                const sh = Math.max(3, 4 * gameState.zoom);
-                const sg = Math.max(5, 8 * gameState.zoom);
-                for (let i = 0; i < h; i += sg) {
-                    ctx.fillRect(p.x + 2 * gameState.zoom, p.y + i, w - 4 * gameState.zoom, sh);
-                }
-                ctx.strokeStyle = '#cccccc';
-                ctx.lineWidth = Math.max(1.5, 2.5 * gameState.zoom);
-                ctx.beginPath();
-                const rx = p.x + Math.max(6, 8 * gameState.zoom);
-                const rx2 = p.x + w - Math.max(6, 8 * gameState.zoom);
-                ctx.moveTo(rx, p.y);
-                ctx.lineTo(rx, p.y + h);
-                ctx.moveTo(rx2, p.y);
-                ctx.lineTo(rx2, p.y + h);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawBuildingShape(ctx, building, info) {
-            const p = worldToScreen(building.x, building.y);
-            const w = building.w * gameState.zoom;
-            const h = building.h * gameState.zoom;
-            const type = building.type;
-            ctx.save();
-            const cx = p.x + w / 2;
-            const cy = p.y + h / 2;
-            ctx.translate(cx, cy);
-            if (building.rotation) ctx.rotate(building.rotation * Math.PI / 180);
-            ctx.translate(-cx, -cy);
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w, h);
-            if (type === 'police_station') {
-                ctx.fillStyle = '#3a5a8a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#1a3a6a';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#1a3a6a';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 6 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'fire_station') {
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 4 * gameState.zoom, w - 8 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 8 * gameState.zoom);
-            } else if (type === 'hospital') {
-                ctx.fillStyle = '#f8f8f8';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + w / 2 - 8 * gameState.zoom, p.y, 16 * gameState.zoom, 12 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y + 2 * gameState.zoom, 4 * gameState.zoom, 8 * gameState.zoom);
-                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 5 * gameState.zoom, 12 * gameState.zoom, 3 * gameState.zoom);
-            } else if (type === 'school') {
-                ctx.fillStyle = '#d4a574';
-                ctx.fillRect(p.x, p.y + 4 * gameState.zoom, w, h - 4 * gameState.zoom);
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x - 2 * gameState.zoom, p.y, w + 4 * gameState.zoom, 10 * gameState.zoom);
-                ctx.fillStyle = '#87ceeb';
-                for (let i = 0; i < 4; i++) {
-                    ctx.fillRect(p.x + 5 * gameState.zoom + i * 11 * gameState.zoom, p.y + 16 * gameState.zoom, 7 * gameState.zoom, 8 * gameState.zoom);
-                }
-            } else if (type === 'park') {
-                ctx.fillStyle = '#5a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                const trees = [
-                    [0.2, 0.25],
-                    [0.5, 0.2],
-                    [0.8, 0.3],
-                    [0.3, 0.6],
-                    [0.7, 0.65],
-                    [0.5, 0.75]
-                ];
-                for (let i = 0; i < trees.length; i++) {
-                    const tx = p.x + trees[i][0] * w;
-                    const ty = p.y + trees[i][1] * h;
-                    ctx.fillStyle = '#3d2b1f';
-                    ctx.fillRect(tx - 1.5 * gameState.zoom, ty, 3 * gameState.zoom, 10 * gameState.zoom);
-                    ctx.fillStyle = '#2d6e2d';
-                    ctx.beginPath();
-                    ctx.arc(tx, ty - 2 * gameState.zoom, 7 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#3d8e3d';
-                    ctx.beginPath();
-                    ctx.arc(tx, ty - 5 * gameState.zoom, 6 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.fillStyle = '#4a90c8';
-                ctx.beginPath();
-                ctx.ellipse(p.x + w * 0.5, p.y + h * 0.45, 12 * gameState.zoom, 7 * gameState.zoom, 0, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'playground') {
-                ctx.fillStyle = '#e8d5b7';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ff9800';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 12 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
-                ctx.fillStyle = '#4CAF50';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 3, 8 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'fountain') {
-                ctx.fillStyle = '#b0b0b0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4a90c8';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 10 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#87ceeb';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + h / 2, 5 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'statue_of_liberty') {
-                ctx.fillStyle = '#4a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#7ec8a0';
-                ctx.fillRect(p.x + w / 2 - 6 * gameState.zoom, p.y + 8 * gameState.zoom, 12 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(p.x + w / 2, p.y + 4 * gameState.zoom, 8 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (type === 'eiffel_tower') {
-                ctx.fillStyle = '#4a8a5a';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#888888';
-                ctx.beginPath();
-                ctx.moveTo(p.x + w / 2, p.y);
-                ctx.lineTo(p.x + 4 * gameState.zoom, p.y + h);
-                ctx.lineTo(p.x + w - 4 * gameState.zoom, p.y + h);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = '#aaaaaa';
-                ctx.fillRect(p.x + w / 2 - 2 * gameState.zoom, p.y, 4 * gameState.zoom, h * 0.6);
-            } else if (type === 'kremlin') {
-                ctx.fillStyle = '#c0392b';
-                ctx.fillRect(p.x, p.y + 10 * gameState.zoom, w, h - 10 * gameState.zoom);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y, w - 8 * gameState.zoom, 18 * gameState.zoom);
-                for (let i = 0; i < 3; i++) {
-                    ctx.fillStyle = '#f0d060';
-                    ctx.beginPath();
-                    ctx.arc(p.x + w * (0.25 + i * 0.25), p.y, 6 * gameState.zoom, Math.PI, 0);
-                    ctx.fill();
-                }
-            } else if (type === 'stadium') {
-                ctx.fillStyle = '#d0d0d0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#3a8a3a';
-                ctx.beginPath();
-                ctx.ellipse(p.x + w / 2, p.y + h / 2, w / 2 - 4 * gameState.zoom, h / 2 - 4 * gameState.zoom, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } else if (type === 'bus_stop') {
-                ctx.fillStyle = '#888888';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4a90c8';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y + 2 * gameState.zoom, w - 4 * gameState.zoom, h - 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + h - 6 * gameState.zoom, w - 8 * gameState.zoom, 4 * gameState.zoom);
-            } else if (type === 'bus_depot') {
-                ctx.fillStyle = '#708090';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4682B4';
-                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
-            } else if (type === 'carshop') {
-                ctx.fillStyle = '#e0e0e0';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#ff4444';
-                ctx.fillRect(p.x + 2 * gameState.zoom, p.y, w - 4 * gameState.zoom, 6 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 10 * gameState.zoom, w - 8 * gameState.zoom, h - 22 * gameState.zoom);
-            } else if (type === 'shipyard') {
-                ctx.fillStyle = '#708090';
-                ctx.fillRect(p.x, p.y, w, h);
-                ctx.fillStyle = '#4682B4';
-                ctx.fillRect(p.x, p.y, w, 8 * gameState.zoom);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x + 4 * gameState.zoom, p.y + 12 * gameState.zoom, w - 8 * gameState.zoom, h - 20 * gameState.zoom);
-                ctx.fillStyle = '#333333';
-                ctx.font = Math.floor(16 * gameState.zoom) + 'px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('🚢', p.x + w * 0.5, p.y + h * 0.55);
-            }
-            ctx.restore();
-        }
-
-        function drawCars(ctx) {
-            for (let i = 0; i < gameState.cars.length; i++) {
-                const car = gameState.cars[i];
-                const p = worldToScreen(car.x, car.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 7 * gameState.zoom;
-                ctx.fillStyle = car.color;
-                ctx.fillRect(p.x - sz, p.y - sz / 2, sz * 2, sz);
-                ctx.fillStyle = '#333333';
-                ctx.fillRect(p.x - sz + 1.5 * gameState.zoom, p.y - sz / 2 - 1.5 * gameState.zoom, sz * 0.5, sz + 3 * gameState.zoom);
-                ctx.fillStyle = '#111111';
-                const wheels = [
-                    [-sz * 0.6, -sz / 2],
-                    [sz * 0.6, -sz / 2],
-                    [-sz * 0.6, sz / 2],
-                    [sz * 0.6, sz / 2]
-                ];
-                for (let w = 0; w < wheels.length; w++) {
-                    ctx.beginPath();
-                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 2.5 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.fillStyle = '#ffff88';
-                ctx.beginPath();
-                ctx.arc(p.x + sz, p.y, 1.5 * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function drawBoats(ctx) {
-            for (let i = 0; i < gameState.boats.length; i++) {
-                const boat = gameState.boats[i];
-                const p = worldToScreen(boat.x, boat.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 8 * gameState.zoom;
-                ctx.fillStyle = boat.color;
-                ctx.beginPath();
-                ctx.ellipse(p.x, p.y, sz, sz * 0.4, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
-                ctx.strokeStyle = '#333333';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(p.x - sz * 0.3, p.y - sz * 0.6, sz * 0.6, sz * 0.5);
-            }
-        }
-
-        function drawBuses(ctx) {
-            for (let i = 0; i < gameState.buses.length; i++) {
-                const bus = gameState.buses[i];
-                const p = worldToScreen(bus.x, bus.y);
-                if (p.x < -30 || p.x > gameState.canvas.width + 30 || p.y < -30 || p.y > gameState.canvas.height + 30) continue;
-                const sz = 10 * gameState.zoom;
-                ctx.fillStyle = bus.color;
-                ctx.fillRect(p.x - sz * 1.5, p.y - sz / 2, sz * 3, sz);
-                ctx.fillStyle = '#87ceeb';
-                for (let j = 0; j < 4; j++) {
-                    ctx.fillRect(p.x - sz * 1.2 + j * sz * 0.7, p.y - sz / 2 + 2 * gameState.zoom, sz * 0.5, sz - 4 * gameState.zoom);
-                }
-                ctx.fillStyle = '#111111';
-                const wheels = [
-                    [-sz * 1.2, -sz / 2],
-                    [sz * 1.2, -sz / 2],
-                    [-sz * 1.2, sz / 2],
-                    [sz * 1.2, sz / 2]
-                ];
-                for (let w = 0; w < wheels.length; w++) {
-                    ctx.beginPath();
-                    ctx.arc(p.x + wheels[w][0], p.y + wheels[w][1], 3 * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawPeople(ctx) {
-            for (let i = 0; i < gameState.people.length; i++) {
-                const person = gameState.people[i];
-                if (person.hasCar && person.carRef) continue;
-                if (person.hasBoat && person.boatRef) continue;
-                const wp = worldToScreen(person.x, person.y);
-                if (wp.x < -20 || wp.x > gameState.canvas.width + 20 || wp.y < -20 || wp.y > gameState.canvas.height + 20) continue;
-                const sz = person.size * gameState.zoom;
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(wp.x, wp.y + sz * 0.8, sz * 0.8, sz * 0.3, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = person.color;
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y - sz * 0.5, sz * 0.6, 0, Math.PI * 2);
-                ctx.fill();
-                const hueMatch = person.color.match(/\d+/);
-                const baseHue = hueMatch ? parseInt(hueMatch[0]) : 0;
-                ctx.fillStyle = 'hsl(' + ((baseHue + 30) % 360) + ', 50%, 55%)';
-                ctx.fillRect(wp.x - sz * 0.4, wp.y - sz * 0.2, sz * 0.8, sz * 0.9);
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.2, wp.y - sz * 0.6, sz * 0.18, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#000000';
-                ctx.beginPath();
-                ctx.arc(wp.x - sz * 0.15, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.arc(wp.x + sz * 0.25, wp.y - sz * 0.6, sz * 0.08, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function drawWeather(ctx) {
-            const alpha = getDayNightAlpha();
-            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
-                for (let i = 0; i < gameState.raindrops.length; i++) {
-                    const drop = gameState.raindrops[i];
-                    const p = worldToScreen(drop.x, drop.y);
-                    ctx.strokeStyle = 'rgba(100,150,255,' + (0.6 - alpha * 0.3) + ')';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p.x - drop.vx * 2, p.y + 8 * gameState.zoom);
-                    ctx.stroke();
-                }
-            }
-            if (gameState.weather === 'snowy') {
-                for (let i = 0; i < gameState.snowflakes.length; i++) {
-                    const flake = gameState.snowflakes[i];
-                    const p = worldToScreen(flake.x, flake.y);
-                    ctx.fillStyle = 'rgba(255,255,255,' + (0.8 - alpha * 0.2) + ')';
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, flake.size * gameState.zoom, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawParticles(ctx) {
-            gameState.particles = gameState.particles.filter(function(p) { return p.life > 0; });
-            for (let i = 0; i < gameState.particles.length; i++) {
-                const particle = gameState.particles[i];
-                const wp = worldToScreen(particle.x, particle.y);
-                ctx.fillStyle = 'rgba(' + particle.r + ',' + particle.g + ',' + particle.b + ',' + particle.life + ')';
-                ctx.beginPath();
-                ctx.arc(wp.x, wp.y, particle.size * gameState.zoom, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // ==================== ИГРОВОЙ ЦИКЛ ====================
-        function gameLoop(timestamp) {
-            gameState.gameTime = timestamp;
-            const ctx = gameState.ctx;
-            const canvas = gameState.canvas;
-            if (!canvas || !ctx) { requestAnimationFrame(gameLoop); return; }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            gameState.gameMinute += 0.05;
-            if (gameState.gameMinute >= 60) { gameState.gameMinute = 0;
-                gameState.gameHour++; if (gameState.gameHour >= 24) gameState.gameHour = 0; }
-            gameState.weatherTimer++;
-            if (gameState.weatherTimer >= gameState.weatherDuration) {
-                gameState.weatherTimer = 0;
-                gameState.weatherDuration = 500 + Math.random() * 1500;
-                const weathers = ['sunny', 'sunny', 'cloudy', 'cloudy', 'rainy', 'rainy', 'stormy', 'snowy'];
-                gameState.weather = weathers[Math.floor(Math.random() * weathers.length)];
-            }
-            if (gameState.weather === 'rainy' || gameState.weather === 'stormy') {
-                if (gameState.raindrops.length < 60) gameState.raindrops.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: 2, vy: 8 });
-                for (let i = 0; i < gameState.raindrops.length; i++) {
-                    const drop = gameState.raindrops[i];
-                    drop.x += drop.vx;
-                    drop.y += drop.vy; if (drop.y > gameState.borderSize) drop.y = -gameState.borderSize;
-                }
-            } else gameState.raindrops = [];
-            if (gameState.weather === 'snowy') {
-                if (gameState.snowflakes.length < 40) gameState.snowflakes.push({ x: (Math.random() - 0.5) * gameState.borderSize * 2, y: (Math.random() - 0.5) * gameState.borderSize * 2, vx: (Math.random() - 0.5) * 0.5, vy: 1 + Math.random() * 2, size: 1 + Math.random() * 3 });
-                for (let i = 0; i < gameState.snowflakes.length; i++) {
-                    const flake = gameState.snowflakes[i];
-                    flake.x += flake.vx;
-                    flake.y += flake.vy; if (flake.y > gameState.borderSize) flake.y = -gameState.borderSize;
-                }
-            } else gameState.snowflakes = [];
-
-            drawGround(ctx);
-            drawWater(ctx);
-            drawGrid(ctx);
-            drawZones(ctx);
-            drawBorder(ctx);
-            for (let i = 0; i < gameState.roads.length; i++) {
-                const road = gameState.roads[i];
-                const info = buildingTypes[road.type] || buildingTypes.road;
-                drawRoad(ctx, road, info);
-            }
-            for (let i = 0; i < gameState.rails.length; i++) {
-                const rail = gameState.rails[i];
-                drawRoad(ctx, rail, buildingTypes.rail);
-            }
-            for (let i = 0; i < gameState.buildings.length; i++) {
-                const building = gameState.buildings[i];
-                const info = buildingTypes[building.type];
-                if (info) drawBuildingShape(ctx, building, info);
-            }
-            updateNPCs();
-            drawPeople(ctx);
-            drawCars(ctx);
-            drawBoats(ctx);
-            drawBuses(ctx);
-            drawWeather(ctx);
-            drawParticles(ctx);
-
-            if ((gameState.selectedType || gameState.currentTool) && !gameState.dragging && !gameState.deleteMode && !gameState.selectMode) {
-                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) {
-                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
-                    const snap = gameState.gridSize;
-                    const sx = Math.round(worldPos.x / snap) * snap;
-                    const sy = Math.round(worldPos.y / snap) * snap;
-                    const pp = worldToScreen(sx, sy);
-                    const gs = gameState.gridSize * gameState.zoom;
-                    let color = 'rgba(76,175,80,0.3)';
-                    if (gameState.currentTool === 'zone_commercial') color = 'rgba(33,150,243,0.3)';
-                    if (gameState.currentTool === 'zone_industrial') color = 'rgba(255,152,0,0.3)';
-                    ctx.fillStyle = color;
-                    ctx.fillRect(pp.x, pp.y, gs, gs);
-                    ctx.strokeStyle = color.replace('0.3', '0.7');
-                    ctx.lineWidth = 2 * gameState.zoom;
-                    ctx.setLineDash([4 * gameState.zoom, 4 * gameState.zoom]);
-                    ctx.strokeRect(pp.x, pp.y, gs, gs);
-                    ctx.setLineDash([]);
-                } else if (gameState.selectedType) {
-                    const info = buildingTypes[gameState.selectedType];
-                    const size = getBuildSize(gameState.selectedType, gameState.buildScale || 1);
-                    const worldPos = screenToWorld(gameState.mouseX, gameState.mouseY);
-                    const buildX = worldPos.x - size.w / 2;
-                    const buildY = worldPos.y - size.h / 2;
-                    const pp = worldToScreen(buildX, buildY);
-                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                    ctx.fillRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                    ctx.setLineDash([5 * gameState.zoom, 5 * gameState.zoom]);
-                    ctx.lineWidth = 2 * gameState.zoom;
-                    ctx.strokeRect(pp.x, pp.y, size.w * gameState.zoom, size.h * gameState.zoom);
-                    ctx.setLineDash([]);
-                    ctx.save();
-                    const ghostCX = pp.x + size.w * gameState.zoom / 2;
-                    const ghostCY = pp.y + size.h * gameState.zoom / 2;
-                    ctx.translate(ghostCX, ghostCY);
-                    if (gameState.buildRotation) ctx.rotate(gameState.buildRotation * Math.PI / 180);
-                    ctx.font = Math.floor(20 * gameState.zoom) + 'px serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(info.emoji, 0, 0);
-                    ctx.restore();
-                }
-            }
-
-            gameState.incomeTimer += 16;
-            if (gameState.incomeTimer >= 3000) {
-                gameState.incomeTimer = 0;
-                let totalIncome = 0;
-                for (let i = 0; i < gameState.buildings.length; i++) {
-                    const building = gameState.buildings[i];
-                    const info = buildingTypes[building.type];
-                    const scale = building.scale || 1;
-                    totalIncome += Math.floor((info ? info.income : 0) * scale);
-                }
-                totalIncome += gameState.roads.length * 5;
-                totalIncome += gameState.rails.length * 20;
-                totalIncome += gameState.cars.length * 10;
-                totalIncome += gameState.boats.length * 30;
-                totalIncome += gameState.buses.length * 50;
-                gameState.money += totalIncome;
-                gameState.happiness += (Math.random() - 0.47) * 0.4;
-                gameState.happiness = Math.max(0, Math.min(100, gameState.happiness));
-                updateUI();
-            }
-
-            gameState.zoneTimer += 16;
-            if (gameState.zoneTimer >= 5000 && gameState.zones.length > 0) {
-                gameState.zoneTimer = 0;
-                for (let i = 0; i < gameState.zones.length; i++) {
-                    const zone = gameState.zones[i];
-                    if (Math.random() < 0.1) {
-                        const services = checkServices(zone.x + zone.w / 2, zone.y + zone.h / 2);
-                        if (gameState.residentialDemand > 0 && zone.type === 'residential' && services.police && services.fire && services.health) {
-                            const house = { type: 'house', x: zone.x, y: zone.y, w: 44, h: 44, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(house, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 22, zone.y + 22)) {
-                                gameState.buildings.push(house);
-                                gameState.population += 8;
-                                gameState.residentialDemand = Math.max(0, gameState.residentialDemand - 5);
-                            }
-                        }
-                        if (gameState.commercialDemand > 0 && zone.type === 'commercial') {
-                            const shop = { type: 'shop', x: zone.x, y: zone.y, w: 42, h: 42, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(shop, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 21, zone.y + 21)) {
-                                gameState.buildings.push(shop);
-                                gameState.population += 3;
-                                gameState.commercialDemand = Math.max(0, gameState.commercialDemand - 5);
-                            }
-                        }
-                        if (gameState.industrialDemand > 0 && zone.type === 'industrial') {
-                            const factory = { type: 'factory', x: zone.x, y: zone.y, w: 52, h: 52, scale: 1, rotation: 0, placedAt: gameState.gameTime };
-                            const allC = gameState.buildings.concat(gameState.roads).concat(gameState.rails);
-                            let overlap = false;
-                            for (let j = 0; j < allC.length; j++) { if (rectanglesOverlap(factory, allC[j], 2)) { overlap = true; break; } }
-                            if (!overlap && !isPointInWater(zone.x + 26, zone.y + 26)) {
-                                gameState.buildings.push(factory);
-                                gameState.population += 20;
-                                gameState.industrialDemand = Math.max(0, gameState.industrialDemand - 5);
-                            }
-                        }
-                    }
-                }
-                gameState.residentialDemand += Math.random() * 2;
-                gameState.commercialDemand += Math.random() * 1.5;
-                gameState.industrialDemand += Math.random() * 1;
-                updateUI();
-            }
-
-            gameState.demandTimer += 16;
-            if (gameState.demandTimer >= 8000) {
-                gameState.demandTimer = 0;
-                gameState.residentialDemand = Math.min(100, gameState.residentialDemand + Math.random() * 5);
-                gameState.commercialDemand = Math.min(100, gameState.commercialDemand + Math.random() * 4);
-                gameState.industrialDemand = Math.min(100, gameState.industrialDemand + Math.random() * 3);
-                updateUI();
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        function checkServices(worldX, worldY) {
-            const result = { police: false, fire: false, health: false, education: false };
-            for (let i = 0; i < gameState.buildings.length; i++) {
-                const b = gameState.buildings[i];
-                const info = buildingTypes[b.type];
-                if (!info || !info.serviceType) continue;
-                const dist = Math.hypot(worldX - (b.x + b.w / 2), worldY - (b.y + b.h / 2));
-                if (dist <= info.serviceRadius) {
-                    result[info.serviceType] = true;
-                }
-            }
-            return result;
-        }
-
-        // ==================== ОБНОВЛЕНИЕ NPC ====================
-        function updateNPCs() {
-            for (let i = 0; i < gameState.people.length; i++) {
-                const person = gameState.people[i];
-                if (person.hasCar && person.carRef) { person.x = person.carRef.x;
-                    person.y = person.carRef.y; continue; }
-                if (person.hasBoat && person.boatRef) { person.x = person.boatRef.x;
-                    person.y = person.boatRef.y; continue; }
-                person.stateTimer--;
-                if (person.stateTimer <= 0) {
-                    person.stateTimer = 80 + Math.random() * 300;
-                    const targets = gameState.buildings.filter(function(b) { return buildingTypes[b.type] && !buildingTypes[b.type].isRoad && !buildingTypes[b.type].isRail && !buildingTypes[b.type].isRoadCurve; });
-                    if (targets.length > 0 && Math.random() < 0.7) { person.target = targets[Math.floor(Math.random() * targets.length)];
-                        person.state = 'visiting'; } else { person.target = null;
-                        person.state = 'walking';
-                        person.vx = (Math.random() - 0.5) * 1.5;
-                        person.vy = (Math.random() - 0.5) * 1.5; }
-                }
-                if (person.state === 'visiting' && person.target) {
-                    const dx = (person.target.x + person.target.w / 2) - person.x;
-                    const dy = (person.target.y + person.target.h / 2) - person.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 12) { person.state = 'inside';
-                        person.stateTimer = 100 + Math.random() * 300; } else { const sp = 1.5;
-                        person.vx = dx / dist * sp;
-                        person.vy = dy / dist * sp; }
-                } else if (person.state === 'inside') { person.vx = 0;
-                    person.vy = 0; }
-                person.x += person.vx;
-                person.y += person.vy; if (Math.abs(person.x) > gameState.borderSize) person.vx *= -1; if (Math.abs(person.y) > gameState.borderSize) person.vy *= -1;
-            }
-            for (let i = 0; i < gameState.cars.length; i++) {
-                const car = gameState.cars[i]; if (car.parked) continue;
-                car.x += car.vx;
-                car.y += car.vy;
-                let onRoad = false;
-                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (car.x >= r.x && car.x <= r.x + r.w && car.y >= r.y && car.y <= r.y + r.h) { onRoad = true; break; } }
-                if (!onRoad) {
-                    let bestRoad = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
-                            ry = r.y + r.h / 2; const d = Math.hypot(car.x - rx, car.y - ry); if (d < bestDist) { bestDist = d;
-                            bestRoad = r; } }
-                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
-                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - car.x,
-                            dy = ry - car.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { car.vx = dx / d * 2;
-                            car.vy = dy / d * 2; } }
-                }
-                if (Math.abs(car.x) > gameState.borderSize || Math.abs(car.y) > gameState.borderSize) { car.vx *= -1;
-                    car.vy = (Math.random() - 0.5) * 2; }
-                if (Math.random() < 0.005) { const person = gameState.people.find(function(p) { return p.carRef === car; }); if (person && Math.random() < 0.3) { person.hasCar = false;
-                        person.carRef = null;
-                        person.x = car.x;
-                        person.y = car.y;
-                        car.parked = true;
-                        setTimeout(function() { car.parked = false; if (Math.random() < 0.5) { const np = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; }); if (np) { np.hasCar = true;
-                                    np.carRef = car; } } }, 2000 + Math.random() * 3000); } }
-            }
-            for (let i = 0; i < gameState.boats.length; i++) {
-                const boat = gameState.boats[i]; if (boat.parked) continue;
-                boat.x += boat.vx;
-                boat.y += boat.vy;
-                let onWater = isPointInWater(boat.x, boat.y);
-                if (!onWater) {
-                    let bestW = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.waterBodies.length; j++) { const w = gameState.waterBodies[j]; let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let k = 0; k < w.points.length; k++) { if (w.points[k].x < minX) minX = w.points[k].x; if (w.points[k].y < minY) minY = w.points[k].y; if (w.points[k].x > maxX) maxX = w.points[k].x; if (w.points[k].y > maxY) maxY = w.points[k].y; } const wx = (minX + maxX) / 2,
-                            wy = (minY + maxY) / 2; const d = Math.hypot(boat.x - wx, boat.y - wy); if (d < bestDist) { bestDist = d;
-                            bestW = w; } }
-                    if (bestW) { let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let k = 0; k < bestW.points.length; k++) { if (bestW.points[k].x < minX) minX = bestW.points[k].x; if (bestW.points[k].y < minY) minY = bestW.points[k].y; if (bestW.points[k].x > maxX) maxX = bestW.points[k].x; if (bestW.points[k].y > maxY) maxY = bestW.points[k].y; } const wx = (minX + maxX) / 2,
-                            wy = (minY + maxY) / 2; const dx = wx - boat.x,
-                            dy = wy - boat.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { boat.vx = dx / d * 2;
-                            boat.vy = dy / d * 2; } }
-                }
-                if (Math.random() < 0.01) { boat.vx = (Math.random() - 0.5) * 2;
-                    boat.vy = (Math.random() - 0.5) * 2; }
-            }
-            for (let i = 0; i < gameState.buses.length; i++) {
-                const bus = gameState.buses[i]; if (bus.parked) continue;
-                bus.x += bus.vx;
-                bus.y += bus.vy;
-                let onRoad = false;
-                for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; if (bus.x >= r.x && bus.x <= r.x + r.w && bus.y >= r.y && bus.y <= r.y + r.h) { onRoad = true; break; } }
-                if (!onRoad) {
-                    let bestRoad = null,
-                        bestDist = 99999;
-                    for (let j = 0; j < gameState.roads.length; j++) { const r = gameState.roads[j]; const rx = r.x + r.w / 2,
-                            ry = r.y + r.h / 2; const d = Math.hypot(bus.x - rx, bus.y - ry); if (d < bestDist) { bestDist = d;
-                            bestRoad = r; } }
-                    if (bestRoad) { const rx = bestRoad.x + bestRoad.w / 2,
-                            ry = bestRoad.y + bestRoad.h / 2; const dx = rx - bus.x,
-                            dy = ry - bus.y; const d = Math.sqrt(dx * dx + dy * dy); if (d > 0) { bus.vx = dx / d * 1.5;
-                            bus.vy = dy / d * 1.5; } }
-                }
-                if (Math.abs(bus.x) > gameState.borderSize || Math.abs(bus.y) > gameState.borderSize) { bus.vx *= -1;
-                    bus.vy = (Math.random() - 0.5) * 1.5; }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'carshop'; }) && gameState.roads.length > 0 && gameState.cars.length < 15 && Math.random() < 0.005) {
-                const shop = gameState.buildings.find(function(b) { return b.type === 'carshop'; });
-                if (shop) {
-                    const car = { x: shop.x + shop.w / 2, y: shop.y + shop.h / 2, vx: 2, vy: 0, color: 'hsl(' + Math.floor(Math.random() * 360) + ',70%,55%)', parked: false, homeRef: shop };
-                    gameState.cars.push(car);
-                    const person = gameState.people.find(function(p) { return !p.hasCar && !p.hasBoat; });
-                    if (person) { person.hasCar = true;
-                        person.carRef = car; }
-                }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'shipyard'; }) && gameState.waterBodies.length > 0 && gameState.boats.length < 8 && Math.random() < 0.003) {
-                const yard = gameState.buildings.find(function(b) { return b.type === 'shipyard'; });
-                if (yard) {
-                    let nearestWater = null;
-                    for (let i = 0; i < gameState.waterBodies.length; i++) { const w = gameState.waterBodies[i]; let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let j = 0; j < w.points.length; j++) { if (w.points[j].x < minX) minX = w.points[j].x; if (w.points[j].y < minY) minY = w.points[j].y; if (w.points[j].x > maxX) maxX = w.points[j].x; if (w.points[j].y > maxY) maxY = w.points[j].y; } if (yard.x >= minX && yard.x <= maxX && yard.y >= minY && yard.y <= maxY) { nearestWater = w; break; } }
-                    if (nearestWater) { let minX = Infinity,
-                            minY = Infinity,
-                            maxX = -Infinity,
-                            maxY = -Infinity; for (let j = 0; j < nearestWater.points.length; j++) { if (nearestWater.points[j].x < minX) minX = nearestWater.points[j].x; if (nearestWater.points[j].y < minY) minY = nearestWater.points[j].y; if (nearestWater.points[j].x > maxX) maxX = nearestWater.points[j].x; if (nearestWater.points[j].y > maxY) maxY = nearestWater.points[j].y; } const boat = { x: (minX + maxX) / 2, y: (minY + maxY) / 2, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, color: 'hsl(' + Math.floor(Math.random() * 360) + ',50%,50%)', parked: false, homeRef: yard };
-                        gameState.boats.push(boat);
-                        const person = gameState.people.find(function(p) { return !p.hasBoat && !p.hasCar; }); if (person) { person.hasBoat = true;
-                            person.boatRef = boat; } }
-                }
-            }
-            if (gameState.buildings.some(function(b) { return b.type === 'bus_depot'; }) && gameState.buildings.some(function(b) { return b.type === 'bus_stop'; }) && gameState.roads.length > 0 && gameState.buses.length < 5 && Math.random() < 0.003) {
-                const depot = gameState.buildings.find(function(b) { return b.type === 'bus_depot'; });
-                if (depot) {
-                    const bus = { x: depot.x + depot.w / 2, y: depot.y + depot.h / 2, vx: 1.5, vy: 0, color: '#4a90c8', parked: false, homeRef: depot };
-                    gameState.buses.push(bus);
-                }
-            }
-        }
-
-        function spawnParticles(worldX, worldY, colorHex) {
-            const hex = colorHex || '#f0d060';
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            for (let i = 0; i < 25; i++) {
-                gameState.particles.push({
-                    x: worldX,
-                    y: worldY,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 4,
-                    life: 1,
-                    size: Math.random() * 5 + 2,
-                    r: r,
-                    g: g,
-                    b: b,
-                });
-            }
-        }
-
-        // ==================== СОБЫТИЯ ====================
-        document.addEventListener('mousemove', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            const coords = getCanvasCoords(event);
-            gameState.mouseX = coords.sx;
-            gameState.mouseY = coords.sy;
-            if (gameState.dragging) {
-                const dx = event.clientX - gameState.dragStartX;
-                const dy = event.clientY - gameState.dragStartY;
-                gameState.cameraX -= dx / gameState.zoom;
-                gameState.cameraY -= dy / gameState.zoom;
-                gameState.dragStartX = event.clientX;
-                gameState.dragStartY = event.clientY;
-                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
-            }
-            const worldPos = screenToWorld(coords.sx, coords.sy);
-            gameState.hoveredBuilding = findBuildingAt(worldPos.x, worldPos.y);
-            updateInfoPopup(coords.sx, coords.sy);
-        });
-
-        document.addEventListener('mousedown', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
-            if (event.button === 0) {
-                const worldPos = getWorldFromEvent(event);
-                gameState.mouseX = worldPos.sx;
-                gameState.mouseY = worldPos.sy;
-                if (gameState.deleteMode) { if (deleteAt(worldPos.wx, worldPos.wy)) return; }
-                if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) { if (placeZone(worldPos.wx, worldPos.wy)) return; }
-                if (gameState.selectedType && !gameState.selectMode) { if (buildAt(worldPos.wx, worldPos.wy)) return; }
-                gameState.dragging = true;
-                gameState.dragStartX = event.clientX;
-                gameState.dragStartY = event.clientY;
-                gameState.dragDistance = 0;
-                updateUI();
-            }
-        });
-
-        document.addEventListener('mouseup', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (gameState.dragging && gameState.dragDistance < 3) {
-                const worldPos = getWorldFromEvent(event);
-                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
-                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
-                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
-            }
-            gameState.dragging = false;
-            gameState.dragDistance = 0;
-            updateUI();
-        });
-
-        document.addEventListener('contextmenu', function(event) { if (event.target.closest('#game-canvas')) event.preventDefault(); });
-
-        document.addEventListener('wheel', function(event) {
-            if (!gameState.canvas || !gameState.countryName || event.target.closest('#build-modal')) return;
-            event.preventDefault();
-            const rect = gameState.canvas.getBoundingClientRect();
-            const mx = event.clientX - rect.left;
-            const my = event.clientY - rect.top;
-            const worldBefore = screenToWorld(mx, my);
-            const zf = 1.07;
-            if (event.deltaY < 0) gameState.zoom = Math.min(3, gameState.zoom * zf);
-            else gameState.zoom = Math.max(0.25, gameState.zoom / zf);
-            gameState.gridSize = Math.round(48 * gameState.zoom);
-            const worldAfter = screenToWorld(mx, my);
-            gameState.cameraX += worldBefore.x - worldAfter.x;
-            gameState.cameraY += worldBefore.y - worldAfter.y;
-        }, { passive: false });
-
-        document.addEventListener('touchstart', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.target.closest('#bottom-panel') || event.target.closest('#top-bar') || event.target.closest('#build-modal')) return;
-            if (event.touches.length === 2) {
-                gameState.dragging = false;
-                gameState.touchDistance = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-                gameState.lastPinchZoom = gameState.zoom;
-                return;
-            }
-            if (event.touches.length === 1) {
-                const touch = event.touches[0];
-                const rect = gameState.canvas.getBoundingClientRect();
-                gameState.mouseX = touch.clientX - rect.left;
-                gameState.mouseY = touch.clientY - rect.top;
-                gameState.dragStartX = touch.clientX;
-                gameState.dragStartY = touch.clientY;
-                gameState.dragDistance = 0;
-                gameState.dragging = true;
-                gameState.touchStartTime = Date.now();
-                updateUI();
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchmove', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            if (event.touches.length === 2) {
-                event.preventDefault();
-                const dist = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-                gameState.zoom = Math.max(0.25, Math.min(3, gameState.lastPinchZoom * (dist / gameState.touchDistance)));
-                gameState.gridSize = Math.round(48 * gameState.zoom);
-            } else if (event.touches.length === 1 && gameState.dragging) {
-                const dx = event.touches[0].clientX - gameState.dragStartX;
-                const dy = event.touches[0].clientY - gameState.dragStartY;
-                gameState.cameraX -= dx / gameState.zoom;
-                gameState.cameraY -= dy / gameState.zoom;
-                gameState.dragStartX = event.touches[0].clientX;
-                gameState.dragStartY = event.touches[0].clientY;
-                gameState.dragDistance += Math.abs(dx) + Math.abs(dy);
-                const rect = gameState.canvas.getBoundingClientRect();
-                gameState.mouseX = event.touches[0].clientX - rect.left;
-                gameState.mouseY = event.touches[0].clientY - rect.top;
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', function(event) {
-            if (!gameState.canvas || !gameState.countryName) return;
-            const wasTap = gameState.dragDistance < 8 && (Date.now() - gameState.touchStartTime) < 300;
-            if (wasTap && event.changedTouches.length === 1) {
-                const worldPos = getWorldFromEvent(event.changedTouches[0]);
-                if (gameState.deleteMode) deleteAt(worldPos.wx, worldPos.wy);
-                else if (gameState.currentTool && gameState.currentTool.startsWith('zone_')) placeZone(worldPos.wx, worldPos.wy);
-                else if (gameState.selectedType && !gameState.selectMode) buildAt(worldPos.wx, worldPos.wy);
-            }
-            gameState.dragging = false;
-            gameState.dragDistance = 0;
-            updateUI();
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (!gameState.countryName) return;
-            if (event.key === 'Escape') { gameState.selectedType = null;
-                gameState.currentTool = null;
-                gameState.deleteMode = false;
-                gameState.selectMode = false;
-                closeBuildModal();
-                updateUI(); }
-            if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault();
-                toggleDeleteMode(); }
-            if (event.key === 'b' || event.key === 'B') openBuildModal();
-            if (event.key === 'i' || event.key === 'I') toggleSelectMode();
-            if (event.key === 'r' || event.key === 'R' || event.key === 'к' || event.key === 'К') { event.preventDefault();
-                rotateBuilding(); }
-            if (event.key === '1') setTool('zone_residential');
-            if (event.key === '2') setTool('zone_commercial');
-            if (event.key === '3') setTool('zone_industrial');
-        });
-
-        document.getElementById('build-modal').addEventListener('click', function(event) { if (event.target === this) closeBuildModal(); });
-
-        document.getElementById('modal-tabs').addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal-tab')) {
-                document.querySelectorAll('#modal-tabs .modal-tab').forEach(function(tab) { tab.classList.remove('active'); });
-                event.target.classList.add('active');
-                currentModalTab = event.target.dataset.tab;
-                modalBuilt = false;
-                buildModalGrid();
-            }
-        });
-
-        document.getElementById('size-selector').addEventListener('click', function(event) {
-            if (event.target.classList.contains('size-btn')) {
-                gameState.buildScale = parseFloat(event.target.dataset.scale);
-                buildModalGrid();
-            }
-        });
-
-        function updateInfoPopup(screenX, screenY) {
-            const popup = document.getElementById('info-popup');
-            if (gameState.hoveredBuilding && !gameState.dragging && (gameState.selectMode || (!gameState.selectedType && !gameState.deleteMode && !gameState.currentTool))) {
-                const building = gameState.hoveredBuilding;
-                const info = buildingTypes[building.type];
-                if (!info) { popup.style.display = 'none'; return; }
-                const scale = building.scale || 1;
-                const cost = getBuildCost(building.type, scale);
-                const income = Math.floor((info.income || 0) * scale);
-                popup.style.display = 'block';
-                popup.style.left = Math.min(screenX + 22, window.innerWidth - 280) + 'px';
-                popup.style.top = Math.max(10, screenY - 30) + 'px';
-                let html = '<span class="pop-title">' + (info.emoji || '?') + ' ' + (info.name || 'Объект') + '</span>';
-                html += '📏 ' + building.w + 'x' + building.h + ' (x' + scale + ') 🔄' + (building.rotation || 0) + '°<br>';
-                html += '💰 Цена: ' + cost.toLocaleString() + '<br>';
-                html += '📈 Доход: 💰' + income.toLocaleString() + '/мес<br>';
-                if (info.serviceType) html += '🔔 Тип: ' + info.serviceType + '<br>';
-                if (info.happinessBonus) html += '😊 Счастье: +' + Math.floor((info.happinessBonus || 0) * scale) + '<br>';
-                popup.innerHTML = html;
-            } else {
-                popup.style.display = 'none';
-            }
-        }
-
-        function addLog(message) {
-            const logContainer = document.getElementById('message-log');
-            const messageElement = document.createElement('div');
-            messageElement.className = 'log-msg';
-            messageElement.textContent = message;
-            logContainer.appendChild(messageElement);
-            setTimeout(function() { messageElement.remove(); }, 3500);
-            if (logContainer.children.length > 6) logContainer.firstChild.remove();
-        }
-
-        function shakeEl(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.style.animation = 'shake 0.4s ease';
-            setTimeout(function() { el.style.animation = ''; }, 400);
-        }
-
-        function showHelp() {
-            alert('🎮 PRESIDENT SIMULATOR - THEOTOWN EDITION\n\n' +
-                '🏘️ ЗОНИРОВАНИЕ:\n' +
-                '• Кнопки Жилая/Коммерция/Индустрия\n' +
-                '• Или клавиши 1, 2, 3\n' +
-                '• Выделите зону — здания вырастут сами!\n\n' +
-                '🏗️ СПЕЦПОСТРОЙКИ:\n' +
-                '• Дороги, службы, парки, достопримечательности\n' +
-                '• Транспорт (автобусы, автосалон)\n\n' +
-                '🚒 СЛУЖБЫ:\n' +
-                '• Полиция, пожарные, больницы, школы\n' +
-                '• Необходимы для роста зон\n\n' +
-                '📈 СПРОС:\n' +
-                '• R — жилой, C — коммерческий, I — индустриальный\n' +
-                '• Растёт со временем\n\n' +
-                '⌨️ КЛАВИШИ:\n' +
-                '• 1/2/3 — зоны\n' +
-                '• B — спецпостройки\n' +
-                '• R — поворот\n' +
-                '• Delete — снос\n' +
-                '• I — информация\n\n' +
-                '🌊 Водоёмы генерируются случайно\n' +
-                '🌤️ Погода и день/ночь\n' +
-                '💾 Автосохранение каждые 30 сек');
-        }
-
-        const shakeCSS = document.createElement('style');
-        shakeCSS.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}';
-        document.head.appendChild(shakeCSS);
-
-        console.log('🏛️ President Simulator - TheoTown Edition ГОТОВ!');
-        console.log('✅ Зонирование (жилое, коммерческое, индустриальное)');
-        console.log('✅ Городские службы (полиция, пожарные, больницы, школы)');
-        console.log('✅ Парки и достопримечательности');
-        console.log('✅ Транспорт (автобусы, автосалон, судостроительный)');
-        console.log('✅ Система спроса');
-        console.log('✅ Кривые водоёмы');
-        console.log('✅ День/ночь и погода');
-        console.log('✅ NPC, машины, лодки, автобусы');
-        console.log('✅ Сохранения');
+        })();
     </script>
 </body>
 </html>
