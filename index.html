@@ -2,88 +2,106 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>НЕ НАЖИМАЙ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>НЕ НАЖИМАЙ, ВАДИМ!</title>
 <style>
-body{
-margin:0;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#111;
-font-family:Arial;
-overflow:hidden;
-}
-#box{
-text-align:center;
-color:white;
-padding:20px;
-}
-button{
-font-size:38px;
-padding:20px 45px;
-border:none;
-border-radius:18px;
-background:red;
-color:white;
-cursor:pointer;
-}
-#text{
-margin-top:30px;
-font-size:30px;
-}
-.shake{
-animation:shake .12s infinite;
-}
-@keyframes shake{
-0%{transform:translate(4px,2px);}
-25%{transform:translate(-4px,-2px);}
-50%{transform:translate(4px,-3px);}
-75%{transform:translate(-3px,3px);}
-100%{transform:translate(3px,-2px);}
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+    }
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #111;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        overflow: hidden;
+        transition: background 0.3s;
+    }
+    #box {
+        text-align: center;
+        color: white;
+        padding: 20px;
+    }
+    button {
+        font-size: 38px;
+        padding: 20px 45px;
+        border: none;
+        border-radius: 60px;
+        background: red;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.1s, background 0.2s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    button:active {
+        transform: scale(0.97);
+    }
+    #text {
+        margin-top: 30px;
+        font-size: 32px;
+        font-weight: bold;
+        text-shadow: 0 0 5px black;
+    }
+    .shake {
+        animation: shake 0.12s infinite;
+    }
+    @keyframes shake {
+        0% { transform: translate(4px, 2px); }
+        25% { transform: translate(-4px, -2px); }
+        50% { transform: translate(4px, -3px); }
+        75% { transform: translate(-3px, 3px); }
+        100% { transform: translate(3px, -2px); }
+    }
 </style>
 </head>
 <body>
 <div id="box">
-<button onclick="press()">НЕ НАЖИМАЙ</button>
-<div id="text"></div>
+    <button onclick="press()">НЕ НАЖИМАЙ</button>
+    <div id="text"></div>
 </div>
 <script>
-let clicks=0;
-function press(){
-clicks++;
-let text=document.getElementById("text");
-if(clicks==1){
-text.innerHTML="Серьёзно?";
-}
-else if(clicks==2){
-text.innerHTML="Я же сказал не нажимать.";
-}
-else if(clicks==3){
-text.innerHTML="Дима... ты реально продолжаешь?";
-document.body.style.background="#4a0000";
-}
-else if(clicks==4){
-text.innerHTML="Последнее предупреждение.";
-document.body.classList.add("shake");
-}
-else if(clicks==5){
-text.innerHTML="Ну всё...";
-}
-else if(clicks>=6){
-document.body.classList.remove("shake");
-document.body.innerHTML=`
-<div style="background:white; width:100%; height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; text-align:center; padding:20px; box-sizing:border-box;">
-<div style="font-size:36px; font-weight:bold; color:black;">
-Ну я же просил не листать.<br>Теперь любуйся им.
-<div style="color:red; font-size:100px; margin-top:15px; transform:rotate(35deg);">↖</div>
-</div>
-<img src="https://s10.iimage.su/s/30/gMEBtp2xACAiFUfku2jQFO8r321ljT44qZAqoyBRT.webp" style="max-width:80%; border-radius:18px; margin-top:10px;">
-</div>
-`;
-}
+let clicks = 0;
+function press() {
+    clicks++;
+    let text = document.getElementById("text");
+    if (clicks == 1) {
+        text.innerHTML = "Серьёзно?";
+    }
+    else if (clicks == 2) {
+        text.innerHTML = "Я же сказал не нажимать.";
+    }
+    else if (clicks == 3) {
+        text.innerHTML = "Вадим... ты реально продолжаешь?";
+        document.body.style.background = "#4a0000";
+    }
+    else if (clicks == 4) {
+        text.innerHTML = "Последнее предупреждение.";
+        document.body.classList.add("shake");
+    }
+    else if (clicks == 5) {
+        text.innerHTML = "Ну всё...";
+    }
+    else if (clicks >= 6) {
+        document.body.classList.remove("shake");
+        document.body.innerHTML = `
+        <div style="background:white; width:100%; height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; text-align:center; padding:20px; box-sizing:border-box;">
+            <div style="font-size:36px; font-weight:bold; color:black;">
+                Ну я же просил не листать.<br>Теперь любуйся.
+                <div style="color:red; font-size:100px; margin-top:15px; transform:rotate(35deg);">↖</div>
+            </div>
+            <video autoplay loop muted playsinline style="max-width:90%; max-height:55%; border-radius:20px; margin-top:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+                <source src="https://files.catbox.moe/jticra.mp4" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+        </div>
+        `;
+    }
 }
 </script>
 </body>
