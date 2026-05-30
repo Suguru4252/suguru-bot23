@@ -1,484 +1,167 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Дима, прикол! 🎉</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>НЕ НАЖИМАЙ</title>
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
+<style>
 
-        /* Контейнер с сюрпризом */
-        .prank-container {
-            text-align: center;
-            padding: 20px;
-            z-index: 10;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+body{
+margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#111;
+font-family:Arial;
+overflow:hidden;
+transition:.3s;
+}
 
-        .prank-container:active {
-            transform: scale(0.98);
-        }
+#box{
+text-align:center;
+color:white;
+padding:20px;
+}
 
-        /* Главная кнопка-ловушка */
-        .dima-button {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            border: none;
-            padding: 20px 50px;
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-            border-radius: 60px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            letter-spacing: 2px;
-        }
+button{
+font-size:38px;
+padding:20px 45px;
+border:none;
+border-radius:18px;
+background:red;
+color:white;
+cursor:pointer;
+transition:.2s;
+}
 
-        .dima-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-        }
+button:hover{
+transform:scale(1.07);
+}
 
-        /* Окошко-предупреждение (фейковое) */
-        .fake-alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: #fef9e6;
-            border-left: 12px solid #ff9800;
-            border-radius: 20px;
-            width: 320px;
-            max-width: 85%;
-            padding: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: 0.2s;
-            font-family: 'Segoe UI', sans-serif;
-        }
+#text{
+margin-top:30px;
+font-size:30px;
+}
 
-        .fake-alert.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1);
-        }
+.shake{
+animation:shake .12s infinite;
+}
 
-        .fake-alert-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #e67e22;
-            margin-bottom: 15px;
-        }
+@keyframes shake{
+0%{transform:translate(4px,2px);}
+25%{transform:translate(-4px,-2px);}
+50%{transform:translate(4px,-3px);}
+75%{transform:translate(-3px,3px);}
+100%{transform:translate(3px,-2px);}
+}
 
-        .fake-alert-message {
-            font-size: 1.2rem;
-            color: #333;
-            margin-bottom: 25px;
-            line-height: 1.4;
-        }
-
-        .fake-alert button {
-            background: #ff9800;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.1s;
-        }
-
-        .fake-alert button:active {
-            transform: scale(0.97);
-        }
-
-        /* Летающие Димы (смешные картинки) */
-        .flying-dima {
-            position: fixed;
-            font-size: 3rem;
-            pointer-events: none;
-            z-index: 100;
-            animation: floatAndRotate 1.5s ease-out forwards;
-        }
-
-        @keyframes floatAndRotate {
-            0% {
-                transform: translate(0, 0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--dx, 200px), var(--dy, -300px)) rotate(720deg);
-                opacity: 0;
-            }
-        }
-
-        /* Хаотичные Димы по углам */
-        .dimas-grid {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            gap: 8px;
-            font-size: 1.8rem;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 15px;
-            border-radius: 50px;
-            z-index: 200;
-            backdrop-filter: blur(4px);
-            font-weight: bold;
-            color: white;
-        }
-
-        /* Кнопка-паника */
-        .panic {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #222;
-            color: #ffaa00;
-            border: none;
-            border-radius: 40px;
-            padding: 8px 16px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            z-index: 300;
-            font-family: monospace;
-            opacity: 0.6;
-        }
-        .panic:active {
-            background: red;
-            color: white;
-        }
-
-        /* взломанный экран (финальный прикол) */
-        .hacker-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 1.5rem;
-            opacity: 0;
-            visibility: hidden;
-            transition: 0.3s;
-            backdrop-filter: blur(8px);
-        }
-        .hacker-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .hacker-text {
-            border-right: 3px solid #0f0;
-            white-space: nowrap;
-            overflow: hidden;
-            animation: blink 0.7s step-end infinite;
-        }
-        @keyframes blink {
-            0%,100% { border-color: #0f0; }
-            50% { border-color: transparent; }
-        }
-    </style>
+</style>
 </head>
+
 <body>
 
-<div class="prank-container" id="prankTrigger">
-    <button class="dima-button" id="dimaBtn">⚡ Дима, нажми меня! ⚡</button>
-    <p style="color: #eee; margin-top: 20px; font-size: 0.9rem;">(обещаю, ничего страшного 😈)</p>
-</div>
+<div id="box">
 
-<!-- Фейковое системное окно -->
-<div id="fakeAlert" class="fake-alert">
-    <div class="fake-alert-header">
-        ⚠️ ВНИМАНИЕ ⚠️
-    </div>
-    <div class="fake-alert-message" id="alertMessage">
-        Обнаружена подозрительная активность...
-    </div>
-    <button id="closeAlertBtn">ОК, я Дима</button>
-</div>
+<button onclick="press()">
+НЕ НАЖИМАЙ
+</button>
 
-<!-- Счётчик дим в углу -->
-<div class="dimas-grid" id="dimaCounter">
-    🧑‍💻 Дим: 0
-</div>
+<div id="text"></div>
 
-<button id="panicReset" class="panic">💥 Сбросить прикол (тайно)</button>
-
-<div id="hackerOverlay" class="hacker-overlay">
-    <div style="background: #000c; padding: 30px; border-radius: 20px; text-align: center;">
-        <div style="font-size: 4rem;">🤡🤡🤡</div>
-        <div class="hacker-text" id="hackerMsg">Взлом системы Димой...</div>
-        <button id="closeHack" style="margin-top: 30px; background:#0f0; color:#000; border:none; padding: 10px 25px; font-weight:bold; border-radius:30px; cursor:pointer;">Выйти из матрицы</button>
-    </div>
 </div>
 
 <script>
-    (function() {
-        // Режим "прикол" — насмехаемся над Димой 
-        let dimaClicked = false;
-        let flyingDimas = 0;
-        let dimaCount = 0;
-        const dimaBtn = document.getElementById('dimaBtn');
-        const fakeAlertDiv = document.getElementById('fakeAlert');
-        const alertMsgSpan = document.getElementById('alertMessage');
-        const closeAlertBtn = document.getElementById('closeAlertBtn');
-        const dimaCounterSpan = document.getElementById('dimaCounter');
-        const panicBtn = document.getElementById('panicReset');
-        const hackerOverlay = document.getElementById('hackerOverlay');
-        const closeHackBtn = document.getElementById('closeHack');
 
-        // Функция обновления счетчика Дим
-        function updateCounter() {
-            dimaCounterSpan.innerHTML = `🧑‍💻 Дим: ${dimaCount}`;
-        }
+let clicks=0;
 
-        // Создать летающего Диму (эмодзи или надпись)
-        function spawnFlyingDima(x, y) {
-            const flying = document.createElement('div');
-            flying.className = 'flying-dima';
-            const variants = ['🤡', '🧨', '🔥', '💩', '🎈', 'Дима 😂', '🤪', '👻'];
-            const randomVar = variants[Math.floor(Math.random() * variants.length)];
-            flying.textContent = randomVar;
-            flying.style.left = x + 'px';
-            flying.style.top = y + 'px';
-            flying.style.fontSize = (Math.random() * 30 + 30) + 'px';
-            const deltaX = (Math.random() - 0.5) * 400;
-            const deltaY = -Math.random() * 400 - 50;
-            flying.style.setProperty('--dx', deltaX + 'px');
-            flying.style.setProperty('--dy', deltaY + 'px');
-            document.body.appendChild(flying);
-            setTimeout(() => {
-                if(flying && flying.remove) flying.remove();
-            }, 1500);
-        }
+function press(){
 
-        // Показать фейковое сообщение
-        function showFakeMessage(text, callback) {
-            alertMsgSpan.innerText = text;
-            fakeAlertDiv.classList.add('show');
-            const closeHandler = function() {
-                fakeAlertDiv.classList.remove('show');
-                closeAlertBtn.removeEventListener('click', closeHandler);
-                if(callback) callback();
-            };
-            closeAlertBtn.addEventListener('click', closeHandler, { once: true });
-        }
+clicks++;
 
-        // Эффект "дрожание" кнопки
-        function shakeButton() {
-            dimaBtn.style.transform = 'translateX(4px)';
-            setTimeout(() => { dimaBtn.style.transform = ''; }, 80);
-            setTimeout(() => { dimaBtn.style.transform = 'translateX(-4px)'; }, 160);
-            setTimeout(() => { dimaBtn.style.transform = ''; }, 240);
-        }
+let text=document.getElementById("text");
 
-        // Главный прикол: при каждом нажатии
-        function dimaPrank() {
-            if(!dimaClicked) {
-                dimaClicked = true;
-                // Сразу первый удар — сообщение
-                showFakeMessage("Система Windows обнаружила: ДИМА! 🚨\nНачинается дестабилизация...", () => {});
-                dimaCount++;
-                updateCounter();
-                spawnFlyingDima(window.innerWidth/2, window.innerHeight/2);
-                dimaBtn.innerText = "⚠️ Дима, опять? ⚠️";
-                setTimeout(() => {
-                    dimaBtn.innerText = "😈 Ну давай, жми ещё 😈";
-                }, 800);
-                return;
-            }
-            
-            // Дальнейшие нажатия — всё более абсурдные
-            dimaCount++;
-            updateCounter();
-            
-            // Координаты для летающего димы (около кнопки)
-            const rect = dimaBtn.getBoundingClientRect();
-            const centerX = rect.left + rect.width/2;
-            const centerY = rect.top + rect.height/2;
-            
-            for(let i=0; i< 2 + Math.floor(Math.random()*4); i++) {
-                setTimeout(() => {
-                    spawnFlyingDima(centerX + (Math.random() - 0.5)*100, centerY + (Math.random() - 0.5)*80);
-                }, i*70);
-            }
-            
-            const messages = [
-                "Дима, ты че творишь? 🙈",
-                "Ошибка 404: Дима найден в системе!",
-                "🧨 Дима-детектор зашкаливает! 🧨",
-                "Внимание! Обнаружен вирус имени Дима!",
-                "🤡 Дима, ты сломал матрицу! 🤡",
-                "Ваш комп теперь — ДимаStation Pro Max",
-                "Дима, Дима, Дима... аааа!",
-                "⚡ Слишком много Дим! Завершение мира ⚡",
-                "💀 ДИМА ОВЕРЛОАД 💀"
-            ];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            showFakeMessage(randomMsg, () => {
-                // после закрытия окошка иногда добавляем эффект
-                if(dimaCount > 7) {
-                    // дополнительный летающий дима
-                    spawnFlyingDima(centerX, centerY);
-                }
-            });
-            
-            // если дим больше 10 — запускаем финальный фейковый взлом
-            if(dimaCount >= 10 && !window._hackerShown) {
-                window._hackerShown = true;
-                setTimeout(() => {
-                    hackerOverlay.classList.add('active');
-                    const hackerMsgSpan = document.getElementById('hackerMsg');
-                    let hackMessages = [
-                        "Взлом системы...", 
-                        "Доступ получен...", 
-                        "Дима — администратор Вселенной...",
-                        "Загружаем мемы про Диму...",
-                        "Поздравляю! Теперь весь ПК — Дима 3000!"
-                    ];
-                    let i = 0;
-                    function updateHackText() {
-                        if(i < hackMessages.length) {
-                            hackerMsgSpan.innerText = hackMessages[i];
-                            i++;
-                            setTimeout(updateHackText, 800);
-                        } else {
-                            hackerMsgSpan.innerText = "🤡 ВЫ ОДИМАЧЕНЫ! 🤡";
-                        }
-                    }
-                    updateHackText();
-                }, 300);
-            }
-            
-            // при особо большом количестве — мелькание страницы
-            if(dimaCount === 5 || dimaCount === 8 || dimaCount === 12) {
-                document.body.style.transition = "0.05s";
-                document.body.style.backgroundColor = "#ff000033";
-                setTimeout(() => { document.body.style.backgroundColor = ""; }, 150);
-                setTimeout(() => { document.body.style.backgroundColor = "#00ff0033"; }, 300);
-                setTimeout(() => { document.body.style.backgroundColor = ""; }, 450);
-            }
-            
-            // тряска кнопки
-            shakeButton();
-            
-            // иногда меняем текст на кнопке
-            const btnTexts = ["Дима, хватит!", "Я сказал хватит!", "Димаааа!", "😭 ПОЩАДИ 😭", "🤖 ДИМА БОТ", "💥 БАХ 💥"];
-            if(Math.random() > 0.6) {
-                dimaBtn.innerText = btnTexts[Math.floor(Math.random() * btnTexts.length)];
-                setTimeout(() => {
-                    if(dimaCount < 15) dimaBtn.innerText = "⚡ Дима, нажми меня! ⚡";
-                    else dimaBtn.innerText = "🧨 ДИМА БЕСКОНЕЧНОСТЬ 🧨";
-                }, 1200);
-            }
-            
-            // если дима уже 15+, добавляем летающих дим постоянно
-            if(dimaCount >= 15) {
-                for(let i=0;i<5;i++) {
-                    setTimeout(() => {
-                        const rX = Math.random() * window.innerWidth;
-                        const rY = Math.random() * window.innerHeight;
-                        spawnFlyingDima(rX, rY);
-                    }, i*150);
-                }
-            }
-        }
-        
-        // Обработчик нажатия на главную кнопку
-        dimaBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dimaPrank();
-        });
-        
-        // Кнопка паники — сброс всей этой димомании (но прикол остаётся)
-        panicBtn.addEventListener('click', () => {
-            dimaCount = 0;
-            dimaClicked = false;
-            updateCounter();
-            dimaBtn.innerText = "⚡ Дима, нажми меня! ⚡";
-            // Убираем возможные навечно висящие оверлеи
-            fakeAlertDiv.classList.remove('show');
-            hackerOverlay.classList.remove('active');
-            window._hackerShown = false;
-            // удаляем все летающие элементы
-            document.querySelectorAll('.flying-dima').forEach(el => el.remove());
-            // дополнительный фан-эффект сброса
-            const tempMsg = document.createElement('div');
-            tempMsg.textContent = '🧹 Система перезагружена, Дима обнулён 🧹';
-            tempMsg.style.position = 'fixed';
-            tempMsg.style.bottom = '60px';
-            tempMsg.style.left = '20px';
-            tempMsg.style.background = '#000';
-            tempMsg.style.color = '#0f0';
-            tempMsg.style.padding = '6px 12px';
-            tempMsg.style.borderRadius = '20px';
-            tempMsg.style.fontSize = '12px';
-            tempMsg.style.zIndex = '9999';
-            document.body.appendChild(tempMsg);
-            setTimeout(() => tempMsg.remove(), 2000);
-        });
-        
-        // закрыть хакерский экран кнопкой
-        closeHackBtn.addEventListener('click', () => {
-            hackerOverlay.classList.remove('active');
-        });
-        
-        // дополнительная фишка: при двойном тапе в любом месте показать "Дима здесь" 
-        document.body.addEventListener('dblclick', (e) => {
-            spawnFlyingDima(e.clientX, e.clientY);
-            const fake = document.createElement('div');
-            fake.textContent = '👀 Дима следит...';
-            fake.style.position = 'fixed';
-            fake.style.left = e.clientX + 'px';
-            fake.style.top = (e.clientY - 30) + 'px';
-            fake.style.fontSize = '1rem';
-            fake.style.background = 'gold';
-            fake.style.padding = '2px 8px';
-            fake.style.borderRadius = '20px';
-            fake.style.pointerEvents = 'none';
-            fake.style.zIndex = '9999';
-            document.body.appendChild(fake);
-            setTimeout(() => fake.remove(), 800);
-        });
-        
-        // начальное сообщение в консоли для администратора — необязательно, но забавно
-        console.log("%c🤡 Система NetErrror: готовность к приколу над Димой 100%", "color: #ff6600; font-size: 16px");
-    })();
+if(clicks==1){
+text.innerHTML="Серьёзно?";
+}
+
+else if(clicks==2){
+text.innerHTML="Я же сказал не нажимать.";
+}
+
+else if(clicks==3){
+text.innerHTML="Дима... ты реально продолжаешь?";
+document.body.style.background="#4a0000";
+}
+
+else if(clicks==4){
+text.innerHTML="Последнее предупреждение.";
+document.body.classList.add("shake");
+}
+
+else if(clicks==5){
+text.innerHTML="Ну всё...";
+}
+
+else if(clicks>=6){
+
+document.body.classList.remove("shake");
+
+document.body.innerHTML=`
+
+<div style="
+background:white;
+width:100%;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+padding:20px;
+box-sizing:border-box;
+">
+
+<img
+src="https://iimg.su/i/xLjoRW"
+style="
+max-width:80%;
+border-radius:18px;
+box-shadow:0 0 25px rgba(0,0,0,.25);
+">
+
+<div style="
+margin-top:25px;
+font-size:36px;
+font-weight:bold;
+color:black;
+position:relative;
+">
+
+Ну я же просил не листать.<br>
+Теперь любуйся им.
+
+<div style="
+color:red;
+font-size:100px;
+margin-top:15px;
+transform:rotate(35deg);
+">
+↖
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+}
+
 </script>
+
 </body>
 </html>
-```
