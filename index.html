@@ -3,489 +3,617 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Продвинутый калькулятор | Дроби · Степени · Функции</title>
+    <title>Текстовая рулетка | Выбор случайного слова</title>
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
+            user-select: none; /* легкий визуальный эффект, но текст можно выделять */
         }
 
         body {
-            background: linear-gradient(145deg, #0f1724 0%, #1a1f2e 100%);
+            background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 20px;
         }
 
-        /* Glassmorphism стиль */
-        .calculator {
-            background: rgba(18, 22, 35, 0.75);
-            backdrop-filter: blur(12px);
-            border-radius: 56px;
-            padding: 20px;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+        /* карточка рулетки */
+        .roulette-card {
+            max-width: 650px;
             width: 100%;
-            max-width: 550px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+            border-radius: 68px;
+            padding: 24px 28px 38px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,240,0.25);
+            transition: all 0.2s;
         }
 
-        /* Дисплей */
-        .display {
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: 38px;
-            padding: 20px 24px;
-            margin-bottom: 25px;
-            text-align: right;
-            word-wrap: break-word;
-            word-break: break-word;
-            min-height: 120px;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+        h1 {
+            text-align: center;
+            margin: 0 0 8px 0;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #FFE6B0, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 3px rgba(0,0,0,0.2);
+            font-weight: 800;
         }
 
-        .expression {
-            font-size: 1.45rem;
-            color: #b9c7d9;
-            letter-spacing: 0.3px;
-            min-height: 42px;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            overflow-x: auto;
-            white-space: pre-wrap;
+        .sub {
+            text-align: center;
+            color: #cdedff;
+            margin-top: -8px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            border-bottom: 1px dashed rgba(255,215,150,0.5);
+            display: inline-block;
+            width: auto;
+            padding-bottom: 6px;
         }
 
-        .result {
-            font-size: 2.8rem;
+        /* контейнер ввода */
+        .input-panel {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 48px;
+            padding: 20px 20px 18px;
+            margin-bottom: 28px;
+            backdrop-filter: blur(4px);
+        }
+
+        label {
+            display: block;
             font-weight: 600;
-            color: #eef5ff;
-            margin-top: 10px;
-            font-family: 'Fira Code', monospace;
-            word-break: break-word;
-            line-height: 1.2;
+            color: #FFE5B4;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            letter-spacing: 1px;
         }
 
-        /* Сетка кнопок */
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-family: monospace;
+            background: #fef9e6;
+            border: none;
+            border-radius: 32px;
+            resize: vertical;
+            color: #1e2a32;
+            font-weight: 500;
+            outline: none;
+            transition: 0.2s;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.1), 0 1px 1px rgba(255,255,200,0.5);
+        }
+
+        textarea:focus {
+            background: #fffae9;
+            box-shadow: inset 0 1px 5px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,200,100,0.6);
+        }
+
+        .hint {
+            font-size: 0.7rem;
+            color: #cfe6f5;
+            margin-top: 8px;
+            margin-left: 12px;
+        }
+
+        /* превью вариантов */
+        .options-preview {
+            background: #0f1a1fc9;
+            border-radius: 50px;
+            padding: 12px 20px;
+            margin: 15px 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,215,130,0.5);
+        }
+
+        .preview-label {
+            font-weight: bold;
+            color: #ffdd99;
+            background: #2c3e2f40;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+
+        .preview-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .tag {
+            background: #2a423f;
+            color: #f7ecc7;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.1s;
+            box-shadow: inset 0 0 0 1px rgba(255,225,150,0.3);
+        }
+
+        .tag-empty {
+            color: #b0c4de;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        /* рулетка-дисплей */
+        .roulette-display {
+            background: radial-gradient(circle at 30% 20%, #2c2118, #0e0c0a);
+            border-radius: 60px;
+            padding: 18px 25px;
+            margin: 15px 0 25px;
+            text-align: center;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,200,100,0.6);
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #ffcf8a;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            word-break: break-word;
+            background: linear-gradient(135deg, #FFF2D0, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px #00000030;
+            min-height: 5rem;
+            padding: 10px 0;
+            font-family: 'Segoe UI', system-ui, monospace;
+        }
+
+        .spin-button {
+            background: linear-gradient(95deg, #ff9800, #ff5722);
+            border: none;
+            width: 100%;
+            padding: 18px 12px;
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.15s linear;
+            box-shadow: 0 6px 0 #a1410b;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 12px;
         }
 
-        button {
-            background: rgba(28, 33, 48, 0.8);
+        .spin-button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #a1410b;
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            transform: translateY(0);
+            cursor: not-allowed;
+            filter: grayscale(0.1);
+        }
+
+        .shuffle-animation {
+            animation: pulseGlow 0.3s ease-in-out 2 alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 0px gold; letter-spacing: normal; }
+            100% { text-shadow: 0 0 12px #ffcc44; letter-spacing: 1px; }
+        }
+
+        .randomize-btn {
+            background: #2e4a62;
+            color: #ffe0b5;
             border: none;
-            border-radius: 28px;
-            padding: 16px 0;
-            font-size: 1.3rem;
-            font-weight: 500;
-            color: #f0f3fa;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 0.75rem;
             cursor: pointer;
-            transition: 0.1s linear;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-            backdrop-filter: blur(4px);
-            font-family: 'Segoe UI', 'Fira Code', monospace;
-        }
-
-        button:active {
-            transform: scale(0.95);
-            background: rgba(45, 55, 80, 0.9);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
-        }
-
-        .func-btn {
-            background: rgba(52, 85, 125, 0.7);
-            color: #d9efff;
-            font-size: 1.1rem;
-        }
-
-        .op-btn {
-            background: rgba(217, 119, 6, 0.75);
-            color: white;
-            font-size: 1.5rem;
+            transition: 0.1s;
+            margin-left: auto;
             font-weight: bold;
         }
 
-        .eq-btn {
-            background: #10b981;
-            color: white;
-            font-size: 1.5rem;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        .randomize-btn:active {
+            background: #1e3a4a;
+            transform: scale(0.96);
         }
 
-        .clear-btn {
-            background: rgba(220, 53, 69, 0.75);
-            color: white;
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
         }
 
-        .special-btn {
-            background: rgba(100, 116, 139, 0.7);
-            font-size: 1.2rem;
+        .error-msg {
+            color: #ffae70;
+            background: #4a1f1f90;
+            border-radius: 60px;
+            padding: 6px 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 12px;
+            font-weight: 500;
         }
 
-        @media (max-width: 500px) {
-            .buttons {
-                gap: 8px;
-            }
-            button {
-                padding: 12px 0;
-                font-size: 1rem;
-            }
-            .result {
-                font-size: 2rem;
-            }
-            .expression {
-                font-size: 1rem;
-            }
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #b9d4f0;
+        }
+
+        @media (max-width: 550px) {
+            .roulette-card { padding: 18px 18px 30px; }
+            .result-value { font-size: 2rem; }
+            .spin-button { font-size: 1.3rem; padding: 14px; }
         }
     </style>
 </head>
 <body>
-<div class="calculator">
-    <div class="display">
-        <div class="expression" id="expression">0</div>
-        <div class="result" id="result">= 0</div>
+
+<div class="roulette-card">
+    <h1>🎡 Колесо выбора</h1>
+    <div style="text-align: center;"><span class="sub">текстовая рулетка · списки слов</span></div>
+
+    <div class="input-panel">
+        <label>📝 Введи варианты (каждый с новой строки)</label>
+        <textarea id="optionsInput" rows="4" placeholder="Пицца&#10;Суши&#10;Бургер&#10;Паста&#10;Салат&#10;Рис с овощами"></textarea>
+        <div class="hint">✨ Разделяй переносом строки. Пустые строчки игнорируются</div>
+        <div class="control-bar">
+            <button id="randomExampleBtn" class="randomize-btn" type="button">🎲 Пример: еда</button>
+            <button id="clearBtn" class="randomize-btn" type="button">🗑️ Очистить</button>
+        </div>
     </div>
-    <div class="buttons">
-        <!-- 1-й ряд -->
-        <button class="clear-btn" data-action="clear">C</button>
-        <button class="special-btn" data-action="backspace">⌫</button>
-        <button class="func-btn" data-func="sqrt">√</button>
-        <button class="func-btn" data-func="pow">xʸ</button>
-        <button class="func-btn" data-func="frac">⅟ₓ</button>
 
-        <!-- 2-й ряд -->
-        <button data-digit="7">7</button>
-        <button data-digit="8">8</button>
-        <button data-digit="9">9</button>
-        <button class="op-btn" data-op="/">÷</button>
-        <button class="func-btn" data-func="sin">sin</button>
-
-        <!-- 3-й ряд -->
-        <button data-digit="4">4</button>
-        <button data-digit="5">5</button>
-        <button data-digit="6">6</button>
-        <button class="op-btn" data-op="*">×</button>
-        <button class="func-btn" data-func="cos">cos</button>
-
-        <!-- 4-й ряд -->
-        <button data-digit="1">1</button>
-        <button data-digit="2">2</button>
-        <button data-digit="3">3</button>
-        <button class="op-btn" data-op="-">−</button>
-        <button class="func-btn" data-func="tan">tan</button>
-
-        <!-- 5-й ряд -->
-        <button data-digit="0">0</button>
-        <button data-digit=".">.</button>
-        <button class="func-btn" data-func="(">(</button>
-        <button class="func-btn" data-func=")">)</button>
-        <button class="eq-btn" data-action="equals">=</button>
-
-        <!-- 6-й ряд (доп. функции) -->
-        <button class="func-btn" data-func="pi">π</button>
-        <button class="func-btn" data-func="e">e</button>
-        <button class="func-btn" data-func="abs">|x|</button>
-        <button class="func-btn" data-func="ln">ln</button>
-        <button class="func-btn" data-func="log">log₁₀</button>
+    <!-- предпросмотр активных вариантов -->
+    <div class="options-preview">
+        <span class="preview-label">📋 активные варианты:</span>
+        <div class="preview-tags" id="previewTags">
+            <span class="tag-empty">— добавьте варианты —</span>
+        </div>
     </div>
+
+    <!-- зона рулетки -->
+    <div class="roulette-display">
+        <div class="result-label">🏆 ВЫБОР РУЛЕТКИ 🏆</div>
+        <div class="result-value" id="resultText">⚡︎ жми крутить ⚡︎</div>
+    </div>
+
+    <button id="spinBtn" class="spin-button">
+        🎲 КРУТИТЬ РУЛЕТКУ 🎲
+    </button>
+    <div id="errorMsg" class="error-msg"></div>
+    <footer>✔️ работает с любыми словами, фразами. Просто введи свои варианты!</footer>
 </div>
 
 <script>
-    // ---------- Продвинутый парсер выражений (с поддержкой дробей, степеней, функций) ----------
-    // Используем Function + подстановку, но с безопасной проверкой и расширенными математическими функциями
-    
-    let currentExpression = "0";   // то, что видит пользователь
-    let lastResult = null;
-    let waitingForOperand = false;
-    
-    const expressionDiv = document.getElementById("expression");
-    const resultDiv = document.getElementById("result");
-    
-    function updateDisplay() {
-        // Показываем выражение, но если пусто — ставим 0
-        let dispExpr = currentExpression === "" ? "0" : currentExpression;
-        expressionDiv.innerText = dispExpr;
-        if (waitingForOperand && lastResult !== null) {
-            resultDiv.innerText = `= ${formatResult(lastResult)}`;
-        } else {
-            // пробуем вычислить на лету (опционально)
-            try {
-                let computed = evaluateExpression(currentExpression);
-                if (isFinite(computed) && !isNaN(computed) && currentExpression.trim() !== "") {
-                    resultDiv.innerText = `≈ ${formatResult(computed)}`;
-                } else {
-                    resultDiv.innerText = `= ?`;
-                }
-            } catch(e) {
-                resultDiv.innerText = `= ?`;
-            }
+    (function() {
+        // DOM элементы
+        const textarea = document.getElementById('optionsInput');
+        const previewContainer = document.getElementById('previewTags');
+        const resultDiv = document.getElementById('resultText');
+        const spinBtn = document.getElementById('spinBtn');
+        const randomExampleBtn = document.getElementById('randomExampleBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const errorMsgDiv = document.getElementById('errorMsg');
+
+        // вспомогательная функция: парсим варианты из textarea (не пустые строки)
+        function getOptionsFromInput() {
+            const raw = textarea.value;
+            // разбиваем по переводу строки, триммируем, удаляем пустые строчки
+            let lines = raw.split(/\r?\n/);
+            let options = lines
+                .map(line => line.trim())
+                .filter(line => line !== "");
+            // убираем дубликаты? не будем, чтобы не мешать, но можно по желанию,
+            // но пусть остаются как есть, пользователь сам контролирует
+            return options;
         }
-    }
-    
-    function formatResult(num) {
-        if (num === null || isNaN(num) || !isFinite(num)) return "Ошибка";
-        // округление до 10 знаков, убираем лишние нули
-        let rounded = parseFloat(num.toFixed(10));
-        let str = rounded.toString();
-        if (str.length > 20) return num.toExponential(8);
-        return str;
-    }
-    
-    // БЕЗОПАСНЫЙ математический evaluator
-    function evaluateExpression(expr) {
-        if (!expr || expr.trim() === "") return 0;
-        // подготовка строки: заменяем символы ×, ÷, ^
-        let prepared = expr
-            .replace(/×/g, '*')
-            .replace(/÷/g, '/')
-            .replace(/\^/g, '**')
-            .replace(/π/g, 'Math.PI')
-            .replace(/e(?![a-z])/g, 'Math.E')   // e как число Эйлера, но не внутри exp
-            .replace(/ln\(/g, 'Math.log(')
-            .replace(/log\(/g, 'Math.log10(')
-            .replace(/sqrt\(/g, 'Math.sqrt(')
-            .replace(/sin\(/g, 'Math.sin(')
-            .replace(/cos\(/g, 'Math.cos(')
-            .replace(/tan\(/g, 'Math.tan(')
-            .replace(/abs\(/g, 'Math.abs(');
-        
-        // добавим поддержку факториала (пользовательский) – просто для продвинутости
-        // факториал вида 5! (только целые неотрицательные)
-        // реализуем через замену перед вычислением
-        let factorialReplaced = prepared.replace(/(\d+)!/g, (_, num) => {
-            let n = parseInt(num);
-            if (isNaN(n) || n < 0) return 'NaN';
-            let fact = 1;
-            for (let i = 2; i <= n; i++) fact *= i;
-            return fact;
-        });
-        
-        // дополнительно разрешим символ % (проценты) простые - но для калькулятора ок
-        // преобразуем x% -> x/100
-        let percentReplaced = factorialReplaced.replace(/(\d+(?:\.\d+)?)%/g, (_, p) => `(${p}/100)`);
-        
-        // проверка на недопустимые символы (только цифры, операторы, функции, точки, скобки, **, Math.xxx)
-        // но безопаснее просто использовать new Function с контекстом window.Math
-        // ВАЖНО: не передаём доступ к опасным объектам
-        const mathContext = {
-            Math: Math,
-            pow: Math.pow,
-            abs: Math.abs,
-            sin: Math.sin,
-            cos: Math.cos,
-            tan: Math.tan,
-            log: Math.log,
-            log10: Math.log10,
-            sqrt: Math.sqrt,
-            PI: Math.PI,
-            E: Math.E
-        };
-        
-        // составим финальное выражение: добавим поддержку ** и функций
-        let finalExpr = percentReplaced;
-        // добавим неявное умножение? (2(3+4) -> 2*(3+4)) — для удобства
-        finalExpr = finalExpr.replace(/(\d+|\))(\()/g, '$1*$2');
-        finalExpr = finalExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2'); // 2sin -> 2*sin
-        
-        // ВАЖНО: функция power дополнительная — xʸ в интерфейсе вызывает возведение, но в самой строке уже ^ обработано в **
-        // также поддержим корень sqrt
-        
-        let computed;
-        try {
-            // Используем Function для вычисления, но изолируем доступ к глобальным объектам
-            const evaluator = new Function('Math', 'return (' + finalExpr + ')');
-            computed = evaluator(mathContext.Math);
-            if (isNaN(computed) || !isFinite(computed)) throw new Error("Math error");
-            return computed;
-        } catch (err) {
-            console.warn("Evaluation error: ", err);
-            // дополнительная попытка если что-то пошло не так с форматированием
-            throw new Error("Invalid expression");
-        }
-    }
-    
-    // Добавление в выражение
-    function appendToExpression(value, type = 'digit') {
-        if (waitingForOperand && lastResult !== null) {
-            // Если только что нажали равно и хотим продолжить — стартуем новое выражение с результатом
-            if (type === 'digit' || value === '.' || (type === 'func' && ['+','-','*','/','^'].includes(value) === false)) {
-                currentExpression = lastResult.toString();
-                waitingForOperand = false;
-            } else if (type === 'op') {
-                currentExpression = lastResult.toString();
-                waitingForOperand = false;
-                currentExpression += value;
-                updateDisplay();
-                return;
-            } else if (type === 'func' && ['+','-','*','/'].includes(value)){
-                currentExpression = lastResult.toString();
-                waitingForOperand = false;
-                currentExpression += value;
-                updateDisplay();
+
+        // обновление тегов предпросмотра
+        function updatePreview() {
+            const options = getOptionsFromInput();
+            previewContainer.innerHTML = '';
+            if (options.length === 0) {
+                const emptySpan = document.createElement('span');
+                emptySpan.className = 'tag-empty';
+                emptySpan.innerText = 'нет вариантов → добавь слова';
+                previewContainer.appendChild(emptySpan);
                 return;
             }
+            // показываем не более 20 тэгов для читаемости
+            const maxShow = 18;
+            options.slice(0, maxShow).forEach(opt => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                // если слишком длинное слово обрезать для вида
+                let displayText = opt.length > 25 ? opt.slice(0, 22) + '...' : opt;
+                tag.innerText = displayText;
+                previewContainer.appendChild(tag);
+            });
+            if (options.length > maxShow) {
+                const moreTag = document.createElement('span');
+                moreTag.className = 'tag';
+                moreTag.innerText = `+ ещё ${options.length - maxShow}`;
+                previewContainer.appendChild(moreTag);
+            }
         }
-        
-        if (currentExpression === "0" && type === 'digit' && value !== '.' && !(value === '0' && currentExpression === "0")) {
-            currentExpression = value;
-        } 
-        else if (type === 'digit' || value === '.') {
-            // избегаем двух точек подряд
-            if (value === '.' && currentExpression.split(/[\+\-\*\/\^\(\)]/).pop().includes('.')) return;
-            currentExpression += value;
-        }
-        else if (type === 'op') {
-            // замена последнего оператора, если подряд
-            if (currentExpression.match(/[\+\-\*\/\^]$/)) {
-                currentExpression = currentExpression.slice(0, -1) + value;
+
+        // показать сообщение об ошибке (временно)
+        function setErrorMsg(message, isError = true) {
+            errorMsgDiv.innerText = message;
+            if (isError) {
+                errorMsgDiv.style.opacity = '1';
+                setTimeout(() => {
+                    if (errorMsgDiv.innerText === message) {
+                        errorMsgDiv.innerText = '';
+                    }
+                }, 2800);
             } else {
-                currentExpression += value;
+                // для информационных сообщений можно чуть дольше
+                setTimeout(() => {
+                    if (errorMsgDiv.innerText === message) errorMsgDiv.innerText = '';
+                }, 2000);
             }
         }
-        else if (type === 'func') {
-            // добавляем функции (sin, cos, sqrt, ln, pi и т.д.)
-            currentExpression += value;
+
+        // анимация мигания для результата
+        function animateResult() {
+            resultDiv.classList.remove('shuffle-animation');
+            // форсируем reflow
+            void resultDiv.offsetWidth;
+            resultDiv.classList.add('shuffle-animation');
+            setTimeout(() => {
+                resultDiv.classList.remove('shuffle-animation');
+            }, 500);
+        }
+
+        // главный выбор: случайный элемент
+        function spinRoulette() {
+            const options = getOptionsFromInput();
+            if (options.length === 0) {
+                setErrorMsg('❌ Нет вариантов! Введи хотя бы одно слово или фразу.');
+                resultDiv.innerText = '⚠️ нет данных';
+                animateResult(); // легкое дрожание
+                return false;
+            }
+            // случайный индекс
+            const randomIndex = Math.floor(Math.random() * options.length);
+            const chosen = options[randomIndex];
+            // обновляем результат с визуальным эффектом
+            resultDiv.innerText = chosen;
+            animateResult();
+            // дополнительный фидбек: краткое уведомление (не ошибка)
+            setErrorMsg(`✨ Выпало: "${chosen}" ✨`, false);
+            // легкое тактильное подражание вибрации (если поддержка, опционально)
+            if (navigator.vibrate) navigator.vibrate(50);
+            return true;
+        }
+
+        // обработчик изменения текстового поля: обновляем превью + сбрасываем ошибку, но результат не трогаем
+        function onInputChange() {
+            updatePreview();
+            // проверка на пустоту, если вариантов нет и результат показывал что-то — можно сбросить сообщение или оставить
+            const opts = getOptionsFromInput();
+            if (opts.length === 0) {
+                if (resultDiv.innerText !== '⚠️ нет данных' && resultDiv.innerText !== '⚡︎ жми крутить ⚡︎') {
+                    // если раньше был результат, не трогаем, пусть остаётся последний выигрыш, но можно не сбрасывать
+                    // однако лучше подсказать, что список пуст, но результат не трогаем, просто показываем превью пусто.
+                }
+            } else {
+                // если был статус ошибки, убираем сообщение
+                if (errorMsgDiv.innerText.includes('нет вариантов')) {
+                    if (errorMsgDiv.innerText !== '') errorMsgDiv.innerText = '';
+                }
+            }
+        }
+
+        // загрузить пример (еда)
+        function loadExampleFood() {
+            const exampleText = `Пицца Маргарита🍕
+Суши сет🦐
+Бургер с беконом🍔
+Карбонара🍝
+Цезарь с креветками🥗
+Том Ям🍲
+Греческий салат🥗
+Ролл Филадельфия🍣
+Стейк рибай🥩
+Тирамису🍰`;
+            textarea.value = exampleText;
+            onInputChange();
+            // обновим превью и при желании можно очистить ошибку
+            setErrorMsg('📌 Пример загружен, крути рулетку!', false);
+            // но не запускаем автоматический спин
+        }
+
+        // очистить textarea и сбросить результат до дефолтного (не пугаем пользователя)
+        function clearAll() {
+            textarea.value = '';
+            onInputChange();   // обновит превью (пусто)
+            resultDiv.innerText = '⚡︎ жми крутить ⚡︎';
+            setErrorMsg('🧹 Список очищен, добавьте свои варианты', false);
+        }
+
+        // дополнительно: обработка кнопки "случайный выбор" (это также спин)
+        function bindEvents() {
+            spinBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                spinRoulette();
+            });
+            randomExampleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadExampleFood();
+            });
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                clearAll();
+            });
+            textarea.addEventListener('input', onInputChange);
+            // если пользователь нажимает Ctrl+Enter в textarea, можно тоже крутить
+            textarea.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    spinRoulette();
+                }
+            });
+        }
+
+        // начальная инициализация: показать пример по умолчанию, но не перегружать,
+        // сделаем более приятный дефолт с несколькими вариантами для демонстрации
+        function initDefaultState() {
+            // загружаем приятный демо-список (чтобы рулетка не была пустой)
+            const defaultOptions = `🎬 Кино дома\n🍿 Попкорн\n📚 Почитать книгу\n🎮 Поиграть в игру\n🚶 Прогулка\n☕ Кофе с другом`;
+            textarea.value = defaultOptions;
+            onInputChange();     // обновит превью
+            resultDiv.innerText = '⚡︎ жми крутить ⚡︎';
+            // даём легкую подсказку
+            setTimeout(() => {
+                setErrorMsg('💡 Напиши свои варианты (каждый с новой строки) и крути!', false);
+            }, 500);
+        }
+
+        // дополнительный фикс: если вдруг пользователь попытается вставить многострочный текст с пустыми строками 
+        // обработчик уже корректен. Сделаем защиту от слишком длинных фраз (визуально ок)
+        // добавим возможность не обрезать результат - показываем полностью, но стиль flex-wrap есть.
+        
+        // расширенная анимация при кручении: добавим "вращающееся" изменение цвета
+        // немного улучшим функцию spinRoulette с дополнительным эффектом псевдослучайной смены
+        // для крутости, но главное, чтобы работало быстро.
+        
+        // сделаем перехват предпросмотра с учётом производительности и автообновления
+        
+        // вызываем инициализацию
+        initDefaultState();
+        bindEvents();
+
+        // дополнительно, если кнопку пробел на кнопке - уже есть стандарт
+        // для большей мобильной адаптивности, добавим плавную прокрутку
+        // поддержка рулетки с большими списками: всё ок.
+        
+        // хак: добавим небольшую обработку, чтобы при изменении поля, если вариантов ровно 1,
+        // подсказывать что выпадет только он, но это не ошибка.
+        function singletonHint() {
+            const opts = getOptionsFromInput();
+            if (opts.length === 1 && errorMsgDiv.innerText === '') {
+                // можно показать ненавязчивую подсказку, но без спама
+                // для этого таймер не будем часто дёргать, оставим как доп. фишку
+            }
         }
         
-        // чистка слишком длинного
-        if (currentExpression.length > 70) currentExpression = currentExpression.slice(0, 70);
-        updateDisplay();
-    }
-    
-    function clearAll() {
-        currentExpression = "0";
-        lastResult = null;
-        waitingForOperand = false;
-        updateDisplay();
-    }
-    
-    function backspace() {
-        if (waitingForOperand && lastResult !== null) {
-            // если ждём операнд после равно — стираем результат
-            clearAll();
-            return;
-        }
-        if (currentExpression.length === 1 || (currentExpression === "0")) {
-            currentExpression = "0";
-        } else {
-            currentExpression = currentExpression.slice(0, -1);
-            if (currentExpression === "") currentExpression = "0";
-        }
-        updateDisplay();
-    }
-    
-    function calculateResult() {
-        if (currentExpression === "" || currentExpression === "0") {
-            lastResult = 0;
-            resultDiv.innerText = "= 0";
-            waitingForOperand = true;
-            return;
-        }
-        try {
-            let evaluated = evaluateExpression(currentExpression);
-            if (isNaN(evaluated) || !isFinite(evaluated)) {
-                resultDiv.innerText = "= Ошибка";
-                lastResult = null;
-                waitingForOperand = false;
-                return;
+        // при обновлении вызываем дополнительно хинт (тихо)
+        const origUpdate = onInputChange;
+        window.onInputChange = function() {
+            origUpdate();
+            singletonHint();
+        };
+        onInputChange = function() {
+            updatePreview();
+            const opts = getOptionsFromInput();
+            if (opts.length === 0) {
+                if (resultDiv.innerText !== '⚠️ нет данных' && resultDiv.innerText !== '⚡︎ жми крутить ⚡︎') {
+                    // оставляем результат, но можем подсветить ошибку, только если пытались крутить
+                    if (errorMsgDiv.innerText.includes('Нет вариантов')) {
+                        // уже сообщение есть, ничего не делаем
+                    }
+                }
             }
-            lastResult = evaluated;
-            resultDiv.innerText = `= ${formatResult(evaluated)}`;
-            waitingForOperand = true;
-            // НЕ обновляем выражение, оставляем его видимым, но после следующего ввода начнём новое
-        } catch (err) {
-            resultDiv.innerText = "= Ошибка";
-            lastResult = null;
-            waitingForOperand = false;
-        }
-    }
-    
-    // Обработка специальных команд и кнопок
-    function handleButton(btn) {
-        // Цифры и десятичная точка
-        if (btn.hasAttribute('data-digit')) {
-            let digit = btn.getAttribute('data-digit');
-            appendToExpression(digit, 'digit');
-            return;
-        }
-        if (btn.hasAttribute('data-op')) {
-            let op = btn.getAttribute('data-op');
-            let mapped = op;
-            if (op === '/') mapped = '÷';
-            if (op === '*') mapped = '×';
-            appendToExpression(mapped, 'op');
-            return;
-        }
-        if (btn.hasAttribute('data-func')) {
-            let func = btn.getAttribute('data-func');
-            switch (func) {
-                case 'sqrt':
-                    appendToExpression('sqrt(', 'func');
-                    break;
-                case 'pow':
-                    appendToExpression('^(', 'func');
-                    break;
-                case 'frac':
-                    appendToExpression('(1/', 'func');
-                    break;
-                case 'sin':
-                    appendToExpression('sin(', 'func');
-                    break;
-                case 'cos':
-                    appendToExpression('cos(', 'func');
-                    break;
-                case 'tan':
-                    appendToExpression('tan(', 'func');
-                    break;
-                case 'pi':
-                    appendToExpression('π', 'func');
-                    break;
-                case 'e':
-                    appendToExpression('e', 'func');
-                    break;
-                case 'abs':
-                    appendToExpression('abs(', 'func');
-                    break;
-                case 'ln':
-                    appendToExpression('ln(', 'func');
-                    break;
-                case 'log':
-                    appendToExpression('log(', 'func');
-                    break;
-                case '(':
-                    appendToExpression('(', 'func');
-                    break;
-                case ')':
-                    appendToExpression(')', 'func');
-                    break;
-                default: break;
+            singletonHint();
+        };
+        // переопределить глобально
+        window.onInputChange = onInputChange;
+        // синхронизируем оригинальный обработчик
+        textarea.removeEventListener('input', onInputChange);
+        textarea.addEventListener('input', onInputChange);
+        
+        // чиним старый биндинг: перепривяжем всё корректно, чтобы избежать двойных
+        // но предыдущий вызов bindEvents уже повесил обработчик, а потом мы перезаписываем функцию onInputChange,
+        // ничего страшного, так как переменная onInputChange теперь новая, а addEventListener уже ссылается на новую?
+        // Нет, старый обработчик который был добавлен через addEventListener ссылается на старую функцию onInputChange.
+        // корректнее удалить старый обработчик и добавить новый. Но поскольку мы обновили переменную, но обработчик остался старый,
+        // то для гарантии обновим:
+        const newTextarea = textarea;
+        const oldListener = getEventListeners ? getEventListeners(newTextarea)?.input : null;
+        // но getEventListeners не везде, проще заменить клоном? не будем усложнять, удалим и добавим заново.
+        // на самом деле можно просто снять все обработчики на 'input', но их может быть несколько.
+        // в этом небольшом приложении я сам задал один обработчик в bindEvents, поэтому достаточно отвязать и привязать заново.
+        // сделаем аккуратно:
+        const replacementHandler = function(e) {
+            updatePreview();
+            const opts = getOptionsFromInput();
+            if (opts.length === 0 && resultDiv.innerText !== '⚠️ нет данных') {
+                if (!errorMsgDiv.innerText.includes('нет вариантов')) {
+                    // не навязываем ошибку, тихо
+                }
             }
-            return;
-        }
-        if (btn.hasAttribute('data-action')) {
-            let action = btn.getAttribute('data-action');
-            if (action === 'clear') clearAll();
-            if (action === 'backspace') backspace();
-            if (action === 'equals') calculateResult();
-            return;
-        }
-    }
-    
-    // Навесить обработчики на все кнопки
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleButton(btn);
-        });
-    });
-    
-    // начальная инициализация
-    updateDisplay();
+            singletonHint();
+        };
+        textarea.removeEventListener('input', onInputChange);
+        // Добавим правильный
+        textarea.addEventListener('input', replacementHandler);
+        // обновим глобальную ссылку на replacementHandler, чтобы если вызывали явно onInputChange из других мест
+        window.fullUpdatePreview = replacementHandler;
+        // также надо исправить вызов onInputChange из clearAll и loadExampleFood
+        // переопределим функции
+        const originalClear = clearAll;
+        const originalLoad = loadExampleFood;
+        window.clearAll = function() {
+            textarea.value = '';
+            replacementHandler();
+            resultDiv.innerText = '⚡︎ жми крутить ⚡︎';
+            setErrorMsg('🧹 Список очищен', false);
+        };
+        window.loadExampleFood = function() {
+            textarea.value = `Пицца Маргарита🍕
+Суши сет🦐
+Бургер с беконом🍔
+Карбонара🍝
+Цезарь с креветками🥗
+Том Ям🍲
+Греческий салат🥗
+Ролл Филадельфия🍣
+Стейк рибай🥩
+Тирамису🍰`;
+            replacementHandler();
+            setErrorMsg('📌 Пример загружен, крути рулетку!', false);
+        };
+        // перепривяжем кнопки (на случай если старые ссылки остались)
+        randomExampleBtn.onclick = (e) => { e.preventDefault(); window.loadExampleFood(); };
+        clearBtn.onclick = (e) => { e.preventDefault(); window.clearAll(); };
+        // обновляем и превью после переопределения
+        replacementHandler();
+        // фикс: spinBtn уже нормально использует getOptionsFromInput, всё ок.
+        // добавим возможность показать красивое вращение если кликнуть повторно
+        console.log('Рулетка готова!');
+    })();
 </script>
 </body>
-</html>
+    </html>
