@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Chugur — Voice Notes</title>
+    <title>Chugur — Music Player</title>
     <style>
         * {
             margin: 0;
@@ -22,7 +22,7 @@
             color: #eee;
         }
 
-        .recorder {
+        .app {
             max-width: 550px;
             width: 100%;
             background: #151515;
@@ -47,82 +47,68 @@
             margin-top: 6px;
         }
 
-        .record-panel {
-            padding: 24px;
+        /* плеер */
+        .player-panel {
+            padding: 20px;
             background: #111;
             border-bottom: 1px solid #222;
-            text-align: center;
         }
 
-        .timer {
-            font-family: 'SF Mono', 'Menlo', monospace;
-            font-size: 3.2rem;
+        .current-label {
+            font-size: 0.65rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .current-track {
+            font-size: 1rem;
             font-weight: 500;
-            background: #0a0a0a;
-            padding: 16px 20px;
-            border: 1px solid #2c2c2c;
-            color: #f5f5f5;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
+            margin: 8px 0 16px;
+            word-break: break-word;
         }
 
-        .btn-group {
+        audio {
+            width: 100%;
+            height: 44px;
+        }
+
+        /* панель добавления */
+        .add-panel {
+            padding: 16px 20px;
+            background: #0c0c0c;
+            border-bottom: 1px solid #222;
             display: flex;
             gap: 12px;
-            justify-content: center;
             flex-wrap: wrap;
         }
 
-        button {
-            background: #1e1e1e;
-            border: 1px solid #3a3a3a;
-            padding: 10px 24px;
-            font-size: 0.9rem;
+        .add-file-btn {
+            background: #2a2a2a;
+            border: 1px solid #4a4a4a;
+            padding: 10px 20px;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #ddd;
             cursor: pointer;
-            transition: 0.1s linear;
-            font-family: inherit;
+            flex: 1;
+            text-align: center;
         }
 
-        button:hover {
-            background: #2c2c2c;
-            border-color: #5a5a5a;
-            color: white;
+        .add-file-btn:hover {
+            background: #3a3a3a;
         }
 
-        button:active {
-            transform: translateY(1px);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: default;
-            transform: none;
-        }
-
-        .btn-record {
-            background: #2a1814;
-            border-color: #7a3a2e;
-            color: #ff9a7a;
-        }
-
-        .btn-record.active {
-            background: #5a2a1e;
-            border-color: #c06040;
-            color: white;
-        }
-
+        /* библиотека */
         .library-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
             padding: 18px 24px 8px 24px;
-            border-bottom: 1px solid #222;
         }
 
         .library-header h3 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: #aaa;
             letter-spacing: 0.5px;
@@ -134,92 +120,86 @@
             padding: 4px 12px;
             font-size: 0.7rem;
             color: #b88a7a;
+            cursor: pointer;
         }
 
-        .recordings-list {
+        .songs-list {
             padding: 16px 20px 24px 20px;
             max-height: 380px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
 
-        .record-item {
+        .song-item {
             background: #121212;
             border: 1px solid #252525;
             padding: 12px;
-        }
-
-        .record-meta {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
         }
 
-        .record-name {
-            font-size: 0.8rem;
-            font-weight: 500;
-            font-family: monospace;
-            color: #ddd;
-        }
-
-        .record-duration {
-            font-size: 0.7rem;
-            font-family: monospace;
+        .song-item:hover {
             background: #1a1a1a;
-            padding: 2px 8px;
-            border: 1px solid #2e2e2e;
-            color: #aaa;
         }
 
-        .record-date {
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .song-date {
             font-size: 0.6rem;
             color: #6a6a6a;
-            margin-bottom: 8px;
+            margin-top: 4px;
         }
 
-        .record-controls {
+        .song-actions {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
+            gap: 6px;
         }
 
-        audio {
-            max-width: 200px;
-            height: 34px;
-            background: #1a1a1a;
-            border: 1px solid #2f2f2f;
-        }
-
-        .delete-btn {
-            background: none;
-            border: 1px solid #442e2a;
-            padding: 4px 12px;
+        .play-song-btn, .delete-song-btn {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            padding: 5px 10px;
             font-size: 0.7rem;
-            color: #c08070;
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        .play-song-btn:hover {
+            background: #3a4a3a;
+        }
+
+        .delete-song-btn:hover {
+            background: #4a2a2a;
+            border-color: #aa5a42;
         }
 
         .empty-message {
             text-align: center;
             color: #5a5a5a;
-            padding: 32px 20px;
-            border: 1px dashed #2a2a2a;
+            padding: 40px;
             font-size: 0.8rem;
+            border: 1px dashed #2a2a2a;
         }
 
-        .footer-note {
-            padding: 14px 20px;
+        .footer {
+            padding: 12px 20px;
             border-top: 1px solid #1f1f1f;
             font-size: 0.6rem;
             color: #6f6f6f;
             text-align: center;
-            background: #0c0c0c;
         }
 
         ::-webkit-scrollbar {
@@ -231,268 +211,270 @@
         ::-webkit-scrollbar-thumb {
             background: #3a3a3a;
         }
+
+        /* скрытый input для выбора файлов */
+        #fileInput {
+            display: none;
+        }
     </style>
 </head>
 <body>
-<div class="recorder">
+<div class="app">
     <div class="header">
         <h1>Chugur</h1>
-        <p>Voice Notes — запись и хранение</p>
+        <p>Добавляй MP3 через кнопку — слушай что хочешь</p>
     </div>
 
-    <div class="record-panel">
-        <div class="timer" id="timerDisplay">00:00:00</div>
-        <div class="btn-group">
-            <button id="recordBtn" class="btn-record">Запись</button>
-            <button id="stopBtn" disabled>Стоп</button>
-            <button id="playLastBtn">Последняя</button>
-        </div>
-        <div style="font-size:0.7rem; color:#6a6a6a; margin-top:16px;">
-            🎙 Работает в фоне · разрешите доступ к микрофону
-        </div>
+    <div class="player-panel">
+        <div class="current-label">Сейчас играет</div>
+        <div class="current-track" id="currentTrackName">—</div>
+        <audio id="audioPlayer" controls preload="metadata"></audio>
+    </div>
+
+    <div class="add-panel">
+        <button id="addFileBtn" class="add-file-btn">📁 Добавить MP3 файл</button>
     </div>
 
     <div class="library-header">
-        <h3>Библиотека записей</h3>
+        <h3>Мои треки</h3>
         <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
     </div>
 
-    <div id="recordingsList" class="recordings-list">
-        <div class="empty-message">Нет записей. Нажмите «Запись».</div>
+    <div id="songsList" class="songs-list">
+        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл» и выберите музыку из памяти телефона.</div>
     </div>
 
-    <div class="footer-note">
-        Chugur · все записи сохраняются в телефоне
+    <div class="footer">
+        🎵 Файлы сохраняются в браузере. Ничего не исчезнет после перезагрузки.
     </div>
 </div>
 
+<input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
+
 <script>
-    // =============== CHUGUR — VOICE RECORDER ===============
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
-    let startTime = null;
-    let timerInterval = null;
-    let db = null;
-    let currentStream = null;
+    // =============== CHUGUR — МУЗЫКАЛЬНЫЙ ПЛЕЕР С ЗАГРУЗКОЙ ФАЙЛОВ ===============
+    let songs = [];  // { id, name, blob, date, url }
+    let currentSongId = null;
+    let nextId = 1;
 
-    // DOM
-    const recordBtn = document.getElementById('recordBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const timerDisplay = document.getElementById('timerDisplay');
-    const playLastBtn = document.getElementById('playLastBtn');
+    const audio = document.getElementById('audioPlayer');
+    const currentTrackSpan = document.getElementById('currentTrackName');
+    const songsListDiv = document.getElementById('songsList');
+    const addFileBtn = document.getElementById('addFileBtn');
+    const fileInput = document.getElementById('fileInput');
     const clearAllBtn = document.getElementById('clearAllBtn');
-    const recordingsListDiv = document.getElementById('recordingsList');
 
-    // IndexedDB
-    const DB_NAME = 'ChugurDB';
-    const STORE_NAME = 'notes';
-
-    function initDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, 1);
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                db = request.result;
-                resolve(db);
-            };
-            request.onupgradeneeded = (event) => {
-                const dbRef = event.target.result;
-                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
-                    dbRef.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+    // Загрузка из localStorage (только метаданные, blob-ы хранятся отдельно)
+    function loadFromStorage() {
+        const saved = localStorage.getItem('chugur_songs_meta');
+        if (saved) {
+            try {
+                const meta = JSON.parse(saved);
+                songs = [];
+                nextId = 1;
+                for (let item of meta) {
+                    // восстанавливаем blob из сохранённого base64
+                    if (item.blobData) {
+                        const byteCharacters = atob(item.blobData);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+                        songs.push({
+                            id: item.id,
+                            name: item.name,
+                            date: item.date,
+                            blob: blob,
+                            url: URL.createObjectURL(blob)
+                        });
+                        if (item.id >= nextId) nextId = item.id + 1;
+                    }
                 }
-            };
+                renderSongsList();
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function saveToStorage() {
+        const meta = songs.map(song => ({
+            id: song.id,
+            name: song.name,
+            date: song.date,
+            blobData: blobToBase64(song.blob)
+        }));
+        localStorage.setItem('chugur_songs_meta', JSON.stringify(meta));
+    }
+
+    function blobToBase64(blob) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(blob);
         });
     }
 
-    function saveRecording(blob, durationFormatted) {
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction([STORE_NAME], 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            const record = {
-                timestamp: Date.now(),
-                date: new Date().toLocaleString(),
-                duration: durationFormatted,
-                audioBlob: blob,
-                name: `chugur_${new Date().toLocaleTimeString()}.webm`
-            };
-            const request = store.add(record);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    function getAllRecordings() {
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction([STORE_NAME], 'readonly');
-            const store = tx.objectStore(STORE_NAME);
-            const request = store.getAll();
-            request.onsuccess = () => resolve(request.result || []);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    function deleteRecordingById(id) {
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction([STORE_NAME], 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            const request = store.delete(id);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async function clearAllRecordings() {
-        const all = await getAllRecordings();
-        for (let rec of all) {
-            await deleteRecordingById(rec.id);
+    // Сохранение с асинхронным преобразованием
+    async function syncStorage() {
+        const meta = [];
+        for (let song of songs) {
+            const base64 = await blobToBase64(song.blob);
+            meta.push({
+                id: song.id,
+                name: song.name,
+                date: song.date,
+                blobData: base64
+            });
         }
-        renderRecordings();
+        localStorage.setItem('chugur_songs_meta', JSON.stringify(meta));
     }
 
-    function formatTime(seconds) {
-        const hrs = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        if (hrs > 0) {
-            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function updateTimer() {
-        if (startTime && isRecording) {
-            const elapsed = (Date.now() - startTime) / 1000;
-            timerDisplay.textContent = formatTime(elapsed);
-        }
-    }
-
-    async function startRecording() {
-        if (isRecording) return;
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            currentStream = stream;
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                if (startTime) {
-                    const durationSec = (Date.now() - startTime) / 1000;
-                    const formatted = formatTime(durationSec);
-                    await saveRecording(audioBlob, formatted);
-                    await renderRecordings();
-                }
-                if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
-                    currentStream = null;
-                }
-                isRecording = false;
-                recordBtn.disabled = false;
-                stopBtn.disabled = true;
-                if (timerInterval) clearInterval(timerInterval);
-                timerDisplay.textContent = '00:00:00';
-                startTime = null;
-                recordBtn.classList.remove('active');
-                recordBtn.textContent = 'Запись';
-            };
-
-            mediaRecorder.start(200);
-            isRecording = true;
-            startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 200);
-            recordBtn.disabled = true;
-            stopBtn.disabled = false;
-            recordBtn.classList.add('active');
-            recordBtn.textContent = 'Запись...';
-        } catch (err) {
-            alert('Ошибка: разрешите доступ к микрофону');
-            console.error(err);
-        }
-    }
-
-    function stopRecording() {
-        if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        } else {
-            if (timerInterval) clearInterval(timerInterval);
-            isRecording = false;
-            recordBtn.disabled = false;
-            stopBtn.disabled = true;
-            recordBtn.classList.remove('active');
-            recordBtn.textContent = 'Запись';
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-        }
-    }
-
-    async function playLastRecording() {
-        const recordings = await getAllRecordings();
-        if (recordings.length === 0) {
-            alert('Нет записей');
+    // Добавление файла
+    function addSongFromFile(file) {
+        if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
+            alert('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)');
             return;
         }
-        const last = recordings.sort((a, b) => b.timestamp - a.timestamp)[0];
-        const audioUrl = URL.createObjectURL(last.audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => alert('Ошибка воспроизведения'));
+
+        const blob = file.slice(0, file.size, file.type);
+        const url = URL.createObjectURL(blob);
+        
+        const newSong = {
+            id: nextId++,
+            name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
+            date: new Date().toLocaleString(),
+            blob: blob,
+            url: url
+        };
+        
+        songs.unshift(newSong);
+        renderSongsList();
+        syncStorage();
+        
+        // маленькое уведомление
+        const msg = document.createElement('div');
+        msg.textContent = `✓ Добавлено: ${newSong.name}`;
+        msg.style.position = 'fixed';
+        msg.style.bottom = '20px';
+        msg.style.left = '50%';
+        msg.style.transform = 'translateX(-50%)';
+        msg.style.backgroundColor = '#2a4a2a';
+        msg.style.color = 'white';
+        msg.style.padding = '8px 20px';
+        msg.style.fontSize = '12px';
+        msg.style.zIndex = '999';
+        msg.style.borderRadius = '0';
+        msg.style.border = '1px solid #5a8a5a';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 2000);
     }
 
-    async function renderRecordings() {
-        const records = await getAllRecordings();
-        if (records.length === 0) {
-            recordingsListDiv.innerHTML = '<div class="empty-message">Нет записей. Нажмите «Запись».</div>';
+    function renderSongsList() {
+        if (!songsListDiv) return;
+        
+        if (songs.length === 0) {
+            songsListDiv.innerHTML = '<div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл» и выберите музыку из памяти телефона.</div>';
             return;
         }
-        const sorted = records.sort((a, b) => b.timestamp - a.timestamp);
-        recordingsListDiv.innerHTML = '';
-        for (let rec of sorted) {
-            const audioUrl = URL.createObjectURL(rec.audioBlob);
+        
+        songsListDiv.innerHTML = '';
+        songs.forEach(song => {
             const div = document.createElement('div');
-            div.className = 'record-item';
+            div.className = 'song-item';
             div.innerHTML = `
-                <div class="record-meta">
-                    <span class="record-name">${rec.name || 'запись'}</span>
-                    <span class="record-duration">${rec.duration || '--:--'}</span>
+                <div class="song-info">
+                    <div class="song-title">${escapeHtml(song.name)}</div>
+                    <div class="song-date">${song.date}</div>
                 </div>
-                <div class="record-date">${rec.date || ''}</div>
-                <div class="record-controls">
-                    <audio controls src="${audioUrl}" preload="metadata"></audio>
-                    <button class="delete-btn" data-id="${rec.id}">Удалить</button>
+                <div class="song-actions">
+                    <button class="play-song-btn" data-id="${song.id}">▶</button>
+                    <button class="delete-song-btn" data-id="${song.id}">🗑</button>
                 </div>
             `;
-            const delBtn = div.querySelector('.delete-btn');
+            
+            const playBtn = div.querySelector('.play-song-btn');
+            const delBtn = div.querySelector('.delete-song-btn');
+            
+            playBtn.addEventListener('click', () => playSongById(song.id));
             delBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                const id = Number(delBtn.dataset.id);
-                await deleteRecordingById(id);
-                await renderRecordings();
+                if (confirm(`Удалить "${song.name}"?`)) {
+                    // очищаем URL
+                    if (song.url) URL.revokeObjectURL(song.url);
+                    songs = songs.filter(s => s.id !== song.id);
+                    if (currentSongId === song.id) {
+                        audio.pause();
+                        audio.src = '';
+                        currentTrackSpan.textContent = '—';
+                        currentSongId = null;
+                    }
+                    renderSongsList();
+                    await syncStorage();
+                }
             });
-            recordingsListDiv.appendChild(div);
+            
+            songsListDiv.appendChild(div);
+        });
+    }
+
+    function playSongById(id) {
+        const song = songs.find(s => s.id === id);
+        if (song && song.url) {
+            audio.src = song.url;
+            audio.load();
+            audio.play().catch(e => {
+                console.log('автоплей заблокирован');
+            });
+            currentTrackSpan.textContent = song.name;
+            currentSongId = song.id;
+        } else {
+            alert('Не удалось воспроизвести файл');
         }
     }
 
-    // Инициализация
-    window.addEventListener('load', async () => {
-        await initDB();
-        await renderRecordings();
+    function clearAllSongs() {
+        if (songs.length === 0) return;
+        if (confirm('Удалить ВСЕ песни из библиотеки?')) {
+            // очищаем все URL объекты
+            songs.forEach(song => {
+                if (song.url) URL.revokeObjectURL(song.url);
+            });
+            songs = [];
+            audio.pause();
+            audio.src = '';
+            currentTrackSpan.textContent = '—';
+            currentSongId = null;
+            renderSongsList();
+            localStorage.removeItem('chugur_songs_meta');
+        }
+    }
 
-        recordBtn.onclick = startRecording;
-        stopBtn.onclick = stopRecording;
-        playLastBtn.onclick = playLastRecording;
-        clearAllBtn.onclick = async () => {
-            if (confirm('Удалить все записи без возможности восстановления?')) {
-                await clearAllRecordings();
-                await renderRecordings();
-            }
-        };
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Обработчики
+    addFileBtn.addEventListener('click', () => {
+        fileInput.click();
     });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            addSongFromFile(e.target.files[0]);
+            fileInput.value = ''; // чтобы можно было выбрать тот же файл снова
+        }
+    });
+
+    clearAllBtn.addEventListener('click', clearAllSongs);
+
+    // Загрузка при старте
+    loadFromStorage();
 </script>
 </body>
-</html>
+</html>и
