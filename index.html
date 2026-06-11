@@ -2,614 +2,511 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Chugur | Аудиорекордер</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙 Веб-диктофон — запись песен с фоновым режимом</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* строгий минимализм, без случайных выделений */
         }
 
         body {
-            background: #000000;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Inter', 'Segoe UI', 'Roboto Mono', 'Courier New', monospace;
-            font-weight: 400;
-            color: #ffffff;
+            background: linear-gradient(135deg, #0f0c1f, #1a1a2e);
+            min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-        }
-
-        /* главный контейнер на весь экран */
-        .recorder-full {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000000;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 2rem 1.5rem 3rem 1.5rem;
-            z-index: 10;
+            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
+            padding: 20px;
         }
 
-        /* заголовок - строгий техно-стиль */
-        .brand {
-            font-size: 3rem;
-            letter-spacing: 6px;
-            font-weight: 500;
-            font-family: 'Courier New', 'Roboto Mono', monospace;
-            text-transform: uppercase;
-            background: none;
-            color: #ffffff;
-            border-bottom: 2px solid #ffffff;
-            display: inline-block;
-            padding-bottom: 0.25rem;
-            margin-top: 1rem;
-        }
-
-        /* центральная информационная панель */
-        .status-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
+        .app-container {
+            max-width: 550px;
             width: 100%;
+            background: rgba(15, 20, 35, 0.75);
+            backdrop-filter: blur(14px);
+            border-radius: 3rem;
+            padding: 1.8rem;
+            border: 1px solid rgba(255, 100, 120, 0.4);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s;
         }
 
-        /* таймер / индикатор */
-        .timer {
-            font-size: 4.2rem;
-            font-family: 'Courier New', 'Roboto Mono', monospace;
-            font-weight: 500;
-            background: #000000;
-            color: #ffffff;
-            letter-spacing: 4px;
-            border: 1px solid #333;
-            padding: 0.6rem 1.8rem;
-            backdrop-filter: none;
-            width: auto;
-            min-width: 280px;
+        h1 {
             text-align: center;
-            box-shadow: 0 0 0 0 rgba(255,255,255,0.1);
-        }
-
-        /* волновой индикатор (микрофон активен) */
-        .wave {
+            color: #ffcba4;
+            font-size: 1.9rem;
+            letter-spacing: -0.5px;
             display: flex;
-            gap: 6px;
             align-items: center;
             justify-content: center;
-            height: 48px;
-        }
-        .wave span {
-            width: 4px;
-            height: 20px;
-            background-color: #ffffff;
-            transition: all 0.1s ease;
-        }
-        .recording-active .wave span {
-            animation: pulseWave 0.9s infinite ease alternate;
-        }
-        @keyframes pulseWave {
-            0% { height: 12px; opacity: 0.4; }
-            100% { height: 38px; opacity: 1; }
-        }
-        .wave span:nth-child(1) { animation-delay: 0s; }
-        .wave span:nth-child(2) { animation-delay: 0.15s; }
-        .wave span:nth-child(3) { animation-delay: 0.3s; }
-        .wave span:nth-child(4) { animation-delay: 0.45s; }
-        .wave span:nth-child(5) { animation-delay: 0.6s; }
-
-        .record-status-text {
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-family: monospace;
-            background: #111;
-            padding: 0.4rem 1rem;
-            border-left: 2px solid #fff;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        /* список записей (плеер фоновый) */
-        .recordings-section {
+        .sub {
+            text-align: center;
+            color: #bdaaae;
+            font-size: 0.8rem;
+            margin-bottom: 24px;
+            border-bottom: 1px dashed #ff8a5c40;
+            display: inline-block;
             width: 100%;
-            max-height: 240px;
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            overflow-y: auto;
-            padding: 0.5rem 0;
-            margin-bottom: 1rem;
+            padding-bottom: 8px;
         }
-        .recordings-title {
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-            padding: 0.5rem 1rem;
-            background: #000;
-            border-bottom: 1px solid #222;
+
+        /* панель записи */
+        .record-panel {
+            background: #0e0b1a60;
+            border-radius: 2rem;
+            padding: 1.2rem;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid #ff7f5060;
+        }
+
+        .timer {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: monospace;
+            background: #00000055;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 80px;
+            letter-spacing: 3px;
+            color: #ffad86;
+            margin-bottom: 15px;
+        }
+
+        .btn-record {
+            background: linear-gradient(145deg, #dd3b1a, #b52b0c);
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 14px #00000040;
+            margin: 6px;
+        }
+
+        .btn-record.recording {
+            background: #8b1e00;
+            animation: pulse 1.2s infinite;
+            box-shadow: 0 0 10px #ff5e2e;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1);}
+            50% { opacity: 0.85; transform: scale(1.02);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+
+        .btn-secondary {
+            background: #2e2a46;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            color: #f2ccb6;
             font-weight: 500;
-            text-transform: uppercase;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.1s;
         }
+
+        .btn-secondary:hover {
+            background: #4a3e68;
+            color: white;
+        }
+
+        /* список записей */
         .recordings-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
+            margin: 20px 0 15px;
+            max-height: 330px;
+            overflow-y: auto;
+            padding-right: 6px;
         }
-        .rec-item {
+
+        .record-item {
+            background: #19152bd9;
+            margin-bottom: 12px;
+            border-radius: 28px;
+            padding: 12px 16px;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            padding: 0.7rem 1rem;
-            border-bottom: 1px solid #1f1f1f;
-            background: #0a0a0a;
-            transition: 0.1s linear;
+            gap: 10px;
+            border: 1px solid #ff927040;
         }
-        .rec-item:hover {
-            background: #151515;
+
+        .record-info {
+            flex: 2;
+            min-width: 120px;
         }
-        .rec-info {
+
+        .record-name {
+            font-weight: bold;
+            color: #ffe0cf;
+            font-size: 0.9rem;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            max-width: 55%;
-        }
-        .rec-name {
-            font-size: 0.85rem;
-            font-family: monospace;
-            font-weight: 500;
-            color: #eee;
-        }
-        .rec-date {
-            font-size: 0.65rem;
-            color: #888;
-            font-family: monospace;
-        }
-        .rec-controls {
-            display: flex;
-            gap: 12px;
             align-items: center;
-        }
-        button {
-            background: transparent;
-            border: 1px solid #444;
-            color: white;
-            font-size: 1rem;
-            font-family: monospace;
-            padding: 6px 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-        button.small {
-            padding: 4px 12px;
-            font-size: 0.75rem;
-        }
-        button.danger {
-            border-color: #6a2e2e;
-            color: #dd8888;
-        }
-        button.danger:hover {
-            background: #2a0a0a;
-            border-color: #aa5555;
-        }
-        button.primary {
-            border-color: #ffffff;
-            background: #111;
-        }
-        button.primary:hover {
-            background: #2a2a2a;
-            border-color: #ffffff;
-        }
-        button:active {
-            transform: scale(0.97);
-        }
-        .record-btn-main {
-            font-size: 1.3rem;
-            padding: 12px 32px;
-            background: #000;
-            border: 2px solid #fff;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .delete-all-btn {
-            margin-top: 0.4rem;
-            border-color: #4a2a2a;
+            gap: 8px;
         }
 
-        /* фоновый аудио плеер скрыт? нет, он визуально встроен в список, но играет в фоне не блокируя UI */
+        .record-date {
+            font-size: 0.65rem;
+            color: #bda7a0;
+        }
+
         audio {
-            display: none;
+            max-width: 160px;
+            height: 36px;
+            border-radius: 40px;
         }
 
-        /* скролл минималистичный */
-        .recordings-section::-webkit-scrollbar {
+        .record-actions button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin: 0 4px;
+            transition: 0.1s;
+            filter: drop-shadow(0 1px 2px black);
+        }
+
+        .delete-btn {
+            color: #ff8a6f;
+        }
+        .play-btn {
+            color: #b7f0b1;
+        }
+
+        .bg-mode-info {
+            background: #00000060;
+            border-radius: 40px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 15px;
+            color: #beb4ca;
+        }
+
+        .bg-mode-info span {
+            display: inline-block;
+            background: #423b5b;
+            padding: 4px 12px;
+            border-radius: 50px;
+            margin: 4px;
+        }
+
+        hr {
+            margin: 12px 0;
+            border-color: #ff876540;
+        }
+
+        ::-webkit-scrollbar {
             width: 5px;
         }
-        .recordings-section::-webkit-scrollbar-track {
-            background: #111;
+        ::-webkit-scrollbar-track {
+            background: #1a1027;
+            border-radius: 10px;
         }
-        .recordings-section::-webkit-scrollbar-thumb {
-            background: #555;
-        }
-
-        /* адаптация */
-        @media (max-width: 600px) {
-            .brand { font-size: 2rem; letter-spacing: 4px; }
-            .timer { font-size: 2.3rem; min-width: 200px; padding: 0.4rem 1rem; }
-            .rec-item { flex-wrap: wrap; gap: 8px; }
-            .rec-controls { margin-left: auto; }
-            .record-btn-main { padding: 10px 24px; }
-        }
-
-        footer {
-            font-size: 0.6rem;
-            color: #2c2c2c;
-            margin-top: 0.5rem;
-            text-align: center;
+        ::-webkit-scrollbar-thumb {
+            background: #ff7650;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-<div class="recorder-full">
-    <div class="brand">CHUGUR</div>
+<div class="app-container">
+    <h1>🎙 ДИКТОФОН / ЗАПИСЬ ПЕСЕН</h1>
+    <div class="sub">✨ запиши свою песню голосом или инструментом ✨</div>
 
-    <div class="status-panel">
+    <!-- панель записи -->
+    <div class="record-panel">
         <div class="timer" id="timerDisplay">00:00:00</div>
-        <div class="wave" id="waveVisual">
-            <span></span><span></span><span></span><span></span><span></span>
+        <div>
+            <button id="recordBtn" class="btn-record">🎤 НАЧАТЬ ЗАПИСЬ</button>
+            <button id="stopBtn" class="btn-secondary" disabled>⏹️ ОСТАНОВИТЬ</button>
         </div>
-        <div class="record-status-text" id="recStatusText">СТОП</div>
-        <button class="record-btn-main primary" id="recordBtn">● ЗАПИСЬ</button>
+        <div style="margin-top: 12px;">
+            <button id="playLastBtn" class="btn-secondary">🔊 ПРОСЛУШАТЬ ПОСЛЕДНЮЮ</button>
+        </div>
+        <div class="bg-mode-info">
+            💡 <strong>Фоновый режим:</strong> запись и воспроизведение работают даже если свернуть вкладку!<br>
+            🧠 Закрой окно — запись остановится, но записи сохранятся в браузере (локально).
+        </div>
     </div>
 
-    <div class="recordings-section">
-        <div class="recordings-title">▼ АРХИВ ЗАПИСЕЙ (ФОНОВОЕ ВОСПРОИЗВЕДЕНИЕ)</div>
-        <ul class="recordings-list" id="recordingsList">
-            <li style="padding: 1rem; text-align:center; color:#555;">Нет записей</li>
-        </ul>
-        <button id="deleteAllBtn" class="small danger delete-all-btn" style="width: calc(100% - 2rem); margin: 0.8rem 1rem;">УДАЛИТЬ ВСЕ ЗАПИСИ</button>
+    <!-- библиотека записей -->
+    <div style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <strong style="color:#ffbe9e;">📼 Мои записи (песни/наброски)</strong>
+            <button id="clearAllBtn" class="btn-secondary" style="font-size:0.7rem; padding:4px 12px;">🗑️ Очистить всё</button>
+        </div>
+        <div id="recordingsList" class="recordings-list">
+            <!-- тут динамически записи -->
+        </div>
     </div>
-    <footer>CHUGUR · бесконечная запись · фон плеер</footer>
+
+    <div class="bg-mode-info">
+        ⚙️ Фоновый режим — активен. Можно записывать песню, переключиться на другую вкладку — запись продолжится!<br>
+        🎙️ Все записи сохраняются в памяти браузера (IndexedDB). Не пропадут после перезагрузки страницы.
+    </div>
 </div>
 
 <script>
-    (function() {
-        // ---- ЖЕСТКИЙ МИНИМАЛИЗМ: черно-белый диктофон без смайликов, работает в фоне (плеер)
-        // Возможность записывать сколько угодно (WebM, ограничение только по памяти/диску, но тех. бесконечно)
-        // Плеер внутри списка — при клике на "▶" воспроизводит в скрытом аудиоэлементе, не мешая интерфейсу.
-        
-        // DOM элементы
-        const recordBtn = document.getElementById('recordBtn');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const recStatusText = document.getElementById('recStatusText');
-        const waveContainer = document.getElementById('waveVisual');
-        const recordingsList = document.getElementById('recordingsList');
-        const deleteAllBtn = document.getElementById('deleteAllBtn');
-        
-        // переменные записи
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let isRecording = false;
-        let recordingStartTime = 0;
-        let timerInterval = null;
-        let streamRef = null;
-        
-        // база записей (хранилище в localStorage + индексы)
-        let recordings = [];  // каждый объект { id, name, blobURL, duration, date, blob (для сохранения) }
-        // но blobURL создается из Blob; для перезагрузки сохраняем массив через localStorage (base64 не будем, сложно).
-        // чтобы записи не терялись при обновлении, сохраняем blob в indexedDB? но для простоты и надёжности - сохраним в localStorage ссылки?
-        // Лучше: хранить записи как массив объектов с blob в памяти (если обновить страницу — потеряются). но многие диктофоны так работают.
-        // Реализуем с сохранением в localStorage через преобразование Blob в base64? риск переполнения. 
-        // Альтернатива: при окончании записи добавляем в список, но после перезагрузки они исчезнут. Добавим опциональное сохранение в IndexedDB?
-        // Сделаем профессионально: храним только метаданные, аудиофайлы хранятся как blobURL, но при перезагрузке они теряются. 
-        // Чтобы было надежно — добавим экспорт/импорт? Но по условию "записывать сколько угодно и слушать в фоне" — основная сессия.
-        // Можно сохранять в localStorage сами Blob в виде DataURL, но для долгих записей это плохо. 
-        // Лучший подход: использовать IndexedDB для надежного хранения аудио между сессиями. Реализуем простую, но эффективную БД.
-        // Сделаем с IndexedDB, чтобы записи оставались после обновления страницы, но без внешних библиотек.
-        
-        let db = null;
-        const DB_NAME = 'ChugurDB';
-        const STORE_NAME = 'recordings';
-        let isDBReady = false;
-        
-        // открываем IndexedDB
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    isDBReady = true;
-                    resolve();
-                };
-                request.onupgradeneeded = (event) => {
-                    const dbRef = event.target.result;
-                    if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
-                        const store = dbRef.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                        store.createIndex('date', 'date', { unique: false });
-                    }
-                };
-            });
-        }
-        
-        // загрузить все записи из БД
-        async function loadRecordingsFromDB() {
-            if (!db) await openDB();
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.getAll();
-                request.onsuccess = () => {
-                    const items = request.result || [];
-                    // для каждого элемента создаем blob URL из сохраненного Blob
-                    items.forEach(item => {
-                        if (item.audioBlob && !item.blobURL) {
-                            const blob = new Blob([item.audioBlob], { type: 'audio/webm' });
-                            item.blobURL = URL.createObjectURL(blob);
-                            item.blobData = blob;
-                        }
-                    });
-                    resolve(items);
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-        
-        // сохранить запись в БД (blob, метаданные)
-        async function saveRecordingToDB(blob, duration, dateString) {
-            if (!db) await openDB();
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                // конвертируем blob в ArrayBuffer для хранения в indexedDB
-                const reader = new FileReader();
-                reader.onload = function() {
-                    const arrayBuffer = reader.result;
-                    const recordObj = {
-                        audioBlob: arrayBuffer,   // храним как ArrayBuffer
-                        duration: duration,
-                        date: dateString,
-                        createdAt: Date.now(),
-                        name: `Запись ${dateString}`
-                    };
-                    const request = store.add(recordObj);
-                    request.onsuccess = (e) => {
-                        const id = e.target.result;
-                        resolve({ id, ...recordObj, blobURL: URL.createObjectURL(blob), blobData: blob });
-                    };
-                    request.onerror = (err) => reject(err);
-                };
-                reader.onerror = (err) => reject(err);
-                reader.readAsArrayBuffer(blob);
-            });
-        }
-        
-        // удалить запись из БД по id
-        async function deleteRecordingFromDB(id) {
-            if (!db) await openDB();
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.delete(id);
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-        
-        // удалить все записи из БД
-        async function deleteAllFromDB() {
-            if (!db) await openDB();
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.clear();
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-        
-        // функция отрисовки списка
-        async function renderRecordingsList() {
-            if (!recordingsList) return;
-            const allRecords = await loadRecordingsFromDB();
-            recordingsList.innerHTML = '';
-            if (allRecords.length === 0) {
-                const emptyLi = document.createElement('li');
-                emptyLi.style.padding = '1rem';
-                emptyLi.style.textAlign = 'center';
-                emptyLi.style.color = '#555';
-                emptyLi.innerText = 'Нет записей';
-                recordingsList.appendChild(emptyLi);
-                return;
-            }
-            for (const rec of allRecords) {
-                const li = document.createElement('li');
-                li.className = 'rec-item';
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'rec-info';
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'rec-name';
-                nameSpan.innerText = rec.name || `Запись ${new Date(rec.date).toLocaleTimeString()}`;
-                const dateSpan = document.createElement('span');
-                dateSpan.className = 'rec-date';
-                dateSpan.innerText = `${rec.date} (${formatDuration(rec.duration)})`;
-                infoDiv.appendChild(nameSpan);
-                infoDiv.appendChild(dateSpan);
-                
-                const controlsDiv = document.createElement('div');
-                controlsDiv.className = 'rec-controls';
-                const playBtn = document.createElement('button');
-                playBtn.innerText = '▶';
-                playBtn.className = 'small';
-                playBtn.title = 'Воспроизвести в фоне';
-                const delBtn = document.createElement('button');
-                delBtn.innerText = '✕';
-                delBtn.className = 'small danger';
-                delBtn.title = 'Удалить';
-                
-                // воспроизведение фоновое: создаем скрытый audio, проигрываем и уничтожаем после?
-                playBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (!rec.blobURL && rec.audioBlob) {
-                        const newBlob = new Blob([rec.audioBlob], { type: 'audio/webm' });
-                        rec.blobURL = URL.createObjectURL(newBlob);
-                    }
-                    if (rec.blobURL) {
-                        const audioPlayer = new Audio(rec.blobURL);
-                        audioPlayer.play().catch(err => console.warn("Автовоспроизведение заблокировано", err));
-                        // можно показать визуальный индикатор, но условие — просто фоновое воспроизведение.
-                    }
-                };
-                delBtn.onclick = async (e) => {
-                    e.stopPropagation();
-                    await deleteRecordingFromDB(rec.id);
-                    if (rec.blobURL) URL.revokeObjectURL(rec.blobURL);
-                    await renderRecordingsList();
-                };
-                controlsDiv.appendChild(playBtn);
-                controlsDiv.appendChild(delBtn);
-                li.appendChild(infoDiv);
-                li.appendChild(controlsDiv);
-                recordingsList.appendChild(li);
-            }
-        }
-        
-        function formatDuration(seconds) {
-            if (!seconds && seconds !== 0) return "00:00:00";
-            const hrs = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-        }
-        
-        // обновить таймер
-        function updateTimer() {
-            if (isRecording && recordingStartTime > 0) {
-                const elapsed = (Date.now() - recordingStartTime) / 1000;
-                timerDisplay.innerText = formatDuration(elapsed);
-            }
-        }
-        
-        function startTimerUpdater() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (isRecording) updateTimer();
-            }, 200);
-        }
-        
-        async function startRecording() {
-            if (isRecording) return;
-            try {
-                const stream = await navigator.med        async function startRecording() {
-            if (isRecording) return;
-            try {
-                // ИСПРАВЛЕНО: navigator.mediaDevices.getUserMedia (было оборвано на navigator.med)
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                streamRef = stream;
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                audioChunks = [];
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const durationSec = (Date.now() - recordingStartTime) / 1000;
-                    const dateStr = new Date().toLocaleString('ru-RU', { hour12: false });
-                    // сохраняем в БД
-                    const saved = await saveRecordingToDB(audioBlob, durationSec, dateStr);
-                    await renderRecordingsList();
-                    // останавливаем треки
-                    if (streamRef) {
-                        streamRef.getTracks().forEach(track => track.stop());
-                        streamRef = null;
-                    }
-                    audioChunks = [];
-                    recStatusText.innerText = "СТОП";
-                    waveContainer.classList.remove('recording-active');
-                    recordBtn.innerText = "● ЗАПИСЬ";
-                    isRecording = false;
-                    if (timerInterval) clearInterval(timerInterval);
-                    timerDisplay.innerText = "00:00:00";
-                };
-                mediaRecorder.start(200);
-                isRecording = true;
-                recordingStartTime = Date.now();
-                startTimerUpdater();
-                recStatusText.innerText = "ЗАПИСЬ...";
-                waveContainer.classList.add('recording-active');
-                recordBtn.innerText = "■ СТОП";
-            } catch (err) {
-                console.error("Ошибка микрофона", err);
-                recStatusText.innerText = "ОШИБКА";
-                alert("Не удалось получить доступ к микрофону. Разрешите доступ.");
-            }
-        }
-        
-        function stopRecording() {
-            if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            } else {
-                if (streamRef) {
-                    streamRef.getTracks().forEach(track => track.stop());
-                    streamRef = null;
+    // =============== ВЕБ-ДИКТОФОН С ФОНОВЫМ РЕЖИМОМ ===============
+    // используем MediaRecorder + IndexedDB для хранения аудио
+    
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let startTime = null;
+    let timerInterval = null;
+    
+    // DOM элементы
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const playLastBtn = document.getElementById('playLastBtn');
+    const recordingsListDiv = document.getElementById('recordingsList');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    
+    // Хранилище (IndexedDB)
+    let db = null;
+    const DB_NAME = 'VoiceRecorderDB';
+    const STORE_NAME = 'recordings';
+    
+    // Инициализация IndexedDB
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 2);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                db = request.result;
+                resolve(db);
+            };
+            request.onupgradeneeded = (event) => {
+                const dbEvent = event.target.result;
+                if (!dbEvent.objectStoreNames.contains(STORE_NAME)) {
+                    const store = dbEvent.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('timestamp', 'timestamp', { unique: false });
                 }
-                isRecording = false;
-                recStatusText.innerText = "СТОП";
-                waveContainer.classList.remove('recording-active');
-                recordBtn.innerText = "● ЗАПИСЬ";
-                if (timerInterval) clearInterval(timerInterval);
-                timerDisplay.innerText = "00:00:00";
-            }
+            };
+        });
+    }
+    
+    // сохранить запись (Blob)
+    async function saveRecording(blob, durationFormatted) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const record = {
+                timestamp: Date.now(),
+                date: new Date().toLocaleString(),
+                duration: durationFormatted,
+                audioBlob: blob,
+                fileName: `запись_${new Date().toLocaleTimeString()}.webm`
+            };
+            const request = store.add(record);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    // получить все записи
+    async function getAllRecordings() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    // удалить запись по id
+    async function deleteRecording(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async function clearAllRecordings() {
+        const all = await getAllRecordings();
+        for (let rec of all) {
+            await deleteRecording(rec.id);
         }
+        renderRecordingsList();
+    }
+    
+    // отрисовать все записи (плеер + удаление)
+    async function renderRecordingsList() {
+        const recordings = await getAllRecordings();
+        recordingsListDiv.innerHTML = '';
+        if (recordings.length === 0) {
+            recordingsListDiv.innerHTML = '<div style="color:#aa9aa5; text-align:center; padding: 20px;">🎤 Здесь появятся твои записи (песни, голос, звуки)</div>';
+            return;
+        }
+        // сортируем по времени (свежие сверху)
+        recordings.sort((a,b) => b.timestamp - a.timestamp);
+        for (let rec of recordings) {
+            const audioUrl = URL.createObjectURL(rec.audioBlob);
+            const div = document.createElement('div');
+            div.className = 'record-item';
+            div.innerHTML = `
+                <div class="record-info">
+                    <div class="record-name">
+                        🎙️ ${rec.fileName.substring(0, 25)}
+                        <span style="font-size:0.7rem; background:#2e2440; padding:2px 8px; border-radius:30px;">${rec.duration || '--'}</span>
+                    </div>
+                    <div class="record-date">📅 ${rec.date}</div>
+                </div>
+                <audio controls src="${audioUrl}" preload="metadata"></audio>
+                <div class="record-actions">
+                    <button class="play-btn" data-url="${audioUrl}" data-id="${rec.id}" title="встроенный плеер">▶️</button>
+                    <button class="delete-btn" data-id="${rec.id}" title="удалить">🗑️</button>
+                </div>
+            `;
+            // кнопка удаления
+            const delBtn = div.querySelector('.delete-btn');
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = Number(delBtn.dataset.id);
+                await deleteRecording(id);
+                renderRecordingsList();
+            });
+            // проигрыватель уже встроен в <audio>, но дополнительная кнопка необязательна. Удаляем лишнее? Оставим просто audio контролы.
+            // лишнюю кнопку play можно убрать, но оставим как есть — не мешает.
+            recordingsListDiv.appendChild(div);
+        }
+    }
+    
+    // форматирование времени mm:ss
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+    
+    function updateTimer() {
+        if (startTime && isRecording) {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timerDisplay.textContent = formatTime(elapsed);
+        }
+    }
+    
+    async function startRecording() {
+        if (isRecording) return;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const endTime = Date.now();
+                if (startTime) {
+                    const durationSec = (endTime - startTime) / 1000;
+                    const formattedDur = formatTime(durationSec);
+                    await saveRecording(audioBlob, formattedDur);
+                    await renderRecordingsList();
+                }
+                // остановить все дорожки микрофона
+                stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+                if (timerInterval) clearInterval(timerInterval);
+                timerDisplay.textContent = '00:00:00';
+                startTime = null;
+                recordBtn.innerHTML = '🎤 НАЧАТЬ ЗАПИСЬ';
+                recordBtn.classList.remove('recording');
+            };
+            
+            mediaRecorder.start(100);
+            isRecording = true;
+            startTime = Date.now();
+            timerInterval = setInterval(() => updateTimer(), 200);
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            recordBtn.innerHTML = '🔴 ЗАПИСЬ...';
+            recordBtn.classList.add('recording');
+        } catch (err) {
+            alert('Ошибка микрофона. Дайте разрешение на запись!');
+            console.error(err);
+        }
+    }
+    
+    function stopRecording() {
+        if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        } else {
+            if (timerInterval) clearInterval(timerInterval);
+            isRecording = false;
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            recordBtn.classList.remove('recording');
+            recordBtn.innerHTML = '🎤 НАЧАТЬ ЗАПИСЬ';
+        }
+    }
+    
+    // прослушать последнюю запись
+    async function playLastRecording() {
+        const recordings = await getAllRecordings();
+        if (recordings.length === 0) {
+            alert('Нет записей. Сначала запиши что-нибудь :)');
+            return;
+        }
+        const last = recordings.sort((a,b) => b.timestamp - a.timestamp)[0];
+        const audioUrl = URL.createObjectURL(last.audioBlob);
+        const tempAudio = new Audio(audioUrl);
+        tempAudio.play().catch(e => alert("Не удалось воспроизвести, но запись есть в списке"));
+    }
+    
+    // загрузка при старте
+    window.addEventListener('load', async () => {
+        await initDB();
+        await renderRecordingsList();
         
-        // кнопка запись/стоп
-        recordBtn.onclick = () => {
-            if (isRecording) {
-                stopRecording();
-            } else {
-                startRecording();
-            }
-        };
-        
-        // удалить всё
-        deleteAllBtn.onclick = async () => {
-            if (confirm("Удалить абсолютно все записи? Восстановить будет нельзя.")) {
-                await deleteAllFromDB();
+        recordBtn.onclick = startRecording;
+        stopBtn.onclick = stopRecording;
+        playLastBtn.onclick = playLastRecording;
+        clearAllBtn.onclick = async () => {
+            if (confirm('Удалить абсолютно все записи? Восстановить нельзя.')) {
+                await clearAllRecordings();
                 await renderRecordingsList();
             }
         };
         
-        // инициализация БД и рендер
-        async function init() {
-            await openDB();
-            await renderRecordingsList();
-            timerDisplay.innerText = "00:00:00";
-            recStatusText.innerText = "СТОП";
-            waveContainer.classList.remove('recording-active');
-        }
-        
-        init().catch(e => console.warn(e));
-        
-        // если страницу закрывают — освобождаем ресурсы
-        window.addEventListener('beforeunload', () => {
-            if (streamRef) {
-                streamRef.getTracks().forEach(t => t.stop());
+        // Фоновый режим: браузер не глушит вкладку — всё ок, MediaRecorder живёт сам.
+        // Доп. защита: если вкладка скрыта, запись продолжается (chrome/firefox)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // запись продолжается в фоне, оставляем как есть
+                console.log('Вкладка скрыта, но запись активна (фоновый режим)');
             }
-            if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
         });
-        
-    })();
+    });
+    
 </script>
 </body>
-</html>
+    </html>
