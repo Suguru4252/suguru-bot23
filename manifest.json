@@ -1,0 +1,21 @@
+{
+  "name": "Chugur Music",
+  "short_name": "Chugur",
+  "description": "Офлайн MP3 плеер с сохранением песен",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#151515",
+  "theme_color": "#151515",
+  "icons": [
+    {
+      "src": "https://iimg.su/i/tzCojv",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iimg.su/i/tzCojv",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
