@@ -2,535 +2,452 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Chugur — Music Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chugur Studio — Генератор договоров</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-
         body {
-            background: #0f0f0f;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            padding: 20px;
-            min-height: 100vh;
+            background: #f5f7fb;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #eee;
-        }
-
-        .app {
-            max-width: 550px;
-            width: 100%;
-            background: #151515;
-            border: 1px solid #2a2a2a;
-        }
-
-        .header {
-            padding: 20px 24px 8px 24px;
-            border-bottom: 1px solid #222;
-        }
-
-        .header h1 {
-            font-size: 1.9rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            color: #fff;
-        }
-
-        .header p {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 6px;
-        }
-
-        .player-panel {
+            min-height: 100vh;
             padding: 20px;
-            background: #111;
-            border-bottom: 1px solid #222;
         }
-
-        .current-label {
-            font-size: 0.65rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .current-track {
-            font-size: 1rem;
-            font-weight: 500;
-            margin: 8px 0 16px;
-            word-break: break-word;
-        }
-
-        audio {
+        .app-container {
+            max-width: 800px;
             width: 100%;
-            height: 44px;
-        }
-
-        .add-panel {
-            padding: 16px 20px;
-            background: #0c0c0c;
-            border-bottom: 1px solid #222;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .add-file-btn {
-            background: #2a2a2a;
-            border: 1px solid #4a4a4a;
-            padding: 10px 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #ddd;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-
-        .add-file-btn:hover {
-            background: #3a3a3a;
-        }
-
-        .library-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 18px 24px 8px 24px;
-        }
-
-        .library-header h3 {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #aaa;
-            letter-spacing: 0.5px;
-        }
-
-        .clear-btn {
-            background: none;
-            border: 1px solid #3a2a28;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            color: #b88a7a;
-            cursor: pointer;
-        }
-
-        .songs-list {
-            padding: 16px 20px 24px 20px;
-            max-height: 380px;
-            overflow-y: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 8px;
         }
-
-        .song-item {
-            background: #121212;
-            border: 1px solid #252525;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
+        .header {
+            background: linear-gradient(135deg, #1e1e2f, #2a2a3d);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
         }
-
-        .song-item:hover {
-            background: #1a1a1a;
+        .header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
-
-        .song-info {
-            flex: 1;
-        }
-
-        .song-title {
+        .chugur-badge {
+            display: inline-block;
+            background: #ffd966;
+            color: #1e1e2f;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
             font-size: 0.85rem;
-            font-weight: 500;
-            word-break: break-word;
+            margin-top: 5px;
         }
-
-        .song-date {
-            font-size: 0.6rem;
-            color: #6a6a6a;
-            margin-top: 4px;
-        }
-
-        .song-actions {
+        .chat-area {
+            padding: 25px;
             display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .chat-label {
+            font-weight: 600;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 90px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 15px;
+            resize: vertical;
+            transition: border 0.2s;
+            line-height: 1.5;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #ffd966;
+        }
+        .example-hint {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: -8px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
             gap: 6px;
         }
-
-        .play-song-btn, .delete-song-btn {
-            background: #2a2a2a;
-            border: 1px solid #3a3a3a;
-            padding: 5px 10px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            color: #ccc;
-        }
-
-        .play-song-btn:hover {
-            background: #3a4a3a;
-        }
-
-        .delete-song-btn:hover {
-            background: #4a2a2a;
-            border-color: #aa5a42;
-        }
-
-        .empty-message {
-            text-align: center;
-            color: #5a5a5a;
-            padding: 40px;
-            font-size: 0.8rem;
-            border: 1px dashed #2a2a2a;
-        }
-
-        .footer {
-            padding: 12px 20px;
-            border-top: 1px solid #1f1f1f;
-            font-size: 0.6rem;
-            color: #6f6f6f;
-            text-align: center;
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2a4a2a;
+        .btn-primary {
+            background: #1e1e2f;
             color: white;
-            padding: 8px 20px;
-            font-size: 12px;
-            z-index: 999;
-            border: 1px solid #5a8a5a;
-            animation: fadeOut 2s ease-in-out forwards;
+            flex: 1;
+            justify-content: center;
         }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
+        .btn-primary:hover {
+            background: #33334d;
+        }
+        .btn-outline {
+            background: white;
+            border: 2px solid #1e1e2f;
+            color: #1e1e2f;
+        }
+        .btn-outline:hover {
+            background: #f0f0f5;
+        }
+        .btn-copy {
+            background: #ffd966;
+            color: #1e1e2f;
+        }
+        .contract-output {
+            padding: 25px;
+            background: #fafafa;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .contract-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 25px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2c2c2c;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .error-msg {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+        @media (max-width: 500px) {
+            .app-container {
+                border-radius: 12px;
+            }
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            textarea {
+                height: 70px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="app">
-    <div class="header">
-        <h1>Chugur</h1>
-        <p>Добавляй MP3 — сохраняются навсегда (без ограничений)</p>
+    <div class="app-container">
+        <div class="header">
+            <h1>📄 Генератор договоров</h1>
+            <span class="chugur-badge">Chugur Studio</span>
+        </div>
+
+        <div class="chat-area">
+            <label class="chat-label">Опишите ситуацию, как в чате:</label>
+            <textarea id="userInput" placeholder="Например: Мне нужен договор на Ивана Иванова, что я с человеком Петром Петровым договорились взять в долг 50 000 ₽"></textarea>
+            <div class="example-hint">Можно писать «долг», «продажа», «услуги» — система попробует понять</div>
+            <div class="btn-row">
+                <button class="btn-primary" id="generateBtn">✨ Сгенерировать договор</button>
+                <button class="btn-outline" id="clearBtn">🗑️ Очистить</button>
+            </div>
+            <div id="parseError" class="error-msg"></div>
+        </div>
+
+        <div class="contract-output" id="outputSection" style="display: none;">
+            <div class="contract-box" id="contractText"></div>
+            <div class="action-buttons">
+                <button class="btn-copy" id="copyBtn">📋 Копировать</button>
+                <button class="btn-outline" id="downloadBtn">⬇️ Скачать .txt</button>
+                <button class="btn-outline" id="printBtn">🖨️ Печать</button>
+            </div>
+            <div class="footer-note">
+                Документ создан с помощью <strong>Chugur Studio</strong> • Не является официальным юридическим документом
+            </div>
+        </div>
     </div>
 
-    <div class="player-panel">
-        <div class="current-label">Сейчас играет</div>
-        <div class="current-track" id="currentTrackName">—</div>
-        <audio id="audioPlayer" controls preload="metadata"></audio>
-    </div>
+    <script>
+        (function() {
+            // DOM элементы
+            const userInput = document.getElementById('userInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const outputSection = document.getElementById('outputSection');
+            const contractTextDiv = document.getElementById('contractText');
+            const copyBtn = document.getElementById('copyBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const printBtn = document.getElementById('printBtn');
+            const parseError = document.getElementById('parseError');
 
-    <div class="add-panel">
-        <button id="addFileBtn" class="add-file-btn">📁 Добавить MP3 файл</button>
-    </div>
+            // ---------- Утилиты ----------
+            function showError(msg) {
+                parseError.textContent = msg;
+                outputSection.style.display = 'none';
+            }
 
-    <div class="library-header">
-        <h3>Мои треки (сохраняются в IndexedDB — безлимит)</h3>
-        <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
-    </div>
+            function clearError() {
+                parseError.textContent = '';
+            }
 
-    <div id="songsList" class="songs-list">
-        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл».</div>
-    </div>
-
-    <div class="footer">
-        🎵 IndexedDB — можно хранить гигабайты музыки. Закрывайте браузер — ничего не пропадёт.
-    </div>
-</div>
-
-<input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
-
-<script>
-    // =============== CHUGUR — ПЛЕЕР НА INDEXEDDB (БЕЗЛИМИТНЫЙ) ===============
-    let songs = [];
-    let currentSongId = null;
-    let db = null;
-    const DB_NAME = 'ChugurDB';
-    const STORE_NAME = 'songs';
-
-    const audio = document.getElementById('audioPlayer');
-    const currentTrackSpan = document.getElementById('currentTrackName');
-    const songsListDiv = document.getElementById('songsList');
-    const addFileBtn = document.getElementById('addFileBtn');
-    const fileInput = document.getElementById('fileInput');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-
-    // ============ ИНИЦИАЛИЗАЦИЯ INDEXEDDB ============
-    function initDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, 1);
-            
-            request.onerror = () => reject(request.error);
-            
-            request.onsuccess = () => {
-                db = request.result;
-                resolve(db);
-            };
-            
-            request.onupgradeneeded = (event) => {
-                const dbRef = event.target.result;
-                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
-                    const store = dbRef.createObjectStore(STORE_NAME, { 
-                        keyPath: 'id', 
-                        autoIncrement: true 
-                    });
-                    store.createIndex('name', 'name', { unique: false });
-                }
-            };
-        });
-    }
-
-    // ============ СОХРАНЕНИЕ ПЕСНИ В INDEXEDDB ============
-    function saveSongToDB(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const blob = e.target.result;
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
+            // Функция для извлечения параметров из текста
+            function parseUserInput(text) {
+                // Удаляем лишние пробелы, переводим в нижний регистр для поиска ключевых слов,
+                // но сохраняем оригинал для извлечения имён.
+                const lower = text.toLowerCase();
                 
-                const songData = {
-                    name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
-                    date: new Date().toLocaleString(),
-                    blob: blob,
-                    mimeType: file.type || 'audio/mpeg'
-                };
-                
-                const request = store.add(songData);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    // ============ ЗАГРУЗКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
-    function loadAllSongsFromDB() {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.getAll();
-            
-            request.onsuccess = () => {
-                const results = request.result;
-                songs = [];
-                for (let item of results) {
-                    const blob = new Blob([item.blob], { type: item.mimeType || 'audio/mpeg' });
-                    const url = URL.createObjectURL(blob);
-                    songs.push({
-                        id: item.id,
-                        name: item.name,
-                        date: item.date,
-                        blob: blob,
-                        url: url
-                    });
-                }
-                resolve(songs);
-            };
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ УДАЛЕНИЕ ПЕСНИ ИЗ INDEXEDDB ============
-    function deleteSongFromDB(id) {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.delete(id);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ ОЧИСТКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
-    function clearAllSongsFromDB() {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.clear();
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ ДОБАВЛЕНИЕ ПЕСНИ (через интерфейс) ============
-    async function addSongFromFile(file) {
-        if (!file.type.includes('audio') && !file.name.match(/\.(mp3|m4a|aac|ogg|wav)$/i)) {
-            alert('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)');
-            return;
-        }
-
-        try {
-            const id = await saveSongToDB(file);
-            await loadAllSongsFromDB();
-            renderSongsList();
-            showToast(`✓ Добавлено: ${file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, '')}`);
-        } catch (e) {
-            console.error('Ошибка сохранения:', e);
-            alert('Не удалось сохранить песню. Возможно, закончилось место.');
-        }
-    }
-
-    // ============ ОТРИСОВКА ПЛЕЙЛИСТА ============
-    function renderSongsList() {
-        if (!songsListDiv) return;
-        
-        if (songs.length === 0) {
-            songsListDiv.innerHTML = '<div class="empty-message">🎵 Нет треков. Нажмите «Добавить MP3 файл».</div>';
-            return;
-        }
-        
-        songsListDiv.innerHTML = '';
-        songs.forEach(song => {
-            const div = document.createElement('div');
-            div.className = 'song-item';
-            div.innerHTML = `
-                <div class="song-info">
-                    <div class="song-title">${escapeHtml(song.name)}</div>
-                    <div class="song-date">${song.date}</div>
-                </div>
-                <div class="song-actions">
-                    <button class="play-song-btn" data-id="${song.id}">▶</button>
-                    <button class="delete-song-btn" data-id="${song.id}">🗑</button>
-                </div>
-            `;
-            
-            const playBtn = div.querySelector('.play-song-btn');
-            const delBtn = div.querySelector('.delete-song-btn');
-            
-            playBtn.addEventListener('click', () => playSongById(song.id));
-            delBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (confirm(`Удалить "${song.name}"?`)) {
-                    try {
-                        await deleteSongFromDB(song.id);
-                        if (song.url) URL.revokeObjectURL(song.url);
-                        if (currentSongId === song.id) {
-                            audio.pause();
-                            audio.src = '';
-                            currentTrackSpan.textContent = '—';
-                            currentSongId = null;
-                        }
-                        await loadAllSongsFromDB();
-                        renderSongsList();
-                        showToast(`🗑 Удалено: ${song.name}`);
-                    } catch (e) {
-                        console.error('Ошибка удаления:', e);
+                // 1. Поиск типа договора
+                let contractType = null;
+                const typePatterns = [
+                    { keywords: ['долг', 'займ', 'занять', 'одолжить', 'ссуда', 'кредит'], type: 'loan' },
+                    { keywords: ['продаж', 'купить', 'продать', 'купля', 'покупка', 'приобрести'], type: 'sale' },
+                    { keywords: ['услуг', 'оказание', 'выполнить', 'сделать', 'сервис'], type: 'service' },
+                    { keywords: ['дар', 'подарить', 'безвозмезд'], type: 'gift' },
+                    { keywords: ['аренд', 'снять', 'найм'], type: 'rent' }
+                ];
+                for (let p of typePatterns) {
+                    if (p.keywords.some(kw => lower.includes(kw))) {
+                        contractType = p.type;
+                        break;
                     }
                 }
-            });
-            
-            songsListDiv.appendChild(div);
-        });
-    }
 
-    // ============ ВОСПРОИЗВЕДЕНИЕ ============
-    function playSongById(id) {
-        const song = songs.find(s => s.id === id);
-        if (song && song.url) {
-            audio.src = song.url;
-            audio.load();
-            audio.play().catch(e => console.log('автоплей заблокирован'));
-            currentTrackSpan.textContent = song.name;
-            currentSongId = song.id;
-        }
-    }
+                // 2. Извлечение имён: ищем конструкции "на [Имя Фамилия]" и "с человеком [Имя Фамилия]"
+                // или просто два слова с большой буквы подряд.
+                let party1 = ''; // тот, на кого оформляют (Заимодавец, Продавец и т.д.)
+                let party2 = ''; // второй участник
 
-    // ============ ОЧИСТКА ВСЕГО ============
-    async function clearAllSongs() {
-        if (songs.length === 0) return;
-        if (confirm('Удалить ВСЕ песни из библиотеки?')) {
-            try {
-                await clearAllSongsFromDB();
-                songs.forEach(song => {
-                    if (song.url) URL.revokeObjectURL(song.url);
-                });
-                songs = [];
-                audio.pause();
-                audio.src = '';
-                currentTrackSpan.textContent = '—';
-                currentSongId = null;
-                renderSongsList();
-                showToast('🗑 Все песни удалены');
-            } catch (e) {
-                console.error('Ошибка очистки:', e);
+                // Регулярки для русского имени/фамилии (упрощённо)
+                const nameRegex = /[А-ЯЁ][а-яё]+\s[А-ЯЁ][а-яё]+/g;
+                const names = text.match(nameRegex) || [];
+
+                // Попробуем понять по предлогам
+                const naMatch = lower.match(/на\s+([а-яё]+\s[а-яё]+)/i);
+                const sPersonMatch = lower.match(/с\s+(человеком\s+)?([а-яё]+\s[а-яё]+)/i);
+                const iPersonMatch = lower.match(/я\s+([а-яё]+\s[а-яё]+)/i); // "я Иван Петров"
+
+                if (naMatch) party1 = capitalize(naMatch[1].trim());
+                if (sPersonMatch) party2 = capitalize(sPersonMatch[2].trim());
+                if (!party2 && iPersonMatch) party2 = capitalize(iPersonMatch[1].trim());
+
+                // Если нашли два разных имени через регулярку
+                if (!party1 && names.length >= 2) {
+                    party1 = names[0];
+                    party2 = names[1];
+                } else if (!party1 && names.length === 1) {
+                    party1 = names[0];
+                } else if (!party2 && names.length === 1 && party1 !== names[0]) {
+                    party2 = names[0];
+                }
+
+                // 3. Извлечение суммы
+                let amount = '';
+                // Ищем числа, возможно с пробелами, с валютой
+                const amountRegex = /(\d[\d\s]*)\s*(₽|руб|рублей|р\.|RUB)/i;
+                const amMatch = text.match(amountRegex);
+                if (amMatch) {
+                    amount = amMatch[1].replace(/\s/g, '') + ' ₽';
+                } else {
+                    // просто крупное число
+                    const numMatch = text.match(/(\d[\d\s]{2,})/);
+                    if (numMatch) amount = numMatch[1].replace(/\s/g, '') + ' ₽';
+                }
+
+                return {
+                    contractType: contractType || 'loan', // по умолчанию займ
+                    party1,
+                    party2,
+                    amount: amount || 'не указана'
+                };
             }
-        }
-    }
 
-    // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
+            function capitalize(str) {
+                return str.replace(/(^|\s)\S/g, l => l.toUpperCase());
+            }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
+            // Генерация текста договора на основе шаблона
+            function generateContractText(params) {
+                const today = new Date().toLocaleDateString('ru-RU');
+                const { contractType, party1, party2, amount } = params;
+                let contractTitle = '';
+                let roles = {};
+                let subject = '';
 
-    // ============ ОБРАБОТЧИКИ ============
-    addFileBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
+                switch (contractType) {
+                    case 'loan':
+                        contractTitle = 'ДОГОВОР ЗАЙМА';
+                        roles = { first: 'Заимодавец', second: 'Заемщик' };
+                        subject = `Передача денежных средств в размере ${amount} на условиях возврата.`;
+                        break;
+                    case 'sale':
+                        contractTitle = 'ДОГОВОР КУПЛИ-ПРОДАЖИ';
+                        roles = { first: 'Продавец', second: 'Покупатель' };
+                        subject = `Продажа товара/имущества стоимостью ${amount}.`;
+                        break;
+                    case 'service':
+                        contractTitle = 'ДОГОВОР ОКАЗАНИЯ УСЛУГ';
+                        roles = { first: 'Заказчик', second: 'Исполнитель' };
+                        subject = `Оказание услуг, стоимость которых оценивается в ${amount}.`;
+                        break;
+                    case 'gift':
+                        contractTitle = 'ДОГОВОР ДАРЕНИЯ';
+                        roles = { first: 'Даритель', second: 'Одаряемый' };
+                        subject = `Безвозмездная передача имущества/денежных средств в размере ${amount}.`;
+                        break;
+                    case 'rent':
+                        contractTitle = 'ДОГОВОР АРЕНДЫ';
+                        roles = { first: 'Арендодатель', second: 'Арендатор' };
+                        subject = `Аренда имущества с ежемесячной платой ${amount}.`;
+                        break;
+                    default:
+                        contractTitle = 'ДОГОВОР';
+                        roles = { first: 'Сторона 1', second: 'Сторона 2' };
+                        subject = `Соглашение на сумму ${amount}.`;
+                }
 
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            addSongFromFile(e.target.files[0]);
-            fileInput.value = '';
-        }
-    });
+                return `
+        ${contractTitle}
+        г. ______________                               «${today}»
 
-    clearAllBtn.addEventListener('click', clearAllSongs);
+        Мы, нижеподписавшиеся:
+        ${roles.first}: ${party1 || '__________________________'},
+        ${roles.second}: ${party2 || '__________________________'},
+        заключили настоящий договор о нижеследующем:
 
-    // ============ ЗАПУСК ============
-    async function init() {
-        try {
-            await initDB();
-            await loadAllSongsFromDB();
-            renderSongsList();
-            console.log('✅ Chugur готов, песен загружено:', songs.length);
-        } catch (e) {
-            console.error('Ошибка инициализации:', e);
-        }
-    }
+        1. ПРЕДМЕТ ДОГОВОРА
+        1.1. ${subject}
 
-    init();
-</script>
+        2. УСЛОВИЯ И ОБЯЗАТЕЛЬСТВА
+        2.1. Стороны обязуются выполнять условия настоящего договора добросовестно.
+        2.2. Все споры решаются путём переговоров.
+
+        3. СРОК ДЕЙСТВИЯ
+        3.1. Договор вступает в силу с момента подписания и действует до полного исполнения обязательств.
+
+        4. ПОДПИСИ СТОРОН
+        ${roles.first}: _______________ (${party1 || '__________'})
+        ${roles.second}: _______________ (${party2 || '__________'})
+
+        ---
+        Документ сгенерирован сервисом Chugur Studio (chugur.studio)
+        `.trim();
+            }
+
+            // Основная функция генерации
+            function generateContract() {
+                clearError();
+                const rawText = userInput.value.trim();
+                if (!rawText) {
+                    showError('Пожалуйста, введите описание ситуации.');
+                    return;
+                }
+
+                const params = parseUserInput(rawText);
+                
+                // Проверка: хотя бы одно имя должно быть
+                if (!params.party1 && !params.party2) {
+                    showError('Не удалось определить имена участников. Напишите, например: "на Ивана Иванова, я Петр Петров".');
+                    return;
+                }
+
+                const contractText = generateContractText(params);
+                contractTextDiv.textContent = contractText;
+                outputSection.style.display = 'flex';
+            }
+
+            // Копирование
+            copyBtn.addEventListener('click', async () => {
+                const text = contractTextDiv.textContent;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    alert('Текст договора скопирован в буфер обмена!');
+                } catch (err) {
+                    alert('Не удалось скопировать. Попробуйте выделить и скопировать вручную.');
+                }
+            });
+
+            // Скачивание как .txt
+            downloadBtn.addEventListener('click', () => {
+                const text = contractTextDiv.textContent;
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'dogovor_chugur.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Печать
+            printBtn.addEventListener('click', () => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head><title>Договор — Chugur Studio</title></head>
+                        <body style="font-family: monospace; white-space: pre-wrap; padding: 30px;">
+                            ${contractTextDiv.textContent.replace(/\n/g, '<br>')}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            });
+
+            // Очистка
+            clearBtn.addEventListener('click', () => {
+                userInput.value = '';
+                outputSection.style.display = 'none';
+                clearError();
+            });
+
+            // Запуск по кнопке
+            generateBtn.addEventListener('click', generateContract);
+
+            // Дополнительно: по Ctrl+Enter
+            userInput.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    generateContract();
+                }
+            });
+
+            // Начальное скрытие секции вывода
+            outputSection.style.display = 'none';
+        })();
+    </script>
 </body>
 </html>
