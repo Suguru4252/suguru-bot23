@@ -47,7 +47,6 @@
             margin-top: 6px;
         }
 
-        /* плеер */
         .player-panel {
             padding: 20px;
             background: #111;
@@ -73,7 +72,6 @@
             height: 44px;
         }
 
-        /* панель добавления */
         .add-panel {
             padding: 16px 20px;
             background: #0c0c0c;
@@ -99,7 +97,6 @@
             background: #3a3a3a;
         }
 
-        /* библиотека */
         .library-header {
             display: flex;
             justify-content: space-between;
@@ -212,9 +209,28 @@
             background: #3a3a3a;
         }
 
-        /* скрытый input для выбора файлов */
         #fileInput {
             display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a4a2a;
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            z-index: 999;
+            border: 1px solid #5a8a5a;
+            animation: fadeOut 2s ease-in-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
         }
     </style>
 </head>
@@ -222,7 +238,7 @@
 <div class="app">
     <div class="header">
         <h1>Chugur</h1>
-        <p>Добавляй MP3 через кнопку — слушай что хочешь</p>
+        <p>Добавляй MP3 — сохраняются навсегда (без ограничений)</p>
     </div>
 
     <div class="player-panel">
@@ -236,26 +252,28 @@
     </div>
 
     <div class="library-header">
-        <h3>Мои треки</h3>
+        <h3>Мои треки (сохраняются в IndexedDB — безлимит)</h3>
         <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
     </div>
 
     <div id="songsList" class="songs-list">
-        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл» и выберите музыку из памяти телефона.</div>
+        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл».</div>
     </div>
 
     <div class="footer">
-        🎵 Файлы сохраняются в браузере. Ничего не исчезнет после перезагрузки.
+        🎵 IndexedDB — можно хранить гигабайты музыки. Закрывайте браузер — ничего не пропадёт.
     </div>
 </div>
 
 <input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
 
 <script>
-    // =============== CHUGUR — МУЗЫКАЛЬНЫЙ ПЛЕЕР С ЗАГРУЗКОЙ ФАЙЛОВ ===============
-    let songs = [];  // { id, name, blob, date, url }
+    // =============== CHUGUR — ПЛЕЕР НА INDEXEDDB (БЕЗЛИМИТНЫЙ) ===============
+    let songs = [];
     let currentSongId = null;
-    let nextId = 1;
+    let db = null;
+    const DB_NAME = 'ChugurDB';
+    const STORE_NAME = 'songs';
 
     const audio = document.getElementById('audioPlayer');
     const currentTrackSpan = document.getElementById('currentTrackName');
@@ -264,117 +282,129 @@
     const fileInput = document.getElementById('fileInput');
     const clearAllBtn = document.getElementById('clearAllBtn');
 
-    // Загрузка из localStorage (только метаданные, blob-ы хранятся отдельно)
-    function loadFromStorage() {
-        const saved = localStorage.getItem('chugur_songs_meta');
-        if (saved) {
-            try {
-                const meta = JSON.parse(saved);
-                songs = [];
-                nextId = 1;
-                for (let item of meta) {
-                    // восстанавливаем blob из сохранённого base64
-                    if (item.blobData) {
-                        const byteCharacters = atob(item.blobData);
-                        const byteNumbers = new Array(byteCharacters.length);
-                        for (let i = 0; i < byteCharacters.length; i++) {
-                            byteNumbers[i] = byteCharacters.charCodeAt(i);
-                        }
-                        const byteArray = new Uint8Array(byteNumbers);
-                        const blob = new Blob([byteArray], { type: 'audio/mpeg' });
-                        songs.push({
-                            id: item.id,
-                            name: item.name,
-                            date: item.date,
-                            blob: blob,
-                            url: URL.createObjectURL(blob)
-                        });
-                        if (item.id >= nextId) nextId = item.id + 1;
-                    }
+    // ============ ИНИЦИАЛИЗАЦИЯ INDEXEDDB ============
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            
+            request.onerror = () => reject(request.error);
+            
+            request.onsuccess = () => {
+                db = request.result;
+                resolve(db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const dbRef = event.target.result;
+                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
+                    const store = dbRef.createObjectStore(STORE_NAME, { 
+                        keyPath: 'id', 
+                        autoIncrement: true 
+                    });
+                    store.createIndex('name', 'name', { unique: false });
                 }
-                renderSongsList();
-            } catch(e) { console.warn(e); }
-        }
-    }
-
-    function saveToStorage() {
-        const meta = songs.map(song => ({
-            id: song.id,
-            name: song.name,
-            date: song.date,
-            blobData: blobToBase64(song.blob)
-        }));
-        localStorage.setItem('chugur_songs_meta', JSON.stringify(meta));
-    }
-
-    function blobToBase64(blob) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(blob);
+            };
         });
     }
 
-    // Сохранение с асинхронным преобразованием
-    async function syncStorage() {
-        const meta = [];
-        for (let song of songs) {
-            const base64 = await blobToBase64(song.blob);
-            meta.push({
-                id: song.id,
-                name: song.name,
-                date: song.date,
-                blobData: base64
-            });
-        }
-        localStorage.setItem('chugur_songs_meta', JSON.stringify(meta));
+    // ============ СОХРАНЕНИЕ ПЕСНИ В INDEXEDDB ============
+    function saveSongToDB(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const blob = e.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const songData = {
+                    name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
+                    date: new Date().toLocaleString(),
+                    blob: blob,
+                    mimeType: file.type || 'audio/mpeg'
+                };
+                
+                const request = store.add(songData);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+        });
     }
 
-    // Добавление файла
-    function addSongFromFile(file) {
-        if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
+    // ============ ЗАГРУЗКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
+    function loadAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                const results = request.result;
+                songs = [];
+                for (let item of results) {
+                    const blob = new Blob([item.blob], { type: item.mimeType || 'audio/mpeg' });
+                    const url = URL.createObjectURL(blob);
+                    songs.push({
+                        id: item.id,
+                        name: item.name,
+                        date: item.date,
+                        blob: blob,
+                        url: url
+                    });
+                }
+                resolve(songs);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ УДАЛЕНИЕ ПЕСНИ ИЗ INDEXEDDB ============
+    function deleteSongFromDB(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ ОЧИСТКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
+    function clearAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ ДОБАВЛЕНИЕ ПЕСНИ (через интерфейс) ============
+    async function addSongFromFile(file) {
+        if (!file.type.includes('audio') && !file.name.match(/\.(mp3|m4a|aac|ogg|wav)$/i)) {
             alert('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)');
             return;
         }
 
-        const blob = file.slice(0, file.size, file.type);
-        const url = URL.createObjectURL(blob);
-        
-        const newSong = {
-            id: nextId++,
-            name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
-            date: new Date().toLocaleString(),
-            blob: blob,
-            url: url
-        };
-        
-        songs.unshift(newSong);
-        renderSongsList();
-        syncStorage();
-        
-        // маленькое уведомление
-        const msg = document.createElement('div');
-        msg.textContent = `✓ Добавлено: ${newSong.name}`;
-        msg.style.position = 'fixed';
-        msg.style.bottom = '20px';
-        msg.style.left = '50%';
-        msg.style.transform = 'translateX(-50%)';
-        msg.style.backgroundColor = '#2a4a2a';
-        msg.style.color = 'white';
-        msg.style.padding = '8px 20px';
-        msg.style.fontSize = '12px';
-        msg.style.zIndex = '999';
-        msg.style.borderRadius = '0';
-        msg.style.border = '1px solid #5a8a5a';
-        document.body.appendChild(msg);
-        setTimeout(() => msg.remove(), 2000);
+        try {
+            const id = await saveSongToDB(file);
+            await loadAllSongsFromDB();
+            renderSongsList();
+            showToast(`✓ Добавлено: ${file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, '')}`);
+        } catch (e) {
+            console.error('Ошибка сохранения:', e);
+            alert('Не удалось сохранить песню. Возможно, закончилось место.');
+        }
     }
 
+    // ============ ОТРИСОВКА ПЛЕЙЛИСТА ============
     function renderSongsList() {
         if (!songsListDiv) return;
         
         if (songs.length === 0) {
-            songsListDiv.innerHTML = '<div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл» и выберите музыку из памяти телефона.</div>';
+            songsListDiv.innerHTML = '<div class="empty-message">🎵 Нет треков. Нажмите «Добавить MP3 файл».</div>';
             return;
         }
         
@@ -400,17 +430,21 @@
             delBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm(`Удалить "${song.name}"?`)) {
-                    // очищаем URL
-                    if (song.url) URL.revokeObjectURL(song.url);
-                    songs = songs.filter(s => s.id !== song.id);
-                    if (currentSongId === song.id) {
-                        audio.pause();
-                        audio.src = '';
-                        currentTrackSpan.textContent = '—';
-                        currentSongId = null;
+                    try {
+                        await deleteSongFromDB(song.id);
+                        if (song.url) URL.revokeObjectURL(song.url);
+                        if (currentSongId === song.id) {
+                            audio.pause();
+                            audio.src = '';
+                            currentTrackSpan.textContent = '—';
+                            currentSongId = null;
+                        }
+                        await loadAllSongsFromDB();
+                        renderSongsList();
+                        showToast(`🗑 Удалено: ${song.name}`);
+                    } catch (e) {
+                        console.error('Ошибка удаления:', e);
                     }
-                    renderSongsList();
-                    await syncStorage();
                 }
             });
             
@@ -418,36 +452,47 @@
         });
     }
 
+    // ============ ВОСПРОИЗВЕДЕНИЕ ============
     function playSongById(id) {
         const song = songs.find(s => s.id === id);
         if (song && song.url) {
             audio.src = song.url;
             audio.load();
-            audio.play().catch(e => {
-                console.log('автоплей заблокирован');
-            });
+            audio.play().catch(e => console.log('автоплей заблокирован'));
             currentTrackSpan.textContent = song.name;
             currentSongId = song.id;
-        } else {
-            alert('Не удалось воспроизвести файл');
         }
     }
 
-    function clearAllSongs() {
+    // ============ ОЧИСТКА ВСЕГО ============
+    async function clearAllSongs() {
         if (songs.length === 0) return;
         if (confirm('Удалить ВСЕ песни из библиотеки?')) {
-            // очищаем все URL объекты
-            songs.forEach(song => {
-                if (song.url) URL.revokeObjectURL(song.url);
-            });
-            songs = [];
-            audio.pause();
-            audio.src = '';
-            currentTrackSpan.textContent = '—';
-            currentSongId = null;
-            renderSongsList();
-            localStorage.removeItem('chugur_songs_meta');
+            try {
+                await clearAllSongsFromDB();
+                songs.forEach(song => {
+                    if (song.url) URL.revokeObjectURL(song.url);
+                });
+                songs = [];
+                audio.pause();
+                audio.src = '';
+                currentTrackSpan.textContent = '—';
+                currentSongId = null;
+                renderSongsList();
+                showToast('🗑 Все песни удалены');
+            } catch (e) {
+                console.error('Ошибка очистки:', e);
+            }
         }
+    }
+
+    // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
     }
 
     function escapeHtml(str) {
@@ -459,7 +504,7 @@
         });
     }
 
-    // Обработчики
+    // ============ ОБРАБОТЧИКИ ============
     addFileBtn.addEventListener('click', () => {
         fileInput.click();
     });
@@ -467,14 +512,25 @@
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             addSongFromFile(e.target.files[0]);
-            fileInput.value = ''; // чтобы можно было выбрать тот же файл снова
+            fileInput.value = '';
         }
     });
 
     clearAllBtn.addEventListener('click', clearAllSongs);
 
-    // Загрузка при старте
-    loadFromStorage();
+    // ============ ЗАПУСК ============
+    async function init() {
+        try {
+            await initDB();
+            await loadAllSongsFromDB();
+            renderSongsList();
+            console.log('✅ Chugur готов, песен загружено:', songs.length);
+        } catch (e) {
+            console.error('Ошибка инициализации:', e);
+        }
+    }
+
+    init();
 </script>
 </body>
-</html>и
+</html>
