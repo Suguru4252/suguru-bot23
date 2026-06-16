@@ -93,7 +93,7 @@
         <div class="chat-messages" id="messages">
             <div class="message ai">
                 <div class="avatar">🧠</div>
-                <div class="bubble">Привет! Я ChugurAI. Спрашивай что угодно.</div>
+                <div class="bubble">Привет! Я ChugurAI. Работаю через ProxyAPI.</div>
             </div>
         </div>
         <div class="chat-input-area">
@@ -102,7 +102,7 @@
         </div>
     </div>
     <script>
-        const CHUGUR_AI_KEY = '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';
+        const PROXY_API_KEY = 'sk-tmKXt9W2ygVWbFJVl9y4Yg97SycvqIPJ';
 
         const messagesDiv = document.getElementById('messages');
         const userInput = document.getElementById('userInput');
@@ -143,11 +143,11 @@
             userInput.value = '';
             addTyping();
             try {
-                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                const res = await fetch('https://api.proxyapi.ru/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CHUGUR_AI_KEY}`
+                        'Authorization': `Bearer ${PROXY_API_KEY}`
                     },
                     body: JSON.stringify({
                         model: 'gpt-3.5-turbo',
@@ -160,7 +160,7 @@
                 if (data.choices && data.choices.length) {
                     addMessage(data.choices[0].message.content.trim(), 'ai');
                 } else {
-                    addMessage('⚠️ Ошибка ответа от API.', 'ai');
+                    addMessage('⚠️ Ошибка ответа от ProxyAPI.', 'ai');
                 }
             } catch (e) {
                 removeTyping();
