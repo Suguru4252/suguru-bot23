@@ -2,179 +2,535 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChugurAI — Нейросеть</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Chugur — Music Player</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #111; color: #eee;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0;
+            background: #0f0f0f;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #eee;
         }
-        .chat-container {
-            width: 100%; max-width: 700px; height: 90vh;
-            background: #1a1a1a; border-radius: 20px;
-            display: flex; flex-direction: column;
-            box-shadow: 0 0 30px rgba(0,0,0,0.6);
-            overflow: hidden;
+
+        .app {
+            max-width: 550px;
+            width: 100%;
+            background: #151515;
+            border: 1px solid #2a2a2a;
         }
-        .chat-header {
-            background: #222; padding: 16px 20px;
-            border-bottom: 1px solid #333;
-            display: flex; align-items: center; gap: 12px;
+
+        .header {
+            padding: 20px 24px 8px 24px;
+            border-bottom: 1px solid #222;
         }
-        .chat-header .logo {
-            font-weight: 700; font-size: 1.2rem;
-            background: linear-gradient(135deg, #a78bfa, #60a5fa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: #fff;
         }
-        .chat-header .badge {
-            font-size: 0.7rem; background: #333; color: #aaa;
-            padding: 3px 10px; border-radius: 12px;
+
+        .header p {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 6px;
         }
-        .chat-messages {
-            flex: 1; overflow-y: auto; padding: 20px;
-            display: flex; flex-direction: column; gap: 16px;
+
+        .player-panel {
+            padding: 20px;
+            background: #111;
+            border-bottom: 1px solid #222;
         }
-        .message {
-            display: flex; gap: 10px; max-width: 90%;
+
+        .current-label {
+            font-size: 0.65rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .message.user { align-self: flex-end; flex-direction: row-reverse; }
-        .message.ai { align-self: flex-start; }
-        .avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; flex-shrink: 0;
+
+        .current-track {
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 8px 0 16px;
+            word-break: break-word;
         }
-        .user .avatar { background: #333; }
-        .ai .avatar { background: #1f1f1f; border: 1px solid #444; }
-        .bubble {
-            padding: 12px 16px; border-radius: 18px;
-            line-height: 1.5; font-size: 14px;
+
+        audio {
+            width: 100%;
+            height: 44px;
         }
-        .user .bubble { background: #2563eb; color: white; border-bottom-right-radius: 6px; }
-        .ai .bubble { background: #262626; color: #ddd; border-bottom-left-radius: 6px; }
-        .chat-input-area {
-            padding: 14px 20px; border-top: 1px solid #333;
-            display: flex; gap: 10px;
+
+        .add-panel {
+            padding: 16px 20px;
+            background: #0c0c0c;
+            border-bottom: 1px solid #222;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .chat-input-area textarea {
-            flex: 1; background: #222; border: 1px solid #444;
-            border-radius: 14px; padding: 12px 16px; color: #eee;
-            font-size: 14px; resize: none; outline: none;
-            font-family: inherit;
+
+        .add-file-btn {
+            background: #2a2a2a;
+            border: 1px solid #4a4a4a;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #ddd;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
         }
-        .chat-input-area textarea:focus { border-color: #a78bfa; }
-        .chat-input-area button {
-            background: #a78bfa; color: #111; border: none;
-            border-radius: 14px; padding: 12px 18px; font-weight: 600;
-            cursor: pointer; transition: 0.2s; font-size: 14px;
+
+        .add-file-btn:hover {
+            background: #3a3a3a;
         }
-        .chat-input-area button:hover { background: #c4b5fd; }
-        .typing { display: flex; align-items: center; gap: 6px; padding: 10px 16px; }
-        .typing span {
-            width: 8px; height: 8px; background: #555; border-radius: 50%;
-            animation: type 1.4s infinite ease-in-out;
+
+        .library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 18px 24px 8px 24px;
         }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes type { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
-        .error { color: #f87171; font-size: 0.8rem; }
+
+        .library-header h3 {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #aaa;
+            letter-spacing: 0.5px;
+        }
+
+        .clear-btn {
+            background: none;
+            border: 1px solid #3a2a28;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            color: #b88a7a;
+            cursor: pointer;
+        }
+
+        .songs-list {
+            padding: 16px 20px 24px 20px;
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .song-item {
+            background: #121212;
+            border: 1px solid #252525;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .song-item:hover {
+            background: #1a1a1a;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .song-date {
+            font-size: 0.6rem;
+            color: #6a6a6a;
+            margin-top: 4px;
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .play-song-btn, .delete-song-btn {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        .play-song-btn:hover {
+            background: #3a4a3a;
+        }
+
+        .delete-song-btn:hover {
+            background: #4a2a2a;
+            border-color: #aa5a42;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #5a5a5a;
+            padding: 40px;
+            font-size: 0.8rem;
+            border: 1px dashed #2a2a2a;
+        }
+
+        .footer {
+            padding: 12px 20px;
+            border-top: 1px solid #1f1f1f;
+            font-size: 0.6rem;
+            color: #6f6f6f;
+            text-align: center;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a4a2a;
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            z-index: 999;
+            border: 1px solid #5a8a5a;
+            animation: fadeOut 2s ease-in-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <span class="logo">ChugurAI</span>
-            <span class="badge">by Chugur Studio</span>
-        </div>
-        <div class="chat-messages" id="messages">
-            <div class="message ai">
-                <div class="avatar">🧠</div>
-                <div class="bubble">Привет! Я ChugurAI. Работаю через ProxyAPI.</div>
-            </div>
-        </div>
-        <div class="chat-input-area">
-            <textarea id="userInput" rows="1" placeholder="Напиши сообщение..."></textarea>
-            <button id="sendBtn">→</button>
-        </div>
+<div class="app">
+    <div class="header">
+        <h1>Chugur</h1>
+        <p>Добавляй MP3 — сохраняются навсегда (без ограничений)</p>
     </div>
-    <script>
-        const PROXY_API_KEY = 'sk-tmKXt9W2ygVWbFJVl9y4Yg97SycvqIPJ';
 
-        const messagesDiv = document.getElementById('messages');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
+    <div class="player-panel">
+        <div class="current-label">Сейчас играет</div>
+        <div class="current-track" id="currentTrackName">—</div>
+        <audio id="audioPlayer" controls preload="metadata"></audio>
+    </div>
 
-        function addMessage(text, role) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message ' + role;
-            msgDiv.innerHTML = `
-                <div class="avatar">${role === 'user' ? '👤' : '🧠'}</div>
-                <div class="bubble">${text}</div>
-            `;
-            messagesDiv.appendChild(msgDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+    <div class="add-panel">
+        <button id="addFileBtn" class="add-file-btn">📁 Добавить MP3 файл</button>
+    </div>
 
-        function addTyping() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message ai';
-            typingDiv.innerHTML = `
-                <div class="avatar">🧠</div>
-                <div class="bubble typing"><span></span><span></span><span></span></div>
-            `;
-            typingDiv.id = 'typingIndicator';
-            messagesDiv.appendChild(typingDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+    <div class="library-header">
+        <h3>Мои треки (сохраняются в IndexedDB — безлимит)</h3>
+        <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
+    </div>
 
-        function removeTyping() {
-            const t = document.getElementById('typingIndicator');
-            if (t) t.remove();
-        }
+    <div id="songsList" class="songs-list">
+        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл».</div>
+    </div>
 
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
-            addMessage(text, 'user');
-            userInput.value = '';
-            addTyping();
-            try {
-                const res = await fetch('https://api.proxyapi.ru/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${PROXY_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: text }],
-                        temperature: 0.8
-                    })
-                });
-                const data = await res.json();
-                removeTyping();
-                if (data.choices && data.choices.length) {
-                    addMessage(data.choices[0].message.content.trim(), 'ai');
-                } else {
-                    addMessage('⚠️ Ошибка ответа от ProxyAPI.', 'ai');
+    <div class="footer">
+        🎵 IndexedDB — можно хранить гигабайты музыки. Закрывайте браузер — ничего не пропадёт.
+    </div>
+</div>
+
+<input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
+
+<script>
+    // =============== CHUGUR — ПЛЕЕР НА INDEXEDDB (БЕЗЛИМИТНЫЙ) ===============
+    let songs = [];
+    let currentSongId = null;
+    let db = null;
+    const DB_NAME = 'ChugurDB';
+    const STORE_NAME = 'songs';
+
+    const audio = document.getElementById('audioPlayer');
+    const currentTrackSpan = document.getElementById('currentTrackName');
+    const songsListDiv = document.getElementById('songsList');
+    const addFileBtn = document.getElementById('addFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    // ============ ИНИЦИАЛИЗАЦИЯ INDEXEDDB ============
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            
+            request.onerror = () => reject(request.error);
+            
+            request.onsuccess = () => {
+                db = request.result;
+                resolve(db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const dbRef = event.target.result;
+                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
+                    const store = dbRef.createObjectStore(STORE_NAME, { 
+                        keyPath: 'id', 
+                        autoIncrement: true 
+                    });
+                    store.createIndex('name', 'name', { unique: false });
                 }
-            } catch (e) {
-                removeTyping();
-                addMessage('⚠️ Ошибка соединения: ' + e.message, 'ai');
-            }
+            };
+        });
+    }
+
+    // ============ СОХРАНЕНИЕ ПЕСНИ В INDEXEDDB ============
+    function saveSongToDB(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const blob = e.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const songData = {
+                    name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
+                    date: new Date().toLocaleString(),
+                    blob: blob,
+                    mimeType: file.type || 'audio/mpeg'
+                };
+                
+                const request = store.add(songData);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // ============ ЗАГРУЗКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
+    function loadAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                const results = request.result;
+                songs = [];
+                for (let item of results) {
+                    const blob = new Blob([item.blob], { type: item.mimeType || 'audio/mpeg' });
+                    const url = URL.createObjectURL(blob);
+                    songs.push({
+                        id: item.id,
+                        name: item.name,
+                        date: item.date,
+                        blob: blob,
+                        url: url
+                    });
+                }
+                resolve(songs);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ УДАЛЕНИЕ ПЕСНИ ИЗ INDEXEDDB ============
+    function deleteSongFromDB(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ ОЧИСТКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
+    function clearAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ ДОБАВЛЕНИЕ ПЕСНИ (через интерфейс) ============
+    async function addSongFromFile(file) {
+        if (!file.type.includes('audio') && !file.name.match(/\.(mp3|m4a|aac|ogg|wav)$/i)) {
+            alert('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)');
+            return;
         }
 
-        sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+        try {
+            const id = await saveSongToDB(file);
+            await loadAllSongsFromDB();
+            renderSongsList();
+            showToast(`✓ Добавлено: ${file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, '')}`);
+        } catch (e) {
+            console.error('Ошибка сохранения:', e);
+            alert('Не удалось сохранить песню. Возможно, закончилось место.');
+        }
+    }
+
+    // ============ ОТРИСОВКА ПЛЕЙЛИСТА ============
+    function renderSongsList() {
+        if (!songsListDiv) return;
+        
+        if (songs.length === 0) {
+            songsListDiv.innerHTML = '<div class="empty-message">🎵 Нет треков. Нажмите «Добавить MP3 файл».</div>';
+            return;
+        }
+        
+        songsListDiv.innerHTML = '';
+        songs.forEach(song => {
+            const div = document.createElement('div');
+            div.className = 'song-item';
+            div.innerHTML = `
+                <div class="song-info">
+                    <div class="song-title">${escapeHtml(song.name)}</div>
+                    <div class="song-date">${song.date}</div>
+                </div>
+                <div class="song-actions">
+                    <button class="play-song-btn" data-id="${song.id}">▶</button>
+                    <button class="delete-song-btn" data-id="${song.id}">🗑</button>
+                </div>
+            `;
+            
+            const playBtn = div.querySelector('.play-song-btn');
+            const delBtn = div.querySelector('.delete-song-btn');
+            
+            playBtn.addEventListener('click', () => playSongById(song.id));
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(`Удалить "${song.name}"?`)) {
+                    try {
+                        await deleteSongFromDB(song.id);
+                        if (song.url) URL.revokeObjectURL(song.url);
+                        if (currentSongId === song.id) {
+                            audio.pause();
+                            audio.src = '';
+                            currentTrackSpan.textContent = '—';
+                            currentSongId = null;
+                        }
+                        await loadAllSongsFromDB();
+                        renderSongsList();
+                        showToast(`🗑 Удалено: ${song.name}`);
+                    } catch (e) {
+                        console.error('Ошибка удаления:', e);
+                    }
+                }
+            });
+            
+            songsListDiv.appendChild(div);
         });
-    </script>
+    }
+
+    // ============ ВОСПРОИЗВЕДЕНИЕ ============
+    function playSongById(id) {
+        const song = songs.find(s => s.id === id);
+        if (song && song.url) {
+            audio.src = song.url;
+            audio.load();
+            audio.play().catch(e => console.log('автоплей заблокирован'));
+            currentTrackSpan.textContent = song.name;
+            currentSongId = song.id;
+        }
+    }
+
+    // ============ ОЧИСТКА ВСЕГО ============
+    async function clearAllSongs() {
+        if (songs.length === 0) return;
+        if (confirm('Удалить ВСЕ песни из библиотеки?')) {
+            try {
+                await clearAllSongsFromDB();
+                songs.forEach(song => {
+                    if (song.url) URL.revokeObjectURL(song.url);
+                });
+                songs = [];
+                audio.pause();
+                audio.src = '';
+                currentTrackSpan.textContent = '—';
+                currentSongId = null;
+                renderSongsList();
+                showToast('🗑 Все песни удалены');
+            } catch (e) {
+                console.error('Ошибка очистки:', e);
+            }
+        }
+    }
+
+    // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ============ ОБРАБОТЧИКИ ============
+    addFileBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            addSongFromFile(e.target.files[0]);
+            fileInput.value = '';
+        }
+    });
+
+    clearAllBtn.addEventListener('click', clearAllSongs);
+
+    // ============ ЗАПУСК ============
+    async function init() {
+        try {
+            await initDB();
+            await loadAllSongsFromDB();
+            renderSongsList();
+            console.log('✅ Chugur готов, песен загружено:', songs.length);
+        } catch (e) {
+            console.error('Ошибка инициализации:', e);
+        }
+    }
+
+    init();
+</script>
 </body>
 </html>
