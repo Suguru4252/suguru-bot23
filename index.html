@@ -1,95 +1,393 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-import matplotlib.patches as patches
-from matplotlib.path import Path
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ШЁПОТЫ В ТЕМНОТЕ • HORROR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=VT323&display=swap');
+        
+        body {
+            font-family: 'VT323', monospace;
+            background: #000;
+            color: #ff3333;
+            overflow: hidden;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            animation: flicker 0.15s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        .room {
+            background-size: cover;
+            background-position: center;
+            transition: all 0.6s ease;
+        }
+        
+        .text-glow {
+            text-shadow: 0 0 10px #ff0000,
+                        0 0 20px #ff0000,
+                        0 0 40px #990000;
+        }
+        
+        .monster {
+            animation: shake 0.5s infinite;
+        }
+        
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 2px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    
+    <!-- Главный контейнер -->
+    <div id="game" class="w-full max-w-4xl mx-auto border-4 border-red-700 bg-black shadow-2xl overflow-hidden">
+        
+        <!-- Заголовок -->
+        <div class="bg-red-950 border-b-4 border-red-700 p-4 text-center">
+            <h1 class="text-6xl text-red-500 tracking-widest text-glow" style="font-family: 'Creepster', cursive;">
+                ШЁПОТЫ В ТЕМНОТЕ
+            </h1>
+            <p class="text-red-400 text-xl mt-1">Ты не один...</p>
+        </div>
+        
+        <!-- Экран игры -->
+        <div id="screen" class="relative h-[520px] room flex flex-col" style="background-image: url('https://picsum.photos/id/1015/1200/600');">
+            
+            <!-- Статус -->
+            <div class="absolute top-4 left-4 bg-black/80 px-4 py-2 border border-red-700">
+                <span id="health" class="text-green-400">❤️ Здоровье: 100</span>
+            </div>
+            
+            <!-- Лог -->
+            <div id="log" class="absolute top-4 right-4 w-80 bg-black/90 p-3 border border-red-700 text-sm h-48 overflow-y-auto text-red-300 font-mono leading-tight">
+            </div>
+            
+            <!-- Основной текст -->
+            <div id="main-text" class="flex-1 flex items-center justify-center p-8 text-center text-2xl leading-relaxed text-red-100 bg-black/60">
+            </div>
+            
+            <!-- Изображение сущности -->
+            <div id="monster-container" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 hidden">
+                <img id="monster-img" src="https://picsum.photos/id/1016/300/300" class="monster w-64 h-64 object-cover border-4 border-red-600 rounded-full shadow-2xl" style="filter: brightness(0.6) contrast(1.3);">
+            </div>
+        </div>
+        
+        <!-- Панель действий -->
+        <div id="actions" class="grid grid-cols-2 gap-2 p-6 bg-zinc-950 border-t-4 border-red-700">
+            <!-- Кнопки будут добавляться JS -->
+        </div>
+        
+        <!-- Нижняя панель -->
+        <div class="bg-black p-3 flex justify-between items-center text-xs text-red-500 border-t border-red-900">
+            <div>📍 <span id="location">Вход в особняк</span></div>
+            <div class="flex gap-6">
+                <button onclick="toggleSound()" id="sound-btn" class="hover:text-white">🔊 ЗВУК ВКЛ</button>
+                <button onclick="restartGame()" class="hover:text-white">⟳ НАЧАТЬ ЗАНОВО</button>
+            </div>
+        </div>
+    </div>
 
-# Создаем фигуру
-fig, ax = plt.subplots(figsize=(10, 8))
-ax.set_xlim(0, 10)
-ax.set_ylim(0, 10)
-ax.set_aspect('equal')
-ax.set_facecolor('#f0f8f0')  # Легкий зеленый фон
+    <!-- Аудио элементы -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"> <!-- заменить на horror ambient при желании -->
+    </audio>
+    <audio id="heartbeat" loop>
+        <source src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="scream" preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="door" preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="whisper" preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg">
+    </audio>
 
-# Кактус в центре
-def draw_cactus(x, y):
-    # Ствол
-    ax.add_patch(patches.Rectangle((x-0.3, y), 0.6, 3, facecolor='#2e8b57', edgecolor='darkgreen'))
-    # Руки кактуса
-    ax.add_patch(patches.Rectangle((x-1.2, y+1.2), 0.8, 1.5, facecolor='#2e8b57', edgecolor='darkgreen'))
-    ax.add_patch(patches.Rectangle((x+0.4, y+1.5), 0.8, 1.2, facecolor='#2e8b57', edgecolor='darkgreen'))
-    # Колючки
-    for i in range(5):
-        ax.plot([x-0.4, x-0.6], [y+0.5+i*0.5, y+0.6+i*0.5], 'k-', lw=1)
-        ax.plot([x+0.4, x+0.6], [y+0.5+i*0.5, y+0.6+i*0.5], 'k-', lw=1)
-
-draw_cactus(5, 2)
-
-# Простые слоны (используем круги + треугольники)
-def draw_elephant(x, y, color='gray', angle=0):
-    # Тело
-    body = patches.Ellipse((x, y), 1.8, 1.2, angle=angle, facecolor=color, edgecolor='black', lw=2)
-    ax.add_patch(body)
-    
-    # Голова
-    head = patches.Circle((x+0.9, y+0.3), 0.7, facecolor=color, edgecolor='black', lw=2)
-    ax.add_patch(head)
-    
-    # Хобот
-    trunk_path = Path([(x+1.5, y+0.2), (x+2.0, y-0.3), (x+2.1, y-0.6)],
-                      [Path.MOVETO, Path.CURVE3, Path.CURVE3])
-    trunk = patches.PathPatch(trunk_path, facecolor='none', edgecolor='black', lw=4)
-    ax.add_patch(trunk)
-    
-    # Ухо
-    ear = patches.Ellipse((x+0.6, y+0.7), 0.6, 0.8, angle=30, facecolor=color, edgecolor='black')
-    ax.add_patch(ear)
-    
-    # Ноги
-    ax.add_patch(patches.Rectangle((x-0.6, y-0.7), 0.4, 0.8, facecolor=color, edgecolor='black'))
-    ax.add_patch(patches.Rectangle((x+0.2, y-0.7), 0.4, 0.8, facecolor=color, edgecolor='black'))
-    
-    # Глаз
-    ax.plot(x+1.2, y+0.4, 'ko', markersize=6)
-    ax.plot(x+1.25, y+0.42, 'wo', markersize=3)
-
-# Два слона
-ele1_x, ele1_y = [], []
-ele2_x, ele2_y = [], []
-
-def animate(frame):
-    ax.clear()
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 10)
-    ax.set_aspect('equal')
-    ax.set_facecolor('#f0f8f0')
-    
-    # Перерисовываем кактус
-    draw_cactus(5, 2)
-    
-    # Слон 1 бегает по кругу (радиус 3.5)
-    angle1 = frame * 0.08
-    x1 = 5 + 3.5 * np.cos(angle1)
-    y1 = 4.5 + 3.5 * np.sin(angle1) * 0.7  # немного овальный круг
-    draw_elephant(x1, y1, color='#808080', angle=np.degrees(angle1) + 90)
-    
-    # Слон 2 бегает по другому кругу (радиус 4.2, в противоположную сторону)
-    angle2 = -frame * 0.06 + np.pi
-    x2 = 5 + 4.2 * np.cos(angle2)
-    y2 = 4.5 + 4.2 * np.sin(angle2) * 0.7
-    draw_elephant(x2, y2, color='#696969', angle=np.degrees(angle2) + 90)
-    
-    # Текст
-    ax.text(5, 9.2, 'Два слона бегают вокруг кактуса!', ha='center', fontsize=14, fontweight='bold')
-    
-    # Следы/пыль (простые точки)
-    if frame > 5:
-        ax.scatter([x1-1.5, x2-1.5], [y1-0.8, y2-0.8], c='brown', s=40, alpha=0.4)
-
-ani = FuncAnimation(fig, animate, frames=180, interval=50, repeat=True)
-
-# Сохраняем видео
-ani.save('elephants_around_cactus.mp4', writer='ffmpeg', fps=20, dpi=120)
-
-print("Видео успешно создано: elephants_around_cactus.mp4")
-plt.close()
+    <script>
+        // === ДАННЫЕ ИГРЫ ===
+        let currentRoom = 0;
+        let health = 100;
+        let inventory = [];
+        let gameOver = false;
+        let soundEnabled = true;
+        
+        const rooms = [
+            {
+                id: 0,
+                name: "Вход в особняк",
+                desc: "Тяжёлые дубовые двери за тобой с грохотом захлопнулись. В воздухе висит густая пыль. Где-то наверху раздаётся тихий детский смех...",
+                img: "https://picsum.photos/id/1015/1200/600",
+                actions: [
+                    { text: "Осмотреть холл", next: () => enterRoom(1) },
+                    { text: "Подняться по лестнице", next: () => enterRoom(2) },
+                    { text: "Пойти в подвал", next: () => enterRoom(3) }
+                ]
+            },
+            {
+                id: 1,
+                name: "Холл особняка",
+                desc: "На стенах висят старые портреты. Глаза на них следят за тобой. На полу — свежие кровавые следы.",
+                img: "https://picsum.photos/id/201/1200/600",
+                actions: [
+                    { text: "Взять старый ключ", next: () => { addToInventory("Ключ"); log("Ты взял ржавый ключ."); playSound('door'); } },
+                    { text: "Открыть дверь в библиотеку", next: () => enterRoom(4) },
+                    { text: "Вернуться ко входу", next: () => enterRoom(0) }
+                ]
+            },
+            {
+                id: 2,
+                name: "Верхний этаж",
+                desc: "Коридор тянется в темноту. Внезапно свет мигает... Ты слышишь шаги прямо за спиной.",
+                img: "https://picsum.photos/id/133/1200/600",
+                actions: [
+                    { text: "Бежать в спальню", next: () => enterRoom(5) },
+                    { text: "Проверить комнату ребёнка", next: () => jumpScare() },
+                    { text: "Сбежать вниз", next: () => enterRoom(1) }
+                ]
+            },
+            {
+                id: 3,
+                name: "Подвал",
+                desc: "Здесь очень холодно. В углу стоит старый холодильник, из которого капает... что-то красное.",
+                img: "https://picsum.photos/id/160/1200/600",
+                actions: [
+                    { text: "Открыть холодильник", next: () => badEnd("Ты открыл холодильник. Из него вывалилась отрезанная голова. Здоровье -40") },
+                    { text: "Осмотреть полки", next: () => { log("Ты нашёл фонарик!"); inventory.push("Фонарик"); } },
+                    { text: "Уйти", next: () => enterRoom(0) }
+                ]
+            },
+            {
+                id: 4,
+                name: "Библиотека",
+                desc: "Книги шепчут твоё имя. Одна из книг открыта на странице с твоей фотографией.",
+                img: "https://picsum.photos/id/201/1200/600",
+                actions: [
+                    { text: "Прочитать книгу", next: () => { log("«Оно уже внутри тебя...»"); health -= 15; updateHealth(); } },
+                    { text: "Взять старинный кинжал", next: () => { addToInventory("Кинжал"); log("Оружие теперь у тебя."); } },
+                    { text: "Уйти", next: () => enterRoom(1) }
+                ]
+            },
+            {
+                id: 5,
+                name: "Спальня",
+                desc: "На кровати лежит мёртвая женщина с открытыми глазами. Она смотрит прямо на тебя.",
+                img: "https://picsum.photos/id/251/1200/600",
+                actions: [
+                    { text: "Подойти ближе", next: () => jumpScare() },
+                    { text: "Выбежать из комнаты", next: () => enterRoom(2) }
+                ]
+            }
+        ];
+        
+        function log(text) {
+            const logEl = document.getElementById('log');
+            logEl.innerHTML += `<div class="mb-1">» ${text}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateHealth() {
+            document.getElementById('health').innerHTML = `❤️ Здоровье: ${health}`;
+            if (health <= 30) {
+                document.getElementById('health').classList.add('text-red-500');
+            }
+            if (health <= 0) {
+                badEnd("Ты не выдержал...");
+            }
+        }
+        
+        function addToInventory(item) {
+            if (!inventory.includes(item)) {
+                inventory.push(item);
+                log(`+ ${item}`);
+            }
+        }
+        
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (type === 'heartbeat') {
+                    document.getElementById('heartbeat').play();
+                } else if (type === 'scream') {
+                    document.getElementById('scream').play();
+                } else if (type === 'door') {
+                    document.getElementById('door').play();
+                } else if (type === 'whisper') {
+                    document.getElementById('whisper').play();
+                }
+            } catch(e) {}
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-btn').textContent = soundEnabled ? "🔊 ЗВУК ВКЛ" : "🔇 ЗВУК ВЫКЛ";
+        }
+        
+        function enterRoom(roomId) {
+            if (gameOver) return;
+            currentRoom = roomId;
+            const room = rooms.find(r => r.id === roomId);
+            
+            document.getElementById('location').textContent = room.name;
+            document.getElementById('main-text').innerHTML = `<p class="max-w-2xl">${room.desc}</p>`;
+            document.getElementById('screen').style.backgroundImage = `url('${room.img}')`;
+            
+            // Случайный шёпот
+            if (Math.random() > 0.7) {
+                setTimeout(() => {
+                    log("Ты слышишь шёпот... «Вернись...»");
+                    playSound('whisper');
+                }, 800);
+            }
+            
+            renderActions(room.actions);
+        }
+        
+        function renderActions(actions) {
+            const container = document.getElementById('actions');
+            container.innerHTML = '';
+            
+            actions.forEach(action => {
+                const btn = document.createElement('button');
+                btn.className = "bg-zinc-900 hover:bg-red-950 border border-red-700 py-4 text-xl transition-all active:scale-95";
+                btn.textContent = action.text;
+                btn.onclick = () => {
+                    playSound('door');
+                    action.next();
+                };
+                container.appendChild(btn);
+            });
+        }
+        
+        function jumpScare() {
+            playSound('scream');
+            health -= 35;
+            updateHealth();
+            
+            const monster = document.getElementById('monster-container');
+            monster.classList.remove('hidden');
+            
+            document.getElementById('main-text').innerHTML = `
+                <div class="text-5xl text-red-600 animate-pulse">ОНО ЗДЕСЬ</div>
+            `;
+            
+            setTimeout(() => {
+                monster.classList.add('hidden');
+                if (health > 0) {
+                    log("Существо исчезло... пока.");
+                    enterRoom(currentRoom);
+                }
+            }, 1200);
+        }
+        
+        function badEnd(message) {
+            gameOver = true;
+            document.getElementById('main-text').innerHTML = `
+                <div class="text-center">
+                    <div class="text-6xl mb-6 text-red-600">💀 ТЫ МЁРТВ 💀</div>
+                    <p class="text-2xl">${message}</p>
+                    <button onclick="restartGame()" class="mt-10 px-8 py-4 bg-red-700 hover:bg-red-600 text-2xl">ИГРАТЬ СНОВА</button>
+                </div>
+            `;
+            document.getElementById('actions').innerHTML = '';
+            playSound('scream');
+        }
+        
+        function goodEnd() {
+            gameOver = true;
+            document.getElementById('main-text').innerHTML = `
+                <div class="text-center">
+                    <div class="text-6xl mb-6 text-green-500">☀️ ТЫ ВЫЖИЛ ☀️</div>
+                    <p class="text-2xl">Ты выбрался из особняка... но оно всё ещё следует за тобой.</p>
+                    <button onclick="restartGame()" class="mt-10 px-8 py-4 bg-green-700 hover:bg-green-600 text-2xl">ИГРАТЬ СНОВА</button>
+                </div>
+            `;
+        }
+        
+        function restartGame() {
+            health = 100;
+            inventory = [];
+            gameOver = false;
+            document.getElementById('health').classList.remove('text-red-500');
+            updateHealth();
+            document.getElementById('log').innerHTML = '<div class="text-green-400 mb-2">=== НОВАЯ ИГРА ===</div>';
+            enterRoom(0);
+        }
+        
+        // Запуск игры
+        window.onload = function() {
+            // Запустить фоновую музыку
+            setTimeout(() => {
+                const music = document.getElementById('bg-music');
+                music.volume = 0.4;
+                music.play().catch(() => {});
+            }, 500);
+            
+            log("Добро пожаловать в кошмар...");
+            enterRoom(0);
+            
+            // Случайные события
+            setInterval(() => {
+                if (!gameOver && Math.random() > 0.85) {
+                    health -= 8;
+                    updateHealth();
+                    log("Тёмная сила высасывает твою жизнь...");
+                    playSound('heartbeat');
+                }
+            }, 14000);
+            
+            // Финальный триггер
+            setTimeout(() => {
+                if (!gameOver && inventory.includes("Кинжал") && inventory.includes("Фонарик")) {
+                    goodEnd();
+                }
+            }, 120000);
+        }
+    </script>
+</body>
+                    </html>
