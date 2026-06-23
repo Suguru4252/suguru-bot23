@@ -2,392 +2,455 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ШЁПОТЫ В ТЕМНОТЕ • HORROR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>НОЧНАЯ СМЕНА • 3D HORROR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=VT323&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
         
         body {
-            font-family: 'VT323', monospace;
-            background: #000;
-            color: #ff3333;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
+            background: #000;
+            font-family: 'VT323', monospace;
+            touch-action: none;
         }
         
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            pointer-events: none;
+            color: #ff3333;
+            text-shadow: 0 0 8px #ff0000;
+        }
+        
+        #top-bar {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
+        }
+        
+        #health {
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
+            border: 2px solid #ff3333;
+        }
+        
+        #status {
+            top: 70px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border: 2px solid #ffff00;
+            font-size: 1.3rem;
+        }
+        
+        #log {
+            bottom: 20px;
+            left: 10px;
+            right: 10px;
+            height: 120px;
+            background: rgba(0,0,0,0.85);
+            border: 2px solid #ff3333;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 1.1rem;
+            pointer-events: auto;
+        }
+        
+        .action-btn {
+            position: absolute;
+            bottom: 180px;
+            background: #330000;
+            color: #ff6666;
+            border: 3px solid #ff3333;
+            padding: 15px 25px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:active {
+            background: #660000;
+            transform: scale(0.95);
+        }
+        
+        #hide-btn { left: 20px; }
+        #repair-btn { right: 20px; }
+        
         .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: repeating-linear-gradient(
-                to bottom,
                 transparent 0px,
-                transparent 2px,
-                rgba(0, 255, 0, 0.03) 2px,
-                rgba(0, 255, 0, 0.03) 4px
+                transparent 3px,
+                rgba(255, 0, 0, 0.08) 3px,
+                rgba(255, 0, 0, 0.08) 6px
             );
             pointer-events: none;
-            z-index: 9999;
-            animation: flicker 0.15s infinite alternate;
+            z-index: 100;
+            animation: flicker 0.2s infinite alternate;
         }
         
         @keyframes flicker {
-            0% { opacity: 0.6; }
+            0% { opacity: 0.75; }
             100% { opacity: 1; }
         }
         
         .vignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
             pointer-events: none;
-            z-index: 9998;
+            z-index: 99;
         }
         
-        .room {
-            background-size: cover;
-            background-position: center;
-            transition: all 0.6s ease;
-        }
-        
-        .text-glow {
-            text-shadow: 0 0 10px #ff0000,
-                        0 0 20px #ff0000,
-                        0 0 40px #990000;
-        }
-        
-        .monster {
-            animation: shake 0.5s infinite;
-        }
-        
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 2px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        .jump-scare {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #300000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            z-index: 200;
+            animation: scare 1.2s;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
-    <div class="scanlines"></div>
-    <div class="vignette"></div>
-    
-    <!-- Главный контейнер -->
-    <div id="game" class="w-full max-w-4xl mx-auto border-4 border-red-700 bg-black shadow-2xl overflow-hidden">
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
         
-        <!-- Заголовок -->
-        <div class="bg-red-950 border-b-4 border-red-700 p-4 text-center">
-            <h1 class="text-6xl text-red-500 tracking-widest text-glow" style="font-family: 'Creepster', cursive;">
-                ШЁПОТЫ В ТЕМНОТЕ
-            </h1>
-            <p class="text-red-400 text-xl mt-1">Ты не один...</p>
+        <!-- UI -->
+        <div class="ui-overlay" id="top-bar">
+            <div id="health">❤️ ЗДОРОВЬЕ: <span id="hp">100</span>%</div>
+            <div>НОЧНАЯ СМЕНА • 03:14</div>
         </div>
         
-        <!-- Экран игры -->
-        <div id="screen" class="relative h-[520px] room flex flex-col" style="background-image: url('https://picsum.photos/id/1015/1200/600');">
-            
-            <!-- Статус -->
-            <div class="absolute top-4 left-4 bg-black/80 px-4 py-2 border border-red-700">
-                <span id="health" class="text-green-400">❤️ Здоровье: 100</span>
-            </div>
-            
-            <!-- Лог -->
-            <div id="log" class="absolute top-4 right-4 w-80 bg-black/90 p-3 border border-red-700 text-sm h-48 overflow-y-auto text-red-300 font-mono leading-tight">
-            </div>
-            
-            <!-- Основной текст -->
-            <div id="main-text" class="flex-1 flex items-center justify-center p-8 text-center text-2xl leading-relaxed text-red-100 bg-black/60">
-            </div>
-            
-            <!-- Изображение сущности -->
-            <div id="monster-container" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 hidden">
-                <img id="monster-img" src="https://picsum.photos/id/1016/300/300" class="monster w-64 h-64 object-cover border-4 border-red-600 rounded-full shadow-2xl" style="filter: brightness(0.6) contrast(1.3);">
-            </div>
-        </div>
+        <div class="ui-overlay" id="status">МОНИТОРИНГ ОБЪЕКТОВ • ВСЁ НОРМА</div>
         
-        <!-- Панель действий -->
-        <div id="actions" class="grid grid-cols-2 gap-2 p-6 bg-zinc-950 border-t-4 border-red-700">
-            <!-- Кнопки будут добавляться JS -->
-        </div>
+        <div class="ui-overlay" id="log"></div>
         
-        <!-- Нижняя панель -->
-        <div class="bg-black p-3 flex justify-between items-center text-xs text-red-500 border-t border-red-900">
-            <div>📍 <span id="location">Вход в особняк</span></div>
-            <div class="flex gap-6">
-                <button onclick="toggleSound()" id="sound-btn" class="hover:text-white">🔊 ЗВУК ВКЛ</button>
-                <button onclick="restartGame()" class="hover:text-white">⟳ НАЧАТЬ ЗАНОВО</button>
+        <button onclick="hidePlayer()" id="hide-btn" class="action-btn">ПРЯТАТЬСЯ В ШКАФ</button>
+        <button onclick="repairItem()" id="repair-btn" class="action-btn">ЧИНИТЬ</button>
+        
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        
+        <!-- Джамп-скейр -->
+        <div id="jumpscare" class="jump-scare">
+            <div style="color:#ff0000; text-align:center; text-shadow: 0 0 30px #ff0000;">
+                ОНО ЗДЕСЬ<br>
+                <span style="font-size:2rem;">БЕГИ</span>
             </div>
         </div>
     </div>
 
-    <!-- Аудио элементы -->
-    <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"> <!-- заменить на horror ambient при желании -->
+    <audio id="ambient" loop preload="auto">
+        <source src="https://freesound.org/data/previews/202/202499_3720018-lq.mp3" type="audio/mpeg">
     </audio>
-    <audio id="heartbeat" loop>
-        <source src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" type="audio/mpeg">
+    <audio id="alert" preload="auto">
+        <source src="https://freesound.org/data/previews/276/276951_5123853-lq.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="repair-sound" preload="auto">
+        <source src="https://freesound.org/data/previews/387/387186_7258993-lq.mp3" type="audio/mpeg">
     </audio>
     <audio id="scream" preload="auto">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="door" preload="auto">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="whisper" preload="auto">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg">
+        <source src="https://freesound.org/data/previews/342/342759_5123853-lq.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // === ДАННЫЕ ИГРЫ ===
-        let currentRoom = 0;
+        // === THREE.JS 3D СЦЕНА ===
+        let scene, camera, renderer;
+        let playerAngle = 0;
+        let isHiding = false;
         let health = 100;
-        let inventory = [];
         let gameOver = false;
-        let soundEnabled = true;
+        let currentAnomaly = null;
         
-        const rooms = [
-            {
-                id: 0,
-                name: "Вход в особняк",
-                desc: "Тяжёлые дубовые двери за тобой с грохотом захлопнулись. В воздухе висит густая пыль. Где-то наверху раздаётся тихий детский смех...",
-                img: "https://picsum.photos/id/1015/1200/600",
-                actions: [
-                    { text: "Осмотреть холл", next: () => enterRoom(1) },
-                    { text: "Подняться по лестнице", next: () => enterRoom(2) },
-                    { text: "Пойти в подвал", next: () => enterRoom(3) }
-                ]
-            },
-            {
-                id: 1,
-                name: "Холл особняка",
-                desc: "На стенах висят старые портреты. Глаза на них следят за тобой. На полу — свежие кровавые следы.",
-                img: "https://picsum.photos/id/201/1200/600",
-                actions: [
-                    { text: "Взять старый ключ", next: () => { addToInventory("Ключ"); log("Ты взял ржавый ключ."); playSound('door'); } },
-                    { text: "Открыть дверь в библиотеку", next: () => enterRoom(4) },
-                    { text: "Вернуться ко входу", next: () => enterRoom(0) }
-                ]
-            },
-            {
-                id: 2,
-                name: "Верхний этаж",
-                desc: "Коридор тянется в темноту. Внезапно свет мигает... Ты слышишь шаги прямо за спиной.",
-                img: "https://picsum.photos/id/133/1200/600",
-                actions: [
-                    { text: "Бежать в спальню", next: () => enterRoom(5) },
-                    { text: "Проверить комнату ребёнка", next: () => jumpScare() },
-                    { text: "Сбежать вниз", next: () => enterRoom(1) }
-                ]
-            },
-            {
-                id: 3,
-                name: "Подвал",
-                desc: "Здесь очень холодно. В углу стоит старый холодильник, из которого капает... что-то красное.",
-                img: "https://picsum.photos/id/160/1200/600",
-                actions: [
-                    { text: "Открыть холодильник", next: () => badEnd("Ты открыл холодильник. Из него вывалилась отрезанная голова. Здоровье -40") },
-                    { text: "Осмотреть полки", next: () => { log("Ты нашёл фонарик!"); inventory.push("Фонарик"); } },
-                    { text: "Уйти", next: () => enterRoom(0) }
-                ]
-            },
-            {
-                id: 4,
-                name: "Библиотека",
-                desc: "Книги шепчут твоё имя. Одна из книг открыта на странице с твоей фотографией.",
-                img: "https://picsum.photos/id/201/1200/600",
-                actions: [
-                    { text: "Прочитать книгу", next: () => { log("«Оно уже внутри тебя...»"); health -= 15; updateHealth(); } },
-                    { text: "Взять старинный кинжал", next: () => { addToInventory("Кинжал"); log("Оружие теперь у тебя."); } },
-                    { text: "Уйти", next: () => enterRoom(1) }
-                ]
-            },
-            {
-                id: 5,
-                name: "Спальня",
-                desc: "На кровати лежит мёртвая женщина с открытыми глазами. Она смотрит прямо на тебя.",
-                img: "https://picsum.photos/id/251/1200/600",
-                actions: [
-                    { text: "Подойти ближе", next: () => jumpScare() },
-                    { text: "Выбежать из комнаты", next: () => enterRoom(2) }
-                ]
-            }
+        const anomalies = [
+            {id:1, name:"Камера 1", broken: false, pos: {x: -4, z: -3}},
+            {id:2, name:"Дверь", broken: false, pos: {x: 5, z: -6}},
+            {id:3, name:"Свет в коридоре", broken: false, pos: {x: -2, z: 4}}
         ];
+        
+        function init3D() {
+            const container = document.getElementById('game-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000000, 8, 35);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 8);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('canvas'), 
+                antialias: true 
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x0a0000);
+            
+            // Освещение (очень тёмное)
+            const ambientLight = new THREE.AmbientLight(0x220000, 0.3);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xff2222, 0.8, 30);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+            
+            // Пол
+            const floorGeo = new THREE.PlaneGeometry(30, 30);
+            const floorMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+            
+            // Стены
+            createWall(0, 3, -12, 30, 6, 1);   // задняя
+            createWall(0, 3, 12, 30, 6, 1);    // передняя
+            createWall(-15, 3, 0, 1, 6, 30);   // левая
+            createWall(15, 3, 0, 1, 6, 30);    // правая
+            
+            // Мебель (простые коробки)
+            createBox(-6, 1, -5, 3, 2, 3, 0x330000);   // шкаф
+            createBox(8, 1.5, -8, 2, 3, 2, 0x222222);  // стол
+            createBox(-3, 1, 6, 4, 2, 2, 0x222222);    // ящик
+            
+            // Аномальные объекты
+            window.anomalyMeshes = [];
+            anomalies.forEach(a => {
+                const mesh = createBox(a.pos.x, 1, a.pos.z, 1.5, 1.5, 1.5, 0x880000);
+                mesh.userData = a;
+                window.anomalyMeshes.push(mesh);
+            });
+            
+            // Управление поворотом (мышь + тач)
+            let isDragging = false;
+            let previousX = 0;
+            
+            container.addEventListener('mousedown', (e) => { isDragging = true; previousX = e.clientX; });
+            container.addEventListener('mousemove', onMouseMove);
+            container.addEventListener('mouseup', () => isDragging = false);
+            container.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                previousX = e.touches[0].clientX;
+            });
+            container.addEventListener('touchmove', onTouchMove);
+            container.addEventListener('touchend', () => isDragging = false);
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            animate();
+        }
+        
+        function createWall(x, y, z, w, h, d) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshLambertMaterial({ color: 0x1a0000 });
+            const wall = new THREE.Mesh(geo, mat);
+            wall.position.set(x, y, z);
+            scene.add(wall);
+        }
+        
+        function createBox(x, y, z, w, h, d, color) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshLambertMaterial({ color: color });
+            const box = new THREE.Mesh(geo, mat);
+            box.position.set(x, y, z);
+            scene.add(box);
+            return box;
+        }
+        
+        function onMouseMove(e) {
+            if (!isDragging || gameOver) return;
+            const delta = (e.clientX - previousX) * 0.003;
+            playerAngle += delta;
+            previousX = e.clientX;
+            updateCamera();
+        }
+        
+        function onTouchMove(e) {
+            if (!isDragging || gameOver) return;
+            const delta = (e.touches[0].clientX - previousX) * 0.005;
+            playerAngle += delta;
+            previousX = e.touches[0].clientX;
+            updateCamera();
+        }
+        
+        function updateCamera() {
+            const radius = 8;
+            camera.position.x = Math.sin(playerAngle) * radius;
+            camera.position.z = Math.cos(playerAngle) * radius;
+            camera.lookAt(0, 1.5, 0);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!gameOver) {
+                // Лёгкое дрожание камеры
+                camera.position.y = 1.6 + Math.sin(Date.now() / 800) * 0.03;
+            }
+            renderer.render(scene, camera);
+        }
         
         function log(text) {
             const logEl = document.getElementById('log');
-            logEl.innerHTML += `<div class="mb-1">» ${text}</div>`;
+            const time = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+            logEl.innerHTML += `<div>[${time}] ${text}</div>`;
             logEl.scrollTop = logEl.scrollHeight;
         }
         
         function updateHealth() {
-            document.getElementById('health').innerHTML = `❤️ Здоровье: ${health}`;
-            if (health <= 30) {
-                document.getElementById('health').classList.add('text-red-500');
-            }
-            if (health <= 0) {
-                badEnd("Ты не выдержал...");
-            }
+            document.getElementById('hp').textContent = Math.floor(health);
+            if (health <= 30) document.getElementById('health').style.color = '#ff0000';
+            if (health <= 0) endGame();
         }
         
-        function addToInventory(item) {
-            if (!inventory.includes(item)) {
-                inventory.push(item);
-                log(`+ ${item}`);
-            }
-        }
-        
-        function playSound(type) {
-            if (!soundEnabled) return;
-            try {
-                if (type === 'heartbeat') {
-                    document.getElementById('heartbeat').play();
-                } else if (type === 'scream') {
-                    document.getElementById('scream').play();
-                } else if (type === 'door') {
-                    document.getElementById('door').play();
-                } else if (type === 'whisper') {
-                    document.getElementById('whisper').play();
-                }
-            } catch(e) {}
-        }
-        
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('sound-btn').textContent = soundEnabled ? "🔊 ЗВУК ВКЛ" : "🔇 ЗВУК ВЫКЛ";
-        }
-        
-        function enterRoom(roomId) {
-            if (gameOver) return;
-            currentRoom = roomId;
-            const room = rooms.find(r => r.id === roomId);
+        function triggerAnomaly() {
+            if (gameOver || isHiding) return;
             
-            document.getElementById('location').textContent = room.name;
-            document.getElementById('main-text').innerHTML = `<p class="max-w-2xl">${room.desc}</p>`;
-            document.getElementById('screen').style.backgroundImage = `url('${room.img}')`;
+            const anomaly = anomalies[Math.floor(Math.random() * anomalies.length)];
+            currentAnomaly = anomaly;
             
-            // Случайный шёпот
-            if (Math.random() > 0.7) {
-                setTimeout(() => {
-                    log("Ты слышишь шёпот... «Вернись...»");
-                    playSound('whisper');
-                }, 800);
-            }
+            document.getElementById('status').innerHTML = `⚠️ АНОМАЛИЯ: ${anomaly.name} ⚠️`;
+            document.getElementById('status').style.color = '#ffff00';
             
-            renderActions(room.actions);
-        }
-        
-        function renderActions(actions) {
-            const container = document.getElementById('actions');
-            container.innerHTML = '';
+            log(`<span style="color:#ff0">АНОМАЛИЯ В ${anomaly.name.toUpperCase()}!</span>`);
             
-            actions.forEach(action => {
-                const btn = document.createElement('button');
-                btn.className = "bg-zinc-900 hover:bg-red-950 border border-red-700 py-4 text-xl transition-all active:scale-95";
-                btn.textContent = action.text;
-                btn.onclick = () => {
-                    playSound('door');
-                    action.next();
-                };
-                container.appendChild(btn);
-            });
-        }
-        
-        function jumpScare() {
-            playSound('scream');
-            health -= 35;
-            updateHealth();
+            // Красный свет
+            scene.fog.color = new THREE.Color(0x440000);
             
-            const monster = document.getElementById('monster-container');
-            monster.classList.remove('hidden');
+            const alert = document.getElementById('alert');
+            alert.volume = 0.7;
+            alert.play().catch(() => {});
             
-            document.getElementById('main-text').innerHTML = `
-                <div class="text-5xl text-red-600 animate-pulse">ОНО ЗДЕСЬ</div>
-            `;
-            
+            // Через 8 секунд — урон если не исправлено
             setTimeout(() => {
-                monster.classList.add('hidden');
-                if (health > 0) {
-                    log("Существо исчезло... пока.");
-                    enterRoom(currentRoom);
-                }
-            }, 1200);
-        }
-        
-        function badEnd(message) {
-            gameOver = true;
-            document.getElementById('main-text').innerHTML = `
-                <div class="text-center">
-                    <div class="text-6xl mb-6 text-red-600">💀 ТЫ МЁРТВ 💀</div>
-                    <p class="text-2xl">${message}</p>
-                    <button onclick="restartGame()" class="mt-10 px-8 py-4 bg-red-700 hover:bg-red-600 text-2xl">ИГРАТЬ СНОВА</button>
-                </div>
-            `;
-            document.getElementById('actions').innerHTML = '';
-            playSound('scream');
-        }
-        
-        function goodEnd() {
-            gameOver = true;
-            document.getElementById('main-text').innerHTML = `
-                <div class="text-center">
-                    <div class="text-6xl mb-6 text-green-500">☀️ ТЫ ВЫЖИЛ ☀️</div>
-                    <p class="text-2xl">Ты выбрался из особняка... но оно всё ещё следует за тобой.</p>
-                    <button onclick="restartGame()" class="mt-10 px-8 py-4 bg-green-700 hover:bg-green-600 text-2xl">ИГРАТЬ СНОВА</button>
-                </div>
-            `;
-        }
-        
-        function restartGame() {
-            health = 100;
-            inventory = [];
-            gameOver = false;
-            document.getElementById('health').classList.remove('text-red-500');
-            updateHealth();
-            document.getElementById('log').innerHTML = '<div class="text-green-400 mb-2">=== НОВАЯ ИГРА ===</div>';
-            enterRoom(0);
-        }
-        
-        // Запуск игры
-        window.onload = function() {
-            // Запустить фоновую музыку
-            setTimeout(() => {
-                const music = document.getElementById('bg-music');
-                music.volume = 0.4;
-                music.play().catch(() => {});
-            }, 500);
-            
-            log("Добро пожаловать в кошмар...");
-            enterRoom(0);
-            
-            // Случайные события
-            setInterval(() => {
-                if (!gameOver && Math.random() > 0.85) {
-                    health -= 8;
+                if (currentAnomaly && !isHiding) {
+                    health -= 35;
                     updateHealth();
-                    log("Тёмная сила высасывает твою жизнь...");
-                    playSound('heartbeat');
+                    log("Существо приближается...");
+                    if (Math.random() > 0.5) showJumpScare();
                 }
-            }, 14000);
-            
-            // Финальный триггер
-            setTimeout(() => {
-                if (!gameOver && inventory.includes("Кинжал") && inventory.includes("Фонарик")) {
-                    goodEnd();
-                }
-            }, 120000);
+            }, 8000);
         }
+        
+        function repairItem() {
+            if (!currentAnomaly || isHiding) {
+                log("Нечего чинить...");
+                return;
+            }
+            
+            const repair = document.getElementById('repair-sound');
+            repair.volume = 0.6;
+            repair.play().catch(() => {});
+            
+            log(`ЧИНИМ ${currentAnomaly.name}...`);
+            
+            setTimeout(() => {
+                currentAnomaly.broken = false;
+                document.getElementById('status').innerHTML = "МОНИТОРИНГ • ВСЁ НОРМА";
+                document.getElementById('status').style.color = '#33ff33';
+                currentAnomaly = null;
+                scene.fog.color = new THREE.Color(0x000000);
+                log("Объект восстановлен.");
+            }, 1400);
+        }
+        
+        function hidePlayer() {
+            if (isHiding) return;
+            isHiding = true;
+            log("ТЫ СПРЯТАЛСЯ В ШКАФУ...");
+            
+            const hideTime = 6500;
+            setTimeout(() => {
+                isHiding = false;
+                log("Ты вышел из укрытия...");
+                if (currentAnomaly) {
+                    health -= 22;
+                    updateHealth();
+                }
+            }, hideTime);
+        }
+        
+        function showJumpScare() {
+            const js = document.getElementById('jumpscare');
+            js.style.display = 'flex';
+            const scream = document.getElementById('scream');
+            scream.volume = 0.9;
+            scream.play().catch(() => {});
+            
+            setTimeout(() => {
+                js.style.display = 'none';
+                health -= 45;
+                updateHealth();
+            }, 1100);
+        }
+        
+        function endGame() {
+            gameOver = true;
+            document.getElementById('status').innerHTML = "💀 ТЫ МЁРТВ 💀";
+            log("<span style='color:#f00'>ИГРА ОКОНЧЕНА. СУЩЕСТВО ЗАБРАЛО ТЕБЯ...</span>");
+        }
+        
+        // Запуск
+        window.onload = () => {
+            init3D();
+            updateCamera();
+            
+            // Фоновая музыка
+            setTimeout(() => {
+                const ambient = document.getElementById('ambient');
+                ambient.volume = 0.45;
+                ambient.play().catch(() => {});
+            }, 800);
+            
+            log("Добро пожаловать на ночную смену...");
+            log("Следи за объектами. При аномалии — чини или прячься.");
+            
+            // Случайные аномалии
+            setInterval(() => {
+                if (!gameOver && Math.random() > 0.55) {
+                    triggerAnomaly();
+                }
+            }, 11000);
+            
+            // Постепенный урон от страха
+            setInterval(() => {
+                if (!gameOver && !isHiding) {
+                    health -= 1.5;
+                    updateHealth();
+                }
+            }, 7000);
+            
+            // Авто-поворот для демо
+            setInterval(() => {
+                if (!isDragging && !gameOver) {
+                    playerAngle += 0.008;
+                    updateCamera();
+                }
+            }, 50);
+        };
     </script>
 </body>
-                    </html>
+    </html>
