@@ -1,536 +1,95 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Chugur — Music Player</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import matplotlib.patches as patches
+from matplotlib.path import Path
 
-        body {
-            background: #0f0f0f;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #eee;
-        }
+# Создаем фигуру
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.set_xlim(0, 10)
+ax.set_ylim(0, 10)
+ax.set_aspect('equal')
+ax.set_facecolor('#f0f8f0')  # Легкий зеленый фон
 
-        .app {
-            max-width: 550px;
-            width: 100%;
-            background: #151515;
-            border: 1px solid #2a2a2a;
-        }
+# Кактус в центре
+def draw_cactus(x, y):
+    # Ствол
+    ax.add_patch(patches.Rectangle((x-0.3, y), 0.6, 3, facecolor='#2e8b57', edgecolor='darkgreen'))
+    # Руки кактуса
+    ax.add_patch(patches.Rectangle((x-1.2, y+1.2), 0.8, 1.5, facecolor='#2e8b57', edgecolor='darkgreen'))
+    ax.add_patch(patches.Rectangle((x+0.4, y+1.5), 0.8, 1.2, facecolor='#2e8b57', edgecolor='darkgreen'))
+    # Колючки
+    for i in range(5):
+        ax.plot([x-0.4, x-0.6], [y+0.5+i*0.5, y+0.6+i*0.5], 'k-', lw=1)
+        ax.plot([x+0.4, x+0.6], [y+0.5+i*0.5, y+0.6+i*0.5], 'k-', lw=1)
 
-        .header {
-            padding: 20px 24px 8px 24px;
-            border-bottom: 1px solid #222;
-        }
+draw_cactus(5, 2)
 
-        .header h1 {
-            font-size: 1.9rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            color: #fff;
-        }
+# Простые слоны (используем круги + треугольники)
+def draw_elephant(x, y, color='gray', angle=0):
+    # Тело
+    body = patches.Ellipse((x, y), 1.8, 1.2, angle=angle, facecolor=color, edgecolor='black', lw=2)
+    ax.add_patch(body)
+    
+    # Голова
+    head = patches.Circle((x+0.9, y+0.3), 0.7, facecolor=color, edgecolor='black', lw=2)
+    ax.add_patch(head)
+    
+    # Хобот
+    trunk_path = Path([(x+1.5, y+0.2), (x+2.0, y-0.3), (x+2.1, y-0.6)],
+                      [Path.MOVETO, Path.CURVE3, Path.CURVE3])
+    trunk = patches.PathPatch(trunk_path, facecolor='none', edgecolor='black', lw=4)
+    ax.add_patch(trunk)
+    
+    # Ухо
+    ear = patches.Ellipse((x+0.6, y+0.7), 0.6, 0.8, angle=30, facecolor=color, edgecolor='black')
+    ax.add_patch(ear)
+    
+    # Ноги
+    ax.add_patch(patches.Rectangle((x-0.6, y-0.7), 0.4, 0.8, facecolor=color, edgecolor='black'))
+    ax.add_patch(patches.Rectangle((x+0.2, y-0.7), 0.4, 0.8, facecolor=color, edgecolor='black'))
+    
+    # Глаз
+    ax.plot(x+1.2, y+0.4, 'ko', markersize=6)
+    ax.plot(x+1.25, y+0.42, 'wo', markersize=3)
 
-        .header p {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 6px;
-        }
+# Два слона
+ele1_x, ele1_y = [], []
+ele2_x, ele2_y = [], []
 
-        .player-panel {
-            padding: 20px;
-            background: #111;
-            border-bottom: 1px solid #222;
-        }
+def animate(frame):
+    ax.clear()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+    ax.set_aspect('equal')
+    ax.set_facecolor('#f0f8f0')
+    
+    # Перерисовываем кактус
+    draw_cactus(5, 2)
+    
+    # Слон 1 бегает по кругу (радиус 3.5)
+    angle1 = frame * 0.08
+    x1 = 5 + 3.5 * np.cos(angle1)
+    y1 = 4.5 + 3.5 * np.sin(angle1) * 0.7  # немного овальный круг
+    draw_elephant(x1, y1, color='#808080', angle=np.degrees(angle1) + 90)
+    
+    # Слон 2 бегает по другому кругу (радиус 4.2, в противоположную сторону)
+    angle2 = -frame * 0.06 + np.pi
+    x2 = 5 + 4.2 * np.cos(angle2)
+    y2 = 4.5 + 4.2 * np.sin(angle2) * 0.7
+    draw_elephant(x2, y2, color='#696969', angle=np.degrees(angle2) + 90)
+    
+    # Текст
+    ax.text(5, 9.2, 'Два слона бегают вокруг кактуса!', ha='center', fontsize=14, fontweight='bold')
+    
+    # Следы/пыль (простые точки)
+    if frame > 5:
+        ax.scatter([x1-1.5, x2-1.5], [y1-0.8, y2-0.8], c='brown', s=40, alpha=0.4)
 
-        .current-label {
-            font-size: 0.65rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+ani = FuncAnimation(fig, animate, frames=180, interval=50, repeat=True)
 
-        .current-track {
-            font-size: 1rem;
-            font-weight: 500;
-            margin: 8px 0 16px;
-            word-break: break-word;
-        }
+# Сохраняем видео
+ani.save('elephants_around_cactus.mp4', writer='ffmpeg', fps=20, dpi=120)
 
-        audio {
-            width: 100%;
-            height: 44px;
-        }
-
-        .add-panel {
-            padding: 16px 20px;
-            background: #0c0c0c;
-            border-bottom: 1px solid #222;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .add-file-btn {
-            background: #2a2a2a;
-            border: 1px solid #4a4a4a;
-            padding: 10px 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #ddd;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-
-        .add-file-btn:hover {
-            background: #3a3a3a;
-        }
-
-        .library-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 18px 24px 8px 24px;
-        }
-
-        .library-header h3 {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #aaa;
-            letter-spacing: 0.5px;
-        }
-
-        .clear-btn {
-            background: none;
-            border: 1px solid #3a2a28;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            color: #b88a7a;
-            cursor: pointer;
-        }
-
-        .songs-list {
-            padding: 16px 20px 24px 20px;
-            max-height: 380px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .song-item {
-            background: #121212;
-            border: 1px solid #252525;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .song-item:hover {
-            background: #1a1a1a;
-        }
-
-        .song-info {
-            flex: 1;
-        }
-
-        .song-title {
-            font-size: 0.85rem;
-            font-weight: 500;
-            word-break: break-word;
-        }
-
-        .song-date {
-            font-size: 0.6rem;
-            color: #6a6a6a;
-            margin-top: 4px;
-        }
-
-        .song-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .play-song-btn, .delete-song-btn {
-            background: #2a2a2a;
-            border: 1px solid #3a3a3a;
-            padding: 5px 10px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            color: #ccc;
-        }
-
-        .play-song-btn:hover {
-            background: #3a4a3a;
-        }
-
-        .delete-song-btn:hover {
-            background: #4a2a2a;
-            border-color: #aa5a42;
-        }
-
-        .empty-message {
-            text-align: center;
-            color: #5a5a5a;
-            padding: 40px;
-            font-size: 0.8rem;
-            border: 1px dashed #2a2a2a;
-        }
-
-        .footer {
-            padding: 12px 20px;
-            border-top: 1px solid #1f1f1f;
-            font-size: 0.6rem;
-            color: #6f6f6f;
-            text-align: center;
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2a4a2a;
-            color: white;
-            padding: 8px 20px;
-            font-size: 12px;
-            z-index: 999;
-            border: 1px solid #5a8a5a;
-            animation: fadeOut 2s ease-in-out forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-    </style>
-</head>
-<body>
-<div class="app">
-    <div class="header">
-        <h1>Chugur</h1>
-        <p>Добавляй MP3 — сохраняются навсегда (без ограничений)</p>
-    </div>
-
-    <div class="player-panel">
-        <div class="current-label">Сейчас играет</div>
-        <div class="current-track" id="currentTrackName">—</div>
-        <audio id="audioPlayer" controls preload="metadata"></audio>
-    </div>
-
-    <div class="add-panel">
-        <button id="addFileBtn" class="add-file-btn">📁 Добавить MP3 файл</button>
-    </div>
-
-    <div class="library-header">
-        <h3>Мои треки (сохраняются в IndexedDB — безлимит)</h3>
-        <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
-    </div>
-
-    <div id="songsList" class="songs-list">
-        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл».</div>
-    </div>
-
-    <div class="footer">
-        🎵 IndexedDB — можно хранить гигабайты музыки. Закрывайте браузер — ничего не пропадёт.
-    </div>
-</div>
-
-<input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
-
-<script>
-    // =============== CHUGUR — ПЛЕЕР НА INDEXEDDB (БЕЗЛИМИТНЫЙ) ===============
-    let songs = [];
-    let currentSongId = null;
-    let db = null;
-    const DB_NAME = 'ChugurDB';
-    const STORE_NAME = 'songs';
-
-    const audio = document.getElementById('audioPlayer');
-    const currentTrackSpan = document.getElementById('currentTrackName');
-    const songsListDiv = document.getElementById('songsList');
-    const addFileBtn = document.getElementById('addFileBtn');
-    const fileInput = document.getElementById('fileInput');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-
-    // ============ ИНИЦИАЛИЗАЦИЯ INDEXEDDB ============
-    function initDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, 1);
-            
-            request.onerror = () => reject(request.error);
-            
-            request.onsuccess = () => {
-                db = request.result;
-                resolve(db);
-            };
-            
-            request.onupgradeneeded = (event) => {
-                const dbRef = event.target.result;
-                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
-                    const store = dbRef.createObjectStore(STORE_NAME, { 
-                        keyPath: 'id', 
-                        autoIncrement: true 
-                    });
-                    store.createIndex('name', 'name', { unique: false });
-                }
-            };
-        });
-    }
-
-    // ============ СОХРАНЕНИЕ ПЕСНИ В INDEXEDDB ============
-    function saveSongToDB(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const blob = e.target.result;
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                
-                const songData = {
-                    name: file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, ''),
-                    date: new Date().toLocaleString(),
-                    blob: blob,
-                    mimeType: file.type || 'audio/mpeg'
-                };
-                
-                const request = store.add(songData);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    // ============ ЗАГРУЗКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
-    function loadAllSongsFromDB() {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.getAll();
-            
-            request.onsuccess = () => {
-                const results = request.result;
-                songs = [];
-                for (let item of results) {
-                    const blob = new Blob([item.blob], { type: item.mimeType || 'audio/mpeg' });
-                    const url = URL.createObjectURL(blob);
-                    songs.push({
-                        id: item.id,
-                        name: item.name,
-                        date: item.date,
-                        blob: blob,
-                        url: url
-                    });
-                }
-                resolve(songs);
-            };
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ УДАЛЕНИЕ ПЕСНИ ИЗ INDEXEDDB ============
-    function deleteSongFromDB(id) {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.delete(id);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ ОЧИСТКА ВСЕХ ПЕСЕН ИЗ INDEXEDDB ============
-    function clearAllSongsFromDB() {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.clear();
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ ДОБАВЛЕНИЕ ПЕСНИ (через интерфейс) ============
-    async function addSongFromFile(file) {
-        if (!file.type.includes('audio') && !file.name.match(/\.(mp3|m4a|aac|ogg|wav)$/i)) {
-            alert('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)');
-            return;
-        }
-
-        try {
-            const id = await saveSongToDB(file);
-            await loadAllSongsFromDB();
-            renderSongsList();
-            showToast(`✓ Добавлено: ${file.name.replace(/\.(mp3|m4a|aac|ogg|wav)$/i, '')}`);
-        } catch (e) {
-            console.error('Ошибка сохранения:', e);
-            alert('Не удалось сохранить песню. Возможно, закончилось место.');
-        }
-    }
-
-    // ============ ОТРИСОВКА ПЛЕЙЛИСТА ============
-    function renderSongsList() {
-        if (!songsListDiv) return;
-        
-        if (songs.length === 0) {
-            songsListDiv.innerHTML = '<div class="empty-message">🎵 Нет треков. Нажмите «Добавить MP3 файл».</div>';
-            return;
-        }
-        
-        songsListDiv.innerHTML = '';
-        songs.forEach(song => {
-            const div = document.createElement('div');
-            div.className = 'song-item';
-            div.innerHTML = `
-                <div class="song-info">
-                    <div class="song-title">${escapeHtml(song.name)}</div>
-                    <div class="song-date">${song.date}</div>
-                </div>
-                <div class="song-actions">
-                    <button class="play-song-btn" data-id="${song.id}">▶</button>
-                    <button class="delete-song-btn" data-id="${song.id}">🗑</button>
-                </div>
-            `;
-            
-            const playBtn = div.querySelector('.play-song-btn');
-            const delBtn = div.querySelector('.delete-song-btn');
-            
-            playBtn.addEventListener('click', () => playSongById(song.id));
-            delBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (confirm(`Удалить "${song.name}"?`)) {
-                    try {
-                        await deleteSongFromDB(song.id);
-                        if (song.url) URL.revokeObjectURL(song.url);
-                        if (currentSongId === song.id) {
-                            audio.pause();
-                            audio.src = '';
-                            currentTrackSpan.textContent = '—';
-                            currentSongId = null;
-                        }
-                        await loadAllSongsFromDB();
-                        renderSongsList();
-                        showToast(`🗑 Удалено: ${song.name}`);
-                    } catch (e) {
-                        console.error('Ошибка удаления:', e);
-                    }
-                }
-            });
-            
-            songsListDiv.appendChild(div);
-        });
-    }
-
-    // ============ ВОСПРОИЗВЕДЕНИЕ ============
-    function playSongById(id) {
-        const song = songs.find(s => s.id === id);
-        if (song && song.url) {
-            audio.src = song.url;
-            audio.load();
-            audio.play().catch(e => console.log('автоплей заблокирован'));
-            currentTrackSpan.textContent = song.name;
-            currentSongId = song.id;
-        }
-    }
-
-    // ============ ОЧИСТКА ВСЕГО ============
-    async function clearAllSongs() {
-        if (songs.length === 0) return;
-        if (confirm('Удалить ВСЕ песни из библиотеки?')) {
-            try {
-                await clearAllSongsFromDB();
-                songs.forEach(song => {
-                    if (song.url) URL.revokeObjectURL(song.url);
-                });
-                songs = [];
-                audio.pause();
-                audio.src = '';
-                currentTrackSpan.textContent = '—';
-                currentSongId = null;
-                renderSongsList();
-                showToast('🗑 Все песни удалены');
-            } catch (e) {
-                console.error('Ошибка очистки:', e);
-            }
-        }
-    }
-
-    // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    // ============ ОБРАБОТЧИКИ ============
-    addFileBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            addSongFromFile(e.target.files[0]);
-            fileInput.value = '';
-        }
-    });
-
-    clearAllBtn.addEventListener('click', clearAllSongs);
-
-    // ============ ЗАПУСК ============
-    async function init() {
-        try {
-            await initDB();
-            await loadAllSongsFromDB();
-            renderSongsList();
-            console.log('✅ Chugur готов, песен загружено:', songs.length);
-        } catch (e) {
-            console.error('Ошибка инициализации:', e);
-        }
-    }
-
-    init();
-</script>
-</body>
-</html>
+print("Видео успешно создано: elephants_around_cactus.mp4")
+plt.close()
