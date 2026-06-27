@@ -2,12 +2,11 @@ import sqlite3
 import datetime
 import random
 import string
-import os
 import asyncio
 import re
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -38,6 +37,7 @@ def init_db():
             subscription_end TEXT,
             is_admin INTEGER DEFAULT 0,
             has_active_sub INTEGER DEFAULT 0,
+            expired_notified INTEGER DEFAULT 0,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -106,7 +106,7 @@ def activate_subscription(user_id, end_date_str):
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
     cur.execute(
-        "UPDATE users SET subscription_end = ?, has_active_sub = 1 WHERE user_id = ?",
+        "UPDATE users SET subscription_end = ?, has_active_sub = 1, expired_notified = 0 WHERE user_id = ?",
         (end_date_str, user_id)
     )
     cur.execute(
@@ -149,18 +149,25 @@ def extend_subscription(user_id, days):
         current_end = datetime.datetime.strptime(user[4], "%Y-%m-%d %H:%M")
         new_end = current_end + datetime.timedelta(days=days)
         new_end_str = new_end.strftime("%Y-%m-%d %H:%M")
-        cur.execute("UPDATE users SET subscription_end = ? WHERE user_id = ?", (new_end_str, user_id))
+        cur.execute("UPDATE users SET subscription_end = ?, expired_notified = 0 WHERE user_id = ?", (new_end_str, user_id))
     else:
         new_end = datetime.datetime.now() + datetime.timedelta(days=days)
         new_end_str = new_end.strftime("%Y-%m-%d %H:%M")
-        cur.execute("UPDATE users SET subscription_end = ?, has_active_sub = 1 WHERE user_id = ?", (new_end_str, user_id))
+        cur.execute("UPDATE users SET subscription_end = ?, has_active_sub = 1, expired_notified = 0 WHERE user_id = ?", (new_end_str, user_id))
     conn.commit()
     conn.close()
 
 def cancel_subscription(user_id):
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
-    cur.execute("UPDATE users SET subscription_end = NULL, has_active_sub = 0 WHERE user_id = ?", (user_id,))
+    cur.execute("UPDATE users SET subscription_end = NULL, has_active_sub = 0, expired_notified = 0 WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+def mark_expired_notified(user_id):
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET expired_notified = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
     conn.close()
 
@@ -267,13 +274,12 @@ async def pay_confirm(callback: CallbackQuery):
         except:
             pass
 
-    await callback.message.answer("Ваш платёж отправлен на модерацию. Ожидайте.")
-    await callback.answer()
+    await callback.answer("Платёж отправлен на модерацию. Ожидайте.", show_alert=True)
 
 @router.callback_query(F.data == "pay_reject")
 async def pay_reject(callback: CallbackQuery):
+    await callback.answer("Вы отказались от оплаты.", show_alert=False)
     await callback.message.answer("Когда созреете - приходите ещё, мы всегда рады!")
-    await callback.answer()
 
 # ==================== ПРОДЛЕНИЕ ====================
 @router.callback_query(F.data == "renew_paid")
@@ -298,20 +304,19 @@ async def renew_paid(callback: CallbackQuery):
         except:
             pass
 
-    await callback.message.answer("Ваш платёж на продление отправлен на модерацию.")
-    await callback.answer()
+    await callback.answer("Платёж на продление отправлен на модерацию.", show_alert=True)
 
 @router.callback_query(F.data == "renew_reject")
 async def renew_reject(callback: CallbackQuery):
+    await callback.answer("Вы отказались от продления.", show_alert=False)
     await callback.message.answer("Будем ждать вас снова!")
-    await callback.answer()
 
 # ==================== АДМИН ЛОГИН ====================
 @router.callback_query(F.data == "admin_login")
 async def admin_login(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
     await callback.message.answer("Введите секретный никнейм:")
     await state.set_state(AdminAuth.waiting_for_username)
-    await callback.answer()
 
 @router.message(AdminAuth.waiting_for_username)
 async def check_username(message: Message, state: FSMContext):
@@ -320,7 +325,7 @@ async def check_username(message: Message, state: FSMContext):
         await message.answer("Введите пароль:")
         await state.set_state(AdminAuth.waiting_for_password)
     else:
-        await message.answer("Неверный никнейм!")
+        await message.answer("Неверный никнейм! Попробуйте ещё раз или нажмите /start для выхода.")
 
 @router.message(AdminAuth.waiting_for_password)
 async def check_password(message: Message, state: FSMContext):
@@ -331,18 +336,18 @@ async def check_password(message: Message, state: FSMContext):
             "Добро пожаловать в админ-панель!\n\n"
             "Вы будете получать уведомления об оплатах и истечении подписок."
         )
+        await state.clear()
     else:
-        await message.answer("Неверный пароль!")
-    await state.clear()
+        await message.answer("Неверный пароль! Попробуйте ещё раз или нажмите /start для выхода.")
 
 # ==================== АДМИН: ВЫДАТЬ ССЫЛКУ ====================
 @router.callback_query(F.data.startswith("approve_"))
 async def approve_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
     admin_temp_data[callback.from_user.id] = {"user_id": user_id}
+    await callback.answer()
     await callback.message.answer("Отправьте ссылку (или любое сообщение) для пользователя:")
     await state.set_state(AdminSendLink.waiting_for_link)
-    await callback.answer()
 
 @router.message(AdminSendLink.waiting_for_link)
 async def get_link(message: Message, state: FSMContext):
@@ -398,9 +403,9 @@ async def get_date_and_send(message: Message, state: FSMContext):
 async def reject_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
     admin_temp_data[callback.from_user.id] = {"user_id": user_id}
+    await callback.answer()
     await callback.message.answer("Напишите причину отказа:")
     await state.set_state(AdminRejectReason.waiting_for_reason)
-    await callback.answer()
 
 @router.message(AdminRejectReason.waiting_for_reason)
 async def send_reject(message: Message, state: FSMContext):
@@ -438,11 +443,9 @@ async def take_subscription(callback: CallbackQuery):
             f"В сообщении укажите ваш код: {code}",
             reply_markup=renew_menu_keyboard()
         )
-        await callback.message.answer("Подписка забрана. Пользователю отправлено уведомление.")
+        await callback.answer("Подписка забрана.", show_alert=True)
     except:
-        await callback.message.answer("Ошибка отправки пользователю.")
-
-    await callback.answer()
+        await callback.answer("Ошибка отправки.", show_alert=True)
 
 @router.callback_query(F.data.startswith("keep_"))
 async def keep_subscription(callback: CallbackQuery):
@@ -454,46 +457,57 @@ async def keep_subscription(callback: CallbackQuery):
             user_id,
             "Подписка продлена на 1 день! Спасибо что вы с нами!"
         )
-        await callback.message.answer("Подписка продлена на 1 день.")
+        await callback.answer("Подписка продлена на 1 день.", show_alert=True)
     except:
-        await callback.message.answer("Ошибка отправки.")
-
-    await callback.answer()
+        await callback.answer("Ошибка отправки.", show_alert=True)
 
 # ==================== ФОНОВАЯ ПРОВЕРКА ====================
 async def check_subscriptions():
     while True:
-        admins = get_admins()
-        conn = sqlite3.connect("vpn_bot.db")
-        cur = conn.cursor()
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        cur.execute(
-            "SELECT user_id, personal_code FROM users WHERE subscription_end IS NOT NULL AND subscription_end <= ?",
-            (now,)
-        )
-        expired = cur.fetchall()
-        conn.close()
+        try:
+            admins = get_admins()
+            conn = sqlite3.connect("vpn_bot.db")
+            cur = conn.cursor()
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            
+            # Ищем подписки которые истекли но ещё не уведомлены
+            cur.execute(
+                "SELECT user_id, personal_code FROM users WHERE subscription_end IS NOT NULL AND subscription_end <= ? AND expired_notified = 0 AND has_active_sub = 1",
+                (now,)
+            )
+            expired = cur.fetchall()
+            conn.close()
 
-        for user_id, code in expired:
-            for admin_id in admins:
-                try:
-                    await bot.send_message(
-                        admin_id,
-                        f"Подписка истекла!\n"
-                        f"Код: {code}\n"
-                        f"ID: {user_id}",
-                        reply_markup=subscription_expired_keyboard(user_id)
-                    )
-                except:
-                    pass
+            for user_id, code in expired:
+                # Отмечаем что уведомили
+                mark_expired_notified(user_id)
+                
+                # Уведомляем всех админов
+                for admin_id in admins:
+                    try:
+                        await bot.send_message(
+                            admin_id,
+                            f"Подписка истекла!\n"
+                            f"Код: {code}\n"
+                            f"ID: {user_id}",
+                            reply_markup=subscription_expired_keyboard(user_id)
+                        )
+                    except:
+                        pass
 
-        await asyncio.sleep(60)
+        except Exception as e:
+            print(f"Ошибка проверки: {e}")
+
+        await asyncio.sleep(30)  # Проверка каждые 30 секунд
 
 # ==================== ЗАПУСК ====================
 async def main():
+    print("Запуск бота...")
     init_db()
+    print("База данных готова")
     dp.include_router(router)
     asyncio.create_task(check_subscriptions())
+    print("Бот запущен!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
