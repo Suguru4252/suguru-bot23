@@ -3,19 +3,17 @@ import datetime
 import random
 import string
 import os
-from dotenv import load_dotenv
+import asyncio
+import re
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
-import asyncio
-import re
 
 # ==================== КОНФИГ ====================
-load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8203822691:AAHCQP2M8imXF0DvqyntA9UdKPE4Y9Fc5eE")
+BOT_TOKEN = "8203822691:AAHriNfGaWY2ppCZ6bkEM5LpM_pprFyW8OM"
 
 ADMIN_USERNAMES = ["Suguru", "W_u_u_W1", "Dexter"]
 ADMIN_PASSWORDS = ["2a3d4g5j", "2a3D4g5J"]
@@ -166,14 +164,6 @@ def cancel_subscription(user_id):
     conn.commit()
     conn.close()
 
-def get_user_by_code(code):
-    conn = sqlite3.connect("vpn_bot.db")
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE personal_code = ?", (code,))
-    user = cur.fetchone()
-    conn.close()
-    return user
-
 # ==================== КЛАВИАТУРЫ ====================
 def main_menu_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -234,24 +224,24 @@ async def cmd_start(message: Message):
             try:
                 await bot.send_message(
                     admin_id,
-                    f"🆕 Новый пользователь!\n"
-                    f"👤 @{username}\n"
-                    f"📛 {first_name}\n"
-                    f"🔑 Код: <b>{code}</b>"
+                    f"Новый пользователь!\n"
+                    f"Ник: @{username}\n"
+                    f"Имя: {first_name}\n"
+                    f"Код: {code}"
                 )
             except:
                 pass
 
     await message.answer(
-        f"👋 Добро пожаловать в <b>ChugurVPN</b>!\n\n"
-        f"⚠️ <b>ВНИМАНИЕ!</b> Ваш персональный номер:\n"
-        f"🔑 <b><code>{code}</code></b>\n\n"
-        f"📌 <b>ЗАПОМНИТЕ ЕГО!</b> Он нужен для подтверждения оплаты.\n\n"
-        f"🎁 За первое посещение мы дарим вам <b>3 дня пробной подписки!</b>\n\n"
-        f"💳 Для активации оплатите <b>1₽</b> на реквизиты:\n"
-        f"🏦 <b>{PAYMENT_BANK}</b>\n"
-        f"💳 <code>{PAYMENT_CARD}</code>\n\n"
-        f"📝 <b>В сообщении перевода укажите ваш персональный номер: <code>{code}</code></b>",
+        f"Добро пожаловать в ChugurVPN!\n\n"
+        f"ВНИМАНИЕ! Ваш персональный номер:\n"
+        f"{code}\n\n"
+        f"ЗАПОМНИТЕ ЕГО! Он нужен для подтверждения оплаты.\n\n"
+        f"За первое посещение мы дарим вам 3 дня пробной подписки!\n\n"
+        f"Для активации оплатите 1 рубль на реквизиты:\n"
+        f"Банк: {PAYMENT_BANK}\n"
+        f"Карта: {PAYMENT_CARD}\n\n"
+        f"В сообщении перевода укажите ваш персональный номер: {code}",
         reply_markup=main_menu_keyboard()
     )
 
@@ -269,20 +259,20 @@ async def pay_confirm(callback: CallbackQuery):
         try:
             await bot.send_message(
                 admin_id,
-                f"💳 <b>Новая оплата!</b>\n"
-                f"🔑 Персональный номер: <b>{code}</b>\n"
-                f"👤 @{callback.from_user.username}",
+                f"Новая оплата!\n"
+                f"Персональный номер: {code}\n"
+                f"Ник: @{callback.from_user.username}",
                 reply_markup=admin_decision_keyboard(user_id)
             )
         except:
             pass
 
-    await callback.message.answer("✅ Ваш платёж отправлен на модерацию. Ожидайте.")
+    await callback.message.answer("Ваш платёж отправлен на модерацию. Ожидайте.")
     await callback.answer()
 
 @router.callback_query(F.data == "pay_reject")
 async def pay_reject(callback: CallbackQuery):
-    await callback.message.answer("👋 Когда созреете — приходите ещё, мы всегда рады!")
+    await callback.message.answer("Когда созреете - приходите ещё, мы всегда рады!")
     await callback.answer()
 
 # ==================== ПРОДЛЕНИЕ ====================
@@ -299,27 +289,27 @@ async def renew_paid(callback: CallbackQuery):
         try:
             await bot.send_message(
                 admin_id,
-                f"💳 <b>Продление подписки!</b>\n"
-                f"🔑 Персональный номер: <b>{code}</b>\n"
-                f"👤 @{callback.from_user.username}\n"
-                f"💰 Сумма: 50₽",
+                f"Продление подписки!\n"
+                f"Персональный номер: {code}\n"
+                f"Ник: @{callback.from_user.username}\n"
+                f"Сумма: 50 руб.",
                 reply_markup=admin_decision_keyboard(user_id)
             )
         except:
             pass
 
-    await callback.message.answer("✅ Ваш платёж на продление отправлен на модерацию.")
+    await callback.message.answer("Ваш платёж на продление отправлен на модерацию.")
     await callback.answer()
 
 @router.callback_query(F.data == "renew_reject")
 async def renew_reject(callback: CallbackQuery):
-    await callback.message.answer("👋 Будем ждать вас снова!")
+    await callback.message.answer("Будем ждать вас снова!")
     await callback.answer()
 
 # ==================== АДМИН ЛОГИН ====================
 @router.callback_query(F.data == "admin_login")
 async def admin_login(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("👤 Введите секретный никнейм:")
+    await callback.message.answer("Введите секретный никнейм:")
     await state.set_state(AdminAuth.waiting_for_username)
     await callback.answer()
 
@@ -327,10 +317,10 @@ async def admin_login(callback: CallbackQuery, state: FSMContext):
 async def check_username(message: Message, state: FSMContext):
     if message.text in ADMIN_USERNAMES:
         await state.update_data(username=message.text)
-        await message.answer("🔑 Введите пароль:")
+        await message.answer("Введите пароль:")
         await state.set_state(AdminAuth.waiting_for_password)
     else:
-        await message.answer("❌ Неверный никнейм!")
+        await message.answer("Неверный никнейм!")
 
 @router.message(AdminAuth.waiting_for_password)
 async def check_password(message: Message, state: FSMContext):
@@ -338,11 +328,11 @@ async def check_password(message: Message, state: FSMContext):
         user_id = message.from_user.id
         set_admin(user_id)
         await message.answer(
-            "✅ <b>Добро пожаловать в админ-панель!</b>\n\n"
-            "📋 Вы будете получать уведомления об оплатах и истечении подписок."
+            "Добро пожаловать в админ-панель!\n\n"
+            "Вы будете получать уведомления об оплатах и истечении подписок."
         )
     else:
-        await message.answer("❌ Неверный пароль!")
+        await message.answer("Неверный пароль!")
     await state.clear()
 
 # ==================== АДМИН: ВЫДАТЬ ССЫЛКУ ====================
@@ -350,7 +340,7 @@ async def check_password(message: Message, state: FSMContext):
 async def approve_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
     admin_temp_data[callback.from_user.id] = {"user_id": user_id}
-    await callback.message.answer("🔗 Отправьте ссылку (или любое сообщение) для пользователя:")
+    await callback.message.answer("Отправьте ссылку (или любое сообщение) для пользователя:")
     await state.set_state(AdminSendLink.waiting_for_link)
     await callback.answer()
 
@@ -362,9 +352,9 @@ async def get_link(message: Message, state: FSMContext):
     admin_temp_data[admin_id] = data
 
     await message.answer(
-        "📅 Укажите дату истечения подписки в формате:\n"
-        "<code>ДД:ММ:ГГГГ ЧЧ:ММ</code>\n\n"
-        "Например: <code>15:12:2026 14:30</code>"
+        "Укажите дату истечения подписки в формате:\n"
+        "ДД:ММ:ГГГГ ЧЧ:ММ\n\n"
+        "Например: 15:12:2026 14:30"
     )
     await state.set_state(AdminSendLink.waiting_for_date)
 
@@ -377,14 +367,14 @@ async def get_date_and_send(message: Message, state: FSMContext):
 
     date_pattern = r"^\d{2}:\d{2}:\d{4} \d{2}:\d{2}$"
     if not re.match(date_pattern, message.text):
-        await message.answer("❌ Неверный формат! Используйте: ДД:ММ:ГГГГ ЧЧ:ММ")
+        await message.answer("Неверный формат! Используйте: ДД:ММ:ГГГГ ЧЧ:ММ")
         return
 
     try:
         end_date = datetime.datetime.strptime(message.text, "%d:%m:%Y %H:%M")
         end_date_str = end_date.strftime("%Y-%m-%d %H:%M")
     except:
-        await message.answer("❌ Некорректная дата!")
+        await message.answer("Некорректная дата!")
         return
 
     if user_id:
@@ -393,13 +383,13 @@ async def get_date_and_send(message: Message, state: FSMContext):
         try:
             await bot.send_message(
                 user_id,
-                f"✅ <b>Подписка активирована!</b>\n\n"
+                f"Подписка активирована!\n\n"
                 f"{link}\n\n"
-                f"⏰ Действует до: <b>{end_date.strftime('%d.%m.%Y %H:%M')}</b>"
+                f"Действует до: {end_date.strftime('%d.%m.%Y %H:%M')}"
             )
-            await message.answer("✅ Сообщение отправлено пользователю!")
+            await message.answer("Сообщение отправлено пользователю!")
         except:
-            await message.answer("❌ Не удалось отправить сообщение.")
+            await message.answer("Не удалось отправить сообщение.")
 
     await state.clear()
 
@@ -408,7 +398,7 @@ async def get_date_and_send(message: Message, state: FSMContext):
 async def reject_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
     admin_temp_data[callback.from_user.id] = {"user_id": user_id}
-    await callback.message.answer("📝 Напишите причину отказа:")
+    await callback.message.answer("Напишите причину отказа:")
     await state.set_state(AdminRejectReason.waiting_for_reason)
     await callback.answer()
 
@@ -422,11 +412,11 @@ async def send_reject(message: Message, state: FSMContext):
         try:
             await bot.send_message(
                 user_id,
-                f"❌ <b>Запрос отклонён.</b>\n\n📝 Причина: {message.text}"
+                f"Запрос отклонён.\n\nПричина: {message.text}"
             )
-            await message.answer("✅ Уведомление отправлено!")
+            await message.answer("Уведомление отправлено!")
         except:
-            await message.answer("❌ Ошибка отправки.")
+            await message.answer("Ошибка отправки.")
 
     await state.clear()
 
@@ -434,21 +424,23 @@ async def send_reject(message: Message, state: FSMContext):
 @router.callback_query(F.data.startswith("take_"))
 async def take_subscription(callback: CallbackQuery):
     user_id = int(callback.data.split("_")[1])
+    user = get_user(user_id)
+    code = user[3]
     cancel_subscription(user_id)
 
     try:
         await bot.send_message(
             user_id,
-            f"⏰ <b>Подписка закончилась!</b>\n\n"
-            f"💳 Чтобы продлить — оплатите <b>50₽</b>:\n"
-            f"🏦 {PAYMENT_BANK}\n"
-            f"💳 <code>{PAYMENT_CARD}</code>\n\n"
-            f"📝 В сообщении укажите ваш код: <b>{get_user(user_id)[3]}</b>",
+            f"Подписка закончилась!\n\n"
+            f"Чтобы продлить - оплатите 50 руб.:\n"
+            f"Банк: {PAYMENT_BANK}\n"
+            f"Карта: {PAYMENT_CARD}\n\n"
+            f"В сообщении укажите ваш код: {code}",
             reply_markup=renew_menu_keyboard()
         )
-        await callback.message.answer("✅ Подписка забрана. Пользователю отправлено уведомление.")
+        await callback.message.answer("Подписка забрана. Пользователю отправлено уведомление.")
     except:
-        await callback.message.answer("❌ Ошибка отправки пользователю.")
+        await callback.message.answer("Ошибка отправки пользователю.")
 
     await callback.answer()
 
@@ -460,11 +452,11 @@ async def keep_subscription(callback: CallbackQuery):
     try:
         await bot.send_message(
             user_id,
-            "🎁 <b>Подписка продлена на 1 день!</b>\nСпасибо что вы с нами!"
+            "Подписка продлена на 1 день! Спасибо что вы с нами!"
         )
-        await callback.message.answer("✅ Подписка продлена на 1 день.")
+        await callback.message.answer("Подписка продлена на 1 день.")
     except:
-        await callback.message.answer("❌ Ошибка отправки.")
+        await callback.message.answer("Ошибка отправки.")
 
     await callback.answer()
 
@@ -487,15 +479,15 @@ async def check_subscriptions():
                 try:
                     await bot.send_message(
                         admin_id,
-                        f"⏰ <b>Подписка истекла!</b>\n"
-                        f"🔑 Код: <b>{code}</b>\n"
-                        f"👤 ID: {user_id}",
+                        f"Подписка истекла!\n"
+                        f"Код: {code}\n"
+                        f"ID: {user_id}",
                         reply_markup=subscription_expired_keyboard(user_id)
                     )
                 except:
                     pass
 
-        await asyncio.sleep(60)  # Проверка каждую минуту
+        await asyncio.sleep(60)
 
 # ==================== ЗАПУСК ====================
 async def main():
