@@ -4,15 +4,17 @@ import random
 import string
 import asyncio
 import re
+from zoneinfo import ZoneInfo
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ==================== КОНФИГ ====================
 BOT_TOKEN = "8203822691:AAHriNfGaWY2ppCZ6bkEM5LpM_pprFyW8OM"
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 ADMIN_USERNAMES = ["Suguru", "W_u_u_W1", "Dexter"]
 ADMIN_PASSWORDS = ["2a3d4g5j", "2a3D4g5J"]
@@ -151,7 +153,7 @@ def extend_subscription(user_id, days):
         new_end_str = new_end.strftime("%Y-%m-%d %H:%M")
         cur.execute("UPDATE users SET subscription_end = ?, expired_notified = 0 WHERE user_id = ?", (new_end_str, user_id))
     else:
-        new_end = datetime.datetime.now() + datetime.timedelta(days=days)
+        new_end = datetime.datetime.now(MOSCOW_TZ) + datetime.timedelta(days=days)
         new_end_str = new_end.strftime("%Y-%m-%d %H:%M")
         cur.execute("UPDATE users SET subscription_end = ?, has_active_sub = 1, expired_notified = 0 WHERE user_id = ?", (new_end_str, user_id))
     conn.commit()
@@ -278,7 +280,7 @@ async def pay_confirm(callback: CallbackQuery):
 
 @router.callback_query(F.data == "pay_reject")
 async def pay_reject(callback: CallbackQuery):
-    await callback.answer("Вы отказались от оплаты.", show_alert=False)
+    await callback.answer()
     await callback.message.answer("Когда созреете - приходите ещё, мы всегда рады!")
 
 # ==================== ПРОДЛЕНИЕ ====================
@@ -308,7 +310,7 @@ async def renew_paid(callback: CallbackQuery):
 
 @router.callback_query(F.data == "renew_reject")
 async def renew_reject(callback: CallbackQuery):
-    await callback.answer("Вы отказались от продления.", show_alert=False)
+    await callback.answer()
     await callback.message.answer("Будем ждать вас снова!")
 
 # ==================== АДМИН ЛОГИН ====================
@@ -334,7 +336,9 @@ async def check_password(message: Message, state: FSMContext):
         set_admin(user_id)
         await message.answer(
             "Добро пожаловать в админ-панель!\n\n"
-            "Вы будете получать уведомления об оплатах и истечении подписок."
+            "Команды админа:\n"
+            "/time - текущее время (МСК)\n"
+            "/check_expired - проверка подписок"
         )
         await state.clear()
     else:
@@ -356,10 +360,11 @@ async def get_link(message: Message, state: FSMContext):
     data["link"] = message.text
     admin_temp_data[admin_id] = data
 
+    now_msk = datetime.datetime.now(MOSCOW_TZ)
     await message.answer(
-        "Укажите дату истечения подписки в формате:\n"
-        "ДД:ММ:ГГГГ ЧЧ:ММ\n\n"
-        "Например: 15:12:2026 14:30"
+        f"Укажите дату истечения подписки в формате:\n"
+        f"ДД:ММ:ГГГГ ЧЧ:ММ (по МСК)\n\n"
+        f"Например: {now_msk.strftime('%d:%m:%Y %H:%M')}"
     )
     await state.set_state(AdminSendLink.waiting_for_date)
 
@@ -376,10 +381,13 @@ async def get_date_and_send(message: Message, state: FSMContext):
         return
 
     try:
-        end_date = datetime.datetime.strptime(message.text, "%d:%m:%Y %H:%M")
-        end_date_str = end_date.strftime("%Y-%m-%d %H:%M")
-    except:
-        await message.answer("Некорректная дата!")
+        # Парсим как московское время
+        end_date_msk = datetime.datetime.strptime(message.text, "%d:%m:%Y %H:%M")
+        end_date_msk = end_date_msk.replace(tzinfo=MOSCOW_TZ)
+        # Сохраняем в базу в том же формате (строка)
+        end_date_str = end_date_msk.strftime("%Y-%m-%d %H:%M")
+    except Exception as e:
+        await message.answer(f"Ошибка даты: {e}")
         return
 
     if user_id:
@@ -390,11 +398,11 @@ async def get_date_and_send(message: Message, state: FSMContext):
                 user_id,
                 f"Подписка активирована!\n\n"
                 f"{link}\n\n"
-                f"Действует до: {end_date.strftime('%d.%m.%Y %H:%M')}"
+                f"Действует до: {end_date_msk.strftime('%d.%m.%Y %H:%M')} (МСК)"
             )
-            await message.answer("Сообщение отправлено пользователю!")
+            await message.answer(f"Готово! Подписка активна до {end_date_msk.strftime('%d.%m.%Y %H:%M')} (МСК)")
         except:
-            await message.answer("Не удалось отправить сообщение.")
+            await message.answer("Не удалось отправить сообщение пользователю.")
 
     await state.clear()
 
@@ -461,53 +469,96 @@ async def keep_subscription(callback: CallbackQuery):
     except:
         await callback.answer("Ошибка отправки.", show_alert=True)
 
-# ==================== ФОНОВАЯ ПРОВЕРКА ====================
+# ==================== КОМАНДЫ ====================
+@router.message(Command("time"))
+async def cmd_time(message: Message):
+    now_msk = datetime.datetime.now(MOSCOW_TZ)
+    await message.answer(
+        f"Текущее время (МСК):\n"
+        f"{now_msk.strftime('%d.%m.%Y %H:%M')}\n\n"
+        f"Формат для ввода: {now_msk.strftime('%d:%m:%Y %H:%M')}"
+    )
+
+@router.message(Command("check_expired"))
+async def cmd_check_expired(message: Message):
+    user = get_user(message.from_user.id)
+    if not user or user[5] != 1:
+        await message.answer("Нет доступа.")
+        return
+
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    now_msk = datetime.datetime.now(MOSCOW_TZ).strftime("%Y-%m-%d %H:%M")
+    
+    cur.execute("SELECT user_id, personal_code, subscription_end, expired_notified, has_active_sub FROM users WHERE subscription_end IS NOT NULL")
+    all_subs = cur.fetchall()
+    conn.close()
+
+    if not all_subs:
+        await message.answer("Нет активных подписок.")
+        return
+
+    msg = f"Текущее время (МСК): {now_msk}\n\n"
+    for sub in all_subs:
+        msg += f"ID: {sub[0]}, Код: {sub[1]}, До: {sub[2]}, Увед: {sub[3]}, Актив: {sub[4]}\n"
+    
+    await message.answer(msg)
+
+# ==================== ФОНОВАЯ ПРОВЕРКА (МСК) ====================
 async def check_subscriptions():
     while True:
         try:
+            now_msk = datetime.datetime.now(MOSCOW_TZ)
+            now_str = now_msk.strftime("%Y-%m-%d %H:%M")
+            
             admins = get_admins()
+            if not admins:
+                await asyncio.sleep(30)
+                continue
+                
             conn = sqlite3.connect("vpn_bot.db")
             cur = conn.cursor()
-            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             
-            # Ищем подписки которые истекли но ещё не уведомлены
+            # Ищем истекшие подписки (время сравнивается как строки, формат одинаковый)
             cur.execute(
-                "SELECT user_id, personal_code FROM users WHERE subscription_end IS NOT NULL AND subscription_end <= ? AND expired_notified = 0 AND has_active_sub = 1",
-                (now,)
+                "SELECT user_id, personal_code, subscription_end FROM users WHERE has_active_sub = 1 AND subscription_end IS NOT NULL AND subscription_end <= ? AND expired_notified = 0",
+                (now_str,)
             )
             expired = cur.fetchall()
             conn.close()
 
-            for user_id, code in expired:
-                # Отмечаем что уведомили
+            if expired:
+                print(f"[{now_str}] Найдено истекших подписок: {len(expired)}")
+                
+            for user_id, code, end_date in expired:
+                print(f"[УВЕДОМЛЕНИЕ] Код {code} истек {end_date}, сейчас {now_str}")
                 mark_expired_notified(user_id)
                 
-                # Уведомляем всех админов
                 for admin_id in admins:
                     try:
                         await bot.send_message(
                             admin_id,
                             f"Подписка истекла!\n"
                             f"Код: {code}\n"
-                            f"ID: {user_id}",
+                            f"ID: {user_id}\n"
+                            f"Истекла: {end_date} (МСК)",
                             reply_markup=subscription_expired_keyboard(user_id)
                         )
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"Ошибка отправки админу {admin_id}: {e}")
 
         except Exception as e:
             print(f"Ошибка проверки: {e}")
 
-        await asyncio.sleep(30)  # Проверка каждые 30 секунд
+        await asyncio.sleep(30)
 
 # ==================== ЗАПУСК ====================
 async def main():
-    print("Запуск бота...")
+    print("=== ЗАПУСК БОТА (МСК) ===")
+    print(f"Текущее время: {datetime.datetime.now(MOSCOW_TZ).strftime('%d.%m.%Y %H:%M')}")
     init_db()
-    print("База данных готова")
     dp.include_router(router)
     asyncio.create_task(check_subscriptions())
-    print("Бот запущен!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
