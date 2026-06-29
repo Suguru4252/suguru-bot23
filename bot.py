@@ -14,14 +14,13 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 # ==================== КОНФИГ ====================
 BOT_TOKEN = "8203822691:AAHriNfGaWY2ppCZ6bkEM5LpM_pprFyW8OM"
-BOT_USERNAME = "ChugurVPNBot"  # Замени на юзернейм своего бота без @
+BOT_USERNAME = "ChugurVPNBot"
 
 ADMIN_USERNAMES = ["Suguru", "W_u_u_W1", "Dexter"]
 ADMIN_PASSWORDS = ["2a3d4g5j", "2a3D4g5J"]
 PAYMENT_CARD = "2200153288930010"
 PAYMENT_BANK = "Альфа-Банк"
 
-# Тарифы
 TARIFFS = {
     "14_days": {"name": "14 дней", "price": 50, "days": 14},
     "1_month": {"name": "1 месяц", "price": 90, "days": 30},
@@ -64,7 +63,7 @@ def init_db():
             tariff TEXT,
             price INTEGER,
             days INTEGER,
-            status TEXT DEFAULT 'pending',
+            status TEXT DEFAULT 'waiting_payment',
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -72,6 +71,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+# ---------- ПОЛЬЗОВАТЕЛИ ----------
 def get_user(user_id):
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
@@ -79,6 +79,12 @@ def get_user(user_id):
     user = cur.fetchone()
     conn.close()
     return user
+
+def is_admin(user_id):
+    user = get_user(user_id)
+    if user and user[6] == 1:  # is_admin теперь на индексе 6
+        return True
+    return False
 
 def add_user(user_id, username, first_name, ref_code=None):
     conn = sqlite3.connect("vpn_bot.db")
@@ -89,7 +95,6 @@ def add_user(user_id, username, first_name, ref_code=None):
         ref = str(uuid.uuid4())[:8]
         ref_by = None
         
-        # Если пришёл по реферальной ссылке
         if ref_code:
             cur.execute("SELECT user_id FROM users WHERE ref_code = ?", (ref_code,))
             referrer = cur.fetchone()
@@ -104,7 +109,7 @@ def add_user(user_id, username, first_name, ref_code=None):
         conn.close()
         return True, code, ref, ref_by
     conn.close()
-    return False, existing[3], existing[6], existing[7]
+    return False, existing[3], existing[8], existing[9]
 
 def generate_unique_code():
     conn = sqlite3.connect("vpn_bot.db")
@@ -118,12 +123,30 @@ def generate_unique_code():
         if code not in existing_codes:
             return code
 
-def add_payment(user_id, code, tariff, price, days):
+def set_admin(user_id):
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET is_admin = 1 WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+# ---------- ПЛАТЕЖИ ----------
+def create_payment(user_id, code, tariff, price, days):
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
     cur.execute(
         "INSERT INTO payments (user_id, personal_code, tariff, price, days) VALUES (?, ?, ?, ?, ?)",
         (user_id, code, tariff, price, days)
+    )
+    conn.commit()
+    conn.close()
+
+def confirm_payment(user_id):
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE payments SET status = 'pending' WHERE user_id = ? AND status = 'waiting_payment'",
+        (user_id,)
     )
     conn.commit()
     conn.close()
@@ -134,7 +157,6 @@ def activate_subscription(user_id, link, end_date_str, days):
     
     user = get_user(user_id)
     if user and user[4]:
-        # Продление существующей подписки
         current_end = datetime.datetime.strptime(user[4], "%d:%m:%Y %H:%M")
         new_end = current_end + datetime.timedelta(days=days)
         new_end_str = new_end.strftime("%d:%m:%Y %H:%M")
@@ -161,21 +183,6 @@ def reject_payment_db(user_id):
         "UPDATE payments SET status = 'rejected' WHERE user_id = ? AND status = 'pending'",
         (user_id,)
     )
-    conn.commit()
-    conn.close()
-
-def get_admins():
-    conn = sqlite3.connect("vpn_bot.db")
-    cur = conn.cursor()
-    cur.execute("SELECT user_id FROM users WHERE is_admin = 1")
-    admins = [row[0] for row in cur.fetchall()]
-    conn.close()
-    return admins
-
-def set_admin(user_id):
-    conn = sqlite3.connect("vpn_bot.db")
-    cur = conn.cursor()
-    cur.execute("UPDATE users SET is_admin = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
     conn.close()
 
@@ -209,6 +216,15 @@ def give_ref_bonus(user_id):
     conn.commit()
     conn.close()
 
+# ---------- ПОЛУЧЕНИЕ ДАННЫХ ----------
+def get_admins():
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute("SELECT user_id FROM users WHERE is_admin = 1")
+    admins = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return admins
+
 def get_all_active_subscriptions():
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
@@ -225,13 +241,27 @@ def get_pending_payments():
     conn.close()
     return pending
 
+def get_user_pending_payment(user_id):
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM payments WHERE user_id = ? AND status = 'waiting_payment' ORDER BY created_at DESC LIMIT 1", (user_id,))
+    payment = cur.fetchone()
+    conn.close()
+    return payment
+
 # ==================== КЛАВИАТУРЫ ====================
-def main_menu_keyboard():
-    return InlineKeyboardMarkup(inline_keyboard=[
+def main_menu_keyboard(user_id):
+    buttons = [
         [InlineKeyboardButton(text="💳 Выбрать тариф", callback_data="select_tariff")],
         [InlineKeyboardButton(text="👥 Реферальная ссылка", callback_data="ref_info")],
-        [InlineKeyboardButton(text="🔐 Админ панель", callback_data="admin_login")]
-    ])
+    ]
+    # Если админ - показываем кнопку админ-панели
+    if is_admin(user_id):
+        buttons.append([InlineKeyboardButton(text="🔐 Админ панель", callback_data="admin_panel")])
+    else:
+        buttons.append([InlineKeyboardButton(text="🔐 Админ панель", callback_data="admin_login")])
+    
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def tariff_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -240,6 +270,12 @@ def tariff_keyboard():
         [InlineKeyboardButton(text="📅 2 месяца - 180₽", callback_data="tariff_2_months")],
         [InlineKeyboardButton(text="📅 6 месяцев - 800₽", callback_data="tariff_6_months")],
         [InlineKeyboardButton(text="📅 1 год - 1200₽", callback_data="tariff_1_year")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_main")]
+    ])
+
+def i_paid_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Я оплатил", callback_data="i_paid")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_main")]
     ])
 
@@ -254,7 +290,8 @@ def admin_decision_keyboard(user_id):
 def admin_panel_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📋 Все активные подписки", callback_data="admin_list_subs")],
-        [InlineKeyboardButton(text="📝 Ожидают модерации", callback_data="admin_list_pending")]
+        [InlineKeyboardButton(text="📝 Ожидают модерации", callback_data="admin_list_pending")],
+        [InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main")]
     ])
 
 def subscription_action_keyboard(user_id):
@@ -300,7 +337,6 @@ async def cmd_start(message: Message):
     username = message.from_user.username or "unknown"
     first_name = message.from_user.first_name or "unknown"
 
-    # Проверяем реферальный код
     ref_code = None
     args = message.text.split()
     if len(args) > 1:
@@ -309,7 +345,6 @@ async def cmd_start(message: Message):
     is_new, code, ref, ref_by = add_user(user_id, username, first_name, ref_code)
 
     if is_new:
-        # Уведомляем админов
         admins = get_admins()
         for admin_id in admins:
             try:
@@ -323,7 +358,6 @@ async def cmd_start(message: Message):
             except:
                 pass
 
-        # Если пришёл по рефералке - уведомляем админов
         if ref_by and ref_by != user_id:
             ref_user = get_user(ref_by)
             if ref_user:
@@ -345,7 +379,7 @@ async def cmd_start(message: Message):
         f"{code}\n\n"
         f"ЗАПОМНИТЕ ЕГО! Он нужен для подтверждения оплаты.\n\n"
         f"Выберите действие:",
-        reply_markup=main_menu_keyboard()
+        reply_markup=main_menu_keyboard(user_id)
     )
 
 # ==================== ВЫБОР ТАРИФА ====================
@@ -367,22 +401,7 @@ async def tariff_selected(callback: CallbackQuery):
     user = get_user(user_id)
     code = user[3]
 
-    add_payment(user_id, code, tariff["name"], tariff["price"], tariff["days"])
-
-    admins = get_admins()
-    for admin_id in admins:
-        try:
-            await bot.send_message(
-                admin_id,
-                f"Новая оплата!\n"
-                f"Тариф: {tariff['name']}\n"
-                f"Сумма: {tariff['price']}₽\n"
-                f"Персональный номер: {code}\n"
-                f"Ник: @{callback.from_user.username}",
-                reply_markup=admin_decision_keyboard(user_id)
-            )
-        except:
-            pass
+    create_payment(user_id, code, tariff["name"], tariff["price"], tariff["days"])
 
     await callback.answer()
     await callback.message.answer(
@@ -392,7 +411,42 @@ async def tariff_selected(callback: CallbackQuery):
         f"Банк: {PAYMENT_BANK}\n"
         f"Карта: {PAYMENT_CARD}\n\n"
         f"В сообщении перевода укажите ваш код: {code}\n\n"
-        f"Ожидайте подтверждения от модератора.",
+        f"После оплаты нажмите кнопку «Я оплатил»",
+        reply_markup=i_paid_keyboard()
+    )
+
+# ==================== Я ОПЛАТИЛ ====================
+@router.callback_query(F.data == "i_paid")
+async def i_paid(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    user = get_user(user_id)
+    code = user[3]
+
+    payment = get_user_pending_payment(user_id)
+    if not payment:
+        await callback.answer("Нет активного тарифа для оплаты. Выберите тариф сначала.", show_alert=True)
+        return
+
+    confirm_payment(user_id)
+
+    admins = get_admins()
+    for admin_id in admins:
+        try:
+            await bot.send_message(
+                admin_id,
+                f"Новая оплата!\n"
+                f"Тариф: {payment[3]}\n"
+                f"Сумма: {payment[4]}₽\n"
+                f"Персональный номер: {code}\n"
+                f"Ник: @{callback.from_user.username}",
+                reply_markup=admin_decision_keyboard(user_id)
+            )
+        except:
+            pass
+
+    await callback.answer("Платёж отправлен на модерацию. Ожидайте подтверждения.", show_alert=True)
+    await callback.message.answer(
+        "Ожидайте подтверждения от модератора.",
         reply_markup=back_to_main_keyboard()
     )
 
@@ -401,7 +455,7 @@ async def tariff_selected(callback: CallbackQuery):
 async def ref_info(callback: CallbackQuery):
     user_id = callback.from_user.id
     user = get_user(user_id)
-    ref_code = user[6]
+    ref_code = user[8]
     
     ref_link = f"https://t.me/{BOT_USERNAME}?start={ref_code}"
     
@@ -409,16 +463,15 @@ async def ref_info(callback: CallbackQuery):
     await callback.message.answer(
         f"Ваша реферальная ссылка:\n"
         f"{ref_link}\n\n"
-        f"За каждого приглашённого пользователя вы получаете +1 день к подписке!\n\n"
-        f"Отправьте эту ссылку друзьям и получайте бонусы.",
+        f"За каждого приглашённого пользователя вы получаете +1 день к подписке!",
         reply_markup=back_to_main_keyboard()
     )
 
-# ==================== НАЗАД В МЕНЮ ====================
+# ==================== НАЗАД ====================
 @router.callback_query(F.data == "back_to_main")
 async def back_to_main(callback: CallbackQuery):
     await callback.answer()
-    await callback.message.answer("Главное меню:", reply_markup=main_menu_keyboard())
+    await callback.message.answer("Главное меню:", reply_markup=main_menu_keyboard(callback.from_user.id))
 
 # ==================== АДМИН ЛОГИН ====================
 @router.callback_query(F.data == "admin_login")
@@ -449,11 +502,19 @@ async def check_password(message: Message, state: FSMContext):
     else:
         await message.answer("Неверный пароль! Попробуйте ещё раз или нажмите /start для выхода.")
 
-# ==================== АДМИН: МЕНЮ ====================
+# ==================== АДМИН ПАНЕЛЬ (для тех кто уже вошёл) ====================
+@router.callback_query(F.data == "admin_panel")
+async def admin_panel(callback: CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Нет доступа! Войдите в админ-панель.", show_alert=True)
+        return
+    await callback.answer()
+    await callback.message.answer("Админ-панель:", reply_markup=admin_panel_keyboard())
+
+# ==================== АДМИН: АКТИВНЫЕ ПОДПИСКИ ====================
 @router.callback_query(F.data == "admin_list_subs")
 async def admin_list_subs(callback: CallbackQuery):
-    user = get_user(callback.from_user.id)
-    if not user or user[5] != 1:
+    if not is_admin(callback.from_user.id):
         await callback.answer("Нет доступа!", show_alert=True)
         return
 
@@ -475,10 +536,10 @@ async def admin_list_subs(callback: CallbackQuery):
             reply_markup=subscription_action_keyboard(user_id)
         )
 
+# ==================== АДМИН: ОЖИДАЮЩИЕ ====================
 @router.callback_query(F.data == "admin_list_pending")
 async def admin_list_pending(callback: CallbackQuery):
-    user = get_user(callback.from_user.id)
-    if not user or user[5] != 1:
+    if not is_admin(callback.from_user.id):
         await callback.answer("Нет доступа!", show_alert=True)
         return
 
@@ -543,7 +604,6 @@ async def get_date_and_send(message: Message, state: FSMContext):
         return
 
     if user_id:
-        # Получаем дни из последнего платежа
         conn = sqlite3.connect("vpn_bot.db")
         cur = conn.cursor()
         cur.execute("SELECT days FROM payments WHERE user_id = ? AND status = 'pending' ORDER BY created_at DESC LIMIT 1", (user_id,))
@@ -646,10 +706,9 @@ async def keep_subscription(callback: CallbackQuery):
 async def ref_bonus(callback: CallbackQuery):
     parts = callback.data.split("_")
     ref_by = int(parts[1])
-    new_user_id = int(parts[2])
 
     user = get_user(ref_by)
-    if user and user[8] == 0:  # Если бонус ещё не выдан
+    if user and user[10] == 0:
         give_ref_bonus(ref_by)
         extend_subscription(ref_by, 1)
         
