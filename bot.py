@@ -7,14 +7,14 @@ import re
 import uuid
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ==================== КОНФИГ ====================
 BOT_TOKEN = "8203822691:AAHriNfGaWY2ppCZ6bkEM5LpM_pprFyW8OM"
-BOT_USERNAME = "ChugurVPNBot"
+BOT_USERNAME = "shtil_ms12bot"
 
 ADMIN_USERNAMES = ["Suguru", "W_u_u_W1", "Dexter"]
 ADMIN_PASSWORDS = ["2a3d4g5j", "2a3D4g5J"]
@@ -99,14 +99,10 @@ def add_user(user_id, username, first_name, ref_code=None):
         code = generate_unique_code()
         ref = str(uuid.uuid4())[:8]
         ref_by = None
-        
-        # Проверяем реферальный код
         if ref_code:
             referrer = get_user_by_ref_code(ref_code)
             if referrer and referrer[0] != user_id:
                 ref_by = referrer[0]
-                print(f"[РЕФ] Пользователь {user_id} пришёл по коду {ref_code} от {ref_by}")
-        
         cur.execute(
             "INSERT INTO users (user_id, username, first_name, personal_code, ref_code, ref_by) VALUES (?, ?, ?, ?, ?, ?)",
             (user_id, username, first_name, code, ref, ref_by)
@@ -343,17 +339,14 @@ async def cmd_start(message: Message):
     username = message.from_user.username or "unknown"
     first_name = message.from_user.first_name or "unknown"
 
-    # Получаем реферальный код из ссылки
     ref_code = None
     args = message.text.split()
     if len(args) > 1:
         ref_code = args[1]
-        print(f"[СТАРТ] Пользователь {user_id} с реф-кодом: {ref_code}")
 
     is_new, code, ref, ref_by = add_user(user_id, username, first_name, ref_code)
 
     if is_new:
-        # Уведомление админам о новом пользователе
         admins = get_admins()
         for admin_id in admins:
             try:
@@ -366,7 +359,6 @@ async def cmd_start(message: Message):
             except:
                 pass
 
-        # Если пришёл по рефералке - уведомление админам о бонусе
         if ref_by:
             ref_user = get_user(ref_by)
             if ref_user and ref_user[10] == 0:
@@ -381,20 +373,6 @@ async def cmd_start(message: Message):
                         )
                     except:
                         pass
-    else:
-        # Если пользователь уже был, но пришёл по реферальной ссылке
-        if ref_code and not ref_by:
-            # Проверяем может он уже есть в базе но без реферера
-            user = get_user(user_id)
-            if user and user[9] is None:
-                referrer = get_user_by_ref_code(ref_code)
-                if referrer and referrer[0] != user_id:
-                    conn = sqlite3.connect("vpn_bot.db")
-                    cur = conn.cursor()
-                    cur.execute("UPDATE users SET ref_by = ? WHERE user_id = ?", (referrer[0], user_id))
-                    conn.commit()
-                    conn.close()
-                    print(f"[РЕФ] Обновлён реферер для {user_id}: {referrer[0]}")
 
     await message.answer(
         f"👋 Добро пожаловать в ChugurVPN!\n\n"
@@ -404,7 +382,6 @@ async def cmd_start(message: Message):
         reply_markup=main_menu_keyboard(user_id)
     )
 
-# ==================== ВЫБОР ТАРИФА ====================
 @router.callback_query(F.data == "select_tariff")
 async def select_tariff(callback: CallbackQuery):
     await callback.answer()
@@ -434,7 +411,6 @@ async def tariff_selected(callback: CallbackQuery):
         reply_markup=i_paid_keyboard()
     )
 
-# ==================== Я ОПЛАТИЛ ====================
 @router.callback_query(F.data == "i_paid")
 async def i_paid(callback: CallbackQuery):
     user_id = callback.from_user.id
@@ -467,32 +443,25 @@ async def i_paid(callback: CallbackQuery):
     await callback.answer("✅ Платёж отправлен на модерацию!", show_alert=True)
     await callback.message.answer("⏳ Ожидайте подтверждения...", reply_markup=back_to_main_keyboard())
 
-# ==================== РЕФЕРАЛЬНАЯ ССЫЛКА ====================
 @router.callback_query(F.data == "ref_info")
 async def ref_info(callback: CallbackQuery):
     user_id = callback.from_user.id
     user = get_user(user_id)
     ref_code = user[8]
-    
-    # Прямая ссылка с реферальным кодом
     ref_link = f"https://t.me/{BOT_USERNAME}?start={ref_code}"
-    
     await callback.answer()
     await callback.message.answer(
         f"👥 Ваша реферальная ссылка:\n\n"
         f"{ref_link}\n\n"
-        f"🎁 За каждого друга, перешедшего по этой ссылке, вы получите +1 день подписки!\n\n"
-        f"📤 Отправьте эту ссылку друзьям.",
+        f"🎁 За каждого друга — +1 день подписки!",
         reply_markup=back_to_main_keyboard()
     )
 
-# ==================== НАЗАД ====================
 @router.callback_query(F.data == "back_to_main")
 async def back_to_main(callback: CallbackQuery):
     await callback.answer()
     await callback.message.answer("🏠 Главное меню:", reply_markup=main_menu_keyboard(callback.from_user.id))
 
-# ==================== АДМИН ЛОГИН ====================
 @router.callback_query(F.data == "admin_login")
 async def admin_login(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
@@ -518,7 +487,6 @@ async def check_password(message: Message, state: FSMContext):
     else:
         await message.answer("❌ Неверный пароль!")
 
-# ==================== АДМИН ПАНЕЛЬ ====================
 @router.callback_query(F.data == "admin_panel")
 async def admin_panel(callback: CallbackQuery):
     if is_admin(callback.from_user.id):
@@ -527,20 +495,16 @@ async def admin_panel(callback: CallbackQuery):
     else:
         await callback.answer("❌ Нет доступа!", show_alert=True)
 
-# ==================== АДМИН: АКТИВНЫЕ ПОДПИСКИ ====================
 @router.callback_query(F.data == "admin_list_subs")
 async def admin_list_subs(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
         await callback.answer("❌ Нет доступа!", show_alert=True)
         return
-
     await callback.answer()
     subs = get_all_active_subscriptions()
-
     if not subs:
         await callback.message.answer("📭 Нет активных подписок.")
         return
-
     for user_id, code, username, end_date, link in subs:
         await callback.message.answer(
             f"📋 Активная подписка:\n\n"
@@ -551,20 +515,16 @@ async def admin_list_subs(callback: CallbackQuery):
             reply_markup=subscription_action_keyboard(user_id)
         )
 
-# ==================== АДМИН: ОЖИДАЮЩИЕ ====================
 @router.callback_query(F.data == "admin_list_pending")
 async def admin_list_pending(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
         await callback.answer("❌ Нет доступа!", show_alert=True)
         return
-
     await callback.answer()
     pending = get_pending_payments()
-
     if not pending:
         await callback.message.answer("📭 Нет ожидающих модерации.")
         return
-
     for user_id, code, username, tariff, price, days in pending:
         await callback.message.answer(
             f"📝 Ожидает модерации:\n\n"
@@ -576,7 +536,6 @@ async def admin_list_pending(callback: CallbackQuery):
             reply_markup=admin_decision_keyboard(user_id)
         )
 
-# ==================== АДМИН: ВЫДАТЬ ССЫЛКУ ====================
 @router.callback_query(F.data.startswith("approve_"))
 async def approve_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
@@ -591,7 +550,6 @@ async def get_link(message: Message, state: FSMContext):
     data = admin_temp_data.get(admin_id, {})
     data["link"] = message.text
     admin_temp_data[admin_id] = data
-
     now = datetime.datetime.now()
     await message.answer(
         f"📅 Укажите дату истечения:\n"
@@ -606,18 +564,15 @@ async def get_date_and_send(message: Message, state: FSMContext):
     data = admin_temp_data.get(admin_id, {})
     user_id = data.get("user_id")
     link = data.get("link")
-
     if not re.match(r"^\d{2}:\d{2}:\d{4} \d{2}:\d{2}$", message.text):
         await message.answer("❌ Неверный формат! ДД:ММ:ГГГГ ЧЧ:ММ")
         return
-
     try:
         end_date = datetime.datetime.strptime(message.text, "%d:%m:%Y %H:%M")
         end_date_str = end_date.strftime("%d:%m:%Y %H:%M")
     except:
         await message.answer("❌ Некорректная дата!")
         return
-
     if user_id:
         conn = sqlite3.connect("vpn_bot.db")
         cur = conn.cursor()
@@ -625,21 +580,14 @@ async def get_date_and_send(message: Message, state: FSMContext):
         payment = cur.fetchone()
         conn.close()
         days = payment[0] if payment else 3
-
         activate_subscription(user_id, link, end_date_str, days)
-
         try:
-            await bot.send_message(
-                user_id,
-                f"✅ Подписка активирована!\n\n{link}\n\n⏰ Действует до: {end_date_str}"
-            )
+            await bot.send_message(user_id, f"✅ Подписка активирована!\n\n{link}\n\n⏰ Действует до: {end_date_str}")
             await message.answer(f"✅ Готово! Подписка активна до {end_date_str}")
         except:
             await message.answer("❌ Не удалось отправить сообщение.")
-
     await state.clear()
 
-# ==================== АДМИН: ОТКАЗ ====================
 @router.callback_query(F.data.startswith("reject_"))
 async def reject_payment(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
@@ -661,7 +609,6 @@ async def send_reject(message: Message, state: FSMContext):
             await message.answer("❌ Ошибка отправки.")
     await state.clear()
 
-# ==================== АДМИН: ЗАБРАТЬ ПОДПИСКУ ====================
 @router.callback_query(F.data.startswith("take_"))
 async def take_subscription_start(callback: CallbackQuery, state: FSMContext):
     user_id = int(callback.data.split("_")[1])
@@ -677,17 +624,12 @@ async def take_subscription_finish(message: Message, state: FSMContext):
     if user_id:
         cancel_subscription(user_id)
         try:
-            await bot.send_message(
-                user_id,
-                f"⏰ Подписка закончилась.\n📝 Причина: {message.text}\n\nВыберите тариф для продления.",
-                reply_markup=back_to_main_keyboard()
-            )
+            await bot.send_message(user_id, f"⏰ Подписка закончилась.\n📝 Причина: {message.text}\n\nВыберите тариф для продления.", reply_markup=back_to_main_keyboard())
             await message.answer("✅ Подписка забрана.")
         except:
             await message.answer("❌ Ошибка отправки.")
     await state.clear()
 
-# ==================== АДМИН: ПРОДЛИТЬ ====================
 @router.callback_query(F.data.startswith("keep_"))
 async def keep_subscription(callback: CallbackQuery):
     user_id = int(callback.data.split("_")[1])
@@ -698,7 +640,6 @@ async def keep_subscription(callback: CallbackQuery):
     except:
         await callback.answer("❌ Ошибка отправки.", show_alert=True)
 
-# ==================== АДМИН: РЕФЕРАЛЬНЫЙ БОНУС ====================
 @router.callback_query(F.data.startswith("refbonus_"))
 async def ref_bonus(callback: CallbackQuery):
     ref_by = int(callback.data.split("_")[1])
@@ -714,7 +655,6 @@ async def ref_bonus(callback: CallbackQuery):
     else:
         await callback.answer("❌ Бонус уже выдан.", show_alert=True)
 
-# ==================== ЗАПУСК ====================
 async def main():
     print("=== БОТ ЗАПУЩЕН ===")
     init_db()
