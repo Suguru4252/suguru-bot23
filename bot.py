@@ -7,7 +7,7 @@ import re
 import uuid
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -71,12 +71,18 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ==================== ФУНКЦИИ БД ====================
-
 def get_user(user_id):
     conn = sqlite3.connect("vpn_bot.db")
     cur = conn.cursor()
     cur.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    user = cur.fetchone()
+    conn.close()
+    return user
+
+def get_user_by_ref_code(ref_code):
+    conn = sqlite3.connect("vpn_bot.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE ref_code = ?", (ref_code,))
     user = cur.fetchone()
     conn.close()
     return user
@@ -93,11 +99,14 @@ def add_user(user_id, username, first_name, ref_code=None):
         code = generate_unique_code()
         ref = str(uuid.uuid4())[:8]
         ref_by = None
+        
+        # Проверяем реферальный код
         if ref_code:
-            cur.execute("SELECT user_id FROM users WHERE ref_code = ?", (ref_code,))
-            referrer = cur.fetchone()
-            if referrer:
+            referrer = get_user_by_ref_code(ref_code)
+            if referrer and referrer[0] != user_id:
                 ref_by = referrer[0]
+                print(f"[РЕФ] Пользователь {user_id} пришёл по коду {ref_code} от {ref_by}")
+        
         cur.execute(
             "INSERT INTO users (user_id, username, first_name, personal_code, ref_code, ref_by) VALUES (?, ?, ?, ?, ?, ?)",
             (user_id, username, first_name, code, ref, ref_by)
@@ -299,7 +308,7 @@ def subscription_action_keyboard(user_id):
         ]
     ])
 
-def ref_bonus_keyboard(ref_by, new_user_id):
+def ref_bonus_keyboard(ref_by):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="✅ Выдать +1 день", callback_data=f"refbonus_{ref_by}")]
     ])
@@ -334,36 +343,58 @@ async def cmd_start(message: Message):
     username = message.from_user.username or "unknown"
     first_name = message.from_user.first_name or "unknown"
 
+    # Получаем реферальный код из ссылки
     ref_code = None
     args = message.text.split()
     if len(args) > 1:
         ref_code = args[1]
+        print(f"[СТАРТ] Пользователь {user_id} с реф-кодом: {ref_code}")
 
     is_new, code, ref, ref_by = add_user(user_id, username, first_name, ref_code)
 
     if is_new:
+        # Уведомление админам о новом пользователе
         admins = get_admins()
         for admin_id in admins:
             try:
-                await bot.send_message(
-                    admin_id,
-                    f"🆕 Новый пользователь!\nНик: @{username}\nИмя: {first_name}\nКод: {code}"
-                )
+                msg = f"🆕 Новый пользователь!\n👤 @{username}\n📛 {first_name}\n🔑 Код: {code}"
+                if ref_by:
+                    ref_user = get_user(ref_by)
+                    if ref_user:
+                        msg += f"\n👥 Пришёл по реферальной ссылке от @{ref_user[1]}"
+                await bot.send_message(admin_id, msg)
             except:
                 pass
 
-        if ref_by and ref_by != user_id:
+        # Если пришёл по рефералке - уведомление админам о бонусе
+        if ref_by:
             ref_user = get_user(ref_by)
-            if ref_user:
+            if ref_user and ref_user[10] == 0:
                 for admin_id in admins:
                     try:
                         await bot.send_message(
                             admin_id,
-                            f"👥 Реферал!\n@{ref_user[1]} (код: {ref_user[3]}) пригласил @{username}",
-                            reply_markup=ref_bonus_keyboard(ref_by, user_id)
+                            f"👥 Реферал!\n\n"
+                            f"@{ref_user[1]} (код: {ref_user[3]}) пригласил @{username}\n"
+                            f"Выдать +1 день?",
+                            reply_markup=ref_bonus_keyboard(ref_by)
                         )
                     except:
                         pass
+    else:
+        # Если пользователь уже был, но пришёл по реферальной ссылке
+        if ref_code and not ref_by:
+            # Проверяем может он уже есть в базе но без реферера
+            user = get_user(user_id)
+            if user and user[9] is None:
+                referrer = get_user_by_ref_code(ref_code)
+                if referrer and referrer[0] != user_id:
+                    conn = sqlite3.connect("vpn_bot.db")
+                    cur = conn.cursor()
+                    cur.execute("UPDATE users SET ref_by = ? WHERE user_id = ?", (referrer[0], user_id))
+                    conn.commit()
+                    conn.close()
+                    print(f"[РЕФ] Обновлён реферер для {user_id}: {referrer[0]}")
 
     await message.answer(
         f"👋 Добро пожаловать в ChugurVPN!\n\n"
@@ -417,7 +448,6 @@ async def i_paid(callback: CallbackQuery):
 
     confirm_payment(user_id)
 
-    # Отправляем ОДНО сообщение всем админам
     admins = get_admins()
     for admin_id in admins:
         try:
@@ -443,11 +473,16 @@ async def ref_info(callback: CallbackQuery):
     user_id = callback.from_user.id
     user = get_user(user_id)
     ref_code = user[8]
+    
+    # Прямая ссылка с реферальным кодом
     ref_link = f"https://t.me/{BOT_USERNAME}?start={ref_code}"
+    
     await callback.answer()
     await callback.message.answer(
-        f"👥 Ваша реферальная ссылка:\n{ref_link}\n\n"
-        f"🎁 +1 день за каждого друга!",
+        f"👥 Ваша реферальная ссылка:\n\n"
+        f"{ref_link}\n\n"
+        f"🎁 За каждого друга, перешедшего по этой ссылке, вы получите +1 день подписки!\n\n"
+        f"📤 Отправьте эту ссылку друзьям.",
         reply_markup=back_to_main_keyboard()
     )
 
@@ -457,7 +492,7 @@ async def back_to_main(callback: CallbackQuery):
     await callback.answer()
     await callback.message.answer("🏠 Главное меню:", reply_markup=main_menu_keyboard(callback.from_user.id))
 
-# ==================== АДМИН ЛОГИН (только для новых) ====================
+# ==================== АДМИН ЛОГИН ====================
 @router.callback_query(F.data == "admin_login")
 async def admin_login(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
@@ -483,7 +518,7 @@ async def check_password(message: Message, state: FSMContext):
     else:
         await message.answer("❌ Неверный пароль!")
 
-# ==================== АДМИН ПАНЕЛЬ (для уже админов) ====================
+# ==================== АДМИН ПАНЕЛЬ ====================
 @router.callback_query(F.data == "admin_panel")
 async def admin_panel(callback: CallbackQuery):
     if is_admin(callback.from_user.id):
@@ -506,7 +541,6 @@ async def admin_list_subs(callback: CallbackQuery):
         await callback.message.answer("📭 Нет активных подписок.")
         return
 
-    # Каждый пользователь - отдельное сообщение
     for user_id, code, username, end_date, link in subs:
         await callback.message.answer(
             f"📋 Активная подписка:\n\n"
@@ -531,7 +565,6 @@ async def admin_list_pending(callback: CallbackQuery):
         await callback.message.answer("📭 Нет ожидающих модерации.")
         return
 
-    # Каждый ожидающий - отдельное сообщение
     for user_id, code, username, tariff, price, days in pending:
         await callback.message.answer(
             f"📝 Ожидает модерации:\n\n"
