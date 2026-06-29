@@ -304,11 +304,6 @@ def subscription_action_keyboard(user_id):
         ]
     ])
 
-def ref_bonus_keyboard(ref_by):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Выдать +1 день", callback_data=f"refbonus_{ref_by}")]
-    ])
-
 def back_to_main_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 Главное меню", callback_data="back_to_main")]
@@ -348,31 +343,62 @@ async def cmd_start(message: Message):
 
     if is_new:
         admins = get_admins()
+        
+        # Уведомление админам о новом пользователе
         for admin_id in admins:
             try:
                 msg = f"🆕 Новый пользователь!\n👤 @{username}\n📛 {first_name}\n🔑 Код: {code}"
                 if ref_by:
                     ref_user = get_user(ref_by)
                     if ref_user:
-                        msg += f"\n👥 Пришёл по реферальной ссылке от @{ref_user[1]}"
+                        msg += f"\n👥 Пришёл по реферальной ссылке от @{ref_user[1]} (код: {ref_user[3]})"
                 await bot.send_message(admin_id, msg)
             except:
                 pass
 
+        # Если пришёл по рефералке - сразу даём бонус
         if ref_by:
             ref_user = get_user(ref_by)
-            if ref_user and ref_user[10] == 0:
-                for admin_id in admins:
+            if ref_user:
+                if ref_user[10] == 0:  # Бонус ещё не выдан
+                    give_ref_bonus(ref_by)
+                    extend_subscription(ref_by, 1)
+                    
+                    # Уведомление пригласившему
                     try:
                         await bot.send_message(
-                            admin_id,
-                            f"👥 Реферал!\n\n"
-                            f"@{ref_user[1]} (код: {ref_user[3]}) пригласил @{username}\n"
-                            f"Выдать +1 день?",
-                            reply_markup=ref_bonus_keyboard(ref_by)
+                            ref_by,
+                            f"🎁 Поздравляем!\n\n"
+                            f"По вашей реферальной ссылке зарегистрировался @{username}\n"
+                            f"Вам начислен +1 день подписки!\n\n"
+                            f"Продолжайте приглашать друзей и получать бонусы!"
                         )
                     except:
                         pass
+                    
+                    # Уведомление в админ-панель
+                    for admin_id in admins:
+                        try:
+                            await bot.send_message(
+                                admin_id,
+                                f"👥 Новый реферал!\n\n"
+                                f"@{ref_user[1]} (код: {ref_user[3]}) пригласил @{username}\n"
+                                f"🎁 +1 день начислен автоматически!"
+                            )
+                        except:
+                            pass
+                else:
+                    # Бонус уже был выдан
+                    for admin_id in admins:
+                        try:
+                            await bot.send_message(
+                                admin_id,
+                                f"👥 Реферал!\n\n"
+                                f"@{ref_user[1]} (код: {ref_user[3]}) пригласил @{username}\n"
+                                f"⚠️ Бонус уже был выдан ранее."
+                            )
+                        except:
+                            pass
 
     await message.answer(
         f"👋 Добро пожаловать в ChugurVPN!\n\n"
@@ -453,7 +479,8 @@ async def ref_info(callback: CallbackQuery):
     await callback.message.answer(
         f"👥 Ваша реферальная ссылка:\n\n"
         f"{ref_link}\n\n"
-        f"🎁 За каждого друга — +1 день подписки!",
+        f"🎁 За каждого друга, перешедшего по этой ссылке, вы получите +1 день подписки!\n\n"
+        f"📤 Отправьте эту ссылку друзьям.",
         reply_markup=back_to_main_keyboard()
     )
 
@@ -639,21 +666,6 @@ async def keep_subscription(callback: CallbackQuery):
         await callback.answer("✅ Продлено!", show_alert=True)
     except:
         await callback.answer("❌ Ошибка отправки.", show_alert=True)
-
-@router.callback_query(F.data.startswith("refbonus_"))
-async def ref_bonus(callback: CallbackQuery):
-    ref_by = int(callback.data.split("_")[1])
-    user = get_user(ref_by)
-    if user and user[10] == 0:
-        give_ref_bonus(ref_by)
-        extend_subscription(ref_by, 1)
-        try:
-            await bot.send_message(ref_by, "🎁 +1 день за друга!")
-        except:
-            pass
-        await callback.message.answer(f"✅ Бонус выдан @{user[1]}!")
-    else:
-        await callback.answer("❌ Бонус уже выдан.", show_alert=True)
 
 async def main():
     print("=== БОТ ЗАПУЩЕН ===")
